@@ -1,4 +1,4 @@
-import Ps.Bridge.CheckedAdmissions
+import CodecSpineProof
 import Lean.Data.Json
 
 namespace PsCodecStaticReference
@@ -362,13 +362,17 @@ theorem levels_eq (values : List PsLevel) :
   simp only [PsCodecStaticReference.psEncodeCodecLevels, psEncodeCodecLevels, level_list_eq]
   all_goals rfl
 
-theorem expr_eq (value : PsExpr) :
-    PsCodecStaticReference.psEncodeCodecExpr value = psEncodeCodecExpr value := by
+theorem expr_static_eq (value : PsExpr) :
+    PsCodecStaticReference.psEncodeCodecExpr value = PsCodecSpineReference.psEncodeCodecExpr value := by
   induction value <;>
-    simp_all only [PsCodecStaticReference.psEncodeCodecExpr, psEncodeCodecExpr,
+    simp_all only [PsCodecStaticReference.psEncodeCodecExpr, PsCodecSpineReference.psEncodeCodecExpr,
       name_eq, level_eq, levels_eq, PsCodecStaticReference.psEncodeCodecBinderInfo,
       psEncodeCodecBinderInfo, psJsonObject, psJsonMapObjectFields, psJsonField, psJsonJoin,
       psJsonConcat3, psJsonConcat2, psCheckedAdmissionJsonField, psCodecQuotedA, psCodecQuotedS, psCodecQuotedN, psCodecQuotedZ, psCodecQuotedMax, psCodecQuotedImax, psCodecQuotedP, psCodecQuotedB, psCodecQuotedSort, psCodecQuotedConst, psCodecQuotedApp, psCodecQuotedLam, psCodecQuotedForall, psCodecQuotedLet, psCodecQuotedNat, psCodecQuotedStr, psCodecQuotedProj, psCodecQuotedE, psCodecQuotedI, psCodecQuotedK, psCodecQuotedV, psCodecQuotedT, psCodecQuotedBi, psCodecQuotedF, psCodecQuotedLs, psCodecQuotedL, psCodecQuotedR, psCodecQuotedO] <;> rfl
+
+theorem expr_eq (value : PsExpr) :
+    PsCodecStaticReference.psEncodeCodecExpr value = psEncodeCodecExpr value :=
+  (expr_static_eq value).trans (codec_spine_eq value).symm
 
 #print axioms name_eq
 #print axioms level_eq

@@ -1,0 +1,172 @@
+# PSC1 development roadmap
+
+Updated 2026-10-25 Asia/Jakarta. Practical Core v1 remains frozen at fourteen
+families and37 finite criteria. The current implementation is
+`daa735017e34ee94da79d747c363237b4adbc4ef` on draft PR178.
+
+## Current qualification update
+
+Rust2d27f142/run40141718481 PASSED genuine G1/G2/G3 and exact fixed point on
+closure07eedac1. G2/G3=2139961/2160767ms; peak service RSS1197260/1197296KiB.
+The separate3600s correctness profile was required;240s performance is unqualified.
+Immutable readback40147896149 verifies all generation byte inventories.
+JS/TS/Wasm request0cabb7ed/run40147825207 is RUNNING on the same frozen root
+under unchanged1800s profiles. Preserve it.
+
+Global provider fix14cb3e30/full40145805549 PASSED37/37 criteria and actual
+global Python/PHP execution in both grammars. Candidate Rust CLI integration
+47db4f83/40149384939 is still pending installed qualification. Node-only transport
+passes10 lifetime/integrity tests; do not claim package integration before CI.
+
+The earlier evidence/queue snapshot below is retained for context. Its pending
+Rust row is superseded by the qualified result above. The immediate queue is:
+finish installed Rust integration and full regression promotion; reconcile the
+three active frozen-root engines; clean release reproduction and separate240s
+performance. No merge or registry publication is authorized.
+
+## Evidence and release boundaries
+
+Full [40141923929](https://github.com/dwijayuda/pskernel/actions/runs/40141923929)
+passes37/37 criteria across all seven backends and both grammars, including real
+applications, minimum Python and installed core/optional-provider regressions.
+Its tested mergeec90dc12 and reviewdaa73501 have identical tree
+b58461d31dd53d217c1353b4373d4a87bf5e9d65.
+
+Measured Rust Nat fixes pass focused/native tests and two genuine G1 executions
+on source closure07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af,
+reproducing the exact G1 executable. Frozen request2d27f142,
+[40141718481](https://github.com/dwijayuda/pskernel/actions/runs/40141718481)/
+job121014751809, is still executing G1/G2/G3 under the new separate
+correctness-3600s profile. G2/G3 and fixed point remain pending.
+
+[Installed package40144094413](https://github.com/dwijayuda/pskernel/actions/runs/40144094413)
+passes offline install,10 corpus cases,12 application builds/44 observations,
+14 negative/tamper checks and26 host-boundary checks. Its artifact12579329783
+contains the current qualified native core and matching optional Python/PHP
+tarballs, plus independently qualified historical TS/Wasm G3 engines.
+Generated execution initially publishes JS; native core retains JS/TS/Rust/Wasm
+core/component. Engine qualifications remain tied to historical closure92654df5.
+This is an installable unpublished candidate, not an all-four-engine/new-root
+generated release. See the [install guide](PSC1_GENERATED_PACKAGE.md).
+
+An isolated lexer candidate, code31e10263/run40143764706, has an all-input equality
+proof, both120-module grammar censuses and admitted generated Rust stage
+comparisons. It removes redundant suffix scans: CheckedAdmissions4039->439ms
+and Rust.Expr3001->341ms in one run. It is not promoted and has no whole-compiler
+G1/G2/G3 qualification. Preserve the active frozen qualification.
+
+## Single dependency-ordered remaining queue
+
+| Order | Work | Actual status and acceptance |
+| --- | --- | --- |
+| 1 | Reconcile frozen Rust G2/G3 | RUNNING in40141718481. Require terminal admitted candidates,120 cross-target cases/27 refusals, exact source/admission/original+transformed IR/raw-executable/four-target observations. No badge from a deadline increase or diagnostic. |
+| 2 | Resolve any measured terminal blocker | CONDITIONAL. Profile the exact archived producer/request late in its failing phase. Keep the unpromoted lexer candidate available; promote only with full native/G1 and genuine new-root qualification. |
+| 3 | One frozen four-engine source | PENDING. Preserve historical v2 TS/Wasm and v1 JS/TS; qualify the remaining engines on the same current root. Historical source qualifications do not transfer. |
+| 4 | Complete generated distribution integration | PARTIAL. Installed TS/Wasm engines and JS publication pass. Integrate newly qualified Rust/JS assets, remaining generated publication targets, component adapters and optional-provider dispatch. Preserve native core/add-ons. |
+| 5 | Reproduction, performance and release | PENDING. Clean independent replay and final release qualification; optimize toward separate240s profile. Merge/registry publication require authorization. |
+| 6 | Broader extensions/readability | DEFERRED beyond frozen v1. Retain working source-only packages and every current feature. |
+
+## Fixed policies
+
+Official independent Lean4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
+strict original/transformed IR, source pairing, negative tests, unsupported-ABI
+refusals and all memory/stack/fuel limits remain mandatory.
+G1/corpus/tools240s and checker120s remain unchanged.
+Separate Rust correctness-3600s extends only G2-self/G3-self, with190-minute job/
+170-minute step. Existing correctness-1800s and performance-240s remain.
+A correctness pass does not qualify240s performance.
+
+Normal development retains tiered/dependency-selected CI. Long self-hosting runs
+require closed-schema request-only commits with exact parents; ordinary edits
+do not launch them. Documentation/receipt updates reuse only successful code
+baselines and retain failed/cancelled test debt.
+[AI state](../AI_WORK_STATE.md) records live status; the
+[runtime receipt](PSC1_RUST_NAT_RUNTIME_QUALIFICATION_2026-10-25.json) owns exact
+identities and measurements; the [continuation](PSC1_UNIFIED_SELFHOST_CONTINUATION.md)
+is executable. Earlier roadmap snapshots remain in Git and canonical receipts.
+
+## Preserved historical queues
+
+The following are prior checkpoint snapshots. The queue above governs current
+work; canonical receipts retain each exact qualified or failed source.
+
+## Historical Python/PHP milestone queue
+
+
+
+The user requested a stop after the verified milestone slice. This slice is complete; no further source work is authorized in this turn. Preserve active long qualification jobs.
+
+| Order | Work | Finite acceptance and current evidence |
+| --- | --- | --- |
+| 1 | Measured backend fixes and regression | COMPLETE: Python `b56da505`/PHP `13c5d4a6`, review `b33027de`. Focused40090956726 PASS retained/runtime/token/readonly/deep tests and87 modules per target in both grammars. Full [40090959568](https://github.com/dwijayuda/pskernel/actions/runs/40090959568) PASSED: Linux `120865715808`, final gate120870365297;37/37 criteria,0 blocked, releaseReady=true. All seven backends, both grammars, practical applications, minimum-Python and installed native package/IO/library regressions. Review `b33027de` and tested merge `2867dadec3ed7e05fbc86c5cffafcc6bf8b8e292` share Git treef4d8a31f19e1574ba91348bc79e1c50aa76ee1ef. Qualification artifact `12559464310`,sha256:a71c38b06de7b8a8d2e378aae640bb075a3fdcb2b6fb8f268c2c5eb865a63942. |
+| 2 | Genuine current-source generations | RUNNING, NOT QUALIFIED: request `336ff212`/run `40091210960`, Python `120864185036`/PHP `120864185108`. Exact compiler/tools snapshot ofb330; only guard/request differ. No duplicate request while active. |
+| 3 | Qualification result reconciliation | On continuation, fetch terminal jobs and immutable artifacts; record exact identities, elapsed/CPU/peak metrics and actual admission/IR/ten-case/raw-byte fixed points. First3600s run `40085445958` remains an immutable two-target G2 deadline failure after G1 success. |
+| 4 | Targeted follow-up or clean reproduction | If new attempt fails, fix a demonstrated generic cost with all retained guards before another chain. If it passes, clean fresh G1 without lake cache reproduces every qualified generation. Full source/regression gates alone never qualify G2/G3. |
+| 5 | Performance and review | Original240s profile remains separately unqualified. Preserve qualified Rust/TS/JS/Wasm snapshots. Merge/publication require authorization and required qualification. |
+
+Correctness3600s extends ONLY G2-self/G3-self. Preserve G1/tools/corpus240s,checker120s,historical1800s,performance240s,independent Lean4.35,strictIR,source pairing,negative/security tests,memory/stack/fuel and unsupported-ABI refusals. One shared compiler and one portable emitter per target.
+
+The [AI state](../AI_WORK_STATE.md), [exact receipt](PSC1_PYTHON_PHP_SELFHOST_QUALIFICATION_2026-10-24.json) and [continuation](PSC1_PYTHON_PHP_SELFHOST_CONTINUATION.md) bind this queue to actual commits and results. Direct-target optimization remains deferred.
+
+## Qualified compiler checkpoint
+
+Source133e589288b563e74578b771ec35595beb3a9fe8, request `2d1f8244`,
+[Linux `40062120079`](https://github.com/dwijayuda/pskernel/actions/runs/40062120079):
+DirectJS and owned import-free DirectWasm independently PASS genuine G1→G2→G3
+and exact source/admission/IR/ten-case/target-byte fixed points.
+JS G2/G3:824066/832426ms; Wasm:876840/888398ms, within correctness1800s.
+[Clean audit40064496804](https://github.com/dwijayuda/pskernel/actions/runs/40064496804)
+also PASS: no restored .lake cache, fresh G1 reproduces exact source/admission/IR,
+ten observations and source/executable bytes of each qualified G1/G2/G3.
+A second clean full G2/G3 replay and a formal compiler-preservation/DDC proof are
+separate claims and were not performed.
+
+[Full40062210987](https://github.com/dwijayuda/pskernel/actions/runs/40062210987)
+PASSED: Linux `120780825013` and final gate120786364196;37/37 qualified,0 blocked,
+releaseReady=true, all seven backends, both grammars, applications, minimum
+Python and installed native package/IO/library regressions. Tested review HEAD
+06186537cf9339fc3f24a7d13387c2ad55ee0749 and merge
+980d096ca3e85b9ad2970f16602ad1d14a089d69 have identical Git tree
+cbf312e1f4bca9e7085719c12b627be5c16099a7, verified through GitHub APIs and checkout log.
+Artifact `12549325904`, digest
+sha256:6ad48b109e2e995c344a6855a85de44380f6ee628b67f4033990a152598a7bf9.
+This qualifies the tested compiler source; the final receipt update edits docs only.
+
+Preserve all working seven-backend functionality, both .lean/.ps grammars,
+four real application categories, typed IO, bounded inference/control, checked
+Nat/Int ordering, CLI/JSON processing, multi-module libraries and compiler-like
+acceptance. No new feature families are added to frozen v1. Kernel research
+continues independently and does not gate compiler development.
+
+## Dependency-ordered remaining queue
+
+| Order | Work | Finite acceptance and status |
+| --- | --- | --- |
+| 1 | Profile completed actual generated workloads toward original240s. | Pending performance work. Retain exact qualified artifacts/requests; sample complete phases and report elapsed/maxRSS separately from sampling overhead. Different target closures are not a matched backend comparison. |
+| 2 | Fix the largest demonstrated generic cost. | Pending measurement. Small dependency-coherent source/runtime changes; retained-original all-input equality where applicable, refusal/fuel/order/capture guards, both grammars, focused generated runtime tests. Avoid speculative architecture replacement or alternate handwritten compilers. |
+| 3 | Requalify changed source and evaluate performance independently. | Existing correctness1800s qualified for both direct targets; current times exceed240s, so performance240s remains unqualified. Source changes require genuine current-source G1/G2/G3/fixed points and seven-backend regressions; documentation edits do not. |
+| 4 | Extend independent repeatability if a release requires it. | Clean G1 reproduction already passed for both; independent full-chain replay is not run. Reuse diagnostic/psc1-direct-clean-g1-20261024 at36d917b0; keep the narrower evidence boundary explicit. |
+| 5 | Release review and publication. | Requires authorization and required final qualification. PR175 remains draft/unmerged; npm publication not authorized. |
+
+The older direct-target checkpoint has no active runs; Python/PHP mission status above supersedes it.
+Use the [architecture](PSC1_COMPILER_SELFHOST_ARCHITECTURE.md) for measured
+mechanisms and [continuation](PSC1_DIRECT_SELFHOST_CONTINUATION.md) for executable
+GitHub-only steps. Preserve exact older Rust/TS qualifications: Rust83e18fe1,
+source `5e0b548e`/run `39908529181`; TS84e1e16f, source `748fd5fd`/run `39993829327`.
+Do not label these as requalified after later common-source changes.
+
+## Evidence and correctness policy
+
+Official Lean 4.35.0 independent checker at eb6cafb7290e8bd5f2937522d8d804f58f02bafc,
+strict original/transformed IR, source/logical graph pairing, negative/refusal
+tests and all resource/security/fuel limits remain mandatory.
+G1/corpus/tools240s and checker120s remain unchanged. Python/PHP may explicitly
+request correctnessG2/G33600s; historical1800s and performance240s stay separate.
+Performance240s remains a separate test; longer correctness cannot qualify it.
+
+Earlier failures and completed planning milestones are preserved in Git history
+and the canonical receipt. They explain the diagnosed defect classes, rather
+than constituting live blockers: eager unused recursive prefixes, ordered list
+reconstruction and encoder spines, generator/GC allocation, and UTF8 cache-key
+cost. The final fixes were qualified by actual generated compiler executions,
+not source census or small fixtures alone.

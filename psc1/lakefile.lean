@@ -175,6 +175,10 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.CompilerService
   ]
 
+lean_lib PsCompilerUnified where
+  srcDir := "packages/compiler-unified/src"
+  roots := #[`Ps.CompilerUnified.Service]
+
 lean_lib PsBackendPython where
   srcDir := "packages/backend-python/src"
   roots := #[`Ps.BackendPython.Runtime, `Ps.BackendPython.Portable, `Ps.BackendPython.Module, `Ps.BackendPython.CompilerService]
@@ -594,3 +598,36 @@ lean_exe psc1_backend_php where
 lean_exe psc1_backend_provider_tests where
   srcDir := "test"
   root := `BackendProviderTests
+
+lean_exe psc1_unified_service_seed where
+  srcDir := "scripts"
+  root := `UnifiedServiceSeed
+
+lean_exe psc1_unified_service_tests where
+  srcDir := "test"
+  root := `UnifiedServiceTests
+
+lean_lib PsRustStringOwnershipReference where
+  srcDir := "test"
+  roots := #[`RustStringOwnershipReference]
+
+lean_exe psc1_rust_string_ownership_tests where
+  srcDir := "test"
+  root := `RustStringOwnershipTests
+
+lean_lib PsWasmNatDivModReference where
+  srcDir := "test"
+  roots := #[`WasmNatDivModReference]
+
+lean_exe psc1_wasm_nat_divmod_tests where
+  srcDir := "test"
+  root := `WasmNatDivModTests
+
+lean_lib PsCodecSpineProof where
+  srcDir := "test"
+  roots := #[`CodecSpineReference, `CodecSpineProof]
+
+
+lean_exe psc1_rust_nat_literal_tests where
+  srcDir := "test"
+  root := `RustNatLiteralTests

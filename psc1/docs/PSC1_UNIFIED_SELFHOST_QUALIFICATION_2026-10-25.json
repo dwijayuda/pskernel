@@ -1,0 +1,1496 @@
+{
+  "schema": "psc1-unified-selfhost-qualification/1",
+  "updated": "2026-10-25 Asia/Jakarta",
+  "status": "verified-milestone-stopped-as-requested",
+  "repository": "dwijayuda/pskernel",
+  "pullRequest": 178,
+  "branch": "feat/psc1-unified-selfhost-20261024",
+  "base": {
+    "pullRequest": 177,
+    "commit": "7cf50ecda689a3771bee0d91086ab43563a5c4d3"
+  },
+  "sourceImplementation": "325b130ada3eaa8962765bf6616e1db1cfc52425",
+  "testedSourceCommit": "783cf8fceeda094b3e49b166e4d10af05e4b0413",
+  "scope": {
+    "compositionRoot": "Ps.CompilerUnified.Service",
+    "exportName": "psCompilerServiceCandidate",
+    "executionEngines": [
+      "js",
+      "ts",
+      "rust",
+      "wasm-core"
+    ],
+    "portableOutputTargets": [
+      "js",
+      "ts",
+      "rust",
+      "wasm-core"
+    ],
+    "optionalPackages": [
+      "@proofscript/backend-python",
+      "@proofscript/backend-php"
+    ],
+    "componentOutput": "preserved native host adapter; outside portable root",
+    "npmDistribution": "existing qualified native distribution; generated distribution integration pending",
+    "formalPreservation": "not-provided",
+    "independentCleanReproduction": "not-run-for-new-unified-source"
+  },
+  "current": {
+    "protocol": "psc1-unified-compiler-service/2",
+    "wire": "[protocol,target,existing-request-array]; no whole-request JSON string",
+    "sourceClosureDigest": "a3350d645a81ed17f69af59333978c60e3b8f9e1d6855a999e0bc5844e183990",
+    "sourceInventorySha256": "1935e007515e65df1ccc3772eb158d8ffbe44c882fde7d809bf3513a288cc49e",
+    "rootSha256": "688ffd1dfdfdc7500a97772291977e36bb763da7520228db3b77f59f5793a313",
+    "sourceModules": 120,
+    "sourceGrammars": [
+      "lean",
+      "ps"
+    ],
+    "sourceAudit": "accepted both grammars",
+    "g1": "passed-all-four-engines",
+    "g2g3": "not-run-on-structured-v2-source",
+    "fixedPoint": "not-run-on-structured-v2-source",
+    "crossTargetCases": 160,
+    "envelopeRefusals": 36,
+    "sharedOriginalIrSha256": "704db6c25aca6d5936b424ec42ea5b5d877c9379ca8ae8bbd161e2014a6c2ee5",
+    "sharedCanonicalAdmissionsSha256": "e28e3f8626a3a1475e6aecd95b1a48967e90edc739ff053a680552a8fc0f3511",
+    "optionalEmitters": "absent from exact source inventory",
+    "runId": 40117051185,
+    "jobIds": [
+      120940502844,
+      120940502851,
+      120940502852,
+      120940502886
+    ],
+    "artifacts": [
+      {
+        "id": 12570385929,
+        "name": "psc1-unified-selfhost-correctness-1800s-ts-783cf8fceeda094b3e49b166e4d10af05e4b0413",
+        "digest": "sha256:781e12d8920dd00e73daafc4128e3133ee3a03742d19c9fada724d9bbebaca34"
+      },
+      {
+        "id": 12569501209,
+        "name": "psc1-unified-selfhost-correctness-1800s-js-783cf8fceeda094b3e49b166e4d10af05e4b0413",
+        "digest": "sha256:e3a0f4818f97dcc18ea82813b05d620d6847b542b3df7fd731a3847e438b9e33"
+      },
+      {
+        "id": 12569441180,
+        "name": "psc1-unified-selfhost-correctness-1800s-wasm-core-783cf8fceeda094b3e49b166e4d10af05e4b0413",
+        "digest": "sha256:f5ba8735501a4fd033eeb37663a685b5fb6fa662e3ed25187eb8d16fd76bb7a6"
+      },
+      {
+        "id": 12569281754,
+        "name": "psc1-unified-selfhost-correctness-1800s-rust-783cf8fceeda094b3e49b166e4d10af05e4b0413",
+        "digest": "sha256:6b70b17cc7f627b899051cc47536a4b9cd10750ba38d7a48884ccc8b7015672c"
+      }
+    ],
+    "engines": [
+      {
+        "testedCommit": "783cf8fceeda094b3e49b166e4d10af05e4b0413",
+        "target": "js",
+        "protocol": "psc1-unified-compiler-service/2",
+        "status": "passed",
+        "mode": "--g1-only",
+        "correctnessQualification": "G1-only",
+        "performanceQualification": "not-run-in-this-profile",
+        "profile": {
+          "name": "correctness-1800s",
+          "g1TimeoutMs": 240000,
+          "corpusTimeoutMs": 240000,
+          "toolTimeoutMs": 240000,
+          "selfCompileTimeoutMs": 1800000,
+          "correctnessAndPerformanceSeparate": true
+        },
+        "sourceClosureDigest": "a3350d645a81ed17f69af59333978c60e3b8f9e1d6855a999e0bc5844e183990",
+        "sourceModules": 120,
+        "sourceInventorySha256": "1935e007515e65df1ccc3772eb158d8ffbe44c882fde7d809bf3513a288cc49e",
+        "root": {
+          "module": "Ps.CompilerUnified.Service",
+          "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.lean",
+          "bytes": 3427,
+          "sha256": "688ffd1dfdfdc7500a97772291977e36bb763da7520228db3b77f59f5793a313"
+        },
+        "nativeSeedSha256": "749c3410dad86bc5955ed4f7bd9fe7ea449fb55199eab51d15e4231068577f74",
+        "toolsInventorySha256": "736595adfe9cd13c085e785cf74783d64ef3d8f7ae477853512128d01c3e4861",
+        "bootstrap": {
+          "sourceClosureDigest": "a3350d645a81ed17f69af59333978c60e3b8f9e1d6855a999e0bc5844e183990",
+          "sourceSha256": "33cb5b84aae9089faaa87f161ea6ce25b94f591add606821917caa955e036640",
+          "admissionsSha256": "e28e3f8626a3a1475e6aecd95b1a48967e90edc739ff053a680552a8fc0f3511",
+          "originalIrSha256": "704db6c25aca6d5936b424ec42ea5b5d877c9379ca8ae8bbd161e2014a6c2ee5",
+          "specializedIrSha256": "e92a580adf2484edf4af80932a2023eb187c837f2823474db0357f6bc36e3584",
+          "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "logicalAdmission": "accepted",
+          "publicNames": [
+            "psCompilerServiceCandidate"
+          ]
+        },
+        "executableSha256": "33cb5b84aae9089faaa87f161ea6ce25b94f591add606821917caa955e036640",
+        "generations": [
+          {
+            "generation": 1,
+            "sourceClosureDigest": "a3350d645a81ed17f69af59333978c60e3b8f9e1d6855a999e0bc5844e183990",
+            "sourceSha256": "33cb5b84aae9089faaa87f161ea6ce25b94f591add606821917caa955e036640",
+            "admissionsSha256": "e28e3f8626a3a1475e6aecd95b1a48967e90edc739ff053a680552a8fc0f3511",
+            "originalIrSha256": "704db6c25aca6d5936b424ec42ea5b5d877c9379ca8ae8bbd161e2014a6c2ee5",
+            "specializedIrSha256": "e92a580adf2484edf4af80932a2023eb187c837f2823474db0357f6bc36e3584",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "psCompilerServiceCandidate"
+            ],
+            "artifactSha256": "91f2db1cc77329ccb8074909b41115db9dbc53f8a3a862cdb475514874c7974d",
+            "executableSha256": "33cb5b84aae9089faaa87f161ea6ce25b94f591add606821917caa955e036640",
+            "observationsSha256": "e0071ad33607e0287b431ca48a4ef04b6a0b2a826c72cc383729276fd928c945",
+            "crossTargetCases": 40,
+            "rustOptimizationLevel": null,
+            "rustCodegenUnits": null
+          }
+        ],
+        "cases": 40,
+        "envelopeRefusals": 9,
+        "nativeDelegationBoundary": "one-seed; native compiler executables removed; generated source semantics only",
+        "fixedPoint": "not-requested",
+        "events": [],
+        "stackOverflow": false
+      },
+      {
+        "testedCommit": "783cf8fceeda094b3e49b166e4d10af05e4b0413",
+        "target": "rust",
+        "protocol": "psc1-unified-compiler-service/2",
+        "status": "passed",
+        "mode": "--g1-only",
+        "correctnessQualification": "G1-only",
+        "performanceQualification": "not-run-in-this-profile",
+        "profile": {
+          "name": "correctness-1800s",
+          "g1TimeoutMs": 240000,
+          "corpusTimeoutMs": 240000,
+          "toolTimeoutMs": 240000,
+          "selfCompileTimeoutMs": 1800000,
+          "correctnessAndPerformanceSeparate": true
+        },
+        "sourceClosureDigest": "a3350d645a81ed17f69af59333978c60e3b8f9e1d6855a999e0bc5844e183990",
+        "sourceModules": 120,
+        "sourceInventorySha256": "1935e007515e65df1ccc3772eb158d8ffbe44c882fde7d809bf3513a288cc49e",
+        "root": {
+          "module": "Ps.CompilerUnified.Service",
+          "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.lean",
+          "bytes": 3427,
+          "sha256": "688ffd1dfdfdc7500a97772291977e36bb763da7520228db3b77f59f5793a313"
+        },
+        "nativeSeedSha256": "749c3410dad86bc5955ed4f7bd9fe7ea449fb55199eab51d15e4231068577f74",
+        "toolsInventorySha256": "736595adfe9cd13c085e785cf74783d64ef3d8f7ae477853512128d01c3e4861",
+        "bootstrap": {
+          "sourceClosureDigest": "a3350d645a81ed17f69af59333978c60e3b8f9e1d6855a999e0bc5844e183990",
+          "sourceSha256": "2df3e71c83df774c7ce08382ebde8617eb9bf9868313f43d3a5d431cef297d63",
+          "admissionsSha256": "e28e3f8626a3a1475e6aecd95b1a48967e90edc739ff053a680552a8fc0f3511",
+          "originalIrSha256": "704db6c25aca6d5936b424ec42ea5b5d877c9379ca8ae8bbd161e2014a6c2ee5",
+          "specializedIrSha256": "e92a580adf2484edf4af80932a2023eb187c837f2823474db0357f6bc36e3584",
+          "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "logicalAdmission": "accepted",
+          "publicNames": [
+            "psCompilerServiceCandidate"
+          ]
+        },
+        "executableSha256": "a488bd3d56a58c15d44d634d6590b985c80909d55d39319f5ea3c367fcf3bf00",
+        "generations": [
+          {
+            "generation": 1,
+            "sourceClosureDigest": "a3350d645a81ed17f69af59333978c60e3b8f9e1d6855a999e0bc5844e183990",
+            "sourceSha256": "2df3e71c83df774c7ce08382ebde8617eb9bf9868313f43d3a5d431cef297d63",
+            "admissionsSha256": "e28e3f8626a3a1475e6aecd95b1a48967e90edc739ff053a680552a8fc0f3511",
+            "originalIrSha256": "704db6c25aca6d5936b424ec42ea5b5d877c9379ca8ae8bbd161e2014a6c2ee5",
+            "specializedIrSha256": "e92a580adf2484edf4af80932a2023eb187c837f2823474db0357f6bc36e3584",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "psCompilerServiceCandidate"
+            ],
+            "artifactSha256": "603fd70e3445a7673be4eafb2d853a673b4beeac61bc944135fea615e768d732",
+            "executableSha256": "a488bd3d56a58c15d44d634d6590b985c80909d55d39319f5ea3c367fcf3bf00",
+            "observationsSha256": "e0071ad33607e0287b431ca48a4ef04b6a0b2a826c72cc383729276fd928c945",
+            "crossTargetCases": 40,
+            "rustOptimizationLevel": 0,
+            "rustCodegenUnits": 256
+          }
+        ],
+        "cases": 40,
+        "envelopeRefusals": 9,
+        "nativeDelegationBoundary": "one-seed; native compiler executables removed; generated source semantics only",
+        "fixedPoint": "not-requested",
+        "events": [],
+        "stackOverflow": false
+      },
+      {
+        "testedCommit": "783cf8fceeda094b3e49b166e4d10af05e4b0413",
+        "target": "ts",
+        "protocol": "psc1-unified-compiler-service/2",
+        "status": "passed",
+        "mode": "--g1-only",
+        "correctnessQualification": "G1-only",
+        "performanceQualification": "not-run-in-this-profile",
+        "profile": {
+          "name": "correctness-1800s",
+          "g1TimeoutMs": 240000,
+          "corpusTimeoutMs": 240000,
+          "toolTimeoutMs": 240000,
+          "selfCompileTimeoutMs": 1800000,
+          "correctnessAndPerformanceSeparate": true
+        },
+        "sourceClosureDigest": "a3350d645a81ed17f69af59333978c60e3b8f9e1d6855a999e0bc5844e183990",
+        "sourceModules": 120,
+        "sourceInventorySha256": "1935e007515e65df1ccc3772eb158d8ffbe44c882fde7d809bf3513a288cc49e",
+        "root": {
+          "module": "Ps.CompilerUnified.Service",
+          "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.lean",
+          "bytes": 3427,
+          "sha256": "688ffd1dfdfdc7500a97772291977e36bb763da7520228db3b77f59f5793a313"
+        },
+        "nativeSeedSha256": "749c3410dad86bc5955ed4f7bd9fe7ea449fb55199eab51d15e4231068577f74",
+        "toolsInventorySha256": "736595adfe9cd13c085e785cf74783d64ef3d8f7ae477853512128d01c3e4861",
+        "bootstrap": {
+          "sourceClosureDigest": "a3350d645a81ed17f69af59333978c60e3b8f9e1d6855a999e0bc5844e183990",
+          "sourceSha256": "47c4ef5fd103ec7c83fe1295faf0d2f5ad491317f7da12363aad5b7ca061e08f",
+          "admissionsSha256": "e28e3f8626a3a1475e6aecd95b1a48967e90edc739ff053a680552a8fc0f3511",
+          "originalIrSha256": "704db6c25aca6d5936b424ec42ea5b5d877c9379ca8ae8bbd161e2014a6c2ee5",
+          "specializedIrSha256": "e92a580adf2484edf4af80932a2023eb187c837f2823474db0357f6bc36e3584",
+          "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "logicalAdmission": "accepted",
+          "publicNames": [
+            "psCompilerServiceCandidate"
+          ]
+        },
+        "executableSha256": "26df66115655bfa78a48aa0f1afa7a36eefd75d69d48bc9429ae63a114d50e92",
+        "generations": [
+          {
+            "generation": 1,
+            "sourceClosureDigest": "a3350d645a81ed17f69af59333978c60e3b8f9e1d6855a999e0bc5844e183990",
+            "sourceSha256": "47c4ef5fd103ec7c83fe1295faf0d2f5ad491317f7da12363aad5b7ca061e08f",
+            "admissionsSha256": "e28e3f8626a3a1475e6aecd95b1a48967e90edc739ff053a680552a8fc0f3511",
+            "originalIrSha256": "704db6c25aca6d5936b424ec42ea5b5d877c9379ca8ae8bbd161e2014a6c2ee5",
+            "specializedIrSha256": "e92a580adf2484edf4af80932a2023eb187c837f2823474db0357f6bc36e3584",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "psCompilerServiceCandidate"
+            ],
+            "artifactSha256": "ed7b397fbb21ed2c8f918d946f8ebda000d8fbe5499c3a2549e9235002a6bf0b",
+            "executableSha256": "26df66115655bfa78a48aa0f1afa7a36eefd75d69d48bc9429ae63a114d50e92",
+            "observationsSha256": "e0071ad33607e0287b431ca48a4ef04b6a0b2a826c72cc383729276fd928c945",
+            "crossTargetCases": 40,
+            "rustOptimizationLevel": null,
+            "rustCodegenUnits": null
+          }
+        ],
+        "cases": 40,
+        "envelopeRefusals": 9,
+        "nativeDelegationBoundary": "one-seed; native compiler executables removed; generated source semantics only",
+        "fixedPoint": "not-requested",
+        "events": [],
+        "stackOverflow": false
+      },
+      {
+        "testedCommit": "783cf8fceeda094b3e49b166e4d10af05e4b0413",
+        "target": "wasm-core",
+        "protocol": "psc1-unified-compiler-service/2",
+        "status": "passed",
+        "mode": "--g1-only",
+        "correctnessQualification": "G1-only",
+        "performanceQualification": "not-run-in-this-profile",
+        "profile": {
+          "name": "correctness-1800s",
+          "g1TimeoutMs": 240000,
+          "corpusTimeoutMs": 240000,
+          "toolTimeoutMs": 240000,
+          "selfCompileTimeoutMs": 1800000,
+          "correctnessAndPerformanceSeparate": true
+        },
+        "sourceClosureDigest": "a3350d645a81ed17f69af59333978c60e3b8f9e1d6855a999e0bc5844e183990",
+        "sourceModules": 120,
+        "sourceInventorySha256": "1935e007515e65df1ccc3772eb158d8ffbe44c882fde7d809bf3513a288cc49e",
+        "root": {
+          "module": "Ps.CompilerUnified.Service",
+          "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.lean",
+          "bytes": 3427,
+          "sha256": "688ffd1dfdfdc7500a97772291977e36bb763da7520228db3b77f59f5793a313"
+        },
+        "nativeSeedSha256": "749c3410dad86bc5955ed4f7bd9fe7ea449fb55199eab51d15e4231068577f74",
+        "toolsInventorySha256": "736595adfe9cd13c085e785cf74783d64ef3d8f7ae477853512128d01c3e4861",
+        "bootstrap": {
+          "sourceClosureDigest": "a3350d645a81ed17f69af59333978c60e3b8f9e1d6855a999e0bc5844e183990",
+          "sourceSha256": "832f555d5d4f6ed23fabcdc6387035f407aa337bca80196371d2f5c47a1268a9",
+          "admissionsSha256": "e28e3f8626a3a1475e6aecd95b1a48967e90edc739ff053a680552a8fc0f3511",
+          "originalIrSha256": "704db6c25aca6d5936b424ec42ea5b5d877c9379ca8ae8bbd161e2014a6c2ee5",
+          "specializedIrSha256": "e92a580adf2484edf4af80932a2023eb187c837f2823474db0357f6bc36e3584",
+          "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "logicalAdmission": "accepted",
+          "publicNames": [
+            "psCompilerServiceCandidate"
+          ]
+        },
+        "executableSha256": "3da7d2bf38a335303649c775a680fb9ab9d2e2d943306b0123c4ed856bd82883",
+        "generations": [
+          {
+            "generation": 1,
+            "sourceClosureDigest": "a3350d645a81ed17f69af59333978c60e3b8f9e1d6855a999e0bc5844e183990",
+            "sourceSha256": "832f555d5d4f6ed23fabcdc6387035f407aa337bca80196371d2f5c47a1268a9",
+            "admissionsSha256": "e28e3f8626a3a1475e6aecd95b1a48967e90edc739ff053a680552a8fc0f3511",
+            "originalIrSha256": "704db6c25aca6d5936b424ec42ea5b5d877c9379ca8ae8bbd161e2014a6c2ee5",
+            "specializedIrSha256": "e92a580adf2484edf4af80932a2023eb187c837f2823474db0357f6bc36e3584",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "psCompilerServiceCandidate"
+            ],
+            "artifactSha256": "a7b4a7e34161fba783fcb44a36a28e816d351e14ff7968388c2f091a171f7d37",
+            "executableSha256": "3da7d2bf38a335303649c775a680fb9ab9d2e2d943306b0123c4ed856bd82883",
+            "observationsSha256": "e0071ad33607e0287b431ca48a4ef04b6a0b2a826c72cc383729276fd928c945",
+            "crossTargetCases": 40,
+            "rustOptimizationLevel": null,
+            "rustCodegenUnits": null
+          }
+        ],
+        "cases": 40,
+        "envelopeRefusals": 9,
+        "nativeDelegationBoundary": "one-seed; native compiler executables removed; generated source semantics only",
+        "fixedPoint": "not-requested",
+        "events": [],
+        "stackOverflow": false
+      }
+    ]
+  },
+  "priorStringEnvelope": {
+    "protocol": "psc1-unified-compiler-service/1",
+    "sourceCommit": "b2ab4d340ddc85fbad6cc7ed47fb3a1c22ce11ac",
+    "sourceClosureDigest": "873cf68508d0189c35fa1fd4753fcee2190cfbe89e88639b289cad136d56141d",
+    "runId": 40113918732,
+    "overallWorkflow": "failure because Rust/Wasm jobs failed; JS/TS jobs independently passed",
+    "qualifiedEngines": [
+      "js",
+      "ts"
+    ],
+    "currentSourceQualification": "does not carry over to v2",
+    "artifacts": [
+      {
+        "id": 12569716244,
+        "name": "psc1-unified-selfhost-correctness-1800s-js-b2ab4d340ddc85fbad6cc7ed47fb3a1c22ce11ac",
+        "digest": "sha256:7d291bfa410d91b94a4e909a26b540b07780601e87e3ebb9be57f0db2464db99"
+      },
+      {
+        "id": 12569600307,
+        "name": "psc1-unified-selfhost-correctness-1800s-wasm-core-b2ab4d340ddc85fbad6cc7ed47fb3a1c22ce11ac",
+        "digest": "sha256:4850bdc5079c3b627b2d00bf571e62414904af39f18777e3f9c62e23bb5efd26"
+      },
+      {
+        "id": 12569455511,
+        "name": "psc1-unified-selfhost-correctness-1800s-ts-b2ab4d340ddc85fbad6cc7ed47fb3a1c22ce11ac",
+        "digest": "sha256:25a94f41b77c38dbc07cc21e11282f4a79c646b6ca459605595f0ee1927755a3"
+      },
+      {
+        "id": 12568190623,
+        "name": "psc1-unified-selfhost-correctness-1800s-rust-b2ab4d340ddc85fbad6cc7ed47fb3a1c22ce11ac",
+        "digest": "sha256:23a0fb03d005e405588e489d3f7cca492061998459549e3c28a0cc7defe702a9"
+      }
+    ],
+    "engines": [
+      {
+        "testedCommit": "b2ab4d340ddc85fbad6cc7ed47fb3a1c22ce11ac",
+        "target": "js",
+        "protocol": "psc1-unified-compiler-service/1",
+        "status": "passed",
+        "mode": "--self-host",
+        "correctnessQualification": "qualified",
+        "performanceQualification": "not-run-in-this-profile",
+        "profile": {
+          "name": "correctness-1800s",
+          "g1TimeoutMs": 240000,
+          "corpusTimeoutMs": 240000,
+          "toolTimeoutMs": 240000,
+          "selfCompileTimeoutMs": 1800000,
+          "correctnessAndPerformanceSeparate": true
+        },
+        "sourceClosureDigest": "873cf68508d0189c35fa1fd4753fcee2190cfbe89e88639b289cad136d56141d",
+        "sourceModules": 120,
+        "sourceInventorySha256": "ab16ae260f17cc7d6909d307a6a3e0ec632a4680ba18e11d9ee41fef82decab9",
+        "root": {
+          "module": "Ps.CompilerUnified.Service",
+          "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.lean",
+          "bytes": 2496,
+          "sha256": "afc8a774381ac9e3193127486eba08fd744c9acc6960d7fa3ceae4255abf2d9a"
+        },
+        "nativeSeedSha256": "5010e5ed49467fd156fae569da9f6ce7fb8d0f7f0cde13430ab39a7d6f44a8ce",
+        "toolsInventorySha256": "36699353a1a988ea4a0a099f908c47e68f480f34ecace0e59e85d3b1e498689c",
+        "bootstrap": {
+          "sourceClosureDigest": "873cf68508d0189c35fa1fd4753fcee2190cfbe89e88639b289cad136d56141d",
+          "sourceSha256": "c6ee47683347d8b3b5084ae346bbaf64a7293e3f24fd9d3f576315a8ee56617a",
+          "admissionsSha256": "989064f51c9eeeed1d207ff62c98d6179d9579445c8642278af3df26519d43e6",
+          "originalIrSha256": "9d6b2b3e6d994a42ebb892ff09e67546fd05fedbab6c092f57683563e8bce2c4",
+          "specializedIrSha256": "8a59c04d1578969ec36f06029020da28b213ad599b08ed032e7640522ea93772",
+          "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "logicalAdmission": "accepted",
+          "publicNames": [
+            "psCompilerServiceCandidate"
+          ]
+        },
+        "executableSha256": "c6ee47683347d8b3b5084ae346bbaf64a7293e3f24fd9d3f576315a8ee56617a",
+        "generations": [
+          {
+            "generation": 1,
+            "sourceClosureDigest": "873cf68508d0189c35fa1fd4753fcee2190cfbe89e88639b289cad136d56141d",
+            "sourceSha256": "c6ee47683347d8b3b5084ae346bbaf64a7293e3f24fd9d3f576315a8ee56617a",
+            "admissionsSha256": "989064f51c9eeeed1d207ff62c98d6179d9579445c8642278af3df26519d43e6",
+            "originalIrSha256": "9d6b2b3e6d994a42ebb892ff09e67546fd05fedbab6c092f57683563e8bce2c4",
+            "specializedIrSha256": "8a59c04d1578969ec36f06029020da28b213ad599b08ed032e7640522ea93772",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "psCompilerServiceCandidate"
+            ],
+            "artifactSha256": "8691460572238635f93ec216c7d8c0f35d4521b39b083dbd0bdff2774c002161",
+            "executableSha256": "c6ee47683347d8b3b5084ae346bbaf64a7293e3f24fd9d3f576315a8ee56617a",
+            "observationsSha256": "e0071ad33607e0287b431ca48a4ef04b6a0b2a826c72cc383729276fd928c945",
+            "crossTargetCases": 40,
+            "rustOptimizationLevel": null
+          },
+          {
+            "generation": 2,
+            "sourceClosureDigest": "873cf68508d0189c35fa1fd4753fcee2190cfbe89e88639b289cad136d56141d",
+            "sourceSha256": "c6ee47683347d8b3b5084ae346bbaf64a7293e3f24fd9d3f576315a8ee56617a",
+            "admissionsSha256": "989064f51c9eeeed1d207ff62c98d6179d9579445c8642278af3df26519d43e6",
+            "originalIrSha256": "9d6b2b3e6d994a42ebb892ff09e67546fd05fedbab6c092f57683563e8bce2c4",
+            "specializedIrSha256": "8a59c04d1578969ec36f06029020da28b213ad599b08ed032e7640522ea93772",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "psCompilerServiceCandidate"
+            ],
+            "artifactSha256": "603b42536b67211e368c3ce00bcece17ea0a22b3034c7db31c00d6bbd292c599",
+            "executableSha256": "c6ee47683347d8b3b5084ae346bbaf64a7293e3f24fd9d3f576315a8ee56617a",
+            "observationsSha256": "e0071ad33607e0287b431ca48a4ef04b6a0b2a826c72cc383729276fd928c945",
+            "crossTargetCases": 40,
+            "rustOptimizationLevel": null
+          },
+          {
+            "generation": 3,
+            "sourceClosureDigest": "873cf68508d0189c35fa1fd4753fcee2190cfbe89e88639b289cad136d56141d",
+            "sourceSha256": "c6ee47683347d8b3b5084ae346bbaf64a7293e3f24fd9d3f576315a8ee56617a",
+            "admissionsSha256": "989064f51c9eeeed1d207ff62c98d6179d9579445c8642278af3df26519d43e6",
+            "originalIrSha256": "9d6b2b3e6d994a42ebb892ff09e67546fd05fedbab6c092f57683563e8bce2c4",
+            "specializedIrSha256": "8a59c04d1578969ec36f06029020da28b213ad599b08ed032e7640522ea93772",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "psCompilerServiceCandidate"
+            ],
+            "artifactSha256": "c21a583be2320425e42eec67ddcad672c2960373fbafd2407012ed6c74fb93f0",
+            "executableSha256": "c6ee47683347d8b3b5084ae346bbaf64a7293e3f24fd9d3f576315a8ee56617a",
+            "observationsSha256": "e0071ad33607e0287b431ca48a4ef04b6a0b2a826c72cc383729276fd928c945",
+            "crossTargetCases": 40,
+            "rustOptimizationLevel": null
+          }
+        ],
+        "cases": 120,
+        "envelopeRefusals": 27,
+        "nativeDelegationBoundary": "one-seed; native compiler executables removed; generated source semantics only",
+        "fixedPoint": "passed-G1-G2-G3-exact-source-admission-IR-executable-and-four-target-observations",
+        "events": [
+          {
+            "role": "generated-compiler",
+            "target": "js",
+            "id": "G2-self",
+            "serviceSha256": "8691460572238635f93ec216c7d8c0f35d4521b39b083dbd0bdff2774c002161",
+            "requestSha256": "0aa5bdb6066efe73d6c8174fef1b44507335b7f5e6036de564507d54488a59a5",
+            "timeoutMs": 1800000,
+            "timeoutPolicy": "g2g3-correctness-1800s",
+            "maxRssKiB": 3538684,
+            "peakTreeRssKiB": 3523964,
+            "sampledCpuSeconds": 1220.09,
+            "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+            "elapsedMs": 1112514,
+            "status": 0,
+            "signal": null,
+            "error": null,
+            "serviceMaxRssKiB": 3538684
+          },
+          {
+            "role": "generated-compiler",
+            "target": "js",
+            "id": "G3-self",
+            "serviceSha256": "603b42536b67211e368c3ce00bcece17ea0a22b3034c7db31c00d6bbd292c599",
+            "requestSha256": "0eb428ece178eb8b8ad185358e9d605ce5304a340864cd06a12d69660fa3c0ee",
+            "timeoutMs": 1800000,
+            "timeoutPolicy": "g2g3-correctness-1800s",
+            "maxRssKiB": 3535544,
+            "peakTreeRssKiB": 3465116,
+            "sampledCpuSeconds": 1211.84,
+            "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+            "elapsedMs": 1096375,
+            "status": 0,
+            "signal": null,
+            "error": null,
+            "serviceMaxRssKiB": 3535544
+          }
+        ],
+        "stackOverflow": false
+      },
+      {
+        "testedCommit": "b2ab4d340ddc85fbad6cc7ed47fb3a1c22ce11ac",
+        "target": "rust",
+        "protocol": "psc1-unified-compiler-service/1",
+        "status": "failed",
+        "mode": "--self-host",
+        "correctnessQualification": "not-qualified",
+        "performanceQualification": "not-qualified",
+        "profile": {
+          "name": "correctness-1800s",
+          "g1TimeoutMs": 240000,
+          "corpusTimeoutMs": 240000,
+          "toolTimeoutMs": 240000,
+          "selfCompileTimeoutMs": 1800000,
+          "correctnessAndPerformanceSeparate": true
+        },
+        "sourceClosureDigest": "873cf68508d0189c35fa1fd4753fcee2190cfbe89e88639b289cad136d56141d",
+        "sourceModules": 120,
+        "sourceInventorySha256": "ab16ae260f17cc7d6909d307a6a3e0ec632a4680ba18e11d9ee41fef82decab9",
+        "root": {
+          "module": "Ps.CompilerUnified.Service",
+          "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.lean",
+          "bytes": 2496,
+          "sha256": "afc8a774381ac9e3193127486eba08fd744c9acc6960d7fa3ceae4255abf2d9a"
+        },
+        "nativeSeedSha256": "5010e5ed49467fd156fae569da9f6ce7fb8d0f7f0cde13430ab39a7d6f44a8ce",
+        "toolsInventorySha256": "36699353a1a988ea4a0a099f908c47e68f480f34ecace0e59e85d3b1e498689c",
+        "bootstrap": {
+          "sourceClosureDigest": "873cf68508d0189c35fa1fd4753fcee2190cfbe89e88639b289cad136d56141d",
+          "sourceSha256": "0b2e1ffb2d5946f92ce73b9d09f9aecde5c3b8d5f0d434d7c4fd0442801f471b",
+          "admissionsSha256": "989064f51c9eeeed1d207ff62c98d6179d9579445c8642278af3df26519d43e6",
+          "originalIrSha256": "9d6b2b3e6d994a42ebb892ff09e67546fd05fedbab6c092f57683563e8bce2c4",
+          "specializedIrSha256": "8a59c04d1578969ec36f06029020da28b213ad599b08ed032e7640522ea93772",
+          "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "logicalAdmission": "accepted",
+          "publicNames": [
+            "psCompilerServiceCandidate"
+          ]
+        },
+        "generations": [],
+        "cases": 0,
+        "envelopeRefusals": 0,
+        "fixedPoint": "not-run",
+        "events": [],
+        "failure": "PSC1_TARGET_TOOL_FAILED:{\"executable\":\"cargo\",\"args\":[\"build\",\"--release\",\"--locked\",\"--message-format=short\",\"--manifest-path\",\"/home/runner/work/pskernel/pskernel/psc1/dist/generated-unified-rust-compiler/G1-service/Cargo.toml\"],\"status\":null,\"signal\":\"SIGKILL\",\"elapsedMs\":240014,\"maxRssKiB\":341776,\"peakTreeRssKiB\":4394556,\"error\":\"process tree exceeded hard deadline\"}\n    Updating crates.io index\n Downloading crates ...\n  Downloaded num-traits v0.2.19\n  Downloaded num-integer v0.1.47\n  Downloaded autocfg v1.5.1\n  Downloaded num-bigint v0.4.6\n   Compiling autocfg v1.5.1\n   Compiling num-traits v0.2.19\n   Compiling num-integer v0.1.47\n   Compiling num-bigint v0.4.6\n   Compiling psc1-generated-target v0.0.0 (/home/runner/work/pskernel/pskernel/psc1/dist/generated-unified-rust-compiler/G1-service)\nmain.rs:346:8: warning: type `Ps_Internal_WorkerFusion_Arrow` should have an upper camel case name: help: convert the identifier to upper camel case: `PsInternalWorkerFusionArrow`\nmain.rs:348:8: warning: type `Ps_Internal_WorkerFusion_NewParameters` should have an upper camel case name: help: convert the identifier to upper camel case: `PsInternalWorkerFusionNewParameters`\nmain.rs:350:8: warning: type `Ps_Internal_WorkerFusion_Spec` should have an upper camel case name: help: convert the identifier to upper camel case: `PsInternalWorkerFusionSpec`\nmain.rs:352:8: warning: type `Ps_Inter",
+        "stackOverflow": false
+      },
+      {
+        "testedCommit": "b2ab4d340ddc85fbad6cc7ed47fb3a1c22ce11ac",
+        "target": "ts",
+        "protocol": "psc1-unified-compiler-service/1",
+        "status": "passed",
+        "mode": "--self-host",
+        "correctnessQualification": "qualified",
+        "performanceQualification": "not-run-in-this-profile",
+        "profile": {
+          "name": "correctness-1800s",
+          "g1TimeoutMs": 240000,
+          "corpusTimeoutMs": 240000,
+          "toolTimeoutMs": 240000,
+          "selfCompileTimeoutMs": 1800000,
+          "correctnessAndPerformanceSeparate": true
+        },
+        "sourceClosureDigest": "873cf68508d0189c35fa1fd4753fcee2190cfbe89e88639b289cad136d56141d",
+        "sourceModules": 120,
+        "sourceInventorySha256": "ab16ae260f17cc7d6909d307a6a3e0ec632a4680ba18e11d9ee41fef82decab9",
+        "root": {
+          "module": "Ps.CompilerUnified.Service",
+          "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.lean",
+          "bytes": 2496,
+          "sha256": "afc8a774381ac9e3193127486eba08fd744c9acc6960d7fa3ceae4255abf2d9a"
+        },
+        "nativeSeedSha256": "5010e5ed49467fd156fae569da9f6ce7fb8d0f7f0cde13430ab39a7d6f44a8ce",
+        "toolsInventorySha256": "36699353a1a988ea4a0a099f908c47e68f480f34ecace0e59e85d3b1e498689c",
+        "bootstrap": {
+          "sourceClosureDigest": "873cf68508d0189c35fa1fd4753fcee2190cfbe89e88639b289cad136d56141d",
+          "sourceSha256": "e9a9b2718d1a6c01a15e200512c0783e473ce4710242ef8941e9bd340595d1cf",
+          "admissionsSha256": "989064f51c9eeeed1d207ff62c98d6179d9579445c8642278af3df26519d43e6",
+          "originalIrSha256": "9d6b2b3e6d994a42ebb892ff09e67546fd05fedbab6c092f57683563e8bce2c4",
+          "specializedIrSha256": "8a59c04d1578969ec36f06029020da28b213ad599b08ed032e7640522ea93772",
+          "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "logicalAdmission": "accepted",
+          "publicNames": [
+            "psCompilerServiceCandidate"
+          ]
+        },
+        "executableSha256": "cd39d48a76716eeee0cace3537a840ff7effe341c45149a1471ce0d89b98eadf",
+        "generations": [
+          {
+            "generation": 1,
+            "sourceClosureDigest": "873cf68508d0189c35fa1fd4753fcee2190cfbe89e88639b289cad136d56141d",
+            "sourceSha256": "e9a9b2718d1a6c01a15e200512c0783e473ce4710242ef8941e9bd340595d1cf",
+            "admissionsSha256": "989064f51c9eeeed1d207ff62c98d6179d9579445c8642278af3df26519d43e6",
+            "originalIrSha256": "9d6b2b3e6d994a42ebb892ff09e67546fd05fedbab6c092f57683563e8bce2c4",
+            "specializedIrSha256": "8a59c04d1578969ec36f06029020da28b213ad599b08ed032e7640522ea93772",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "psCompilerServiceCandidate"
+            ],
+            "artifactSha256": "3027658229d40c636365ae943732692653b1a37433b661b4ebc1678e3130099d",
+            "executableSha256": "cd39d48a76716eeee0cace3537a840ff7effe341c45149a1471ce0d89b98eadf",
+            "observationsSha256": "e0071ad33607e0287b431ca48a4ef04b6a0b2a826c72cc383729276fd928c945",
+            "crossTargetCases": 40,
+            "rustOptimizationLevel": null
+          },
+          {
+            "generation": 2,
+            "sourceClosureDigest": "873cf68508d0189c35fa1fd4753fcee2190cfbe89e88639b289cad136d56141d",
+            "sourceSha256": "e9a9b2718d1a6c01a15e200512c0783e473ce4710242ef8941e9bd340595d1cf",
+            "admissionsSha256": "989064f51c9eeeed1d207ff62c98d6179d9579445c8642278af3df26519d43e6",
+            "originalIrSha256": "9d6b2b3e6d994a42ebb892ff09e67546fd05fedbab6c092f57683563e8bce2c4",
+            "specializedIrSha256": "8a59c04d1578969ec36f06029020da28b213ad599b08ed032e7640522ea93772",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "psCompilerServiceCandidate"
+            ],
+            "artifactSha256": "c87302cee582d95e38bb28414880de2b5021ee11e61bcac22fce86cb4801af4b",
+            "executableSha256": "cd39d48a76716eeee0cace3537a840ff7effe341c45149a1471ce0d89b98eadf",
+            "observationsSha256": "e0071ad33607e0287b431ca48a4ef04b6a0b2a826c72cc383729276fd928c945",
+            "crossTargetCases": 40,
+            "rustOptimizationLevel": null
+          },
+          {
+            "generation": 3,
+            "sourceClosureDigest": "873cf68508d0189c35fa1fd4753fcee2190cfbe89e88639b289cad136d56141d",
+            "sourceSha256": "e9a9b2718d1a6c01a15e200512c0783e473ce4710242ef8941e9bd340595d1cf",
+            "admissionsSha256": "989064f51c9eeeed1d207ff62c98d6179d9579445c8642278af3df26519d43e6",
+            "originalIrSha256": "9d6b2b3e6d994a42ebb892ff09e67546fd05fedbab6c092f57683563e8bce2c4",
+            "specializedIrSha256": "8a59c04d1578969ec36f06029020da28b213ad599b08ed032e7640522ea93772",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "psCompilerServiceCandidate"
+            ],
+            "artifactSha256": "8e09da7a1c0022f659de1ccb837fb307380e948e6f1573a5f0283a48f3e807c2",
+            "executableSha256": "cd39d48a76716eeee0cace3537a840ff7effe341c45149a1471ce0d89b98eadf",
+            "observationsSha256": "e0071ad33607e0287b431ca48a4ef04b6a0b2a826c72cc383729276fd928c945",
+            "crossTargetCases": 40,
+            "rustOptimizationLevel": null
+          }
+        ],
+        "cases": 120,
+        "envelopeRefusals": 27,
+        "nativeDelegationBoundary": "one-seed; native compiler executables removed; generated source semantics only",
+        "fixedPoint": "passed-G1-G2-G3-exact-source-admission-IR-executable-and-four-target-observations",
+        "events": [
+          {
+            "role": "generated-compiler",
+            "target": "ts",
+            "id": "G2-self",
+            "serviceSha256": "3027658229d40c636365ae943732692653b1a37433b661b4ebc1678e3130099d",
+            "requestSha256": "552ca57fb88b09b0a81b7e500997ceb64bc51682c000e383a8c25318d0250e75",
+            "timeoutMs": 1800000,
+            "timeoutPolicy": "g2g3-correctness-1800s",
+            "maxRssKiB": 3481504,
+            "peakTreeRssKiB": 3431968,
+            "sampledCpuSeconds": 1014.17,
+            "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+            "elapsedMs": 925482,
+            "status": 0,
+            "signal": null,
+            "error": null,
+            "serviceMaxRssKiB": 3481504
+          },
+          {
+            "role": "generated-compiler",
+            "target": "ts",
+            "id": "G3-self",
+            "serviceSha256": "c87302cee582d95e38bb28414880de2b5021ee11e61bcac22fce86cb4801af4b",
+            "requestSha256": "d922d77f8558c4fb65a74d63abed08267243f85287e74fa078f537e87af31acc",
+            "timeoutMs": 1800000,
+            "timeoutPolicy": "g2g3-correctness-1800s",
+            "maxRssKiB": 3435248,
+            "peakTreeRssKiB": 3435248,
+            "sampledCpuSeconds": 1106.78,
+            "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+            "elapsedMs": 1009493,
+            "status": 0,
+            "signal": null,
+            "error": null,
+            "serviceMaxRssKiB": 3435248
+          }
+        ],
+        "stackOverflow": false
+      },
+      {
+        "testedCommit": "b2ab4d340ddc85fbad6cc7ed47fb3a1c22ce11ac",
+        "target": "wasm-core",
+        "protocol": "psc1-unified-compiler-service/1",
+        "status": "failed",
+        "mode": "--self-host",
+        "correctnessQualification": "not-qualified",
+        "performanceQualification": "not-qualified",
+        "profile": {
+          "name": "correctness-1800s",
+          "g1TimeoutMs": 240000,
+          "corpusTimeoutMs": 240000,
+          "toolTimeoutMs": 240000,
+          "selfCompileTimeoutMs": 1800000,
+          "correctnessAndPerformanceSeparate": true
+        },
+        "sourceClosureDigest": "873cf68508d0189c35fa1fd4753fcee2190cfbe89e88639b289cad136d56141d",
+        "sourceModules": 120,
+        "sourceInventorySha256": "ab16ae260f17cc7d6909d307a6a3e0ec632a4680ba18e11d9ee41fef82decab9",
+        "root": {
+          "module": "Ps.CompilerUnified.Service",
+          "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.lean",
+          "bytes": 2496,
+          "sha256": "afc8a774381ac9e3193127486eba08fd744c9acc6960d7fa3ceae4255abf2d9a"
+        },
+        "nativeSeedSha256": "5010e5ed49467fd156fae569da9f6ce7fb8d0f7f0cde13430ab39a7d6f44a8ce",
+        "toolsInventorySha256": "36699353a1a988ea4a0a099f908c47e68f480f34ecace0e59e85d3b1e498689c",
+        "bootstrap": {
+          "sourceClosureDigest": "873cf68508d0189c35fa1fd4753fcee2190cfbe89e88639b289cad136d56141d",
+          "sourceSha256": "4dd858485ab35697723293e9f859b0b900190e1e1cb98b448afe130757ec9d9b",
+          "admissionsSha256": "989064f51c9eeeed1d207ff62c98d6179d9579445c8642278af3df26519d43e6",
+          "originalIrSha256": "9d6b2b3e6d994a42ebb892ff09e67546fd05fedbab6c092f57683563e8bce2c4",
+          "specializedIrSha256": "8a59c04d1578969ec36f06029020da28b213ad599b08ed032e7640522ea93772",
+          "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "logicalAdmission": "accepted",
+          "publicNames": [
+            "psCompilerServiceCandidate"
+          ]
+        },
+        "executableSha256": "7884de6b8aad6cf5f8a878d96d1be62590cc3987ffe6128709c6eb09f561fe4b",
+        "generations": [
+          {
+            "generation": 1,
+            "sourceClosureDigest": "873cf68508d0189c35fa1fd4753fcee2190cfbe89e88639b289cad136d56141d",
+            "sourceSha256": "4dd858485ab35697723293e9f859b0b900190e1e1cb98b448afe130757ec9d9b",
+            "admissionsSha256": "989064f51c9eeeed1d207ff62c98d6179d9579445c8642278af3df26519d43e6",
+            "originalIrSha256": "9d6b2b3e6d994a42ebb892ff09e67546fd05fedbab6c092f57683563e8bce2c4",
+            "specializedIrSha256": "8a59c04d1578969ec36f06029020da28b213ad599b08ed032e7640522ea93772",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "psCompilerServiceCandidate"
+            ],
+            "artifactSha256": "6480df99147b2930e76b6d4ab313e51624561900ca6cbf58ac1a0e020ced03ad",
+            "executableSha256": "7884de6b8aad6cf5f8a878d96d1be62590cc3987ffe6128709c6eb09f561fe4b",
+            "observationsSha256": "e0071ad33607e0287b431ca48a4ef04b6a0b2a826c72cc383729276fd928c945",
+            "crossTargetCases": 40,
+            "rustOptimizationLevel": null
+          }
+        ],
+        "cases": 40,
+        "envelopeRefusals": 9,
+        "nativeDelegationBoundary": "one-seed; native compiler executables removed; generated source semantics only",
+        "fixedPoint": "not-run",
+        "events": [
+          {
+            "role": "generated-compiler",
+            "target": "wasm-core",
+            "id": "G2-self",
+            "serviceSha256": "6480df99147b2930e76b6d4ab313e51624561900ca6cbf58ac1a0e020ced03ad",
+            "requestSha256": "3bfc6e9bdf1f69b36de9de8c8757339c18b36fad1a6dd4220e0def5de9513b78",
+            "timeoutMs": 1800000,
+            "timeoutPolicy": "g2g3-correctness-1800s",
+            "maxRssKiB": 1068780,
+            "peakTreeRssKiB": 1066992,
+            "sampledCpuSeconds": 1872.77,
+            "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+            "elapsedMs": 1800101,
+            "status": null,
+            "signal": "SIGKILL",
+            "error": "process tree exceeded hard deadline"
+          }
+        ],
+        "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"wasm-core\",\"id\":\"G2-self\",\"serviceSha256\":\"6480df99147b2930e76b6d4ab313e51624561900ca6cbf58ac1a0e020ced03ad\",\"requestSha256\":\"3bfc6e9bdf1f69b36de9de8c8757339c18b36fad1a6dd4220e0def5de9513b78\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":1068780,\"peakTreeRssKiB\":1066992,\"sampledCpuSeconds\":1872.77,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":1800101,\"status\":null,\"signal\":\"SIGKILL\",\"error\":\"process tree exceeded hard deadline\"}\n",
+        "stackOverflow": false
+      }
+    ]
+  },
+  "rustRetry": {
+    "sourceCommit": "0cf66b05272e40f26e3d1464478b8b944d7745bc",
+    "control": "6c46641efa11293fbe45f960bea38daeaf8305ec",
+    "runId": 40115403218,
+    "jobId": 120935640656,
+    "artifacts": [
+      {
+        "id": 12569456057,
+        "name": "psc1-unified-selfhost-correctness-1800s-rust-0cf66b05272e40f26e3d1464478b8b944d7745bc",
+        "digest": "sha256:19240c233e767048eaf1135e3bcf21a0ad1e4dfb5f187c9483e6d03daff50f97"
+      }
+    ],
+    "result": {
+      "testedCommit": "0cf66b05272e40f26e3d1464478b8b944d7745bc",
+      "target": "rust",
+      "protocol": "psc1-unified-compiler-service/1",
+      "status": "failed",
+      "mode": "--self-host",
+      "correctnessQualification": "not-qualified",
+      "performanceQualification": "not-qualified",
+      "profile": {
+        "name": "correctness-1800s",
+        "g1TimeoutMs": 240000,
+        "corpusTimeoutMs": 240000,
+        "toolTimeoutMs": 240000,
+        "selfCompileTimeoutMs": 1800000,
+        "correctnessAndPerformanceSeparate": true
+      },
+      "sourceClosureDigest": "873cf68508d0189c35fa1fd4753fcee2190cfbe89e88639b289cad136d56141d",
+      "sourceModules": 120,
+      "sourceInventorySha256": "ab16ae260f17cc7d6909d307a6a3e0ec632a4680ba18e11d9ee41fef82decab9",
+      "root": {
+        "module": "Ps.CompilerUnified.Service",
+        "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.lean",
+        "bytes": 2496,
+        "sha256": "afc8a774381ac9e3193127486eba08fd744c9acc6960d7fa3ceae4255abf2d9a"
+      },
+      "nativeSeedSha256": "5010e5ed49467fd156fae569da9f6ce7fb8d0f7f0cde13430ab39a7d6f44a8ce",
+      "toolsInventorySha256": "9decf41a3be6ff4cbbe748b4b170de714d077e8965ba55d5008505a13da0e2ae",
+      "bootstrap": {
+        "sourceClosureDigest": "873cf68508d0189c35fa1fd4753fcee2190cfbe89e88639b289cad136d56141d",
+        "sourceSha256": "0b2e1ffb2d5946f92ce73b9d09f9aecde5c3b8d5f0d434d7c4fd0442801f471b",
+        "admissionsSha256": "989064f51c9eeeed1d207ff62c98d6179d9579445c8642278af3df26519d43e6",
+        "originalIrSha256": "9d6b2b3e6d994a42ebb892ff09e67546fd05fedbab6c092f57683563e8bce2c4",
+        "specializedIrSha256": "8a59c04d1578969ec36f06029020da28b213ad599b08ed032e7640522ea93772",
+        "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "logicalAdmission": "accepted",
+        "publicNames": [
+          "psCompilerServiceCandidate"
+        ]
+      },
+      "executableSha256": "6f9a191ed2764576c8086a9e2cc4e866d01bb6d1bf5ca7f09f58720ebbe763b2",
+      "generations": [
+        {
+          "generation": 1,
+          "sourceClosureDigest": "873cf68508d0189c35fa1fd4753fcee2190cfbe89e88639b289cad136d56141d",
+          "sourceSha256": "0b2e1ffb2d5946f92ce73b9d09f9aecde5c3b8d5f0d434d7c4fd0442801f471b",
+          "admissionsSha256": "989064f51c9eeeed1d207ff62c98d6179d9579445c8642278af3df26519d43e6",
+          "originalIrSha256": "9d6b2b3e6d994a42ebb892ff09e67546fd05fedbab6c092f57683563e8bce2c4",
+          "specializedIrSha256": "8a59c04d1578969ec36f06029020da28b213ad599b08ed032e7640522ea93772",
+          "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "logicalAdmission": "accepted",
+          "publicNames": [
+            "psCompilerServiceCandidate"
+          ],
+          "artifactSha256": "89b99035ff8d2d59cfb29bd85d2093e327586bddb64ae06d975881de999f1b44",
+          "executableSha256": "6f9a191ed2764576c8086a9e2cc4e866d01bb6d1bf5ca7f09f58720ebbe763b2",
+          "observationsSha256": "e0071ad33607e0287b431ca48a4ef04b6a0b2a826c72cc383729276fd928c945",
+          "crossTargetCases": 40,
+          "rustOptimizationLevel": 0,
+          "rustCodegenUnits": 256
+        }
+      ],
+      "cases": 40,
+      "envelopeRefusals": 9,
+      "nativeDelegationBoundary": "one-seed; native compiler executables removed; generated source semantics only",
+      "fixedPoint": "not-run",
+      "events": [
+        {
+          "role": "generated-compiler",
+          "target": "rust",
+          "id": "G2-self",
+          "serviceSha256": "89b99035ff8d2d59cfb29bd85d2093e327586bddb64ae06d975881de999f1b44",
+          "requestSha256": "68c75df9aae2918e4a5c9f7eff45cf703e230917b8f9c0a42b581cf77dade4d7",
+          "timeoutMs": 1800000,
+          "timeoutPolicy": "g2g3-correctness-1800s",
+          "maxRssKiB": 477012,
+          "peakTreeRssKiB": 575080,
+          "sampledCpuSeconds": 1249.68,
+          "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+          "elapsedMs": 1179495,
+          "status": 1,
+          "signal": null,
+          "error": null
+        }
+      ],
+      "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"rust\",\"id\":\"G2-self\",\"serviceSha256\":\"89b99035ff8d2d59cfb29bd85d2093e327586bddb64ae06d975881de999f1b44\",\"requestSha256\":\"68c75df9aae2918e4a5c9f7eff45cf703e230917b8f9c0a42b581cf77dade4d7\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":477012,\"peakTreeRssKiB\":575080,\"sampledCpuSeconds\":1249.68,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":1179495,\"status\":1,\"signal\":null,\"error\":null}\nutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-1800s\", \"supervisorPid\": 4452, \"childPid\": 4453, \"elapsedMs\": 420318, \"timeoutMs\": 1800000, \"sampledCpuSeconds\": 420.26, \"currentTreeRssKiB\": 112296, \"peakTreeRssKiB\": 112296, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-1800s\", \"supervisorPid\": 4452, \"childPid\": 4453, \"elapsedMs\": 480349, \"timeoutMs\": 1800000, \"sampledCpuSeconds\": 480.28, \"currentTreeRssKiB\": 123328, \"peakTreeRssKiB\": 123328, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g",
+      "stackOverflow": true
+    },
+    "failureKind": "G2 stack overflow after1179495ms; exact stack site not established; no G3/fixed point"
+  },
+  "rustTargetBuild": {
+    "diagnostic": {
+      "branch": "diagnostic/psc1-unified-rust-build-20261025",
+      "head": "4f11f09254510f27e0f79bc3891d8a171c983113"
+    },
+    "runId": 40114865357,
+    "measurements": [
+      {
+        "jobId": 120933957343,
+        "runId": 40114865357,
+        "schema": "psc1-unified-rust-build-measurement/1",
+        "sourceCommit": "b2ab4d340ddc85fbad6cc7ed47fb3a1c22ce11ac",
+        "sourceSha256": "0b2e1ffb2d5946f92ce73b9d09f9aecde5c3b8d5f0d434d7c4fd0442801f471b",
+        "sourceBytes": 15210217,
+        "sourceModules": 120,
+        "optimization": 0,
+        "codegenUnits": 256,
+        "timeoutMs": 240000,
+        "elapsedMs": 51719,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "maxRssKiB": 2475072,
+        "peakTreeRssKiB": 2499780,
+        "selfHostQualification": "not-provided"
+      },
+      {
+        "jobId": 120933957243,
+        "runId": 40114865357,
+        "schema": "psc1-unified-rust-build-measurement/1",
+        "sourceCommit": "b2ab4d340ddc85fbad6cc7ed47fb3a1c22ce11ac",
+        "sourceSha256": "0b2e1ffb2d5946f92ce73b9d09f9aecde5c3b8d5f0d434d7c4fd0442801f471b",
+        "sourceBytes": 15210217,
+        "sourceModules": 120,
+        "optimization": 1,
+        "codegenUnits": 256,
+        "timeoutMs": 240000,
+        "elapsedMs": 240010,
+        "status": null,
+        "signal": "SIGKILL",
+        "error": {
+          "code": "ETIMEDOUT",
+          "message": "process tree exceeded hard deadline"
+        },
+        "maxRssKiB": 342000,
+        "peakTreeRssKiB": 4388452,
+        "selfHostQualification": "not-provided"
+      }
+    ],
+    "artifacts": [
+      {
+        "id": 12567614993,
+        "name": "psc1-unified-rust-build-opt1-4f11f09254510f27e0f79bc3891d8a171c983113",
+        "digest": "sha256:379808cdc55a30c61d11f5efade7a3acb18a08a33ff836bed4ce7e0fa70d757c"
+      },
+      {
+        "id": 12567403466,
+        "name": "psc1-unified-rust-build-opt0-4f11f09254510f27e0f79bc3891d8a171c983113",
+        "digest": "sha256:aaaec06777bfe1bd45565c718d1268a5ccba6991fd4cf45f658cdd70c54717c1"
+      }
+    ],
+    "chosen": "only new unified Rust correctness service uses optimization0/codegen-units256; stable Cargo package path with verified exact inputs",
+    "preserved": "single-emitter Rust optimization1 and all existing qualification/resource profiles unchanged",
+    "blocker": "optimization1 cannot build the15.2MB admitted unified compiler within240s; remains unqualified"
+  },
+  "immutableReadback": {
+    "sourceCommit": "1d9e1dedaa64dfa93fdb410c1546944a00ab8e7a",
+    "runId": 40117873559,
+    "jobId": 120942876835,
+    "artifacts": [
+      {
+        "id": 12569656720,
+        "name": "psc1-unified-receipt-readback-1d9e1dedaa64dfa93fdb410c1546944a00ab8e7a",
+        "digest": "sha256:76e237d0d166ed4f3991fe7fea7676e048c89a3895fbb3bc0711e5fc089c05f3"
+      }
+    ],
+    "status": "passed",
+    "checks": [
+      "nine immutable qualification records",
+      "native captured source bytes/SHA256 and closure digest",
+      "generated manifest/file/executable identities",
+      "per-generation observations and admission metadata",
+      "current four-engine original IR and canonical admissions equal",
+      "optional emitters absent"
+    ]
+  },
+  "resourcePolicy": {
+    "officialLean": "4.35.0",
+    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "g1AndToolsMs": 240000,
+    "checkerMs": 120000,
+    "g2g3CorrectnessMs": 1800000,
+    "performanceTargetMs": 240000,
+    "performanceQualification": "not-qualified",
+    "memoryStackFuel": "unchanged",
+    "originalAndTransformedIr": "strict validation mandatory",
+    "sourceLogicalPairing": "unchanged",
+    "negativeTests": "preserved",
+    "responseLimitBytes": 134217728
+  },
+  "nextQueue": [
+    "Attempt structured-v2 Rust/Wasm G2/G3, diagnose actual failures without increasing stack/heap/fuel",
+    "Requalify structured-v2 JS/TS; older v1 chains remain pinned separately",
+    "Complete independently checked generated-engine distribution/CLI integration, component adapter and optional-provider dispatch",
+    "Optimize Rust optimization1 build throughput and all engines toward separate240s performance target",
+    "Perform required clean independent reproduction and final release qualification before authorized publication"
+  ],
+  "authorization": {
+    "githubAndLinuxOnly": true,
+    "nonForce": true,
+    "merged": false,
+    "published": false
+  },
+  "fullRegression": {
+    "runId": 40117055147,
+    "linuxJobId": 120943685823,
+    "gateJobId": 120948016037,
+    "status": "passed",
+    "reviewedSourceCommit": "783cf8fceeda094b3e49b166e4d10af05e4b0413",
+    "testedMergeCommit": "b816df5d8082d2e805e99684e7ce2a2cc7224a54",
+    "identicalGitTree": "cfc8b5304f943945d1a52bc9de2047fb4ad4b928",
+    "readiness": {
+      "counts": {
+        "implemented": 0,
+        "tested": 0,
+        "qualified": 37,
+        "blocked": 0
+      },
+      "releaseReady": true
+    },
+    "targets": [
+      "js",
+      "ts",
+      "rust",
+      "wasm-core",
+      "wasm-component",
+      "python",
+      "php"
+    ],
+    "grammars": [
+      "lean",
+      "ps"
+    ],
+    "targetExecutionBundles": 14,
+    "scriptingRegressionGroups": 28,
+    "scriptingArtifactBundles": 24,
+    "architectureRegressionGroups": 11,
+    "logicalChecker": {
+      "version": "4.35.0",
+      "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+    },
+    "versions": {
+      "lean": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+      "node": "v22.23.3",
+      "npm": "10.9.9",
+      "typescriptConsumer": "Version 7.0.2",
+      "rust": "rustc 1.90.0 (1159e78c4 2025-09-14)",
+      "cargo": "cargo 1.90.0 (840b83a10 2025-07-30)",
+      "wasmTools": "wasm-tools 1.254.0 (bb58fdf91 2026-07-20)",
+      "wasmtime": "wasmtime 49.0.4 (2c2970205 2026-10-19)",
+      "python": "Python 3.15.0",
+      "pythonMinimum": "Python 3.14.8",
+      "php": "PHP 8.5.12 (cli) (built: Oct 19 2026 17:51:02) (NTS)"
+    },
+    "unifiedNativeDispatch": "passed exact four retained emitters and nine refusals",
+    "provider": {
+      "schema": "psc1-backend-provider-tests/1",
+      "testedCommit": "b816df5d8082d2e805e99684e7ce2a2cc7224a54",
+      "defaultTargets": [
+        "js",
+        "ts",
+        "rust",
+        "wasm-core",
+        "wasm-component"
+      ],
+      "defaultBinaryExcludesOptionalEmitters": true,
+      "providersExcludeFrontendCheckerAndPublisher": true,
+      "retainedPayloadsExact": true,
+      "malformedWorkerRefused": true,
+      "missingProviderPreservesOutput": true,
+      "cases": [
+        {
+          "target": "python",
+          "syntax": "lean",
+          "passed": true,
+          "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "requestSha256": "9d4b7adb2613d758179b224be3f01dedd8e3b663de6a991327ba2acc4a08204c"
+        },
+        {
+          "target": "python",
+          "syntax": "ps",
+          "passed": true,
+          "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "requestSha256": "9d4b7adb2613d758179b224be3f01dedd8e3b663de6a991327ba2acc4a08204c"
+        },
+        {
+          "target": "php",
+          "syntax": "lean",
+          "passed": true,
+          "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "requestSha256": "774b4c733fe84b90f0ad0d9381e4b9c1aab66ac2d351b5df5ea00f504f9573f7"
+        },
+        {
+          "target": "php",
+          "syntax": "ps",
+          "passed": true,
+          "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "requestSha256": "774b4c733fe84b90f0ad0d9381e4b9c1aab66ac2d351b5df5ea00f504f9573f7"
+        }
+      ]
+    },
+    "npm": {
+      "schemaVersion": 1,
+      "sourceCommit": "b816df5d8082d2e805e99684e7ce2a2cc7224a54",
+      "branchHeadCommit": "783cf8fceeda094b3e49b166e4d10af05e4b0413",
+      "compilerIdentity": {
+        "protocol": "psc1-native/1",
+        "profile": "psc1-checked-direct/1",
+        "lean": "4.35.0",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "targets": [
+          "js",
+          "ts",
+          "rust",
+          "wasm-core",
+          "wasm-component"
+        ],
+        "optionalTargets": [
+          "python",
+          "php"
+        ],
+        "backendProviderProtocol": "psc1-backend-provider/1"
+      },
+      "backendProviderPackages": {
+        "python": {
+          "schema": "psc1-backend-package/1",
+          "protocol": "psc1-backend-provider/1",
+          "target": "python",
+          "compilerProtocol": "psc1-native/1",
+          "compilerProfile": "psc1-checked-direct/1",
+          "leanVersion": "4.35.0",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "compilerSourceCommit": "b816df5d8082d2e805e99684e7ce2a2cc7224a54",
+          "runtimeContract": "psc1-runtime-semantics/1",
+          "native": {
+            "path": "native/bin/psc1_backend_python",
+            "sha256": "d37cf2a52161ddf84707c10289a596ca5a8cb4f30d573a99baf29ae44976bd48",
+            "bytes": 119097176
+          },
+          "resources": [
+            {
+              "path": "resources/typed_io.py",
+              "sha256": "445f19dd5e7271d96ea5e3b24c385cfe851e54038a45cfe2ea9510296f4d8d8d",
+              "bytes": 9857
+            },
+            {
+              "path": "resources/generated-python-transport.py",
+              "sha256": "8c56de21ab5850b30f78edceb5f20225aee7725539fcd7425f63f70f3f2b4237",
+              "bytes": 1183
+            }
+          ]
+        },
+        "php": {
+          "schema": "psc1-backend-package/1",
+          "protocol": "psc1-backend-provider/1",
+          "target": "php",
+          "compilerProtocol": "psc1-native/1",
+          "compilerProfile": "psc1-checked-direct/1",
+          "leanVersion": "4.35.0",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "compilerSourceCommit": "b816df5d8082d2e805e99684e7ce2a2cc7224a54",
+          "runtimeContract": "psc1-runtime-semantics/1",
+          "native": {
+            "path": "native/bin/psc1_backend_php",
+            "sha256": "766f8f7280f854fa77484caa80dc054198edbd240749d7933b03e29963196367",
+            "bytes": 119147696
+          },
+          "resources": [
+            {
+              "path": "resources/typed-io.php",
+              "sha256": "f066cf3f6254ac3df5c5aef92c952c9133ce368046e9180cf05e1680e766a546",
+              "bytes": 14150
+            },
+            {
+              "path": "resources/generated-php-transport.php",
+              "sha256": "45c4525af5a9cfd26bc1678a45be8a4183fb84c14e83a99a68baf5a6c20c233a",
+              "bytes": 1111
+            }
+          ]
+        }
+      },
+      "builtInTargets": [
+        "js",
+        "ts",
+        "rust",
+        "wasm-core",
+        "wasm-component"
+      ],
+      "optionalTargets": [
+        "python",
+        "php"
+      ],
+      "backendProviderProtocol": "psc1-backend-provider/1",
+      "nativeSha256": "4000bcf43af7c4b0ed6e5e284b5b2c7ce6ff36e6a61166599ba19bc1ec9e783d",
+      "nativeBytes": 124618352,
+      "platform": {
+        "os": "linux",
+        "cpu": "x64",
+        "libc": "glibc",
+        "qualifiedGlibc": "2.39"
+      },
+      "hostDependencyLockSha256": "7d8f3f53689b0ae639a2c1b6dccc26955016b026a3578a0b3d9b343fe3411345",
+      "bundledNpmDependencies": {
+        "@babel/parser": "7.28.0",
+        "prettier": "3.6.2"
+      },
+      "bundledNativeLibraries": [],
+      "logicalAdmission": "official Lean 4.35.0",
+      "noSelfHostQualification": true,
+      "publicationStatus": "unpublished",
+      "packageQualification": "receipt written only after install and execution tests",
+      "qualification": "passed",
+      "providerQualification": {
+        "schema": "psc1-installed-backend-providers/1",
+        "testedCommit": "b816df5d8082d2e805e99684e7ce2a2cc7224a54",
+        "passed": true,
+        "defaultTargets": [
+          "js",
+          "ts",
+          "rust",
+          "wasm-core",
+          "wasm-component"
+        ],
+        "optionalTargets": [
+          "python",
+          "php"
+        ],
+        "explicitOfflineInstalls": true,
+        "optionalPackagesAbsentByDefault": true,
+        "optionalResourcesAbsentByDefault": true,
+        "records": [
+          {
+            "syntax": "lean",
+            "target": "js",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "lean",
+            "target": "ts",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "lean",
+            "target": "rust",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "lean",
+            "target": "wasm-core",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "lean",
+            "target": "wasm-component",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "ps",
+            "target": "js",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "ps",
+            "target": "ts",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "ps",
+            "target": "rust",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "ps",
+            "target": "wasm-core",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          },
+          {
+            "syntax": "ps",
+            "target": "wasm-component",
+            "installed": true,
+            "executed": true,
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "validated": true
+          }
+        ],
+        "providerRecords": [
+          {
+            "target": "python",
+            "syntax": "lean",
+            "installed": true,
+            "executed": true,
+            "packageName": "@proofscript/backend-python",
+            "binarySha256": "d37cf2a52161ddf84707c10289a596ca5a8cb4f30d573a99baf29ae44976bd48",
+            "requestSha256": "9d4b7adb2613d758179b224be3f01dedd8e3b663de6a991327ba2acc4a08204c",
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          {
+            "target": "python",
+            "syntax": "ps",
+            "installed": true,
+            "executed": true,
+            "packageName": "@proofscript/backend-python",
+            "binarySha256": "d37cf2a52161ddf84707c10289a596ca5a8cb4f30d573a99baf29ae44976bd48",
+            "requestSha256": "9d4b7adb2613d758179b224be3f01dedd8e3b663de6a991327ba2acc4a08204c",
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          {
+            "target": "php",
+            "syntax": "lean",
+            "installed": true,
+            "executed": true,
+            "packageName": "@proofscript/backend-php",
+            "binarySha256": "766f8f7280f854fa77484caa80dc054198edbd240749d7933b03e29963196367",
+            "requestSha256": "774b4c733fe84b90f0ad0d9381e4b9c1aab66ac2d351b5df5ea00f504f9573f7",
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          {
+            "target": "php",
+            "syntax": "ps",
+            "installed": true,
+            "executed": true,
+            "packageName": "@proofscript/backend-php",
+            "binarySha256": "766f8f7280f854fa77484caa80dc054198edbd240749d7933b03e29963196367",
+            "requestSha256": "774b4c733fe84b90f0ad0d9381e4b9c1aab66ac2d351b5df5ea00f504f9573f7",
+            "admission": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          }
+        ],
+        "refusals": [
+          "absent-lean-python",
+          "absent-lean-php",
+          "absent-ps-python",
+          "absent-ps-php",
+          "python-lean-pin",
+          "python-lean-source",
+          "python-lean-target",
+          "python-lean-schema",
+          "python-binary-integrity",
+          "python-self-authorized-binary-refused",
+          "python-resource-integrity",
+          "python-ps-pin",
+          "python-ps-source",
+          "python-ps-target",
+          "python-ps-schema",
+          "php-lean-pin",
+          "php-lean-source",
+          "php-lean-target",
+          "php-lean-schema",
+          "php-binary-integrity",
+          "php-self-authorized-binary-refused",
+          "php-resource-integrity",
+          "php-ps-pin",
+          "php-ps-source",
+          "php-ps-target",
+          "php-ps-schema"
+        ],
+        "preservedExistingOutput": true
+      },
+      "addonTarballs": {
+        "python": {
+          "path": "dist/scoped-correctness/npm-native/run-XlRI4W/tarballs/proofscript-backend-python-0.1.0-psc1.3.tgz",
+          "sha256": "f100acd470c266075d577dd1bdeb73eb62d1c38158f81cba806d79052f0dacbc",
+          "bytes": 33206929
+        },
+        "php": {
+          "path": "dist/scoped-correctness/npm-native/run-XlRI4W/tarballs/proofscript-backend-php-0.1.0-psc1.3.tgz",
+          "sha256": "7e0301cd9f44ce2abca7d929cd013e5d45a1ded2c0bccc784400829b439c8ab2",
+          "bytes": 33225277
+        }
+      },
+      "adapterResources": [
+        {
+          "file": "typed-io.mjs",
+          "sha256": "a4bdabb80b8b76dd7dbbb1f547a8ce5bf8cc3bd081e43df168307dd4beff7dfe"
+        },
+        {
+          "file": "typed-io-wasm.mjs",
+          "sha256": "25b63a011635d273c17e71f7815a49c77e1119a3db9b9e7bdf03ccc2b87cace4"
+        },
+        {
+          "file": "typed_io.py",
+          "sha256": "445f19dd5e7271d96ea5e3b24c385cfe851e54038a45cfe2ea9510296f4d8d8d"
+        },
+        {
+          "file": "typed_io_component.py",
+          "sha256": "e94c4788ef64dc3e7f2bd998016d0a14c5d197f00dbd03d86fb9010491964329"
+        },
+        {
+          "file": "typed-io.php",
+          "sha256": "f066cf3f6254ac3df5c5aef92c952c9133ce368046e9180cf05e1680e766a546"
+        },
+        {
+          "file": "typed-io-rust/Cargo.toml",
+          "sha256": "d28a3e016a9066f90c97dbaf7b080e87f11f8b14be59f101008d82ffcc6b553d"
+        },
+        {
+          "file": "typed-io-rust/Cargo.lock",
+          "sha256": "da0b94a30c54d1275a0e59b85b622cf2215d561d8a9257209b1913bc1057b42a"
+        },
+        {
+          "file": "typed-io-rust/src/lib.rs",
+          "sha256": "15d3a2939f276e9831924ae3494393c75a02ff5a18bff47c95700a2afe4c72b2"
+        },
+        {
+          "file": "typed-io-rust/src/policy_server.rs",
+          "sha256": "19f426587494dd772b8627792c9ac996fa2166f8733968458b8f97b22b17ce2e"
+        }
+      ],
+      "installedTypedIo": [
+        {
+          "syntax": "lean",
+          "target": "js",
+          "passed": true,
+          "sourceClosureSha256": "6a51b53bc28031eed4960f19baec7874b73ec5598da1b913131a0916ca84e905",
+          "kernelAdmissionSha256": "ffdf4fa44646e8e035e159111922937b74e6afab65bc3b0f80c32e55b93e61b7",
+          "artifactSha256": "16434d73786bf75c93736d92b86558db4425fe2e1dea0d980058dea7b935f09e"
+        },
+        {
+          "syntax": "ps",
+          "target": "js",
+          "passed": true,
+          "sourceClosureSha256": "c2fa76dcdcf7eab579d43ac15ed4719b295f67327286543a76647a781dfe0960",
+          "kernelAdmissionSha256": "ffdf4fa44646e8e035e159111922937b74e6afab65bc3b0f80c32e55b93e61b7",
+          "artifactSha256": "16434d73786bf75c93736d92b86558db4425fe2e1dea0d980058dea7b935f09e"
+        }
+      ],
+      "tarball": "dist/scoped-correctness/npm-native/run-XlRI4W/tarballs/proofscript-0.1.0-psc1.3.tgz",
+      "tarballSha256": "61460e75952c1a8125c0aebab6639837b141832fa751f658a2a7093514086ff6",
+      "tarballBytes": 37811171,
+      "offlineLocalInstall": true,
+      "offlineGlobalInstall": true,
+      "nativeNpmIdentityAgreement": true,
+      "nativeDirectBuild": true,
+      "generatedJavaScriptExecuted": true,
+      "typeScriptInstalled": false,
+      "optionalLibraryReceipt": "dist/scoped-correctness/npm-native/run-XlRI4W/library/qualification.json",
+      "nodeVersion": "v22.23.3",
+      "npmVersion": "10.9.9"
+    },
+    "artifacts": [
+      {
+        "id": 12570094990,
+        "name": "psc1-scoped-correctness-b816df5d8082d2e805e99684e7ce2a2cc7224a54",
+        "digest": "sha256:b16c12f209ae899aa74e74117c0e4bd7cf6868188400d37e34f280649178d6df"
+      }
+    ],
+    "scope": "finite Practical Core37 criteria and all-seven native distribution/regressions; excludes new-v2 full selfhosting/formal preservation/non-Linux/npm publication"
+  }
+}

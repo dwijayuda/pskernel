@@ -35,7 +35,7 @@ const runnerHash = sha(fs.readFileSync(runner));
 const publicationRoot = path.join(directory, 'publication');
 let serial = 0;
 const records = [];
-function fixtureSession(mutate = '', capture = source) {
+function fixtureSession(mutate = '', capture = source, serviceDependencies = []) {
   const id = 'host-fixture-' + serial++;
   const file = path.join(directory, id + '.mjs');
   fs.writeFileSync(file, 'const template=' + JSON.stringify(base) + ';\n' +
@@ -49,7 +49,7 @@ function fixtureSession(mutate = '', capture = source) {
   const session = createGeneratedJsCompilerSession({ requestId: id, sources: capture,
     entryModule: 'Entry', assurance: 'checked', serviceFile: file,
     serviceSha256: sha(fs.readFileSync(file)), runnerFile: runner, runnerSha256: runnerHash,
-    checkerExecutable: checker, checkerSha256: checkerHash, publicationRoot });
+    checkerExecutable: checker, checkerSha256: checkerHash, publicationRoot, serviceDependencies });
   return { session, file };
 }
 function pointer() {
@@ -159,6 +159,24 @@ failClosed('stale prior-publication session', () =>
   assert.throws(() => stale.session.publish(), /PSC1_SERVICE_PRIOR_PUBLICATION_CHANGED/));
 assert.ok(fs.existsSync(path.join(published.directory, 'target.mjs')), 'old immutable generation retained');
 assert.equal(fs.existsSync(path.join(publicationRoot, '.publish.lock')), false);
+// Imported engine files are host-pinned resources, never wire-selected tools.
+const dependency=path.join(directory,'engine-dependency.mjs');
+fs.writeFileSync(dependency,'export const value=42;\n');
+const dependencyPin={path:dependency,sha256:sha(fs.readFileSync(dependency))};
+failClosed('imported engine changed before execution',()=>{
+ const {session}=fixtureSession('',source,[dependencyPin]);
+ fs.appendFileSync(dependency,' ');
+ assert.throws(()=>session.execute(),/PSC1_SERVICE_TOOL_IDENTITY_CHANGED/);
+ fs.writeFileSync(dependency,'export const value=42;\n');
+});
+failClosed('imported engine changed after admission',()=>{
+ const {session}=fixtureSession('',source,[dependencyPin]);
+ session.execute();fs.appendFileSync(dependency,' ');
+ assert.throws(()=>session.publish(),/PSC1_SERVICE_TOOL_IDENTITY_CHANGED/);
+ fs.writeFileSync(dependency,'export const value=42;\n');
+});
+assert.throws(()=>fixtureSession('',source,{}),/PSC1_SERVICE_DEPENDENCIES_INVALID/);
+assert.throws(()=>fixtureSession('',source,[{path:dependency,sha256:'0'.repeat(64)}]),/PSC1_SERVICE_TOOL_IDENTITY_CHANGED/);
 fs.unlinkSync(checker); // retain the exact binary hash, not a duplicate checker executable
 fs.writeFileSync(path.join(directory, 'results.json'), JSON.stringify({
   schema: 'psc1-generated-session-boundary/1', commit: process.env.GITHUB_SHA,

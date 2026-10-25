@@ -1,0 +1,159 @@
+{
+  "schema": "psc1-global-package-qualification/1",
+  "initialFailure": {
+    "run": 40145246949,
+    "job": 121025070219,
+    "reason": "npm global required peer resolves nested proofscript registry package despite explicit core; offline ENOTCACHED"
+  },
+  "candidate": {
+    "run": 40145577407,
+    "job": 121026066810,
+    "conclusion": "success",
+    "artifact": 12580715967,
+    "digest": "sha256:eee8bbfc8c4aa80d063411b998c4663db4fccc56b006c5e39b654796a297fa7d",
+    "receipt": {
+      "patchedOptionalPeerMetadata": [
+        {
+          "target": "python",
+          "tarball": "/home/runner/work/pskernel/pskernel/repacked/proofscript-backend-python-0.1.0-psc1.3.tgz",
+          "sha256": "e2c30e30588e907b1166bbaf661124df1a2cbb10c6b54d648c90ca2d1aee9ab9",
+          "nativeDescriptorUnchanged": true,
+          "nonMetadataInventoryUnchanged": true
+        },
+        {
+          "target": "php",
+          "tarball": "/home/runner/work/pskernel/pskernel/repacked/proofscript-backend-php-0.1.0-psc1.3.tgz",
+          "sha256": "b4536b8766df908f290947ed4c19fb3c36e597e4fba5ecf8cf8ff86eddf3b3df",
+          "nativeDescriptorUnchanged": true,
+          "nonMetadataInventoryUnchanged": true
+        }
+      ],
+      "schema": "psc1-clean-installed-generated/1",
+      "controlCommit": "6e71d8b88e45fc19dca04c38107f3a62d9ccf797",
+      "status": "passed",
+      "inputArtifact": 12579329783,
+      "coreSha256": "203c7b58ec8e1b3c6aaa0cdaa5ead0aff942a9b4beb7ed1e865f83779ae5e3f0",
+      "noRepositoryCheckout": true,
+      "noLakeBuildTree": true,
+      "offlineLocalAndGlobal": true,
+      "matchingOptionalPackagesInstalled": true,
+      "optionalEmitterExecution": "covered by exact native full40141923929, not repeated here",
+      "nativeCompilerUnavailableDuringGeneratedCases": true,
+      "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "cases": [
+        {
+          "mode": "local",
+          "grammar": "lean",
+          "engine": "ts",
+          "passed": true,
+          "manifest": "780fd49aafb80611359afc0728c2fd552e305a76de329ccbe017e1291da7e3b2"
+        },
+        {
+          "mode": "local",
+          "grammar": "lean",
+          "engine": "wasm-core",
+          "passed": true,
+          "manifest": "71da441bcc803c6225e48e02662f997c5783d83362a45907b09eb2d6df1ea937"
+        },
+        {
+          "mode": "local",
+          "grammar": "ps",
+          "engine": "ts",
+          "passed": true,
+          "manifest": "cd4b27db1c0eea3dd16708095cf40a93d03217e30a529cc3b2da62ea77a8323b"
+        },
+        {
+          "mode": "local",
+          "grammar": "ps",
+          "engine": "wasm-core",
+          "passed": true,
+          "manifest": "8cfc46fc0e985097460adc831f501a9e43b1bf2b6514e33ea5215062ef8e182d"
+        },
+        {
+          "mode": "global",
+          "grammar": "lean",
+          "engine": "ts",
+          "passed": true,
+          "manifest": "6666e51d1c73beda533eecab13525b136a4c1ae8d650279e5439aa1cfeed6cbb"
+        },
+        {
+          "mode": "global",
+          "grammar": "lean",
+          "engine": "wasm-core",
+          "passed": true,
+          "manifest": "af506bdaf4a0eb16f0be262d9f17c9d711ee9c333449c32410aaaccf24f09709"
+        },
+        {
+          "mode": "global",
+          "grammar": "ps",
+          "engine": "ts",
+          "passed": true,
+          "manifest": "c29f181c5f27230fae4bb47081dbc25cb154c482fd354df14658d3acdcc455df"
+        },
+        {
+          "mode": "global",
+          "grammar": "ps",
+          "engine": "wasm-core",
+          "passed": true,
+          "manifest": "bc742cb870502e0f6d350efd304257e8bbd11f43255a9c691902c3d0744edef7"
+        }
+      ]
+    }
+  },
+  "productionBuilderFix": "optional peer metadata; same exact peer version and provider source/native/resource contract",
+  "fullProductionQualification": {
+    "reviewCommit": "14cb3e30503d0c5e6b1e007598b0bde7ad77befb",
+    "testedCommit": "348746f32e7fe04b3402eb22030054375eb9ebcd",
+    "equalTree": "c57b723e3809ec591920b326dece50b0903d4aa4",
+    "run": 40145805549,
+    "job": 121029022566,
+    "finalGate": 121034253918,
+    "conclusion": "success",
+    "readiness": {
+      "counts": {
+        "implemented": 0,
+        "tested": 0,
+        "qualified": 37,
+        "blocked": 0
+      },
+      "releaseReady": true
+    },
+    "globalProviderCases": [
+      {
+        "syntax": "lean",
+        "target": "python",
+        "passed": true,
+        "logicalCheckerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelAdmissionSha256": "69d79dcc09ed85f9bab3f1555a12ef74253edfdc119c2f4d058dfb6645b27a5c",
+        "artifactSha256": "275bec1728faeb34e53f77adece2a252d0a15be2e6add78884d76a336d0a623a"
+      },
+      {
+        "syntax": "lean",
+        "target": "php",
+        "passed": true,
+        "logicalCheckerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelAdmissionSha256": "69d79dcc09ed85f9bab3f1555a12ef74253edfdc119c2f4d058dfb6645b27a5c",
+        "artifactSha256": "d63428bc023255b5fc79580ed60c8061143a706f25735d87151922b5cf85fa24"
+      },
+      {
+        "syntax": "ps",
+        "target": "python",
+        "passed": true,
+        "logicalCheckerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelAdmissionSha256": "69d79dcc09ed85f9bab3f1555a12ef74253edfdc119c2f4d058dfb6645b27a5c",
+        "artifactSha256": "275bec1728faeb34e53f77adece2a252d0a15be2e6add78884d76a336d0a623a"
+      },
+      {
+        "syntax": "ps",
+        "target": "php",
+        "passed": true,
+        "logicalCheckerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "kernelAdmissionSha256": "69d79dcc09ed85f9bab3f1555a12ef74253edfdc119c2f4d058dfb6645b27a5c",
+        "artifactSha256": "d63428bc023255b5fc79580ed60c8061143a706f25735d87151922b5cf85fa24"
+      }
+    ],
+    "artifact": 12581184979,
+    "digest": "sha256:2bf7d0fadd0bacd45c1b645ad9f15ba400a67236d9720c55f21391470e12fda3"
+  },
+  "compilerClosureUnchanged": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af"
+}

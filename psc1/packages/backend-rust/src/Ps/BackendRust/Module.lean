@@ -128,6 +128,83 @@ def psRustEmitConstructorList
           | Except.ok printedRest =>
               Except.ok (List.cons printed printedRest)
 
+-- Private recursive carriers with an empty constructor can safely detach
+-- self-recursive Rc fields before Rust's implicit field destruction. Public
+-- enums keep their existing ability to move fields out in downstream Rust code.
+def psRustDropEmptyConstructor (constructors : List PsVerifiedIrConstructor) : Option String :=
+  match constructors with
+  | List.nil => Option.none
+  | List.cons constructorInfo rest =>
+      if psListIsEmpty constructorInfo.fields then Option.some constructorInfo.name
+      else psRustDropEmptyConstructor rest
+
+def psRustDropSelfField (value : PsVerifiedIrInductive)
+    (field : PsVerifiedIrConstructorField) : Bool :=
+  match field.type with
+  | PsVerifiedIrType.named name arguments =>
+      psStringEq name value.name && psRustTailSameTypes value.typeParameters arguments
+  | _ => false
+
+def psRustInductiveNeedsDrop (value : PsVerifiedIrInductive) : Bool :=
+  match psRustDropEmptyConstructor value.constructors with
+  | Option.none => false
+  | Option.some _ =>
+      psListAny (fun (constructorInfo : PsVerifiedIrConstructor) =>
+        psListAny (psRustDropSelfField value) constructorInfo.fields) value.constructors
+
+def psRustDropFields (value : PsVerifiedIrInductive)
+    (fields : List PsVerifiedIrConstructorField) : List String :=
+  match fields with
+  | List.nil => List.nil
+  | List.cons field rest =>
+      if psRustDropSelfField value field then
+        List.cons (psRustIdentifier field.name) (psRustDropFields value rest)
+      else psRustDropFields value rest
+
+def psRustDropStatements (empty : String) (fields : List String) : String :=
+  match fields with
+  | List.nil => ""
+  | List.cons field rest =>
+      psRustJoin "" ["__ps_internal_drop_shared(::std::mem::replace(", field,
+        ", ::std::rc::Rc::new(Self::", psRustIdentifier empty, " {}))); ",
+        psRustDropStatements empty rest]
+
+def psRustDropArms (value : PsVerifiedIrInductive) (empty : String)
+    (constructors : List PsVerifiedIrConstructor) : List String :=
+  match constructors with
+  | List.nil => List.nil
+  | List.cons constructorInfo rest =>
+      let fields := psRustDropFields value constructorInfo.fields;
+      let bindings := if psListIsEmpty fields then ".."
+        else psRustConcat2 (psRustJoin ", " fields) ", ..";
+      List.cons (psRustJoin "" ["Self::", psRustIdentifier constructorInfo.name,
+        " { ", bindings, " } => { ", psRustDropStatements empty fields, " }"])
+        (psRustDropArms value empty rest)
+
+def psRustDropTypeArguments (parameters : List PsVerifiedIrTypeParameter) : String :=
+  if psListIsEmpty parameters then ""
+  else psRustJoin "" ["<", psRustJoin ", "
+    (psListMap (fun (parameter : PsVerifiedIrTypeParameter) => psRustIdentifier parameter.name) parameters), ">"]
+
+def psRustEmitPrivateInductiveDrop (value : PsVerifiedIrInductive) : String :=
+  if !psRustInductiveNeedsDrop value then ""
+  else
+    match psRustDropEmptyConstructor value.constructors with
+    | Option.none => ""
+    | Option.some empty =>
+        psRustJoin "" ["\nimpl", psRustGenericNames value.typeParameters, " ::std::ops::Drop for ",
+          psRustIdentifier value.name, psRustDropTypeArguments value.typeParameters,
+          " { fn drop(&mut self) { match self { ",
+          psRustJoin ", " (psRustDropArms value empty value.constructors), " } } }"]
+
+def psRustSharedDropRuntime : String :=
+  "fn __ps_internal_drop_shared<T: 'static>(value: ::std::rc::Rc<T>) {\n    if ::std::rc::Rc::strong_count(&value) != 1 { return; }\n    // Private generated immutable carriers only. Drain outside the RefCell borrow:\n    // nested final owners append work instead of extending the native call stack.\n    ::std::thread_local! {\n        static STATE: ::std::cell::RefCell<(bool, ::std::vec::Vec<::std::boxed::Box<dyn ::std::ops::FnOnce()>>)> =\n            ::std::cell::RefCell::new((false, ::std::vec::Vec::new()));\n    }\n    STATE.with(|state| {\n        let nested = {\n            let mut pending = state.borrow_mut();\n            pending.1.push(::std::boxed::Box::new(move || ::std::mem::drop(value)));\n            let nested = pending.0;\n            pending.0 = true;\n            nested\n        };\n        if nested { return; }\n        loop {\n            let next = { state.borrow_mut().1.pop() };\n            match next { ::std::option::Option::Some(reclaim) => reclaim(), ::std::option::Option::None => break }\n        }\n        state.borrow_mut().0 = false;\n    });\n}\n"
+
+def psRustPrivateDropRuntimeNeeded (publicTypes : List String)
+    (inductives : List PsVerifiedIrInductive) : Bool :=
+  psListAny (fun (value : PsVerifiedIrInductive) =>
+    !psRustStringListContains publicTypes value.name && psRustInductiveNeedsDrop value) inductives
+
 def psRustEmitInductiveWithVisibility (isPublic : Bool)
     (inductiveInfo : PsVerifiedIrInductive) :
     Except PsRustEmitError String :=
@@ -146,7 +223,7 @@ def psRustEmitInductiveWithVisibility (isPublic : Bool)
             " { "
             (psRustJoin ", " printedConstructors)
             " }"
-            ""))
+            (if isPublic then "" else psRustEmitPrivateInductiveDrop inductiveInfo)))
 
 def psRustEmitInductive (value : PsVerifiedIrInductive) : Except PsRustEmitError String :=
   psRustEmitInductiveWithVisibility true value
@@ -1248,6 +1325,59 @@ def psRustWithFailureLocation {alpha : Type} (location : String)
       Except.error (psRustConcat4 "PSC1_RUST_TARGET_UNSUPPORTED: phase=rust-lowering location="
         location " reason=" (psRustEmitFailureReason error))
 
+-- A selected scalar-only module cannot construct or mention a carrier.
+-- Omit its unused prelude type templates and their cleanup support. Any
+-- unknown type, polymorphic type or exhausted scan conservatively retains all.
+def psRustTypeMayUseCarrier (fuel : Nat) (type : PsVerifiedIrType) : Bool :=
+  match fuel with
+  | Nat.zero => true
+  | Nat.succ remaining =>
+      match type with
+      | .primitive _ => false
+      | .function parameters result =>
+          psListAny (fun (value : PsVerifiedIrType) => psRustTypeMayUseCarrier remaining value) parameters ||
+            psRustTypeMayUseCarrier remaining result
+      | _ => true
+
+def psRustExprMayUseCarrier (fuel : Nat) (expr : PsVerifiedIrExpr) : Bool :=
+  match fuel with
+  | Nat.zero => true
+  | Nat.succ remaining =>
+      match expr with
+      | .literal _ => false
+      | .var _ => false
+      | .intrinsic _ types arguments =>
+          psListAny (fun (value : PsVerifiedIrType) => psRustTypeMayUseCarrier remaining value) types ||
+            psListAny (fun (value : PsVerifiedIrExpr) => psRustExprMayUseCarrier remaining value) arguments
+      | .lambda parameters result body =>
+          psListAny (fun (parameter : PsVerifiedIrParameter) =>
+            psRustTypeMayUseCarrier remaining parameter.type) parameters ||
+          psRustTypeMayUseCarrier remaining result ||
+          psRustExprMayUseCarrier remaining body
+      | .call fn types arguments =>
+          psRustExprMayUseCarrier remaining fn ||
+          psListAny (fun (value : PsVerifiedIrType) => psRustTypeMayUseCarrier remaining value) types ||
+          psListAny (fun (value : PsVerifiedIrExpr) => psRustExprMayUseCarrier remaining value) arguments
+      | .letE _ type value body =>
+          psRustTypeMayUseCarrier remaining type ||
+          psRustExprMayUseCarrier remaining value ||
+          psRustExprMayUseCarrier remaining body
+      | .ifE condition yes no =>
+          psRustExprMayUseCarrier remaining condition ||
+          psRustExprMayUseCarrier remaining yes ||
+          psRustExprMayUseCarrier remaining no
+      | _ => true
+
+def psRustSelectedModuleNeedsCarriers (module : PsVerifiedIrModule)
+    (publicTypes : List String) : Bool :=
+  !psListIsEmpty publicTypes ||
+  psListAny (fun (declaration : PsVerifiedIrDeclaration) =>
+    !psListIsEmpty declaration.typeParameters ||
+    psListAny (fun (parameter : PsVerifiedIrParameter) =>
+      psRustTypeMayUseCarrier 4096 parameter.type) declaration.parameters ||
+    psRustTypeMayUseCarrier 4096 declaration.resultType ||
+    psRustExprMayUseCarrier 4096 declaration.body) module.declarations
+
 def psRustEmitSelectedValidatedModule (source : PsValidatedIrModule)
     (publicValues publicTypes : List String) : Except String String :=
   match psStrictValidateModule source.raw with
@@ -1257,6 +1387,7 @@ def psRustEmitSelectedValidatedModule (source : PsValidatedIrModule)
       if psRustModuleHasImports module.imports then
         Except.error "PSC1_RUST_EXTERNAL_IMPORT_UNSUPPORTED"
       else
+        let needsCarriers : Bool := psRustSelectedModuleNeedsCarriers module publicTypes;
         let valueNames : List String := psRustValueDeclarationNames module.declarations;
         match psRustWithFailureLocation "names" (psRustValidateModuleNames module) with
         | Except.error error => Except.error error
@@ -1269,7 +1400,7 @@ def psRustEmitSelectedValidatedModule (source : PsValidatedIrModule)
                       psRustWithFailureLocation (psRustConcat2 "structure:" value.name)
                         (psRustEmitStructureWithVisibility
                           (psRustStringListContains publicTypes value.name) value))
-                    module.structures with
+                    (if needsCarriers then module.structures else List.nil) with
                 | Except.error error => Except.error error
                 | Except.ok structures =>
                     match psListMapExcept
@@ -1277,7 +1408,7 @@ def psRustEmitSelectedValidatedModule (source : PsValidatedIrModule)
                           psRustWithFailureLocation (psRustConcat2 "inductive:" value.name)
                             (psRustEmitInductiveWithVisibility
                               (psRustStringListContains publicTypes value.name) value))
-                        module.inductives with
+                        (if needsCarriers then module.inductives else List.nil) with
                     | Except.error error => Except.error error
                     | Except.ok inductives =>
                         match psListMapExcept
@@ -1292,6 +1423,8 @@ def psRustEmitSelectedValidatedModule (source : PsValidatedIrModule)
                             let runtime : PsRustRuntimePlan := psRustPlanRuntime module;
                             Except.ok (psRustConcat2
                               (psRustJoin "\n"
-                                (psListAppend ["#![forbid(unsafe_code)]", runtime.source]
+                                (psListAppend ["#![forbid(unsafe_code)]", runtime.source,
+                                  (if needsCarriers && psRustPrivateDropRuntimeNeeded publicTypes module.inductives
+                                    then psRustSharedDropRuntime else "")]
                                   (psListAppend structures (psListAppend inductives declarations))))
                               "\n")

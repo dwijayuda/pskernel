@@ -1,8 +1,41 @@
 # PSC1 compiler self-host architecture
 
-Current provider/package checkpoint: the native core includes JS/TS/Rust/Wasm core+component, with exact-build-pinned optional Python/PHP emit-only providers. The shared portable compiler is unchanged. Core retains independent admission, strict original/transformed IR, ABI policy and publication; workers validate IR/ABI and return candidates only. [Full40106542849](https://github.com/dwijayuda/pskernel/actions/runs/40106542849) PASS37/37/all-seven/both grammars; [receipt](PSC1_BACKEND_PROVIDER_QUALIFICATION_2026-10-24.json), [guide](PSC1_BACKEND_PROVIDERS.md) and [roadmap](PSC1_DEVELOPMENT_ROADMAP.md) own exact status.
+## Current codec/admission stack milestone
 
-This native package milestone is complete and stopped as requested. One generated multi-backend composition root and genuine enlarged-source G1/G2/G3/fixed points remain a separate next milestone. Preserve qualified Rust/TS/JS/Wasm evidence on exact older snapshots. Python/PHP retry40091210960 failed both3600s G2 deadlines; no G3/fixed point. Historical mechanisms/evidence below remain preserved.
+Code5d4d4d1a/closuree0f7640b retains the single120-module JS/TS/Rust/Wasm
+composition root and optional native Python/PHP providers. Codec return frames
+and fully applied admission/reversal workers remove the demonstrated return
+stack accumulation. Exact all-input Lean proofs and generated Rust deep
+expression/admission-batch regressions pass without new axioms or limits.
+Full40133272707 passes37/37 finite criteria/all seven native targets/both
+grammars and installed matching packages.
+
+Rust requestf707e037 passes G1 but reaches1800s G2 after1800055ms without an
+observed stack overflow; no candidate/G3/fixed point. Readback40136555747
+verifies its immutable failure and same-source independent G1 reproduction.
+The next task is late profiling of this exact workload, followed by a measured
+generic optimization and real G2/G3/fixed-point retry.
+
+Preserved v2 TS/Wasm source92654df5 genuinely passes all three generations and
+exact executable/source/admission/IR/four-target fixed points, independently
+read back in40130870206. Its JS G2 deadline and Rust overflow remain failures.
+Older v2 Wasm and v1 JS/TS qualifications stay pinned to their own source.
+Native npm qualification remains distinct from generated-distribution readiness.
+
+[Exact codec receipt](PSC1_UNIFIED_V2_CODEC_QUALIFICATION_2026-10-25.json),
+[roadmap](PSC1_DEVELOPMENT_ROADMAP.md),
+[continuation](PSC1_UNIFIED_SELFHOST_CONTINUATION.md).
+
+## Historical previous unified/provider snapshots
+
+The following paragraphs describe earlier checkpoints. Current status and
+remaining work are governed by the section above.
+
+Current unified-service checkpoint (2026-10-25): one 120-module portable root composes existing JS/TS/Rust/Wasm emitters. Structured-v2 source `783cf8fc` passes all four actual generated G1 engines,160 cross-target cases/36 refusals and immutable originalIR/admission parity. Earlier v1 source `b2ab4d34` passes genuine JS/TS G1/G2/G3 and exact executable/source/admission/IR/observations fixed points. These source scopes are separate. Rust optimization1 target-build deadline, v1 Rust G2 stack overflow and v1 Wasm G2 deadline are retained as actual failures. Full 40117055147 passes37/37 finite criteria/all seven backends/both grammars and installed optional packages. The native npm distribution remains native; generated assets/CLI/component/provider integration and current-v2 G2/G3 are pending. [Guide](PSC1_UNIFIED_COMPILER_SERVICE.md), [exact receipt](PSC1_UNIFIED_SELFHOST_QUALIFICATION_2026-10-25.json), [roadmap](PSC1_DEVELOPMENT_ROADMAP.md).
+
+Current provider/package checkpoint: the native core includes JS/TS/Rust/Wasm core+component, with exact-build-pinned optional Python/PHP emit-only providers. The shared portable compiler is unchanged. Core retains independent admission, strict original/transformed IR, ABI policy and publication; workers validate IR/ABI and return candidates only. [Full 40106542849](https://github.com/dwijayuda/pskernel/actions/runs/40106542849) PASS37/37/all-seven/both grammars; [receipt](PSC1_BACKEND_PROVIDER_QUALIFICATION_2026-10-24.json), [guide](PSC1_BACKEND_PROVIDERS.md) and [roadmap](PSC1_DEVELOPMENT_ROADMAP.md) own exact status.
+
+The native package milestone remains preserved. The new unified composition root now has current structured-v2 four-engine G1 evidence; enlarged-source G1/G2/G3 fixed points passed for JS and TS on the earlier v1 snapshot. Current v2 full-chain qualification and generated distribution integration remain pending. Preserve qualified Rust/TS/JS/Wasm evidence on exact older snapshots. Python/PHP retry40091210960 failed both3600s G2 deadlines; no G3/fixed point. Historical mechanisms/evidence below remain preserved.
 
 ## Historical Python/PHP measured mechanisms
 
@@ -30,7 +63,7 @@ depth before restoring old yield nodes for exact remaining-AST comparison.
 PHP compares direct and retained schedulers with identical runtime/carrier.
 Both targets pass200000-deep dynamic alias/local/parameter-shadow recursion.
 Gate40077267520 passes87 modules per target in both grammars and all admitted
-library/retained regression guards. Genuine request809070eb/run40077476210 independently admits both G1s, passes
+library/retained regression guards. Genuine request809070eb/run `40077476210` independently admits both G1s, passes
 strict IR/all ten cases, then both G2 requests fail the1800s deadline. No G3/fixed
 point. This source gate did not establish compiler-generation qualification.
 
@@ -67,18 +100,18 @@ origins are checked against exact actual headers. Gate40079503171 at e20a1154
 passes87-module/both-grammar censuses, all retained/admitted guards,43 loop
 comparisons,2M steps,200k escaping-closure fallback, swaps and typed IO order/
 first-error tests without changing Python recursion limits. Genuine Python
-requeste6327cdd/run40079719620 and PHP extraction request1174300d/run40078954006
+requeste6327cdd/run `40079719620` and PHP extraction request1174300d/run `40078954006`
 both passed independent G1/strict IR/ten observations and then failed G2 at
 1800057/1800042ms. Neither reached G3/fixed point. Current full40080321500
-passes37/37 for sourcee20a1154. The isolated correctness-3600s profile in451aef05
+passes37/37 for source `e20a1154`. The isolated correctness-3600s profile in451aef05
 passes preflight40083935614 and preserves historical1800s/performance240s/G1
-and every other resource or checking limit. Genuine both-target run40085445958 at requesta6a399c6 FAILED both3600s G2 deadlines after independently checked G1/strictIR/ten-case success. Python3600060ms/tree781180KiB; PHP3600056ms/tree1180260KiB. No G3/fixed point. Readbacks40089881019/40089760678 bind immutable artifacts. Minute resource heartbeats use existing procfs sampling, not compiler callbacks; busy CPU is not semantic progress.
+and every other resource or checking limit. Genuine both-target run `40085445958` at requesta6a399c6 FAILED both3600s G2 deadlines after independently checked G1/strictIR/ten-case success. Python3600060ms/tree781180KiB; PHP3600056ms/tree1180260KiB. No G3/fixed point. Readbacks40089881019/40089760678 bind immutable artifacts. Minute resource heartbeats use existing procfs sampling, not compiler callbacks; busy CPU is not semantic progress.
 
-Measured follow-up sourceb56da505/13c5d4a6 uses the same compiler/emitter architecture. Python returns either of the two hot UTF8 identity entries without enumeration/promotion/allocation; immutable8entry/32MiB cache limits and all errors/eviction remain. PHP exposes five existing node fields as public private(set) and uses direct properties only for strictly canonical checked slots. ArrayAccess/iterative dead-node collection remain; indexed reads are a retained policy of the same emitter. The frozen old runtime permits only five visibility declarations, and token comparison restores only canonical reads. Proven two-layer nonzero pure global call sites bypass scheduler requests after the same callee/argument snapshots; dynamic/shadowed/aliased/recursive calls retain scheduling. Existing PHP self-tail loops were already present.
+Measured follow-up source `b56da505`/13c5d4a6 uses the same compiler/emitter architecture. Python returns either of the two hot UTF8 identity entries without enumeration/promotion/allocation; immutable8entry/32MiB cache limits and all errors/eviction remain. PHP exposes five existing node fields as public private(set) and uses direct properties only for strictly canonical checked slots. ArrayAccess/iterative dead-node collection remain; indexed reads are a retained policy of the same emitter. The frozen old runtime permits only five visibility declarations, and token comparison restores only canonical reads. Proven two-layer nonzero pure global call sites bypass scheduler requests after the same callee/argument snapshots; dynamic/shadowed/aliased/recursive calls retain scheduling. Existing PHP self-tail loops were already present.
 
-Focused40090956726/job120863330756 at reviewb33027de PASS:234895 UTF8 queries/20000 snapshot-identity hot hits,11 slot token restorations,readonly writes/references refused,frozen node-interface comparisons,2M dead-spine/collection,one static-call token restoration,200k deep dynamic recursion,all source/runtime/admitted-library guards and87-module closures in both grammars. Full [40090959568](https://github.com/dwijayuda/pskernel/actions/runs/40090959568) PASSED: Linux120865715808, final gate120870365297;37/37 criteria,0 blocked, releaseReady=true. All seven backends, both grammars, practical applications, minimum-Python and installed native package/IO/library regressions. Reviewb33027de and tested merge2867dadec3ed7e05fbc86c5cffafcc6bf8b8e292 share Git treef4d8a31f19e1574ba91348bc79e1c50aa76ee1ef. Qualification artifact12559464310,sha256:a71c38b06de7b8a8d2e378aae640bb075a3fdcb2b6fb8f268c2c5eb865a63942.
+Focused40090956726/job120863330756 at review `b33027de` PASS:234895 UTF8 queries/20000 snapshot-identity hot hits,11 slot token restorations,readonly writes/references refused,frozen node-interface comparisons,2M dead-spine/collection,one static-call token restoration,200k deep dynamic recursion,all source/runtime/admitted-library guards and87-module closures in both grammars. Full [40090959568](https://github.com/dwijayuda/pskernel/actions/runs/40090959568) PASSED: Linux `120865715808`, final gate120870365297;37/37 criteria,0 blocked, releaseReady=true. All seven backends, both grammars, practical applications, minimum-Python and installed native package/IO/library regressions. Review `b33027de` and tested merge `2867dadec3ed7e05fbc86c5cffafcc6bf8b8e292` share Git treef4d8a31f19e1574ba91348bc79e1c50aa76ee1ef. Qualification artifact `12559464310`,sha256:a71c38b06de7b8a8d2e378aae640bb075a3fdcb2b6fb8f268c2c5eb865a63942.
 
-One genuine BOTH-target correctness-3600s retry is running on qualification/psc1-python-php-3600s-20261024: control3a78709e01e0ca1dd0be2ed4f17b3e4b7170faf0, request336ff212bb810bcafa1573350355fbd1f6a0509e, [run40091210960](https://github.com/dwijayuda/pskernel/actions/runs/40091210960), Python120864185036/PHP120864185108. Compiler and critical host tools exactly matchb33027de; GitHub compare shows only workflow branch guard and request JSON differ. Both jobs entered genuine generation execution; no new G2/G3/fixed-point success is claimed. Preserve these running jobs.
+One genuine BOTH-target correctness-3600s retry is running on qualification/psc1-python-php-3600s-20261024: control3a78709e01e0ca1dd0be2ed4f17b3e4b7170faf0, request336ff212bb810bcafa1573350355fbd1f6a0509e, [run `40091210960`](https://github.com/dwijayuda/pskernel/actions/runs/40091210960), Python `120864185036`/PHP `120864185108`. Compiler and critical host tools exactly matchb33027de; GitHub compare shows only workflow branch guard and request JSON differ. Both jobs entered genuine generation execution; no new G2/G3/fixed-point success is claimed. Preserve these running jobs.
 
 The user requested a stop after this verified milestone slice. On continuation inspect the active jobs before further changes. The new source gates qualify preserved functionality, not self-hosted G2/G3. Original performance240s remains separately unqualified.
 
@@ -97,7 +130,7 @@ memory/stack/fuel/admission/IR/refusal policies are unchanged.
 
 ## Current qualified evidence — 2026-10-24
 
-Executable source133e5892, request2d1f8244, Linux40062120079 PASSED actual
+Executable source `133e5892`, request2d1f8244, Linux `40062120079` PASSED actual
 independently admittedG1→G2→G3 and exact fixed points for BOTH DirectJS and
 owned import-free DirectWasm. Native compiler tools are disabled after one seed.
 All generations pass strict original/transformed IR and ten positive/negative
@@ -124,13 +157,13 @@ fixes remain. No representation rewrite, alternate compiler or resource-limit
 increase was required. Original performance240s remains unqualified.
 
 [Full40062210987](https://github.com/dwijayuda/pskernel/actions/runs/40062210987)
-PASSED: Linux120780825013 and final gate120786364196;37/37 qualified,0 blocked,
+PASSED: Linux `120780825013` and final gate120786364196;37/37 qualified,0 blocked,
 releaseReady=true, all seven backends, both grammars, applications, minimum
 Python and installed native package/IO/library regressions. Tested review HEAD
 06186537cf9339fc3f24a7d13387c2ad55ee0749 and merge
 980d096ca3e85b9ad2970f16602ad1d14a089d69 have identical Git tree
 cbf312e1f4bca9e7085719c12b627be5c16099a7, verified through GitHub APIs and checkout log.
-Artifact12549325904, digest
+Artifact `12549325904`, digest
 sha256:6ad48b109e2e995c344a6855a85de44380f6ee628b67f4033990a152598a7bf9.
 This qualifies the tested compiler source; the final receipt update edits docs only.
 
@@ -171,7 +204,7 @@ floating source operations or previously refused machine-scalar source IR.
 
 ## Retained artifact comparison boundary
 
-Read-only Linux40035257537 validates exact archived JS40027650302 and qualified
+Read-only Linux `40035257537` validates exact archived JS40027650302 and qualified
 TS39993829327 source/artifact/closure identities. No compiler executes in this
 audit. JS has8,429 generator functions/3,889 generator IIFEs; qualified TS has
 9,404/4,286. Common generated instantiate/name/equality workers have broadly
@@ -409,7 +442,7 @@ Census the compiler+Rust-emitter closure independently of the JS service and rec
 
 ## Current qualified diagnostic checkpoint
 
-At 5496943a30423269654fffcd7579b3c5dd16b4f9, run39495181966, the actual census is semantic-compiler 67/40/35; directjs-compiler 79/48/41; rust-compiler 83/49/40 (modules/parse accepted/elaboration accepted).
+At 5496943a30423269654fffcd7579b3c5dd16b4f9, run `39495181966`, the actual census is semantic-compiler 67/40/35; directjs-compiler 79/48/41; rust-compiler 83/49/40 (modules/parse accepted/elaboration accepted).
 It covers Lean parse/elaboration only. Admission, IR, generated compiler execution
 and repeated generations remain not-run, despite successful generated transport.
 

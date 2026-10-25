@@ -1,0 +1,662 @@
+{
+  "schema": "psc1-rust-installed-integration/1",
+  "candidateCommit": "47db4f83090df292f9ba9358b6de8f1f0bc4007b",
+  "run": 40149384939,
+  "job": 121037495375,
+  "conclusion": "success",
+  "artifact": 12581373839,
+  "digest": "sha256:8409dd64fe0fc41a8bd829c385290c4839f11ed1e9d54b866f2c556f04677638",
+  "receipt": {
+    "schema": "psc1-generated-package-qualification/1",
+    "status": "passed",
+    "testedCommit": "47db4f83090df292f9ba9358b6de8f1f0bc4007b",
+    "nativeInputTarballSha256": "71a78faf3ee4a533a3571276ba05822cd111f6e7eaa1cf7cb41670020afaaca5",
+    "distribution": {
+      "schema": "psc1-installed-generated-engines/1",
+      "packageBuildCommit": "47db4f83090df292f9ba9358b6de8f1f0bc4007b",
+      "nativeCoreSourceCommit": "348746f32e7fe04b3402eb22030054375eb9ebcd",
+      "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "engines": {
+        "ts": {
+          "sourceClosureDigest": "92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2",
+          "qualifiedCommit": "812094c1f5e1e0c0dca516dab1e30ef66f3076f7",
+          "qualification": "qualified",
+          "fixedPoint": "passed-G1-G2-G3-exact-source-admission-IR-executable-and-four-target-observations",
+          "performanceQualification": "not-run-in-this-profile",
+          "executableSha256": "8667e1fe0b68c46859c4150dd5c3b721e91975bb21ac9f49dcac4bab0e8d2a75",
+          "adapter": {
+            "path": "selfhost/ts/adapter.mjs",
+            "sha256": "15960a31fbfea8dc93e316e71639a7e033c4e6797faf8c2b9d7b9da0355e7a5d"
+          },
+          "dependencies": [
+            {
+              "path": "selfhost/ts/artifact.json",
+              "sha256": "dacdd66e5ed9a92ea3b47069755f17c645df022909d2f84f0dd5b1acb8a0c85b"
+            },
+            {
+              "path": "selfhost/ts/module.d.ts",
+              "sha256": "eb30704e90a4009eda4fbe4076465056a6aa63790ef6966fa1c9248494ad0e1e"
+            },
+            {
+              "path": "selfhost/ts/module.js",
+              "sha256": "8667e1fe0b68c46859c4150dd5c3b721e91975bb21ac9f49dcac4bab0e8d2a75"
+            },
+            {
+              "path": "selfhost/ts/module.js.map",
+              "sha256": "252a54c1c26ab00a7fb36ba59cd17c1f77168fe029ea88a2133c8db595649898"
+            },
+            {
+              "path": "selfhost/ts/module.ts",
+              "sha256": "cc8f89bea641d935df27ea742ed1d60f6ee70c1c7f7a9fad3b09e3a18a25c47c"
+            },
+            {
+              "path": "selfhost/ts/package.json",
+              "sha256": "d218e29ec01186542b0d85bdc6691d12514e4cdd0ba3b9cd81f253250c8d1e34"
+            },
+            {
+              "path": "selfhost/ts/tsconfig.json",
+              "sha256": "15c99e834a57338ec2edb135c28782c911eb5db8ac881b5aca2b01324209ecec"
+            },
+            {
+              "path": "selfhost/ts/qualification.json",
+              "sha256": "2fe9b19ce6378b66e4450101b8c123348485d08843eea434db5962a7fa1742b2"
+            }
+          ]
+        },
+        "wasm-core": {
+          "sourceClosureDigest": "92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2",
+          "qualifiedCommit": "812094c1f5e1e0c0dca516dab1e30ef66f3076f7",
+          "qualification": "qualified",
+          "fixedPoint": "passed-G1-G2-G3-exact-source-admission-IR-executable-and-four-target-observations",
+          "performanceQualification": "not-run-in-this-profile",
+          "executableSha256": "73dd31e8e58572ba1f9cea66fe06edb41c6223ed18062696327fd06f916905df",
+          "adapter": {
+            "path": "selfhost/wasm-core/adapter.mjs",
+            "sha256": "67b6b330249da51146dcd93a7072eb053c3bbf1ce063b89add62054af6f72556"
+          },
+          "dependencies": [
+            {
+              "path": "selfhost/wasm-core/artifact.json",
+              "sha256": "1f33a6a8b2b731d50f997f1ac4008ec06a0d4d3a4b5c04ca0b1d5ab06d0c6996"
+            },
+            {
+              "path": "selfhost/wasm-core/module.wasm",
+              "sha256": "73dd31e8e58572ba1f9cea66fe06edb41c6223ed18062696327fd06f916905df"
+            },
+            {
+              "path": "selfhost/wasm-core/module.wasm.hex",
+              "sha256": "f370d6c4fc845075f3fb307bd0e60dc25ef41390017210e7f8cb9cf9ef056f04"
+            },
+            {
+              "path": "selfhost/wasm-core/probe.mjs",
+              "sha256": "6dd875d6b8235a07673f5bbdb2395cabd5bdee8d20291636793807f5acb3dc18"
+            },
+            {
+              "path": "selfhost/wasm-core/qualification.json",
+              "sha256": "879664b36b59aa7ade892295f246a7feda619833c49fffcf5adbf149ae38fe8e"
+            }
+          ]
+        },
+        "rust": {
+          "sourceClosureDigest": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+          "qualifiedCommit": "2d27f1428e6a53a6de5006f950fc94f2d471b214",
+          "qualification": "qualified",
+          "fixedPoint": "passed-G1-G2-G3-exact-source-admission-IR-executable-and-four-target-observations",
+          "performanceQualification": "not-run-in-this-profile",
+          "executableSha256": "07f58b1f083da6f0757fdffd4866ae16535d193065cf95d9c56443b5548636d6",
+          "adapter": {
+            "path": "selfhost/rust/adapter.mjs",
+            "sha256": "7ad29f792c49c264ee040ae27b22abae298a18033f74317f4f28153f003b89c0"
+          },
+          "dependencies": [
+            {
+              "path": "selfhost/rust/artifact.json",
+              "sha256": "33a22e78a1e119870553b30ad4475ac54f1d3469cb8ed9ca49d5ff77e131802a"
+            },
+            {
+              "path": "selfhost/rust/Cargo.lock",
+              "sha256": "4d375c97eebc30fce378df900dd76bdd2cb9d82ce7619f50fb7ab3161f8e576d"
+            },
+            {
+              "path": "selfhost/rust/Cargo.toml",
+              "sha256": "8a07b05c6b941314681f565f553d7a13fa2d24137c5e2a95c8aead976e4e0f55"
+            },
+            {
+              "path": "selfhost/rust/main.rs",
+              "sha256": "d15d5dda54a03b78771d3faf4eb2c3bf642c21297f01725d084e1c5c8e7766b2"
+            },
+            {
+              "path": "selfhost/rust/module.rs",
+              "sha256": "5cc6017a178bb902f7cba7b4631efb7ff87b0fd4ffaa8009452b2866ef3a5bea"
+            },
+            {
+              "path": "selfhost/rust/service.bin",
+              "sha256": "07f58b1f083da6f0757fdffd4866ae16535d193065cf95d9c56443b5548636d6"
+            },
+            {
+              "path": "selfhost/rust/qualification.json",
+              "sha256": "28aa15d3271b6ab80e66680a0a0923ba11d03ddb0e22886d018f260712e8cf2c"
+            }
+          ]
+        }
+      },
+      "checker": {
+        "path": "native/bin/psc1_independent_checker",
+        "sha256": "c829020981c1e3a5ddd45c02d2e82b458ce9ee77c2c9668975da9ca6578645cc"
+      },
+      "runner": {
+        "path": "scripts/generated-compiler-runner.mjs",
+        "sha256": "bbcda77cb0942484146fc23bd299ac821bfb13e9780cfdace5742d8c6725187e"
+      },
+      "session": {
+        "path": "host-tools/generated-compiler-session.mjs",
+        "sha256": "8ba8bb8226a62504829fdb3fedae78f44b19e1dc27440b38e877e20218a40974"
+      },
+      "hostDependencies": [
+        {
+          "path": "host-tools/generated-rust-transport.mjs",
+          "sha256": "d4007670e4bae00101b239ee7418d2952fbceced1a9e99e61a76eef65d4100ac"
+        },
+        {
+          "path": "host-tools/generated-rust-guard.mjs",
+          "sha256": "9f20bede1d0f0e640292202234f1ff0eca4b3320c38963d080ff9dd036a17c1e"
+        },
+        {
+          "path": "host-tools/compiler-host-protocol.mjs",
+          "sha256": "def328a4a74c51ce71ae7365b2573ece27964da8f78ef2391310e4f97f1c962f"
+        },
+        {
+          "path": "scripts/compiler-closure-contract.mjs",
+          "sha256": "2a2c1244ab18a85777feef29bfc8802939c21db966c7fe95246939524fe5ad8d"
+        },
+        {
+          "path": "host-tools/generated-wasm-transport.mjs",
+          "sha256": "c1c870ff75140ad4e74427dc94f7d46de9230502d1f737033f28914391376c06"
+        }
+      ],
+      "nativeLibraries": [],
+      "generatedPublicationTargets": [
+        "js"
+      ],
+      "nativeOutputTargets": [
+        "js",
+        "ts",
+        "rust",
+        "wasm-core",
+        "wasm-component"
+      ],
+      "unavailableGeneratedEngines": {
+        "js": "latest shared-root fixed point pending"
+      },
+      "allFourEngineReleaseQualified": false,
+      "publication": "unpublished"
+    },
+    "cases": [
+      {
+        "engine": "ts",
+        "id": "lean-modules",
+        "grammar": "lean",
+        "passed": true,
+        "compilerExecutionMs": 492,
+        "manifestSha256": "1081dd93ab537ed151dea61322a65365bbc8f9eb1df3341264c67af9de1000bc"
+      },
+      {
+        "engine": "ts",
+        "id": "ps-integer-unicode",
+        "grammar": "ps",
+        "passed": true,
+        "compilerExecutionMs": 458,
+        "manifestSha256": "00a49f2b363580d491237162687c0aedc76bd328534e54f9dd97271f0df36d2e"
+      },
+      {
+        "engine": "ts",
+        "id": "ps-list-literal",
+        "grammar": "ps",
+        "passed": true,
+        "compilerExecutionMs": 621,
+        "manifestSha256": "5c37d4fde228ffce87eaf4a7631ee69fc499774ada7ca0cb127767e5f32f4c10"
+      },
+      {
+        "engine": "ts",
+        "id": "lean-handler-pattern",
+        "grammar": "lean",
+        "passed": true,
+        "compilerExecutionMs": 884,
+        "manifestSha256": "438e31931ee17c50f94997c94dabd426c2551ab91506aef529835d48d24c30e3"
+      },
+      {
+        "engine": "ts",
+        "id": "lean-ordinary-loop",
+        "grammar": "lean",
+        "passed": true,
+        "compilerExecutionMs": 887,
+        "manifestSha256": "92f6003dff034a62347d59a33116582cbc98d57ac23fcb75553f840e02b00e7e"
+      },
+      {
+        "engine": "wasm-core",
+        "id": "lean-modules",
+        "grammar": "lean",
+        "passed": true,
+        "compilerExecutionMs": 333,
+        "manifestSha256": "1f761d9314fe3b839d6082daacbbc44bc2301cf947c6230b6669044ede544de2"
+      },
+      {
+        "engine": "wasm-core",
+        "id": "ps-integer-unicode",
+        "grammar": "ps",
+        "passed": true,
+        "compilerExecutionMs": 327,
+        "manifestSha256": "025de43c59f49e6c67bc3c1fcf1b932ce7f86e174437e3f0041d7ece164d6f89"
+      },
+      {
+        "engine": "wasm-core",
+        "id": "ps-list-literal",
+        "grammar": "ps",
+        "passed": true,
+        "compilerExecutionMs": 351,
+        "manifestSha256": "a97b91aba05ce1e16b7c4cf50306f954c674bcf09097d63bf60e7880e2d998cd"
+      },
+      {
+        "engine": "wasm-core",
+        "id": "lean-handler-pattern",
+        "grammar": "lean",
+        "passed": true,
+        "compilerExecutionMs": 414,
+        "manifestSha256": "0535af6835214909dcd003405c43ff9254fb906118bf78aa52bcc6352385d73e"
+      },
+      {
+        "engine": "wasm-core",
+        "id": "lean-ordinary-loop",
+        "grammar": "lean",
+        "passed": true,
+        "compilerExecutionMs": 484,
+        "manifestSha256": "0e6bbd6f740ab5d6c48fc2072a9040f32dccc32a45a3589ec502904c493fbc07"
+      },
+      {
+        "engine": "rust",
+        "id": "lean-modules",
+        "grammar": "lean",
+        "passed": true,
+        "compilerExecutionMs": 490,
+        "manifestSha256": "c9a66ec00eb96d7a022c1f705adf340149dd9e40bfd7a3ec6c7fe815c683b4f0"
+      },
+      {
+        "engine": "rust",
+        "id": "ps-integer-unicode",
+        "grammar": "ps",
+        "passed": true,
+        "compilerExecutionMs": 483,
+        "manifestSha256": "1b610a24441a0c27d1fa43160e159ca4ddcb15bf13f3f80a06e4608a051e9961"
+      },
+      {
+        "engine": "rust",
+        "id": "ps-list-literal",
+        "grammar": "ps",
+        "passed": true,
+        "compilerExecutionMs": 534,
+        "manifestSha256": "41afe83444a32c601961389aecffc22e9761f2f96fcdb1c4ea46db88b4b61231"
+      },
+      {
+        "engine": "rust",
+        "id": "lean-handler-pattern",
+        "grammar": "lean",
+        "passed": true,
+        "compilerExecutionMs": 678,
+        "manifestSha256": "3dfb1f1b26eda7d787e91d7f57e076bfa102407fce6258ede0add696b1d3d4b0"
+      },
+      {
+        "engine": "rust",
+        "id": "lean-ordinary-loop",
+        "grammar": "lean",
+        "passed": true,
+        "compilerExecutionMs": 797,
+        "manifestSha256": "d51f8bb76b33df1f9d706b5bb35eb210568eab7d3cfc8139fa00bd24ca6a1572"
+      }
+    ],
+    "applicationCases": [
+      {
+        "engine": "ts",
+        "grammar": "lean",
+        "app": "json-records",
+        "modules": 7,
+        "observations": 5,
+        "sourceClosureDigest": "fec33ed2909db4c59dd24c5479a58e3de37b8aa4cea48fda286f266abdec56d4",
+        "compilerExecutionMs": 12284,
+        "manifestSha256": "9a9801fe3b8127956bb3e3826bc8dfcf2a0b5ee8082141835cd42524f6d84e73",
+        "passed": true
+      },
+      {
+        "engine": "wasm-core",
+        "grammar": "lean",
+        "app": "json-records",
+        "modules": 7,
+        "observations": 5,
+        "sourceClosureDigest": "fec33ed2909db4c59dd24c5479a58e3de37b8aa4cea48fda286f266abdec56d4",
+        "compilerExecutionMs": 5116,
+        "manifestSha256": "696aaa61bdb64205f11d41e19a862e71f697072f2a924bf3e3867ca7863d63a0",
+        "passed": true
+      },
+      {
+        "engine": "rust",
+        "grammar": "lean",
+        "app": "json-records",
+        "modules": 7,
+        "observations": 5,
+        "sourceClosureDigest": "fec33ed2909db4c59dd24c5479a58e3de37b8aa4cea48fda286f266abdec56d4",
+        "compilerExecutionMs": 12432,
+        "manifestSha256": "d6a5c9cea621b9dff4006df79bf6279cefe45747799434d377b4b24320207e03",
+        "passed": true
+      },
+      {
+        "engine": "ts",
+        "grammar": "lean",
+        "app": "cli-arguments",
+        "modules": 9,
+        "observations": 5,
+        "sourceClosureDigest": "6ed8fbe251fc398d95cd95b28fa5e049b5bb7233c6063e07c446c8039a5a8ba6",
+        "compilerExecutionMs": 15994,
+        "manifestSha256": "274450dd3bcc07d5ae3459eb8f4bf0b65e290a45a02c2c1280678bf06e652631",
+        "passed": true
+      },
+      {
+        "engine": "wasm-core",
+        "grammar": "lean",
+        "app": "cli-arguments",
+        "modules": 9,
+        "observations": 5,
+        "sourceClosureDigest": "6ed8fbe251fc398d95cd95b28fa5e049b5bb7233c6063e07c446c8039a5a8ba6",
+        "compilerExecutionMs": 6688,
+        "manifestSha256": "826accaed2c6e2ed319af4a0c965d71b54c0c5dacf08e9d54f5bfce808d14bf7",
+        "passed": true
+      },
+      {
+        "engine": "rust",
+        "grammar": "lean",
+        "app": "cli-arguments",
+        "modules": 9,
+        "observations": 5,
+        "sourceClosureDigest": "6ed8fbe251fc398d95cd95b28fa5e049b5bb7233c6063e07c446c8039a5a8ba6",
+        "compilerExecutionMs": 16907,
+        "manifestSha256": "5ab54b80c3b33a465e698b6b2bd3ba244afcc4ace64f44f0088ff91dd7de54d9",
+        "passed": true
+      },
+      {
+        "engine": "ts",
+        "grammar": "lean",
+        "app": "single-file",
+        "observations": 1,
+        "compilerExecutionMs": 425,
+        "passed": true
+      },
+      {
+        "engine": "wasm-core",
+        "grammar": "lean",
+        "app": "single-file",
+        "observations": 1,
+        "compilerExecutionMs": 323,
+        "passed": true
+      },
+      {
+        "engine": "rust",
+        "grammar": "lean",
+        "app": "single-file",
+        "observations": 1,
+        "compilerExecutionMs": 476,
+        "passed": true
+      },
+      {
+        "engine": "ts",
+        "grammar": "ps",
+        "app": "json-records",
+        "modules": 7,
+        "observations": 5,
+        "sourceClosureDigest": "3466e9aaa5eb1a094d84a17afa202538db5c724d1efea0ef169f50eb2ff8f1e7",
+        "compilerExecutionMs": 12657,
+        "manifestSha256": "2009141b5b5152cf0b20068f08576c0f07a32a53c42f02ca0e7b902cfff45a31",
+        "passed": true
+      },
+      {
+        "engine": "wasm-core",
+        "grammar": "ps",
+        "app": "json-records",
+        "modules": 7,
+        "observations": 5,
+        "sourceClosureDigest": "3466e9aaa5eb1a094d84a17afa202538db5c724d1efea0ef169f50eb2ff8f1e7",
+        "compilerExecutionMs": 5149,
+        "manifestSha256": "3fbdf0fb1be60b21b1a21ce6208f51db2f416c39a1331a6a6a6c7d6215848823",
+        "passed": true
+      },
+      {
+        "engine": "rust",
+        "grammar": "ps",
+        "app": "json-records",
+        "modules": 7,
+        "observations": 5,
+        "sourceClosureDigest": "3466e9aaa5eb1a094d84a17afa202538db5c724d1efea0ef169f50eb2ff8f1e7",
+        "compilerExecutionMs": 12490,
+        "manifestSha256": "298608f0d3bdfd9da82e5fb2eeb39793102c69264272542f06201feb74d251e9",
+        "passed": true
+      },
+      {
+        "engine": "ts",
+        "grammar": "ps",
+        "app": "cli-arguments",
+        "modules": 9,
+        "observations": 5,
+        "sourceClosureDigest": "a21da9822a1d1e83ee3605af209980cbb46f8b3e74335cf0007d2ed940f68474",
+        "compilerExecutionMs": 16795,
+        "manifestSha256": "2f854ee5487b470c1d0bb7f42ae5400133be4270a3f9827e6da26d52d3510ada",
+        "passed": true
+      },
+      {
+        "engine": "wasm-core",
+        "grammar": "ps",
+        "app": "cli-arguments",
+        "modules": 9,
+        "observations": 5,
+        "sourceClosureDigest": "a21da9822a1d1e83ee3605af209980cbb46f8b3e74335cf0007d2ed940f68474",
+        "compilerExecutionMs": 6822,
+        "manifestSha256": "ff65cd4439bcc48dabae81b16ac45d64c5225cf623bfd2c1a2ab7d8b5c4fe596",
+        "passed": true
+      },
+      {
+        "engine": "rust",
+        "grammar": "ps",
+        "app": "cli-arguments",
+        "modules": 9,
+        "observations": 5,
+        "sourceClosureDigest": "a21da9822a1d1e83ee3605af209980cbb46f8b3e74335cf0007d2ed940f68474",
+        "compilerExecutionMs": 16855,
+        "manifestSha256": "79f6db40ff8a2ca5d8b5a26bdabc095a21ba4778b8946c08b6c69b737abffe66",
+        "passed": true
+      },
+      {
+        "engine": "ts",
+        "grammar": "ps",
+        "app": "single-file",
+        "observations": 1,
+        "compilerExecutionMs": 430,
+        "passed": true
+      },
+      {
+        "engine": "wasm-core",
+        "grammar": "ps",
+        "app": "single-file",
+        "observations": 1,
+        "compilerExecutionMs": 318,
+        "passed": true
+      },
+      {
+        "engine": "rust",
+        "grammar": "ps",
+        "app": "single-file",
+        "observations": 1,
+        "compilerExecutionMs": 476,
+        "passed": true
+      }
+    ],
+    "negativeCases": 20,
+    "nativeCompilerUnavailableDuringGeneratedCases": true,
+    "offlineInstall": true,
+    "tarball": "dist/npm-generated/run-l3nf8u/tarballs/proofscript-0.1.0-psc1.3.tgz",
+    "tarballSha256": "35f0077d9a9b4e80f13c4fdaf86c6ce976e17e54e85f3f1fe0c4ca0451da174e",
+    "bytes": 87606703,
+    "scope": "Qualified Rust/TS/Wasm engines integrated for independently admitted JS publication. Rust uses current frozen root; TS/Wasm retain historical qualifications. Not all-four-engine/shared-root qualification."
+  },
+  "inputs": {
+    "schema": "psc1-current-package-inputs/1",
+    "controlCommit": "47db4f83090df292f9ba9358b6de8f1f0bc4007b",
+    "packagingSourceCommit": "14cb3e30503d0c5e6b1e007598b0bde7ad77befb",
+    "nativeSourceCommit": "348746f32e7fe04b3402eb22030054375eb9ebcd",
+    "nativeQualificationRun": 40145805549,
+    "nativeArtifact": 12581184979,
+    "core": {
+      "file": "dist/npm-generated/run-l3nf8u/tarballs/proofscript-0.1.0-psc1.3.tgz",
+      "sha256": "35f0077d9a9b4e80f13c4fdaf86c6ce976e17e54e85f3f1fe0c4ca0451da174e"
+    },
+    "optional": {
+      "python": {
+        "file": "dist/npm-generated/run-l3nf8u/tarballs/proofscript-backend-python-0.1.0-psc1.3.tgz",
+        "sha256": "a9e26065a916ba53405897a29bdcb6b0cb4b750fef516e2948ad0c30a1a3e1bd",
+        "bytes": 33206951
+      },
+      "php": {
+        "file": "dist/npm-generated/run-l3nf8u/tarballs/proofscript-backend-php-0.1.0-psc1.3.tgz",
+        "sha256": "7eaaa1f667e9783803e2402ce5d1adb6bd0d867faf665dbb8c5e406a260afaec",
+        "bytes": 33225298
+      }
+    },
+    "publication": "unpublished"
+  },
+  "transport": {
+    "schema": "psc1-rust-host-transport-regression/1",
+    "testedCommit": "fa763381e8d9325287d50116f7bd86679d0d9fc9",
+    "status": "passed",
+    "checks": 10,
+    "normalRequestMs": 240000,
+    "requestAndResponseMaxBytes": 134217728,
+    "streamMaxBytes": 33554432,
+    "tested": [
+      "execution",
+      "binary-integrity",
+      "timeout-policy-refusals",
+      "request-mutation",
+      "response-symlink",
+      "output-limit",
+      "deadline-process-group-cleanup",
+      "success-descendant-cleanup",
+      "caller-death-group-cleanup"
+    ],
+    "compilerQualification": false,
+    "scope": "Node-only Linux process/integrity boundary; compiler qualification is independent"
+  },
+  "compiler": {
+    "schema": "psc1-rust-hour-immutable-readback/1",
+    "controlCommit": "91896ad1c6e6c048d159b59a710c38723afe3d61",
+    "producerRun": 40141718481,
+    "producerRequest": "2d27f1428e6a53a6de5006f950fc94f2d471b214",
+    "sourceClosure": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+    "generations": [
+      {
+        "generation": 1,
+        "sourceClosureDigest": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+        "sourceSha256": "5cc6017a178bb902f7cba7b4631efb7ff87b0fd4ffaa8009452b2866ef3a5bea",
+        "admissionsSha256": "4a43d82487eb09e6efcac248d6db211e9c2854bd2a9e04a9202affce6bdd3e39",
+        "originalIrSha256": "cbed7390ddadcb9adb2694aa72d7e67a0bbc010520750f2353161661d91a8815",
+        "specializedIrSha256": "6a78d47394e1955a1e588250eb6ad344a21dc9f763486f273d95755123f22b54",
+        "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "logicalAdmission": "accepted",
+        "publicNames": [
+          "psCompilerServiceCandidate"
+        ],
+        "artifactSha256": "12503c12426b50bc38c2b67cd8e9ec1f5582f3d2eda71a83b42eada983997972",
+        "observations": "40 retained cross-target cases plus9 envelope refusals",
+        "executableSha256": "07f58b1f083da6f0757fdffd4866ae16535d193065cf95d9c56443b5548636d6",
+        "rustOptimizationLevel": 0,
+        "rustDependencyOptimizationLevel": 3
+      },
+      {
+        "generation": 2,
+        "sourceClosureDigest": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+        "sourceSha256": "5cc6017a178bb902f7cba7b4631efb7ff87b0fd4ffaa8009452b2866ef3a5bea",
+        "admissionsSha256": "4a43d82487eb09e6efcac248d6db211e9c2854bd2a9e04a9202affce6bdd3e39",
+        "originalIrSha256": "cbed7390ddadcb9adb2694aa72d7e67a0bbc010520750f2353161661d91a8815",
+        "specializedIrSha256": "6a78d47394e1955a1e588250eb6ad344a21dc9f763486f273d95755123f22b54",
+        "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "logicalAdmission": "accepted",
+        "publicNames": [
+          "psCompilerServiceCandidate"
+        ],
+        "artifactSha256": "59a2c4a5912f4be4d3dcfa886b03c5d0d057aeb8d700fb2b46a2a23ca3e3433b",
+        "observations": "40 retained cross-target cases plus9 envelope refusals",
+        "executableSha256": "07f58b1f083da6f0757fdffd4866ae16535d193065cf95d9c56443b5548636d6",
+        "rustOptimizationLevel": 0,
+        "rustDependencyOptimizationLevel": 3
+      },
+      {
+        "generation": 3,
+        "sourceClosureDigest": "07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",
+        "sourceSha256": "5cc6017a178bb902f7cba7b4631efb7ff87b0fd4ffaa8009452b2866ef3a5bea",
+        "admissionsSha256": "4a43d82487eb09e6efcac248d6db211e9c2854bd2a9e04a9202affce6bdd3e39",
+        "originalIrSha256": "cbed7390ddadcb9adb2694aa72d7e67a0bbc010520750f2353161661d91a8815",
+        "specializedIrSha256": "6a78d47394e1955a1e588250eb6ad344a21dc9f763486f273d95755123f22b54",
+        "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "logicalAdmission": "accepted",
+        "publicNames": [
+          "psCompilerServiceCandidate"
+        ],
+        "artifactSha256": "33a22e78a1e119870553b30ad4475ac54f1d3469cb8ed9ca49d5ff77e131802a",
+        "observations": "40 retained cross-target cases plus9 envelope refusals",
+        "executableSha256": "07f58b1f083da6f0757fdffd4866ae16535d193065cf95d9c56443b5548636d6",
+        "rustOptimizationLevel": 0,
+        "rustDependencyOptimizationLevel": 3
+      }
+    ],
+    "metrics": [
+      {
+        "role": "generated-compiler",
+        "target": "rust",
+        "id": "G2-self",
+        "serviceSha256": "12503c12426b50bc38c2b67cd8e9ec1f5582f3d2eda71a83b42eada983997972",
+        "requestSha256": "9b52f7d7cad553d96abb4432e6d3906ac92d8e2e2639f229364d168abcbfb3ae",
+        "timeoutMs": 3600000,
+        "timeoutPolicy": "g2g3-correctness-3600s",
+        "maxRssKiB": 1197260,
+        "peakTreeRssKiB": 1225916,
+        "sampledCpuSeconds": 2254.48,
+        "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+        "elapsedMs": 2139961,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "serviceMaxRssKiB": 1197260
+      },
+      {
+        "role": "generated-compiler",
+        "target": "rust",
+        "id": "G3-self",
+        "serviceSha256": "59a2c4a5912f4be4d3dcfa886b03c5d0d057aeb8d700fb2b46a2a23ca3e3433b",
+        "requestSha256": "ef8c56a368042b61c549ffbb5775056e923f3729d30d4acf4b76087af20f6283",
+        "timeoutMs": 3600000,
+        "timeoutPolicy": "g2g3-correctness-3600s",
+        "maxRssKiB": 1197296,
+        "peakTreeRssKiB": 1182824,
+        "sampledCpuSeconds": 2277.3,
+        "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+        "elapsedMs": 2160767,
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "serviceMaxRssKiB": 1197296
+      }
+    ],
+    "manifestG3": "33a22e78a1e119870553b30ad4475ac54f1d3469cb8ed9ca49d5ff77e131802a",
+    "executableSha256": "07f58b1f083da6f0757fdffd4866ae16535d193065cf95d9c56443b5548636d6",
+    "status": "passed",
+    "fixedPoint": "passed-G1-G2-G3-exact-source-admission-IR-executable-and-four-target-observations",
+    "performanceQualification": "not-run-in-this-profile",
+    "nativeDelegationBoundary": "one-seed; native compiler executables removed; generated source semantics only",
+    "scope": "immutable source/admission/IR/executable inventory verification; not a clean full-generation replay or a formal compiler preservation proof"
+  },
+  "productionFullQualification": "pending"
+}

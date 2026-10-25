@@ -7,7 +7,7 @@ import crypto from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {compilerRequestLimit,supervisorLimit,PERFORMANCE_PROFILE} from '../scripts/selfhost-qualification-profiles.mjs';
-import {generatedTarget} from './generated-target-profiles.mjs';
+import {generatedTarget,compilerService} from './generated-target-profiles.mjs';
 import {decodeWasmHex} from './generated-wasm-transport.mjs';
 export const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 export function boundedRun(executable,args,options={}) {
@@ -43,7 +43,7 @@ export function verifyArtifact(manifestFile,expectedHash) {
  assert.equal(sha(fs.readFileSync(manifestFile)),expectedHash,'PSC1_TARGET_MANIFEST_CHANGED');
  const m=JSON.parse(fs.readFileSync(manifestFile,'utf8'));
  assert.equal(m.schema,'psc1-generated-target-artifact/1');
- const definition=generatedTarget(m.target);
+ const definition=compilerService(m.target,m.serviceKind||'single');
  const directory=path.dirname(manifestFile);
  assert.ok(m.files.length>0&&new Set(m.files.map(f=>f.path)).size===m.files.length);
  for(const f of m.files) {
@@ -65,8 +65,8 @@ export function verifyArtifact(manifestFile,expectedHash) {
  }
  return {...m,directory};
 }
-export function buildTarget({target,source,directory,service=false,consumer='',publicNames=[],publicTypes=[]}) {
- const definition=generatedTarget(target);fs.mkdirSync(directory,{recursive:true});
+export function buildTarget({target,source,directory,service=false,consumer='',publicNames=[],publicTypes=[],serviceKind='single'}) {
+ const definition=compilerService(target,serviceKind);assert.ok(serviceKind==='single'||service);fs.mkdirSync(directory,{recursive:true});
  const events=[];
  let executable;
  if(target==='ts') {
@@ -122,18 +122,27 @@ export function buildTarget({target,source,directory,service=false,consumer='',p
    "<?php\ndeclare(strict_types=1);\n$m=require __DIR__.'/module.php';\n"+consumer);
  } else {
   const main=service ?
-   'fn main() { let a: Vec<String> = std::env::args().collect(); assert_eq!(a.len(), 3); let input = std::fs::read_to_string(&a[1]).expect("request"); let output = psCompilerRustServiceCandidate(input); assert!(output.len() <= 134217728); std::fs::write(&a[2], output).expect("response"); }' :
+   'fn main() { let a: Vec<String> = std::env::args().collect(); assert_eq!(a.len(), 3); let input = std::fs::read_to_string(&a[1]).expect("request"); let output = '+definition.exportName+'(input); assert!(output.len() <= 134217728); std::fs::write(&a[2], output).expect("response"); }' :
    'fn main() { '+consumer+' }';
   fs.writeFileSync(path.join(directory,'module.rs'),source);
   fs.writeFileSync(path.join(directory,'main.rs'),source+'\n'+main+'\n');
-  fs.writeFileSync(path.join(directory,'Cargo.toml'),'[package]\nname="psc1-generated-target"\nversion="0.0.0"\nedition="2021"\npublish=false\n[[bin]]\nname="psc1-generated-target"\npath="main.rs"\n[dependencies]\nnum-bigint="=0.4.6"\nnum-traits="=0.2.19"\n[profile.release]\nopt-level=1\n');
+  fs.writeFileSync(path.join(directory,'Cargo.toml'),'[package]\nname="psc1-generated-target"\nversion="0.0.0"\nedition="2021"\npublish=false\n[[bin]]\nname="psc1-generated-target"\npath="main.rs"\n[dependencies]\nnum-bigint="=0.4.6"\nnum-traits="=0.2.19"\n[profile.release]\nopt-level='+(serviceKind==='unified'?0:1)+'\n'+(serviceKind==='unified'?'codegen-units=256\n[profile.release.package.\"*\"]\nopt-level=3\n':''));
   const locked=path.resolve('scripts/fixtures/selfhost-rust.Cargo.lock');
   // The first diagnostic records the exact resolver output. Once checked in,
   // every subsequent build uses that repository lock without re-resolution.
   if(fs.existsSync(locked)) fs.copyFileSync(locked,path.join(directory,'Cargo.lock'));
   else events.push(runTool('cargo',['generate-lockfile','--manifest-path',path.join(directory,'Cargo.toml')],{logDirectory:directory}).event);
-  events.push(runTool('cargo',['build','--release','--locked','--message-format=short','--manifest-path',path.join(directory,'Cargo.toml')],
+  // A stable Cargo package path avoids generation-specific crate metadata in
+  // executable fixed points. Every generation rewrites and verifies exact inputs.
+  const rustBuildDirectory=serviceKind==='unified'?path.resolve('dist/unified-rust-service-build'):directory;
+  const rustInputs=['main.rs','Cargo.toml','Cargo.lock'];
+  if(serviceKind==='unified'){
+   fs.mkdirSync(rustBuildDirectory,{recursive:true});
+   for(const file of rustInputs)fs.copyFileSync(path.join(directory,file),path.join(rustBuildDirectory,file));
+  }
+  events.push(runTool('cargo',['build','--release','--locked','--message-format=short','--manifest-path',path.join(rustBuildDirectory,'Cargo.toml')],
    {env:{...process.env,CARGO_TARGET_DIR:path.resolve('dist/selfhost-rust-cargo')},logDirectory:directory}).event);
+  if(serviceKind==='unified')for(const file of rustInputs)assert.equal(sha(fs.readFileSync(path.join(rustBuildDirectory,file))),sha(fs.readFileSync(path.join(directory,file))),'PSC1_RUST_BUILD_INPUT_CHANGED');
   executable='service.bin';
   fs.copyFileSync(path.resolve('dist/selfhost-rust-cargo/release/psc1-generated-target'),path.join(directory,executable));
   fs.chmodSync(path.join(directory,executable),0o700);
@@ -144,9 +153,12 @@ export function buildTarget({target,source,directory,service=false,consumer='',p
  });
  const manifest={schema:'psc1-generated-target-artifact/1',target,sourceSha256:sha(source),
   executable,service,publicNames,files,events,nodeVersion:process.version,
-  rustOptimizationLevel:target==='rust'?1:null,
+  rustOptimizationLevel:target==='rust'?(serviceKind==='unified'?0:1):null,
+  rustCodegenUnits:target==='rust'&&serviceKind==='unified'?256:null,
+  rustDependencyOptimizationLevel:target==='rust'&&serviceKind==='unified'?3:null,
   compilerVersion:target==='python'?runTool('python3',['--version']).stdout.trim():target==='php'?runTool('php',['-r','echo PHP_VERSION;']).stdout.trim():target==='js'?process.version:target==='wasm-core'?runTool('wasm-tools',['--version']).stdout.trim():target==='rust'?runTool('rustc',['--version']).stdout.trim():
    runTool(process.execPath,[path.resolve('..','node_modules/typescript/bin/tsc'),'--version']).stdout.trim()};
+ if(serviceKind==='unified')manifest.serviceKind='unified';
  if(target==='wasm-core'){manifest.transport='psc1-wasm-selfhost-gc/1';manifest.publicTypes=publicTypes;}
  fs.writeFileSync(path.join(directory,'artifact.json'),JSON.stringify(manifest,null,2)+'\n');
  return {file:path.join(directory,'artifact.json'),sha256:sha(fs.readFileSync(path.join(directory,'artifact.json'))),manifest};
@@ -164,14 +176,15 @@ export async function executeService(manifestFile,expectedHash,requestFile,outpu
  // Invalid wire must still reach the generated compiler's existing refusal path.
  let id;
  try {
-  const wire=JSON.parse(input.toString('utf8'));
+  let wire=JSON.parse(input.toString('utf8'));
+  if(m.serviceKind==='unified'&&Array.isArray(wire)&&wire[0]==='psc1-unified-compiler-service/2'&&Array.isArray(wire[2]))wire=wire[2];
   if(Array.isArray(wire)&&wire[0]==='psc1-compiler-service/1')id=wire[1];
  } catch {}
  const limits=compilerRequestLimit(profile,id);
  const started=Date.now();let maxRssKiB;
  if(m.target==='ts'||m.target==='js'||m.target==='wasm-core') {
   const api=m.target==='wasm-core'?(await import('./generated-wasm-transport.mjs')).loadWasmArtifact(manifestFile):await import(pathToFileURL(path.join(m.directory,m.executable)).href);
-  const exported=generatedTarget(m.target).exportName;
+  const exported=compilerService(m.target,m.serviceKind||'single').exportName;
   assert.deepEqual(Object.keys(api),[exported]);
   const response=api[exported](input.toString('utf8'));
   assert.equal(typeof response,'string');assert.ok(Buffer.byteLength(response)<=128*1024*1024);

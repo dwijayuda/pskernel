@@ -1,0 +1,1900 @@
+{
+  "schema": "psc1-unified-v2-codec-qualification-checkpoint/1",
+  "updated": "2026-10-25 Asia/Jakarta",
+  "review": {
+    "repository": "dwijayuda/pskernel",
+    "pullRequest": 178,
+    "branch": "feat/psc1-unified-selfhost-20261024",
+    "codeCommit": "5d4d4d1a1693de57fa16ecf796536d73040bbf64",
+    "sourceModules": 120,
+    "sourceClosureDigest": "e0f7640b77ee9eaa17e946c628de23f320f2943dc181ac6063a35c81ccb7ca66",
+    "rootModule": "Ps.CompilerUnified.Service",
+    "rootSourceSha256": "688ffd1dfdfdc7500a97772291977e36bb763da7520228db3b77f59f5793a313",
+    "optionalEmittersInClosure": false
+  },
+  "boundaries": {
+    "independentLeanVersion": "4.35.0",
+    "independentLeanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "originalAndTransformedIr": "strict",
+    "sourceLogicalPairing": "required",
+    "negativeTests": "preserved",
+    "nativeSeedBoundary": "one chain seed; all native compiler executables removed after G1 except independent checker",
+    "compilerFormalPreservation": "not-provided",
+    "packageMode": "native-lean",
+    "generatedDistributionIntegration": "not-qualified",
+    "merge": "not-performed",
+    "npmPublication": "not-performed"
+  },
+  "limits": {
+    "g1Ms": 240000,
+    "corpusMs": 240000,
+    "targetToolsMs": 240000,
+    "independentCheckerMs": 120000,
+    "g2g3CorrectnessMs": 1800000,
+    "separatePerformanceTargetMs": 240000,
+    "unifiedRustOptimizationLevel": 0,
+    "unifiedRustCodegenUnits": 256,
+    "historicalSingleRustOptimizationLevel": 1,
+    "historicalPythonPhpCorrectnessMs": 3600000,
+    "memoryPolicy": "unchanged",
+    "stackPolicy": "unchanged",
+    "semanticFuel": "unchanged",
+    "correctnessAndPerformanceSeparate": true
+  },
+  "changes": [
+    {
+      "mechanism": "Rust read-only String wrapper forwarding and ordered last-use tail moves",
+      "commits": [
+        "87f62b3e338581f9bced30ca225dff0d55988bdb",
+        "9fcab97b8f21675350020d6667817ab70b3d91e5",
+        "4559b76402b3a1ff138fda1c05932f743084a3fd"
+      ],
+      "guards": [
+        "structural identity forwarding",
+        "intrinsic/type/arity/shadowing/fuel checks",
+        "later argument and capture snapshots before move",
+        "conservative escaping-use fallback"
+      ]
+    },
+    {
+      "mechanism": "Iterative final-owner reclamation for eligible private self-recursive Rc carriers",
+      "commits": [
+        "4181da5dd6be994975261ae5edb189b1021c7aca",
+        "b25a01ab0a692974267d1083cb26411f559994e0",
+        "a3d3e0a9444934d3f55c41939e971c39e56472d3"
+      ],
+      "guards": [
+        "private only",
+        "empty constructor required",
+        "exact same-type recursive Rc fields",
+        "shared owners retained",
+        "no unsafe code",
+        "public enum bytes and downstream owned field moves unchanged",
+        "fully qualified generated std names"
+      ]
+    },
+    {
+      "mechanism": "Scalar-only selected Rust modules omit unused private prelude carriers",
+      "commits": [
+        "dbc5069e04bae5d1e714c61144280418059cb3a8",
+        "e913a6d391a68c6c9460d090de7100323e3bd9b0"
+      ],
+      "guards": [
+        "unknown/generic/named types retain carriers",
+        "public types retain carriers",
+        "carrier operations retain carriers",
+        "scan exhaustion retains carriers",
+        "original runtime-free Boolean assertion unchanged"
+      ]
+    },
+    {
+      "mechanism": "Wasm arbitrary-Nat even-divisor factoring and divisor-one shortcut",
+      "commits": [
+        "75adeaa7cbef015c9349d28169e5e7dfee0ab58f",
+        "0c75e8553439cc45a97cb0abb6daf19187b24501"
+      ],
+      "guards": [
+        "zero dividend checked before factoring",
+        "every new recursive step halves dividend",
+        "original odd-divisor algorithm",
+        "unchanged division-by-zero result"
+      ]
+    },
+    {
+      "mechanism": "Exact codec return frames and structural comparison of both application return spines",
+      "commits": [
+        "854b15efe9cb0c72fa56a2b5719add77b5e8e6c3",
+        "e98ea691d311348059313183452fe517a7d783fa"
+      ],
+      "guards": [
+        "original opaque append tree retained",
+        "exact refusal order",
+        "no new cutoff",
+        "side branches remain structural",
+        "legacy definitions retained"
+      ]
+    },
+    {
+      "mechanism": "Fully applied admission declaration fold and string reversal",
+      "commits": [
+        "b36632a35c87b4e5e6789f4c0a9a75dfe6991031",
+        "5d4d4d1a1693de57fa16ecf796536d73040bbf64"
+      ],
+      "guards": [
+        "all-state/list equality",
+        "unchanged heights/admissions/order/refusal",
+        "original public function types retained",
+        "fully applied structural recursion"
+      ]
+    }
+  ],
+  "codecProofs": {
+    "file": "psc1/test/CodecSpineProof.lean",
+    "retainedReference": "psc1/test/CodecSpineReference.lean",
+    "theorems": [
+      "codec_spine_acc_eq",
+      "codec_spine_eq",
+      "codec_admissions_loop_eq",
+      "codec_admissions_reverse_eq"
+    ],
+    "scope": "all expressions/frame stacks and all declaration states/lists",
+    "dependencies": [
+      "propext",
+      "Quot.sound"
+    ],
+    "addedAxioms": [],
+    "originalStaticSchemaTheorem": "preserved-unconditional"
+  },
+  "focused": {
+    "runId": 40133269028,
+    "jobId": 120989348408,
+    "status": "passed",
+    "artifactId": 12576126918,
+    "artifactZipSha256": "09357b2b1c6ab48d1e9b8a7e3327544072cb0d333c7321def06c4e13871ee9fc",
+    "codec": {
+      "schema": "psc1-codec-spine-regression/1",
+      "testedCommit": "5d4d4d1a1693de57fa16ecf796536d73040bbf64",
+      "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "passed": true,
+      "defaultStack": true,
+      "newFuelLimit": false,
+      "records": [
+        {
+          "kind": "legacy",
+          "closure": "36b16ed2ccc910f254ceb4f6a4b5055b532b68aa3e85a6d50fb84106bf2146a1",
+          "requestSha256": "a8b21ef251f1417c910a4006767c90ce54f54270ebc3e7f888385e16688ee6cf",
+          "candidateSha256": "8bd5516e2b6b79bb278741b2f707fdfa9f0681f7c9efd668fa8666671666b74f",
+          "sourceSha256": "873f254d293b96cb17f812f11c287389b9f391665b13d312424ca2bc06610d1b",
+          "admissionsSha256": "be3cfe84e187583860ed04797036a1b5196a4b79e33eee66b1f5801fa0a0a521",
+          "artifactSha256": "e40ff05d13765b2fc2a5496f17a60b3e066590e5b6b5e4c95fd460c1ba165c23",
+          "event": {
+            "executable": "/home/runner/work/pskernel/pskernel/psc1/dist/codec-spine/legacy/service.bin",
+            "args": [],
+            "status": 0,
+            "signal": null,
+            "elapsedMs": 55,
+            "maxRssKiB": 12276,
+            "peakTreeRssKiB": 3232,
+            "error": null
+          },
+          "observationCount": 44,
+          "observationsArchivedAt": "codec-spine/qualification.json"
+        },
+        {
+          "kind": "current",
+          "closure": "cd160e1912ea870e85003279bde144bef4f0a26eb90cc0eab8771702df2713f5",
+          "requestSha256": "e8e20abb664050d219ead82312b78b4d90e1ad3609edbfbdd12114ebed989574",
+          "candidateSha256": "ff06b1d02157323aaba7c4fecfc2e34d5ce24ade7994f092460d9d6062ad77ef",
+          "sourceSha256": "385bac534d08c57d2feace596abab2137e4cc757c58882594836541922c61980",
+          "admissionsSha256": "38952340c34df402b9a14ab99b185819a033936174c6211a210c712434893904",
+          "artifactSha256": "3fddf8577fa59b05f7ff3360c9abbf3a8341f046edf78fa844c56aa4f2923294",
+          "event": {
+            "executable": "/home/runner/work/pskernel/pskernel/psc1/dist/codec-spine/current/service.bin",
+            "args": [],
+            "status": 0,
+            "signal": null,
+            "elapsedMs": 27,
+            "maxRssKiB": 12304,
+            "peakTreeRssKiB": 3288,
+            "error": null
+          },
+          "observationCount": 44,
+          "observationsArchivedAt": "codec-spine/qualification.json"
+        },
+        {
+          "kind": "deep-10000-ten-spines-and-admission-fold",
+          "artifactSha256": "72b4552d7b8295c1c5210876c3862ae9dda061e890d354cdfebd66fe7d205a1f",
+          "event": {
+            "executable": "/home/runner/work/pskernel/pskernel/psc1/dist/codec-spine/scale/service.bin",
+            "args": [],
+            "status": 0,
+            "signal": null,
+            "elapsedMs": 12825,
+            "maxRssKiB": 34760,
+            "peakTreeRssKiB": 32328,
+            "error": null
+          },
+          "byteLengths": [
+            "360024",
+            "650024",
+            "690024",
+            "740024",
+            "370024",
+            "360024",
+            "720024",
+            "360024",
+            "720024",
+            "1100024",
+            "2020001"
+          ]
+        }
+      ]
+    },
+    "generatedG1": {
+      "target": "rust",
+      "profile": {
+        "name": "correctness-1800s",
+        "g1TimeoutMs": 240000,
+        "corpusTimeoutMs": 240000,
+        "toolTimeoutMs": 240000,
+        "selfCompileTimeoutMs": 1800000,
+        "correctnessAndPerformanceSeparate": true
+      },
+      "correctnessQualification": "G1-only",
+      "performanceQualification": "not-run-in-this-profile",
+      "status": "passed",
+      "sourceModules": 120,
+      "sourceClosureDigest": "e0f7640b77ee9eaa17e946c628de23f320f2943dc181ac6063a35c81ccb7ca66",
+      "generations": [
+        1
+      ],
+      "fixedPoint": "not-requested",
+      "attempts": []
+    },
+    "boundedG2Diagnostic": {
+      "testedCommit": "5d4d4d1a1693de57fa16ecf796536d73040bbf64",
+      "sourceClosure": "e0f7640b77ee9eaa17e946c628de23f320f2943dc181ac6063a35c81ccb7ca66",
+      "requestSha256": "636624936f655a0412cf5ce0f31df9436bc9f311e63aee25d808f009a76f4118",
+      "executableSha256": "91b12534f04b80c8ee4be93f0cca6d6a915a8c44b6087f62db28a677e7620d42",
+      "result": {
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 180610,
+        "stdoutBytes": 17440,
+        "stderrBytes": 0,
+        "timeoutMs": 240000,
+        "timeoutPolicy": "standard-240s",
+        "maxBuffer": 33554432,
+        "maxRssKiB": 451944,
+        "sampledCpuSeconds": 180.09,
+        "peakTreeRssKiB": 533480,
+        "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+        "processGroup": 5346
+      },
+      "qualification": false
+    }
+  },
+  "full": {
+    "runId": 40133272707,
+    "jobId": 120991938920,
+    "gateJobId": 120997291745,
+    "status": "passed",
+    "treeIdentity": {
+      "review": "5d4d4d1a1693de57fa16ecf796536d73040bbf64",
+      "testedMerge": "764078561a0b4a09dd7cccd1fac4174f566bf4c4",
+      "tree": "47b683bb30905531799e7e3717450e1644762c8f"
+    },
+    "readiness": {
+      "counts": {
+        "implemented": 0,
+        "tested": 0,
+        "qualified": 37,
+        "blocked": 0
+      },
+      "releaseReady": true
+    },
+    "artifactId": 12576144430,
+    "artifactZipSha256": "fae7c60ccea2162d46a65b547d935f11216c5bfab3d2f5eb1aba4b620bb1ee7c",
+    "qualification": {
+      "schema": "psc1-seven-backend-qualification/1",
+      "qualification": "passed-scoped-execution",
+      "testedCommit": "764078561a0b4a09dd7cccd1fac4174f566bf4c4",
+      "branchHeadCommit": "5d4d4d1a1693de57fa16ecf796536d73040bbf64",
+      "runUrl": "https://github.com/dwijayuda/pskernel/actions/runs/40133272707",
+      "logicalChecker": {
+        "version": "4.35.0",
+        "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+      },
+      "runtimeContract": "psc1-runtime-semantics/1",
+      "assurance": {
+        "checked": true,
+        "explicitOrdinary": true,
+        "behavioralCertificate": false,
+        "verifiedRequest": "refused"
+      },
+      "versions": {
+        "lean": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+        "node": "v22.23.3",
+        "npm": "10.9.9",
+        "typescriptConsumer": "Version 7.0.2",
+        "rust": "rustc 1.90.0 (1159e78c4 2025-09-14)",
+        "cargo": "cargo 1.90.0 (840b83a10 2025-07-30)",
+        "wasmTools": "wasm-tools 1.254.0 (bb58fdf91 2026-07-20)",
+        "wasmtime": "wasmtime 49.0.4 (2c2970205 2026-10-19)",
+        "python": "Python 3.15.0",
+        "pythonMinimum": "Python 3.14.8",
+        "php": "PHP 8.5.12 (cli) (built: Oct 24 2026 12:34:32) (NTS)"
+      },
+      "sourceSyntaxes": [
+        "lean",
+        "ps"
+      ],
+      "targetExecutionBundles": 14,
+      "scriptingRegressionGroups": 28,
+      "scriptingArtifactBundles": 24,
+      "architectureRegressionGroups": 11,
+      "minimumPython": {
+        "targetExecutionBundles": 2,
+        "scriptingRegressionGroups": 14,
+        "artifactBundles": 12,
+        "runtimeEvidence": "runtime-conformance-python314/results.json",
+        "scriptingEvidence": "script-backends-python314/results.json"
+      },
+      "practicalCore": {
+        "nativeSuites": [
+          {
+            "suite": "psc1_do_tests",
+            "passed": true,
+            "evidence": "practical-core/psc1_do_tests.log",
+            "source": "test/DoTests.lean",
+            "sourceEvaluationCallsExactlyOnce": [
+              "evaluationItems",
+              "evaluationLower",
+              "evaluationUpper",
+              "evaluationArray",
+              "evaluationIndex"
+            ],
+            "logSha256": "2fa1011e1b9e87a6d54db70e29cf82d577a80277d6c490fb3eb0f125f86f82fe",
+            "testSha256": "3a33d4dd3385d9e6bf114567188db9da5bd15cccdd7683d1299f061c00d0da98"
+          },
+          {
+            "suite": "psc1_data_tests",
+            "passed": true,
+            "evidence": "practical-core/psc1_data_tests.log",
+            "source": "test/DataTests.lean",
+            "sourceEvaluationCallsExactlyOnce": [],
+            "logSha256": "3b52303d31fa4a1c791a12453f371f0734155f8d585c4395a4f2b1609e00f083",
+            "testSha256": "8b60ca947e00bc694e4b130efb80b2051895422e96981d71fbaa0d8365f31751"
+          },
+          {
+            "suite": "psc1_while_tests",
+            "passed": true,
+            "evidence": "practical-core/psc1_while_tests.log",
+            "source": "test/WhileTests.lean",
+            "sourceEvaluationCallsExactlyOnce": [],
+            "logSha256": "ffb2a3b98dc1016817f1b49392322aee9353728ea3125fc8ff5a35f503033a55",
+            "testSha256": "0b45570e7f49372707b34bf80c10f34fd40c524ae94033133dbee988d46b1cce"
+          },
+          {
+            "suite": "psc1_namespace_tests",
+            "passed": true,
+            "evidence": "practical-core/psc1_namespace_tests.log",
+            "source": "test/NamespaceTests.lean",
+            "sourceEvaluationCallsExactlyOnce": [],
+            "logSha256": "740f2ba28cfb81d22f81cd6ce74f1090c84480b6f0f9e30e58a4b2ea02776980",
+            "testSha256": "01c3439c1ab981ea8cb6d56ce4f63b2ddd559bf3b98f95229801e1d74083df6a"
+          },
+          {
+            "suite": "psc1_ordinary_tests",
+            "passed": true,
+            "evidence": "practical-core/psc1_ordinary_tests.log",
+            "source": "test/OrdinaryExecutionTests.lean",
+            "sourceEvaluationCallsExactlyOnce": [],
+            "logSha256": "7d20784b8b82a9c15d9de822e8e5e6ae26c4e0f99c302c034295af730bc0d15f",
+            "testSha256": "72cebd54c7ed9860abc4640438b24c1a889f1449b9f3fb233a9ca1274c4791a3"
+          },
+          {
+            "suite": "psc1_operator_tests",
+            "passed": true,
+            "evidence": "practical-core/psc1_operator_tests.log",
+            "source": "test/OperatorTests.lean",
+            "sourceEvaluationCallsExactlyOnce": [],
+            "logSha256": "1edea8e1f1b946eaea45a4b398dc4b3f7fac8926aa899f67a94d2d9c95b1a457",
+            "testSha256": "597fe649a978217c4d0324399cfac297acb1616c689ad3f0e9972aef2e6812e0"
+          },
+          {
+            "suite": "contextual_inference_tests",
+            "passed": true,
+            "evidence": "practical-core/contextual_inference_tests.log",
+            "source": "test/ContextualInferenceTests.lean",
+            "sourceEvaluationCallsExactlyOnce": [],
+            "logSha256": "0533743561feabfd501761e7f620c14536afcefdc80ad6fa265de49a311485ce",
+            "testSha256": "7fbb65a37546a5f014e6e8f77c7b15d23c2014508d2edf85ab7218f6353e1c01"
+          }
+        ],
+        "controlFlowChecks": [
+          "mutationcheck",
+          "capturecheck",
+          "earlycheck",
+          "shadowcheck",
+          "danglingcheck",
+          "errorcheck",
+          "forlistcheck",
+          "forarraycheck",
+          "forrangecheck"
+        ],
+        "referenceOracle": "pinned-native-Lean",
+        "handwrittenLiteralSyntaxes": [
+          "lean",
+          "ps"
+        ],
+        "handwrittenOptionalIndexSyntaxes": [
+          "lean",
+          "ps"
+        ],
+        "tuplePatterns": {
+          "checks": [
+            "tuplepatterncheck",
+            "tuplepatterndocheck"
+          ],
+          "handwrittenSyntaxes": [
+            "lean",
+            "ps"
+          ],
+          "referenceFields": [
+            "tuplePatternFalse",
+            "tuplePatternTrue",
+            "tuplePatternDoFalse",
+            "tuplePatternDoTrue"
+          ],
+          "strictRhsEvaluation": {
+            "targetSourceBundles": 14,
+            "minimumPythonBundles": 2,
+            "externalDeadlineMs": 2000,
+            "earlyReturnPreflight": true,
+            "evidence": "ordinary-while-conformance/results.json:patternStrictness",
+            "minimumPythonEvidence": "ordinary-while-conformance-python314/results.json:patternStrictness"
+          }
+        },
+        "namespaces": {
+          "nativeSuite": "psc1_namespace_tests",
+          "checks": [
+            "namespacecheck"
+          ],
+          "handwrittenSyntaxes": [
+            "lean",
+            "ps"
+          ],
+          "referenceFields": [
+            "namespaceFalse",
+            "namespaceTrue"
+          ],
+          "importedHelpersPrivate": true,
+          "entryNamespaceExported": true,
+          "boundaryChecks": [
+            {
+              "syntax": "lean",
+              "passed": true,
+              "refusalChecks": 6,
+              "previousArtifactPreservationChecks": 5,
+              "evidence": "namespace-boundaries/lean.json"
+            },
+            {
+              "syntax": "ps",
+              "passed": true,
+              "refusalChecks": 6,
+              "previousArtifactPreservationChecks": 5,
+              "evidence": "namespace-boundaries/ps.json"
+            }
+          ]
+        },
+        "rustPrivateClosures": [
+          {
+            "syntax": "lean",
+            "target": "rust",
+            "passed": true,
+            "privateExecution": true,
+            "publicRefusal": true,
+            "oracleFields": [
+              "rustPrivateFalse",
+              "rustPrivateTrue"
+            ],
+            "publicNames": [
+              "privatehighercheck"
+            ],
+            "checks": [
+              [
+                "privatehighercheck",
+                true,
+                true
+              ]
+            ],
+            "refusalReason": "nested-function-parameter:f"
+          },
+          {
+            "syntax": "ps",
+            "target": "rust",
+            "passed": true,
+            "privateExecution": true,
+            "publicRefusal": true,
+            "oracleFields": [
+              "rustPrivateFalse",
+              "rustPrivateTrue"
+            ],
+            "publicNames": [
+              "privatehighercheck"
+            ],
+            "checks": [
+              [
+                "privatehighercheck",
+                true,
+                true
+              ]
+            ],
+            "refusalReason": "nested-function-parameter:f"
+          }
+        ],
+        "ordinaryWhile": {
+          "targetExecutionBundles": 14,
+          "externalDivergenceDeadlines": 14,
+          "refusalChecks": 16,
+          "loopChecks": [
+            "whilefalsecheck",
+            "whilecountcheck",
+            "whileearlycheck",
+            "whilecapturecheck",
+            "whilesequentialcheck",
+            "whileforcheck",
+            "whileselfcheck",
+            "whileexceptcheck"
+          ],
+          "longLoopIterations": 100000,
+          "referenceFields": [
+            "whileCaptureFalse",
+            "whileCaptureTrue",
+            "whileCountFalse",
+            "whileCountTrue",
+            "whileEarlyFalse",
+            "whileEarlyTrue",
+            "whileExceptFalseTag",
+            "whileExceptFalseValue",
+            "whileExceptTrueTag",
+            "whileExceptTrueValue",
+            "whileFalseFalse",
+            "whileFalseTrue",
+            "whileForFalse",
+            "whileForTrue",
+            "whileSelfFalse",
+            "whileSelfTrue",
+            "whileSequentialFalse",
+            "whileSequentialTrue"
+          ],
+          "minimumPythonBundles": 2,
+          "minimumPythonDeadlines": 2,
+          "evidence": "ordinary-while-conformance/results.json",
+          "minimumPythonEvidence": "ordinary-while-conformance-python314/results.json"
+        },
+        "completeFamilies": false
+      },
+      "evidence": {
+        "runtime": "runtime-conformance/results.json",
+        "nativeOracle": "runtime-conformance/lean-runtime-oracle.json",
+        "scripting": "script-backends/results.json",
+        "directIr": "script-ir/",
+        "combinedPublication": "backend-architecture/results.json",
+        "npm": "npm-native/qualification.json"
+      },
+      "exclusions": [
+        "full Practical Core feature families",
+        "unrestricted Lean",
+        "Int division/modulo",
+        "fixed-width/floating runtime scalars",
+        "Python/PHP public compound ABI",
+        "component public ABI outside explicit Bool/String dispatcher profiles",
+        "formal backend preservation",
+        "full self-host/fixed-point qualification",
+        "npm registry publication",
+        "non-Linux native package qualification"
+      ],
+      "nativeNpm": {
+        "sourceCommit": "764078561a0b4a09dd7cccd1fac4174f566bf4c4",
+        "qualification": "passed",
+        "packageMode": "native-lean",
+        "publicationStatus": "unpublished",
+        "builtInTargets": [
+          "js",
+          "ts",
+          "rust",
+          "wasm-core",
+          "wasm-component"
+        ],
+        "optionalTargets": [
+          "python",
+          "php"
+        ],
+        "coreTarball": {
+          "path": "dist/scoped-correctness/npm-native/run-MXS0Vu/tarballs/proofscript-0.1.0-psc1.3.tgz",
+          "sha256": "04d7c1f462f4c1326b3a243497f5b464020038f92eb4c2adf3b813c90820e238",
+          "bytes": 37827369
+        },
+        "addonTarballs": {
+          "python": {
+            "path": "dist/scoped-correctness/npm-native/run-MXS0Vu/tarballs/proofscript-backend-python-0.1.0-psc1.3.tgz",
+            "sha256": "d192605c886d25e724ec6914739b5b3cebf263d0b4f06053e20b54d6ac45da7b",
+            "bytes": 33206929
+          },
+          "php": {
+            "path": "dist/scoped-correctness/npm-native/run-MXS0Vu/tarballs/proofscript-backend-php-0.1.0-psc1.3.tgz",
+            "sha256": "bf45d5af68c6ae4a8f6634e86b0bdfe2ab3cc88131e7ec525325e5fcdc37adc0",
+            "bytes": 33225275
+          }
+        },
+        "providerQualification": true,
+        "installedTypedIo": [
+          {
+            "syntax": "lean",
+            "target": "js",
+            "passed": true
+          },
+          {
+            "syntax": "ps",
+            "target": "js",
+            "passed": true
+          }
+        ],
+        "sourceLibrary": {
+          "sourceClosureSha256": "c3c6b461e9c668fe24d90fe233bc663aa4bea796ac6bac3a3182488f1c4e8956",
+          "independentlyAdmitted": true,
+          "privateModuleRefused": true,
+          "incompatibleProfileRefused": true,
+          "illTypedDependencyRefused": true
+        }
+      }
+    }
+  },
+  "preserved": {
+    "runId": 40126488125,
+    "requestCommit": "812094c1f5e1e0c0dca516dab1e30ef66f3076f7",
+    "qualifiedEngines": [
+      "ts",
+      "wasm-core"
+    ],
+    "failedEngines": [
+      "rust",
+      "js"
+    ],
+    "readback": {
+      "runId": 40130870206,
+      "jobId": 120982103024,
+      "controlCommit": "2dbacd3c005fc4158edd4968f265a94357d45f46",
+      "artifactId": 12573913590,
+      "artifactZipSha256": "4abb265607f6ba7bc7b1cb68ec8c0f1021fc267309a276d4c3dd593477083d3f",
+      "archives": [
+        {
+          "id": 12572179712,
+          "name": "psc1-unified-selfhost-correctness-1800s-wasm-core-9359f07320eaf84af1e551fb86c38718150291ff",
+          "digest": "sha256:e2826e164fb66d2916a57f39839d4d7c89b231d294afd67d904c5fecfed466be",
+          "workflowRun": {
+            "id": 40120346573,
+            "repository_id": 1381609925,
+            "head_repository_id": 1381609925,
+            "head_branch": "feat/psc1-unified-selfhost-20261024",
+            "head_sha": "9359f07320eaf84af1e551fb86c38718150291ff"
+          }
+        },
+        {
+          "id": 12570778666,
+          "name": "psc1-unified-selfhost-correctness-1800s-rust-9359f07320eaf84af1e551fb86c38718150291ff",
+          "digest": "sha256:8d6f9613137acc090e5292c7db59d2746619da80e1ab3b9b5cc93d4a08b46ef2",
+          "workflowRun": {
+            "id": 40120346573,
+            "repository_id": 1381609925,
+            "head_repository_id": 1381609925,
+            "head_branch": "feat/psc1-unified-selfhost-20261024",
+            "head_sha": "9359f07320eaf84af1e551fb86c38718150291ff"
+          }
+        },
+        {
+          "id": 12573542754,
+          "name": "psc1-rust-string-ownership-a3d3e0a9444934d3f55c41939e971c39e56472d3",
+          "digest": "sha256:3114d0ddfb0cbe144fc4cf79027ce6b3a36606bb2e0f9d57fccd6e41efd41f52",
+          "workflowRun": {
+            "id": 40126169429,
+            "repository_id": 1381609925,
+            "head_repository_id": 1381609925,
+            "head_branch": "feat/psc1-unified-selfhost-20261024",
+            "head_sha": "a3d3e0a9444934d3f55c41939e971c39e56472d3"
+          }
+        },
+        {
+          "id": 12575002462,
+          "name": "psc1-unified-selfhost-correctness-1800s-wasm-core-812094c1f5e1e0c0dca516dab1e30ef66f3076f7",
+          "digest": "sha256:77c0e130074807cf538dc9759c656a0ef6fa5ec9c3939cecb0c37922d8205d77",
+          "workflowRun": {
+            "id": 40126488125,
+            "repository_id": 1381609925,
+            "head_repository_id": 1381609925,
+            "head_branch": "qualification/psc1-unified-v2-20261025",
+            "head_sha": "812094c1f5e1e0c0dca516dab1e30ef66f3076f7"
+          }
+        },
+        {
+          "id": 12573999378,
+          "name": "psc1-unified-selfhost-correctness-1800s-ts-812094c1f5e1e0c0dca516dab1e30ef66f3076f7",
+          "digest": "sha256:330a41af351664b86d41791664a3a7a659813963c35b1e24af633ba99d1a9ce3",
+          "workflowRun": {
+            "id": 40126488125,
+            "repository_id": 1381609925,
+            "head_repository_id": 1381609925,
+            "head_branch": "qualification/psc1-unified-v2-20261025",
+            "head_sha": "812094c1f5e1e0c0dca516dab1e30ef66f3076f7"
+          }
+        },
+        {
+          "id": 12573856951,
+          "name": "psc1-unified-selfhost-correctness-1800s-js-812094c1f5e1e0c0dca516dab1e30ef66f3076f7",
+          "digest": "sha256:029429486cf6a60233c183d29ce83434eb02f7103c83f2ea7d6430f974292049",
+          "workflowRun": {
+            "id": 40126488125,
+            "repository_id": 1381609925,
+            "head_repository_id": 1381609925,
+            "head_branch": "qualification/psc1-unified-v2-20261025",
+            "head_sha": "812094c1f5e1e0c0dca516dab1e30ef66f3076f7"
+          }
+        },
+        {
+          "id": 12573548958,
+          "name": "psc1-unified-selfhost-correctness-1800s-rust-812094c1f5e1e0c0dca516dab1e30ef66f3076f7",
+          "digest": "sha256:4797e276ceef1c3d8384beedeb7f1478ac1d959d047af013aad2f9d8037b07de",
+          "workflowRun": {
+            "id": 40126488125,
+            "repository_id": 1381609925,
+            "head_repository_id": 1381609925,
+            "head_branch": "qualification/psc1-unified-v2-20261025",
+            "head_sha": "812094c1f5e1e0c0dca516dab1e30ef66f3076f7"
+          }
+        }
+      ],
+      "records": [
+        {
+          "testedCommit": "9359f07320eaf84af1e551fb86c38718150291ff",
+          "target": "rust",
+          "status": "failed",
+          "correctnessQualification": "not-qualified",
+          "performanceQualification": "not-qualified",
+          "profile": {
+            "name": "correctness-1800s",
+            "g1TimeoutMs": 240000,
+            "corpusTimeoutMs": 240000,
+            "toolTimeoutMs": 240000,
+            "selfCompileTimeoutMs": 1800000,
+            "correctnessAndPerformanceSeparate": true
+          },
+          "nativeSeedSha256": "749c3410dad86bc5955ed4f7bd9fe7ea449fb55199eab51d15e4231068577f74",
+          "toolsInventorySha256": "736595adfe9cd13c085e785cf74783d64ef3d8f7ae477853512128d01c3e4861",
+          "sourceClosureDigest": "a3350d645a81ed17f69af59333978c60e3b8f9e1d6855a999e0bc5844e183990",
+          "sourceInventorySha256": "1935e007515e65df1ccc3772eb158d8ffbe44c882fde7d809bf3513a288cc49e",
+          "root": {
+            "module": "Ps.CompilerUnified.Service",
+            "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.lean",
+            "bytes": 3427,
+            "sha256": "688ffd1dfdfdc7500a97772291977e36bb763da7520228db3b77f59f5793a313"
+          },
+          "sourceModules": 120,
+          "bootstrap": {
+            "sourceClosureDigest": "a3350d645a81ed17f69af59333978c60e3b8f9e1d6855a999e0bc5844e183990",
+            "sourceSha256": "2df3e71c83df774c7ce08382ebde8617eb9bf9868313f43d3a5d431cef297d63",
+            "admissionsSha256": "e28e3f8626a3a1475e6aecd95b1a48967e90edc739ff053a680552a8fc0f3511",
+            "originalIrSha256": "704db6c25aca6d5936b424ec42ea5b5d877c9379ca8ae8bbd161e2014a6c2ee5",
+            "specializedIrSha256": "e92a580adf2484edf4af80932a2023eb187c837f2823474db0357f6bc36e3584",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "psCompilerServiceCandidate"
+            ]
+          },
+          "generations": [
+            {
+              "generation": 1,
+              "sourceClosureDigest": "a3350d645a81ed17f69af59333978c60e3b8f9e1d6855a999e0bc5844e183990",
+              "sourceSha256": "2df3e71c83df774c7ce08382ebde8617eb9bf9868313f43d3a5d431cef297d63",
+              "admissionsSha256": "e28e3f8626a3a1475e6aecd95b1a48967e90edc739ff053a680552a8fc0f3511",
+              "originalIrSha256": "704db6c25aca6d5936b424ec42ea5b5d877c9379ca8ae8bbd161e2014a6c2ee5",
+              "specializedIrSha256": "e92a580adf2484edf4af80932a2023eb187c837f2823474db0357f6bc36e3584",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "logicalAdmission": "accepted",
+              "publicNames": [
+                "psCompilerServiceCandidate"
+              ],
+              "artifactSha256": "ca10b0d996c7c6d4ed30f079d1f5cc6812ae83ec5771beef1642374724fca5e3",
+              "executableSha256": "a488bd3d56a58c15d44d634d6590b985c80909d55d39319f5ea3c367fcf3bf00",
+              "observationsSha256": "e0071ad33607e0287b431ca48a4ef04b6a0b2a826c72cc383729276fd928c945",
+              "rawAdmissionsSha256": "804c0b15783306fd76fc57ebe1c6da8fe2db9f9a0692e8e985b3981dbbb6b2c8"
+            }
+          ],
+          "fixedPoint": "not-run",
+          "executableSha256": "a488bd3d56a58c15d44d634d6590b985c80909d55d39319f5ea3c367fcf3bf00",
+          "events": [
+            {
+              "role": "generated-compiler",
+              "target": "rust",
+              "id": "G2-self",
+              "serviceSha256": "ca10b0d996c7c6d4ed30f079d1f5cc6812ae83ec5771beef1642374724fca5e3",
+              "requestSha256": "b12e907a8aad25e531c538e0c24e040f27f83c025419223e9c55d6ccf3252c17",
+              "timeoutMs": 1800000,
+              "timeoutPolicy": "g2g3-correctness-1800s",
+              "maxRssKiB": 463540,
+              "peakTreeRssKiB": 555836,
+              "sampledCpuSeconds": 673.28,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 648336,
+              "status": 1,
+              "signal": null,
+              "error": null
+            }
+          ],
+          "cases": 40,
+          "envelopeRefusals": 9,
+          "nativeDelegationBoundary": "one-seed; native compiler executables removed; generated source semantics only",
+          "stackOverflow": true,
+          "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"rust\",\"id\":\"G2-self\",\"serviceSha256\":\"ca10b0d996c7c6d4ed30f079d1f5cc6812ae83ec5771beef1642374724fca5e3\",\"requestSha256\":\"b12e907a8aad25e531c538e0c24e040f27f83c025419223e9c55d6ccf3252c17\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":463540,\"peakTreeRssKiB\":555836,\"sampledCpuSeconds\":673.28,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":648336,\"status\":1,\"signal\":null,\"error\":null}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-1800s\", \"supervisorPid\": 4161, \"childPid\": 4162, \"elapsedMs\": 5, \"timeoutMs\": 1800000, \"sampledCpuSeconds\": 0.0, \"currentTreeRssKiB\": 1528, \"peakTreeRssKiB\": 1528, \"liveProcesses\": 1, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-1800s\", \"supervisorPid\": 4161, \"childPid\": 4162, \"elapsedMs\": 60011, \"timeoutMs\": 1800000, \"sampledCpuSeconds\": 59.98, \"currentTreeRssKiB\": 51204, \"peakTreeRssKiB\": 51204, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-1800s\", \"supervisorPid\": 4161, \"childPid\": 4162, \"elapsedMs\": 120103, \"timeoutMs\": 1800000, \"sampledCpuSeconds\": 120.07, \"currentTreeRssKiB\": 69764, \"peakTreeRssKiB\": 69764, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-1800s\", \"supervisorPid\": 4161, \"childPid\": 4162, \"elapsedMs\": 180179, \"timeoutMs\": 1800000, \"sampledCpuSeconds\": 180.14, \"currentTreeRssKiB\": 90924, \"peakTreeRssKiB\": 90924, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semant"
+        },
+        {
+          "testedCommit": "9359f07320eaf84af1e551fb86c38718150291ff",
+          "target": "wasm-core",
+          "status": "passed",
+          "correctnessQualification": "qualified",
+          "performanceQualification": "not-run-in-this-profile",
+          "profile": {
+            "name": "correctness-1800s",
+            "g1TimeoutMs": 240000,
+            "corpusTimeoutMs": 240000,
+            "toolTimeoutMs": 240000,
+            "selfCompileTimeoutMs": 1800000,
+            "correctnessAndPerformanceSeparate": true
+          },
+          "nativeSeedSha256": "749c3410dad86bc5955ed4f7bd9fe7ea449fb55199eab51d15e4231068577f74",
+          "toolsInventorySha256": "736595adfe9cd13c085e785cf74783d64ef3d8f7ae477853512128d01c3e4861",
+          "sourceClosureDigest": "a3350d645a81ed17f69af59333978c60e3b8f9e1d6855a999e0bc5844e183990",
+          "sourceInventorySha256": "1935e007515e65df1ccc3772eb158d8ffbe44c882fde7d809bf3513a288cc49e",
+          "root": {
+            "module": "Ps.CompilerUnified.Service",
+            "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.lean",
+            "bytes": 3427,
+            "sha256": "688ffd1dfdfdc7500a97772291977e36bb763da7520228db3b77f59f5793a313"
+          },
+          "sourceModules": 120,
+          "bootstrap": {
+            "sourceClosureDigest": "a3350d645a81ed17f69af59333978c60e3b8f9e1d6855a999e0bc5844e183990",
+            "sourceSha256": "832f555d5d4f6ed23fabcdc6387035f407aa337bca80196371d2f5c47a1268a9",
+            "admissionsSha256": "e28e3f8626a3a1475e6aecd95b1a48967e90edc739ff053a680552a8fc0f3511",
+            "originalIrSha256": "704db6c25aca6d5936b424ec42ea5b5d877c9379ca8ae8bbd161e2014a6c2ee5",
+            "specializedIrSha256": "e92a580adf2484edf4af80932a2023eb187c837f2823474db0357f6bc36e3584",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "psCompilerServiceCandidate"
+            ]
+          },
+          "generations": [
+            {
+              "generation": 1,
+              "sourceClosureDigest": "a3350d645a81ed17f69af59333978c60e3b8f9e1d6855a999e0bc5844e183990",
+              "sourceSha256": "832f555d5d4f6ed23fabcdc6387035f407aa337bca80196371d2f5c47a1268a9",
+              "admissionsSha256": "e28e3f8626a3a1475e6aecd95b1a48967e90edc739ff053a680552a8fc0f3511",
+              "originalIrSha256": "704db6c25aca6d5936b424ec42ea5b5d877c9379ca8ae8bbd161e2014a6c2ee5",
+              "specializedIrSha256": "e92a580adf2484edf4af80932a2023eb187c837f2823474db0357f6bc36e3584",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "logicalAdmission": "accepted",
+              "publicNames": [
+                "psCompilerServiceCandidate"
+              ],
+              "artifactSha256": "15b157cf0530bf11af532df0f931a7532da748dd1a61129082d3168677329fbd",
+              "executableSha256": "3da7d2bf38a335303649c775a680fb9ab9d2e2d943306b0123c4ed856bd82883",
+              "observationsSha256": "e0071ad33607e0287b431ca48a4ef04b6a0b2a826c72cc383729276fd928c945",
+              "rawAdmissionsSha256": "804c0b15783306fd76fc57ebe1c6da8fe2db9f9a0692e8e985b3981dbbb6b2c8"
+            },
+            {
+              "generation": 2,
+              "sourceClosureDigest": "a3350d645a81ed17f69af59333978c60e3b8f9e1d6855a999e0bc5844e183990",
+              "sourceSha256": "832f555d5d4f6ed23fabcdc6387035f407aa337bca80196371d2f5c47a1268a9",
+              "admissionsSha256": "e28e3f8626a3a1475e6aecd95b1a48967e90edc739ff053a680552a8fc0f3511",
+              "originalIrSha256": "704db6c25aca6d5936b424ec42ea5b5d877c9379ca8ae8bbd161e2014a6c2ee5",
+              "specializedIrSha256": "e92a580adf2484edf4af80932a2023eb187c837f2823474db0357f6bc36e3584",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "logicalAdmission": "accepted",
+              "publicNames": [
+                "psCompilerServiceCandidate"
+              ],
+              "artifactSha256": "bf4967b0b1cf6ec7e0163f5cdba5b388f009c9f00ee97ed8f2640e58fad66302",
+              "executableSha256": "3da7d2bf38a335303649c775a680fb9ab9d2e2d943306b0123c4ed856bd82883",
+              "observationsSha256": "e0071ad33607e0287b431ca48a4ef04b6a0b2a826c72cc383729276fd928c945",
+              "rawAdmissionsSha256": "804c0b15783306fd76fc57ebe1c6da8fe2db9f9a0692e8e985b3981dbbb6b2c8"
+            },
+            {
+              "generation": 3,
+              "sourceClosureDigest": "a3350d645a81ed17f69af59333978c60e3b8f9e1d6855a999e0bc5844e183990",
+              "sourceSha256": "832f555d5d4f6ed23fabcdc6387035f407aa337bca80196371d2f5c47a1268a9",
+              "admissionsSha256": "e28e3f8626a3a1475e6aecd95b1a48967e90edc739ff053a680552a8fc0f3511",
+              "originalIrSha256": "704db6c25aca6d5936b424ec42ea5b5d877c9379ca8ae8bbd161e2014a6c2ee5",
+              "specializedIrSha256": "e92a580adf2484edf4af80932a2023eb187c837f2823474db0357f6bc36e3584",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "logicalAdmission": "accepted",
+              "publicNames": [
+                "psCompilerServiceCandidate"
+              ],
+              "artifactSha256": "75f815b01cfd4ecda3b8e7be92b52c078c01251a3ddb7525745445d72ac7e0b8",
+              "executableSha256": "3da7d2bf38a335303649c775a680fb9ab9d2e2d943306b0123c4ed856bd82883",
+              "observationsSha256": "e0071ad33607e0287b431ca48a4ef04b6a0b2a826c72cc383729276fd928c945",
+              "rawAdmissionsSha256": "804c0b15783306fd76fc57ebe1c6da8fe2db9f9a0692e8e985b3981dbbb6b2c8"
+            }
+          ],
+          "fixedPoint": "passed-G1-G2-G3-exact-source-admission-IR-executable-and-four-target-observations",
+          "executableSha256": "3da7d2bf38a335303649c775a680fb9ab9d2e2d943306b0123c4ed856bd82883",
+          "events": [
+            {
+              "role": "generated-compiler",
+              "target": "wasm-core",
+              "id": "G2-self",
+              "serviceSha256": "15b157cf0530bf11af532df0f931a7532da748dd1a61129082d3168677329fbd",
+              "requestSha256": "a207aa6f68fa89a5566d3bb41cf7440b57f2fdca9db6e54459ab7fe848b8dc42",
+              "timeoutMs": 1800000,
+              "timeoutPolicy": "g2g3-correctness-1800s",
+              "maxRssKiB": 2767832,
+              "peakTreeRssKiB": 2767832,
+              "sampledCpuSeconds": 1855.77,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 1647713,
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "serviceMaxRssKiB": 2767832
+            },
+            {
+              "role": "generated-compiler",
+              "target": "wasm-core",
+              "id": "G3-self",
+              "serviceSha256": "bf4967b0b1cf6ec7e0163f5cdba5b388f009c9f00ee97ed8f2640e58fad66302",
+              "requestSha256": "5c9089841a0d6d8c6ea0419f456b4e5e425e5dd21d770c3ac471c035d222791b",
+              "timeoutMs": 1800000,
+              "timeoutPolicy": "g2g3-correctness-1800s",
+              "maxRssKiB": 2192844,
+              "peakTreeRssKiB": 2192588,
+              "sampledCpuSeconds": 1740.18,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 1542403,
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "serviceMaxRssKiB": 2192844
+            }
+          ],
+          "cases": 120,
+          "envelopeRefusals": 27,
+          "nativeDelegationBoundary": "one-seed; native compiler executables removed; generated source semantics only",
+          "stackOverflow": false
+        },
+        {
+          "testedCommit": "a3d3e0a9444934d3f55c41939e971c39e56472d3",
+          "target": "rust",
+          "status": "passed",
+          "correctnessQualification": "G1-only",
+          "performanceQualification": "not-run-in-this-profile",
+          "profile": {
+            "name": "correctness-1800s",
+            "g1TimeoutMs": 240000,
+            "corpusTimeoutMs": 240000,
+            "toolTimeoutMs": 240000,
+            "selfCompileTimeoutMs": 1800000,
+            "correctnessAndPerformanceSeparate": true
+          },
+          "nativeSeedSha256": "86f5d980743e0387b70cafa29c70a8c8bae57b5eab945cabf8ff19a1ce68224d",
+          "toolsInventorySha256": "736595adfe9cd13c085e785cf74783d64ef3d8f7ae477853512128d01c3e4861",
+          "sourceClosureDigest": "92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2",
+          "sourceInventorySha256": "c4d454046ea8caa7a9a03efcbdf304213b94e61dc844b3459ebea5944ef130b5",
+          "root": {
+            "module": "Ps.CompilerUnified.Service",
+            "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.lean",
+            "bytes": 3427,
+            "sha256": "688ffd1dfdfdc7500a97772291977e36bb763da7520228db3b77f59f5793a313"
+          },
+          "sourceModules": 120,
+          "bootstrap": {
+            "sourceClosureDigest": "92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2",
+            "sourceSha256": "348aa2cdedec03b812b6f84561825a8914087b11359295d95b33b989612349d1",
+            "admissionsSha256": "01f429a4bbcc0d154bace8ed28a6db269e3f02e52f5ebc9442e88ca72319253b",
+            "originalIrSha256": "e2760cb84d18b1ce59490a53a59277fb8cc787c97fadb1a8648346e90948c769",
+            "specializedIrSha256": "3d6e72f74f38c2c5bd51eddf1c6fa5960e00a6bb47dca4351ba350c7f1ff53c6",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "psCompilerServiceCandidate"
+            ]
+          },
+          "generations": [
+            {
+              "generation": 1,
+              "sourceClosureDigest": "92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2",
+              "sourceSha256": "348aa2cdedec03b812b6f84561825a8914087b11359295d95b33b989612349d1",
+              "admissionsSha256": "01f429a4bbcc0d154bace8ed28a6db269e3f02e52f5ebc9442e88ca72319253b",
+              "originalIrSha256": "e2760cb84d18b1ce59490a53a59277fb8cc787c97fadb1a8648346e90948c769",
+              "specializedIrSha256": "3d6e72f74f38c2c5bd51eddf1c6fa5960e00a6bb47dca4351ba350c7f1ff53c6",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "logicalAdmission": "accepted",
+              "publicNames": [
+                "psCompilerServiceCandidate"
+              ],
+              "artifactSha256": "b7bd6b0daf55ca75f55d7852f3545e1d87540a25b4a7b7ff4fb06c10a2f22f69",
+              "executableSha256": "aa96ba699d69056035b67822ed89c3ed91e7b043d5c31636c54fcafe8a7483ce",
+              "observationsSha256": "14b10b59b43b2335b1a1f3bc0a4c1e6dd63ea2345a79706ac5a3932a9cac3e04",
+              "rawAdmissionsSha256": "8bb838797e37e765ea119aa835c0f75f9639668e76af0b9ddf644e731fcf989b"
+            }
+          ],
+          "fixedPoint": "not-requested",
+          "executableSha256": "aa96ba699d69056035b67822ed89c3ed91e7b043d5c31636c54fcafe8a7483ce",
+          "events": [],
+          "cases": 40,
+          "envelopeRefusals": 9,
+          "nativeDelegationBoundary": "one-seed; native compiler executables removed; generated source semantics only",
+          "stackOverflow": false
+        },
+        {
+          "testedCommit": "812094c1f5e1e0c0dca516dab1e30ef66f3076f7",
+          "target": "rust",
+          "status": "failed",
+          "correctnessQualification": "not-qualified",
+          "performanceQualification": "not-qualified",
+          "profile": {
+            "name": "correctness-1800s",
+            "g1TimeoutMs": 240000,
+            "corpusTimeoutMs": 240000,
+            "toolTimeoutMs": 240000,
+            "selfCompileTimeoutMs": 1800000,
+            "correctnessAndPerformanceSeparate": true
+          },
+          "nativeSeedSha256": "86f5d980743e0387b70cafa29c70a8c8bae57b5eab945cabf8ff19a1ce68224d",
+          "toolsInventorySha256": "736595adfe9cd13c085e785cf74783d64ef3d8f7ae477853512128d01c3e4861",
+          "sourceClosureDigest": "92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2",
+          "sourceInventorySha256": "c4d454046ea8caa7a9a03efcbdf304213b94e61dc844b3459ebea5944ef130b5",
+          "root": {
+            "module": "Ps.CompilerUnified.Service",
+            "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.lean",
+            "bytes": 3427,
+            "sha256": "688ffd1dfdfdc7500a97772291977e36bb763da7520228db3b77f59f5793a313"
+          },
+          "sourceModules": 120,
+          "bootstrap": {
+            "sourceClosureDigest": "92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2",
+            "sourceSha256": "348aa2cdedec03b812b6f84561825a8914087b11359295d95b33b989612349d1",
+            "admissionsSha256": "01f429a4bbcc0d154bace8ed28a6db269e3f02e52f5ebc9442e88ca72319253b",
+            "originalIrSha256": "e2760cb84d18b1ce59490a53a59277fb8cc787c97fadb1a8648346e90948c769",
+            "specializedIrSha256": "3d6e72f74f38c2c5bd51eddf1c6fa5960e00a6bb47dca4351ba350c7f1ff53c6",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "psCompilerServiceCandidate"
+            ]
+          },
+          "generations": [
+            {
+              "generation": 1,
+              "sourceClosureDigest": "92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2",
+              "sourceSha256": "348aa2cdedec03b812b6f84561825a8914087b11359295d95b33b989612349d1",
+              "admissionsSha256": "01f429a4bbcc0d154bace8ed28a6db269e3f02e52f5ebc9442e88ca72319253b",
+              "originalIrSha256": "e2760cb84d18b1ce59490a53a59277fb8cc787c97fadb1a8648346e90948c769",
+              "specializedIrSha256": "3d6e72f74f38c2c5bd51eddf1c6fa5960e00a6bb47dca4351ba350c7f1ff53c6",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "logicalAdmission": "accepted",
+              "publicNames": [
+                "psCompilerServiceCandidate"
+              ],
+              "artifactSha256": "5ba97e5e1670473a05ae628837c659181cec9e80a227e3c1c43c54ba2b8853c2",
+              "executableSha256": "aa96ba699d69056035b67822ed89c3ed91e7b043d5c31636c54fcafe8a7483ce",
+              "observationsSha256": "14b10b59b43b2335b1a1f3bc0a4c1e6dd63ea2345a79706ac5a3932a9cac3e04",
+              "rawAdmissionsSha256": "8bb838797e37e765ea119aa835c0f75f9639668e76af0b9ddf644e731fcf989b"
+            }
+          ],
+          "fixedPoint": "not-run",
+          "executableSha256": "aa96ba699d69056035b67822ed89c3ed91e7b043d5c31636c54fcafe8a7483ce",
+          "events": [
+            {
+              "role": "generated-compiler",
+              "target": "rust",
+              "id": "G2-self",
+              "serviceSha256": "5ba97e5e1670473a05ae628837c659181cec9e80a227e3c1c43c54ba2b8853c2",
+              "requestSha256": "c6b04937446d0f549d76d965aae53bac04c23122ab4b14befb7fd425783ad0ad",
+              "timeoutMs": 1800000,
+              "timeoutPolicy": "g2g3-correctness-1800s",
+              "maxRssKiB": 462464,
+              "peakTreeRssKiB": 555080,
+              "sampledCpuSeconds": 543.09,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 520538,
+              "status": 1,
+              "signal": null,
+              "error": null
+            }
+          ],
+          "cases": 40,
+          "envelopeRefusals": 9,
+          "nativeDelegationBoundary": "one-seed; native compiler executables removed; generated source semantics only",
+          "stackOverflow": true,
+          "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"rust\",\"id\":\"G2-self\",\"serviceSha256\":\"5ba97e5e1670473a05ae628837c659181cec9e80a227e3c1c43c54ba2b8853c2\",\"requestSha256\":\"c6b04937446d0f549d76d965aae53bac04c23122ab4b14befb7fd425783ad0ad\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":462464,\"peakTreeRssKiB\":555080,\"sampledCpuSeconds\":543.09,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":520538,\"status\":1,\"signal\":null,\"error\":null}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-1800s\", \"supervisorPid\": 4570, \"childPid\": 4571, \"elapsedMs\": 4, \"timeoutMs\": 1800000, \"sampledCpuSeconds\": 0.0, \"currentTreeRssKiB\": 1528, \"peakTreeRssKiB\": 1528, \"liveProcesses\": 1, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-1800s\", \"supervisorPid\": 4570, \"childPid\": 4571, \"elapsedMs\": 60042, \"timeoutMs\": 1800000, \"sampledCpuSeconds\": 60.02, \"currentTreeRssKiB\": 449528, \"peakTreeRssKiB\": 449528, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-1800s\", \"supervisorPid\": 4570, \"childPid\": 4571, \"elapsedMs\": 120126, \"timeoutMs\": 1800000, \"sampledCpuSeconds\": 120.1, \"currentTreeRssKiB\": 450296, \"peakTreeRssKiB\": 450296, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-1800s\", \"supervisorPid\": 4570, \"childPid\": 4571, \"elapsedMs\": 180198, \"timeoutMs\": 1800000, \"sampledCpuSeconds\": 180.15, \"currentTreeRssKiB\": 450936, \"peakTreeRssKiB\": 450936, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-s"
+        },
+        {
+          "testedCommit": "812094c1f5e1e0c0dca516dab1e30ef66f3076f7",
+          "target": "js",
+          "status": "failed",
+          "correctnessQualification": "not-qualified",
+          "performanceQualification": "not-qualified",
+          "profile": {
+            "name": "correctness-1800s",
+            "g1TimeoutMs": 240000,
+            "corpusTimeoutMs": 240000,
+            "toolTimeoutMs": 240000,
+            "selfCompileTimeoutMs": 1800000,
+            "correctnessAndPerformanceSeparate": true
+          },
+          "nativeSeedSha256": "86f5d980743e0387b70cafa29c70a8c8bae57b5eab945cabf8ff19a1ce68224d",
+          "toolsInventorySha256": "736595adfe9cd13c085e785cf74783d64ef3d8f7ae477853512128d01c3e4861",
+          "sourceClosureDigest": "92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2",
+          "sourceInventorySha256": "c4d454046ea8caa7a9a03efcbdf304213b94e61dc844b3459ebea5944ef130b5",
+          "root": {
+            "module": "Ps.CompilerUnified.Service",
+            "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.lean",
+            "bytes": 3427,
+            "sha256": "688ffd1dfdfdc7500a97772291977e36bb763da7520228db3b77f59f5793a313"
+          },
+          "sourceModules": 120,
+          "bootstrap": {
+            "sourceClosureDigest": "92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2",
+            "sourceSha256": "b471646a30cdfc559172f3f7794324e05549376bd4a7143e6ae7040f52ace29a",
+            "admissionsSha256": "01f429a4bbcc0d154bace8ed28a6db269e3f02e52f5ebc9442e88ca72319253b",
+            "originalIrSha256": "e2760cb84d18b1ce59490a53a59277fb8cc787c97fadb1a8648346e90948c769",
+            "specializedIrSha256": "3d6e72f74f38c2c5bd51eddf1c6fa5960e00a6bb47dca4351ba350c7f1ff53c6",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "psCompilerServiceCandidate"
+            ]
+          },
+          "generations": [
+            {
+              "generation": 1,
+              "sourceClosureDigest": "92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2",
+              "sourceSha256": "b471646a30cdfc559172f3f7794324e05549376bd4a7143e6ae7040f52ace29a",
+              "admissionsSha256": "01f429a4bbcc0d154bace8ed28a6db269e3f02e52f5ebc9442e88ca72319253b",
+              "originalIrSha256": "e2760cb84d18b1ce59490a53a59277fb8cc787c97fadb1a8648346e90948c769",
+              "specializedIrSha256": "3d6e72f74f38c2c5bd51eddf1c6fa5960e00a6bb47dca4351ba350c7f1ff53c6",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "logicalAdmission": "accepted",
+              "publicNames": [
+                "psCompilerServiceCandidate"
+              ],
+              "artifactSha256": "37ca897f06d449a7a21f850ba8e2a163d49676fce031fcc5487adafeace1225b",
+              "executableSha256": "b471646a30cdfc559172f3f7794324e05549376bd4a7143e6ae7040f52ace29a",
+              "observationsSha256": "14b10b59b43b2335b1a1f3bc0a4c1e6dd63ea2345a79706ac5a3932a9cac3e04",
+              "rawAdmissionsSha256": "8bb838797e37e765ea119aa835c0f75f9639668e76af0b9ddf644e731fcf989b"
+            }
+          ],
+          "fixedPoint": "not-run",
+          "executableSha256": "b471646a30cdfc559172f3f7794324e05549376bd4a7143e6ae7040f52ace29a",
+          "events": [
+            {
+              "role": "generated-compiler",
+              "target": "js",
+              "id": "G2-self",
+              "serviceSha256": "37ca897f06d449a7a21f850ba8e2a163d49676fce031fcc5487adafeace1225b",
+              "requestSha256": "b922ffbacf3b7440870c03d6cd6a00f2fd74843c1e20fca396d5940e814fbdc4",
+              "timeoutMs": 1800000,
+              "timeoutPolicy": "g2g3-correctness-1800s",
+              "maxRssKiB": 3157096,
+              "peakTreeRssKiB": 3157096,
+              "sampledCpuSeconds": 1959.71,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 1800278,
+              "status": null,
+              "signal": "SIGKILL",
+              "error": "process tree exceeded hard deadline"
+            }
+          ],
+          "cases": 40,
+          "envelopeRefusals": 9,
+          "nativeDelegationBoundary": "one-seed; native compiler executables removed; generated source semantics only",
+          "stackOverflow": false,
+          "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"js\",\"id\":\"G2-self\",\"serviceSha256\":\"37ca897f06d449a7a21f850ba8e2a163d49676fce031fcc5487adafeace1225b\",\"requestSha256\":\"b922ffbacf3b7440870c03d6cd6a00f2fd74843c1e20fca396d5940e814fbdc4\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":3157096,\"peakTreeRssKiB\":3157096,\"sampledCpuSeconds\":1959.71,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":1800278,\"status\":null,\"signal\":\"SIGKILL\",\"error\":\"process tree exceeded hard deadline\"}\n"
+        },
+        {
+          "testedCommit": "812094c1f5e1e0c0dca516dab1e30ef66f3076f7",
+          "target": "ts",
+          "status": "passed",
+          "correctnessQualification": "qualified",
+          "performanceQualification": "not-run-in-this-profile",
+          "profile": {
+            "name": "correctness-1800s",
+            "g1TimeoutMs": 240000,
+            "corpusTimeoutMs": 240000,
+            "toolTimeoutMs": 240000,
+            "selfCompileTimeoutMs": 1800000,
+            "correctnessAndPerformanceSeparate": true
+          },
+          "nativeSeedSha256": "86f5d980743e0387b70cafa29c70a8c8bae57b5eab945cabf8ff19a1ce68224d",
+          "toolsInventorySha256": "736595adfe9cd13c085e785cf74783d64ef3d8f7ae477853512128d01c3e4861",
+          "sourceClosureDigest": "92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2",
+          "sourceInventorySha256": "c4d454046ea8caa7a9a03efcbdf304213b94e61dc844b3459ebea5944ef130b5",
+          "root": {
+            "module": "Ps.CompilerUnified.Service",
+            "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.lean",
+            "bytes": 3427,
+            "sha256": "688ffd1dfdfdc7500a97772291977e36bb763da7520228db3b77f59f5793a313"
+          },
+          "sourceModules": 120,
+          "bootstrap": {
+            "sourceClosureDigest": "92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2",
+            "sourceSha256": "cc8f89bea641d935df27ea742ed1d60f6ee70c1c7f7a9fad3b09e3a18a25c47c",
+            "admissionsSha256": "01f429a4bbcc0d154bace8ed28a6db269e3f02e52f5ebc9442e88ca72319253b",
+            "originalIrSha256": "e2760cb84d18b1ce59490a53a59277fb8cc787c97fadb1a8648346e90948c769",
+            "specializedIrSha256": "3d6e72f74f38c2c5bd51eddf1c6fa5960e00a6bb47dca4351ba350c7f1ff53c6",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "psCompilerServiceCandidate"
+            ]
+          },
+          "generations": [
+            {
+              "generation": 1,
+              "sourceClosureDigest": "92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2",
+              "sourceSha256": "cc8f89bea641d935df27ea742ed1d60f6ee70c1c7f7a9fad3b09e3a18a25c47c",
+              "admissionsSha256": "01f429a4bbcc0d154bace8ed28a6db269e3f02e52f5ebc9442e88ca72319253b",
+              "originalIrSha256": "e2760cb84d18b1ce59490a53a59277fb8cc787c97fadb1a8648346e90948c769",
+              "specializedIrSha256": "3d6e72f74f38c2c5bd51eddf1c6fa5960e00a6bb47dca4351ba350c7f1ff53c6",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "logicalAdmission": "accepted",
+              "publicNames": [
+                "psCompilerServiceCandidate"
+              ],
+              "artifactSha256": "c8518b2440f184cda65b81fe931bc4bc9684583037ea99d4a9eab8b7687f6abe",
+              "executableSha256": "8667e1fe0b68c46859c4150dd5c3b721e91975bb21ac9f49dcac4bab0e8d2a75",
+              "observationsSha256": "14b10b59b43b2335b1a1f3bc0a4c1e6dd63ea2345a79706ac5a3932a9cac3e04",
+              "rawAdmissionsSha256": "8bb838797e37e765ea119aa835c0f75f9639668e76af0b9ddf644e731fcf989b"
+            },
+            {
+              "generation": 2,
+              "sourceClosureDigest": "92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2",
+              "sourceSha256": "cc8f89bea641d935df27ea742ed1d60f6ee70c1c7f7a9fad3b09e3a18a25c47c",
+              "admissionsSha256": "01f429a4bbcc0d154bace8ed28a6db269e3f02e52f5ebc9442e88ca72319253b",
+              "originalIrSha256": "e2760cb84d18b1ce59490a53a59277fb8cc787c97fadb1a8648346e90948c769",
+              "specializedIrSha256": "3d6e72f74f38c2c5bd51eddf1c6fa5960e00a6bb47dca4351ba350c7f1ff53c6",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "logicalAdmission": "accepted",
+              "publicNames": [
+                "psCompilerServiceCandidate"
+              ],
+              "artifactSha256": "b35e613eb5bca2df7d956b26d5c71d376296b358aef216e59051a22009083d50",
+              "executableSha256": "8667e1fe0b68c46859c4150dd5c3b721e91975bb21ac9f49dcac4bab0e8d2a75",
+              "observationsSha256": "14b10b59b43b2335b1a1f3bc0a4c1e6dd63ea2345a79706ac5a3932a9cac3e04",
+              "rawAdmissionsSha256": "8bb838797e37e765ea119aa835c0f75f9639668e76af0b9ddf644e731fcf989b"
+            },
+            {
+              "generation": 3,
+              "sourceClosureDigest": "92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2",
+              "sourceSha256": "cc8f89bea641d935df27ea742ed1d60f6ee70c1c7f7a9fad3b09e3a18a25c47c",
+              "admissionsSha256": "01f429a4bbcc0d154bace8ed28a6db269e3f02e52f5ebc9442e88ca72319253b",
+              "originalIrSha256": "e2760cb84d18b1ce59490a53a59277fb8cc787c97fadb1a8648346e90948c769",
+              "specializedIrSha256": "3d6e72f74f38c2c5bd51eddf1c6fa5960e00a6bb47dca4351ba350c7f1ff53c6",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "logicalAdmission": "accepted",
+              "publicNames": [
+                "psCompilerServiceCandidate"
+              ],
+              "artifactSha256": "dacdd66e5ed9a92ea3b47069755f17c645df022909d2f84f0dd5b1acb8a0c85b",
+              "executableSha256": "8667e1fe0b68c46859c4150dd5c3b721e91975bb21ac9f49dcac4bab0e8d2a75",
+              "observationsSha256": "14b10b59b43b2335b1a1f3bc0a4c1e6dd63ea2345a79706ac5a3932a9cac3e04",
+              "rawAdmissionsSha256": "8bb838797e37e765ea119aa835c0f75f9639668e76af0b9ddf644e731fcf989b"
+            }
+          ],
+          "fixedPoint": "passed-G1-G2-G3-exact-source-admission-IR-executable-and-four-target-observations",
+          "executableSha256": "8667e1fe0b68c46859c4150dd5c3b721e91975bb21ac9f49dcac4bab0e8d2a75",
+          "events": [
+            {
+              "role": "generated-compiler",
+              "target": "ts",
+              "id": "G2-self",
+              "serviceSha256": "c8518b2440f184cda65b81fe931bc4bc9684583037ea99d4a9eab8b7687f6abe",
+              "requestSha256": "e01996920d989eed68c83b53aa85e82b938d5240f984f4e84cb1025558300e2e",
+              "timeoutMs": 1800000,
+              "timeoutPolicy": "g2g3-correctness-1800s",
+              "maxRssKiB": 3499080,
+              "peakTreeRssKiB": 3499080,
+              "sampledCpuSeconds": 1501.16,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 1379563,
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "serviceMaxRssKiB": 3499080
+            },
+            {
+              "role": "generated-compiler",
+              "target": "ts",
+              "id": "G3-self",
+              "serviceSha256": "b35e613eb5bca2df7d956b26d5c71d376296b358aef216e59051a22009083d50",
+              "requestSha256": "1f251aa91638052c2b0b96f1bcfae99e9d4b473961dab9c0f45712ec01fd0e98",
+              "timeoutMs": 1800000,
+              "timeoutPolicy": "g2g3-correctness-1800s",
+              "maxRssKiB": 3497244,
+              "peakTreeRssKiB": 3440668,
+              "sampledCpuSeconds": 1523.27,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 1401815,
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "serviceMaxRssKiB": 3497244
+            }
+          ],
+          "cases": 120,
+          "envelopeRefusals": 27,
+          "nativeDelegationBoundary": "one-seed; native compiler executables removed; generated source semantics only",
+          "stackOverflow": false
+        },
+        {
+          "testedCommit": "812094c1f5e1e0c0dca516dab1e30ef66f3076f7",
+          "target": "wasm-core",
+          "status": "passed",
+          "correctnessQualification": "qualified",
+          "performanceQualification": "not-run-in-this-profile",
+          "profile": {
+            "name": "correctness-1800s",
+            "g1TimeoutMs": 240000,
+            "corpusTimeoutMs": 240000,
+            "toolTimeoutMs": 240000,
+            "selfCompileTimeoutMs": 1800000,
+            "correctnessAndPerformanceSeparate": true
+          },
+          "nativeSeedSha256": "86f5d980743e0387b70cafa29c70a8c8bae57b5eab945cabf8ff19a1ce68224d",
+          "toolsInventorySha256": "736595adfe9cd13c085e785cf74783d64ef3d8f7ae477853512128d01c3e4861",
+          "sourceClosureDigest": "92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2",
+          "sourceInventorySha256": "c4d454046ea8caa7a9a03efcbdf304213b94e61dc844b3459ebea5944ef130b5",
+          "root": {
+            "module": "Ps.CompilerUnified.Service",
+            "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.lean",
+            "bytes": 3427,
+            "sha256": "688ffd1dfdfdc7500a97772291977e36bb763da7520228db3b77f59f5793a313"
+          },
+          "sourceModules": 120,
+          "bootstrap": {
+            "sourceClosureDigest": "92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2",
+            "sourceSha256": "f370d6c4fc845075f3fb307bd0e60dc25ef41390017210e7f8cb9cf9ef056f04",
+            "admissionsSha256": "01f429a4bbcc0d154bace8ed28a6db269e3f02e52f5ebc9442e88ca72319253b",
+            "originalIrSha256": "e2760cb84d18b1ce59490a53a59277fb8cc787c97fadb1a8648346e90948c769",
+            "specializedIrSha256": "3d6e72f74f38c2c5bd51eddf1c6fa5960e00a6bb47dca4351ba350c7f1ff53c6",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "psCompilerServiceCandidate"
+            ]
+          },
+          "generations": [
+            {
+              "generation": 1,
+              "sourceClosureDigest": "92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2",
+              "sourceSha256": "f370d6c4fc845075f3fb307bd0e60dc25ef41390017210e7f8cb9cf9ef056f04",
+              "admissionsSha256": "01f429a4bbcc0d154bace8ed28a6db269e3f02e52f5ebc9442e88ca72319253b",
+              "originalIrSha256": "e2760cb84d18b1ce59490a53a59277fb8cc787c97fadb1a8648346e90948c769",
+              "specializedIrSha256": "3d6e72f74f38c2c5bd51eddf1c6fa5960e00a6bb47dca4351ba350c7f1ff53c6",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "logicalAdmission": "accepted",
+              "publicNames": [
+                "psCompilerServiceCandidate"
+              ],
+              "artifactSha256": "96bafb7d4f1f259cc01fcfde1ed101a02eeaa3a0996747505cdbc58d0d4fe8f6",
+              "executableSha256": "73dd31e8e58572ba1f9cea66fe06edb41c6223ed18062696327fd06f916905df",
+              "observationsSha256": "14b10b59b43b2335b1a1f3bc0a4c1e6dd63ea2345a79706ac5a3932a9cac3e04",
+              "rawAdmissionsSha256": "8bb838797e37e765ea119aa835c0f75f9639668e76af0b9ddf644e731fcf989b"
+            },
+            {
+              "generation": 2,
+              "sourceClosureDigest": "92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2",
+              "sourceSha256": "f370d6c4fc845075f3fb307bd0e60dc25ef41390017210e7f8cb9cf9ef056f04",
+              "admissionsSha256": "01f429a4bbcc0d154bace8ed28a6db269e3f02e52f5ebc9442e88ca72319253b",
+              "originalIrSha256": "e2760cb84d18b1ce59490a53a59277fb8cc787c97fadb1a8648346e90948c769",
+              "specializedIrSha256": "3d6e72f74f38c2c5bd51eddf1c6fa5960e00a6bb47dca4351ba350c7f1ff53c6",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "logicalAdmission": "accepted",
+              "publicNames": [
+                "psCompilerServiceCandidate"
+              ],
+              "artifactSha256": "b99a35fbafb14aecded25d4ca14d9c5195563f9e47c4921152501514e792529f",
+              "executableSha256": "73dd31e8e58572ba1f9cea66fe06edb41c6223ed18062696327fd06f916905df",
+              "observationsSha256": "14b10b59b43b2335b1a1f3bc0a4c1e6dd63ea2345a79706ac5a3932a9cac3e04",
+              "rawAdmissionsSha256": "8bb838797e37e765ea119aa835c0f75f9639668e76af0b9ddf644e731fcf989b"
+            },
+            {
+              "generation": 3,
+              "sourceClosureDigest": "92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2",
+              "sourceSha256": "f370d6c4fc845075f3fb307bd0e60dc25ef41390017210e7f8cb9cf9ef056f04",
+              "admissionsSha256": "01f429a4bbcc0d154bace8ed28a6db269e3f02e52f5ebc9442e88ca72319253b",
+              "originalIrSha256": "e2760cb84d18b1ce59490a53a59277fb8cc787c97fadb1a8648346e90948c769",
+              "specializedIrSha256": "3d6e72f74f38c2c5bd51eddf1c6fa5960e00a6bb47dca4351ba350c7f1ff53c6",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "logicalAdmission": "accepted",
+              "publicNames": [
+                "psCompilerServiceCandidate"
+              ],
+              "artifactSha256": "1f33a6a8b2b731d50f997f1ac4008ec06a0d4d3a4b5c04ca0b1d5ab06d0c6996",
+              "executableSha256": "73dd31e8e58572ba1f9cea66fe06edb41c6223ed18062696327fd06f916905df",
+              "observationsSha256": "14b10b59b43b2335b1a1f3bc0a4c1e6dd63ea2345a79706ac5a3932a9cac3e04",
+              "rawAdmissionsSha256": "8bb838797e37e765ea119aa835c0f75f9639668e76af0b9ddf644e731fcf989b"
+            }
+          ],
+          "fixedPoint": "passed-G1-G2-G3-exact-source-admission-IR-executable-and-four-target-observations",
+          "executableSha256": "73dd31e8e58572ba1f9cea66fe06edb41c6223ed18062696327fd06f916905df",
+          "events": [
+            {
+              "role": "generated-compiler",
+              "target": "wasm-core",
+              "id": "G2-self",
+              "serviceSha256": "96bafb7d4f1f259cc01fcfde1ed101a02eeaa3a0996747505cdbc58d0d4fe8f6",
+              "requestSha256": "87d5259419ab4289008f4cc50fac0421658464d697243433d98ad937caa57c9d",
+              "timeoutMs": 1800000,
+              "timeoutPolicy": "g2g3-correctness-1800s",
+              "maxRssKiB": 2279520,
+              "peakTreeRssKiB": 2279520,
+              "sampledCpuSeconds": 1595.3,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 1396916,
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "serviceMaxRssKiB": 2279520
+            },
+            {
+              "role": "generated-compiler",
+              "target": "wasm-core",
+              "id": "G3-self",
+              "serviceSha256": "b99a35fbafb14aecded25d4ca14d9c5195563f9e47c4921152501514e792529f",
+              "requestSha256": "1f68bcf646daff8b803d64fe435d3dac5dce8b5e50117b1ff468bc6a711a8728",
+              "timeoutMs": 1800000,
+              "timeoutPolicy": "g2g3-correctness-1800s",
+              "maxRssKiB": 1968020,
+              "peakTreeRssKiB": 1968020,
+              "sampledCpuSeconds": 1614,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 1410393,
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "serviceMaxRssKiB": 1968020
+            }
+          ],
+          "cases": 120,
+          "envelopeRefusals": 27,
+          "nativeDelegationBoundary": "one-seed; native compiler executables removed; generated source semantics only",
+          "stackOverflow": false
+        }
+      ]
+    }
+  },
+  "firstFrameRetry": {
+    "sourceCommit": "e913a6d391a68c6c9460d090de7100323e3bd9b0",
+    "requestCommit": "f5a00e75ef4b46831ccefdfc78f47a45ea1174bf",
+    "runId": 40130597594,
+    "jobId": 120981399833,
+    "status": "failed",
+    "elapsedMs": 530106,
+    "artifactId": 12575715924,
+    "artifactZipSha256": "dab6fdac3f8fc069201e11b271b1818a39da3c9184eae79ed2313c71d7c83489",
+    "trace": {
+      "runId": 40131756069,
+      "jobId": 120984747118,
+      "artifactId": 12575755986,
+      "artifactZipSha256": "813dc8baf16217eb055a1faa96463bbd844fb83532760bafed88d853261c44e0",
+      "elapsedMs": 523662,
+      "site": "psEncodeCodecExprAcc worker with many psEncodeCheckedAdmissionsLoop closure frames below it",
+      "qualification": false
+    },
+    "readback": {
+      "runId": 40131756188,
+      "jobId": 120984747463,
+      "artifactId": 12575241831,
+      "artifactZipSha256": "1ff228b55316f4973bafae5e446e91021c4bc44bab230ee1d730aa513c11b952",
+      "records": [
+        {
+          "testedCommit": "e913a6d391a68c6c9460d090de7100323e3bd9b0",
+          "target": "rust",
+          "status": "passed",
+          "correctnessQualification": "G1-only",
+          "performanceQualification": "not-run-in-this-profile",
+          "profile": {
+            "name": "correctness-1800s",
+            "g1TimeoutMs": 240000,
+            "corpusTimeoutMs": 240000,
+            "toolTimeoutMs": 240000,
+            "selfCompileTimeoutMs": 1800000,
+            "correctnessAndPerformanceSeparate": true
+          },
+          "nativeSeedSha256": "ab1645db52aa91a5ad5cf6d61aa0bacb0da9a4b92aee94e0febc9077760709b9",
+          "toolsInventorySha256": "5f2899698b427e309e3e20782e5daa64be594899d983b4f25815da408accb5cc",
+          "sourceClosureDigest": "50d5d0d099686020ad79fee1cb3ace38f3a511b3f315b3273a1e088b90555d76",
+          "sourceInventorySha256": "47708750813f881724d37089f7cca5a957b5e7ba765cfc080f8ce381e1dd28a7",
+          "root": {
+            "module": "Ps.CompilerUnified.Service",
+            "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.lean",
+            "bytes": 3427,
+            "sha256": "688ffd1dfdfdc7500a97772291977e36bb763da7520228db3b77f59f5793a313"
+          },
+          "sourceModules": 120,
+          "bootstrap": {
+            "sourceClosureDigest": "50d5d0d099686020ad79fee1cb3ace38f3a511b3f315b3273a1e088b90555d76",
+            "sourceSha256": "533e80e3ebbacdff6307f1831f34a33ff5a02f1ed9ae8ccc97558882e2164141",
+            "admissionsSha256": "92c1b4d043c207db0dd1fb73d06356e0377e5f491df5a45c22ed4040cfafaac3",
+            "originalIrSha256": "15344c1bcfde70470a5340f339599ffdbca24cbc409349bf629e0b9da8b64034",
+            "specializedIrSha256": "45f33a11e78bd82204148827e87529eff3b63537cee7a4d4500623befb40b76e",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "psCompilerServiceCandidate"
+            ]
+          },
+          "generations": [
+            {
+              "generation": 1,
+              "sourceClosureDigest": "50d5d0d099686020ad79fee1cb3ace38f3a511b3f315b3273a1e088b90555d76",
+              "sourceSha256": "533e80e3ebbacdff6307f1831f34a33ff5a02f1ed9ae8ccc97558882e2164141",
+              "admissionsSha256": "92c1b4d043c207db0dd1fb73d06356e0377e5f491df5a45c22ed4040cfafaac3",
+              "originalIrSha256": "15344c1bcfde70470a5340f339599ffdbca24cbc409349bf629e0b9da8b64034",
+              "specializedIrSha256": "45f33a11e78bd82204148827e87529eff3b63537cee7a4d4500623befb40b76e",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "logicalAdmission": "accepted",
+              "publicNames": [
+                "psCompilerServiceCandidate"
+              ],
+              "artifactSha256": "3c6fd58563a421346d1a2e8b11a72c68ede3ecbd5f832a08830cf15b6293fc6f",
+              "executableSha256": "175ef0ddc0722ccdb91b160901448297c86fc4222ada8d7870b157f67bbc3be8",
+              "observationsSha256": "14b10b59b43b2335b1a1f3bc0a4c1e6dd63ea2345a79706ac5a3932a9cac3e04",
+              "rawAdmissionsSha256": "abb819226780e491d70ee136b0c48ec1d750023afbf358fee72b4f518dad3e06"
+            }
+          ],
+          "fixedPoint": "not-requested",
+          "executableSha256": "175ef0ddc0722ccdb91b160901448297c86fc4222ada8d7870b157f67bbc3be8",
+          "events": [],
+          "cases": 40,
+          "envelopeRefusals": 9,
+          "nativeDelegationBoundary": "one-seed; native compiler executables removed; generated source semantics only",
+          "stackOverflow": false
+        },
+        {
+          "testedCommit": "f5a00e75ef4b46831ccefdfc78f47a45ea1174bf",
+          "target": "rust",
+          "status": "failed",
+          "correctnessQualification": "not-qualified",
+          "performanceQualification": "not-qualified",
+          "profile": {
+            "name": "correctness-1800s",
+            "g1TimeoutMs": 240000,
+            "corpusTimeoutMs": 240000,
+            "toolTimeoutMs": 240000,
+            "selfCompileTimeoutMs": 1800000,
+            "correctnessAndPerformanceSeparate": true
+          },
+          "nativeSeedSha256": "ab1645db52aa91a5ad5cf6d61aa0bacb0da9a4b92aee94e0febc9077760709b9",
+          "toolsInventorySha256": "5f2899698b427e309e3e20782e5daa64be594899d983b4f25815da408accb5cc",
+          "sourceClosureDigest": "50d5d0d099686020ad79fee1cb3ace38f3a511b3f315b3273a1e088b90555d76",
+          "sourceInventorySha256": "47708750813f881724d37089f7cca5a957b5e7ba765cfc080f8ce381e1dd28a7",
+          "root": {
+            "module": "Ps.CompilerUnified.Service",
+            "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.lean",
+            "bytes": 3427,
+            "sha256": "688ffd1dfdfdc7500a97772291977e36bb763da7520228db3b77f59f5793a313"
+          },
+          "sourceModules": 120,
+          "bootstrap": {
+            "sourceClosureDigest": "50d5d0d099686020ad79fee1cb3ace38f3a511b3f315b3273a1e088b90555d76",
+            "sourceSha256": "533e80e3ebbacdff6307f1831f34a33ff5a02f1ed9ae8ccc97558882e2164141",
+            "admissionsSha256": "92c1b4d043c207db0dd1fb73d06356e0377e5f491df5a45c22ed4040cfafaac3",
+            "originalIrSha256": "15344c1bcfde70470a5340f339599ffdbca24cbc409349bf629e0b9da8b64034",
+            "specializedIrSha256": "45f33a11e78bd82204148827e87529eff3b63537cee7a4d4500623befb40b76e",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "psCompilerServiceCandidate"
+            ]
+          },
+          "generations": [
+            {
+              "generation": 1,
+              "sourceClosureDigest": "50d5d0d099686020ad79fee1cb3ace38f3a511b3f315b3273a1e088b90555d76",
+              "sourceSha256": "533e80e3ebbacdff6307f1831f34a33ff5a02f1ed9ae8ccc97558882e2164141",
+              "admissionsSha256": "92c1b4d043c207db0dd1fb73d06356e0377e5f491df5a45c22ed4040cfafaac3",
+              "originalIrSha256": "15344c1bcfde70470a5340f339599ffdbca24cbc409349bf629e0b9da8b64034",
+              "specializedIrSha256": "45f33a11e78bd82204148827e87529eff3b63537cee7a4d4500623befb40b76e",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "logicalAdmission": "accepted",
+              "publicNames": [
+                "psCompilerServiceCandidate"
+              ],
+              "artifactSha256": "37a38bdd87af395daf9f3224991630d04e415636d2a39e098e52c6252a3b2ddf",
+              "executableSha256": "175ef0ddc0722ccdb91b160901448297c86fc4222ada8d7870b157f67bbc3be8",
+              "observationsSha256": "14b10b59b43b2335b1a1f3bc0a4c1e6dd63ea2345a79706ac5a3932a9cac3e04",
+              "rawAdmissionsSha256": "abb819226780e491d70ee136b0c48ec1d750023afbf358fee72b4f518dad3e06"
+            }
+          ],
+          "fixedPoint": "not-run",
+          "executableSha256": "175ef0ddc0722ccdb91b160901448297c86fc4222ada8d7870b157f67bbc3be8",
+          "events": [
+            {
+              "role": "generated-compiler",
+              "target": "rust",
+              "id": "G2-self",
+              "serviceSha256": "37a38bdd87af395daf9f3224991630d04e415636d2a39e098e52c6252a3b2ddf",
+              "requestSha256": "327c9f8c2f20b38512e88dbd60690efad91e171fda6855bb1abfce89b8cabad4",
+              "timeoutMs": 1800000,
+              "timeoutPolicy": "g2g3-correctness-1800s",
+              "maxRssKiB": 463544,
+              "peakTreeRssKiB": 556424,
+              "sampledCpuSeconds": 552.85,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 530106,
+              "status": 1,
+              "signal": null,
+              "error": null
+            }
+          ],
+          "cases": 40,
+          "envelopeRefusals": 9,
+          "nativeDelegationBoundary": "one-seed; native compiler executables removed; generated source semantics only",
+          "stackOverflow": true,
+          "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"rust\",\"id\":\"G2-self\",\"serviceSha256\":\"37a38bdd87af395daf9f3224991630d04e415636d2a39e098e52c6252a3b2ddf\",\"requestSha256\":\"327c9f8c2f20b38512e88dbd60690efad91e171fda6855bb1abfce89b8cabad4\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":463544,\"peakTreeRssKiB\":556424,\"sampledCpuSeconds\":552.85,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":530106,\"status\":1,\"signal\":null,\"error\":null}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-1800s\", \"supervisorPid\": 4760, \"childPid\": 4762, \"elapsedMs\": 5, \"timeoutMs\": 1800000, \"sampledCpuSeconds\": 0.0, \"currentTreeRssKiB\": 1528, \"peakTreeRssKiB\": 1528, \"liveProcesses\": 1, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-1800s\", \"supervisorPid\": 4760, \"childPid\": 4762, \"elapsedMs\": 60091, \"timeoutMs\": 1800000, \"sampledCpuSeconds\": 60.07, \"currentTreeRssKiB\": 450352, \"peakTreeRssKiB\": 450352, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-1800s\", \"supervisorPid\": 4760, \"childPid\": 4762, \"elapsedMs\": 120152, \"timeoutMs\": 1800000, \"sampledCpuSeconds\": 120.12, \"currentTreeRssKiB\": 451248, \"peakTreeRssKiB\": 451248, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-1800s\", \"supervisorPid\": 4760, \"childPid\": 4762, \"elapsedMs\": 180214, \"timeoutMs\": 1800000, \"sampledCpuSeconds\": 180.18, \"currentTreeRssKiB\": 451888, \"peakTreeRssKiB\": 451888, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-"
+        }
+      ]
+    }
+  },
+  "twoAxisRetry": {
+    "sourceCommit": "e98ea691d311348059313183452fe517a7d783fa",
+    "requestCommit": "04771b2beb55cdab26c7fa18e7438dcca01c81be",
+    "runId": 40132435573,
+    "jobId": 120986936955,
+    "status": "failed",
+    "elapsedMs": 638133,
+    "maxRssKiB": 464092,
+    "peakTreeRssKiB": 556780,
+    "sampledCpuSeconds": 670.23,
+    "artifactId": 12576236415,
+    "artifactZipSha256": "904d77e38af8d31744afacdf666714aadaf0d3a514a645a9ef3706edf0473837",
+    "failure": "stack overflow; exact site not traced for this snapshot",
+    "generations": [
+      1
+    ],
+    "fixedPoint": "not-run"
+  },
+  "tailRetry": {
+    "sourceCommit": "5d4d4d1a1693de57fa16ecf796536d73040bbf64",
+    "branch": "qualification/psc1-codec-tail-workers-20261025",
+    "controlCommit": "d8a5ffa168f2744b5897420ecded84ef72475bda",
+    "requestCommit": "f707e037b5f470ceee65891e0c735316ba097444",
+    "sourceTree": "dfec32f502a08d8f56c2014707087c73ca563f1f",
+    "runId": 40133622389,
+    "jobId": 120990512358,
+    "status": "failed-G2-deadline-no-observed-stack-overflow",
+    "fixedPoint": "not-run",
+    "correctnessQualification": "not-qualified",
+    "performanceQualification": "not-qualified",
+    "generations": [
+      1
+    ],
+    "g3": "not-run-without-G2-candidate",
+    "artifactId": 12576967932,
+    "artifactZipSha256": "0f8f31d00fdb3def362dbcd979fd82649864ca90ca44d4a1be3a96a8cacb5bf8",
+    "event": {
+      "role": "generated-compiler",
+      "target": "rust",
+      "id": "G2-self",
+      "serviceSha256": "a3c309d25cf5bb855b1eb80b3a3ce07ad7c7e5bcfac287283fadb56dc6665005",
+      "requestSha256": "636624936f655a0412cf5ce0f31df9436bc9f311e63aee25d808f009a76f4118",
+      "timeoutMs": 1800000,
+      "timeoutPolicy": "g2g3-correctness-1800s",
+      "maxRssKiB": 103732,
+      "peakTreeRssKiB": 924096,
+      "sampledCpuSeconds": 1889.15,
+      "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+      "elapsedMs": 1800055,
+      "status": null,
+      "signal": "SIGKILL",
+      "error": "process tree exceeded hard deadline"
+    },
+    "serviceSpecificCompletedMaxRss": "unavailable-after-hard-kill",
+    "memoryMeasurementCaveat": "wait4 maxRSS is the outer waited child; use sampled descendant RSS peak for tree consumption; shared pages may be counted twice",
+    "noSourceCandidateProduced": true,
+    "readback": {
+      "status": "passed",
+      "runId": 40136555747,
+      "jobId": 120999195540,
+      "controlCommit": "2c8f2d4f74751c510d3c6a9ea147eee074023569",
+      "artifactId": 12576759844,
+      "artifactZipSha256": "ae0106604fc1cc70be2ccf0c1ff8ced6033b3f37b4415a131bbcda7d9dc34e73",
+      "records": [
+        {
+          "testedCommit": "5d4d4d1a1693de57fa16ecf796536d73040bbf64",
+          "target": "rust",
+          "status": "passed",
+          "correctnessQualification": "G1-only",
+          "performanceQualification": "not-run-in-this-profile",
+          "profile": {
+            "name": "correctness-1800s",
+            "g1TimeoutMs": 240000,
+            "corpusTimeoutMs": 240000,
+            "toolTimeoutMs": 240000,
+            "selfCompileTimeoutMs": 1800000,
+            "correctnessAndPerformanceSeparate": true
+          },
+          "nativeSeedSha256": "b7b5a0a46d129f62bee1fdbbf4078b751e8c074aef6f70f05bccc184da85f22b",
+          "toolsInventorySha256": "5f2899698b427e309e3e20782e5daa64be594899d983b4f25815da408accb5cc",
+          "sourceClosureDigest": "e0f7640b77ee9eaa17e946c628de23f320f2943dc181ac6063a35c81ccb7ca66",
+          "sourceInventorySha256": "b775d0a6f7a12d502e9b71c2b0109677ede32eb13102efa9feacfa7e921ff5f3",
+          "root": {
+            "module": "Ps.CompilerUnified.Service",
+            "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.lean",
+            "bytes": 3427,
+            "sha256": "688ffd1dfdfdc7500a97772291977e36bb763da7520228db3b77f59f5793a313"
+          },
+          "sourceModules": 120,
+          "bootstrap": {
+            "sourceClosureDigest": "e0f7640b77ee9eaa17e946c628de23f320f2943dc181ac6063a35c81ccb7ca66",
+            "sourceSha256": "a73b3225c3f9a745daab5cbe28e7c3fe92ab03934253a6bb6b8a1fa3d9a34b84",
+            "admissionsSha256": "e4243e37f5f1f4c967f1aae9d0d1e51ace5051b10d7e3c8005a3d3aa2f33fbc2",
+            "originalIrSha256": "b829fa995b8c4feedbf1265de1fdd410bd9e88f27bf9f31502c0e3756c722a2e",
+            "specializedIrSha256": "5dcb7bdfbc44cd81813248518b5e4c2d12b5b8ab326871c2f4909ae3a044a30b",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "psCompilerServiceCandidate"
+            ]
+          },
+          "generations": [
+            {
+              "generation": 1,
+              "sourceClosureDigest": "e0f7640b77ee9eaa17e946c628de23f320f2943dc181ac6063a35c81ccb7ca66",
+              "sourceSha256": "a73b3225c3f9a745daab5cbe28e7c3fe92ab03934253a6bb6b8a1fa3d9a34b84",
+              "admissionsSha256": "e4243e37f5f1f4c967f1aae9d0d1e51ace5051b10d7e3c8005a3d3aa2f33fbc2",
+              "originalIrSha256": "b829fa995b8c4feedbf1265de1fdd410bd9e88f27bf9f31502c0e3756c722a2e",
+              "specializedIrSha256": "5dcb7bdfbc44cd81813248518b5e4c2d12b5b8ab326871c2f4909ae3a044a30b",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "logicalAdmission": "accepted",
+              "publicNames": [
+                "psCompilerServiceCandidate"
+              ],
+              "artifactSha256": "a0e4bd26351dd858a5168c33ae708e0b8be42ef4a378e18eeda818aff1c346f2",
+              "executableSha256": "91b12534f04b80c8ee4be93f0cca6d6a915a8c44b6087f62db28a677e7620d42",
+              "observationsSha256": "14b10b59b43b2335b1a1f3bc0a4c1e6dd63ea2345a79706ac5a3932a9cac3e04",
+              "rawAdmissionsSha256": "8baa478c3a6b5b5bcc56b384942686a248185700e8b5a1de5f4733dc8a31c8c6"
+            }
+          ],
+          "fixedPoint": "not-requested",
+          "executableSha256": "91b12534f04b80c8ee4be93f0cca6d6a915a8c44b6087f62db28a677e7620d42",
+          "events": [],
+          "cases": 40,
+          "envelopeRefusals": 9,
+          "nativeDelegationBoundary": "one-seed; native compiler executables removed; generated source semantics only",
+          "stackOverflow": false
+        },
+        {
+          "testedCommit": "f707e037b5f470ceee65891e0c735316ba097444",
+          "target": "rust",
+          "status": "failed",
+          "correctnessQualification": "not-qualified",
+          "performanceQualification": "not-qualified",
+          "profile": {
+            "name": "correctness-1800s",
+            "g1TimeoutMs": 240000,
+            "corpusTimeoutMs": 240000,
+            "toolTimeoutMs": 240000,
+            "selfCompileTimeoutMs": 1800000,
+            "correctnessAndPerformanceSeparate": true
+          },
+          "nativeSeedSha256": "b7b5a0a46d129f62bee1fdbbf4078b751e8c074aef6f70f05bccc184da85f22b",
+          "toolsInventorySha256": "5f2899698b427e309e3e20782e5daa64be594899d983b4f25815da408accb5cc",
+          "sourceClosureDigest": "e0f7640b77ee9eaa17e946c628de23f320f2943dc181ac6063a35c81ccb7ca66",
+          "sourceInventorySha256": "b775d0a6f7a12d502e9b71c2b0109677ede32eb13102efa9feacfa7e921ff5f3",
+          "root": {
+            "module": "Ps.CompilerUnified.Service",
+            "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.lean",
+            "bytes": 3427,
+            "sha256": "688ffd1dfdfdc7500a97772291977e36bb763da7520228db3b77f59f5793a313"
+          },
+          "sourceModules": 120,
+          "bootstrap": {
+            "sourceClosureDigest": "e0f7640b77ee9eaa17e946c628de23f320f2943dc181ac6063a35c81ccb7ca66",
+            "sourceSha256": "a73b3225c3f9a745daab5cbe28e7c3fe92ab03934253a6bb6b8a1fa3d9a34b84",
+            "admissionsSha256": "e4243e37f5f1f4c967f1aae9d0d1e51ace5051b10d7e3c8005a3d3aa2f33fbc2",
+            "originalIrSha256": "b829fa995b8c4feedbf1265de1fdd410bd9e88f27bf9f31502c0e3756c722a2e",
+            "specializedIrSha256": "5dcb7bdfbc44cd81813248518b5e4c2d12b5b8ab326871c2f4909ae3a044a30b",
+            "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "logicalAdmission": "accepted",
+            "publicNames": [
+              "psCompilerServiceCandidate"
+            ]
+          },
+          "generations": [
+            {
+              "generation": 1,
+              "sourceClosureDigest": "e0f7640b77ee9eaa17e946c628de23f320f2943dc181ac6063a35c81ccb7ca66",
+              "sourceSha256": "a73b3225c3f9a745daab5cbe28e7c3fe92ab03934253a6bb6b8a1fa3d9a34b84",
+              "admissionsSha256": "e4243e37f5f1f4c967f1aae9d0d1e51ace5051b10d7e3c8005a3d3aa2f33fbc2",
+              "originalIrSha256": "b829fa995b8c4feedbf1265de1fdd410bd9e88f27bf9f31502c0e3756c722a2e",
+              "specializedIrSha256": "5dcb7bdfbc44cd81813248518b5e4c2d12b5b8ab326871c2f4909ae3a044a30b",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "logicalAdmission": "accepted",
+              "publicNames": [
+                "psCompilerServiceCandidate"
+              ],
+              "artifactSha256": "a3c309d25cf5bb855b1eb80b3a3ce07ad7c7e5bcfac287283fadb56dc6665005",
+              "executableSha256": "91b12534f04b80c8ee4be93f0cca6d6a915a8c44b6087f62db28a677e7620d42",
+              "observationsSha256": "14b10b59b43b2335b1a1f3bc0a4c1e6dd63ea2345a79706ac5a3932a9cac3e04",
+              "rawAdmissionsSha256": "8baa478c3a6b5b5bcc56b384942686a248185700e8b5a1de5f4733dc8a31c8c6"
+            }
+          ],
+          "fixedPoint": "not-run",
+          "executableSha256": "91b12534f04b80c8ee4be93f0cca6d6a915a8c44b6087f62db28a677e7620d42",
+          "events": [
+            {
+              "role": "generated-compiler",
+              "target": "rust",
+              "id": "G2-self",
+              "serviceSha256": "a3c309d25cf5bb855b1eb80b3a3ce07ad7c7e5bcfac287283fadb56dc6665005",
+              "requestSha256": "636624936f655a0412cf5ce0f31df9436bc9f311e63aee25d808f009a76f4118",
+              "timeoutMs": 1800000,
+              "timeoutPolicy": "g2g3-correctness-1800s",
+              "maxRssKiB": 103732,
+              "peakTreeRssKiB": 924096,
+              "sampledCpuSeconds": 1889.15,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "elapsedMs": 1800055,
+              "status": null,
+              "signal": "SIGKILL",
+              "error": "process tree exceeded hard deadline"
+            }
+          ],
+          "cases": 40,
+          "envelopeRefusals": 9,
+          "nativeDelegationBoundary": "one-seed; native compiler executables removed; generated source semantics only",
+          "stackOverflow": false,
+          "failure": "PSC1_GENERATED_TARGET_FAILED:{\"role\":\"generated-compiler\",\"target\":\"rust\",\"id\":\"G2-self\",\"serviceSha256\":\"a3c309d25cf5bb855b1eb80b3a3ce07ad7c7e5bcfac287283fadb56dc6665005\",\"requestSha256\":\"636624936f655a0412cf5ce0f31df9436bc9f311e63aee25d808f009a76f4118\",\"timeoutMs\":1800000,\"timeoutPolicy\":\"g2g3-correctness-1800s\",\"maxRssKiB\":103732,\"peakTreeRssKiB\":924096,\"sampledCpuSeconds\":1889.15,\"memoryMeasurement\":\"Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice\",\"elapsedMs\":1800055,\"status\":null,\"signal\":\"SIGKILL\",\"error\":\"process tree exceeded hard deadline\"}\nconds\": 720.55, \"currentTreeRssKiB\": 485688, \"peakTreeRssKiB\": 542780, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-1800s\", \"supervisorPid\": 6976, \"childPid\": 6977, \"elapsedMs\": 780683, \"timeoutMs\": 1800000, \"sampledCpuSeconds\": 780.61, \"currentTreeRssKiB\": 485688, \"peakTreeRssKiB\": 542780, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-1800s\", \"supervisorPid\": 6976, \"childPid\": 6977, \"elapsedMs\": 840757, \"timeoutMs\": 1800000, \"sampledCpuSeconds\": 840.69, \"currentTreeRssKiB\": 543440, \"peakTreeRssKiB\": 558612, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-1800s\", \"supervisorPid\": 6976, \"childPid\": 6977, \"elapsedMs\": 900834, \"timeoutMs\": 1800000, \"sampledCpuSeconds\": 900.76, \"currentTreeRssKiB\": 543440, \"peakTreeRssKiB\": 558612, \"liveProcesses\": 2, \"stdoutBytes\": 0, \"stderrBytes\": 0}\nPSC1_PROCESS_HEARTBEAT: {\"kind\": \"resource-heartbeat-not-semantic-progress\", \"timeoutPolicy\": \"g2g3-correctness-1800s\", \"supervisorPid\": 6976, \"childPid\": 6977, \"elapsedMs\": 960894, \"timeoutMs\": 1800000, \"sampledCpuSe"
+        }
+      ],
+      "independentG1Reproduction": "passed-same-source-separate-run-not-clean-build"
+    },
+    "observedStackOverflow": false,
+    "performanceHotFunction": "not-established-by-resource-heartbeats; exact late profiling required"
+  },
+  "overall": {
+    "practicalCoreQualifiedCriteria": 37,
+    "practicalCoreBlockedCriteria": 0,
+    "currentSourceFourEngineFixedPoints": "not-qualified",
+    "generatedDistributionReleaseReady": false,
+    "performance240s": "not-run-for-current-correctness-profile",
+    "milestone": "verified-codec-admission-stack-correction; Rust self-host correctness remains blocked at G2 deadline"
+  },
+  "nextSteps": [
+    "Profile the exact archived Rust G1/request late in the 1800s G2 workload; do not infer a hot function from resource heartbeats.",
+    "Keep all qualification claims pinned to exact source closure.",
+    "Qualify remaining engines on a frozen root, including the retained JS G2 deadline defect.",
+    "Integrate generated engine assets/CLI/component/optional-provider dispatch separately from the native npm package.",
+    "Clean independent full reproduction and final release qualification; no merge/publication without authorization."
+  ],
+  "originalCodecTrace": {
+    "subjectCommit": "812094c1f5e1e0c0dca516dab1e30ef66f3076f7",
+    "sourceClosure": "92654df5c0a58fafd3ec9b9b045304706c5992c3eaa34de6b4aadab39a7e00c2",
+    "runId": 40128155977,
+    "jobId": 120973928569,
+    "artifactId": 12573865924,
+    "trace": "90 repeated psEncodeCodecExpr frames",
+    "elapsedMs": 517774,
+    "executableSha256": "aa96ba699d69056035b67822ed89c3ed91e7b043d5c31636c54fcafe8a7483ce",
+    "requestSha256": "c6b04937446d0f549d76d965aae53bac04c23122ab4b14befb7fd425783ad0ad",
+    "zipSha256": "41be77f839bed627cea182ea45721adee9d4a07bee071d3e75d29dd52f33ca67",
+    "qualification": false
+  }
+}

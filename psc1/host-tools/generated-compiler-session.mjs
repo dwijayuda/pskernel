@@ -56,7 +56,7 @@ function checkFiles(stage, expected) {
  */
 export function createGeneratedJsCompilerSession({ requestId, sources, entryModule, assurance,
     serviceFile, serviceSha256, runnerFile, runnerSha256,
-    checkerExecutable, checkerSha256, publicationRoot }) {
+    checkerExecutable, checkerSha256, publicationRoot, serviceDependencies = [] }) {
   if (process.version !== 'v22.23.3') fail('PSC1_SERVICE_NODE_PIN');
   if (typeof requestId !== 'string' || !requestId || typeof entryModule !== 'string' ||
       !['checked', 'ordinary-checked'].includes(assurance) ||
@@ -71,6 +71,13 @@ export function createGeneratedJsCompilerSession({ requestId, sources, entryModu
     checker: identity(checkerExecutable, checkerSha256),
     node: identity(process.execPath, sha(fs.readFileSync(process.execPath)))
   };
+  // Trusted host-selected dependencies bind imported generated engine bytes too.
+  // Generated wire fields cannot add paths or choose a checker.
+  if (!Array.isArray(serviceDependencies)) fail('PSC1_SERVICE_DEPENDENCIES_INVALID');
+  serviceDependencies.forEach((tool, index) => {
+    if (!tool || typeof tool !== 'object') fail('PSC1_SERVICE_DEPENDENCIES_INVALID');
+    tools['dependency' + index] = identity(tool.path, tool.sha256);
+  });
   const verifyTools = () => Object.values(tools).forEach(tool => identity(tool.path, tool.sha256));
   const requestText = JSON.stringify(['psc1-compiler-service/1', requestId, sourceClosureDigest,
     grammar, assurance, entryModule, captured.map(row => [row.module, row.text])]);

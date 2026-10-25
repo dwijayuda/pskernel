@@ -160,7 +160,10 @@ for(const target of optionalTargets){
   os:meta.os,cpu:meta.cpu,libc:meta.libc,engines:meta.engines,
   files:['native/','resources/','licenses/','NATIVE_SOURCE_PIN.json','README.md'],
   exports:{'./package.json':'./package.json',...Object.fromEntries(spec.resources.map(file=>['./runtime/'+file,'./resources/'+file]))},
-  peerDependencies:{proofscript:version},proofscript:{backendProvider:contract}};
+  // Installation never auto-fetches or nests another compiler. The core's
+  // exact source/native/resource pins still authorize every provider request.
+  peerDependencies:{proofscript:version},
+  peerDependenciesMeta:{proofscript:{optional:true}},proofscript:{backendProvider:contract}};
  write(path.join(addon,'package.json'),json(addonMeta));
  write(path.join(addon,'README.md'),'# '+spec.package+'\\n\\nExplicit optional backend for proofscript@'+version+
   '. Receives strict checked IR and returns candidates; core retains independent admission and publication.\\n'+
@@ -195,8 +198,35 @@ const program = await import(pathToFileURL(generated).href);
 assert.equal(typeof program.answer === 'function' ? program.answer() : program.answer, 42n);
 run(path.join(installed, 'native/bin/psc1'), ['build', source, '--target', 'js', '--out', path.join(consumer, 'Native.js')], { cwd: consumer, env: nativeEnv });
 const globalPrefix = path.join(runRoot, 'global');
-run('npm', ['install', '--global', '--prefix', globalPrefix, '--cache', emptyCache, '--offline', '--ignore-scripts', '--no-audit', '--no-fund', tarball]);
+const globalCache = path.join(runRoot, 'global-empty-npm-cache');
+run('npm', ['install', '--global', '--prefix', globalPrefix, '--cache', globalCache, '--offline', '--ignore-scripts', '--no-audit', '--no-fund', tarball]);
 assert.deepEqual(JSON.parse(run(path.join(globalPrefix, 'bin/psc'), ['--identity'])), nativeIdentity);
+// A separate empty global cache exposes npm's automatic-peer registry lookups.
+const globalCli=path.join(globalPrefix,'bin/psc');
+run('npm',['install','--global','--prefix',globalPrefix,'--cache',globalCache,'--offline','--ignore-scripts','--no-audit','--no-fund',addonTarballs.python,addonTarballs.php]);
+for(const target of ['python','php']){
+ const metadata=JSON.parse(fs.readFileSync(path.join(globalPrefix,'lib/node_modules/@proofscript/backend-'+target,'package.json')));
+ assert.equal(metadata.peerDependencies.proofscript,version);
+ assert.deepEqual(metadata.peerDependenciesMeta,{proofscript:{optional:true}});
+ assert.deepEqual(metadata.proofscript.backendProvider,distribution.backendProviderPackages[target]);
+}
+const globalProviderCases=[];
+for(const syntax of ['lean','ps']){
+ const input=path.join(globalPrefix,'Global.'+syntax);
+ write(input,syntax==='lean'?'def invert (flag : Bool) : Bool := if flag then false else true\n':'def invert(flag : Bool) : Bool := if (flag) { false } else { true }\n');
+ for(const target of ['python','php']){
+  const output=path.join(globalPrefix,'Global-'+syntax+'.'+(target==='python'?'py':'php'));
+  run(globalCli,['build',input,'--target',target,'--out',output],{cwd:globalPrefix});
+  if(target==='python'){
+   const code="import importlib.util,sys\ns=importlib.util.spec_from_file_location('psc1_global',sys.argv[1]);m=importlib.util.module_from_spec(s);s.loader.exec_module(m)\nassert m.invert(True) is False and m.invert(False) is True\n";
+   run('python3',['-I','-c',code,output],{cwd:globalPrefix});
+  }else run('php',['-r',"$m=require $argv[1];if($m['invert'](true)!==false||$m['invert'](false)!==true){exit(1);}",output],{cwd:globalPrefix});
+  const manifest=JSON.parse(fs.readFileSync(output+'.bundle.json'));
+  assert.equal(manifest.logicalCheckerCommit,pin.commit);
+  globalProviderCases.push({syntax,target,passed:true,logicalCheckerCommit:manifest.logicalCheckerCommit,kernelAdmissionSha256:manifest.kernelAdmissionSha256,artifactSha256:sha(output)});
+ }
+}
+console.log('PSC1_GLOBAL_OPTIONAL_PROVIDERS: '+JSON.stringify({offline:true,automaticPeerInstall:false,cases:globalProviderCases}));
 console.log(run(process.execPath, [path.join(root, 'scripts/npm-native-library-canary.mjs'), path.join(runRoot, 'library'), cli]).trim());
 const providerQualification=JSON.parse(run(process.execPath,[
  path.join(root,'scripts/npm-backend-provider-canary.mjs'),runRoot,consumer,cli,
@@ -251,7 +281,8 @@ for(const syntax of ['lean','ps']){
  installedTypedIo.push({syntax,target:'js',passed:true,sourceClosureSha256:manifest.sourceClosureSha256,
   kernelAdmissionSha256:manifest.kernelAdmissionSha256,artifactSha256:sha(generatedIo)});
 }
-const receipt = { ...distribution, qualification: 'passed', providerQualification,
+const receipt = { ...distribution, qualification: 'passed', providerQualification, globalProviderCases,
+  optionalCompilerPeerPolicy:'explicit-core-install; exact host provider pins unchanged',
   addonTarballs:Object.fromEntries(Object.entries(addonTarballs).map(([target,file])=>[target,{path:path.relative(root,file),sha256:sha(file),bytes:fs.statSync(file).size}])),adapterResources,installedTypedIo, tarball: path.relative(root, tarball),
   tarballSha256: sha(tarball), tarballBytes: fs.statSync(tarball).size,
   offlineLocalInstall: true, offlineGlobalInstall: true, nativeNpmIdentityAgreement: true,
@@ -262,7 +293,7 @@ write(path.join(output, 'qualification.json'), json(receipt));
 write(path.join(runRoot, 'NATIVE_DISTRIBUTION.json'), json(distribution));
 // Retain the installable tarball, receipts and library/source bundles once every
 // qualification succeeded. Avoid archiving four duplicate native installations.
-for (const temporary of [stage, consumer, globalPrefix, emptyCache, path.join(runRoot,'installed-rust-host-target'),path.join(runRoot,'addons'),path.join(runRoot,'rust-package-target')]) {
+for (const temporary of [stage, consumer, globalPrefix, globalCache, emptyCache, path.join(runRoot,'installed-rust-host-target'),path.join(runRoot,'addons'),path.join(runRoot,'rust-package-target')]) {
   fs.rmSync(temporary, { recursive: true, force: true });
 }
 console.log('PSC1_NPM_NATIVE_DISTRIBUTION: PASS ' + JSON.stringify(receipt));

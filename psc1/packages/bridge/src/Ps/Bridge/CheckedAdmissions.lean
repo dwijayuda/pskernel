@@ -170,82 +170,192 @@ def psEncodeCodecLevels
   | Except.error error => Except.error error
   | Except.ok encoded => Except.ok (psJsonArray encoded)
 
-def psEncodeCodecExpr
-    (expr : PsExpr) :
+-- Explicit return frames preserve the original opaque append tree exactly.
+-- Only side branches recurse normally; expression spines and frame unwinding
+-- use direct tail calls. No additional semantic fuel or stack allowance.
+inductive PsCodecExprFrame where
+  | app (encodedArg : String)
+  | appArg (encodedFn : Except PsCheckedAdmissionCodecError String)
+  | lam (name : PsName) (type : Except PsCheckedAdmissionCodecError String) (binder : PsBinderInfo)
+  | forallE (name : PsName) (type : Except PsCheckedAdmissionCodecError String) (binder : PsBinderInfo)
+  | letE (name : PsName) (type : Except PsCheckedAdmissionCodecError String) (value : Except PsCheckedAdmissionCodecError String)
+  | proj (name : PsName) (index : Nat)
+
+def psCodecExprApplyFrame (frame : PsCodecExprFrame)
+    (result : Except PsCheckedAdmissionCodecError String) :
     Except PsCheckedAdmissionCodecError String :=
-  match expr with
-  | .bvar index =>
-      Except.ok
-        ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append (psCodecQuotedI) (String.Internal.append (":") ((psCheckedAdmissionNatToString index)))) (String.Internal.append (",") (String.Internal.append (psCodecQuotedK) (String.Internal.append (":") ((psCodecQuotedB)))))) ("}"))))
-  | .fvar _ =>
-      Except.error PsCheckedAdmissionCodecError.freeVariable
-  | .mvar _ =>
-      Except.error PsCheckedAdmissionCodecError.expressionMetavariable
-  | .sortE level =>
-      match psEncodeCodecLevel level with
+  match frame with
+  | .app encodedArg =>
+      match result with
       | Except.error error => Except.error error
-      | Except.ok encodedLevel =>
+      | Except.ok encodedFn =>
           Except.ok
-            ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append (psCodecQuotedK) (String.Internal.append (":") ((psCodecQuotedSort)))) (String.Internal.append (",") (String.Internal.append (psCodecQuotedL) (String.Internal.append (":") ((encodedLevel)))))) ("}"))))
-  | .constE name levels =>
-      match psEncodeCodecLevels levels with
-      | Except.error error => Except.error error
-      | Except.ok encodedLevels =>
-          Except.ok
-            ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append (psCodecQuotedK) (String.Internal.append (":") ((psCodecQuotedConst)))) (String.Internal.append (",") (String.Internal.append (String.Internal.append (psCodecQuotedLs) (String.Internal.append (":") ((encodedLevels)))) (String.Internal.append (",") (String.Internal.append (psCodecQuotedN) (String.Internal.append (":") ((psEncodeCodecName name)))))))) ("}"))))
-  | .app fn arg =>
-      match psEncodeCodecExpr arg with
+            ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append (psCodecQuotedA) (String.Internal.append (":") ((encodedArg)))) (String.Internal.append (",") (String.Internal.append (String.Internal.append (psCodecQuotedF) (String.Internal.append (":") ((encodedFn)))) (String.Internal.append (",") (String.Internal.append (psCodecQuotedK) (String.Internal.append (":") ((psCodecQuotedApp)))))))) ("}"))))
+  | .appArg encodedFn =>
+      match result with
       | Except.error error => Except.error error
       | Except.ok encodedArg =>
-          match psEncodeCodecExpr fn with
+          match encodedFn with
           | Except.error error => Except.error error
           | Except.ok encodedFn =>
               Except.ok
                 ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append (psCodecQuotedA) (String.Internal.append (":") ((encodedArg)))) (String.Internal.append (",") (String.Internal.append (String.Internal.append (psCodecQuotedF) (String.Internal.append (":") ((encodedFn)))) (String.Internal.append (",") (String.Internal.append (psCodecQuotedK) (String.Internal.append (":") ((psCodecQuotedApp)))))))) ("}"))))
-  | .lam name type body binder =>
-      match psEncodeCodecExpr body with
+  | .lam name type binder =>
+      match result with
       | Except.error error => Except.error error
       | Except.ok encodedBody =>
-          match psEncodeCodecExpr type with
+          match type with
           | Except.error error => Except.error error
           | Except.ok encodedType =>
               Except.ok
                 ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append (psCodecQuotedB) (String.Internal.append (":") ((encodedBody)))) (String.Internal.append (",") (String.Internal.append (String.Internal.append (psCodecQuotedBi) (String.Internal.append (":") ((psJsonQuote (psEncodeCodecBinderInfo binder))))) (String.Internal.append (",") (String.Internal.append (String.Internal.append (psCodecQuotedK) (String.Internal.append (":") ((psCodecQuotedLam)))) (String.Internal.append (",") (String.Internal.append (String.Internal.append (psCodecQuotedN) (String.Internal.append (":") ((psEncodeCodecName name)))) (String.Internal.append (",") (String.Internal.append (psCodecQuotedT) (String.Internal.append (":") ((encodedType)))))))))))) ("}"))))
-  | .forallE name type body binder =>
-      match psEncodeCodecExpr body with
+  | .forallE name type binder =>
+      match result with
       | Except.error error => Except.error error
       | Except.ok encodedBody =>
-          match psEncodeCodecExpr type with
+          match type with
           | Except.error error => Except.error error
           | Except.ok encodedType =>
               Except.ok
                 ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append (psCodecQuotedB) (String.Internal.append (":") ((encodedBody)))) (String.Internal.append (",") (String.Internal.append (String.Internal.append (psCodecQuotedBi) (String.Internal.append (":") ((psJsonQuote (psEncodeCodecBinderInfo binder))))) (String.Internal.append (",") (String.Internal.append (String.Internal.append (psCodecQuotedK) (String.Internal.append (":") ((psCodecQuotedForall)))) (String.Internal.append (",") (String.Internal.append (String.Internal.append (psCodecQuotedN) (String.Internal.append (":") ((psEncodeCodecName name)))) (String.Internal.append (",") (String.Internal.append (psCodecQuotedT) (String.Internal.append (":") ((encodedType)))))))))))) ("}"))))
-  | .letE name type value body =>
-      match psEncodeCodecExpr body with
+  | .letE name type value =>
+      match result with
       | Except.error error => Except.error error
       | Except.ok encodedBody =>
-          match psEncodeCodecExpr type with
+          match type with
           | Except.error error => Except.error error
           | Except.ok encodedType =>
-              match psEncodeCodecExpr value with
+              match value with
               | Except.error error => Except.error error
               | Except.ok encodedValue =>
                   Except.ok
                     ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append (psCodecQuotedB) (String.Internal.append (":") ((encodedBody)))) (String.Internal.append (",") (String.Internal.append (String.Internal.append (psCodecQuotedK) (String.Internal.append (":") ((psCodecQuotedLet)))) (String.Internal.append (",") (String.Internal.append (String.Internal.append (psCodecQuotedN) (String.Internal.append (":") ((psEncodeCodecName name)))) (String.Internal.append (",") (String.Internal.append (String.Internal.append (psCodecQuotedT) (String.Internal.append (":") ((encodedType)))) (String.Internal.append (",") (String.Internal.append (psCodecQuotedV) (String.Internal.append (":") ((encodedValue)))))))))))) ("}"))))
-  | .lit literal =>
-      match literal with
-      | .natural value =>
-          Except.ok
-            ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append (psCodecQuotedK) (String.Internal.append (":") ((psCodecQuotedNat)))) (String.Internal.append (",") (String.Internal.append (psCodecQuotedV) (String.Internal.append (":") ((psJsonQuote (psCheckedAdmissionNatToString value))))))) ("}"))))
-      | .string value =>
-          Except.ok
-            ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append (psCodecQuotedK) (String.Internal.append (":") ((psCodecQuotedStr)))) (String.Internal.append (",") (String.Internal.append (psCodecQuotedV) (String.Internal.append (":") ((psJsonQuote value)))))) ("}"))))
-  | .proj typeName index value =>
-      match psEncodeCodecExpr value with
+  | .proj typeName index =>
+      match result with
       | Except.error error => Except.error error
       | Except.ok encodedValue =>
           Except.ok
             ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append (psCodecQuotedE) (String.Internal.append (":") ((encodedValue)))) (String.Internal.append (",") (String.Internal.append (String.Internal.append (psCodecQuotedI) (String.Internal.append (":") ((psCheckedAdmissionNatToString index)))) (String.Internal.append (",") (String.Internal.append (String.Internal.append (psCodecQuotedK) (String.Internal.append (":") ((psCodecQuotedProj)))) (String.Internal.append (",") (String.Internal.append (psCodecQuotedN) (String.Internal.append (":") ((psEncodeCodecName typeName)))))))))) ("}"))))
+
+def psCodecExprResume (frames : List PsCodecExprFrame)
+    (result : Except PsCheckedAdmissionCodecError String) :
+    Except PsCheckedAdmissionCodecError String :=
+  match frames with
+  | List.nil => result
+  | List.cons frame rest =>
+      psCodecExprResume rest (psCodecExprApplyFrame frame result)
+
+-- Compare the two return spines by an unbounded structural tail walk.
+-- This chooses traversal order only, without a fuel or acceptance cutoff.
+def psCodecPreferAppArg (fn : PsExpr) (arg : PsExpr) : Bool :=
+  match fn with
+  | .app parent _ =>
+      match arg with
+      | .app _ child => psCodecPreferAppArg parent child
+      | .lam _ _ child _ => psCodecPreferAppArg parent child
+      | .forallE _ _ child _ => psCodecPreferAppArg parent child
+      | .letE _ _ _ child => psCodecPreferAppArg parent child
+      | .proj _ _ child => psCodecPreferAppArg parent child
+      | _ => false
+  | .lam _ _ body _ =>
+      match arg with
+      | .app _ child => psCodecPreferAppArg body child
+      | .lam _ _ child _ => psCodecPreferAppArg body child
+      | .forallE _ _ child _ => psCodecPreferAppArg body child
+      | .letE _ _ _ child => psCodecPreferAppArg body child
+      | .proj _ _ child => psCodecPreferAppArg body child
+      | _ => false
+  | .forallE _ _ body _ =>
+      match arg with
+      | .app _ child => psCodecPreferAppArg body child
+      | .lam _ _ child _ => psCodecPreferAppArg body child
+      | .forallE _ _ child _ => psCodecPreferAppArg body child
+      | .letE _ _ _ child => psCodecPreferAppArg body child
+      | .proj _ _ child => psCodecPreferAppArg body child
+      | _ => false
+  | .letE _ _ _ body =>
+      match arg with
+      | .app _ child => psCodecPreferAppArg body child
+      | .lam _ _ child _ => psCodecPreferAppArg body child
+      | .forallE _ _ child _ => psCodecPreferAppArg body child
+      | .letE _ _ _ child => psCodecPreferAppArg body child
+      | .proj _ _ child => psCodecPreferAppArg body child
+      | _ => false
+  | .proj _ _ value =>
+      match arg with
+      | .app _ child => psCodecPreferAppArg value child
+      | .lam _ _ child _ => psCodecPreferAppArg value child
+      | .forallE _ _ child _ => psCodecPreferAppArg value child
+      | .letE _ _ _ child => psCodecPreferAppArg value child
+      | .proj _ _ child => psCodecPreferAppArg value child
+      | _ => false
+  | _ => true
+
+def psEncodeCodecExprAcc (expr : PsExpr) (frames : List PsCodecExprFrame) :
+    Except PsCheckedAdmissionCodecError String :=
+  match expr with
+  | .bvar index =>
+      psCodecExprResume frames
+        (Except.ok
+            ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append (psCodecQuotedI) (String.Internal.append (":") ((psCheckedAdmissionNatToString index)))) (String.Internal.append (",") (String.Internal.append (psCodecQuotedK) (String.Internal.append (":") ((psCodecQuotedB)))))) ("}")))))
+  | .fvar _ =>
+      psCodecExprResume frames
+        (Except.error PsCheckedAdmissionCodecError.freeVariable)
+  | .mvar _ =>
+      psCodecExprResume frames
+        (Except.error PsCheckedAdmissionCodecError.expressionMetavariable)
+  | .sortE level =>
+      psCodecExprResume frames
+        (match psEncodeCodecLevel level with
+          | Except.error error => Except.error error
+          | Except.ok encodedLevel =>
+              Except.ok
+                ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append (psCodecQuotedK) (String.Internal.append (":") ((psCodecQuotedSort)))) (String.Internal.append (",") (String.Internal.append (psCodecQuotedL) (String.Internal.append (":") ((encodedLevel)))))) ("}")))))
+  | .constE name levels =>
+      psCodecExprResume frames
+        (match psEncodeCodecLevels levels with
+          | Except.error error => Except.error error
+          | Except.ok encodedLevels =>
+              Except.ok
+                ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append (psCodecQuotedK) (String.Internal.append (":") ((psCodecQuotedConst)))) (String.Internal.append (",") (String.Internal.append (String.Internal.append (psCodecQuotedLs) (String.Internal.append (":") ((encodedLevels)))) (String.Internal.append (",") (String.Internal.append (psCodecQuotedN) (String.Internal.append (":") ((psEncodeCodecName name)))))))) ("}")))))
+  | .app fn arg =>
+      if psCodecPreferAppArg fn arg then
+        let encodedFn : Except PsCheckedAdmissionCodecError String :=
+          psEncodeCodecExprAcc fn List.nil;
+        psEncodeCodecExprAcc arg (List.cons (PsCodecExprFrame.appArg encodedFn) frames)
+      else
+        match psEncodeCodecExprAcc arg List.nil with
+        | Except.error error => psCodecExprResume frames (Except.error error)
+        | Except.ok encodedArg =>
+            psEncodeCodecExprAcc fn (List.cons (PsCodecExprFrame.app encodedArg) frames)
+  | .lam name type body binder =>
+      let encodedType : Except PsCheckedAdmissionCodecError String :=
+        psEncodeCodecExprAcc type List.nil;
+      psEncodeCodecExprAcc body (List.cons (PsCodecExprFrame.lam name encodedType binder) frames)
+  | .forallE name type body binder =>
+      let encodedType : Except PsCheckedAdmissionCodecError String :=
+        psEncodeCodecExprAcc type List.nil;
+      psEncodeCodecExprAcc body (List.cons (PsCodecExprFrame.forallE name encodedType binder) frames)
+  | .letE name type value body =>
+      let encodedType : Except PsCheckedAdmissionCodecError String :=
+        psEncodeCodecExprAcc type List.nil;
+      let encodedValue : Except PsCheckedAdmissionCodecError String :=
+        psEncodeCodecExprAcc value List.nil;
+      psEncodeCodecExprAcc body (List.cons (PsCodecExprFrame.letE name encodedType encodedValue) frames)
+  | .lit literal =>
+      psCodecExprResume frames
+        (match literal with
+          | .natural value =>
+              Except.ok
+                ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append (psCodecQuotedK) (String.Internal.append (":") ((psCodecQuotedNat)))) (String.Internal.append (",") (String.Internal.append (psCodecQuotedV) (String.Internal.append (":") ((psJsonQuote (psCheckedAdmissionNatToString value))))))) ("}"))))
+          | .string value =>
+              Except.ok
+                ((String.Internal.append ("{") (String.Internal.append (String.Internal.append (String.Internal.append (psCodecQuotedK) (String.Internal.append (":") ((psCodecQuotedStr)))) (String.Internal.append (",") (String.Internal.append (psCodecQuotedV) (String.Internal.append (":") ((psJsonQuote value)))))) ("}")))))
+  | .proj typeName index value =>
+      psEncodeCodecExprAcc value (List.cons (PsCodecExprFrame.proj typeName index) frames)
+
+def psEncodeCodecExpr (expr : PsExpr) : Except PsCheckedAdmissionCodecError String :=
+  psEncodeCodecExprAcc expr List.nil
 
 def psEncodeCodecNames
     (names : List PsName) : List String :=
@@ -539,98 +649,100 @@ structure PsCheckedAdmissionEncodeState where
   heights : PsBridgeHeightIndex
   admissionsRev : List String
 
+def psEncodeCheckedAdmissionsLoopWorker
+    (allDeclarations : List PsDeclaration)
+    (declarations : List PsDeclaration)
+    (state : PsCheckedAdmissionEncodeState) :
+    Except PsCheckedAdmissionCodecError PsCheckedAdmissionEncodeState :=
+  match declarations with
+  | List.nil => Except.ok state
+  | List.cons declaration rest =>
+      match declaration with
+      | .definitionDecl name levelParams type value =>
+          let height :=
+            Nat.succ
+              (psBridgeExprMaxRegularHeight
+                state.heights
+                value);
+          match
+              psEncodeCodecDefinition
+                name
+                levelParams
+                type
+                value
+                height with
+          | Except.error error =>
+              Except.error error
+          | Except.ok encoded =>
+              psEncodeCheckedAdmissionsLoopWorker allDeclarations rest {
+                heights := psBridgeHeightInsert state.heights name height
+                admissionsRev :=
+                  List.cons
+                    (psEncodeConstantAdmission encoded)
+                    state.admissionsRev
+              }
+      | .theoremDecl name levelParams type value =>
+          match psEncodeCodecTheorem name levelParams type value with
+          | Except.error error =>
+              Except.error error
+          | Except.ok encoded =>
+              psEncodeCheckedAdmissionsLoopWorker allDeclarations rest {
+                heights := state.heights
+                admissionsRev :=
+                  List.cons
+                    (psEncodeConstantAdmission encoded)
+                    state.admissionsRev
+              }
+      | .inductiveDecl info =>
+          match psEncodeCodecInductive allDeclarations info with
+          | Except.error error =>
+              Except.error error
+          | Except.ok encoded =>
+              psEncodeCheckedAdmissionsLoopWorker allDeclarations rest {
+                heights := state.heights
+                admissionsRev :=
+                  List.cons
+                    (psEncodeInductiveAdmission encoded)
+                    state.admissionsRev
+              }
+      | .constructorDecl _ =>
+          psEncodeCheckedAdmissionsLoopWorker allDeclarations rest state
+      | .recursorDecl _ =>
+          psEncodeCheckedAdmissionsLoopWorker allDeclarations rest state
+      | .axiomDecl _ _ _ =>
+          Except.error
+            PsCheckedAdmissionCodecError.unsupportedDeclaration
+      | .opaqueDecl name levelParams type value =>
+          match psEncodeCodecOpaque name levelParams type value with
+          | Except.error error => Except.error error
+          | Except.ok encoded =>
+              psEncodeCheckedAdmissionsLoopWorker allDeclarations rest {
+                heights := state.heights
+                admissionsRev :=
+                  List.cons (psEncodeConstantAdmission encoded) state.admissionsRev
+              }
+      | .partialDecl _ _ _ _ =>
+          Except.error
+            PsCheckedAdmissionCodecError.unsupportedDeclaration
+
 def psEncodeCheckedAdmissionsLoop
     (allDeclarations : List PsDeclaration)
     (declarations : List PsDeclaration) :
     PsCheckedAdmissionEncodeState -> Except PsCheckedAdmissionCodecError PsCheckedAdmissionEncodeState :=
-  match declarations with
-  | List.nil =>
-      fun (state : PsCheckedAdmissionEncodeState) =>
-        Except.ok state
-  | List.cons declaration rest =>
-      let smaller : PsCheckedAdmissionEncodeState -> Except PsCheckedAdmissionCodecError PsCheckedAdmissionEncodeState :=
-        psEncodeCheckedAdmissionsLoop allDeclarations rest;
-      fun (state : PsCheckedAdmissionEncodeState) =>
-        match declaration with
-        | .definitionDecl name levelParams type value =>
-            let height :=
-              Nat.succ
-                (psBridgeExprMaxRegularHeight
-                  state.heights
-                  value);
-            match
-                psEncodeCodecDefinition
-                  name
-                  levelParams
-                  type
-                  value
-                  height with
-            | Except.error error =>
-                Except.error error
-            | Except.ok encoded =>
-                smaller {
-                  heights := psBridgeHeightInsert state.heights name height
-                  admissionsRev :=
-                    List.cons
-                      (psEncodeConstantAdmission encoded)
-                      state.admissionsRev
-                }
-        | .theoremDecl name levelParams type value =>
-            match psEncodeCodecTheorem name levelParams type value with
-            | Except.error error =>
-                Except.error error
-            | Except.ok encoded =>
-                smaller {
-                  heights := state.heights
-                  admissionsRev :=
-                    List.cons
-                      (psEncodeConstantAdmission encoded)
-                      state.admissionsRev
-                }
-        | .inductiveDecl info =>
-            match psEncodeCodecInductive allDeclarations info with
-            | Except.error error =>
-                Except.error error
-            | Except.ok encoded =>
-                smaller {
-                  heights := state.heights
-                  admissionsRev :=
-                    List.cons
-                      (psEncodeInductiveAdmission encoded)
-                      state.admissionsRev
-                }
-        | .constructorDecl _ =>
-            smaller state
-        | .recursorDecl _ =>
-            smaller state
-        | .axiomDecl _ _ _ =>
-            Except.error
-              PsCheckedAdmissionCodecError.unsupportedDeclaration
-        | .opaqueDecl name levelParams type value =>
-            match psEncodeCodecOpaque name levelParams type value with
-            | Except.error error => Except.error error
-            | Except.ok encoded =>
-                smaller {
-                  heights := state.heights
-                  admissionsRev :=
-                    List.cons (psEncodeConstantAdmission encoded) state.admissionsRev
-                }
-        | .partialDecl _ _ _ _ =>
-            Except.error
-              PsCheckedAdmissionCodecError.unsupportedDeclaration
+  fun (state : PsCheckedAdmissionEncodeState) =>
+    psEncodeCheckedAdmissionsLoopWorker allDeclarations declarations state
+
+def psCheckedAdmissionReverseStringsWorker
+    (values : List String) (acc : List String) : List String :=
+  match values with
+  | List.nil => acc
+  | List.cons head tail =>
+      psCheckedAdmissionReverseStringsWorker tail (List.cons head acc)
 
 def psCheckedAdmissionReverseStringsAcc
     (values : List String) :
     List String -> List String :=
-  match values with
-  | List.nil =>
-      fun (acc : List String) => acc
-  | List.cons head tail =>
-      let smaller : List String -> List String :=
-        psCheckedAdmissionReverseStringsAcc tail;
-      fun (acc : List String) =>
-        smaller (List.cons head acc)
-
+  fun (acc : List String) => psCheckedAdmissionReverseStringsWorker values acc
 
 def psCheckedAdmissionReverseStrings
     (values : List String) : List String :=

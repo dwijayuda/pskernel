@@ -50,6 +50,24 @@ source-library metadata still rejects plugin/kernel/FFI/runtime authority.
 Providers are qualified compiler components; admission and well-typed IR alone
 are not a proof of backend semantic preservation.
 
+## Optional compiler peer and global installation
+
+The package builder keeps `peerDependencies.proofscript` at the matching version
+and marks it optional in npm metadata. This prevents npm from auto-installing a
+second compiler for globally installed add-ons. Install the core explicitly.
+Every provider request still requires the core's complete exact source, native
+binary and resource descriptor; npm metadata grants no compilation/publication
+authority. [npm's optional-peer semantics](https://github.com/npm/cli/blob/v10.9.9/docs/lib/content/configuring-npm/package-json.md#peerdependenciesmeta)
+describe the installation behavior.
+
+A clean-runner candidate passes offline local/global installs and generated
+compilation without a repository checkout or build tree in40145577407.
+The production fix's new full native global Python/PHP execution regressions
+are pending CI. The [global receipt](PSC1_GLOBAL_PACKAGE_QUALIFICATION_2026-10-25.json)
+records the initial failure and exact metadata-only candidate.
+Use matching tarballs from one qualification; previous same-version artifacts
+with required peers still have the global offline limitation.
+
 ## Installation and resources
 
 Use the tarball names recorded in the successful Actions receipt. For example,

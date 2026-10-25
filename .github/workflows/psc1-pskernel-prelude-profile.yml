@@ -1,0 +1,55 @@
+name: PSC1 exact Prelude unchanged generated V8 profile
+'on':
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-prelude-profile-20261025
+    paths:
+    - .github/workflows/psc1-pskernel-prelude-profile.yml
+    - psc1/scripts/pskernel-prelude-profile-ci.py
+permissions:
+  contents: read
+  actions: read
+jobs:
+  profile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        fetch-depth: 0
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Authenticate exact qualified kernel and unchanged original corpus
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -euo pipefail
+        python3 psc1/scripts/pskernel-unary-arena-artifact.py
+        curl -fL --retry 3 --retry-delay 2 \
+          -o "$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz" \
+          https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
+        printf 'PSC1_PRELUDE_NODE=%s\n' "$(command -v node)" >> "$GITHUB_ENV"
+    - name: Profile real unchanged Prelude under the existing bounded public entry
+      shell: bash
+      run: |
+        set -euo pipefail
+        python3 psc1/scripts/pskernel-prelude-profile-ci.py \
+          2>&1 | tee "$RUNNER_TEMP/prelude-profile.log"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-prelude-original-profile-attempt-${{ github.run_attempt }}
+        path: |
+          ${{ runner.temp }}/prelude-ingress/
+          ${{ runner.temp }}/arena435-independent/
+          ${{ runner.temp }}/prelude-profile.log
+        include-hidden-files: true
+        if-no-files-found: error
+        retention-days: 30

@@ -87,7 +87,7 @@ theorem finish_universe_mismatch_preserves_exact_error
     (node : entry.node = .sort other)
     (different : psKernelLevelEquivalent other level = false) :
     psKernelExprV2MutualFinishIndices level indices =
-      .error "mutually inductive types must live in the same universe" := by
+      .error "mutually inductive types must live in the same resultUniverse" := by
   simp [psKernelExprV2MutualFinishIndices, found, node, different]
 
 theorem empty_tail_keeps_exact_arena
@@ -107,7 +107,7 @@ theorem group_error_precedes_first_check
 theorem first_finish_preserves_original_mutual_non_sort_error
     (parameters indices : PsKernelExprV2OrdinaryOpenResult) (entry : PsKernelExprV2Entry)
     (found : psKernelExprV2PagedRequire indices.state.whnf.arena indices.result = .ok entry)
-    (notSort : ∀ universe, entry.node ≠ PsKernelExprV2Node.sort universe) :
+    (notSort : ∀ resultUniverse, entry.node ≠ PsKernelExprV2Node.sort resultUniverse) :
     psKernelExprV2MutualFirstHeaderFinish parameters indices =
       .error "mutual inductive result must be a sort" := by
   cases node : entry.node <;> first
@@ -116,11 +116,11 @@ theorem first_finish_preserves_original_mutual_non_sort_error
 
 theorem first_finish_retains_exact_parameter_index_owners
     (parameters indices : PsKernelExprV2OrdinaryOpenResult) (entry : PsKernelExprV2Entry)
-    (universe : PsKernelLevel)
+    (resultUniverse : PsKernelLevel)
     (found : psKernelExprV2PagedRequire indices.state.whnf.arena indices.result = .ok entry)
-    (node : entry.node = .sort universe) :
+    (node : entry.node = .sort resultUniverse) :
     psKernelExprV2MutualFirstHeaderFinish parameters indices =
-      .ok (PsKernelExprV2OrdinaryHeaderAnalysis.mk parameters indices universe) := by
+      .ok (PsKernelExprV2OrdinaryHeaderAnalysis.mk parameters indices resultUniverse) := by
   simp only [psKernelExprV2MutualFirstHeaderFinish, found, node]
 
 theorem retained_original_duplicate_bundle_error

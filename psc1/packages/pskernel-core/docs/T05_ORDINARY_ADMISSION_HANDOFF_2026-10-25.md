@@ -1,3 +1,13 @@
+## 2026-10-25 — Deferred-transform candidate prepared for complete qualification
+
+The integration branch remains at the fully qualified T05 source `10144e2f9e8d223b5dcde275bd1f48d25df113b3`. This next candidate carries only the three previously prepared predecessor-binding moves in Transform, TransformSupport and Lift, their universal equality proofs, the 23 raw staged-call controls, and qualification/evidence infrastructure. No new fuel policy, public admission behavior, theorem statement, or unsafe construct is introduced.
+
+The existing complete qualification workflow is extended in place: both source inventories contain 82 exact inputs, all 371 retained native reports and retained runtime controls remain required, three new universal equality reports bring the required total to 374, and 17 detached scripts include the new 23-assertion harness. Its new final runtime receipt follows the eight retained receipt snapshots without changing them. The native gate authenticates the entire three edited files against pinned predecessor blobs and checks the proof's frozen bodies before compilation.
+
+Reviewed shared-bootstrap adapter `7bd3303c49bd48b17ce70fa42e7dda389a35732c` is included. The earlier A/B diagnostic [40146310517](https://github.com/dwijayuda/pskernel/actions/runs/40146310517) at `c5f0050747a2c34cabbc711305bc975c77fc6d2d` must reach a terminal state before starting the single replacement experiment. That replacement will use the same exact candidate SHA as the complete qualification, with authenticated shared translation, check and build binaries. The old diagnostic's per-checkout bootstrap translator limitation remains explicit.
+
+**This transform candidate is not qualified.** Retrieve this commit's exact source/run before recording any result. Require native374, complete generated and canonical routes, exact 23 new assertions on each route, and the separate deferred-profile archive audit. Keep integration at `10144e2f` until those gates pass; inspect the bounded A/B observations before deciding to adopt the optimization. B remains OPEN, C remains FAIL, D remains OPEN.
+
 ## 2026-10-25 — Complete T05 ordinary admission qualified and integrated
 
 **Qualified implementation source:** `10144e2f9e8d223b5dcde275bd1f48d25df113b3`. The integration branch `integration/psc1-pskernel-expr-v2-lean435-20261021` was fast-forwarded to this exact commit from `a49d64ae494d51fdc80b688dab0922dd96403e5e` using a non-force expected-SHA update. All 21 intervening commits were preserved. This documentation update records that source's evidence; it does not claim a separate qualification run for the documentation commit.

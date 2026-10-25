@@ -1,0 +1,26 @@
+{
+  "source": "2f7ee0afc1cc2fbccdf47b4f140b5cf01eb05c89",
+  "run": 40228598527,
+  "auditorSource": "417578e4ee7bbb94082c71f828b4d225782f1f0b",
+  "auditorRun": "40228636222",
+  "status": "pass",
+  "actualReportBytes": 448755,
+  "actualReportSha256": "e841e77d114b1a41db1d84fe17c45974ee2bc06d62fd196c30a081fe8fc486e5",
+  "actualNativeGeneratedCanonicalArchivesRootRead": true,
+  "archiveMembers": [
+    273,
+    448,
+    451
+  ],
+  "auditedGitBlobBindingsIndependentlyMatchedActualArchiveSourceBytes": 248,
+  "additionalImmutableGitOnlyLayoutInput": {
+    "path": "psc1/scripts/workspace-layout.mjs",
+    "role": "canonical workspace layout source read by auditor; not a declared physical archive snapshot",
+    "actualBytesReadAndGitBlobAndSha256Matched": true
+  },
+  "totalAuditedGitInputsIndependentlyVerified": 249,
+  "nativeProofReports": 561,
+  "nativeProofModules": 40,
+  "fullKernel": false,
+  "performanceQualified": false
+}

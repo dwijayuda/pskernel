@@ -1,0 +1,108 @@
+{
+  "schema": "psc1-quot-complete561-root-evidence-v1",
+  "source": "2f7ee0afc1cc2fbccdf47b4f140b5cf01eb05c89",
+  "sourceTree": "a661cfcf4e1ee6cfec5642bf32869770d6fe51b6",
+  "productionTree": "65d5b9c3d0431a8b86961b6d1aec398f7169d223",
+  "productionChanges": [
+    "psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean",
+    "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean",
+    "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagGenerated.lean",
+    "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean",
+    "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean"
+  ],
+  "run": 40228598527,
+  "attempt": 1,
+  "allThreeJobs": "PASS",
+  "nativeProofReports": 561,
+  "nativeProofModules": 40,
+  "newLocalProofs": {
+    "quotStructuralAndFrozenInstaller": 9,
+    "sessionProtocol": 10
+  },
+  "actualArchives": {
+    "native": {
+      "artifact": 12612671802,
+      "job": 121275297518,
+      "archiveBytes": 4138784,
+      "archiveSha256": "f296c756c3b3f8590c5399f2f7f6ca3bf78eeba7ee063040b9ddcf7803176366",
+      "members": 273,
+      "actualRootRead": true
+    },
+    "generated": {
+      "artifact": 12612921864,
+      "job": 121276279943,
+      "archiveBytes": 3236917,
+      "archiveSha256": "4edee14fb5426d3ea7f5ceb754edd76d68b67d38b57237181106dfef9c1413a7",
+      "members": 448,
+      "actualRootRead": true,
+      "kernel": {
+        "bytes": 10393520,
+        "sha256": "7087dca9590782117a7569cb2222c76d73882c1fe9a91966eef08b99995b01c4"
+      }
+    },
+    "canonical": {
+      "artifact": 12613925573,
+      "job": 121276280021,
+      "archiveBytes": 3378670,
+      "archiveSha256": "022325528963617002e5732a1f07dfef3b316a7b114bcf0eedd1d73b8fdee924",
+      "members": 451,
+      "actualRootRead": true,
+      "kernel": {
+        "bytes": 10393527,
+        "sha256": "6715de576141e99857494af05608a42b6dfb48c71f7332ea1b3aef10d350ed04"
+      }
+    }
+  },
+  "independentAudit": {
+    "source": "2f7ee0afc1cc2fbccdf47b4f140b5cf01eb05c89",
+    "run": 40228598527,
+    "auditorSource": "417578e4ee7bbb94082c71f828b4d225782f1f0b",
+    "auditorRun": "40228636222",
+    "status": "pass",
+    "actualReportBytes": 448755,
+    "actualReportSha256": "e841e77d114b1a41db1d84fe17c45974ee2bc06d62fd196c30a081fe8fc486e5",
+    "actualNativeGeneratedCanonicalArchivesRootRead": true,
+    "archiveMembers": [
+      273,
+      448,
+      451
+    ],
+    "auditedGitBlobBindingsIndependentlyMatchedActualArchiveSourceBytes": 248,
+    "additionalImmutableGitOnlyLayoutInput": {
+      "path": "psc1/scripts/workspace-layout.mjs",
+      "role": "canonical workspace layout source read by auditor; not a declared physical archive snapshot",
+      "actualBytesReadAndGitBlobAndSha256Matched": true
+    },
+    "totalAuditedGitInputsIndependentlyVerified": 249,
+    "nativeProofReports": 561,
+    "nativeProofModules": 40,
+    "fullKernel": false,
+    "performanceQualified": false
+  },
+  "sameRuntimeBodiesApartFinalMapURL": true,
+  "newGenericNativeControls": 26,
+  "newSessionNativeControls": 17,
+  "retainedCompleteQuotJSAssertions": 1368,
+  "newSessionJSControls": 17,
+  "originalAndStagedChurchAcceptedWithMetadataAt4096": true,
+  "nativeOriginalSourceAndBothCompleteRoutesRetainPriorGates": true,
+  "unchanged193Replay": {
+    "source": "146e3d4e2a5247b984b97c37dae6bc8ee9e9405b",
+    "run": 40228699303,
+    "status": "running",
+    "allCases": 193,
+    "excluded": [],
+    "fuel": 4096,
+    "timeoutPerCaseSeconds": 60,
+    "oldSpaceMiB": 2048,
+    "emptyPATH": true,
+    "workers": 2
+  },
+  "scope": "same-batch and preexisting-session Quot owning-ID admission; local refinements/protocols only",
+  "globalCheckerSoundnessEstablished": false,
+  "backendPreservationEstablished": false,
+  "fullKernel": false,
+  "performanceQualified": false,
+  "adopted": false,
+  "integrationStill": "ecafaabf844babd76a5de57bdf12909845961fba"
+}

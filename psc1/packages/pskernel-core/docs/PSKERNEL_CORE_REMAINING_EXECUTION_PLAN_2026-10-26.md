@@ -23,9 +23,9 @@ the fixed resource policy.
 | Work | Current state | Completion evidence |
 |---|---|---|
 | Scoped String and local worker batches | Qualified within recorded sources | Actual receipts and independent archives |
-| Quot ID admission | Implemented; exact-tree native561 and complete-program helper1368 PASS | Final2f7 complete561/audit and unchanged193 pending |
-| Cross-session Quot owners | Implemented, native19/43 and actual complete-program17sessioncontrols PASS | Final source-bound complete561 and audit pending |
-| Mutual/nested ID admission | Private mutual-header native12proofs/33controls PASS; full admission open | Complete checked bundle, constructors and recursor ownership |
+| Quot ID admission | Final2f7 complete561/40 and both complete routes PASS; independent417578e4 audit PASS | Read actual unchanged193 replay, evidence-before-integration, confirmation |
+| Cross-session Quot owners | Final complete source561/audit PASS with17actual session controls on both routes | Preserve exact ownership/input namespace/publication; no adoption yet |
+| Mutual/nested ID admission | Private header+family native22/147 and reused complete-program147 PASS; exact ID size native11/26 PASS | Recursive fields, constructors, all recursors and atomic publication open |
 | Whole-operation restart removal | Open | Four public routes without supported original-operation restart |
 | Eager decode/metadata import removal | Open | Demand-based output decode and bounded owning worklist import |
 | Arena performance |17timeouts; two separately classified agreements | All193 preserved original bodies and pinned official controls |
@@ -45,11 +45,11 @@ psKernelExprEq's binder erasure, metadata and other fields. Shared installation
 has a complete frozen-function refinement theorem. It reads no expanded input
 type and imports no input expression.
 
-Current final cohort: **2f7ee0af /40228598527**, exact production65d5b9c3d0431a8b86961b6d1aec398f7169d223. Independent417578e4 /40228636222 and unchanged193 replay146e3d4e /40228699303 target this source. No adoption. Actual same-tree native561 is proven and corrected complete-program helper8af5e3b3 /40228452649 passes all1368retained+17sessioncontrols at30.95s/413244KiB. Its actual7-member ZIP and complete program7087dca9 were read. This reused-program diagnostic does not replace the final rebuilt-source cohort.
+Current final cohort **2f7ee0af /40228598527 PASS all3routes**, exact production65d5b9c3d0431a8b86961b6d1aec398f7169d223. Independent417578e4 /40228636222 PASS actual273/448/451archives/all561reports40modules and complete programs. Root read those archives and all249 audited Git bindings (248physical source bindings; workspace-layout is an explicitly separate immutable Git-only layout input). Generated7087dca9 and canonical6715de57 bodies match except final map URL. The actual unchanged193 replay146e3d4e /40228699303 remains running with fixed original inputs/resources and the authentic already passed official reference. No adoption before actual replay inspection and evidence commit.
 
-Preserve cb0 external curried-call failure,7ec BigInt missing-root literal failure,45d flat injected-callback failure and earlier portable syntax/structural/source-guard failures.2f7 changes only the passed JS helper ABI and reviewed pins; production and all native proof statements are unchanged. Exact live owners, original input-ID bounds, preflight/error/limit order, initialized identity, atomic publication and full-original restart on genuine decline remain required in both rebuilt routes.
+Private c673885b /40230310206 now passes native22reports/147controls and all307Git-bound archived sources. edb92439 /40231776046 passes exactly the same147labels through the authenticated complete f55program from2f7d65df, correcting only2injected callback Option wrappers. This is a reused-program private preflight, not fresh full-source qualification or complete mutual admission. The all-family selector and occurrence workers preserve exact first target/index, parameter fvars, target-specific index arity, recursive occurrence short circuiting and original index IDs.
 
-Private mutual-header ed458022 /40227506926 now passes192production jobs,12local proofs and33frozen-V1 comparisons. All304source snapshots match immutable Git blobs. It adds API/DagMutualHeader.lean and no public route. Complete group validation uses all names/constructor occurrences, later closed checks have fresh state, alignment resumes the first parameter owner, only the arena crosses scopes, indices retain owning IDs and result universes are compared with the original equivalent-level worker. This does not implement mutual constructors/recursors/publication or nested admission.
+Private exact-size30aeb034 /40231705901 passes11local reports/26controls; all310source blobs and actual316-member archive checked. Use its conditional count correspondence to preserve the original mutual structural budget. It is native-only and not consumed by admission yet. Preserve all earlier failed proof/parser/mock-callback attempts and rejected provisional sorryAx.2f7 production/proof statements were unchanged by the passing external JS ABI fixes.
 
 ## 2. Implement shared mutual headers
 
@@ -72,11 +72,13 @@ environment or local header owner may escape on error/decline.
 
 ## 3. Finish mutual constructors, recursors and publication
 
-Ordinary constructor helpers currently recognize one recursive target.
+Ordinary constructor helpers recognize one recursive target. The private mutual structural selector/occurrence stage now exists and passes22native reports/147controls plus147reused complete-program controls; complete mutual constructor/field/recursor admission remains open.
 Generalize recursive-field analysis to a checked mutual-family target/index,
 with joint positivity, exact uniform parameters, dependent indices and
 cross-family recursive arguments. Keep closed constructor checking isolated
 from the shared parameter owner.
+
+The mutual recursive-argument reference tries structural AppInfo on the original domain before WHNF. It uses fixed checkerFuel and separately succ(original expanded node count) as traversal fuel. Do not substitute ordinary helper order or entry.depth. Exact ID-size helper30aeb is native-qualified; next qualify its generated route and use it without exposing its memo. On forall, check syntactic argument-domain positivity, consume annotations and open the local; the original does not add a domain WHNF/check in this stage. Preserve original-before-reduced terminal checks and prove the unused applied accumulator irrelevant before removing it.
 
 Build every provisional inductive header privately, check every constructor,
 derive recursive/reflexive metadata from checked shapes, construct every

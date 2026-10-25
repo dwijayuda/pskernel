@@ -1,0 +1,943 @@
+{
+  "schema": "psc1-unary-spine-full541-qualified-v1",
+  "recordedAt": "2026-10-25T15:43:00.445Z",
+  "phase": "qualified-evidence-before-nonforce-integration",
+  "qualifiedSource": "f091db586dcbe4a31905d6edf1c8c7957082527d",
+  "productionTree": "62d48691ff7d9680878cf668862017d1061f2ebd",
+  "baselineSource": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5",
+  "baselineProductionTree": "e567685e5c441a5b0a78d8241f7bae151b48b5ca",
+  "productionChanges": [
+    "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean",
+    "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean"
+  ],
+  "algorithm": {
+    "minimumCanceledFrames": 2,
+    "headCondition": "same fvar node ID in one canonical owned arena",
+    "structuralBound": "succ(left.depth + right.depth)",
+    "semanticFuelReset": false,
+    "fuelIncrease": false,
+    "stateOwnerPreserved": true,
+    "recursionDepthGuardPreserved": true,
+    "nonpositiveAttempts": "original full-shape rule from original owner",
+    "retainedOriginalRuleByteIdentical": true,
+    "localProofScope": "application-congruent relation under compatible arena interpretation, decreasing structural rank, exact callback owner; no global soundness/backend preservation theorem"
+  },
+  "fullCohort": {
+    "run": 40201690903,
+    "attempt": 1,
+    "jobs": {
+      "native": 121194020577,
+      "generated": 121194926386,
+      "canonical": 121194926423
+    },
+    "status": "pass",
+    "nativeReceipt": {
+      "schema": "psc1-unary-native-v1",
+      "sourceSha": "f091db586dcbe4a31905d6edf1c8c7957082527d",
+      "runId": "40201690903",
+      "runAttempt": "1",
+      "status": "pass",
+      "productionTree": "62d48691ff7d9680878cf668862017d1061f2ebd",
+      "retainedProofs": 532,
+      "newProofs": 9,
+      "totalProofs": 541,
+      "proofModules": 37,
+      "names": [
+        "psKernelUnaryPlanZero",
+        "psKernelUnaryPlanStops",
+        "psKernelUnaryPlanPreserves",
+        "psKernelUnaryPlanSkippedBound",
+        "psKernelUnaryViewHasSharedHead",
+        "psKernelUnaryPlanExpressionCongruence",
+        "psKernelUnaryContextZero",
+        "psKernelUnaryPlanTerminates",
+        "psKernelUnaryCallbackOwner"
+      ],
+      "newProofSource": {
+        "bytes": 11532,
+        "sha256": "4098607f1b2d5874f998d69bb732ab9150a5031c1ab584e4e524b23d0a6340c2"
+      },
+      "newProofLog": {
+        "bytes": 1025,
+        "sha256": "2f32b41200bae456672ca543c1519816d156cb20a3ef5394e2609dff731800eb"
+      },
+      "retainedReceipt": {
+        "bytes": 59422,
+        "sha256": "499fd166a4bbe1e36f8e942aa888ff9d31f412b1388e7f875f3664f99ccc8df6"
+      },
+      "sourceInventory": {
+        "bytes": 3284,
+        "sha256": "af100150aea07388055330323445b9bf604fdd0dfe8460dca64a8f46bbc7c6ad"
+      },
+      "church": {
+        "baseline": {
+          "fuel": 4096,
+          "milliseconds": 27,
+          "mode": "baseline",
+          "reason": "",
+          "runtime": "native",
+          "schema": "psc1-church-stages-v1",
+          "sourceNodes": 197,
+          "verdict": "accepted"
+        },
+        "stages": {
+          "fuel": 4096,
+          "milliseconds": 27,
+          "mode": "stages",
+          "reason": "",
+          "runtime": "native",
+          "schema": "psc1-church-stages-v1",
+          "sourceNodes": 197,
+          "verdict": "accepted"
+        }
+      },
+      "fuel": 4096,
+      "fullKernel": false,
+      "performanceQualified": false
+    },
+    "generated": {
+      "schema": "psc1-unary-route-v1",
+      "sourceSha": "f091db586dcbe4a31905d6edf1c8c7957082527d",
+      "runId": "40201690903",
+      "runAttempt": "1",
+      "status": "pass",
+      "route": "generated",
+      "productionTree": "62d48691ff7d9680878cf668862017d1061f2ebd",
+      "nativeProofs": 541,
+      "newRuntimeControls": {
+        "schema": "psc1-unary-spine-v1",
+        "assertions": 20,
+        "labels": [
+          "harness/rejection",
+          "arena/canonical",
+          "view/shared-head",
+          "view/different-head",
+          "view/distinct-id-conservative",
+          "view/non-fvar",
+          "plan/zero",
+          "plan/structural-exhaustion",
+          "plan/exact-residual",
+          "plan/canonical-depth-bound",
+          "callback/exact-owner-once",
+          "shortcut/positive-only",
+          "fallback/false",
+          "fallback/decline",
+          "fallback/error",
+          "shortcut/one-layer-declines",
+          "resource/depth-guard",
+          "resource/three-scopes",
+          "boundary/invalid-id",
+          "ownership/inputs-unchanged"
+        ],
+        "actualGeneratedConstructors": true,
+        "helperOnly": true,
+        "fullKernel": false,
+        "performanceQualified": false
+      },
+      "church": {
+        "baseline": {
+          "format": "psc1-arena-replay-v1",
+          "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+          "verdict": "accepted",
+          "stage": "complete",
+          "coreInvoked": true,
+          "records": 227,
+          "metadataCounts": {
+            "ctorInfo": 1,
+            "recInfo": 1,
+            "inductInfo": 1,
+            "defnInfo": 2,
+            "thmInfo": 1
+          },
+          "metadataCoverage": "all supplied checking and regenerated metadata; definition/theorem/opaque source mutual-block all-lists are name-validated and retained separately; absent records are not independently compared",
+          "sourceMutualBlockMetadata": [
+            {
+              "kind": "defnInfo",
+              "name": {
+                "tableId": "15",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "CNat"
+                  }
+                ]
+              },
+              "all": [
+                {
+                  "tableId": "15",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "CNat"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "defnInfo",
+              "name": {
+                "tableId": "17",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "cmul"
+                  }
+                ]
+              },
+              "all": [
+                {
+                  "tableId": "17",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "cmul"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "thmInfo",
+              "name": {
+                "tableId": "20",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "kernel_church_numerals"
+                  }
+                ]
+              },
+              "all": [
+                {
+                  "tableId": "20",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "kernel_church_numerals"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "sourceMutualBlockMetadataRole": "nonchecking source annotation under pinned Lean 4.35 DefinitionVal.all",
+          "exportedDeclarations": 6,
+          "admissionCommands": 4,
+          "arenaNodes": "197",
+          "fuel": "4096",
+          "containsUnsafeOrPartial": false,
+          "metadataValidated": true,
+          "officialReplaySkipsUnsafeOrPartial": false
+        },
+        "stages": {
+          "schema": "psc1-church-stages-v1",
+          "runtime": "generated",
+          "mode": "stages",
+          "verdict": "accepted",
+          "reason": "",
+          "milliseconds": 8416.983565999999,
+          "fuel": "4096",
+          "sourceNodes": "197"
+        }
+      },
+      "kernel": {
+        "bytes": 10319156,
+        "sha256": "39e06dc5d7c7c7800411354b66eed46d57318e147f98499264392f67dc819ec7"
+      },
+      "retainedReceipt": {
+        "bytes": 997,
+        "sha256": "d8c789924ad3d0cdd480c3d16e9233d5f5845f736a2cb0e730be9f86d958033b"
+      },
+      "nativeReceipt": {
+        "bytes": 1720,
+        "sha256": "dfcf4589db090b2a005508dc15cbe972f8f397b2258284026e7de1cdb88ccaa2"
+      },
+      "sourceInventory": {
+        "bytes": 3284,
+        "sha256": "af100150aea07388055330323445b9bf604fdd0dfe8460dca64a8f46bbc7c6ad"
+      },
+      "fuel": 4096,
+      "processLimitSeconds": 60,
+      "oldSpaceMiB": 2048,
+      "emptyPATH": true,
+      "fullKernel": false,
+      "performanceQualified": false
+    },
+    "canonical": {
+      "schema": "psc1-unary-route-v1",
+      "sourceSha": "f091db586dcbe4a31905d6edf1c8c7957082527d",
+      "runId": "40201690903",
+      "runAttempt": "1",
+      "status": "pass",
+      "route": "canonical",
+      "productionTree": "62d48691ff7d9680878cf668862017d1061f2ebd",
+      "nativeProofs": 541,
+      "newRuntimeControls": {
+        "schema": "psc1-unary-spine-v1",
+        "assertions": 20,
+        "labels": [
+          "harness/rejection",
+          "arena/canonical",
+          "view/shared-head",
+          "view/different-head",
+          "view/distinct-id-conservative",
+          "view/non-fvar",
+          "plan/zero",
+          "plan/structural-exhaustion",
+          "plan/exact-residual",
+          "plan/canonical-depth-bound",
+          "callback/exact-owner-once",
+          "shortcut/positive-only",
+          "fallback/false",
+          "fallback/decline",
+          "fallback/error",
+          "shortcut/one-layer-declines",
+          "resource/depth-guard",
+          "resource/three-scopes",
+          "boundary/invalid-id",
+          "ownership/inputs-unchanged"
+        ],
+        "actualGeneratedConstructors": true,
+        "helperOnly": true,
+        "fullKernel": false,
+        "performanceQualified": false
+      },
+      "church": {
+        "baseline": {
+          "format": "psc1-arena-replay-v1",
+          "sourceSha256": "443428491e773dc131b1655bf72312517ddc29010112bb8bb241a48ab55c51c1",
+          "verdict": "accepted",
+          "stage": "complete",
+          "coreInvoked": true,
+          "records": 227,
+          "metadataCounts": {
+            "ctorInfo": 1,
+            "recInfo": 1,
+            "inductInfo": 1,
+            "defnInfo": 2,
+            "thmInfo": 1
+          },
+          "metadataCoverage": "all supplied checking and regenerated metadata; definition/theorem/opaque source mutual-block all-lists are name-validated and retained separately; absent records are not independently compared",
+          "sourceMutualBlockMetadata": [
+            {
+              "kind": "defnInfo",
+              "name": {
+                "tableId": "15",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "CNat"
+                  }
+                ]
+              },
+              "all": [
+                {
+                  "tableId": "15",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "CNat"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "defnInfo",
+              "name": {
+                "tableId": "17",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "cmul"
+                  }
+                ]
+              },
+              "all": [
+                {
+                  "tableId": "17",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "cmul"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "kind": "thmInfo",
+              "name": {
+                "tableId": "20",
+                "segments": [
+                  {
+                    "kind": "str",
+                    "value": "kernel_church_numerals"
+                  }
+                ]
+              },
+              "all": [
+                {
+                  "tableId": "20",
+                  "segments": [
+                    {
+                      "kind": "str",
+                      "value": "kernel_church_numerals"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "sourceMutualBlockMetadataRole": "nonchecking source annotation under pinned Lean 4.35 DefinitionVal.all",
+          "exportedDeclarations": 6,
+          "admissionCommands": 4,
+          "arenaNodes": "197",
+          "fuel": "4096",
+          "containsUnsafeOrPartial": false,
+          "metadataValidated": true,
+          "officialReplaySkipsUnsafeOrPartial": false
+        },
+        "stages": {
+          "schema": "psc1-church-stages-v1",
+          "runtime": "generated",
+          "mode": "stages",
+          "verdict": "accepted",
+          "reason": "",
+          "milliseconds": 6723.013824000001,
+          "fuel": "4096",
+          "sourceNodes": "197"
+        }
+      },
+      "kernel": {
+        "bytes": 10319163,
+        "sha256": "138c61facf6dae040c1c59abbeb646b42d6c09fc6537713372b63990859f5518"
+      },
+      "retainedReceipt": {
+        "bytes": 997,
+        "sha256": "2c7e7009b49e03e2effd24558e4ae2327cd931fe993709e292ec5c65201e4e58"
+      },
+      "nativeReceipt": {
+        "bytes": 1720,
+        "sha256": "dfcf4589db090b2a005508dc15cbe972f8f397b2258284026e7de1cdb88ccaa2"
+      },
+      "sourceInventory": {
+        "bytes": 3284,
+        "sha256": "af100150aea07388055330323445b9bf604fdd0dfe8460dca64a8f46bbc7c6ad"
+      },
+      "fuel": 4096,
+      "processLimitSeconds": 60,
+      "oldSpaceMiB": 2048,
+      "emptyPATH": true,
+      "fullKernel": false,
+      "performanceQualified": false
+    },
+    "actualArtifacts": [
+      {
+        "id": 12603447463,
+        "name": "psc1-t05-header-canonical-attempt-1",
+        "bytes": 3114796,
+        "digest": "sha256:f72ae6b6d71c6ec760d0290b850e48dbdbd3bb611f4e7ffda04ba69981cbb7c7"
+      },
+      {
+        "id": 12602480763,
+        "name": "psc1-t05-header-native-attempt-1",
+        "bytes": 3892275,
+        "digest": "sha256:e809bc7d5793cbffeba4d8d1431f9c88ec5546ebec0280dbd42ae9842a6b62a4"
+      },
+      {
+        "id": 12602374819,
+        "name": "psc1-t05-header-generated-attempt-1",
+        "bytes": 2974740,
+        "digest": "sha256:059cf9759096ffb445fccdfe845f7ccc99271e9c4b2cde19d3477088dfa6f64f"
+      }
+    ],
+    "actualMemberCounts": {
+      "native": 226,
+      "generated": 401,
+      "canonical": 404
+    },
+    "nativeReports": 541,
+    "nativeModules": 37,
+    "retainedReports": 532,
+    "newReports": 9,
+    "newGeneratedAssertionsPerRoute": 20,
+    "retainedRuntimeHarnessesPerRoute": 18
+  },
+  "independentCohortAudit": {
+    "source": "f33d91760b11eb36e2ba6d3afcb868226317122a",
+    "run": 40201797756,
+    "job": 121194337379,
+    "status": "pass",
+    "artifact": {
+      "id": 12603527609,
+      "bytes": 98260,
+      "sha256": "ad7e81ea08e2d85d6064874fc36a45d45935a4b3ed28e462a8a9f9cae1b70064"
+    },
+    "actualAuditJson": {
+      "bytes": 405138,
+      "sha256": "fc8c4310104dd4a6eccd08dbfd762e6b9bf6bc9a3673ee99e3d34eb2047a41d2"
+    },
+    "actualZipRead": true,
+    "errors": []
+  },
+  "runtimeBodies": {
+    "generated": {
+      "bytes": 10319156,
+      "sha256": "39e06dc5d7c7c7800411354b66eed46d57318e147f98499264392f67dc819ec7"
+    },
+    "canonical": {
+      "bytes": 10319163,
+      "sha256": "138c61facf6dae040c1c59abbeb646b42d6c09fc6537713372b63990859f5518"
+    },
+    "byteIdenticalApartFromFinalSourceMapComment": true,
+    "generatedSourceMap": "kernel.js.map",
+    "canonicalSourceMap": "pskernel-core.js.map",
+    "benchmarkCandidateKernelByteIdenticalToQualifiedGeneratedKernel": true,
+    "benchmarkBaselineKernelByteIdenticalToQualifiedDbdGeneratedKernel": true
+  },
+  "abba": {
+    "source": "a6a1e1fd4a1558df36a51e5be43a33a15047da22",
+    "productionTree": "62d48691ff7d9680878cf668862017d1061f2ebd",
+    "run": 40202200567,
+    "status": "pass",
+    "observations": 16,
+    "cases": 4,
+    "sequence": [
+      "A",
+      "B",
+      "B",
+      "A"
+    ],
+    "compilerSha256": "13635a423d1343e9a4770be0b7e02d859a6b845b221a0363d19bfdfab8e3cc1c",
+    "sameActualCompilerBinary": true,
+    "summaries": [
+      {
+        "name": "perf/repeated-subproblem.ndjson",
+        "verdicts": {
+          "baseline": [
+            "accepted",
+            "accepted"
+          ],
+          "candidate": [
+            "accepted",
+            "accepted"
+          ]
+        },
+        "elapsedSeconds": {
+          "baseline": [
+            1.8556404750000013,
+            1.6906120000000442
+          ],
+          "candidate": [
+            1.801392686000014,
+            1.7451265990000024
+          ]
+        },
+        "peakRssKiB": {
+          "baseline": [
+            286728,
+            289736
+          ],
+          "candidate": [
+            289852,
+            286724
+          ]
+        },
+        "uncensoredPair": true,
+        "performanceComparable": true,
+        "intendedChurchRecovery": false,
+        "candidateMedianTimeRatio": 1.0000752371699002,
+        "candidateMedianRssRatio": 1.0001942879347192,
+        "timeRegressionOver10Percent": false,
+        "rssRegressionOver15Percent": false
+      },
+      {
+        "name": "perf/church-numerals.ndjson",
+        "verdicts": {
+          "baseline": [
+            "resource_exhausted",
+            "resource_exhausted"
+          ],
+          "candidate": [
+            "accepted",
+            "accepted"
+          ]
+        },
+        "elapsedSeconds": {
+          "baseline": [
+            22.024754337999994,
+            19.386154919000035
+          ],
+          "candidate": [
+            9.447654809999989,
+            9.330106553999997
+          ]
+        },
+        "peakRssKiB": {
+          "baseline": [
+            1141460,
+            1152280
+          ],
+          "candidate": [
+            409172,
+            639008
+          ]
+        },
+        "uncensoredPair": true,
+        "performanceComparable": false,
+        "intendedChurchRecovery": true,
+        "candidateMedianTimeRatio": null,
+        "candidateMedianRssRatio": null,
+        "timeRegressionOver10Percent": false,
+        "rssRegressionOver15Percent": false
+      },
+      {
+        "name": "init-prelude.ndjson",
+        "verdicts": {
+          "baseline": [
+            "timeout",
+            "timeout"
+          ],
+          "candidate": [
+            "timeout",
+            "timeout"
+          ]
+        },
+        "elapsedSeconds": {
+          "baseline": [
+            60.157679083999994,
+            60.15647080399998
+          ],
+          "candidate": [
+            60.117895876000006,
+            60.12352762400002
+          ]
+        },
+        "peakRssKiB": {
+          "baseline": [],
+          "candidate": []
+        },
+        "uncensoredPair": false,
+        "performanceComparable": false,
+        "intendedChurchRecovery": false,
+        "candidateMedianTimeRatio": null,
+        "candidateMedianRssRatio": null,
+        "timeRegressionOver10Percent": false,
+        "rssRegressionOver15Percent": false
+      },
+      {
+        "name": "bugs/proj-of-stuck-prop.ndjson",
+        "verdicts": {
+          "baseline": [
+            "rejected",
+            "rejected"
+          ],
+          "candidate": [
+            "rejected",
+            "rejected"
+          ]
+        },
+        "elapsedSeconds": {
+          "baseline": [
+            33.37824344499998,
+            31.766268303000004
+          ],
+          "candidate": [
+            32.06381572700002,
+            31.991688501
+          ]
+        },
+        "peakRssKiB": {
+          "baseline": [
+            670284,
+            451260
+          ],
+          "candidate": [
+            434984,
+            627068
+          ]
+        },
+        "uncensoredPair": true,
+        "performanceComparable": true,
+        "intendedChurchRecovery": false,
+        "candidateMedianTimeRatio": 0.9832832038988549,
+        "candidateMedianRssRatio": 0.9469552688080004,
+        "timeRegressionOver10Percent": false,
+        "rssRegressionOver15Percent": false
+      }
+    ],
+    "errors": [],
+    "rawArtifact": {
+      "id": 12603493065,
+      "bytes": 3248450,
+      "sha256": "4dddd27a3c060f241370eb903f1136190dd2ca38ab1a27badce7a0adc7227124",
+      "members": 121
+    },
+    "reportSha256": "3f056ebb87c5ba1b3bb23c488407d9fc1a39bda241bf9a57ac107d52ff5c0ba6",
+    "actualZipRead": true
+  },
+  "independentAbbaAudit": {
+    "source": "1014f0424a8c5df84c08ff2d16234bb5a7460b1c",
+    "run": 40206818462,
+    "job": 121209417913,
+    "status": "pass",
+    "artifact": {
+      "id": 12603209899,
+      "bytes": 36605,
+      "sha256": "06b0cf05e90a651bd2d2125a460e6bd7e1a74b619611b8004fc43c3e76f4d1ce"
+    },
+    "actualAuditJson": {
+      "bytes": 7553,
+      "sha256": "dc6bca46d8020a2848f5c151f35e3c88d268e64e422bb7383bee367721104a5f"
+    },
+    "actualZipRead": true,
+    "sourceSnapshotCoverage": {
+      "nativeArchivedSourceFiles": 14,
+      "declaredSourceFiles": 15,
+      "exactOmittedPath": "unary/sources/.github/workflows/psc1-pskernel-t05-header.yml",
+      "supplementArtifact": 12602374819,
+      "supplementArchive": {
+        "bytes": 2974740,
+        "sha256": "059cf9759096ffb445fccdfe845f7ccc99271e9c4b2cde19d3477088dfa6f64f"
+      },
+      "supplementSnapshot": {
+        "bytes": 196473,
+        "sha256": "15b77c874c17467f96563f35c673737ca26426f02d7a58c78fb552657d941d8f"
+      },
+      "allProductionAndProofSourcesPresentInOriginalArchive": true,
+      "qualifiedAndPerformanceWorkflowBytesIdentical": true
+    },
+    "archives": {
+      "native-preflight": {
+        "id": 12602067514,
+        "bytes": 54395,
+        "sha256": "4b523de52b7ada13b038d9c6806a8756a66ce0c20620a2623d682ce2e5cda47a",
+        "members": 19
+      },
+      "compiler": {
+        "id": 12602546598,
+        "bytes": 2470045,
+        "sha256": "e7384838ec2f0335cd551de1f5f4a4d65337647a37a7a5e959d3b383a9afe044",
+        "members": 28
+      },
+      "baseline": {
+        "id": 12602858518,
+        "bytes": 1269189,
+        "sha256": "b03b8df4650b0c8f6024bb09f5e04d188de3d694c2ea9a3b16a527985f8c4800",
+        "members": 21
+      },
+      "candidate": {
+        "id": 12603910141,
+        "bytes": 1273221,
+        "sha256": "5d6d2fb8f9bc492cca2660fee1c72b6f5b13869cd0dcd020f29e8b5b9d4261c5",
+        "members": 21
+      },
+      "abba": {
+        "id": 12603493065,
+        "bytes": 3248450,
+        "sha256": "4dddd27a3c060f241370eb903f1136190dd2ca38ab1a27badce7a0adc7227124",
+        "members": 121
+      }
+    },
+    "errors": []
+  },
+  "fullArena": {
+    "toolSource": "8e642bad5367568abab6b50d8c2ee78eb314a2c9",
+    "kernelSource": "f091db586dcbe4a31905d6edf1c8c7957082527d",
+    "kernelSha256": "39e06dc5d7c7c7800411354b66eed46d57318e147f98499264392f67dc819ec7",
+    "run": 40205593639,
+    "officialJob": 121205708626,
+    "comparisonJob": 121206203029,
+    "workflowConclusion": "failure; strict full compatibility remains blocked",
+    "cases": 193,
+    "unchangedBodies": 193,
+    "strictMatches": 174,
+    "counts": {
+      "matched_kernel_rejection": 60,
+      "matched_metadata_rejection": 1,
+      "pskernel_timeout": 17,
+      "matched_transport_rejection": 7,
+      "agreement_with_unsafe_or_partial_contract_difference": 2,
+      "matched_acceptance": 106
+    },
+    "church": {
+      "index": 81,
+      "official": "accepted",
+      "actual": "accepted",
+      "metadataValidated": true
+    },
+    "open": [
+      {
+        "index": 23,
+        "name": "perf/refute-cheap-last.ndjson",
+        "classification": "pskernel_timeout",
+        "verdict": "timeout"
+      },
+      {
+        "index": 69,
+        "name": "tutorial/140_falseFromUnsafe.ndjson",
+        "classification": "agreement_with_unsafe_or_partial_contract_difference",
+        "verdict": "rejected"
+      },
+      {
+        "index": 70,
+        "name": "tutorial/141_falseFromPartial.ndjson",
+        "classification": "agreement_with_unsafe_or_partial_contract_difference",
+        "verdict": "rejected"
+      },
+      {
+        "index": 72,
+        "name": "init-prelude.ndjson",
+        "classification": "pskernel_timeout",
+        "verdict": "timeout"
+      },
+      {
+        "index": 78,
+        "name": "perf/app-lam.ndjson",
+        "classification": "pskernel_timeout",
+        "verdict": "timeout"
+      },
+      {
+        "index": 80,
+        "name": "perf/beta-ladder.ndjson",
+        "classification": "pskernel_timeout",
+        "verdict": "timeout"
+      },
+      {
+        "index": 82,
+        "name": "perf/discarded-argument-match.ndjson",
+        "classification": "pskernel_timeout",
+        "verdict": "timeout"
+      },
+      {
+        "index": 83,
+        "name": "perf/discarded-argument.ndjson",
+        "classification": "pskernel_timeout",
+        "verdict": "timeout"
+      },
+      {
+        "index": 84,
+        "name": "perf/folded-constant-first.ndjson",
+        "classification": "pskernel_timeout",
+        "verdict": "timeout"
+      },
+      {
+        "index": 85,
+        "name": "perf/folded-constant-last.ndjson",
+        "classification": "pskernel_timeout",
+        "verdict": "timeout"
+      },
+      {
+        "index": 86,
+        "name": "perf/fueled-chain.ndjson",
+        "classification": "pskernel_timeout",
+        "verdict": "timeout"
+      },
+      {
+        "index": 87,
+        "name": "perf/grind-ring-5.ndjson",
+        "classification": "pskernel_timeout",
+        "verdict": "timeout"
+      },
+      {
+        "index": 90,
+        "name": "perf/let-ladder.ndjson",
+        "classification": "pskernel_timeout",
+        "verdict": "timeout"
+      },
+      {
+        "index": 91,
+        "name": "perf/magma-list-deep-n21.ndjson",
+        "classification": "pskernel_timeout",
+        "verdict": "timeout"
+      },
+      {
+        "index": 92,
+        "name": "perf/magma-list-deep-n36.ndjson",
+        "classification": "pskernel_timeout",
+        "verdict": "timeout"
+      },
+      {
+        "index": 93,
+        "name": "perf/magma-list-pair-n21.ndjson",
+        "classification": "pskernel_timeout",
+        "verdict": "timeout"
+      },
+      {
+        "index": 94,
+        "name": "perf/magma-list-pair-n7.ndjson",
+        "classification": "pskernel_timeout",
+        "verdict": "timeout"
+      },
+      {
+        "index": 96,
+        "name": "perf/shared-subterm.ndjson",
+        "classification": "pskernel_timeout",
+        "verdict": "timeout"
+      },
+      {
+        "index": 98,
+        "name": "perf/unroll-versus-evaluate.ndjson",
+        "classification": "pskernel_timeout",
+        "verdict": "timeout"
+      }
+    ],
+    "actualArtifact": {
+      "id": 12603888713,
+      "bytes": 3614512,
+      "sha256": "8e13a83173a82224ae1b6bd10544c209ccfb00fe6708a9d6b3872eec201050c1",
+      "members": 586
+    },
+    "actualReport": {
+      "bytes": 669370,
+      "sha256": "78092c2b33e91efe4eb6a4f4d660a455e46b557ce3e4a3eaf9cee1a84469dfb4"
+    },
+    "actualZipRead": true
+  },
+  "comparisonCaveats": {
+    "churchRatiosReported": false,
+    "reason": "different outcomes; recovery is not a same-outcome speed ratio",
+    "prelude": "all four observations hit unchanged60-second host cap; last actual progress records kernel entry",
+    "pairedRepetitionsPerVariant": 2,
+    "generalPerformanceQualified": false
+  },
+  "failedAttemptsRetained": {
+    "previousNativeAndProofFailures": "T08_CHURCH_STAGE_AND_UNARY_NATIVE_2026-10-25.json",
+    "source9b7": "40200020837 native541PASS; generated/canonical shallow-baseline lookup failure",
+    "source9de6": "40200450224 native541PASS; portable parser rejects nested constructor pattern before code generation",
+    "benchmark4eef": "40200839664 candidate source-parser failure; no completed experiment adopted",
+    "benchmark365": "40201993411 superseded comparison validation expected a field absent from baseline error envelope",
+    "auditFb523": "40203596465 detected omitted hidden qualification-workflow snapshot",
+    "auditD014": "40206364098 assumed top-level kernel-entry field for censored observations; repaired to validate actual progress envelopes"
+  },
+  "integrationDecision": {
+    "eligible": true,
+    "requestedTarget": "f091db586dcbe4a31905d6edf1c8c7957082527d",
+    "expectedBefore": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5",
+    "force": false,
+    "adoptedAtThisRecord": false,
+    "reason": "genuine Church acceptance recovery at unchanged4096; complete component qualification and both independent audits pass; no paired10%time/15%RSS flags; full193 has one recovery and no new semantic mismatches"
+  },
+  "scope": {
+    "T08a": "complete for original Church case",
+    "A": "historically scoped qualified",
+    "B": "OPEN",
+    "C": "FAIL",
+    "D": "OPEN",
+    "fullKernel": false,
+    "performanceQualified": false,
+    "globalSoundness": false,
+    "backendPreservationProof": false,
+    "fullDirectJS": "unsupported",
+    "remaining": [
+      "17 authentic Arena host timeouts",
+      "2 separate unsafe/partial contract agreements",
+      "T06 mutual/nested ID-native admission",
+      "T07 four whole-operation fallbacks",
+      "T04 ingress and metadata import work",
+      "T09 performance and T10 release obligations"
+    ]
+  }
+}

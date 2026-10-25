@@ -1,0 +1,264 @@
+{
+  "schema": "psc1-unary-abba-independent-v1",
+  "sourceSha": "a6a1e1fd4a1558df36a51e5be43a33a15047da22",
+  "runId": 40202200567,
+  "runAttempt": 1,
+  "baselineSha": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5",
+  "productionTree": "62d48691ff7d9680878cf668862017d1061f2ebd",
+  "sourceExecution": "none; static Git/artifact reads only",
+  "status": "pass",
+  "errors": [],
+  "performanceQualified": false,
+  "fullKernel": false,
+  "sources": {
+    "baseline": "dbd9db47bd8ef184583bcd5ae3feb38f3ce612c5",
+    "productionTree": "62d48691ff7d9680878cf668862017d1061f2ebd",
+    "productionChanges": [
+      "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean",
+      "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean"
+    ],
+    "retainedFullShapeBodyByteIdentical": true,
+    "reviewedSourcePins": {
+      "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean": {
+        "bytes": 20939,
+        "sha256": "bd66aa2e8cc039406b76d8e24459d3d9107e579c7e17ed5432cf192b38e3e2d2"
+      },
+      "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean": {
+        "bytes": 3754,
+        "sha256": "0a5eb430466bff2fa3f3f00384b5ac7f22dc62bbc0505429ca52494259a8e26e"
+      },
+      "psc1/test/PsKernelUnarySpineProofs.lean": {
+        "bytes": 11532,
+        "sha256": "4098607f1b2d5874f998d69bb732ab9150a5031c1ab584e4e524b23d0a6340c2"
+      },
+      "psc1/test/PsKernelChurchSource.lean": {
+        "bytes": 21080,
+        "sha256": "5f723e4b184c9134128552fe8186064dd0b291a42e54ecc575d210d339dd0a30"
+      },
+      "psc1/test/PsKernelChurchStageProbe.lean": {
+        "bytes": 6043,
+        "sha256": "3601231d19268d33474697a2058a7ada58918ce5a8d11b56da263b4377e41a32"
+      },
+      "psc1/scripts/pskernel-unary-spine-smoke.mjs": {
+        "bytes": 5583,
+        "sha256": "9053a5bfc66687c7d1529c6f18179bfb97ced1e41ac0dd3d24ae039d60612d2b"
+      },
+      "psc1/scripts/pskernel-church-fixture.py": {
+        "bytes": 5437,
+        "sha256": "9053ae13a6df9fd542ab9f76177f4daea4835fa68c661b1d1c1b446c06608ddf"
+      },
+      "psc1/scripts/pskernel-church-stages.mjs": {
+        "bytes": 4798,
+        "sha256": "d008052b8bb6ecab9c0b0fc5c7c43a2de66304da03e34016c0396cfee947f11d"
+      }
+    }
+  },
+  "archives": {
+    "native-preflight": {
+      "id": 12602067514,
+      "bytes": 54395,
+      "sha256": "4b523de52b7ada13b038d9c6806a8756a66ce0c20620a2623d682ce2e5cda47a",
+      "members": 19
+    },
+    "compiler": {
+      "id": 12602546598,
+      "bytes": 2470045,
+      "sha256": "e7384838ec2f0335cd551de1f5f4a4d65337647a37a7a5e959d3b383a9afe044",
+      "members": 28
+    },
+    "baseline": {
+      "id": 12602858518,
+      "bytes": 1269189,
+      "sha256": "b03b8df4650b0c8f6024bb09f5e04d188de3d694c2ea9a3b16a527985f8c4800",
+      "members": 21
+    },
+    "candidate": {
+      "id": 12603910141,
+      "bytes": 1273221,
+      "sha256": "5d6d2fb8f9bc492cca2660fee1c72b6f5b13869cd0dcd020f29e8b5b9d4261c5",
+      "members": 21
+    },
+    "abba": {
+      "id": 12603493065,
+      "bytes": 3248450,
+      "sha256": "4dddd27a3c060f241370eb903f1136190dd2ca38ab1a27badce7a0adc7227124",
+      "members": 121
+    }
+  },
+  "sourceSnapshotCoverage": {
+    "nativeArchivedSourceFiles": 14,
+    "declaredSourceFiles": 15,
+    "exactOmittedPath": "unary/sources/.github/workflows/psc1-pskernel-t05-header.yml",
+    "supplementArtifact": 12602374819,
+    "supplementArchive": {
+      "bytes": 2974740,
+      "sha256": "059cf9759096ffb445fccdfe845f7ccc99271e9c4b2cde19d3477088dfa6f64f"
+    },
+    "supplementSnapshot": {
+      "bytes": 196473,
+      "sha256": "15b77c874c17467f96563f35c673737ca26426f02d7a58c78fb552657d941d8f"
+    },
+    "allProductionAndProofSourcesPresentInOriginalArchive": true,
+    "qualifiedAndPerformanceWorkflowBytesIdentical": true
+  },
+  "nativeReports": 9,
+  "observations": 16,
+  "sameCompilerBinary": true,
+  "originalChurchAcceptanceRestored": true,
+  "summaries": [
+    {
+      "name": "perf/repeated-subproblem.ndjson",
+      "verdicts": {
+        "baseline": [
+          "accepted",
+          "accepted"
+        ],
+        "candidate": [
+          "accepted",
+          "accepted"
+        ]
+      },
+      "elapsedSeconds": {
+        "baseline": [
+          1.8556404750000013,
+          1.6906120000000442
+        ],
+        "candidate": [
+          1.801392686000014,
+          1.7451265990000024
+        ]
+      },
+      "peakRssKiB": {
+        "baseline": [
+          286728,
+          289736
+        ],
+        "candidate": [
+          289852,
+          286724
+        ]
+      },
+      "uncensoredPair": true,
+      "performanceComparable": true,
+      "intendedChurchRecovery": false,
+      "candidateMedianTimeRatio": 1.0000752371699002,
+      "candidateMedianRssRatio": 1.0001942879347192,
+      "timeRegressionOver10Percent": false,
+      "rssRegressionOver15Percent": false
+    },
+    {
+      "name": "perf/church-numerals.ndjson",
+      "verdicts": {
+        "baseline": [
+          "resource_exhausted",
+          "resource_exhausted"
+        ],
+        "candidate": [
+          "accepted",
+          "accepted"
+        ]
+      },
+      "elapsedSeconds": {
+        "baseline": [
+          22.024754337999994,
+          19.386154919000035
+        ],
+        "candidate": [
+          9.447654809999989,
+          9.330106553999997
+        ]
+      },
+      "peakRssKiB": {
+        "baseline": [
+          1141460,
+          1152280
+        ],
+        "candidate": [
+          409172,
+          639008
+        ]
+      },
+      "uncensoredPair": true,
+      "performanceComparable": false,
+      "intendedChurchRecovery": true,
+      "candidateMedianTimeRatio": null,
+      "candidateMedianRssRatio": null,
+      "timeRegressionOver10Percent": false,
+      "rssRegressionOver15Percent": false
+    },
+    {
+      "name": "init-prelude.ndjson",
+      "verdicts": {
+        "baseline": [
+          "timeout",
+          "timeout"
+        ],
+        "candidate": [
+          "timeout",
+          "timeout"
+        ]
+      },
+      "elapsedSeconds": {
+        "baseline": [
+          60.157679083999994,
+          60.15647080399998
+        ],
+        "candidate": [
+          60.117895876000006,
+          60.12352762400002
+        ]
+      },
+      "peakRssKiB": {
+        "baseline": [],
+        "candidate": []
+      },
+      "uncensoredPair": false,
+      "performanceComparable": false,
+      "intendedChurchRecovery": false,
+      "candidateMedianTimeRatio": null,
+      "candidateMedianRssRatio": null,
+      "timeRegressionOver10Percent": false,
+      "rssRegressionOver15Percent": false
+    },
+    {
+      "name": "bugs/proj-of-stuck-prop.ndjson",
+      "verdicts": {
+        "baseline": [
+          "rejected",
+          "rejected"
+        ],
+        "candidate": [
+          "rejected",
+          "rejected"
+        ]
+      },
+      "elapsedSeconds": {
+        "baseline": [
+          33.37824344499998,
+          31.766268303000004
+        ],
+        "candidate": [
+          32.06381572700002,
+          31.991688501
+        ]
+      },
+      "peakRssKiB": {
+        "baseline": [
+          670284,
+          451260
+        ],
+        "candidate": [
+          434984,
+          627068
+        ]
+      },
+      "uncensoredPair": true,
+      "performanceComparable": true,
+      "intendedChurchRecovery": false,
+      "candidateMedianTimeRatio": 0.9832832038988549,
+      "candidateMedianRssRatio": 0.9469552688080004,
+      "timeRegressionOver10Percent": false,
+      "rssRegressionOver15Percent": false
+    }
+  ]
+}

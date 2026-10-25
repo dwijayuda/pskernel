@@ -1,10 +1,31 @@
 # PSC1 AI work state
 
-Updated 2026-10-25 Asia/Jakarta. Active source-ownership branch
-`feat/psc1-source-ownership-20261025`, based on qualified PR #183 HEAD
-`b63d09c8f79f3886565c788c478cb9937057080d`.
+Updated 2026-10-25 Asia/Jakarta. Active checked-conversion branch
+`feat/psc1-checked-source-conversion-20261025`, stacked on PR #184 implementation
+`a77ec1a8153d94ff8586a3dfa37df521e75df501`.
 Use connected GitHub and Linux Actions only. Refresh HEAD before writes and use
 single-parent expected-HEAD non-force updates. No merge or npm publication.
+
+## Checked conversion (R3; implemented, qualification in progress)
+
+The host reuses the existing grammar printers and R2a ownership pipeline. It
+independently admits the complete before/after closures and requires equal
+canonical admission, original strict IR, partial names and exact source/member
+ownership. The ordinary logical/body pairing remains included in the comparison.
+Candidate source bytes and declaration origin maps are returned for review;
+project files are never edited. This does not implement binding-aware rename.
+
+Raw comments retain their order and bytes. The default refuses comments inside
+declaration bodies; explicit owner-notes relocates them to the owning declaration's
+leading notes. Canonical conversion intentionally changes layout, spelling and
+source identities. Exact graph comparison is a finite compiler-mediated relation,
+not formal source preservation or an effect-equivalence theorem.
+
+A manifest-pinned developer CLI emits candidate JSON only. It does not select
+tools from source input, publish packages or install new compiler payloads.
+Native/shared-host build fccd4e01fa4ce6a01eeafde75032720b95493211 passes in Linux
+run 40201874043/job 121194564980. Behavioral, CLI, real application and full compiler
+conversion qualification is in progress; no successful R3 qualification is claimed.
 
 ## R2a declaration ownership (implemented, qualification in progress)
 
@@ -22,9 +43,12 @@ independent official Lean checker; it admits exact candidate graph bytes before
 returning an index. Tooling does not grant rename, reference-resolution,
 semantic-equivalence or publication authority. This is not R2b.
 
-Current validation is in progress. The first build passes; actual origin,
-admission/IR byte correspondence, full compiler closure in both grammars, stale/
-forged capabilities and refusal tests must finish before R2a is qualified.
+Expanded focused run 40200895349/job 121191660829 PASSED at a77ec1a8:
+121 modules and 4,676 members under both grammars, ten exact production-path
+admission/IR comparisons, 42 refusal cases and the original 359/49 lossless corpus.
+Native phase timings are 59,974ms/339,156KiB (Lean) and 62,098ms/398,296KiB (PS);
+these exclude separate checker/host overhead. Ordinary run 40200961302 remains
+in progress, so final R2a qualification is not yet claimed.
 The selected ordinary lossless job now requires those tests without removing
 existing lexical or character-proof regressions. Existing timeout, checker,
 fuel, memory and stack policies remain unchanged.

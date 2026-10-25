@@ -4,7 +4,13 @@ on:
   push:
     branches: [feat/psc1-checked-source-conversion-20261025]
     paths:
-      - psc1/**
+      - psc1/**/*.lean
+      - psc1/host-tools/**/*.mjs
+      - psc1/host-tools/package-lock.json
+      - psc1/scripts/**/*.mjs
+      - psc1/scripts/bounded-process.py
+      - psc1/lakefile.lean
+      - psc1/lean-toolchain
       - .github/workflows/psc1-source-conversion.yml
 permissions:
   contents: read
@@ -31,6 +37,8 @@ jobs:
           set -euo pipefail
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Install locked native publication dependencies
+        run: npm ci --prefix psc1/host-tools --ignore-scripts
       - name: Compile production provenance and independent checker
         working-directory: psc1
         run: |
@@ -38,4 +46,19 @@ jobs:
           lake build psc1_source_ownership psc1_lossless_source psc1_independent_checker psc1_source_census_probe psc1
       - name: Check candidate conversion host syntax
         working-directory: psc1
-        run: node --check host-tools/source-refactoring.mjs
+        run: |
+          node --check host-tools/source-refactoring.mjs
+          node --check scripts/refactor-source.mjs
+      - name: Check conversion candidates, comments, exact correspondence and CLI refusals
+        working-directory: psc1
+        run: node scripts/source-conversion-tests.mjs --focused
+      - name: Convert real applications and complete compiler source in both directions
+        working-directory: psc1
+        run: node scripts/source-conversion-tests.mjs --full-only
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-source-conversion-${{ github.sha }}
+          path: psc1/dist/source-conversion/
+          if-no-files-found: warn
+          retention-days: 90

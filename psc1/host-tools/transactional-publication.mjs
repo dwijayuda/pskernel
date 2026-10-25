@@ -18,6 +18,24 @@ function syncDirectory(directory) {
   const fd = fs.openSync(directory, 'r');
   try { fs.fsyncSync(fd); } finally { fs.closeSync(fd); }
 }
+function directory(file) {
+  const stat=inspect(file);
+  if(!stat||!stat.isDirectory()||stat.isSymbolicLink())fail('STORE_INVALID');
+}
+function ensureDirectory(file) {
+  const stat=inspect(file);
+  if(stat){directory(file);return;}
+  const parent=path.dirname(file);
+  ensureDirectory(parent);
+  fs.mkdirSync(file,{mode:0o700});
+  syncDirectory(parent);
+}
+function committedFailure(cause,result){
+  const error=Error('PSC1_SERVICE_PUBLICATION_COMMITTED_DURABILITY_UNCERTAIN',{cause});
+  Object.defineProperty(error,'committedPublication',
+    {value:Object.freeze({...result,durability:'unconfirmed'}),enumerable:true});
+  return error;
+}
 function regular(file, limit = 128 * 1024 * 1024) {
   const stat = fs.lstatSync(file);
   if (!stat.isFile() || stat.isSymbolicLink() || stat.size > limit) fail('ARTIFACT_CHANGED');
@@ -64,6 +82,8 @@ function verifyGeneration(directory, generation, expectedFiles) {
 export function readPublication(root, protocol = 'legacy-symlink') {
   requirePublicationPlatform(protocol);
   root = path.resolve(root);
+  if(!inspect(root))return null;
+  directory(root);directory(path.join(root,'generations'));
   const value = pointer(root, protocol);
   if (!value) return null;
   const directory = path.join(root, 'generations', value.generation);
@@ -72,15 +92,13 @@ export function readPublication(root, protocol = 'legacy-symlink') {
   if (!manifest.files.some(row => row.path === targetFile)) fail('MANIFEST_INVALID');
   return Object.freeze({ generation: value.generation, directory,
     manifestSha256: value.generation, target: path.join(directory, targetFile),
-    protocol, durability: 'confirmed-at-commit', manifest });
+    protocol, durability: 'recorded-commit', manifest });
 }
 export function openPublicationStore(root, protocol = 'legacy-symlink') {
   requirePublicationPlatform(protocol);
   root = path.resolve(root);
   for (const directory of [root, path.join(root, 'generations')]) {
-    const stat = inspect(directory);
-    if (stat && (!stat.isDirectory() || stat.isSymbolicLink())) fail('STORE_INVALID');
-    fs.mkdirSync(directory, { recursive: true });
+    ensureDirectory(directory);
   }
   const pointerName = protocol === 'portable-file' ? 'current.json' : 'current';
   if (fs.readdirSync(root).some(name =>
@@ -145,15 +163,17 @@ export function openPublicationStore(root, protocol = 'legacy-symlink') {
         return result;
       } catch (error) {
         if (committed) {
-          const uncertain = Error('PSC1_SERVICE_PUBLICATION_COMMITTED_DURABILITY_UNCERTAIN', { cause: error });
-          Object.defineProperty(uncertain, 'committedPublication',
-            { value: Object.freeze({ ...result, durability: 'unconfirmed' }), enumerable: true });
-          throw uncertain;
+          throw committedFailure(error,result);
         }
         throw error;
       } finally {
-        if (temporary && inspect(temporary)) fs.unlinkSync(temporary);
-        if (fd !== undefined) { fs.closeSync(fd); fs.unlinkSync(lock); }
+        try{
+          if (temporary && inspect(temporary)) fs.unlinkSync(temporary);
+          if (fd !== undefined) { fs.closeSync(fd); fs.unlinkSync(lock); }
+        }catch(error){
+          if(committed)throw committedFailure(error,result);
+          throw error;
+        }
       }
     },
   });

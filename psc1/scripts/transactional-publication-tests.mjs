@@ -27,6 +27,7 @@ function publish(p,fault) {
 }
 for(const protocol of ['legacy-symlink','portable-file']) {
  const root=path.join(out,protocol);
+ assert.equal(readPublication(path.join(root,'absent'),protocol),null);
  const first=publish(prepared(root,protocol,42));
  assert.equal(readPublication(root,protocol).generation,first.generation);
  const firstBytes=fs.readFileSync(first.target);
@@ -62,7 +63,18 @@ for(const protocol of ['legacy-symlink','portable-file']) {
  }),/ARTIFACT_CHANGED/);
  assert.equal(readPublication(root,protocol).generation,uncertain.committedPublication.generation);
  assert.throws(()=>openPublicationStore(root,protocol==='portable-file'?'legacy-symlink':'portable-file'),/STORE_UNMANAGED/);
- records.push({protocol,priorPreserved:true,immutableReaders:true,staleWriterRefused:true,
+ const gens=path.join(root,'generations'),moved=gens+'.saved';
+ fs.renameSync(gens,moved);fs.symlinkSync(moved,gens,'dir');
+ try{assert.throws(()=>readPublication(root,protocol),/STORE_INVALID/);}
+ finally{fs.unlinkSync(gens);fs.renameSync(moved,gens);}
+ const cleanup=prepared(root,protocol,46);let cleanupError;
+ try{publish(cleanup,phase=>{if(phase==='after-commit'){
+   fs.unlinkSync(path.join(root,'.publish.lock'));fs.mkdirSync(path.join(root,'.publish.lock'));
+ }});}catch(error){cleanupError=error;}
+ assert.match(cleanupError.message,/COMMITTED_DURABILITY_UNCERTAIN/);
+ assert.equal(readPublication(root,protocol).generation,cleanupError.committedPublication.generation);
+ fs.rmdirSync(path.join(root,'.publish.lock'));
+ records.push({protocol,postcommitCleanupFailureExplicit:true,symlinkGenerationRootRefused:true,priorPreserved:true,immutableReaders:true,staleWriterRefused:true,
    precommitFaults:3,postcommitUncertaintyExplicit:true,sealedTamperRefused:true,mixedProtocolsRefused:true});
 }
 // Kill a writer after durable seal, before pointer replacement. Readers retain the

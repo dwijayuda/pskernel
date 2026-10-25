@@ -14,16 +14,16 @@ assert.equal(install.status,0,install.stdout+install.stderr);
 const consumer=path.join(work,'consumer.mjs'),output=path.join(out,'checked-publication.json');
 fs.writeFileSync(consumer,`import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';import {pathToFileURL} from 'node:url';
 import {build,compile,readPublication,getCompilerMetadata} from 'proofscript';
-const records=[],rustConsumers=[],negatives=[];
-const source=(kind,n)=>({sources:[{module:'Entry',kind,text:'def answer : Nat := '+n+'\\n'}],entryModule:'Entry'});
+const records=[],ioRecords=[],rustConsumers=[],negatives=[];
+const source=(kind,n)=>({sources:[{module:'Entry',kind,text:'def answer : Nat := '+n+'\\ndef signed : Int := -42\\ndef flag : Bool := true\\ndef word : String := "λ🙂"\\n'}],entryModule:'Entry'});
 for(const engine of ['js','ts','rust','wasm-core'])for(const kind of ['lean','ps'])for(const target of ['js','ts','rust','wasm-core']) {
  const options={...source(kind,42),engine,target,publicationProtocol:'portable-file',out:path.resolve('stores',engine,kind,target)};
  const result=build(options);assert.equal(result.logicalAdmission,'accepted');assert.equal(result.target,target);assert.equal(result.durability,'confirmed');assert.deepEqual(result.kernelProviders,['wasm']);
  const current=readPublication(options);assert.equal(current.generation,result.generation);assert.equal(current.target,result.artifact);assert.equal(fs.existsSync(path.join(options.out,'current')),false);
  if(target==='rust'){
- const input=path.resolve('rust-consumer-'+engine+'-'+kind+'.rs');fs.writeFileSync(input,'fn main(){assert_eq!(proofscript_generated::answer().to_string(),"42");}');
+ const input=path.resolve('rust-consumer-'+engine+'-'+kind+'.rs');fs.writeFileSync(input,'fn main(){assert_eq!(proofscript_generated::answer().to_string(),"42");assert_eq!(proofscript_generated::signed().to_string(),"-42");assert!(proofscript_generated::flag());assert_eq!(proofscript_generated::word(),"λ🙂");}');
  rustConsumers.push({input,library:result.runtimeArtifact});
-}else{let api=await import(pathToFileURL(result.runtimeArtifact).href);if(target==='wasm-core')api=api.default;assert.equal(api.answer,42n);}
+}else{let api=await import(pathToFileURL(result.runtimeArtifact).href);if(target==='wasm-core')api=api.default;assert.equal(api.answer,42n);assert.equal(api.signed,-42n);assert.equal(api.flag,true);assert.equal(api.word,'λ🙂');}
  const next=build({...options,...source(kind,43)});assert.notEqual(next.generation,result.generation);if(target!=='rust'){let old=await import(pathToFileURL(result.runtimeArtifact).href);if(target==='wasm-core')old=old.default;assert.equal(old.answer,42n,'immutable reader');}
  const prior=readPublication(options).generation;
  for(const changed of [{assurance:'verified'},{target:'php'},{publicationProtocol:'arbitrary'},{sources:[{module:'Entry',kind,text:'def answer : Bool := 42\\n'}]}]) {
@@ -32,6 +32,25 @@ for(const engine of ['js','ts','rust','wasm-core'])for(const kind of ['lean','ps
  records.push({engine,kind,target,generation:result.generation,logicalAdmission:result.logicalAdmission,consumer:result.receipt.targetArtifact.consumer,immutableReader:true});
  console.log('PSC1_CHECKED_TARGET_CASE: '+JSON.stringify(records.at(-1)));
 }
+
+for(const engine of ['js','ts','rust','wasm-core'])for(const kind of ['lean','ps'])for(const target of ['js','ts','rust']){
+ const text=kind==='lean'?'def run (input : String) (dispatch : String -> String) : String := dispatch input\\n':'def run(input : String, dispatch : String -> String) : String := dispatch(input)\\n';
+ const options={engine,target,entryModule:'Entry',sources:[{module:'Entry',kind,text}],out:path.resolve('io-stores',engine,kind,target),publicationProtocol:'portable-file',outputAbi:'io-dispatcher'};
+ const result=build(options);assert.equal(result.logicalAdmission,'accepted');
+ if(target==='rust'){
+  const input=path.resolve('rust-io-consumer-'+engine+'-'+kind+'.rs');
+  fs.writeFileSync(input,'fn main(){let value=proofscript_generated::run(String::from("λ🙂"),std::rc::Rc::new(|input:String|format!("ok:{}",input)));assert_eq!(value,"ok:λ🙂");let trapped=std::panic::catch_unwind(std::panic::AssertUnwindSafe(||proofscript_generated::run(String::from("x"),std::rc::Rc::new(|_:String|panic!("explicit host trap"))))).is_err();assert!(trapped);}');
+  rustConsumers.push({input,library:result.runtimeArtifact,io:true});
+ }else{
+  const api=await import(pathToFileURL(result.runtimeArtifact).href);
+  assert.equal(api.run('λ🙂',input=>'ok:'+input),'ok:λ🙂');
+  const token=Error('host trap');assert.throws(()=>api.run('x',()=>{throw token;}),error=>error===token);
+ }
+ ioRecords.push({engine,kind,target,generation:result.generation,logicalAdmission:'accepted',unicodeCallback:true,hostTrapPreserved:true});
+ console.log('PSC1_CHECKED_IO_CASE: '+JSON.stringify(ioRecords.at(-1)));
+}
+assert.equal(ioRecords.length,24);
+
 const options={...source('lean',42),target:'ts',out:path.resolve('sdk-negative'),publicationProtocol:'portable-file'};
 build(options);const prior=readPublication(options).generation;
 const sdk=path.resolve('node_modules/typescript'),saved=sdk+'.saved';fs.renameSync(sdk,saved);
@@ -41,6 +60,13 @@ const file=path.join(sdk,'bin/tsc'),bytes=fs.readFileSync(file);fs.appendFileSyn
 try{assert.throws(()=>build(options),/IDENTITY|RESOURCE|CHANGED/);}finally{fs.writeFileSync(file,bytes);}
 assert.equal(readPublication(options).generation,prior);negatives.push({id:'corrupt-ts-sdk',priorPreserved:true});
 
+
+const tsNative=path.resolve('node_modules/@typescript/typescript-linux-x64');
+fs.renameSync(tsNative,tsNative+'.saved');try{assert.throws(()=>build(options),/OPTIONAL_PACKAGE_MISSING/);}finally{fs.renameSync(tsNative+'.saved',tsNative);}
+assert.equal(readPublication(options).generation,prior);negatives.push({id:'missing-ts-native-sdk',priorPreserved:true});
+const nativeFile=fs.readdirSync(tsNative,{recursive:true}).map(name=>path.join(tsNative,name)).filter(file=>fs.lstatSync(file).isFile()).sort((a,b)=>fs.statSync(b).size-fs.statSync(a).size)[0],nativeBytes=fs.readFileSync(nativeFile);
+fs.appendFileSync(nativeFile,'x');try{assert.throws(()=>build(options),/IDENTITY|RESOURCE|CHANGED/);}finally{fs.writeFileSync(nativeFile,nativeBytes);}
+assert.equal(readPublication(options).generation,prior);negatives.push({id:'corrupt-ts-native-sdk',priorPreserved:true});
 const rustOptions={...source('lean',42),target:'rust',out:path.resolve('rust-sdk-negative'),publicationProtocol:'portable-file'};
 build(rustOptions);const rustPrior=readPublication(rustOptions).generation;
 const rustPkg=path.resolve('node_modules/@proofscript/rust-target-consumer-linux-x64');
@@ -57,8 +83,8 @@ for(const engine of ['js','ts','rust','wasm-core'])for(const kind of ['lean','ps
  assert.throws(()=>build({engine,target:'wasm-core',entryModule:'Entry',sources:[{module:'Entry',kind,text}],out,publicationProtocol:'portable-file',outputAbi:'io-dispatcher'}),/COMPILER_REFUSED/);
  assert.equal(readPublication({out,publicationProtocol:'portable-file'}).generation,prior);negatives.push({id:'wasm-io-abi-refusal',engine,kind,priorPreserved:true});
 }
-assert.equal(records.length,32);assert.equal(negatives.length,141);
-fs.writeFileSync(${JSON.stringify(output)},JSON.stringify({schema:'psc1-installed-checked-publication/1',testedCommit:process.env.GITHUB_SHA,status:'passed',platform:process.platform,compilerSourceClosureDigest:getCompilerMetadata().compilerSourceClosureDigest,records,rustConsumers,negatives,nonLinuxQualification:'not-run',rustOutput:'typechecked-awaiting-external-link-observations'},null,2)+'\\n');
+assert.equal(records.length,32);assert.equal(negatives.length,143);
+fs.writeFileSync(${JSON.stringify(output)},JSON.stringify({schema:'psc1-installed-checked-publication/1',testedCommit:process.env.GITHUB_SHA,status:'passed',platform:process.platform,compilerSourceClosureDigest:getCompilerMetadata().compilerSourceClosureDigest,records,ioRecords,rustConsumers,negatives,nonLinuxQualification:'not-run',rustOutput:'typechecked-awaiting-external-link-observations'},null,2)+'\\n');
 console.log('PSC1_INSTALLED_CHECKED_PUBLICATION: PASS '+JSON.stringify({cases:records.length,negatives:negatives.length}));
 `);
 const result=spawnSync(process.execPath,[consumer],{cwd:work,env,encoding:'utf8',timeout:1500000,maxBuffer:32*1024*1024});

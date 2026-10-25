@@ -33,4 +33,4 @@ const toolchain={version:'1.90.0',platform:'linux',arch:'x64',directoryName:path
 fs.writeFileSync(path.join(stage,'index.mjs'),'export const target="rust";\n');
 fs.writeFileSync(path.join(stage,'package.json'),JSON.stringify({name:'@proofscript/rust-target-consumer-linux-x64',version:'0.1.0-psc1.6',type:'module',private:true,os:['linux'],cpu:['x64'],main:'index.mjs',exports:{'.':'./index.mjs','./package.json':'./package.json'},files:['index.mjs','api-inspector','deps','inspector.Cargo.lock','target.Cargo.lock']},null,2)+'\n');
 fs.writeFileSync(path.join(out,'descriptor.json'),JSON.stringify({schema:'psc1-rust-target-consumer/1',locked,package:'@proofscript/rust-target-consumer-linux-x64',version:'0.1.0-psc1.6',entry:'index.mjs',inspector:'api-inspector',files:inventory(stage),toolchain},null,2)+'\n');
-console.log('PSC1_RUST_TARGET_CONSUMER: '+JSON.stringify({locked,sdkFiles:sdkFiles.length,packageFiles:inventory(stage).length}));
+console.log('PSC1_RUST_TARGET_CONSUMER: '+JSON.stringify({locked,sdkFiles:sdkFiles.length,sdkBytes:sdkFiles.reduce((n,r)=>n+r.bytes,0),largestSdkFile:Math.max(...sdkFiles.map(r=>r.bytes)),packageFiles:inventory(stage).length}));

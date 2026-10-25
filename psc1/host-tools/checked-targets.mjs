@@ -5,7 +5,7 @@ import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 const fail = code => { throw Error('PSC1_SERVICE_' + code); };
 const ownWasmTransport = fileURLToPath(new URL('./generated-wasm-transport.mjs', import.meta.url));
-export function prepareCheckedTarget(stage, candidate, { target, typescript }, run) {
+export function prepareCheckedTarget(stage, candidate, { target, typescript, rust }, run) {
   if (target === 'js') {
     fs.writeFileSync(path.join(stage, 'target.mjs'), candidate.source);
     return { targetFile: 'target.mjs', runtimeFile: 'target.mjs',
@@ -30,6 +30,23 @@ export function prepareCheckedTarget(stage, candidate, { target, typescript }, r
         files: ['target.ts','target.mjs','target.d.ts','target-config.json'],
         consumer: 'typescript7.0.2-strict-noEmitOnError' };
     } finally { fs.rmSync(work,{recursive:true,force:true}); }
+  }
+  if(target==='rust'){
+    if(!rust||!path.isAbsolute(rust.rustc||'')||!path.isAbsolute(rust.inspector||''))fail('RUST_CONSUMER_UNAVAILABLE');
+    const file=path.join(stage,'target.rs');fs.writeFileSync(file,candidate.source);
+    const names=run('target-rust-api',[file],rust.inspector).trim().split('\\n').filter(Boolean).sort();
+    if(JSON.stringify(names)!==JSON.stringify([...candidate.publicNames].sort()))fail('TARGET_API_MISMATCH');
+    const args=['--edition=2021','--crate-name','proofscript_generated','--crate-type','rlib',
+      '--sysroot',rust.sysroot,'-L','dependency='+rust.dependencyDirectory,
+      ...rust.externs.flatMap(row=>['--extern',row.name+'='+row.file]),
+      file,'-o',path.join(stage,'libproofscript.rlib')];
+    run('target-rust-typecheck',args,rust.rustc);
+    fs.writeFileSync(path.join(stage,'target-consumer.json'),JSON.stringify({
+      schema:'psc1-rust-target-consumer-receipt/1',rustVersion:'1.90.0',platform:'linux-x64',
+      crateType:'rlib',publicNames:candidate.publicNames,dependencyFiles:rust.externs.map(row=>({name:row.name,file:path.basename(row.file)}))}));
+    return {targetFile:'target.rs',runtimeFile:'libproofscript.rlib',
+      files:['target.rs','libproofscript.rlib','target-consumer.json'],
+      consumer:'rust1.90.0-locked-dependencies-syn2.0.106-public-values'};
   }
   if (target === 'wasm-core') {
     if (candidate.outputAbi) fail('WASM_ABI_UNSUPPORTED');

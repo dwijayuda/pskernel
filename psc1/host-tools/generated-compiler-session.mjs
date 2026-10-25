@@ -26,21 +26,9 @@ function identity(file, expected) {
     fail('PSC1_SERVICE_TOOL_IDENTITY_CHANGED');
   return { path: file, sha256: expected };
 }
-function currentPointer(root) {
-  const file = path.join(root, 'current'), stat = inspect(file);
-  if (!stat) return null;
-  if (!stat.isSymbolicLink()) fail('PSC1_SERVICE_CURRENT_INVALID');
-  const value = fs.readlinkSync(file);
-  if (!/^generations\/[0-9a-f]{64}$/.test(value)) fail('PSC1_SERVICE_CURRENT_INVALID');
-  return value;
-}
 function publicationFault(phase) {
   if (process.env.PSC1_TEST_SERVICE_PUBLICATION_FAIL_AT === phase)
     fail('PSC1_SERVICE_INJECTED_PUBLICATION_FAILURE:' + phase);
-}
-function syncDirectory(directory) {
-  const fd = fs.openSync(directory, 'r');
-  try { fs.fsyncSync(fd); } finally { fs.closeSync(fd); }
 }
 function inventory(stage) {
   return fs.readdirSync(stage).sort().map(name => {
@@ -58,14 +46,14 @@ function checkFiles(stage, expected) {
  * hash, generated JSON field, or fabricated wrapper cannot publish a session.
  */
 export function createGeneratedJsCompilerSession({ requestId, sources, entryModule, assurance, outputAbi = 'scalar', target = 'js', publicationProtocol = 'legacy-symlink',
-    serviceKind = 'js-adapter', typescript,
+    serviceKind = 'js-adapter', typescript, rust,
     serviceFile, serviceSha256, runnerFile, runnerSha256,
     checkerExecutable, checkerSha256, checkerScriptFile, checkerScriptSha256, publicationRoot, serviceDependencies = [], additionalCheckers = [] }) {
   if (process.version !== 'v22.23.3') fail('PSC1_SERVICE_NODE_PIN');
   if (typeof requestId !== 'string' || !requestId || typeof entryModule !== 'string' ||
       !['checked', 'ordinary-checked'].includes(assurance) ||
       !['scalar', 'io-dispatcher'].includes(outputAbi) ||
-      !['js','ts','wasm-core'].includes(target) ||
+      !['js','ts','rust','wasm-core'].includes(target) ||
       !['js-adapter','unified-embedded','unified-bundle'].includes(serviceKind) ||
       (target !== 'js' && serviceKind === 'js-adapter') ||
       !path.isAbsolute(publicationRoot || '')) fail('PSC1_SERVICE_REQUEST_INVALID');
@@ -100,6 +88,12 @@ export function createGeneratedJsCompilerSession({ requestId, sources, entryModu
     typescript.pins.forEach((pin,index)=>{tools['typescript-'+index]=identity(pin.path,pin.sha256);});
     if (!typescript.pins.some(pin=>pin.path===typescript.entry)) fail('PSC1_SERVICE_TYPESCRIPT_ENTRY');
   }
+  if (rust) {
+    if(target!=='rust'||!Array.isArray(rust.pins))fail('PSC1_SERVICE_RUST_CONSUMER');
+    rust.pins.forEach((pin,index)=>{tools['rust-'+index]=identity(pin.path,pin.sha256);});
+    if(![rust.rustc,rust.inspector].every(file=>rust.pins.some(pin=>pin.path===file)))
+      fail('PSC1_SERVICE_RUST_ENTRY');
+  }
   const additionalAdmissions=[];
   const verifyTools = () => Object.values(tools).forEach(tool => identity(tool.path, tool.sha256));
   const scalarRequest = ['psc1-compiler-service/1', requestId, sourceClosureDigest,
@@ -131,18 +125,22 @@ export function createGeneratedJsCompilerSession({ requestId, sources, entryModu
         authoritative:false,publication:state==='published'?'committed':'not-committed'}));
     } catch (loggingError) { events.push({role:'host-diagnostic',error:loggingError.message}); }
   }
-  const run = (role, args) => {
+  const run = (role, args, executable = process.execPath) => {
+    if(![process.execPath,...(rust?[rust.rustc,rust.inspector]:[])].includes(executable))fail('PSC1_SERVICE_EXECUTABLE');
     const started = Date.now();
-    const result = spawnSync(process.execPath, args, { encoding: 'utf8',
-      timeout: 240000, maxBuffer: 32 * 1024 * 1024 });
-    events.push({ role, executable: process.execPath, args: [...args],
+    const env={...process.env};
+    for(const key of Object.keys(env))
+      if(key==='NODE_OPTIONS'||key.startsWith('RUST')||key.startsWith('CARGO')||key==='LD_PRELOAD'||key==='LD_LIBRARY_PATH'||key.startsWith('DYLD_'))delete env[key];
+    const result = spawnSync(executable, args, { encoding: 'utf8', env,
+      timeout: 240000, maxBuffer: 32 * 1024 * 1024,killSignal:'SIGKILL',windowsHide:true });
+    events.push({ role, executable, args: [...args],
       status: result.status, signal: result.signal, elapsedMs: Date.now() - started,
       error: result.error?.message || null });
     if (result.error || result.status !== 0) {
       fs.writeFileSync(path.join(stage,role+'.stderr.txt'),result.stderr || '');
       fs.writeFileSync(path.join(stage,role+'.stdout.txt'),result.stdout || '');
       fail('PSC1_SERVICE_PROCESS_FAILED:' + role + ':' +
-        (result.error?.code || result.signal || result.status));
+        (result.error?.code || result.signal || result.status)+':'+(result.stderr||result.stdout||'').slice(0,8192));
     }
     return result.stdout;
   };
@@ -243,7 +241,8 @@ export function createGeneratedJsCompilerSession({ requestId, sources, entryModu
           additionalAdmissions.push({name:checker.name,scriptSha256:checker.script.sha256,
             admissionsSha256:sha(admissions),checkerCommit:result.leanCommit,accepted:true,responseSha256:sha(checked.stdout)});
         }
-        targetArtifact=prepareCheckedTarget(stage,candidate,{target,typescript},run);
+        targetArtifact=prepareCheckedTarget(stage,candidate,{target,typescript,rust},run);
+        if(target!=='rust'){
         if(target!=='wasm-core')run('target-syntax',['--check',path.join(stage,targetArtifact.runtimeFile)]);
         const apiCode="import {pathToFileURL} from 'node:url';"+
           "let api=await import(pathToFileURL(process.argv[1]).href);"+
@@ -253,6 +252,7 @@ export function createGeneratedJsCompilerSession({ requestId, sources, entryModu
           "throw Error('PSC1_SERVICE_TARGET_API_MISMATCH');";
         run('target-public-api',['--input-type=module','-e',apiCode,
           path.join(stage,targetArtifact.runtimeFile),JSON.stringify(candidate.publicNames)]);
+        }
         fs.writeFileSync(path.join(stage, 'admissions.json'), admissions);
         fs.writeFileSync(path.join(stage, 'original-ir.json'), JSON.stringify(candidate.originalIr));
         fs.writeFileSync(path.join(stage, 'specialized-ir.json'), JSON.stringify(candidate.specializedIr));

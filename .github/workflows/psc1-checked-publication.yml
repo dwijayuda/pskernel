@@ -3,6 +3,9 @@ on:
   push:
     branches: [feat/psc1-portable-checked-publication-20261026]
     paths: ['psc1/host-tools/transactional-publication.mjs', 'psc1/scripts/transactional-publication-tests.mjs', 'psc1/host-tools/checked-targets.mjs', 'psc1/host-tools/generated-compiler-session.mjs', 'psc1/host-tools/installed-engine-resolver.mjs', 'psc1/npm-cli/universal*', 'psc1/scripts/slim-universal-package.mjs', 'psc1/scripts/checked-publication-installed.mjs', '.github/workflows/psc1-checked-publication.yml']
+concurrency:
+  group: psc1-checked-publication-${{ github.ref }}-${{ github.sha }}
+  cancel-in-progress: false
 permissions:
   contents: read
   actions: read
@@ -40,6 +43,10 @@ jobs:
           node-version: '22.23.3'
       - name: Install locked target consumer for assembly only
         run: npm ci --prefix .. --ignore-scripts --include=optional
+      - name: Prepare locked optional Rust target consumer
+        run: |
+          rustup toolchain install 1.90.0 --profile minimal
+          node scripts/prepare-rust-target-consumer.mjs
       - name: Assemble unchanged qualified G3s and actual kernels
         env:
           GH_TOKEN: ${{ github.token }}
@@ -53,6 +60,15 @@ jobs:
           node scripts/slim-universal-io-preflight.mjs
       - name: Execute checked target publication and transaction boundaries
         run: node scripts/checked-publication-installed.mjs
+      - name: Preserve actual installed application and target mapping regressions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rustup default 1.90.0
+          node scripts/generated-io-installed-applications.mjs
+          node scripts/generated-io-installed-candidates.mjs
+      - name: Check the packed public declarations with the pinned SDK
+        run: node scripts/checked-publication-types.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -64,4 +80,7 @@ jobs:
             psc1/dist/slim-universal/io-adapter-preflight.json
             psc1/dist/slim-universal/compiler-kernel-admission.json
             psc1/dist/slim-universal/checked-publication.json
+            psc1/dist/slim-universal/application-qualification.json
+            psc1/dist/slim-universal/io-candidate-qualification.json
+            psc1/dist/slim-universal/checked-publication-types.json
           retention-days: 90

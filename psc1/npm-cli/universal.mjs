@@ -36,7 +36,7 @@ function selection(options = {}) {
   if (!['checked', 'ordinary-checked'].includes(assurance)) fail('ASSURANCE');
   if (!['scalar', 'io-dispatcher'].includes(outputAbi)) fail('OUTPUT_ABI');
   if (!['wasm', 'native', 'both'].includes(kernel)) fail('KERNEL');
-  if (!['js','ts','wasm-core'].includes(target)) fail('CHECKED_TARGET_UNSUPPORTED');
+  if (!['js','ts','rust','wasm-core'].includes(target)) fail('CHECKED_TARGET_UNSUPPORTED');
   if (!['legacy-symlink','portable-file'].includes(publicationProtocol)) fail('PUBLICATION_PROTOCOL');
   const sources = clone(options.sources);
   compilerSourceClosureDigest(sources);
@@ -45,7 +45,8 @@ function selection(options = {}) {
     !sources.some((s) => s.module === options.entryModule)
   )
     fail('ENTRY');
-  return { engine, kernel, assurance, outputAbi, target, publicationProtocol, sources, entryModule: options.entryModule };
+  if(options.rustToolchainRoot!==undefined&&(typeof options.rustToolchainRoot!=='string'||!path.isAbsolute(options.rustToolchainRoot)))fail('RUST_SDK_ROOT');
+  return { engine, kernel, assurance, outputAbi, target, publicationProtocol, sources, rustToolchainRoot:options.rustToolchainRoot, entryModule: options.entryModule };
 }
 // Only the installed host composes tool paths, pins and independent checkers.
 // Source/project/wire data never supplies these capabilities.
@@ -81,7 +82,7 @@ function sessionFor(selected, publicationRoot) {
     target: selected.target,
     publicationProtocol: selected.publicationProtocol,
     serviceKind: selected.target==='js'?'js-adapter':(engine.candidateKind==='embedded'?'unified-embedded':'unified-bundle'),
-    ...resolveCheckedTarget(selected.target,d),
+    ...resolveCheckedTarget(selected.target,d,{rustToolchainRoot:selected.rustToolchainRoot}),
     serviceFile: selected.target==='js'?engine.service.path:engine.candidate.path,
     serviceSha256: selected.target==='js'?engine.service.sha256:engine.candidate.sha256,
     runnerFile: path.join(installationRoot,selected.target==='js'?'scripts/generated-compiler-runner.mjs':'scripts/universal-candidate-runner.mjs'),
@@ -101,7 +102,7 @@ export function getCompilerMetadata() {
 export async function checkCanonicalAdmissions(source, { provider = 'wasm' } = {}) {
   return checkInstalledAdmissions(source, provider);
 }
-// Execute the complete checked session, then return the sealed JS bytes.
+// Execute the complete checked session, then return the sealed target source.
 // Temporary staging is always removed; this API does not publish a generation.
 export function compile(options) {
   const selected = selection(options),
@@ -109,7 +110,7 @@ export function compile(options) {
   try {
     const session = sessionFor(selected, path.join(temporary, 'store')),
       receipt = session.execute();
-    const sourceFile=selected.target==='ts'?'target.ts':selected.target==='wasm-core'?'target.wasm.hex':'target.mjs';
+    const sourceFile=selected.target==='ts'?'target.ts':selected.target==='rust'?'target.rs':selected.target==='wasm-core'?'target.wasm.hex':'target.mjs';
     const source = fs.readFileSync(path.join(session.stagingDirectory, sourceFile), 'utf8');
     if (hash(source) !== receipt.sourceSha256) fail('CHECKED_SOURCE_CHANGED');
     return Object.freeze({
@@ -120,6 +121,7 @@ export function compile(options) {
       kernelProviders: selected.kernel === 'both' ? ['wasm', 'native'] : [selected.kernel],
       compilerSourceClosureDigest: loadDistribution().compilerSourceClosureDigest,
       source,
+      sourceEncoding:selected.target==='wasm-core'?'psc1-wasm-hex/1':'utf8',
       receipt,
       logicalAdmission: 'accepted',
       irValidation: 'original-and-transformed-by-pinned-compiler',
@@ -131,7 +133,7 @@ export function compile(options) {
   }
 }
 export function build(options) {
-  // Preserve Linux directory-fsync/symlink commit guarantees. Other platforms use compile().
+  // Both pointer layouts require qualified Linux durability. Other platforms use compile().
   if (process.platform !== 'linux')
     fail('PUBLICATION_PLATFORM_UNQUALIFIED: use the checked compile API or compile stdout command');
   if (typeof options?.out !== 'string' || !options.out) fail('OUTPUT_DIRECTORY');

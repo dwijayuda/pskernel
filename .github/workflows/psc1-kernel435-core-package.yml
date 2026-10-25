@@ -28,6 +28,26 @@ jobs:
           node scripts/kernel435-core-package.mjs
       - name: Real installed native and four generated compiler engines with dual admission
         run: node scripts/kernel435-core-installed.mjs dist/kernel435-core/tarballs/proofscript-0.1.0-psc1.3.tgz
+      - name: Typecheck actual installed core and kernel public APIs
+        run: |
+          npm install --prefix "$RUNNER_TEMP/psc1-core-types" --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          npm install --prefix "$RUNNER_TEMP/psc1-core-types" --offline --ignore-scripts --no-audit --no-fund "$GITHUB_WORKSPACE/psc1/dist/kernel435-core/tarballs/proofscript-0.1.0-psc1.3.tgz" "$GITHUB_WORKSPACE/psc1/dist/kernel435-core/tarballs/proofscript-pskernel-lean-4.35.0.tgz" "$GITHUB_WORKSPACE/psc1/dist/kernel435-core/tarballs/proofscript-pskernel-lean-wasm-4.35.0.tgz"
+          cat > "$RUNNER_TEMP/psc1-core-types/consumer.mts" <<'TS'
+          import {createIndependentKernelToolchain,type KernelToolchainResult} from 'proofscript/kernel';
+          import {createKernel as nativeKernel} from '@proofscript/pskernel-lean';
+          import {createKernel as wasmKernel} from '@proofscript/pskernel-lean-wasm';
+          const checker=await createIndependentKernelToolchain({root:'.'});
+          const result:KernelToolchainResult=await checker.checkCanonicalAdmissions('{}');
+          const native=await nativeKernel();const wasm=await wasmKernel();
+          const accepted:boolean=result.accepted&&(await native.checkCanonicalAdmissions('{}')).accepted&&(await wasm.checkCanonicalAdmissions('{}')).accepted;
+          // @ts-expect-error public result is readonly
+          result.accepted=true;
+          console.log(accepted);
+          TS
+          cat > "$RUNNER_TEMP/psc1-core-types/tsconfig.json" <<'JSON'
+          {"compilerOptions":{"noEmit":true,"strict":true,"module":"NodeNext","moduleResolution":"NodeNext","target":"ES2022"},"files":["consumer.mts"]}
+          JSON
+          node "$RUNNER_TEMP/psc1-core-types/node_modules/typescript/bin/tsc" --project "$RUNNER_TEMP/psc1-core-types/tsconfig.json"
       - name: Independently recheck the exact frozen compiler graph with both kernels
         env:
           GH_TOKEN: ${{ github.token }}

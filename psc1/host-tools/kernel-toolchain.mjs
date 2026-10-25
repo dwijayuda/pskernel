@@ -4,7 +4,8 @@ const expectedCommit='eb6cafb7290e8bd5f2937522d8d804f58f02bafc',sha=b=>crypto.cr
 const fail=message=>{throw new Error('PSC1_KERNEL_PACKAGE: '+message);};
 export function loadKernelDistribution(root){
  const file=path.join(root,'KERNEL_DISTRIBUTION.json'),st=fs.lstatSync(file);if(!st.isFile()||st.isSymbolicLink()||st.size>1024*1024)fail('distribution file kind/size');
- const d=JSON.parse(fs.readFileSync(file,'utf8'));if(d.schema!=='psc1-installed-independent-kernels/1'||d.leanVersion!=='4.35.0'||d.leanCommit!==expectedCommit||d.canonicalAdmissionsVersion!==2)fail('distribution identity');
+ const d=JSON.parse(fs.readFileSync(file,'utf8'));if(d.schema!=='psc1-installed-independent-kernels/1'||d.leanVersion!=='4.35.0'||d.leanCommit!==expectedCommit||d.canonicalAdmissionsVersion!==2||d.defaultProvider!=='wasm')fail('distribution identity');
+ if(!Array.isArray(d.hostFiles)||d.hostFiles.length===0)fail('host pin set missing');
  if(!d.providers||Object.keys(d.providers).sort().join(',')!=='native,wasm')fail('closed provider set');
  return d;
 }

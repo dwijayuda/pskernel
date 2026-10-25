@@ -1,0 +1,32 @@
+{
+  "schema": "psc1-t05-layout497-integration-v1",
+  "repository": "dwijayuda/pskernel",
+  "branch": "integration/psc1-pskernel-expr-v2-lean435-20261021",
+  "expectedPreviousSha": "ae47fa0ca776980890c20c730d00a4f11c73b6c4",
+  "qualifiedSourceSha": "20224a295359abb201f56c72395690bf0bfac9fa",
+  "force": false,
+  "fullRunId": 40156344029,
+  "fullRunAttempt": 1,
+  "auditRunId": 40156379316,
+  "auditRunAttempt": 1,
+  "auditorSourceSha": "1b95b01a585310d7a305f16edb59ba48d1a7e085",
+  "evidenceCommitBeforeIntegration": "350a2de8d9089c99f7710df0fc8a3dcb8d04ce72",
+  "evidencePath": "psc1/packages/pskernel-core/docs/qualification/T05_LAYOUT497_QUALIFIED_20224a29.json",
+  "ancestorVerified": true,
+  "aheadBy": 3,
+  "productionChanges": [],
+  "result": {
+    "success": true
+  },
+  "postUpdateRefVerified": true,
+  "postUpdateRef": {
+    "ref": "refs/heads/integration/psc1-pskernel-expr-v2-lean435-20261021",
+    "node_id": "REF_kwDOUlmxxdoAPXJlZnMvaGVhZHMvaW50ZWdyYXRpb24vcHNjMS1wc2tlcm5lbC1leHByLXYyLWxlYW40MzUtMjAyNjEwMjE",
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/git/refs/heads/integration/psc1-pskernel-expr-v2-lean435-20261021",
+    "object": {
+      "sha": "20224a295359abb201f56c72395690bf0bfac9fa",
+      "type": "commit",
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/git/commits/20224a295359abb201f56c72395690bf0bfac9fa"
+    }
+  }
+}

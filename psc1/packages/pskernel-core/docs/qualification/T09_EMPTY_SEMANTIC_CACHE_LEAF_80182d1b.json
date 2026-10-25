@@ -1,0 +1,882 @@
+{
+  "schema": "psc1-empty-semantic-cache-paired-leaf-checkpoint-v1",
+  "repository": "dwijayuda/pskernel",
+  "experimentSourceSha": "80182d1b95894fc3daa5c7fbcfe8b1a7adb687d9",
+  "runId": 40158333460,
+  "runAttempt": 1,
+  "jobId": 121064387870,
+  "status": "pass",
+  "inputReceipt": {
+    "schema": "psc1-empty-cache-leaf-inputs-v1",
+    "compilerSourceSha": "80005bb250a7324772db76d51684d23fbf0fe6ed",
+    "compilerSha256": "13635a423d1343e9a4770be0b7e02d859a6b845b221a0363d19bfdfab8e3cc1c",
+    "compilerReceipt": {
+      "bytes": 1832,
+      "sha256": "0c852d2948bf0310823bade83253a391977a10a7184d466a7b5245c1e0499b3b"
+    },
+    "candidateNativeSourceSha": "e503972553ae2d41d5ba7a26d7739fb32ee86b96",
+    "candidateNativeProofs": 69,
+    "candidateNativeReceipt": {
+      "bytes": 8895,
+      "sha256": "57c2beac55dd1ab5184df29176ca9cc6189032fbddbc9e2cdd40fe6cef635a74"
+    },
+    "rawZipSha256Verified": true,
+    "extractedContentsVerified": true,
+    "officialExtraction": true,
+    "independentZipParser": false,
+    "compilerFiles": {
+      "source-audit.json": {
+        "bytes": 1986,
+        "sha256": "446b17e32dc08159b3a2fd3bc23699a339375a320f1dd80e6d5e3604b356057e"
+      },
+      "psc1": {
+        "bytes": 8153536,
+        "sha256": "13635a423d1343e9a4770be0b7e02d859a6b845b221a0363d19bfdfab8e3cc1c"
+      },
+      "proofs.log": {
+        "bytes": 321,
+        "sha256": "d4149b5e52dd64256bfc68acb407fe110a436dbcfccd4faa72d26d0aa170cc4c"
+      },
+      "native-build.log": {
+        "bytes": 14539,
+        "sha256": "6205c43a466028d6830e71c9fa532e5422f06cadaf402597043ffbb9b4816106"
+      },
+      "compiler-build.log": {
+        "bytes": 25030,
+        "sha256": "d55c757817c2b4f55fc9c9c510e3f09d0a4726809bd2a15371f99fac777746d3"
+      },
+      "portable-leaf.log": {
+        "bytes": 15890,
+        "sha256": "d24923e70c58d86ec09061581eb8efebec5162327f7eb5d0620570930e365609"
+      },
+      "compiler-receipt.json": {
+        "bytes": 1832,
+        "sha256": "0c852d2948bf0310823bade83253a391977a10a7184d466a7b5245c1e0499b3b"
+      },
+      "native-receipt.json": {
+        "bytes": 667,
+        "sha256": "e16e8b3518e57723149c0a121b2eb43c28e50513c84b9da268fa2449e84073bd"
+      },
+      "runtime/pskernel-expr-v2-dag-smoke.mjs": {
+        "bytes": 244729,
+        "sha256": "b931f685eb8b1fd8f189e1ce9f0b1ca655ddf1320d801f5b4ace93d64b7660b0"
+      },
+      "runtime/pskernel-arena-replay-controls.mjs": {
+        "bytes": 17512,
+        "sha256": "28e8ea79d5557a8bb7f5b7d5afa4f69741884c1ee31c3c0a3d7c245de3ca144a"
+      },
+      "runtime/pskernel-expr-v2-generated-smoke.mjs": {
+        "bytes": 38574,
+        "sha256": "9cf5f24aa79b314bb6165fccd9c4df6ca0a0d791493472792da20a97a9cb38d8"
+      },
+      "runtime/pskernel-expr-v2-transform-delay-smoke.mjs": {
+        "bytes": 8829,
+        "sha256": "6d37adba950f4d77cde78c9c82ef9607f641e25ced9a7e275e005595c1aa8421"
+      },
+      "runtime/pskernel-arena-replay.mjs": {
+        "bytes": 29464,
+        "sha256": "4751f15a97288d494354d1bd5d5b2ee7375d0f0ce0f2885929bb0b8e8084a821"
+      }
+    },
+    "nativeFiles": {
+      "proof-status.log": {
+        "bytes": 340,
+        "sha256": "bbde5fdaf59d186562017a5aa4d221bcfca99921af56a418c57bd72d32fe3718"
+      },
+      "native-build.log": {
+        "bytes": 14538,
+        "sha256": "d9ef489276105ab0e6b83f874c415364c731550dc3ab7136085fdce80013fc0b"
+      },
+      "empty-semantic-cache-proofs.log": {
+        "bytes": 249,
+        "sha256": "d7e0c6becb572011aaafce0c2b232914376c96d5e2ef4c524e9e996ceefbd4e9"
+      },
+      "closed-cache-analysis-proofs.log": {
+        "bytes": 1150,
+        "sha256": "b746149a52202f619ae47573875540cb5550c03673429cedbc371ba6efecdd10"
+      },
+      "source-inventory.json": {
+        "bytes": 10243,
+        "sha256": "8b0874cf6be298d6312b457072ef60a3d4a7089e36433fc0abd78ae9af0395cb"
+      },
+      "cache-scope-proofs.log": {
+        "bytes": 9311,
+        "sha256": "d6f86aa750b5d93f9c42fea60153aac1f8457d8ef868e314632b6f7c83b566ae"
+      },
+      "native-receipt.json": {
+        "bytes": 8895,
+        "sha256": "57c2beac55dd1ab5184df29176ca9cc6189032fbddbc9e2cdd40fe6cef635a74"
+      },
+      "sources/psc1/lean-toolchain": {
+        "bytes": 25,
+        "sha256": "ca5f1f601d34c49079e38d7e7041eb0f2a9c227fbc1df0f404820069a052330c"
+      },
+      "sources/psc1/kernel-lakefile.lean": {
+        "bytes": 17793,
+        "sha256": "fcdb014258574e01a3c2b0800ab1e0687f89916874c5da6d5985ce4e485d5170"
+      },
+      "sources/psc1/scripts/install-lean435-ci.sh": {
+        "bytes": 1051,
+        "sha256": "0d7bef69b04c5ba426e9c48003e8c34247853c722e116d5185613e11620162c9"
+      },
+      "sources/psc1/test/PsKernelCacheScopeProofs.lean": {
+        "bytes": 36771,
+        "sha256": "c44f6929ae59560ca107e548485421a60caaaa8e7fcd2f41a32ddd55038b75a5"
+      },
+      "sources/psc1/test/PsKernelClosedCacheAnalysisRegression.lean": {
+        "bytes": 6106,
+        "sha256": "ecb1da642bacc61f60806bf0875d4461ac1b6090058edff9d9cd9b94d7d1c61c"
+      },
+      "sources/psc1/test/PsKernelEmptySemanticCacheProofs.lean": {
+        "bytes": 1917,
+        "sha256": "abb7e3dd6b93dec51f9e315e6bd6289ce1869c75744da3beb8a9627edac9606d"
+      },
+      "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Expr.lean": {
+        "bytes": 27573,
+        "sha256": "068312a568ee3b1b86312d9a9e589a32813e45cf703d0830108efc1556666e51"
+      },
+      "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean": {
+        "bytes": 15152,
+        "sha256": "77562cae6b5e1eec7272f292982fcb39cb9037f2e045a4b962ab8b10cb13d819"
+      },
+      "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean": {
+        "bytes": 9740,
+        "sha256": "462d8d839b1e5fd5b5f0620cb18b860d789247aabb4d14c677a0bc69cbc3c16e"
+      },
+      "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean": {
+        "bytes": 1784,
+        "sha256": "0894a4c8c7f6ffe232c34201280ff82bbc90ab966df885a56ac40bc5c3803aa5"
+      },
+      "sources/.github/workflows/psc1-empty-semantic-cache-preflight.yml": {
+        "bytes": 18066,
+        "sha256": "48a9b4bd6cc25cfa444e44ee0363bf702a801fb3721f42cb13ebd4204f0d5766"
+      }
+    }
+  },
+  "variants": [
+    {
+      "schema": "psc1-empty-cache-leaf-variant-v1",
+      "status": "pass",
+      "variant": "baseline",
+      "kernelSourceSha": "20224a295359abb201f56c72395690bf0bfac9fa",
+      "compilerSourceSha": "80005bb250a7324772db76d51684d23fbf0fe6ed",
+      "compilerSha256": "13635a423d1343e9a4770be0b7e02d859a6b845b221a0363d19bfdfab8e3cc1c",
+      "experiment": {
+        "sourceSha": "80182d1b95894fc3daa5c7fbcfe8b1a7adb687d9",
+        "runId": "40158333460",
+        "runAttempt": "1",
+        "job": "paired",
+        "files": [
+          {
+            "path": ".github/workflows/psc1-empty-semantic-cache-leaf.yml",
+            "bytes": 4286,
+            "sha256": "df5843fcad4cf6c9346e45b329551531e63c2890e34f2a344a30308f70eba2bf",
+            "gitBlobSha": "3157ec79aaae99df7c324723d3987ab369010ed4"
+          },
+          {
+            "path": ".github/psc1-empty-semantic-cache/leaf.py",
+            "bytes": 36226,
+            "sha256": "abf7848400b9ad6b2feb8109ec8474e7eccbe35be4c5d706d32464ab140c48e5",
+            "gitBlobSha": "7556f7d827f9c96fbb517ad9073e8752b9f1142c"
+          },
+          {
+            "path": "psc1/scripts/pskernel-empty-semantic-cache-smoke.mjs",
+            "bytes": 4508,
+            "sha256": "0cce9ce96ace90dcd6ac9cfe1c7a5352d4aca3f05a842fa76e89112961277721",
+            "gitBlobSha": "8791063bc6850dec0af726afad8563f78cb63d7e"
+          }
+        ]
+      },
+      "entry": "psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean",
+      "sourceCount": 8,
+      "sourceManifest": {
+        "bytes": 4116,
+        "sha256": "af77c51c41fa59f59aefc204f824b2c51c22b7c2427eb558927ca18927832e8e"
+      },
+      "bootstrapTools": {
+        "bytes": 603,
+        "sha256": "af850a6f6b911c579c01f13e3f5b740fc26a901461ff7364d6654b7caedb047b"
+      },
+      "canonicalClosureSha256": "297644d0833761a21326cda69abe698b7f2e213cfa9de373f348d814e242f40e",
+      "generatedKernel": {
+        "bytes": 360259,
+        "sha256": "47c320361a197b3bfe4eeb16c7a95375ceed26869375d1fd941ed7c2cb34021e"
+      },
+      "commandStatuses": {
+        "bytes": 4687,
+        "sha256": "6194620465a1b42d008e41d9a29f441c216fce225a65b5a953a9821af222d8e1"
+      },
+      "runtime": {
+        "retained": {
+          "expressions": 20,
+          "states": 2,
+          "mapQueries": 40,
+          "pairQueries": 800,
+          "inferQueries": 80,
+          "assertions": 1884,
+          "smallAndIndexed": true,
+          "openEntriesSeeded": true
+        },
+        "empty": {
+          "schema": "psc1-empty-semantic-cache-v1",
+          "assertions": 21,
+          "sectionAssertions": {
+            "harness": 1,
+            "empty": 20
+          },
+          "coldQueries": 20,
+          "actualGeneratedConstructors": true,
+          "inputsUnchanged": true,
+          "helperOnly": true,
+          "fullKernel": false,
+          "performanceQualified": false
+        }
+      },
+      "assertions": 1905,
+      "retainedAssertions": 1884,
+      "newAssertions": 21,
+      "route": "canonical-ps-typescript-js-leaf",
+      "helperOnly": true,
+      "heldKernelProductionImported": false,
+      "nativeProofsRerun": false,
+      "fuelPolicyChanged": false,
+      "fullKernelGenerated": false,
+      "fullQualification": false,
+      "fullKernel": false,
+      "churchAcceptanceFixed": false,
+      "performanceMeasured": false,
+      "performanceQualified": false,
+      "files": {
+        "generated-build.log": {
+          "bytes": 245,
+          "sha256": "6c492a9c53aee9bb76b3657a01cf26c71f8a16f1bf769038257facd066f4e33a"
+        },
+        "canonical-source.log": {
+          "bytes": 36,
+          "sha256": "3174580cf0ba25a4fc9134b4d9d1381d9f03636e84f26c763d90b3bcd89db8de"
+        },
+        "source-manifest.json": {
+          "bytes": 4116,
+          "sha256": "af77c51c41fa59f59aefc204f824b2c51c22b7c2427eb558927ca18927832e8e"
+        },
+        "bootstrap.log": {
+          "bytes": 343,
+          "sha256": "3af2dc8fccf50fd88785d93a87649e5165bb21eedde5b0697f7a87e2072ef1b0"
+        },
+        "kernel.d.ts": {
+          "bytes": 24593,
+          "sha256": "90fac28f079e89c571a7d9a770a8d6400e5c88b0b62504a9a206c662797f3ef5"
+        },
+        "command-statuses.json": {
+          "bytes": 4687,
+          "sha256": "6194620465a1b42d008e41d9a29f441c216fce225a65b5a953a9821af222d8e1"
+        },
+        "check-manifest.mjs": {
+          "bytes": 504,
+          "sha256": "55b751e83249704958a2dca9073fd23a213a80431291ccee4bf57ae58e96911e"
+        },
+        "generated-syntax.log": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "kernel.js.map": {
+          "bytes": 377223,
+          "sha256": "d433c339b01d90c773520567e53fcd3f7f80943c081f6bd3d3730c687a8696e2"
+        },
+        "bootstrap-tools.json": {
+          "bytes": 603,
+          "sha256": "af850a6f6b911c579c01f13e3f5b740fc26a901461ff7364d6654b7caedb047b"
+        },
+        "bootstrap-shared.mjs": {
+          "bytes": 5205,
+          "sha256": "0a7ccd32cc1513bc4bc185de34b6dcbafd994456541dc95ee9451ed3aa7e1b4e"
+        },
+        "canonical-manifest.log": {
+          "bytes": 51,
+          "sha256": "8fcb8ecd0ce2c293c0c7fa862a6e722c1b21168154d35b37416fcd6056aba436"
+        },
+        "kernel.ts": {
+          "bytes": 352956,
+          "sha256": "83a7c48a77c29478924d2c4ed43afa3c5aaac6eb960ddca7bcc9e7cb1749f0dc"
+        },
+        "kernel.js": {
+          "bytes": 360259,
+          "sha256": "47c320361a197b3bfe4eeb16c7a95375ceed26869375d1fd941ed7c2cb34021e"
+        },
+        "adapter-syntax.log": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "authentic-source.log": {
+          "bytes": 36,
+          "sha256": "3174580cf0ba25a4fc9134b4d9d1381d9f03636e84f26c763d90b3bcd89db8de"
+        },
+        "empty-runtime.log": {
+          "bytes": 1257,
+          "sha256": "bf10453c3092eee7e3843a9dee4c01a581858096131a50dfa25268395e8b399c"
+        },
+        "retained-runtime.log": {
+          "bytes": 184,
+          "sha256": "51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda"
+        },
+        "runtime/pskernel-empty-semantic-cache-smoke.mjs": {
+          "bytes": 4508,
+          "sha256": "0cce9ce96ace90dcd6ac9cfe1c7a5352d4aca3f05a842fa76e89112961277721"
+        },
+        "runtime/pskernel-closed-cache-analysis-smoke.mjs": {
+          "bytes": 7826,
+          "sha256": "0cdc843f9fdbe7c0e9a150f3026dcf6ae6cbc75f5441536d687ce6d35d05f736"
+        },
+        "runtime/kernel.mjs": {
+          "bytes": 360259,
+          "sha256": "47c320361a197b3bfe4eeb16c7a95375ceed26869375d1fd941ed7c2cb34021e"
+        },
+        "canonical/.proofscript-bootstrap.json": {
+          "bytes": 857,
+          "sha256": "5513c36aebfb9cdee91b73ff2e0047caf57a3f5859f991b1e8ac40972a736e91"
+        },
+        "sources/psc1/psconfig.json": {
+          "bytes": 655,
+          "sha256": "2c89c1e637f101e2c076644418ad3727af3bdff46b40adfcdbb5d1c1ee9d3984"
+        },
+        "sources/psc1/lean-toolchain": {
+          "bytes": 25,
+          "sha256": "ca5f1f601d34c49079e38d7e7041eb0f2a9c227fbc1df0f404820069a052330c"
+        },
+        "sources/psc1/scripts/workspace-layout.mjs": {
+          "bytes": 1030,
+          "sha256": "83cf09f925265952d9efff8bda76d79df52a635cd564be4eec1b743bffe60358"
+        },
+        "sources/psc1/scripts/bootstrap-manifest.mjs": {
+          "bytes": 4810,
+          "sha256": "0288d91fe560822051095efe20f8dacdebfcdbba5869d4e3d5d3a65f96bf73ef"
+        },
+        "sources/psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs": {
+          "bytes": 7826,
+          "sha256": "0cdc843f9fdbe7c0e9a150f3026dcf6ae6cbc75f5441536d687ce6d35d05f736"
+        },
+        "sources/psc1/scripts/bootstrap-project.mjs": {
+          "bytes": 4987,
+          "sha256": "57dd414323fa1c2e88b0e19929012f011032ba795b6c46913ece7d0df3500376"
+        },
+        "sources/psc1/scripts/install-lean435-ci.sh": {
+          "bytes": 1051,
+          "sha256": "0d7bef69b04c5ba426e9c48003e8c34247853c722e116d5185613e11620162c9"
+        },
+        "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Expr.lean": {
+          "bytes": 27573,
+          "sha256": "068312a568ee3b1b86312d9a9e589a32813e45cf703d0830108efc1556666e51"
+        },
+        "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprScalar.lean": {
+          "bytes": 2246,
+          "sha256": "358a9f76fe942d7846985bb073f26e60599e5b3bc9070a2013e421b5a1d962ea"
+        },
+        "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Level.lean": {
+          "bytes": 26794,
+          "sha256": "8c45c901530bba582975be7032f00990ccbd38d4568cb8cc932a12df4b698cc7"
+        },
+        "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Name.lean": {
+          "bytes": 12995,
+          "sha256": "15a2e2249a80101fafb825cb60877c969ad572d54ef82866bb7105dff228056d"
+        },
+        "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean": {
+          "bytes": 15152,
+          "sha256": "77562cae6b5e1eec7272f292982fcb39cb9037f2e045a4b962ab8b10cb13d819"
+        },
+        "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean": {
+          "bytes": 9629,
+          "sha256": "fe26126cae9c7757d29b3b2193d9530a2de0dc7d5e76a591abb6f2a4b35421bf"
+        },
+        "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/ScalarHash.lean": {
+          "bytes": 13225,
+          "sha256": "6549195619b22439fd6513af6f12dbfa90cdb9a8bc646237feeee12dff6d80c2"
+        },
+        "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean": {
+          "bytes": 1784,
+          "sha256": "0894a4c8c7f6ffe232c34201280ff82bbc90ab966df885a56ac40bc5c3803aa5"
+        },
+        "canonical/packages/pskernel-core/src/Ps/KernelCore/Core/Name.ps": {
+          "bytes": 10730,
+          "sha256": "3941309f66691649e22655c4868e60d47f59ba1c9251a52a285d2c99cf0b1f00"
+        },
+        "canonical/packages/pskernel-core/src/Ps/KernelCore/Core/ExprScalar.ps": {
+          "bytes": 1853,
+          "sha256": "7c9bafb3d3502be145e4daf150c2769a126176df2faf1409bf4440d6b26a0445"
+        },
+        "canonical/packages/pskernel-core/src/Ps/KernelCore/Core/Expr.ps": {
+          "bytes": 22641,
+          "sha256": "8b783126150f2ac1cfa51195c988ecf8ff7f633a18e8c2026f82fb6597ed31d8"
+        },
+        "canonical/packages/pskernel-core/src/Ps/KernelCore/Core/Level.ps": {
+          "bytes": 20622,
+          "sha256": "8bac178a3de2549b85c790d351f834114bb9706609586139f1525b2892da5975"
+        },
+        "canonical/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/ScalarHash.ps": {
+          "bytes": 9833,
+          "sha256": "41880230b721270b93f680822cad129169c8ece9ee45bccb470c7263a6ab5425"
+        },
+        "canonical/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.ps": {
+          "bytes": 825,
+          "sha256": "33df278aaa6287c2a255ba8bd738f3961cd9697ac5bda8d67bc71dce438c770f"
+        },
+        "canonical/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.ps": {
+          "bytes": 7299,
+          "sha256": "9fff571d27c54ebc03ba69c380a768609079ab5df214193a699e748dec0c4d53"
+        },
+        "canonical/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/Cache.ps": {
+          "bytes": 11519,
+          "sha256": "ca616424f75b2e6abfcaca4289d6c7ff3e51fe4041a1e947198ddd6014ba9fe5"
+        }
+      }
+    },
+    {
+      "schema": "psc1-empty-cache-leaf-variant-v1",
+      "status": "pass",
+      "variant": "candidate",
+      "kernelSourceSha": "e503972553ae2d41d5ba7a26d7739fb32ee86b96",
+      "compilerSourceSha": "80005bb250a7324772db76d51684d23fbf0fe6ed",
+      "compilerSha256": "13635a423d1343e9a4770be0b7e02d859a6b845b221a0363d19bfdfab8e3cc1c",
+      "experiment": {
+        "sourceSha": "80182d1b95894fc3daa5c7fbcfe8b1a7adb687d9",
+        "runId": "40158333460",
+        "runAttempt": "1",
+        "job": "paired",
+        "files": [
+          {
+            "path": ".github/workflows/psc1-empty-semantic-cache-leaf.yml",
+            "bytes": 4286,
+            "sha256": "df5843fcad4cf6c9346e45b329551531e63c2890e34f2a344a30308f70eba2bf",
+            "gitBlobSha": "3157ec79aaae99df7c324723d3987ab369010ed4"
+          },
+          {
+            "path": ".github/psc1-empty-semantic-cache/leaf.py",
+            "bytes": 36226,
+            "sha256": "abf7848400b9ad6b2feb8109ec8474e7eccbe35be4c5d706d32464ab140c48e5",
+            "gitBlobSha": "7556f7d827f9c96fbb517ad9073e8752b9f1142c"
+          },
+          {
+            "path": "psc1/scripts/pskernel-empty-semantic-cache-smoke.mjs",
+            "bytes": 4508,
+            "sha256": "0cce9ce96ace90dcd6ac9cfe1c7a5352d4aca3f05a842fa76e89112961277721",
+            "gitBlobSha": "8791063bc6850dec0af726afad8563f78cb63d7e"
+          }
+        ]
+      },
+      "entry": "psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean",
+      "sourceCount": 8,
+      "sourceManifest": {
+        "bytes": 4116,
+        "sha256": "c5d1b40729d6f8ead6642084c52b12babd7622007571982ccbd9e51e9045249f"
+      },
+      "bootstrapTools": {
+        "bytes": 603,
+        "sha256": "a4bdcec24fab709ad519834d3b8fb2079116cb23c96e84f58fb9d5a5b2b31eec"
+      },
+      "canonicalClosureSha256": "553a7693c22f0b753c696b9b98f58f3e2bb4f315f996c07bda9d90920bd3e3b3",
+      "generatedKernel": {
+        "bytes": 360611,
+        "sha256": "067b7c540f340ccfc12b730156f5fdee0fa288ec4b784640f788a8e1eec0d554"
+      },
+      "commandStatuses": {
+        "bytes": 4704,
+        "sha256": "f4f72f5912fb51122e266cbd72bd1c5a7fdbe34bb0633ece742eef4d21a08369"
+      },
+      "runtime": {
+        "retained": {
+          "expressions": 20,
+          "states": 2,
+          "mapQueries": 40,
+          "pairQueries": 800,
+          "inferQueries": 80,
+          "assertions": 1884,
+          "smallAndIndexed": true,
+          "openEntriesSeeded": true
+        },
+        "empty": {
+          "schema": "psc1-empty-semantic-cache-v1",
+          "assertions": 21,
+          "sectionAssertions": {
+            "harness": 1,
+            "empty": 20
+          },
+          "coldQueries": 20,
+          "actualGeneratedConstructors": true,
+          "inputsUnchanged": true,
+          "helperOnly": true,
+          "fullKernel": false,
+          "performanceQualified": false
+        }
+      },
+      "assertions": 1905,
+      "retainedAssertions": 1884,
+      "newAssertions": 21,
+      "route": "canonical-ps-typescript-js-leaf",
+      "helperOnly": true,
+      "heldKernelProductionImported": false,
+      "nativeProofsRerun": false,
+      "fuelPolicyChanged": false,
+      "fullKernelGenerated": false,
+      "fullQualification": false,
+      "fullKernel": false,
+      "churchAcceptanceFixed": false,
+      "performanceMeasured": false,
+      "performanceQualified": false,
+      "files": {
+        "generated-build.log": {
+          "bytes": 245,
+          "sha256": "6c492a9c53aee9bb76b3657a01cf26c71f8a16f1bf769038257facd066f4e33a"
+        },
+        "canonical-source.log": {
+          "bytes": 36,
+          "sha256": "3174580cf0ba25a4fc9134b4d9d1381d9f03636e84f26c763d90b3bcd89db8de"
+        },
+        "source-manifest.json": {
+          "bytes": 4116,
+          "sha256": "c5d1b40729d6f8ead6642084c52b12babd7622007571982ccbd9e51e9045249f"
+        },
+        "bootstrap.log": {
+          "bytes": 343,
+          "sha256": "4849aefa9b7229d0ca5eedfbf5b9b030c701d35d6d72c1da64dcbcd93977630e"
+        },
+        "kernel.d.ts": {
+          "bytes": 24593,
+          "sha256": "90fac28f079e89c571a7d9a770a8d6400e5c88b0b62504a9a206c662797f3ef5"
+        },
+        "command-statuses.json": {
+          "bytes": 4704,
+          "sha256": "f4f72f5912fb51122e266cbd72bd1c5a7fdbe34bb0633ece742eef4d21a08369"
+        },
+        "check-manifest.mjs": {
+          "bytes": 506,
+          "sha256": "74f08629c6e7640a6b3dc2a20f6f4c65e95c85868676d964420dfe9671e4d663"
+        },
+        "generated-syntax.log": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "kernel.js.map": {
+          "bytes": 377603,
+          "sha256": "355d65d8adc3d4220665b9de226697eacffab1af82802cdc0fa072d20b121ab0"
+        },
+        "bootstrap-tools.json": {
+          "bytes": 603,
+          "sha256": "a4bdcec24fab709ad519834d3b8fb2079116cb23c96e84f58fb9d5a5b2b31eec"
+        },
+        "bootstrap-shared.mjs": {
+          "bytes": 5208,
+          "sha256": "7a6fc75558f50ee038c9b7b12722227d9c62fb9ae0554e450a95a1e4c72f66cc"
+        },
+        "canonical-manifest.log": {
+          "bytes": 51,
+          "sha256": "8fcb8ecd0ce2c293c0c7fa862a6e722c1b21168154d35b37416fcd6056aba436"
+        },
+        "kernel.ts": {
+          "bytes": 353331,
+          "sha256": "ada340837ac358110300862b0bc337540c3563d7af1f0ce591116448683a433a"
+        },
+        "kernel.js": {
+          "bytes": 360611,
+          "sha256": "067b7c540f340ccfc12b730156f5fdee0fa288ec4b784640f788a8e1eec0d554"
+        },
+        "adapter-syntax.log": {
+          "bytes": 0,
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        "authentic-source.log": {
+          "bytes": 36,
+          "sha256": "3174580cf0ba25a4fc9134b4d9d1381d9f03636e84f26c763d90b3bcd89db8de"
+        },
+        "empty-runtime.log": {
+          "bytes": 1257,
+          "sha256": "bf10453c3092eee7e3843a9dee4c01a581858096131a50dfa25268395e8b399c"
+        },
+        "retained-runtime.log": {
+          "bytes": 184,
+          "sha256": "51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda"
+        },
+        "runtime/pskernel-empty-semantic-cache-smoke.mjs": {
+          "bytes": 4508,
+          "sha256": "0cce9ce96ace90dcd6ac9cfe1c7a5352d4aca3f05a842fa76e89112961277721"
+        },
+        "runtime/pskernel-closed-cache-analysis-smoke.mjs": {
+          "bytes": 7826,
+          "sha256": "0cdc843f9fdbe7c0e9a150f3026dcf6ae6cbc75f5441536d687ce6d35d05f736"
+        },
+        "runtime/kernel.mjs": {
+          "bytes": 360611,
+          "sha256": "067b7c540f340ccfc12b730156f5fdee0fa288ec4b784640f788a8e1eec0d554"
+        },
+        "canonical/.proofscript-bootstrap.json": {
+          "bytes": 857,
+          "sha256": "9e1455951a1b719ef7a04ad3c74cce74a483449b79dce2aeb521ec3a620934ce"
+        },
+        "sources/psc1/psconfig.json": {
+          "bytes": 655,
+          "sha256": "2c89c1e637f101e2c076644418ad3727af3bdff46b40adfcdbb5d1c1ee9d3984"
+        },
+        "sources/psc1/lean-toolchain": {
+          "bytes": 25,
+          "sha256": "ca5f1f601d34c49079e38d7e7041eb0f2a9c227fbc1df0f404820069a052330c"
+        },
+        "sources/psc1/scripts/workspace-layout.mjs": {
+          "bytes": 1030,
+          "sha256": "83cf09f925265952d9efff8bda76d79df52a635cd564be4eec1b743bffe60358"
+        },
+        "sources/psc1/scripts/bootstrap-manifest.mjs": {
+          "bytes": 4810,
+          "sha256": "0288d91fe560822051095efe20f8dacdebfcdbba5869d4e3d5d3a65f96bf73ef"
+        },
+        "sources/psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs": {
+          "bytes": 7826,
+          "sha256": "0cdc843f9fdbe7c0e9a150f3026dcf6ae6cbc75f5441536d687ce6d35d05f736"
+        },
+        "sources/psc1/scripts/bootstrap-project.mjs": {
+          "bytes": 4987,
+          "sha256": "57dd414323fa1c2e88b0e19929012f011032ba795b6c46913ece7d0df3500376"
+        },
+        "sources/psc1/scripts/install-lean435-ci.sh": {
+          "bytes": 1051,
+          "sha256": "0d7bef69b04c5ba426e9c48003e8c34247853c722e116d5185613e11620162c9"
+        },
+        "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Expr.lean": {
+          "bytes": 27573,
+          "sha256": "068312a568ee3b1b86312d9a9e589a32813e45cf703d0830108efc1556666e51"
+        },
+        "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprScalar.lean": {
+          "bytes": 2246,
+          "sha256": "358a9f76fe942d7846985bb073f26e60599e5b3bc9070a2013e421b5a1d962ea"
+        },
+        "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Level.lean": {
+          "bytes": 26794,
+          "sha256": "8c45c901530bba582975be7032f00990ccbd38d4568cb8cc932a12df4b698cc7"
+        },
+        "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Name.lean": {
+          "bytes": 12995,
+          "sha256": "15a2e2249a80101fafb825cb60877c969ad572d54ef82866bb7105dff228056d"
+        },
+        "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean": {
+          "bytes": 15152,
+          "sha256": "77562cae6b5e1eec7272f292982fcb39cb9037f2e045a4b962ab8b10cb13d819"
+        },
+        "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean": {
+          "bytes": 9740,
+          "sha256": "462d8d839b1e5fd5b5f0620cb18b860d789247aabb4d14c677a0bc69cbc3c16e"
+        },
+        "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/ScalarHash.lean": {
+          "bytes": 13225,
+          "sha256": "6549195619b22439fd6513af6f12dbfa90cdb9a8bc646237feeee12dff6d80c2"
+        },
+        "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean": {
+          "bytes": 1784,
+          "sha256": "0894a4c8c7f6ffe232c34201280ff82bbc90ab966df885a56ac40bc5c3803aa5"
+        },
+        "canonical/packages/pskernel-core/src/Ps/KernelCore/Core/Name.ps": {
+          "bytes": 10730,
+          "sha256": "3941309f66691649e22655c4868e60d47f59ba1c9251a52a285d2c99cf0b1f00"
+        },
+        "canonical/packages/pskernel-core/src/Ps/KernelCore/Core/ExprScalar.ps": {
+          "bytes": 1853,
+          "sha256": "7c9bafb3d3502be145e4daf150c2769a126176df2faf1409bf4440d6b26a0445"
+        },
+        "canonical/packages/pskernel-core/src/Ps/KernelCore/Core/Expr.ps": {
+          "bytes": 22641,
+          "sha256": "8b783126150f2ac1cfa51195c988ecf8ff7f633a18e8c2026f82fb6597ed31d8"
+        },
+        "canonical/packages/pskernel-core/src/Ps/KernelCore/Core/Level.ps": {
+          "bytes": 20622,
+          "sha256": "8bac178a3de2549b85c790d351f834114bb9706609586139f1525b2892da5975"
+        },
+        "canonical/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/ScalarHash.ps": {
+          "bytes": 9833,
+          "sha256": "41880230b721270b93f680822cad129169c8ece9ee45bccb470c7263a6ab5425"
+        },
+        "canonical/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.ps": {
+          "bytes": 825,
+          "sha256": "33df278aaa6287c2a255ba8bd738f3961cd9697ac5bda8d67bc71dce438c770f"
+        },
+        "canonical/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.ps": {
+          "bytes": 7375,
+          "sha256": "b027030fd6721e387bc86b84abbb61528192ad870d39ffc72f581d98fc9ecef9"
+        },
+        "canonical/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/Cache.ps": {
+          "bytes": 11519,
+          "sha256": "ca616424f75b2e6abfcaca4289d6c7ff3e51fe4041a1e947198ddd6014ba9fe5"
+        }
+      }
+    }
+  ],
+  "pairedReport": {
+    "schema": "psc1-empty-cache-paired-leaf-v1",
+    "status": "pass",
+    "experiment": {
+      "sourceSha": "80182d1b95894fc3daa5c7fbcfe8b1a7adb687d9",
+      "runId": "40158333460",
+      "runAttempt": "1",
+      "job": "paired",
+      "files": [
+        {
+          "path": ".github/workflows/psc1-empty-semantic-cache-leaf.yml",
+          "bytes": 4286,
+          "sha256": "df5843fcad4cf6c9346e45b329551531e63c2890e34f2a344a30308f70eba2bf",
+          "gitBlobSha": "3157ec79aaae99df7c324723d3987ab369010ed4"
+        },
+        {
+          "path": ".github/psc1-empty-semantic-cache/leaf.py",
+          "bytes": 36226,
+          "sha256": "abf7848400b9ad6b2feb8109ec8474e7eccbe35be4c5d706d32464ab140c48e5",
+          "gitBlobSha": "7556f7d827f9c96fbb517ad9073e8752b9f1142c"
+        },
+        {
+          "path": "psc1/scripts/pskernel-empty-semantic-cache-smoke.mjs",
+          "bytes": 4508,
+          "sha256": "0cce9ce96ace90dcd6ac9cfe1c7a5352d4aca3f05a842fa76e89112961277721",
+          "gitBlobSha": "8791063bc6850dec0af726afad8563f78cb63d7e"
+        }
+      ]
+    },
+    "baselineSourceSha": "20224a295359abb201f56c72395690bf0bfac9fa",
+    "candidateSourceSha": "e503972553ae2d41d5ba7a26d7739fb32ee86b96",
+    "compilerSourceSha": "80005bb250a7324772db76d51684d23fbf0fe6ed",
+    "compilerSha256": "13635a423d1343e9a4770be0b7e02d859a6b845b221a0363d19bfdfab8e3cc1c",
+    "sourceClosureCountPerVariant": 8,
+    "leafSourceChanges": [
+      "psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"
+    ],
+    "inputReceipt": {
+      "bytes": 5668,
+      "sha256": "c05c627f1d0d9ac95f6d5fa289f76e02ad815fe31cfbbfc9cab2c8db06e86883"
+    },
+    "tools": {
+      "bytes": 786,
+      "sha256": "68bba9f8f489586cae33d8587d70064da17683299ccb6fd237a637964e51f27b"
+    },
+    "variants": [
+      {
+        "variant": "baseline",
+        "kernelSourceSha": "20224a295359abb201f56c72395690bf0bfac9fa",
+        "receipt": {
+          "bytes": 10477,
+          "sha256": "776e4c512466b16d497d74aa9dc04365d2f841b5f0a1e6c6fbc4ba0076eddcc7"
+        },
+        "generatedKernel": {
+          "bytes": 360259,
+          "sha256": "47c320361a197b3bfe4eeb16c7a95375ceed26869375d1fd941ed7c2cb34021e"
+        }
+      },
+      {
+        "variant": "candidate",
+        "kernelSourceSha": "e503972553ae2d41d5ba7a26d7739fb32ee86b96",
+        "receipt": {
+          "bytes": 10478,
+          "sha256": "5d30641c6b59039c62e6eaf2b80e73435201eb59a15ca2a1f9ce833a8074e866"
+        },
+        "generatedKernel": {
+          "bytes": 360611,
+          "sha256": "067b7c540f340ccfc12b730156f5fdee0fa288ec4b784640f788a8e1eec0d554"
+        }
+      }
+    ],
+    "retainedAssertionsPerVariant": 1884,
+    "newAssertionsPerVariant": 21,
+    "totalAssertions": 3810,
+    "nativeCandidateProofs": 69,
+    "semanticReceiptsMatch": true,
+    "actualSourceClosuresVerified": true,
+    "explicitSharedTranslatorAdapter": true,
+    "rawInputZipDigestsVerified": true,
+    "downloadedInputContentsVerified": true,
+    "independentZipParser": false,
+    "heldKernelProductionImported": false,
+    "nativeProofsRerun": false,
+    "fullKernelGenerated": false,
+    "fullQualification": false,
+    "fullKernel": false,
+    "churchAcceptanceFixed": false,
+    "performanceMeasured": false,
+    "performanceQualified": false
+  },
+  "artifact": {
+    "id": 12585423993,
+    "name": "psc1-empty-semantic-cache-paired-leaf-attempt-1",
+    "size_in_bytes": 5226483,
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12585423993",
+    "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12585423993/zip",
+    "expired": false,
+    "created_at": "2026-10-25T03:35:43Z",
+    "expires_at": "2026-11-24T03:35:41Z",
+    "updated_at": "2026-10-25T03:35:43Z",
+    "digest": "sha256:adf655c16ab115565e3bbeb8204cc2d1d25c8fa98b495d0bd8849926986e4d63",
+    "workflow_run": {
+      "id": 40158333460,
+      "repository_id": 1381609925,
+      "head_repository_id": 1381609925,
+      "head_branch": "work/psc1-pskernel-empty-semantic-cache-leaf-20261025",
+      "head_sha": "80182d1b95894fc3daa5c7fbcfe8b1a7adb687d9"
+    }
+  },
+  "actualLogReviewed": true,
+  "actualInputArchiveContentsVerified": true,
+  "independentOutputArtifactContentAudit": false,
+  "independentZipParser": false,
+  "actualSourceChanges": [
+    "sources/psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean"
+  ],
+  "actualOrderedRuntimeLabels": [
+    "harness/rejection",
+    "empty/00",
+    "empty/01",
+    "empty/02",
+    "empty/03",
+    "empty/04",
+    "empty/05",
+    "empty/06",
+    "empty/07",
+    "empty/08",
+    "empty/09",
+    "empty/10",
+    "empty/11",
+    "empty/12",
+    "empty/13",
+    "empty/14",
+    "empty/15",
+    "empty/16",
+    "empty/17",
+    "empty/18",
+    "empty/19",
+    "harness/rejection",
+    "empty/00",
+    "empty/01",
+    "empty/02",
+    "empty/03",
+    "empty/04",
+    "empty/05",
+    "empty/06",
+    "empty/07",
+    "empty/08",
+    "empty/09",
+    "empty/10",
+    "empty/11",
+    "empty/12",
+    "empty/13",
+    "empty/14",
+    "empty/15",
+    "empty/16",
+    "empty/17",
+    "empty/18",
+    "empty/19"
+  ],
+  "canonicalChecks": 4,
+  "declarationsPerCheck": 207,
+  "scope": {
+    "focusedNativeProofs": 69,
+    "helperRuntimeSemanticsQualified": true,
+    "retainedAssertionsPerVariant": 1884,
+    "newAssertionsPerVariant": 21,
+    "fullSourceQualification": false,
+    "adopted": false,
+    "churchAcceptanceFixed": false,
+    "fullKernel": false,
+    "fullArenaQualified": false,
+    "performanceQualified": false
+  }
+}

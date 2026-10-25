@@ -22,13 +22,13 @@ Exact source `9c48af315d254b0263f4013eb3f0183e27b662af` passed [native preflight
 
 The complete source/native/audit evidence is `qualification/T05_LAYOUT_BOUNDARY_PREFLIGHT_9c48af31.json`. The isolated branch inherits the held 80005 transform experiment; do not merge that branch. The active work branch copies only the exact proof blob onto restored production.
 
-## Fresh full qualification required
+## Complete qualification and integration
 
-The containing source includes the exact new module and extends `.github/workflows/psc1-pskernel-t05-header.yml` to 497 reports / 30 modules / 93 explicit inputs. It builds the already registered `PsKernelExprV2PagedModelNativeProofs` library before the early new proof check. The dedicated five-report log is separate from the dependency build log.
+Exact source `20224a295359abb201f56c72395690bf0bfac9fa` passed [40156344029](https://github.com/dwijayuda/pskernel/actions/runs/40156344029), attempt1: native497 reports/30modules/93inputs and both complete generated routes with all17scripts and9receipt layers. The independent [layout archive audit40156379316](https://github.com/dwijayuda/pskernel/actions/runs/40156379316), auditor1b95b01a585310d7a305f16edb59ba48d1a7e085, verified all165/330/333archive members and every source/log/proof/receipt chain with no errors.
 
-The existing 492-report and all earlier receipt chains remain required. A new `layout-boundary-native-receipt.json` records the five new proof names, source/log/status digests, the retained492 parent digest and explicit physical-layout scope. Both generated routes retain all 17 scripts and runtime obligations. Only the archived source inventory gains the new proof file. Pinned Lean, fuel4096, negative controls, fallback and all production bytes remain unchanged.
+The fixed five-proof module is included in the full native inventory. Its dedicated log/status/receipt is separate from dependency-build reports; its retained492 parent remains required. No production bytes, negative controls, resource limits, fallback rules or earlier obligations changed.
 
-The independent auditor's `layout` profile must require the fresh exact source/run/attempt, all497 globally distinct theorem names /30 distinct modules, the entire restored production tree, the fixed proof byte/blob pin, all source archives and all inherited runtime/ZIP checks. Run the existing native-first workflow; do not dispatch duplicates or reuse old qualification. Integration must advance only to the exact fully qualified source using a non-force expected-SHA update.
+Qualification evidence was committed before integration at350a2de8d9089c99f7710df0fc8a3dcb8d04ce72. The integration branch advanced non-force from expectedae47fa0ca776980890c20c730d00a4f11c73b6c4 to exact20224; the read-back matched. Evidence is `qualification/T05_LAYOUT497_QUALIFIED_20224a29.json`; the actual ref result is `qualification/T05_LAYOUT497_INTEGRATION_20224a29.json`. Do not rerun a duplicate cohort or replace the tested source with the containing documentation commit.
 
 ## Remaining work
 

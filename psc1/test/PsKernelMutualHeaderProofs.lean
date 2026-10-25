@@ -87,7 +87,7 @@ theorem finish_universe_mismatch_preserves_exact_error
     (node : entry.node = .sort other)
     (different : psKernelLevelEquivalent other level = false) :
     psKernelExprV2MutualFinishIndices level indices =
-      .error "mutually inductive types must live in the same resultUniverse" := by
+      .error "mutually inductive types must live in the same universe" := by
   simp [psKernelExprV2MutualFinishIndices, found, node, different]
 
 theorem empty_tail_keeps_exact_arena

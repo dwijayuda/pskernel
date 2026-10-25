@@ -2,7 +2,7 @@ name: PSC1 kernel integration static and public types
 on:
   push:
     branches: [integration/psc1-lean435-kernel-packages-20261025]
-    paths: [.github/workflows/psc1-kernel435-static.yml, 'psc1/scripts/kernel435-*.mjs', psc1/host-tools/kernel-toolchain.mjs, psc1/host-tools/generated-compiler-session.mjs, psc1/host-tools/compiler-host-protocol.mjs, psc1/host-tools/artifacts.mjs, 'psc1/npm-cli/kernel*.mjs', psc1/npm-cli/generated.mjs, psc1/npm-cli/generated-entry.mjs]
+    paths: [.github/workflows/psc1-kernel435-static.yml, 'psc1/scripts/kernel435-*.mjs', 'psc1/scripts/compiler-execution-*.mjs', psc1/host-tools/kernel-toolchain.mjs, psc1/host-tools/generated-compiler-session.mjs, psc1/host-tools/compiler-host-protocol.mjs, psc1/host-tools/artifacts.mjs, 'psc1/npm-cli/kernel*.mjs', psc1/npm-cli/generated.mjs, psc1/npm-cli/generated-entry.mjs]
 permissions:
   contents: read
   actions: read
@@ -21,7 +21,7 @@ jobs:
           node-version: '22.23.3'
       - name: Parse integration code and retain exact semantic closure
         run: |
-          for file in scripts/kernel435-*.mjs host-tools/kernel-toolchain.mjs host-tools/generated-compiler-session.mjs host-tools/compiler-host-protocol.mjs host-tools/artifacts.mjs npm-cli/generated.mjs npm-cli/generated-entry.mjs npm-cli/kernel.mjs npm-cli/kernel-checker.mjs packages/pskernel-lean/index.mjs packages/pskernel-lean/host/*.mjs packages/pskernel-lean-wasm/index.mjs packages/pskernel-lean-wasm/host/*.mjs; do node --check "$file"; done
+          for file in scripts/kernel435-*.mjs scripts/compiler-execution-*.mjs host-tools/kernel-toolchain.mjs host-tools/generated-compiler-session.mjs host-tools/compiler-host-protocol.mjs host-tools/artifacts.mjs npm-cli/generated.mjs npm-cli/generated-entry.mjs npm-cli/kernel.mjs npm-cli/kernel-checker.mjs packages/pskernel-lean/index.mjs packages/pskernel-lean/host/*.mjs packages/pskernel-lean-wasm/index.mjs packages/pskernel-lean-wasm/host/*.mjs; do node --check "$file"; done
           bash -n packages/pskernel-lean-wasm/scripts/build-wasm.sh
           node scripts/kernel-provider-source.mjs . "$RUNNER_TEMP/static-kernel-overlay" "$RUNNER_TEMP/static-kernel-source.json"
           node -e "const m=require(process.argv[1]);if(m.modules.length!==25||m.sourceClosureDigest!=='f1bd2a7d42b9473945028ffa698f244b33afeb937224c5c8e37d8c50d9de0a2b')process.exit(1)" "$RUNNER_TEMP/static-kernel-source.json"

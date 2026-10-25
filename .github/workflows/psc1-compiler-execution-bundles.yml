@@ -1,0 +1,71 @@
+name: PSC1 separate compiled compiler execution bundles
+on:
+  push:
+    branches: [integration/psc1-lean435-kernel-packages-20261025]
+    paths: [.github/workflows/psc1-compiler-execution-bundles.yml, 'psc1/scripts/compiler-execution-*.mjs', psc1/scripts/compiler-execution-bundle-input.json]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  assemble:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: psc1
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Package exact qualified G3 Rust and compiler-Wasm payloads
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node --check scripts/compiler-execution-bundles.mjs
+          node --check scripts/compiler-execution-installed.mjs
+          node scripts/compiler-execution-bundles.mjs
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import {readQualifiedArtifact,sha256} from './scripts/kernel435-qualified-artifact.mjs';
+          const input=JSON.parse(fs.readFileSync('scripts/kernel435-typed-input.json','utf8')).native;
+          const dir=await readQualifiedArtifact(input,'dist/compiler-execution-test-reference');
+          if(sha256(fs.readFileSync(dir+'/'+input.tarball))!==input.tarballSha256)throw Error('test reference identity');
+          fs.copyFileSync(dir+'/'+input.tarball,'dist/compiler-execution-bundles/tarballs/'+input.tarball);
+          JS
+          cp dist/compiler-execution-bundles/package-receipt.json dist/compiler-execution-bundles/tarballs/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-compiled-compiler-bundles-${{ github.sha }}
+          path: psc1/dist/compiler-execution-bundles/tarballs/
+          if-no-files-found: error
+          retention-days: 90
+  installed:
+    needs: assemble
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, ubuntu-24.04-arm, macos-15-intel, macos-15, windows-2022]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: psc1
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-compiled-compiler-bundles-${{ github.sha }}
+          path: ${{ runner.temp }}/compiler-bundles
+      - name: Execute actual installed compilers without compiler SDKs
+        run: node scripts/compiler-execution-installed.mjs "$RUNNER_TEMP/compiler-bundles" "$RUNNER_TEMP/compiler-bundles/proofscript-pskernel-lean-4.35.0.tgz"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-compiler-bundle-installed-${{ runner.os }}-${{ runner.arch }}-${{ github.sha }}
+          path: psc1/dist/compiler-execution-installed/
+          retention-days: 90

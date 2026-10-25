@@ -1,0 +1,39 @@
+{
+  "pages": [
+    "index.html",
+    "layanan.html",
+    "paket.html",
+    "karya.html",
+    "tentang.html",
+    "proses.html",
+    "insight.html",
+    "insight-logo-bukan-strategi.html",
+    "insight-website-whatsapp.html",
+    "insight-brief.html",
+    "kontak.html",
+    "cek-merek.html",
+    "faq.html",
+    "privasi.html",
+    "ketentuan.html"
+  ],
+  "files": [
+    "assets/config.js",
+    "cek-merek.html",
+    "faq.html",
+    "index.html",
+    "insight-brief.html",
+    "insight-logo-bukan-strategi.html",
+    "insight-website-whatsapp.html",
+    "insight.html",
+    "karya.html",
+    "ketentuan.html",
+    "kontak.html",
+    "layanan.html",
+    "paket.html",
+    "privasi.html",
+    "proses.html",
+    "robots.txt",
+    "sitemap.xml",
+    "tentang.html"
+  ]
+}

@@ -488,7 +488,11 @@ function publicationFault(phase) {
 function checkInstalledKernelBeforePublication(admissions){
   const installation=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
   const meta=readJson(path.join(installation,'package.json'));
-  if(meta.proofscript?.defaultKernel!=='wasm')return undefined; // Preserved legacy/development profile.
+  const selfFile=path.join(installation,'SELFHOST_DISTRIBUTION.json');
+  const selfDefault=fs.existsSync(selfFile)?readJson(selfFile).defaultKernel:undefined;
+  const modern=meta.proofscript?.defaultKernel!==undefined||selfDefault!==undefined||fs.existsSync(path.join(installation,'KERNEL_DISTRIBUTION.json'));
+  if(!modern)return undefined; // Preserved legacy/development profile declares no kernel policy.
+  if(meta.proofscript?.defaultKernel!=='wasm'||selfDefault!=='wasm')fail('PSC1_BUNDLE_DEFAULT_KERNEL_POLICY');
   const distribution=readJson(path.join(installation,'KERNEL_DISTRIBUTION.json'));
   if(distribution.defaultProvider!=='wasm'||distribution.leanCommit!==nativePin.commit)fail('PSC1_BUNDLE_KERNEL_POLICY');
   const provider=process.env.PSC1_KERNEL_PROVIDER||'wasm';

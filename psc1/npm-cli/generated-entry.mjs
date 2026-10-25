@@ -4,6 +4,13 @@ import fs from 'node:fs';import path from 'node:path';import {fileURLToPath} fro
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const packageMeta=JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8'));
 try{
+ const selfFile=path.join(root,'SELFHOST_DISTRIBUTION.json'),policyFile=path.join(root,'KERNEL_DISTRIBUTION.json');
+ const selfDefault=fs.existsSync(selfFile)?JSON.parse(fs.readFileSync(selfFile,'utf8')).defaultKernel:undefined;
+ if(packageMeta.proofscript?.defaultKernel!==undefined||selfDefault!==undefined||fs.existsSync(policyFile)){
+  if(packageMeta.proofscript?.defaultKernel!=='wasm'||selfDefault!=='wasm')throw Error('PSC1_DEFAULT_KERNEL_POLICY');
+  const policy=JSON.parse(fs.readFileSync(policyFile,'utf8'));
+  if(policy.defaultProvider!=='wasm')throw Error('PSC1_DEFAULT_KERNEL_POLICY');
+ }
  const command=process.argv[2];
  if(command==='generated'){const {generatedMain}=await import('./generated.mjs');await generatedMain(process.argv.slice(3),root);}
  else if(command==='kernel'){const {kernelMain}=await import('./kernel.mjs');await kernelMain(process.argv.slice(3),root);}

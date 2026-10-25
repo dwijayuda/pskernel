@@ -79,4 +79,4 @@ jobs:
             psc1/dist/kernel435-core-installed/
           retention-days: 90
 
-# Requalify consistent root/generated default-kernel policy declarations.
+# Requalify consistent kernel policy across CLI and publication entry points.

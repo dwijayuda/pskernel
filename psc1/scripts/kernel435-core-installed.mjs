@@ -133,7 +133,12 @@ for(const [id,file,original,change]of [
  try{
   const refused=spawnSync(process.execPath,[cli,'generated','build','--project',project,'--engine','js','--out',prior],{cwd:consumer,encoding:'utf8',timeout:240000});
   assert.notEqual(refused.status,0,id);assert.match(refused.stderr,/DEFAULT_KERNEL_POLICY/,id);assert.equal(fs.readlinkSync(path.join(prior,'current')),beforePointer);
-  policyDeclarations.push({id,refused:true,priorPreserved:true,nativeCheckerAvailable:true});
+  const nativeOutput=path.join(consumer,'native-lean.js'),nativeCurrent=path.join(consumer,'.native-lean.js.psc1/current'),nativePrior=fs.readlinkSync(nativeCurrent);
+  for(const args of [['check',path.join(consumer,'Native.lean')],['build',path.join(consumer,'Native.lean'),'--out',nativeOutput]]){
+   const denied=spawnSync(process.execPath,[cli,...args],{cwd:consumer,encoding:'utf8',timeout:240000});assert.notEqual(denied.status,0,id+' native command');assert.match(denied.stderr,/DEFAULT_KERNEL_POLICY/);
+  }
+  assert.equal(fs.readlinkSync(nativeCurrent),nativePrior);
+  policyDeclarations.push({id,refused:true,priorPreserved:true,nativeCheckerAvailable:true,commands:['generated-build','source-check','native-build']});
  }finally{fs.writeFileSync(file,original);}
 }
 

@@ -1,0 +1,47 @@
+name: PSC1 integrated independent kernel compiler packages
+on:
+  push:
+    branches: [integration/psc1-lean435-kernel-packages-20261025]
+    paths: [psc1/scripts/kernel435-integrated-inputs.json]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  integrated:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: psc1
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Assemble pinned compiler and independently qualified kernel packages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node --check scripts/kernel435-core-package.mjs
+          node --check scripts/kernel435-core-installed.mjs
+          node scripts/kernel435-core-package.mjs
+      - name: Real installed native and four generated compiler engines with dual admission
+        run: node scripts/kernel435-core-installed.mjs dist/kernel435-core/tarballs/proofscript-0.1.0-psc1.3.tgz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-kernel435-integrated-toolchain-qualified-${{ github.sha }}
+          path: |
+            psc1/dist/kernel435-core/tarballs/
+            psc1/dist/kernel435-core/package-receipt.json
+            psc1/dist/kernel435-core-installed/
+          if-no-files-found: error
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: psc1-kernel435-integrated-diagnostics-${{ github.sha }}
+          path: |
+            psc1/dist/kernel435-core/package-receipt.json
+            psc1/dist/kernel435-core-installed/
+          retention-days: 90

@@ -2,7 +2,7 @@ name: PSC1 kernel integration static and public types
 on:
   push:
     branches: [integration/psc1-lean435-kernel-packages-20261025]
-    paths: [.github/workflows/psc1-kernel435-static.yml]
+    paths: [.github/workflows/psc1-kernel435-static.yml, 'psc1/scripts/kernel435-*.mjs', psc1/host-tools/kernel-toolchain.mjs, psc1/host-tools/generated-compiler-session.mjs, 'psc1/npm-cli/kernel*.mjs', psc1/npm-cli/generated.mjs, psc1/npm-cli/generated-entry.mjs]
 permissions:
   contents: read
   actions: read

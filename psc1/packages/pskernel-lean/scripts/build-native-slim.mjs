@@ -77,6 +77,8 @@ for(const library of ['libleancpp.a','libInit.a','libStd.a','libLean.a','liblean
   );
 }
 
+const relativeBuildRoot=path.relative(packageRoot,buildRoot);
+assert.ok(relativeBuildRoot&&!relativeBuildRoot.startsWith('..')&&!path.isAbsolute(relativeBuildRoot),'build root must remain inside the kernel package');
 rmSync(buildRoot,{recursive:true,force:true});
 for(const dir of [providerRoot,oleanRoot,cRoot,objRoot,outputDir])mkdirSync(dir,{recursive:true});
 const sourceManifest=path.join(buildRoot,'source.json');

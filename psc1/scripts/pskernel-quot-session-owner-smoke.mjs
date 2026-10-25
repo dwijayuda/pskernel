@@ -349,11 +349,11 @@ must(same(directQuotWorker(withEq.environment,generated.arena,nil),none),"Quot-m
 must(same(directQuotWorker(session.environment,get("psKernelExprV2PagedEmpty"),nil),
  Option.some(get("Except").ok(session.environment))),"Quot-initialized-exact-environment");
 for(const pattern of [eqType,eqReflType]){
- must(same(get("psKernelDagQuotMatchShape")(pattern.term)(generated.arena,pattern.id),
+ must(same(get("psKernelDagQuotMatchShape")(pattern.term)(generated.arena)(pattern.id),
   Option.some(true)),"Quot-valid-bounded-pattern");
- must(same(get("psKernelDagQuotMatchShape")(pattern.term)(generated.arena,generated.arena.size+1),none),
+ must(same(get("psKernelDagQuotMatchShape")(pattern.term)(generated.arena)(generated.arena.size+1n),none),
   "Quot-missing-shape-root-declines");
- must(same(get("psKernelDagQuotMatchShape")(pattern.term)(generated.arena,s1.id),
+ must(same(get("psKernelDagQuotMatchShape")(pattern.term)(generated.arena)(s1.id),
   Option.some(exprEq(s1.term,pattern.term))),"Quot-wrong-sort-exact-shape-result");
 }
 
@@ -477,20 +477,20 @@ quotSessionRequire("session/private-ID-is-not-external",
 const quotSessionMarked=accepted(get("psKernelDagGeneratedImport")(
  E.sort(L.succ(L.succ(one))),quotSessionPrepared),"session-marker");
 const quotSessionDeclined=accepted(get("psKernelDagRunQuotOwnedWith")(
- (_env,_owner)=>get("Except").ok(quotSessionMarked.fst),
- (_env,_arena,_refs)=>none,quotSessionBuilt,quotSessionExecution,nil,safe,quotSessionArena,quotSessionBuilt),"session-decline");
+ _env=>_owner=>get("Except").ok(quotSessionMarked.fst),
+ _env=>_arena=>_refs=>none,quotSessionBuilt,quotSessionExecution,nil,safe,quotSessionArena,quotSessionBuilt),"session-decline");
 quotSessionRequire("session/decline-discards-prepared-suffix",
  same(quotSessionDeclined.reply,quotSessionOriginal.reply)&&
  quotSessionDeclined.owner.arena.size===quotSessionOriginal.owner.arena.size&&
  quotSessionDeclined.owner.built.size===quotSessionOriginal.owner.built.size);
 const quotSessionFailure=get("psKernelDagRunQuotOwnedWith")(
- (_env,_owner)=>get("Except").ok(quotSessionPrepared),
- (_env,_arena,_refs)=>Option.some(get("Except").error("expected sort")),
+ _env=>_owner=>get("Except").ok(quotSessionPrepared),
+ _env=>_arena=>_refs=>Option.some(get("Except").error("expected sort")),
  quotSessionBuilt,quotSessionExecution,nil,safe,quotSessionArena,quotSessionBuilt);
 quotSessionRequire("session/hard-error-does-not-fallback",
  same(quotSessionFailure,get("Except").error(ErrorTag.rejectedInvalid("expected sort"))));
 const quotSessionImportFailure=get("psKernelDagRunQuotOwnedWith")(
- (_env,_owner)=>get("Except").error("owner import marker"),get("psKernelDagTryAdmitQuot"),
+ _env=>_owner=>get("Except").error("owner import marker"),get("psKernelDagTryAdmitQuot"),
  quotSessionBuilt,quotSessionExecution,nil,safe,quotSessionArena,quotSessionBuilt);
 quotSessionRequire("session/import-error-publishes-no-owner",
  same(quotSessionImportFailure,get("Except").error(ErrorTag.internalError("owner import marker"))));

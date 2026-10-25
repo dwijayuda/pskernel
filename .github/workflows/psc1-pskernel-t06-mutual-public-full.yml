@@ -9,6 +9,7 @@ name: PSC1 complete public mutual generated and canonical qualification
     - psc1/scripts/pskernel-mutual-public-smoke.mjs
     - psc1/scripts/pskernel-mutual-retained-runtime-audit.py
     - psc1/test/retained-21-generated-helper-manifest.json
+    - psc1/test/retained-249-audited-input-manifest.json
     - psc1/packages/pskernel-core/src/**
 permissions:
   contents: read
@@ -83,8 +84,12 @@ jobs:
         packages=[str(p) for p in pathlib.Path('psc1/packages').iterdir() if p.is_dir() and p.name!='pskernel-core']\n\
         stable=packages+['psc1/lakefile.lean','psc1/lake-manifest.json','psc1/lean-toolchain','psc1/host','psc1/stdlib','psc1/psconfig.json']\n\
         subprocess.run(['git','diff','--exit-code',compiler_source,'HEAD','--',*stable],check=True)\nexe=pathlib.Path(os.environ['RUNNER_TEMP'])/'mutual-psc1';exe.write_bytes(binary);exe.chmod(0o700)\n\
+        baseline249=json.loads(pathlib.Path('psc1/test/retained-249-audited-input-manifest.json').read_text())\n\
+        assert len(baseline249['bindings'])==249 and len(baseline249['intentionalNativeQualifiedChanges'])==2\n\
+        for spec in baseline249['bindings']:\n    path=spec['path'];wanted=baseline249['intentionalNativeQualifiedChanges'].get(path,spec['gitBlobSha'])\n\
+        \    assert subprocess.check_output(['git','rev-parse','HEAD:'+path]).decode().strip()==wanted,(path,'audited249binding')\n\
         snapshots=[]\npaths=['psc1/packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean',\n    'psc1/scripts/pskernel-mutual-complete-smoke.mjs','psc1/scripts/pskernel-mutual-public-smoke.mjs',\n\
-        \    'psc1/scripts/pskernel-mutual-retained-runtime-audit.py','psc1/test/retained-21-generated-helper-manifest.json',\n\
+        \    'psc1/scripts/pskernel-mutual-retained-runtime-audit.py','psc1/test/retained-21-generated-helper-manifest.json','psc1/test/retained-249-audited-input-manifest.json',\n\
         \    '.github/workflows/psc1-pskernel-t06-mutual-public-full.yml',\n    'psc1/scripts/bootstrap-project.mjs','psc1/scripts/bootstrap-manifest.mjs','psc1/scripts/workspace-layout.mjs']\n\
         paths+=['psc1/packages/pskernel-core/src/Ps/KernelCore/'+p+'.lean' for p in ['API/Dag','API/DagMutualHeader','API/DagMutualConstructorResult','Core/ExprV2/ExpandedSize','API/DagMutualRecursiveArgument','API/DagMutualConstructorFields','API/DagMutualConstructorAnalysis','API/DagMutualConstructorLoop','API/DagMutualGenerated','API/DagMutualRecursorValidation','API/DagMutualAdmission']]\n\
         legacy=json.loads(pathlib.Path('psc1/test/retained-21-generated-helper-manifest.json').read_text());assert\

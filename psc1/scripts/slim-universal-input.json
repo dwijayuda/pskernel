@@ -34,5 +34,47 @@
       "tarball": "proofscript-compiler-wasm-0.1.0-psc1.3.tgz",
       "sha256": "340b90eca1d08b1f20b4ca618358d7ac7b7931371f2232eb6aa54101099fcc83"
     }
+  },
+  "qualifiedCompilerGenerations": {
+    "schema": "psc1-qualified-compiler-generation-inputs/1",
+    "sourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+    "engines": {
+      "js": {
+        "run": 40223062370,
+        "job": 121258729566,
+        "artifact": 12611622480,
+        "zipSha256": "1c18b578e110f96545a91ba6f520eed436826206f556243695261b72e68ede45",
+        "commit": "4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98",
+        "manifestSha256": "6f55b61fcaf69e9eb1ac790bd85f31d900a4baced97dbb73fb5ccd2a3359e2af",
+        "executableSha256": "e7d9c7b6eb9ea22aaaecad2bbf21adcf9856a0518dba0079eb63e8db0d03a0aa"
+      },
+      "ts": {
+        "run": 40223062370,
+        "job": 121258729656,
+        "artifact": 12612640406,
+        "zipSha256": "60e453cfbfd42d63533adb1014b3e255b69c522ce63eeebed55753ae2817607d",
+        "commit": "4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98",
+        "manifestSha256": "b8eb2279226222cb79f8b90234d4b5c6d8b9a2920352703c3827c78ec762ea44",
+        "executableSha256": "9a7c60fc9d02a596d2a3a2aa725dfce653e3babea2585e116ef809d8144ecdc2"
+      },
+      "wasm-core": {
+        "run": 40223062370,
+        "job": 121258729664,
+        "artifact": 12611662030,
+        "zipSha256": "4bc22aed89ba9fd494a7044bb503ec8f0a8592ea4b26fffd0aaa56d378533c27",
+        "commit": "4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98",
+        "manifestSha256": "c02be90d27cca4861ca2b9f98b9b5193c38fcd7f9e15a9e496e207a1ebd7fb78",
+        "executableSha256": "53e30eac21add83fd1b7eb8635530d16a4d0af54f8dbe7bb995d24590f3bc137"
+      },
+      "rust": {
+        "run": 40223086966,
+        "job": 121258808523,
+        "artifact": 12612555500,
+        "zipSha256": "d33f5329203ed41fb3503e1d3cdccf6bc4f833023a456c91976494a1db005ca0",
+        "commit": "4c88681f6fef70e6dcac7e990ffaac83b78b45be",
+        "manifestSha256": "5ac54e9006aab1de9eea9fd46d4d5a8637938d3d1a24809af37ef1e0a67a783e",
+        "executableSha256": "29078960566487cbd33b2504af6a71b777e72c92f68f7bf4733e7eb45e966bab"
+      }
+    }
   }
 }

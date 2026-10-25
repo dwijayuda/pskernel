@@ -333,6 +333,25 @@
       "job": 121272516496,
       "reason": "test assumed a required protocol property and nested error.kind",
       "fix": "follow canonical format/version with optional transport protocol, and existing errorKind API; compiler/kernel bytes unchanged"
+    },
+    {
+      "run": 40229553987,
+      "job": 121278132252,
+      "commit": "28bdbef32e92989c27798dca0b3c3afff49bf65c",
+      "reason": "installed application harness expected inputSource in Lean census; only PS translation census carries source text",
+      "passedBeforeFailure": {
+        "actualG3Promotion": true,
+        "compilerAdmissionBothKernels": true,
+        "offlineExistingRegressions": true,
+        "installedIoAdapter": true
+      },
+      "fix": "hash actual owned source closure; require archived measured module order/bytes/imports/stage acceptance against the same captured sources",
+      "compilerKernelOrRuntimeBytesChanged": false,
+      "diagnosticArtifact": {
+        "id": 12612855002,
+        "zipSha256": "7f03d01c700f86747c52ca01c1af15c5dd5594810a33190cad0b49c3e2869052"
+      },
+      "finalQualification": false
     }
   ],
   "limits": {
@@ -754,5 +773,364 @@
     "apiCliFeatureSnapshot": "4174fefe50fccc0bd68e3882c069c784bc5f3a7e",
     "historicalCleanupPreserved": true,
     "featureQualification": "installed-new-source-package-gate-required"
+  },
+  "qualifiedGenerationInputs": {
+    "schema": "psc1-qualified-compiler-generation-inputs/1",
+    "sourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+    "engines": {
+      "js": {
+        "run": 40223062370,
+        "job": 121258729566,
+        "artifact": 12611622480,
+        "zipSha256": "1c18b578e110f96545a91ba6f520eed436826206f556243695261b72e68ede45",
+        "commit": "4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98",
+        "manifestSha256": "6f55b61fcaf69e9eb1ac790bd85f31d900a4baced97dbb73fb5ccd2a3359e2af",
+        "executableSha256": "e7d9c7b6eb9ea22aaaecad2bbf21adcf9856a0518dba0079eb63e8db0d03a0aa"
+      },
+      "ts": {
+        "run": 40223062370,
+        "job": 121258729656,
+        "artifact": 12612640406,
+        "zipSha256": "60e453cfbfd42d63533adb1014b3e255b69c522ce63eeebed55753ae2817607d",
+        "commit": "4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98",
+        "manifestSha256": "b8eb2279226222cb79f8b90234d4b5c6d8b9a2920352703c3827c78ec762ea44",
+        "executableSha256": "9a7c60fc9d02a596d2a3a2aa725dfce653e3babea2585e116ef809d8144ecdc2"
+      },
+      "wasm-core": {
+        "run": 40223062370,
+        "job": 121258729664,
+        "artifact": 12611662030,
+        "zipSha256": "4bc22aed89ba9fd494a7044bb503ec8f0a8592ea4b26fffd0aaa56d378533c27",
+        "commit": "4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98",
+        "manifestSha256": "c02be90d27cca4861ca2b9f98b9b5193c38fcd7f9e15a9e496e207a1ebd7fb78",
+        "executableSha256": "53e30eac21add83fd1b7eb8635530d16a4d0af54f8dbe7bb995d24590f3bc137"
+      },
+      "rust": {
+        "run": 40223086966,
+        "job": 121258808523,
+        "artifact": 12612555500,
+        "zipSha256": "d33f5329203ed41fb3503e1d3cdccf6bc4f833023a456c91976494a1db005ca0",
+        "commit": "4c88681f6fef70e6dcac7e990ffaac83b78b45be",
+        "manifestSha256": "5ac54e9006aab1de9eea9fd46d4d5a8637938d3d1a24809af37ef1e0a67a783e",
+        "executableSha256": "29078960566487cbd33b2504af6a71b777e72c92f68f7bf4733e7eb45e966bab"
+      }
+    }
+  },
+  "generationArtifactAudit": {
+    "run": 40229443268,
+    "job": 121277802691,
+    "commit": "4bd0aec93243203ea71e327ed2b83885fddb8a41",
+    "status": "passed",
+    "records": [
+      {
+        "engine": "js",
+        "run": 40223062370,
+        "job": 121258729566,
+        "artifact": 12611622480,
+        "zipSha256": "1c18b578e110f96545a91ba6f520eed436826206f556243695261b72e68ede45",
+        "commit": "4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98",
+        "manifestSha256": "6f55b61fcaf69e9eb1ac790bd85f31d900a4baced97dbb73fb5ccd2a3359e2af",
+        "executableSha256": "e7d9c7b6eb9ea22aaaecad2bbf21adcf9856a0518dba0079eb63e8db0d03a0aa",
+        "profile": {
+          "name": "correctness-1800s",
+          "g1TimeoutMs": 240000,
+          "corpusTimeoutMs": 240000,
+          "toolTimeoutMs": 240000,
+          "selfCompileTimeoutMs": 1800000,
+          "correctnessAndPerformanceSeparate": true
+        },
+        "sourceModules": 122,
+        "sourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+        "admissionsSha256": "a1c75ace20b2071d66ea4a9263b98980c39bea92b5b4f459d26978f46c66f213",
+        "originalIrSha256": "ae2f697098419ccac7e42e05204d96e54bd3510e606ac3d0e7411c6bd7eac64f",
+        "sourceSha256": "e7d9c7b6eb9ea22aaaecad2bbf21adcf9856a0518dba0079eb63e8db0d03a0aa",
+        "selfCompileEvents": [
+          {
+            "role": "generated-compiler",
+            "target": "js",
+            "id": "G2-self",
+            "serviceSha256": "0f581847436da43788f1a230dbb7c4fa466f9258d930843ba916c29aff93d799",
+            "requestSha256": "c5f048598db01748a437d2b9226d81d23322110bf58b2f53c8b7bf826ba604b3",
+            "timeoutMs": 1800000,
+            "timeoutPolicy": "g2g3-correctness-1800s",
+            "maxRssKiB": 3434572,
+            "peakTreeRssKiB": 3401804,
+            "sampledCpuSeconds": 1755.64,
+            "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+            "elapsedMs": 1603085,
+            "status": 0,
+            "signal": null,
+            "error": null,
+            "serviceMaxRssKiB": 3434572
+          },
+          {
+            "role": "generated-compiler",
+            "target": "js",
+            "id": "G3-self",
+            "serviceSha256": "2db5c868b5af422985571d9ae4a0ffcda1c56a51d55e1a75d28eb0061f3da2fd",
+            "requestSha256": "e3d55f0f250a7c9244e4dae856902e3dc1b627eba393246a34932661e66ee515",
+            "timeoutMs": 1800000,
+            "timeoutPolicy": "g2g3-correctness-1800s",
+            "maxRssKiB": 3600140,
+            "peakTreeRssKiB": 3544588,
+            "sampledCpuSeconds": 1839.07,
+            "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+            "elapsedMs": 1682611,
+            "status": 0,
+            "signal": null,
+            "error": null,
+            "serviceMaxRssKiB": 3600140
+          }
+        ],
+        "fixedPoint": "passed-G1-G2-G3-exact-source-admission-IR-executable-and-four-target-observations"
+      },
+      {
+        "engine": "ts",
+        "run": 40223062370,
+        "job": 121258729656,
+        "artifact": 12612640406,
+        "zipSha256": "60e453cfbfd42d63533adb1014b3e255b69c522ce63eeebed55753ae2817607d",
+        "commit": "4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98",
+        "manifestSha256": "b8eb2279226222cb79f8b90234d4b5c6d8b9a2920352703c3827c78ec762ea44",
+        "executableSha256": "9a7c60fc9d02a596d2a3a2aa725dfce653e3babea2585e116ef809d8144ecdc2",
+        "profile": {
+          "name": "correctness-1800s",
+          "g1TimeoutMs": 240000,
+          "corpusTimeoutMs": 240000,
+          "toolTimeoutMs": 240000,
+          "selfCompileTimeoutMs": 1800000,
+          "correctnessAndPerformanceSeparate": true
+        },
+        "sourceModules": 122,
+        "sourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+        "admissionsSha256": "a1c75ace20b2071d66ea4a9263b98980c39bea92b5b4f459d26978f46c66f213",
+        "originalIrSha256": "ae2f697098419ccac7e42e05204d96e54bd3510e606ac3d0e7411c6bd7eac64f",
+        "sourceSha256": "c09fe8556b298b97ec36e23a8a3f567f7d91a3684ac1f697349a041738c1d0cf",
+        "selfCompileEvents": [
+          {
+            "role": "generated-compiler",
+            "target": "ts",
+            "id": "G2-self",
+            "serviceSha256": "187215b42d61970d64eea858f4357571ba9f51db4376dfdd06de0f27e63c77db",
+            "requestSha256": "8d9a828253e26df33c74b48b32d9e9b2b103fd19a62f3a46a60cc886a000ae59",
+            "timeoutMs": 1800000,
+            "timeoutPolicy": "g2g3-correctness-1800s",
+            "maxRssKiB": 3472852,
+            "peakTreeRssKiB": 3423700,
+            "sampledCpuSeconds": 1650.83,
+            "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+            "elapsedMs": 1519212,
+            "status": 0,
+            "signal": null,
+            "error": null,
+            "serviceMaxRssKiB": 3472852
+          },
+          {
+            "role": "generated-compiler",
+            "target": "ts",
+            "id": "G3-self",
+            "serviceSha256": "48b0decbeef89ed9dee5a4866cdc4f33fba015536487ae5e6440bd197f28bd93",
+            "requestSha256": "661dd737911793b5d259f2437ef1618ca775dfe3bcd2d8899c0a5234b00f17c0",
+            "timeoutMs": 1800000,
+            "timeoutPolicy": "g2g3-correctness-1800s",
+            "maxRssKiB": 3479120,
+            "peakTreeRssKiB": 3468752,
+            "sampledCpuSeconds": 1580.24,
+            "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+            "elapsedMs": 1453882,
+            "status": 0,
+            "signal": null,
+            "error": null,
+            "serviceMaxRssKiB": 3479120
+          }
+        ],
+        "fixedPoint": "passed-G1-G2-G3-exact-source-admission-IR-executable-and-four-target-observations"
+      },
+      {
+        "engine": "wasm-core",
+        "run": 40223062370,
+        "job": 121258729664,
+        "artifact": 12611662030,
+        "zipSha256": "4bc22aed89ba9fd494a7044bb503ec8f0a8592ea4b26fffd0aaa56d378533c27",
+        "commit": "4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98",
+        "manifestSha256": "c02be90d27cca4861ca2b9f98b9b5193c38fcd7f9e15a9e496e207a1ebd7fb78",
+        "executableSha256": "53e30eac21add83fd1b7eb8635530d16a4d0af54f8dbe7bb995d24590f3bc137",
+        "profile": {
+          "name": "correctness-1800s",
+          "g1TimeoutMs": 240000,
+          "corpusTimeoutMs": 240000,
+          "toolTimeoutMs": 240000,
+          "selfCompileTimeoutMs": 1800000,
+          "correctnessAndPerformanceSeparate": true
+        },
+        "sourceModules": 122,
+        "sourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+        "admissionsSha256": "a1c75ace20b2071d66ea4a9263b98980c39bea92b5b4f459d26978f46c66f213",
+        "originalIrSha256": "ae2f697098419ccac7e42e05204d96e54bd3510e606ac3d0e7411c6bd7eac64f",
+        "sourceSha256": "a6649c8f53bdb890192b7e4e578870991f905b83827c6aef932dad5723d033c8",
+        "selfCompileEvents": [
+          {
+            "role": "generated-compiler",
+            "target": "wasm-core",
+            "id": "G2-self",
+            "serviceSha256": "7ccd20db0d48c4007757368d7bbc1b0c2e445ea4cc2f739758a656054ae8c765",
+            "requestSha256": "19706a593b5a5b252e429a29db545e280d964533b75dcfa5b264b8f002751b87",
+            "timeoutMs": 1800000,
+            "timeoutPolicy": "g2g3-correctness-1800s",
+            "maxRssKiB": 2240000,
+            "peakTreeRssKiB": 2240000,
+            "sampledCpuSeconds": 1769.33,
+            "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+            "elapsedMs": 1559993,
+            "status": 0,
+            "signal": null,
+            "error": null,
+            "serviceMaxRssKiB": 2240000
+          },
+          {
+            "role": "generated-compiler",
+            "target": "wasm-core",
+            "id": "G3-self",
+            "serviceSha256": "4497d724995bd405e3788c9ccd188404f4ca8ffc79d364283222ceef4c68ac11",
+            "requestSha256": "276c4bd289dc06120f8cd48be79e50675ba44c49540742daafe8526f1f60d0e0",
+            "timeoutMs": 1800000,
+            "timeoutPolicy": "g2g3-correctness-1800s",
+            "maxRssKiB": 2273048,
+            "peakTreeRssKiB": 2273048,
+            "sampledCpuSeconds": 1736.28,
+            "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+            "elapsedMs": 1526983,
+            "status": 0,
+            "signal": null,
+            "error": null,
+            "serviceMaxRssKiB": 2273048
+          }
+        ],
+        "fixedPoint": "passed-G1-G2-G3-exact-source-admission-IR-executable-and-four-target-observations"
+      },
+      {
+        "engine": "rust",
+        "run": 40223086966,
+        "job": 121258808523,
+        "artifact": 12612555500,
+        "zipSha256": "d33f5329203ed41fb3503e1d3cdccf6bc4f833023a456c91976494a1db005ca0",
+        "commit": "4c88681f6fef70e6dcac7e990ffaac83b78b45be",
+        "manifestSha256": "5ac54e9006aab1de9eea9fd46d4d5a8637938d3d1a24809af37ef1e0a67a783e",
+        "executableSha256": "29078960566487cbd33b2504af6a71b777e72c92f68f7bf4733e7eb45e966bab",
+        "profile": {
+          "name": "correctness-3600s",
+          "g1TimeoutMs": 240000,
+          "corpusTimeoutMs": 240000,
+          "toolTimeoutMs": 240000,
+          "selfCompileTimeoutMs": 3600000,
+          "correctnessAndPerformanceSeparate": true
+        },
+        "sourceModules": 122,
+        "sourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+        "admissionsSha256": "a1c75ace20b2071d66ea4a9263b98980c39bea92b5b4f459d26978f46c66f213",
+        "originalIrSha256": "ae2f697098419ccac7e42e05204d96e54bd3510e606ac3d0e7411c6bd7eac64f",
+        "sourceSha256": "df5d51a4d8f77ac20af405a7527f1258bead38adc59dd7c431df4650c7ae03ad",
+        "selfCompileEvents": [
+          {
+            "role": "generated-compiler",
+            "target": "rust",
+            "id": "G2-self",
+            "serviceSha256": "e9a9e1de1d439f8f406b28c500ace57c8144c0fc3a22c1a969d09023d83b6332",
+            "requestSha256": "f304a0816498057dec1d7ebfcabe0cb1178d8515c0393c117e13a3057b84d1d0",
+            "timeoutMs": 3600000,
+            "timeoutPolicy": "g2g3-correctness-3600s",
+            "maxRssKiB": 1092132,
+            "peakTreeRssKiB": 1041216,
+            "sampledCpuSeconds": 1533.58,
+            "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+            "elapsedMs": 1484143,
+            "status": 0,
+            "signal": null,
+            "error": null,
+            "serviceMaxRssKiB": 1092132
+          },
+          {
+            "role": "generated-compiler",
+            "target": "rust",
+            "id": "G3-self",
+            "serviceSha256": "0a8fb4be1efe70eecf9c972e2b99ff4137e194eed01b983a43d0f40e6ae46813",
+            "requestSha256": "25ed44c564ecc5861487c36f1aadf26215d4a5b05147617c14634f3423e734ae",
+            "timeoutMs": 3600000,
+            "timeoutPolicy": "g2g3-correctness-3600s",
+            "maxRssKiB": 1092060,
+            "peakTreeRssKiB": 1038436,
+            "sampledCpuSeconds": 1539.27,
+            "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+            "elapsedMs": 1486236,
+            "status": 0,
+            "signal": null,
+            "error": null,
+            "serviceMaxRssKiB": 1092060
+          }
+        ],
+        "fixedPoint": "passed-G1-G2-G3-exact-source-admission-IR-executable-and-four-target-observations"
+      }
+    ]
+  },
+  "defaultPackageGenerationInputs": {
+    "schema": "psc1-qualified-compiler-generation-inputs/1",
+    "sourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+    "engines": {
+      "js": {
+        "run": 40223062370,
+        "job": 121258729566,
+        "artifact": 12611622480,
+        "zipSha256": "1c18b578e110f96545a91ba6f520eed436826206f556243695261b72e68ede45",
+        "commit": "4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98",
+        "manifestSha256": "6f55b61fcaf69e9eb1ac790bd85f31d900a4baced97dbb73fb5ccd2a3359e2af",
+        "executableSha256": "e7d9c7b6eb9ea22aaaecad2bbf21adcf9856a0518dba0079eb63e8db0d03a0aa"
+      },
+      "ts": {
+        "run": 40223062370,
+        "job": 121258729656,
+        "artifact": 12612640406,
+        "zipSha256": "60e453cfbfd42d63533adb1014b3e255b69c522ce63eeebed55753ae2817607d",
+        "commit": "4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98",
+        "manifestSha256": "b8eb2279226222cb79f8b90234d4b5c6d8b9a2920352703c3827c78ec762ea44",
+        "executableSha256": "9a7c60fc9d02a596d2a3a2aa725dfce653e3babea2585e116ef809d8144ecdc2"
+      },
+      "wasm-core": {
+        "run": 40223062370,
+        "job": 121258729664,
+        "artifact": 12611662030,
+        "zipSha256": "4bc22aed89ba9fd494a7044bb503ec8f0a8592ea4b26fffd0aaa56d378533c27",
+        "commit": "4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98",
+        "manifestSha256": "c02be90d27cca4861ca2b9f98b9b5193c38fcd7f9e15a9e496e207a1ebd7fb78",
+        "executableSha256": "53e30eac21add83fd1b7eb8635530d16a4d0af54f8dbe7bb995d24590f3bc137"
+      },
+      "rust": {
+        "run": 40223086966,
+        "job": 121258808523,
+        "artifact": 12612555500,
+        "zipSha256": "d33f5329203ed41fb3503e1d3cdccf6bc4f833023a456c91976494a1db005ca0",
+        "commit": "4c88681f6fef70e6dcac7e990ffaac83b78b45be",
+        "manifestSha256": "5ac54e9006aab1de9eea9fd46d4d5a8637938d3d1a24809af37ef1e0a67a783e",
+        "executableSha256": "29078960566487cbd33b2504af6a71b777e72c92f68f7bf4733e7eb45e966bab"
+      }
+    }
+  },
+  "finalPackageQualification": {
+    "run": 40230101814,
+    "job": 121279783037,
+    "commit": "46cea8b91448db9845641a048e4c5d01afd991c0",
+    "status": "running; not-qualified",
+    "control": "a37b49a23d756d006cb650f234aab044f78aff04"
+  },
+  "updatedHostGate": {
+    "run": 40229514151,
+    "job": 121278013272,
+    "commit": "11f598d2992a9f04a7fd8d43b8396f6d81b87c11",
+    "status": "passed",
+    "applications": 16,
+    "cases": 264,
+    "artifact": {
+      "id": 12612925080,
+      "zipSha256": "86b3aa4385c11e6a2a75529c71b122a0852ced38f24991ff9be1a47245bab441"
+    }
   }
 }

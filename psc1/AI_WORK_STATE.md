@@ -89,12 +89,18 @@ per-request resource verification. Source/project metadata gains no authority.
 The original formatting-only cleanup AST proof is preserved against its immutable
 snapshot; intentional IO/pin behavior has explicit feature baselines and tests.
 
-Next: audit all four exact generation receipts, then request the separate
-unpublished npm qualification workflow. It must execute offline installed
+All four artifact identities are audited in **40229443268 / 121277802691**.
+The repository package input now selects those exact current-source G3s by default.
+The unpublished npm qualification retry **40230101814 / 121279783037** is running. It must execute offline installed
 CLI/API/source-data applications through four engines, public IO runtime/types,
 real JS/TS/Rust consumers, mandatory linear-memory Wasm checking, optional native
-cross-checking and all preserved regressions. The source/host/package final gates
-remain required. [Guide](docs/PSC1_GENERATED_IO_APPLICATIONS.md).
+cross-checking and all preserved regressions. The final source/package gates remain required. Updated host run
+**40229514151 / 121278013272** passes all 264 G1 application cases and boundaries.
+The preceding package attempt **40229553987** passed G3 promotion, both complete
+compiler kernel checks and all installed regressions, then exposed a test-harness
+mistake: Lean census rows carry measured facts, not PS translation source text.
+The correction hashes actual owned source bytes and compares the archived ordered
+module/byte/import/stage facts; no compiler, kernel or runtime gate was weakened. [Guide](docs/PSC1_GENERATED_IO_APPLICATIONS.md).
 
 ## Protocol and authority
 

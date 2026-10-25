@@ -7,6 +7,7 @@ import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { readQualifiedArtifact, sha256 as sha } from './kernel435-qualified-artifact.mjs';
 import { compilerSourceClosureDigest } from '../host-tools/compiler-host-protocol.mjs';
+import { readOwnedCompilerSources } from '../host-tools/compiler-source-inputs.mjs';
 import { executeApplication } from './output-abi-applications.mjs';
 const out = path.resolve('dist/slim-universal');
 const assembly = JSON.parse(fs.readFileSync(path.join(out, 'package-receipt.json')));
@@ -16,8 +17,26 @@ const archive = await readQualifiedArtifact(referenceInput, path.join(out, 'appl
 const reference = JSON.parse(fs.readFileSync(path.join(archive, 'output-abi/native-reference.json')));
 assert.equal(reference.applications.length, 4);
 const census = JSON.parse(fs.readFileSync(path.join(archive, 'source-conversion/census-lean.json')));
-assert.equal(compilerSourceClosureDigest(census.records.map(row =>
-  ({ module: row.module, text: row.inputSource, kind: 'lean' }))), assembly.compilerSourceClosureDigest);
+// Lean census records contain measured stage/byte/import facts; only the PS
+// translation lane carries inputSource. Hash the actual owned source bytes and
+// bind the archived ordered census to those same modules, bytes and imports.
+const owned = readOwnedCompilerSources('Ps.CompilerUnified.Service');
+assert.equal(compilerSourceClosureDigest(owned.map(row => ({ ...row, kind: 'lean' }))),
+  assembly.compilerSourceClosureDigest);
+assert.equal(census.schema, 'psc1-live-source-stage-probe/1');
+assert.equal(census.grammar, 'lean');
+assert.deepEqual(census.records.map(row => row.module), owned.map(row => row.module));
+census.records.forEach((row, index) => {
+  const source = owned[index];
+  assert.equal(row.grammar, 'lean');
+  assert.equal(row.translation, 'not-applicable');
+  assert.equal(row.parse, 'accepted'); assert.equal(row.elaboration, 'accepted');
+  assert.equal(row.utf8Bytes, Buffer.byteLength(source.text));
+  assert.equal(row.inputUtf8Bytes, Buffer.byteLength(source.text));
+  const imports = [...source.text.matchAll(/^import\s+(.+)$/gm)]
+    .flatMap(match => match[1].trim().split(/\s+/));
+  assert.deepEqual(row.parsedImports, imports);
+});
 
 const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'proofscript-installed-applications-'));
 const consumer = path.join(temporary, 'consumer'), prefix = path.join(temporary, 'global');

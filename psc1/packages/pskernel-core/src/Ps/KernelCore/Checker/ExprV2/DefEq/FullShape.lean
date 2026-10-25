@@ -2,6 +2,7 @@ import Ps.KernelCore.Checker.ExprV2.DefEq.Quick
 import Ps.KernelCore.Checker.ExprV2.DefEq.LazyProjection
 import Ps.KernelCore.Checker.ExprV2.DefEq.FinalRules
 import Ps.KernelCore.Core.ExprV2.TransformSpine
+import Ps.KernelCore.Checker.ExprV2.DefEq.UnarySpines
 
 /-
 DAG full-shape rules and the residual continuation after ordered lazy delta.
@@ -68,7 +69,7 @@ def psKernelExprV2DefEqFullShapeListsWithFuel
                           smaller defeq context (Prod.fst result) leftRest rightRest
                         else Option.some (Except.ok result)
 
-def psKernelExprV2DefEqFullShapeAppWith
+def psKernelExprV2DefEqFullShapeAppOriginalWith
     (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
       Option (Except String (Prod PsKernelExprV2CheckState Bool)))
     (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
@@ -97,6 +98,21 @@ def psKernelExprV2DefEqFullShapeAppWith
                         defeq context (Prod.fst result) leftArgs rightArgs
                     else Option.some (Except.ok (Prod.mk (Prod.fst result) false))
                   else Option.some (Except.ok result)
+
+/- A positive congruence shortcut. Every nonpositive attempt restarts the
+   existing rule with the original owner and its unchanged callback. -/
+def psKernelExprV2DefEqFullShapeAppWith
+    (defeq : PsKernelExprV2CheckContext -> PsKernelExprV2CheckState -> Nat -> Nat ->
+      Option (Except String (Prod PsKernelExprV2CheckState Bool)))
+    (context : PsKernelExprV2CheckContext) (state : PsKernelExprV2CheckState)
+    (left right : Nat) :
+    Option (Except String (Prod PsKernelExprV2CheckState Bool)) :=
+  match psKernelExprV2TryUnarySpineWith defeq context state left right with
+  | Option.some (Except.ok result) =>
+      if Prod.snd result then Option.some (Except.ok result)
+      else psKernelExprV2DefEqFullShapeAppOriginalWith defeq context state left right
+  | _ => psKernelExprV2DefEqFullShapeAppOriginalWith defeq context state left right
+
 
 def psKernelExprV2DefEqFullShapeEtaOwnedWith
     (lambdaOnLeft : Bool)

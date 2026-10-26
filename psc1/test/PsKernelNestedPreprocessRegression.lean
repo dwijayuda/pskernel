@@ -112,4 +112,11 @@ def main : IO Unit := do
   let twice : PsKernelSimpleMutualInductiveDecl := {single with types := [⟨name,s1,
     [⟨PsKernelName.str name "mk",all "child" deep self⟩]⟩]}
   compare "nested-discovery-queue" boxed.session twice true
+  let paramName := nm "NestedPlanParameterized"
+  let applied := PsKernelExpr.app (.const paramName []) (.bvar 0)
+  let paramNested := PsKernelExpr.app (.const boxName []) applied
+  let parameterized : PsKernelSimpleMutualInductiveDecl := ⟨[],1,
+    [⟨paramName,all "A" s1 s1,[⟨PsKernelName.str paramName "mk",
+      all "A" s1 (all "child" paramNested (.app (.const paramName []) (.bvar 1)))⟩]⟩],false⟩
+  compare "shared-parameter-rebasing" boxed.session parameterized true
   IO.println "PSC1_NESTED_PREPROCESS_NATIVE: PASS privateOnly=true publicRouteChanged=false"

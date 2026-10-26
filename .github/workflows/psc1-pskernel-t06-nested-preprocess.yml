@@ -204,8 +204,8 @@ jobs:
         \ test/PsKernelNestedPreprocessRegression.lean 2>&1 | tee \"$RUNNER_TEMP/t06-mutual-public/nested-preprocess-native.log\"\
         \npython3 - <<'PYCODE'\nimport pathlib,os\nt=(pathlib.Path(os.environ['RUNNER_TEMP'])/'t06-mutual-public/nested-preprocess-native.log').read_text()\n\
         labels=[s.removeprefix('PSC1_NESTED_PREPROCESS_ASSERT ') for s in t.splitlines() if s.startswith('PSC1_NESTED_PREPROCESS_ASSERT\
-        \ ')]\nassert len(labels)==len(set(labels))==21,labels\nassert 'PSC1_NESTED_PREPROCESS_NATIVE: PASS privateOnly=true\
-        \ publicRouteChanged=false' in t\nprint('PSC1_NESTED_PREPROCESS_CONTROLS: PASS controls=21 retained=1219')\n\
+        \ ')]\nassert len(labels)==len(set(labels))==26,labels\nassert 'PSC1_NESTED_PREPROCESS_NATIVE: PASS privateOnly=true\
+        \ publicRouteChanged=false' in t\nprint('PSC1_NESTED_PREPROCESS_CONTROLS: PASS controls=26 retained=1219')\n\
         PYCODE\n"
     - name: Bind every actual source snapshot and log
       if: always()
@@ -222,7 +222,7 @@ jobs:
         for p in sorted(out.rglob(''*'')) if p.is_file()}
 
         (out/''files.json'').write_text(json.dumps({''source'':os.environ[''GITHUB_SHA''],''run'':os.environ[''GITHUB_RUN_ID''],''attempt'':os.environ[''GITHUB_RUN_ATTEMPT''],''scope'':''Private
-        nested discovery/flattening;757unique reports;1184retainedmutual+35retainedheader+21newplancontrols;actualretainedqueueandgenuinenestedoriginaladmissionfixtures;publicrouteunchanged;no
+        nested discovery/flattening;757unique reports;1184retainedmutual+35retainedheader+26newplancontrols;actualretainedqueueandgenuinenestedoriginaladmissionfixtures;publicrouteunchanged;no
         transformedadmission/restoration/globalproof'',''files'':files},indent=2)+''\n'')
 
         PYCODE

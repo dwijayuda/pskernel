@@ -118,7 +118,7 @@ for(const file of ['host-tools/source-refactoring.mjs','host-tools/generated-tar
   .replace("import {pathToFileURL} from 'node:url';","import {fileURLToPath,pathToFileURL} from 'node:url';")
   .replace("path.resolve('host-tools/process/bounded-process.py')","fileURLToPath(new URL('./process/bounded-process.py',import.meta.url))");
  assert.equal(read(file),expected,'host relocation changed non-path bytes: '+file);
- compared.push({from:file,to:file,relation:'only-enumerated-runtime-path-literals'});
+ compared.push({from:file,to:file,relation:file==='host-tools/generated-target-tools.mjs'?'enumerated-paths-and-module-relative-supervisor-resolution':'only-enumerated-runtime-path-literals'});
 }
 for(const name of ['STATUS','NPM_PACKAGE_WORK_STATE'])
  assert.equal(read('docs/history/'+name+'_BEFORE_LAYOUT_2026-10-26.md'),historical(name+'.md'));

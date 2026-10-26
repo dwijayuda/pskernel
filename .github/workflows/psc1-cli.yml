@@ -87,6 +87,10 @@ jobs:
           tar xJf "$RUNNER_TEMP/wasmtime.tar.xz" -C "$RUNNER_TEMP/wasmtime"
           install -m 755 "$(find "$RUNNER_TEMP/wasmtime" -type f -name wasmtime -print -quit)" "$RUNNER_TEMP/wasmtime/wasmtime"
           echo "PSC1_WASMTIME=$RUNNER_TEMP/wasmtime/wasmtime" >> "$GITHUB_ENV"
+      - name: Execute unchanged real applications against the exact frozen source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/cli-application-regressions.mjs
       - name: Preserve every existing installed dispatch and publication regression
         run: |
           node scripts/checked-component-tests.mjs
@@ -99,7 +103,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          node scripts/cli-application-regressions.mjs
           node scripts/generated-io-installed-candidates.mjs
           node scripts/checked-publication-types.mjs
       - name: Qualify candidate only after all previous and new gates pass

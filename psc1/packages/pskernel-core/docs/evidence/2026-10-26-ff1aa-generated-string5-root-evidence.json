@@ -1,0 +1,72 @@
+{
+  "source": "ff1aa23dc2c95785f5349dd7b7a022dac893f5ac",
+  "run": 40251383616,
+  "job": 121352663835,
+  "artifact": 12622943395,
+  "bytes": 3498,
+  "sha256": "1595a9ac49210c92348d0f2b017dc75baea76a800c112c0afe2905da3dc450fe",
+  "all3ActualMembersRead": true,
+  "independent294AdmissionsCompleted": true,
+  "all377MetadataCompleted": true,
+  "mixedSingletonPassed": true,
+  "noFinal1400Receipt": true,
+  "actualInputs": {
+    "repository": "dwijayuda/pskernel",
+    "sourceSha": "ff1aa23dc2c95785f5349dd7b7a022dac893f5ac",
+    "runId": "40251383616",
+    "runAttempt": "1",
+    "workflow": ".github/workflows/psc1-pskernel-expr-v2-integration.yml",
+    "route": "generated",
+    "producerJob": "generated-dag-integration",
+    "producerArtifact": "psc1-v2-dag-generated-js",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "kernelFuel": 4096,
+    "nodeOldSpaceLimitMiB": 2048,
+    "requests": 294,
+    "metadata": 377,
+    "samples": [
+      "",
+      "a",
+      "\u00e9",
+      "\u20ac",
+      "\ud83d\ude00",
+      "A\u00e9\u20ac\ud83d\ude00"
+    ],
+    "hashes": {
+      "kernel": {
+        "bytes": 10601802,
+        "sha256": "9e81e1323aefacb71f3db71eb8698922e747160b051eff8ef82e1daa61679e9d"
+      },
+      "fixture": {
+        "bytes": 2791525,
+        "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+      },
+      "fixtureProducer": {
+        "bytes": 39734,
+        "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+      },
+      "generatedRunner": {
+        "bytes": 27140,
+        "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+      },
+      "provenance": {
+        "bytes": 1209,
+        "sha256": "179bbade79c59d483381a8cddcfa54cf2dcd77b49c2dae72b90e4294db8cc0eb"
+      },
+      "orchestrator": {
+        "bytes": 15637,
+        "sha256": "afb46ae5afc32bc4187687f3e2de7ee49a7cb4441bf4e14cd93abb84ad6e7a10"
+      },
+      "workflow": {
+        "bytes": 97168,
+        "sha256": "9d1d84c14764b6f6dc87fa4a9eca38eb9fdc4af0816ff398d53d60a26cb02065"
+      },
+      "providerManifest": {
+        "bytes": 2205,
+        "sha256": "ca7ca8222420c3e63fb037b2c612e3d249be9d08d0b2e6d79250486c28042d93"
+      }
+    }
+  },
+  "status": "FAIL at unchanged1500s shard budget;rawGHAexitneeded forkillclassification",
+  "performanceQualified": false
+}

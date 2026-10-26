@@ -1,0 +1,288 @@
+{
+  "source": "72b5e882ceab864a410e7078b0f9a1d03d1d3bff",
+  "run": 40255859346,
+  "job": 121357422313,
+  "artifact": 12623619836,
+  "archiveBytes": 16554838,
+  "archiveSha256": "b14c0f87e869bdd5eb94045b62ff7e71490e86983938495949ae97ddeb04b3e5",
+  "members": 17,
+  "all16ManifestDigestsReadAndVerified": true,
+  "all3ActualNestedArchivesExactlyMatchRootVerifiedOriginals": true,
+  "all4Full1400ReceiptsAndLogsReadAndVerified": true,
+  "totalAssertions": 5600,
+  "report": {
+    "schema": "psc1-cache-string-sample5-abba-v1",
+    "workflowSource": "72b5e882ceab864a410e7078b0f9a1d03d1d3bff",
+    "workflowRun": "40255859346",
+    "role": "same-runner fresh-process diagnostic; not full String/performance qualification",
+    "identity": {
+      "baseline": {
+        "source": "2708d07d5827b8aca72497a1ea3de989700b6996",
+        "run": 40246049646,
+        "artifact": 12619111746,
+        "program": {
+          "bytes": 10601802,
+          "sha256": "9e81e1323aefacb71f3db71eb8698922e747160b051eff8ef82e1daa61679e9d"
+        },
+        "productionTree": "7471f228b9bbc1eb5b9c0b78b85bf326aac72929"
+      },
+      "candidate": {
+        "source": "8c077fa9f10a0370b70ad9e6d0c3d7d87df77d35",
+        "run": 40252766388,
+        "artifact": 12621583441,
+        "program": {
+          "bytes": 10632560,
+          "sha256": "8c4a337157a88bf8ddd199d7562c7eb7a3a4f96a852368bcc615dc9022828cfe"
+        },
+        "productionTree": "c4a5fa4dc72f81d4c28a45e0772d9cd7788b3ae5"
+      }
+    },
+    "order": [
+      "baseline",
+      "candidate",
+      "candidate",
+      "baseline"
+    ],
+    "sampleIndex": 5,
+    "sample": "A\u00e9\u20ac\ud83d\ude00",
+    "fuel": 4096,
+    "nodeOldSpaceMiB": 2048,
+    "deadlineSecondsPerProcess": 1500,
+    "emptyPATH": true,
+    "requests": 294,
+    "metadata": 377,
+    "assertionsPerCompletedProcess": 1400,
+    "node": "v22.23.3",
+    "observations": [
+      {
+        "index": 0,
+        "variant": "baseline",
+        "exitCode": 0,
+        "wallSeconds": 1147.706912702,
+        "complete1400": true,
+        "timedOut": false,
+        "log": {
+          "bytes": 14640,
+          "sha256": "fd82dd77dc18a1428e34c13da1d444bc6c2eb99288f4944a617e0ea5afa660ae"
+        },
+        "memory": "wallSeconds=1147.69 maxRssKiB=1127540 exit=0\n",
+        "receipt": {
+          "kernelSha256": "9e81e1323aefacb71f3db71eb8698922e747160b051eff8ef82e1daa61679e9d",
+          "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+          "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+          "requests": 294,
+          "metadata": 377,
+          "declarations": "377",
+          "samples": 1,
+          "availableSamples": 6,
+          "executedSamples": 1,
+          "fuel": 4096,
+          "independentAdmission": true,
+          "assertions": 1400,
+          "constructionMs": 34.062782999999996,
+          "admissionMs": 40844.481869,
+          "metadataMs": 1387.953085000001,
+          "totalMs": 1147500.158134,
+          "diagnosticTracing": false,
+          "measurements": [
+            {
+              "sample": "A\u00e9\u20ac\ud83d\ude00",
+              "utf8Bytes": 10,
+              "owners": 224,
+              "ownerAndConstructionMs": 5852.943552000004,
+              "totalMs": 1105123.821027,
+              "arenaNodes": "288",
+              "ownedArenaNodes": "10476",
+              "memory": {
+                "rss": 1152397312,
+                "heapTotal": 587206656,
+                "heapUsed": 539634704,
+                "external": 4739784,
+                "arrayBuffers": 2819560
+              }
+            }
+          ],
+          "sampleIndex": 5,
+          "sample": "A\u00e9\u20ac\ud83d\ude00"
+        }
+      },
+      {
+        "index": 1,
+        "variant": "candidate",
+        "exitCode": 0,
+        "wallSeconds": 1136.320679954,
+        "complete1400": true,
+        "timedOut": false,
+        "log": {
+          "bytes": 14644,
+          "sha256": "add1a70acc885e57c0d930f8913ebedd05eb0fed23d310bdf6bcecd6e329eddf"
+        },
+        "memory": "wallSeconds=1136.31 maxRssKiB=1279832 exit=0\n",
+        "receipt": {
+          "kernelSha256": "8c4a337157a88bf8ddd199d7562c7eb7a3a4f96a852368bcc615dc9022828cfe",
+          "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+          "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+          "requests": 294,
+          "metadata": 377,
+          "declarations": "377",
+          "samples": 1,
+          "availableSamples": 6,
+          "executedSamples": 1,
+          "fuel": 4096,
+          "independentAdmission": true,
+          "assertions": 1400,
+          "constructionMs": 35.00010500000002,
+          "admissionMs": 38144.477872999996,
+          "metadataMs": 1159.335500000001,
+          "totalMs": 1136102.93866,
+          "diagnosticTracing": false,
+          "measurements": [
+            {
+              "sample": "A\u00e9\u20ac\ud83d\ude00",
+              "utf8Bytes": 10,
+              "owners": 224,
+              "ownerAndConstructionMs": 4819.497121,
+              "totalMs": 1096654.197429,
+              "arenaNodes": "288",
+              "ownedArenaNodes": "10476",
+              "memory": {
+                "rss": 1308344320,
+                "heapTotal": 559742976,
+                "heapUsed": 506546912,
+                "external": 4739352,
+                "arrayBuffers": 2819128
+              }
+            }
+          ],
+          "sampleIndex": 5,
+          "sample": "A\u00e9\u20ac\ud83d\ude00"
+        }
+      },
+      {
+        "index": 2,
+        "variant": "candidate",
+        "exitCode": 0,
+        "wallSeconds": 1154.5168896230002,
+        "complete1400": true,
+        "timedOut": false,
+        "log": {
+          "bytes": 14641,
+          "sha256": "2d2472f07d9108d3be5240cb32eb08ba11ac370310bdc87fd68ba3de43f1aabe"
+        },
+        "memory": "wallSeconds=1154.51 maxRssKiB=1175272 exit=0\n",
+        "receipt": {
+          "kernelSha256": "8c4a337157a88bf8ddd199d7562c7eb7a3a4f96a852368bcc615dc9022828cfe",
+          "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+          "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+          "requests": 294,
+          "metadata": 377,
+          "declarations": "377",
+          "samples": 1,
+          "availableSamples": 6,
+          "executedSamples": 1,
+          "fuel": 4096,
+          "independentAdmission": true,
+          "assertions": 1400,
+          "constructionMs": 42.49212299999999,
+          "admissionMs": 41458.97028,
+          "metadataMs": 1354.908543999998,
+          "totalMs": 1154368.651213,
+          "diagnosticTracing": false,
+          "measurements": [
+            {
+              "sample": "A\u00e9\u20ac\ud83d\ude00",
+              "utf8Bytes": 10,
+              "owners": 224,
+              "ownerAndConstructionMs": 5586.446901000003,
+              "totalMs": 1111391.1666189998,
+              "arenaNodes": "288",
+              "ownedArenaNodes": "10476",
+              "memory": {
+                "rss": 1201766400,
+                "heapTotal": 575733760,
+                "heapUsed": 378359296,
+                "external": 4740028,
+                "arrayBuffers": 2819804
+              }
+            }
+          ],
+          "sampleIndex": 5,
+          "sample": "A\u00e9\u20ac\ud83d\ude00"
+        }
+      },
+      {
+        "index": 3,
+        "variant": "baseline",
+        "exitCode": 0,
+        "wallSeconds": 1008.7343396040001,
+        "complete1400": true,
+        "timedOut": false,
+        "log": {
+          "bytes": 14645,
+          "sha256": "d59f305b9e03a8c580e1101fdb1c72994e7f9abb3c351aa469cdc765baa746eb"
+        },
+        "memory": "wallSeconds=1008.73 maxRssKiB=1154332 exit=0\n",
+        "receipt": {
+          "kernelSha256": "9e81e1323aefacb71f3db71eb8698922e747160b051eff8ef82e1daa61679e9d",
+          "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+          "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+          "requests": 294,
+          "metadata": 377,
+          "declarations": "377",
+          "samples": 1,
+          "availableSamples": 6,
+          "executedSamples": 1,
+          "fuel": 4096,
+          "independentAdmission": true,
+          "assertions": 1400,
+          "constructionMs": 32.61281700000001,
+          "admissionMs": 34531.450617,
+          "metadataMs": 1138.1763580000043,
+          "totalMs": 1008539.8316070001,
+          "diagnosticTracing": false,
+          "measurements": [
+            {
+              "sample": "A\u00e9\u20ac\ud83d\ude00",
+              "utf8Bytes": 10,
+              "owners": 224,
+              "ownerAndConstructionMs": 4605.9966300000015,
+              "totalMs": 972729.785351,
+              "arenaNodes": "288",
+              "ownedArenaNodes": "10476",
+              "memory": {
+                "rss": 1180663808,
+                "heapTotal": 563875840,
+                "heapUsed": 401648936,
+                "external": 4737000,
+                "arrayBuffers": 2816776
+              }
+            }
+          ],
+          "sampleIndex": 5,
+          "sample": "A\u00e9\u20ac\ud83d\ude00"
+        }
+      }
+    ],
+    "fullKernel": false,
+    "performanceQualified": false,
+    "allFourSelectedSampleProcessesPass": true,
+    "sameRunnerDiagnosticMediansSeconds": {
+      "baseline": 1078.220626153,
+      "candidate": 1145.4187847885
+    },
+    "sameRunnerDiagnosticBaselineOverCandidateRatio": 0.941333109315203
+  },
+  "medianSeconds": {
+    "baseline": 1078.220626153,
+    "candidate": 1145.4187847885
+  },
+  "candidateMedianSlowdownPercent": 6.232319898688776,
+  "medianPeakRssKiB": {
+    "baseline": 1140936.0,
+    "candidate": 1227552.0
+  },
+  "candidateMedianRssIncreasePercent": 7.591661583121234,
+  "decision": "Do not adopt scan4 candidate: no observed runtime or memory benefit; same193timeoutclassifications; retain qualified original cache. Four-process diagnostic is not full performance qualification.",
+  "performanceQualified": false,
+  "cacheAdopted": false
+}

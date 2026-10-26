@@ -1,0 +1,67 @@
+{
+  "source": "ff1aa23dc2c95785f5349dd7b7a022dac893f5ac",
+  "run": 40251383558,
+  "collectorArtifact": 12623318573,
+  "allSixIndependentLeafArchivesDownloadedAndRead": true,
+  "allSixReceiptBytesAndDigestsMatchActualCollector": true,
+  "assertions": 8400,
+  "samples": [
+    {
+      "sampleIndex": 0,
+      "artifact": 12622675938,
+      "archiveBytes": 5649,
+      "archiveSha256": "081e7eac0915a9ead81923efc1f18baacb7d9253e3c3a249eba20eededea6eaf",
+      "receiptSha256": "743c01ebc1aefa38d44790f8b00f23f7368377df4a6ac09c9e37d4ccf796c4eb",
+      "wallSeconds": 328.04,
+      "assertions": 1400
+    },
+    {
+      "sampleIndex": 1,
+      "artifact": 12622218530,
+      "archiveBytes": 5649,
+      "archiveSha256": "dfe6ab309766a4e4397ee21cfa51d086e1f67d6c9a48b34f8aed5c482fff27b9",
+      "receiptSha256": "62110c986eff65a288474ab6a1270b7eb37fd5f38ec270e1eda91b9e19b12038",
+      "wallSeconds": 369.33,
+      "assertions": 1400
+    },
+    {
+      "sampleIndex": 2,
+      "artifact": 12622577216,
+      "archiveBytes": 5649,
+      "archiveSha256": "715adc7ba7e91b7763e8ae4f616f56029cb05b859837aaa3496c1f5746d1b52f",
+      "receiptSha256": "8bc396b7bbef9a1e084bb1534a9b432616daca169c7e16baa2c2e3b2e7759589",
+      "wallSeconds": 489.92,
+      "assertions": 1400
+    },
+    {
+      "sampleIndex": 3,
+      "artifact": 12622482682,
+      "archiveBytes": 5656,
+      "archiveSha256": "d2ac639317a02b4ac9316152bc30db4fa0e4a221ba42c7e1d7caccc962035726",
+      "receiptSha256": "95116c194792787a7c45ddc17627f5326789f2fbaa2af285696d4a6359489abf",
+      "wallSeconds": 595.14,
+      "assertions": 1400
+    },
+    {
+      "sampleIndex": 4,
+      "artifact": 12623097248,
+      "archiveBytes": 5660,
+      "archiveSha256": "3c904022e120a2056321e334f1b7a7e02d1dc9c396d3d59db2cca75f20578cd0",
+      "receiptSha256": "87a1482eb06af10be2a9db976668a342de4c916bd46534f7c293e8d8fea61f34",
+      "wallSeconds": 644.97,
+      "assertions": 1400
+    },
+    {
+      "sampleIndex": 5,
+      "artifact": 12623303308,
+      "archiveBytes": 5678,
+      "archiveSha256": "9ee6f94bb7a3c18945a7848bb78ef188682500018d11ffea5bcb27f3b4ba86ba",
+      "receiptSha256": "c84cc4a92e6cb033d9b6fee21de978d57a3e1f86a90232d9b5eed439a421c19d",
+      "wallSeconds": 1272.91,
+      "assertions": 1400
+    }
+  ],
+  "performanceQualified": false,
+  "generatedRouteStillFailsSample5": true,
+  "scope": "Current adopted mutual canonical correctness:all8400Stringassertions pass under unchanged1500s/fuel4096/2048MiB/emptyPATH. Generated sample5 still fails; no overall performance qualification."
+}

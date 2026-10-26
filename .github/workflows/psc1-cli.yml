@@ -89,7 +89,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          node scripts/generated-io-installed-applications.mjs
+          node scripts/cli-application-regressions.mjs
           node scripts/generated-io-installed-candidates.mjs
           node scripts/checked-publication-types.mjs
       - name: Qualify candidate only after all previous and new gates pass

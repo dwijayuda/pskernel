@@ -10,6 +10,26 @@ continues to use GC.
 
 ## Two stages, with explicit identities
 
+~~~mermaid
+flowchart TD
+  S["Captured .lean / .ps sources"] --> G["Pinned genuine G3 frontend / elaborator"]
+  G --> I["Original and transformed strict IR"]
+  G --> C["Canonical logical graph"]
+  C --> K["Independent official Lean 4.35 checker"]
+  I --> A["Private admitted host session"]
+  K --> A
+  A --> O["Existing JS / TS / Rust / Wasm-core consumers"]
+  A --> W["Bool component container + exact WIT validation"]
+  A --> P["Optional Python / PHP emitters + native IR / ABI recheck"]
+  O --> T["Checked immutable generation"]
+  W --> T
+  P --> T
+~~~
+
+The admission gate checks the logical graph. It is not a proof of backend
+semantic preservation.
+
+
 The host captures exact sources, runs a pinned actual G3 executor and validates
 its complete candidate identity, origin counts and source/body relationship.
 The generated compiler strictly validates original and transformed IR. The host
@@ -23,7 +43,7 @@ owned component encoder. It does not lower or modify core instructions.
 The optional pinned wasm-tools 1.254.0 validates both modules and reports the
 component WIT; a closed parser requires exact Bool signatures, argument names,
 export order and no imports/extra declarations. The public ABI is Bool only,
-at most16 direct parameters. Other types, unsupported names and callback IO
+at most 16 direct parameters. Other types, unsupported names and callback IO
 refuse. No String component support is claimed by this particular dispatch path;
 the preceding native String component path remains preserved.
 
@@ -31,7 +51,9 @@ For Python/PHP, compilerTarget is js and final target is python or php. The host
 discards the preliminary JS emission and passes only the already admitted
 specialized portable IR, exact public names and explicit scalar/dispatcher ABI
 to an optional emit-only worker. This uses the same shared backend source as the
-existing native compiler. The worker has no source frontend, checker or publisher.
+existing native compiler. The worker has no PSC1 source frontend, admission host or publisher; native official Lean support libraries remain linked.
+The new portable command requires a nonempty, unique public surface; the legacy
+native provider command retains its existing empty-API behavior.
 It decodes tagged tuples with finite depth, requires exact round-trip equality
 through the existing canonical encoder, strictly revalidates IR, and performs
 the target's existing public ABI checks before emission.
@@ -51,8 +73,8 @@ receipts cannot acquire session admission/publication authority.
 Packages are absent by default and require explicit installation.
 
 New optional packages contain Linux x64 tools and are qualified only on the
-actual Linux runner environment. Python includes isolated Python3.14.8; PHP
-includes PHP8.5.12 with GMP and explicitly disables FFI during target checking.
+actual Linux runner environment. Python includes isolated Python 3.14.8; PHP
+includes PHP 8.5.12 with GMP and explicitly disables FFI during target checking.
 Those versions retain the established minimum target profiles. No runtime is
 downloaded or compiled during npm installation or a compiler request.
 macOS/Windows/other architectures refuse this new native dispatch path until
@@ -60,10 +82,10 @@ their own package and execution evidence exists. The core package remains
 platform-neutral; this is not a final universal-platform release.
 
 The package-local C launcher uses fixed programs and argument modes, no shell.
-It installs the Linux parent-death signal,4GiB address-space and8MiB stack bounds
-before exec. The host binds parent identity and enforces240-second requests,
-32MiB request/response bounds and before/after resource integrity. Independent
-checking remains120seconds. Source, project, candidate and package metadata
+It installs the Linux parent-death signal, 4 GiB address-space and 8 MiB stack bounds
+before exec. The host binds parent identity and enforces 240-second requests,
+32 MiB request/response bounds and before/after resource integrity. Independent
+checking remains 120 seconds. Source, project, candidate and package metadata
 cannot choose tools, SDK paths, admission providers or publication operations.
 
 A pinned actual target consumer checks syntax and exact public API. Python
@@ -91,6 +113,7 @@ callback IO, actual isolated target runtimes and actual Wasmtime component
 execution. Refusals must preserve prior generation identities. The old checked
 publication/application/kernel/type/negative gates remain required.
 
-Qualification is pending until exact successful jobs and artifact identities are
-recorded. Logical admission plus bounded IR/consumer checks is not a formal proof
+Actual results, source/test commits and artifact identities are recorded in the
+[exact qualification receipt](PSC1_CHECKED_DISPATCH_QUALIFICATION_2026-10-26.json).
+Use the [installation guide](PSC1_CHECKED_DISPATCH_INSTALL.md) for those exact bytes. Logical admission plus bounded IR/consumer checks is not a formal proof
 of erasure, backend preservation or whole-program equivalence.

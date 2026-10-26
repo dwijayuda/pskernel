@@ -1,47 +1,52 @@
 # Slim universal ProofScript package
 
-The current host/package work is `proofscript@0.1.0-psc1.6`:
-[checked output and transactional publication](PSC1_CHECKED_PUBLICATION.md),
-[exact current receipt](PSC1_CHECKED_PUBLICATION_QUALIFICATION_2026-10-26.json).
-Linux qualification passes40238538092 and source37/37 passes40238649527.
-[Install the eight exact tarballs](PSC1_CHECKED_PUBLICATION_INSTALL.md).
-The preceding qualified generated-IO package remains available in
-[its exact installation guide](PSC1_GENERATED_IO_INSTALL.md).
+The current Linux-qualified host is `proofscript@0.1.0-psc1.7`.
+Use the [checked-dispatch install guide](PSC1_CHECKED_DISPATCH_INSTALL.md) and
+[exact receipt](PSC1_CHECKED_DISPATCH_QUALIFICATION_2026-10-26.json).
+The root is 3,811,703 bytes; the qualified archive contains eleven tarballs,
+plus actual installed, kernel and immutable-store evidence.
 
-The root embeds the same qualified JS/TS G3 compilers and genuine official Lean4.35
-linear-memory Wasm checker. Rust/compiler-Wasm executors and native checking stay
-optional. It contains no default native compiler SDK, optional executor payload,
-platform SDK binary, Python/PHP transport, SDK download or install-time compilation.
+The default root embeds the unchanged qualified JS/TS G3 compilers and genuine
+official Lean 4.35 C++/Emscripten **linear-memory Wasm** checker. It requires no
+native compiler SDK or install-time build. Rust/compiler-Wasm execution bundles,
+native kernel comparison, TS/Rust output consumers, Python/PHP runtimes and
+component tooling are explicit optional installations. Compiler Wasm remains GC.
 
-Checked JS, TS, Rust and Wasm-core outputs share the existing private admission
-and strict IR session. Output consumers are optional and explicit; they are
-separate from compiler execution bundles. All target SDK resources must match
-trusted distribution pins. Source/project/package metadata cannot select tools.
+Seven checked output selections share the private independent-admission and strict
+IR session. Python/PHP reuse existing emit-only backends over admitted canonical
+portable IR; component output packages the exact GC core with the closed Bool ABI.
+The [dispatch guide](PSC1_CHECKED_DISPATCH.md) describes the ABI, authority,
+consumer and platform boundaries. Broader component String/IO remains separate.
 
-Use the current receipt's exact local tarballs and Node22.23.3:
+With Node 22.23.3 and the exact local tarballs:
 
-```sh
-npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1.6.tgz
+~~~sh
+npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1.7.tgz
 npx --no-install psc --identity
 npx --no-install psc compile Main.ps --engine ts
 npx --no-install psc build Main.lean --target wasm-core --publication-protocol portable-file --out dist/app
-```
+~~~
 
-The new file pointer is opt-in; default legacy stores keep their format. Builds
-return immutable generation paths. Post-commit durability uncertainty is explicit;
-unsafe stale-lock takeover is refused. Linux publication is the current qualified
-platform boundary; actual macOS/Windows commit behavior remains a release blocker.
-Do not mistake universal npm metadata for whole-platform qualification.
+Install optional providers/consumers only as shown in the install guide.
+Removing execution bundles does not remove the core candidate emitters. Checked
+TS/Rust output still requires its exact pinned output consumer/SDK; the default
+JS/Wasm-core paths require neither. Source/project/package metadata cannot select
+tools, checker paths or publication authority.
 
-Independent canonical Lean admission, IR validation, runtime tests and exact
-self-host fixed points are distinct forms of evidence, not a preservation proof.
-No merge or npm publication is authorized.
-The [roadmap](PSC1_DEVELOPMENT_ROADMAP.md) owns remaining platform, component/provider,
-source-package resolution and final clean-release work.
+Both pointer layouts retain [the checked-publication contract](PSC1_CHECKED_PUBLICATION.md):
+immutable returned paths, sealed inventories, stale-writer refusal, precommit
+prior-output preservation and explicit committed-but-durability-uncertain errors.
+Actual Linux qualification does not qualify macOS/Windows transaction behavior;
+those commits remain refused. New native dispatch packages are Linux x64 only.
 
-[Preserved PR #181 slim guide](history/PSC1_SLIM_UNIVERSAL_BEFORE_CHECKED_PUBLICATION_2026-10-26.md)
-retains its frozen120-module payload identities and .4 artifacts.
-They remain separate from current122-module .5/.6 payloads and qualifications.
+Independent canonical admission, strict IR, runtime tests and self-host fixed
+points are distinct evidence. They do not prove whole-compiler preservation.
+Final universal-platform release, clean reproduction, merge and publication remain
+open obligations in [the roadmap](PSC1_DEVELOPMENT_ROADMAP.md) and distribution
+contract. No merge or npm registry publication is authorized.
 
-The preserved guide is verbatim; resolve its original relative links at commit
-`563ee855407581d0d34adcbc450ad77863f39f94` and its original docs path.
+The preceding [.6 receipt](PSC1_CHECKED_PUBLICATION_QUALIFICATION_2026-10-26.json)
+and [eight-tarball install guide](PSC1_CHECKED_PUBLICATION_INSTALL.md) remain intact.
+The preserved [PR #181 guide](history/PSC1_SLIM_UNIVERSAL_BEFORE_CHECKED_PUBLICATION_2026-10-26.md)
+retains its frozen 120-module .4 identities. Resolve that verbatim snapshot's
+original relative links at 563ee855407581d0d34adcbc450ad77863f39f94.

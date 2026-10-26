@@ -1,75 +1,109 @@
-# PSC1 continuation after the checked-publication milestone
+# Continue after checked seven-target dispatch
 
-Continue PR #188 and live HEAD on `feat/psc1-portable-checked-publication-20261026`.
-Use connected GitHub and Linux Actions only. Refresh HEAD and actual CI before
-writing; preserve single-parent expected-HEAD non-force history.
-No merge, npm registry or release publication is authorized.
+Continue draft PR #189 on `feat/psc1-checked-component-providers-20261026`.
+Fetch live HEAD, AI_WORK_STATE.md, the one roadmap, the exact checked-dispatch
+receipt and terminal CI before any write. Use connected GitHub tools and Linux
+Actions only: no local checkout, build or test. Preserve single-parent history
+with fresh expected-HEAD, non-force updates. Do not merge or publish packages.
 
-Read AI_WORK_STATE.md, the one development roadmap and
-PSC1_CHECKED_PUBLICATION_QUALIFICATION_2026-10-26.json.
-The exact receipt and actual CI take precedence over prose. Preserve dated
-R1/R2a/R2b/R3, compiler-generation and package identities.
+Read:
+- [Work state](../AI_WORK_STATE.md)
+- [Roadmap and dependency queue](PSC1_DEVELOPMENT_ROADMAP.md)
+- [Exact dispatch qualification](PSC1_CHECKED_DISPATCH_QUALIFICATION_2026-10-26.json)
+- [Architecture and deliberately closed interfaces](PSC1_CHECKED_DISPATCH.md)
+- [Install the exact qualified tarballs](PSC1_CHECKED_DISPATCH_INSTALL.md)
+- [Distribution requirements](../NPM_DISTRIBUTION_CONTRACT.json)
+- [Provider protocols](../BACKEND_PROVIDER_CONTRACT.json)
 
-The checked-publication implementation is1b0e695e. Package40238538092 passes
-actual portable-file transactions, four executors/both grammars/four checked
-targets,32 scalar cases,24 callback IO cases,143 refusals and16 actual Rust
-consumer links/executions. Existing264 application,24 mapping/eight ABI refusal,
-offline local/global/kernel and packed-type gates remain required and pass.
-Root proofscript0.1.0-psc1.6 is3,761,565 bytes, SHA256
-4657ecbf3d4afaf3438d115ec24e60d9c4af80e3602c8ee19ed93e45104810dd.
-Artifact12616533098 contains eight tarballs plus immutable-store/application evidence.
-The final source gate and documentation checkpoint are recorded in the exact receipt.
+The requirement contracts retain the broader release obligations. The dated
+receipt owns actual qualification states; Linux dispatch does not qualify the
+complete universal release. Preserve earlier receipts and every failed attempt.
 
-The compiler is unchanged:122 modules/4742 members, source closure
-073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9.
-Reuse genuine qualified G3 inputs:JS/TS/Wasm40223062370; Rust40223086966.
-Do not rerun unchanged long chains for host-only work or relabel frozen generations.
+## Preserve the verified milestone
 
-Do not redo the qualified Linux transaction/target implementation. Remaining
-release work is:
-1. Actual macOS/Windows transactional commit qualification and additional SDK/Rust
-   platforms. Current instructions allow Linux CI only; keep other OS commits
-   disabled. Platform simulation is not release evidence. Node/libuv replacement
-   and directory-flush semantics require actual platform qualification.
-2. Remaining checked Wasm-component/optional-provider dispatch through existing
-   emitters, exact target consumers, independent admission and strict IR. Preserve
-   explicit unsupported ABI refusals and optional Python/PHP. The current generated
-   unified service exposes four targets; inspect its real capability before planning
-   host dispatch. Changing compiler source requires its own actual generation and
-   fixed-point evidence before promotion.
-3. Automatic source-package resolution as captured data, with bounded dependency
-   ordering, exact source identities and no package JavaScript execution or tool,
-   checker, FFI, filesystem or publication authority from metadata.
-4. Clean final source/package/platform reproduction and authorization before any
-   merge or publication. Original240-second self-compilation remains unqualified.
+The installed replay tests the exact proofscript 0.1.0-psc1.7 candidate produced
+at 7e63615b0d0713db8b252f194d5740bbb5c5893f, root 3,811,703 bytes,
+SHA256 d4a0e963375366ac9b417dd1e9eb5372168c25c5230d3ce69f694274daa87043.
+Producer and qualification/test commits are distinct. Use the exact successful
+run/artifact from the receipt, not an earlier archive with a similar name.
 
-For package requalification on a Linux Actions runner:
-```sh
-npm ci --prefix .. --ignore-scripts --include=optional
-rustup toolchain install 1.90.0 --profile minimal
-node scripts/prepare-rust-target-consumer.mjs
-node scripts/slim-universal-package.mjs
-node scripts/slim-universal-installed.mjs
-node scripts/slim-universal-io-preflight.mjs
-node scripts/checked-publication-installed.mjs
-node scripts/generated-io-installed-applications.mjs
-rustup default 1.90.0
-node scripts/generated-io-installed-candidates.mjs
-node scripts/checked-publication-types.mjs
-```
+Four genuine G3 engines now support seven checked output selections. Python/PHP
+remain explicit optional emit-only packages, with actual isolated runtimes.
+Component output wraps the unchanged GC core, validates exact closed Bool WIT
+and executes under actual Wasmtime. Unsupported types/names/imports refuse.
+Both transaction layouts, all prior installed/application/type/kernel gates,
+resource/lifetime bounds and ordinary source gates remain mandatory.
 
-Run from psc1 with the workflow's read-only Actions token for exact artifact
-transport and actual kernel cross-checking. The existing
-psc1-checked-publication.yml carries the installed gates, bounded supervisors,
-historical cleanup/feature AST correspondence and archived evidence.
-Use dependency-selected normal CI; its required full source qualification retains
-all37 finite criteria. A new packaged artifact needs its own actual installed
-qualification, even when compiler payloads are unchanged.
+The portable compiler is unchanged: 122 modules / 4742 Core members,
+closure 073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9.
+Reuse the actual qualified JS/TS/Wasm generations from 40223062370 and Rust from
+40223086966, pinned by scripts/slim-universal-input.json. Do not rerun unchanged
+long chains for a host-only task or relabel an older source generation.
 
-Official Lean4.35.0 /eb6cafb7290e8bd5f2937522d8d804f58f02bafc,trust0,
-strict original/transformed IR, ordinary logical/body pairing, semantic fuel,
-memory/stack/lifetime policies and negatives remain mandatory.
-Compiler/tools/G1/corpus240s and checker120s are unchanged; manual G2/G3 profiles
-remain separate. Default kernel stays genuine C++/Emscripten linear-memory Wasm;
-compiler Wasm stays GC. Independent admission, runtime tests and fixed points
-are scoped evidence, not a whole-compiler semantic-preservation proof.
+## Next coherent implementation
+
+Follow the roadmap rather than reopening completed Linux dispatch.
+The next bounded language/consumer slice is generated component String/IO
+and explicit export selection, using existing compiler/backend semantics.
+First inspect the owned native component implementation and actual generated
+core ABI. Do not invent another source frontend, accept an unchecked candidate
+or silently change the established kernel/core-Wasm memory architectures.
+Define exact finite positive and refusal criteria before changing production.
+
+Also outstanding: full real-application acceptance for optional providers;
+automatic source-package capture/resolution as bounded data; additional native
+tool/SDK/Rust platforms; actual macOS/Windows transactional publication; final
+clean release reproduction and user authorization. Preserve other-platform
+publication refusals while development is restricted to Linux. The original
+240-second compiler self-compilation performance target is still unqualified.
+
+A changed portable compiler closure needs its own actual generation/fixed-point
+evidence before promotion. A host/provider change still needs fresh exact package
+assembly, full compiler independent checking and all installed/source gates.
+
+## Execute qualification in Linux Actions
+
+The assembly workflow is `.github/workflows/psc1-checked-dispatch.yml`.
+It prepares the native emit-only workers, bundled Python/PHP runtimes,
+wasm-tools, existing Rust consumer, unchanged G3 engines and official kernels.
+It executes actual transaction faults and every installed gate.
+
+Use its existing request protocol on
+`qualification/psc1-checked-dispatch-20261026`:
+`.github/qualification-requests/psc1-checked-dispatch.json`, schema
+`psc1-checked-dispatch-request/1`, action
+`qualify-unpublished-checked-dispatch`.
+First commit production/test changes normally. Then fetch live HEAD and make
+a separate single-file request commit whose parentCommit is exactly that HEAD;
+update the branch with the same expected HEAD and force:false.
+The workflow validates the actual push before/after and request-only diff.
+
+For a test-only correction, the separate exact-candidate replay workflow
+`psc1-checked-dispatch-replay.yml` can reuse the original producer bytes.
+Its request file is `psc1-checked-dispatch-replay.json`, schema
+`psc1-checked-dispatch-replay-request/1`, action
+`qualify-exact-unpublished-candidate`. Preserve exact source/run/job/artifact/
+ZIP/root pins from the receipt; use the same fresh single-file request procedure.
+
+Replay verifies the producer's successful actual assembly/kernel step, ZIP and
+root hashes, report schema, ancestor relationship, strict test/docs-only diff,
+and all packaged production-file identities. Production changes require fresh
+assembly. The replay allowlist is deliberately narrow: root/host README changes
+outside docs/ also require fresh assembly before another replay. Existing
+qualified artifacts need no rerun merely to consume them. An archive from a failed producer is candidate data until a complete
+successful replay; never relabel that producer's failed conclusion.
+
+Only after every installed/application/type gate passes does replay mark its
+provenance qualified. Uploading an artifact alone is not success.
+Before promoting qualification fixes into the PR, let any active required source
+run finish. Then verify ancestry and fast-forward with an expected-HEAD update.
+Use ordinary dependency-selected CI; never suppress failed or cancelled test debt.
+
+Official Lean 4.35.0 / eb6cafb7290e8bd5f2937522d8d804f58f02bafc, trust 0,
+independent admission, strict original/transformed IR, source/body pairing,
+semantic fuel, negatives and all resource policies remain mandatory.
+Compiler/tools/G1/corpus requests stay 240 seconds and checking 120 seconds.
+The aggregate test supervisor is separate from each compiler request.
+Default kernel: genuine C++/Emscripten linear-memory Wasm. Compiler Wasm: GC.
+Logical admission, strict IR, runtime tests and fixed points are scoped evidence,
+not a formal whole-compiler semantic-preservation proof.

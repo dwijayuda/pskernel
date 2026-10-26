@@ -14,9 +14,12 @@ not implement another semantic compiler or replace independent checking.
    independent admission, target/API checks and publication.
 4. `checked-targets.mjs` and `transactional-publication.mjs`: pinned target consumers,
    immutable generations, pointer replacement and explicit commit outcomes.
-5. `artifacts.mjs`: existing native target tooling, maps, sealed generations and
+5. `checked-component.mjs` and `checked-optional-provider.mjs`: wrap the exact
+   admitted GC core or transport admitted IR to pinned emit-only workers. Validate
+   actual target resources and consumers; retain requested/compiler target identities.
+6. `artifacts.mjs`: existing native target tooling, maps, sealed generations and
    Linux publication contract.
-6. `backend-providers.mjs`: native optional Python/PHP candidate workers.
+7. `backend-providers.mjs`: native optional Python/PHP candidate workers.
 
 The installed API in `../npm-cli/universal.mjs` composes the first three.
 The CLI accepts a single source file or a project object with only
@@ -41,8 +44,9 @@ The CLI accepts a single source file or a project object with only
 
 The pinned Prettier/Babel check preserves the original formatting-only cleanup:
 immutable cleanup 446a0f21 is compared with original baseline 3089cbc3. Live API,
-CLI and resolver ASTs are compared with explicit explicit checked-target/publication feature
-snapshots in Git ancestry. The guard records both relationships, rather than
+CLI and resolver ASTs are compared with explicit checked-target/dispatch feature
+snapshots in Git ancestry. Four new dispatch modules have separate formatting
+baselines; all seven live host modules are checked. The guard records both relationships, rather than
 calling intentional behavior changes formatting. See the dated checked-publication
 qualification receipt and installed application/package tests.
 
@@ -50,3 +54,6 @@ Comments, positions and literal spelling metadata are ignored; executable AST
 structure is retained. This bounded correspondence check is not a semantic proof.
 An intentional behavior change needs its own contract and actual behavior
 qualification before an explicit reviewed feature baseline update.
+
+[Checked dispatch architecture](../docs/PSC1_CHECKED_DISPATCH.md) documents the
+provider/component boundary, finite ABI, resource policies and actual qualification.

@@ -1,21 +1,31 @@
 # PSC1 development roadmap
 
-Updated 2026-10-26 Asia/Jakarta. Checked-target publication follows qualified PR #187.
+Updated 2026-10-26 Asia/Jakarta. Checked seven-target dispatch follows qualified PR #188.
 Practical Core v1 remains frozen at 14 feature families and 37 finite criteria.
 One semantic compiler serves both grammars and all seven native backend mappings.
 No merge or npm publication is authorized.
 
 ## Current checked-dispatch milestone
 
-PR #189 follows PR #188 at9c13f2f2. Checked component/provider implementation is
-in progress; consult [its guide](PSC1_CHECKED_DISPATCH.md) and
-[exact receipt](PSC1_CHECKED_DISPATCH_QUALIFICATION_2026-10-26.json).
-No new qualification is claimed until actual jobs complete. The qualified G3
-source and executable bytes remain unchanged. Component output packages the exact
-GC core with a bounded Bool ABI; Python/PHP receive only admitted portable IR and
-perform native strict IR/target ABI checks. Optional workers contain no PSC1
-frontend, independent admission or publication host.
-New native tools/runtimes require Linux x64 evidence and other platforms refuse.
+PR #189 follows PR #188 at 9c13f2f2. The Linux x64 checked-dispatch
+milestone is qualified in the [exact receipt](PSC1_CHECKED_DISPATCH_QUALIFICATION_2026-10-26.json).
+[Architecture](PSC1_CHECKED_DISPATCH.md) and
+[install the eleven exact tarballs](PSC1_CHECKED_DISPATCH_INSTALL.md).
+
+Four unchanged genuine G3 engines serve seven checked output selections.
+Components wrap the exact GC core with closed Bool WIT; Python/PHP receive only
+independently admitted portable IR and perform native strict IR/target ABI
+checks. Their workers expose no PSC1 frontend, checker or publisher; official
+Lean support libraries remain linked. Optional native tools/runtimes are Linux
+x64 only. Broader component ABI, provider application coverage and actual other
+platform release execution remain distinct queue items.
+
+The exact receipt separates the original producer, successful installed replay
+and normal source qualification. It retains failed attempts without relabeling
+their conclusions. Every old installed/application/kernel/type gate is preserved.
+The root remains 3,811,703 bytes; native emitters and isolated runtimes stay
+optional. Requirement contracts keep their broader final-release obligations;
+dated qualification receipts own actual completed/pending states.
 
 ## Preserved checked-publication milestone
 
@@ -201,7 +211,11 @@ qualification receipts supply exact CI evidence.
 | 1 | Slim real applications and source-package coverage | G1 checked host sessions qualified: 264 cases through four engines/both grammars; native reference 66 and target mappings 24/8 pass. Public IO adapter/types and dynamic source pins pass offline frozen-G3 preflight. All four new fixed points and new-source installed package/application/consumer qualification pass 40230101814. Root proofscript 0.1.0-psc1.5 is 3,723,061 bytes. Source-only package data is captured explicitly; automatic npm source resolution remains unimplemented. Source-only package JS must never execute or grant authority. |
 | 2 | Portable transactional publication | File-pointer and legacy layouts qualified in40238538092,including actual fault/SIGKILL/readback tests. Immutable returned paths, sealed inventory, stale-writer refusal and explicit committed-but-durability-uncertain outcomes are required. Actual macOS/Windows publication remains blocked on platform release evidence; Linux-only tests cannot qualify it. |
 | 3 | Checked generated TS publication | Qualified for Linux x64 in40238538092,including four executors/both grammars and actual strict consumers. Optional TypeScript 7.0.2 requires its separately pinned Linux x64 native dependency for offline execution. Same private admission and strict IR boundary; no SDK in default root. |
-| 4 | Checked Rust/Wasm/component/provider dispatch | Rust and Wasm-core qualified in40238538092 within the stated ABI/platform boundaries. Optional Rust 1.90.0 consumer uses locked BigInt dependencies and a pinned syntax/API inspector; actual rlib linking/execution is required. Wasm uses existing import-free GC transport and closed primitive ABI. Component/provider dispatch is implemented in PR #189 and awaiting exact installed qualification; Python/PHP stay optional. Additional Rust/SDK platforms require actual evidence. |
+| 4 | Checked Rust/Wasm/component/provider dispatch | Linux dispatch qualified in the current receipt: four G3 engines, seven checked selections; 40 Python/PHP corpus cases, 16 callback IO cases and eight actual Bool-component groups, plus all preceding checked publication/application/type gates. Component public ABI remains Bool only. Python/PHP stay optional. Exact G3 source/executable identities are unchanged. |
+| 4a | Generated component String/IO and export selection | Next bounded consumer slice. Reuse the existing native component/core ABI and shared semantics. Require both grammars/all four engines, actual component validation/execution, exact signature/export agreement, deterministic immutable bytes, independent admission, strict IR, bounded runtime behavior and explicit unsupported-interface refusals. No unchecked candidate publication. |
+| 4b | Full optional-provider real applications | Pending. Extend existing CLI/JSON/file/multi-module application acceptance to actual Python/PHP runtimes, comparing contract observations with checked reference results. Preserve corpus/Unicode/large-integer/handler/loop and callback trap cases. Missing source features must be fixed in shared semantics and all relevant mappings. |
+| 4c | Automatic source-package capture/resolution | Pending. Bounded deterministic dependency ordering, exact captured source/package identities, cycle/missing/stale refusal and actual multi-package applications. Treat package metadata as data; never execute its JavaScript or grant tools/checker/FFI/publication authority. |
+| 4d | Additional platform consumers and publication | Blocked on permitted actual platform execution. Qualify final Rust/SDK/provider tools and transaction durability on each release platform; existing historical kernel/candidate evidence alone is insufficient. Retain explicit other-platform refusal under Linux-only development. |
 | 5 | Clean reproduction and final universal release | Pending. Qualify final source/package/platform identities and required compiler generations. Preserve frozen qualifications; promote changed compiler source only with its own evidence. User authorization remains required before merge/publication. |
 | 6 | Original 240-second self-compilation performance target | Unqualified. Optimize measured real compiler workloads without changing fuel, G1/checker or memory/stack policies. Isolated proved lexer experiment 31e10263 remains unpromoted. |
 | 7 | Broader language features and generalized extensions | Deferred beyond frozen v1. Preserve working features. Optional packages cannot acquire kernel, host, FFI or runtime authority through metadata. |

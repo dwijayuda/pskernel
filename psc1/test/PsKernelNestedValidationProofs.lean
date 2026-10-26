@@ -55,6 +55,12 @@ theorem type_hard_error_precedes_sort_and_rule_callbacks
     psKernelExprV2NestedValidateTypeWith check whnf fuel context owner root sortRequired rules = some (.error error) := by
   simp only [psKernelExprV2NestedValidateTypeWith,failed]
 
+theorem named_projection_retains_exact_decoded_extension
+    (checked : Prod PsKernelExprV2CheckState Nat) (built : PsKernelExprV2Decoded) :
+    (let inferredState := Prod.fst checked;
+      psKernelExprV2OrdinaryExtendDecoded inferredState.whnf.arena built) =
+      psKernelExprV2OrdinaryExtendDecoded (Prod.fst checked).whnf.arena built := rfl
+
 end PsKernelNestedValidationProofs
 #print axioms PsKernelNestedValidationProofs.empty_rule_list_retains_complete_checking_state
 #print axioms PsKernelNestedValidationProofs.rule_decline_never_restarts_or_validates_tail
@@ -64,3 +70,4 @@ end PsKernelNestedValidationProofs
 #print axioms PsKernelNestedValidationProofs.empty_constructor_list_retains_entire_owner
 #print axioms PsKernelNestedValidationProofs.type_decline_never_restarts_or_checks_sort_or_rules
 #print axioms PsKernelNestedValidationProofs.type_hard_error_precedes_sort_and_rule_callbacks
+#print axioms PsKernelNestedValidationProofs.named_projection_retains_exact_decoded_extension

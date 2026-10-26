@@ -40,7 +40,7 @@ jobs:
         \ and not a['expired']\n    assert a['size_in_bytes']==size and a['digest']=='sha256:'+sha\n    raw=get('/actions/artifacts/'+str(artifact)+'/zip');assert\
         \ len(raw)==size and hashlib.sha256(raw).hexdigest()==sha\n    z=zipfile.ZipFile(io.BytesIO(raw));assert\
         \ len(z.namelist())==len(set(z.namelist()))==members and z.testzip() is None\n    (out/name).write_bytes(raw);return\
-        \ z\nnative_source='f2ffc9d7bd5219c51956c13e11c7f2bee3ccd220'\nn=archive(native_source,40325910230,12650804167,1070413,'49f685c64423b234e6439abdefb0c5cb051f54c36f00ab85b5d4b40ef5381952',453,'authenticated-native806.zip')\n\
+        \ z\nnative_source='94ffdcb92d74a3a7d95a1a0d6f2d625efe0aeda8'\nn=archive(native_source,40330198655,12654877019,1070830,'7c46c2ae081acf73a9a2c2b00593f1f5df17e2966aae9d91877a4254a2fa42c8',453,'authenticated-native807.zip')\n\
         manifest=json.loads(n.read('files.json'));assert manifest['source']==native_source\nsources=0\nfor path,pin\
         \ in manifest['files'].items():\n    data=n.read(path);assert len(data)==pin['bytes'] and hashlib.sha256(data).hexdigest()==pin['sha256']\n\
         \    if path.startswith('source/'):\n        p=path.removeprefix('source/');assert data==subprocess.check_output(['git','show','HEAD:'+p]),p\n\
@@ -52,8 +52,9 @@ jobs:
         \ ['PsKernelNestedValidationProofs.empty_rule_list_retains_complete_checking_state', 'PsKernelNestedValidationProofs.rule_decline_never_restarts_or_validates_tail',\
         \ 'PsKernelNestedValidationProofs.rule_hard_error_keeps_exact_error_and_no_owner', 'PsKernelNestedValidationProofs.rule_success_passes_the_complete_returned_owner_to_next_rule',\
         \ 'PsKernelNestedValidationProofs.empty_template_list_retains_entire_owner', 'PsKernelNestedValidationProofs.empty_constructor_list_retains_entire_owner',\
-        \ 'PsKernelNestedValidationProofs.type_decline_never_restarts_or_checks_sort_or_rules', 'PsKernelNestedValidationProofs.type_hard_error_precedes_sort_and_rule_callbacks'],\
-        \ 'nested-restoration-proofs.log': ['PsKernelNestedRestorationProofs.no_rename_retains_original_name', 'PsKernelNestedRestorationProofs.matching_rename_selects_actual_transformed_origin',\
+        \ 'PsKernelNestedValidationProofs.type_decline_never_restarts_or_checks_sort_or_rules', 'PsKernelNestedValidationProofs.type_hard_error_precedes_sort_and_rule_callbacks',\
+        \ 'PsKernelNestedValidationProofs.named_projection_retains_exact_decoded_extension'], 'nested-restoration-proofs.log':\
+        \ ['PsKernelNestedRestorationProofs.no_rename_retains_original_name', 'PsKernelNestedRestorationProofs.matching_rename_selects_actual_transformed_origin',\
         \ 'PsKernelNestedRestorationProofs.empty_rule_list_preserves_exact_owner', 'PsKernelNestedRestorationProofs.empty_prefix_preserves_exact_owner',\
         \ 'PsKernelNestedRestorationProofs.retained_base_constant_never_reimports_its_type', 'PsKernelNestedRestorationProofs.existing_origin_uses_exact_id_preserving_overlay',\
         \ 'PsKernelNestedRestorationProofs.missing_origin_uses_existing_generated_syntax_importer', 'PsKernelNestedRestorationProofs.failed_restoration_returns_no_private_owner'],\
@@ -491,7 +492,7 @@ jobs:
         '([^']+)' (?:depends on axioms: \\[([^\\]]*)\\]|does not depend on any axioms)\",text)\n assert len(rows)==len({name\
         \ for name,_ in rows})==len(expected) and {name for name,_ in rows}==set(expected),(filename,rows)\n for\
         \ name,axioms in rows:assert set(x.strip() for x in axioms.split(',') if x.strip())<={'propext','Classical.choice','Quot.sound'}\n\
-        \ actualNames.update(name for name,_ in rows)\nassert len(actualNames)==806\nretained=json.loads(n.read('retained561/receipt.json'))\n\
+        \ actualNames.update(name for name,_ in rows)\nassert len(actualNames)==807\nretained=json.loads(n.read('retained561/receipt.json'))\n\
         assert retained['source']==native_source and retained['all40ProofSourceFilesByteIdenticalToQualifiedBaseline']\
         \ and retained['all561NamesExactlyRetainedAndKernelChecked']\ncontrols=[('public-native.log','PSC1_MUTUAL_PUBLIC_ASSERT\
         \ ',12),('admission-native.log','PSC1_MUTUAL_ADMISSION_ASSERT ',240),('recursor-native.log','PSC1_MUTUAL_RECURSOR_ASSERT\
@@ -531,8 +532,8 @@ jobs:
         \    paths.append(path)\nfor path in ['psc1/scripts/bootstrap-project.mjs','psc1/scripts/bootstrap-manifest.mjs','psc1/scripts/workspace-layout.mjs']:\n\
         \    assert pathlib.Path(path).read_bytes()==subprocess.check_output(['git','show','2f7ee0afc1cc2fbccdf47b4f140b5cf01eb05c89:'+path])\n\
         for p in paths:\n    data=pathlib.Path(p).read_bytes();assert data==subprocess.check_output(['git','show','HEAD:'+p]);dest=out/'sources'/p;dest.parent.mkdir(parents=True,exist_ok=True);dest.write_bytes(data);snapshots.append({'path':p,'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()})\n\
-        record={'schema':'psc1-corrected-mutual-parity-generated-preflight-v1','source':os.environ['GITHUB_SHA'],'run':os.environ['GITHUB_RUN_ID'],'nativeSource':native_source,'nativeRun':40325910230,'nativeReports':806,'nativeAssertions':1184,'generatedAssertions':853,'all364NativeSourceSnapshotsMatchActualGit':True,'all16NegativeErrorsCompareActualOriginalAdmission':True,'compilerSource':compiler_source,'compilerSha256':receipt['compilerSha256'],'allCompilerBuildSourcesUnchanged':True,'entry':'test/PsKernelNestedAdmissionSelfHost.lean','route':os.environ['PSC1_MUTUAL_ROUTE'],'snapshots':snapshots,'privateNestedControls':35,'privateNestedReports':11,'privateNestedPreprocessReports':8,'privateNestedPreprocessControls':26,'nestedCaptureReports':10,'nestedCaptureControls':17,'nestedOverlayReports':7,'nestedOverlayControls':68,'publicNestedRouteChanged':True,'completeNestedReports':32,'completeNestedGeneratedControls':189,'all806ProofNamesExactlyVerified':True,'scope':'Complete\
-        \ nested owning public transaction;806native reports;fresh completeSelfHost plus all7nested phases;1188native-equal\
+        record={'schema':'psc1-corrected-mutual-parity-generated-preflight-v1','source':os.environ['GITHUB_SHA'],'run':os.environ['GITHUB_RUN_ID'],'nativeSource':native_source,'nativeRun':40330198655,'nativeReports':807,'nativeAssertions':1184,'generatedAssertions':853,'all364NativeSourceSnapshotsMatchActualGit':True,'all16NegativeErrorsCompareActualOriginalAdmission':True,'compilerSource':compiler_source,'compilerSha256':receipt['compilerSha256'],'allCompilerBuildSourcesUnchanged':True,'entry':'test/PsKernelNestedAdmissionSelfHost.lean','route':os.environ['PSC1_MUTUAL_ROUTE'],'snapshots':snapshots,'privateNestedControls':35,'privateNestedReports':11,'privateNestedPreprocessReports':8,'privateNestedPreprocessControls':26,'nestedCaptureReports':10,'nestedCaptureControls':17,'nestedOverlayReports':7,'nestedOverlayControls':68,'publicNestedRouteChanged':True,'completeNestedReports':33,'completeNestedGeneratedControls':189,'all807ProofNamesExactlyVerified':True,'scope':'Complete\
+        \ nested owning public transaction;807native reports;fresh completeSelfHost plus all7nested phases;1188native-equal\
         \ controls(999retained+141completeprivate+48public) and21legacy. Isolated paired qualification,not production-adopted/global/performance\
         \ qualified.','privateRuntimeFuel':256,'publicRuntimeFuel':4096,'retainedRuntimeFuel':'unchanged per authenticated\
         \ harness','runtimeDeadlineSeconds':600,'oldSpaceMiB':2048,'emptyPATH':True,'priorCopiedReferenceErrorClaimsSuperseded':True}\n\
@@ -627,7 +628,7 @@ jobs:
         \ \\\n pskernel-nested-header-smoke.mjs ./kernel.mjs > nested-runtime.log 2>&1\ncat nested-runtime.log\n\
         python3 - <<'PYCODE'\nimport pathlib,json,zipfile\ntag='PSC1_NESTED_HEADER_JS: PASS '\nr,=[json.loads(s[len(tag):])\
         \ for s in pathlib.Path('nested-runtime.log').read_text().splitlines() if s.startswith(tag)]\nassert r['assertions']==len(r['labels'])==len(set(r['labels']))==35\
-        \ and r['actualOriginalNegativeComparisons']==10\nwith zipfile.ZipFile('authenticated-native806.zip') as\
+        \ and r['actualOriginalNegativeComparisons']==10\nwith zipfile.ZipFile('authenticated-native807.zip') as\
         \ n:\n    labels=[s.removeprefix('PSC1_NESTED_HEADER_ASSERT ') for s in n.read('nested-header-native.log').decode().splitlines()\
         \ if s.startswith('PSC1_NESTED_HEADER_ASSERT ')]\nassert r['labels']==labels and r['privateOnly'] and not\
         \ r['publicRouteChanged'] and not r['fullKernel'] and not r['performanceQualified']\nprint('PSC1_NESTED_HEADER_NATIVE_EQUAL_ALL:\
@@ -638,7 +639,7 @@ jobs:
         \ > nested-preprocess-runtime.log 2>&1\ncat nested-preprocess-runtime.log\npython3 - <<'PYCODE'\nimport\
         \ pathlib,json,zipfile\ntag='PSC1_NESTED_PREPROCESS_JS: PASS '\nr,=[json.loads(s[len(tag):]) for s in pathlib.Path('nested-preprocess-runtime.log').read_text().splitlines()\
         \ if s.startswith(tag)]\nassert r['assertions']==len(r['labels'])==len(set(r['labels']))==26 and r['actualOriginalCompleteNestedAcceptedPlanFixtures']==5\n\
-        with zipfile.ZipFile('authenticated-native806.zip') as n:\n    labels=[s.removeprefix('PSC1_NESTED_PREPROCESS_ASSERT\
+        with zipfile.ZipFile('authenticated-native807.zip') as n:\n    labels=[s.removeprefix('PSC1_NESTED_PREPROCESS_ASSERT\
         \ ') for s in n.read('nested-preprocess-native.log').decode().splitlines() if s.startswith('PSC1_NESTED_PREPROCESS_ASSERT\
         \ ')]\nassert r['labels']==labels and r['privateOnly'] and not r['publicRouteChanged'] and not r['fullKernel']\
         \ and not r['performanceQualified']\nprint('PSC1_NESTED_PREPROCESS_NATIVE_EQUAL_ALL: PASS controls=26 actualOriginalFixtures=5')\n\
@@ -647,7 +648,7 @@ jobs:
         \  /usr/bin/time -f 'peak_rss_kib=%M wall_seconds=%e exit_status=%x' -o \"$name-runtime.memory\" \\\n  \
         \  timeout --signal=KILL 600s env -i PATH= \"$NODE_BIN\" --max-old-space-size=2048 \\\n    \"pskernel-$name-smoke.mjs\"\
         \ ./kernel.mjs > \"$name-runtime.log\" 2>&1\n  cat \"$name-runtime.log\"\ndone\npython3 - <<'PYCODE'\nimport\
-        \ pathlib,json,zipfile\nwith zipfile.ZipFile('authenticated-native806.zip') as n:\n for prefix,filename,log,count\
+        \ pathlib,json,zipfile\nwith zipfile.ZipFile('authenticated-native807.zip') as n:\n for prefix,filename,log,count\
         \ in [('PSC1_NESTED_PARAM_HYGIENE','nested-param-hygiene-runtime.log','nested-hygiene-native.log',17),('PSC1_NESTED_OVERLAY','nested-overlay-runtime.log','nested-overlay-native.log',68)]:\n\
         \  tag=prefix+'_JS: PASS ';r,=[json.loads(line[len(tag):]) for line in pathlib.Path(filename).read_text().splitlines()\
         \ if line.startswith(tag)]\n  labels=[line.removeprefix(prefix+'_ASSERT ') for line in n.read(log).decode().splitlines()\
@@ -660,7 +661,7 @@ jobs:
         \n /usr/bin/time -f 'peak_rss_kib=%M wall_seconds=%e exit_status=%x' -o \"$name-runtime.memory\" \\\n  timeout\
         \ --signal=KILL 600s env -i PATH= \"$NODE_BIN\" --max-old-space-size=2048 \\\n  \"pskernel-$name-smoke.mjs\"\
         \ ./kernel.mjs > \"$name-runtime.log\" 2>&1\n cat \"$name-runtime.log\"\ndone\npython3 - <<'PYCODE'\nimport\
-        \ pathlib,json,zipfile\nwith zipfile.ZipFile('authenticated-native806.zip') as n:\n for prefix,filename,log,count\
+        \ pathlib,json,zipfile\nwith zipfile.ZipFile('authenticated-native807.zip') as n:\n for prefix,filename,log,count\
         \ in [('PSC1_NESTED_ADMISSION','nested-admission-runtime.log','nested-admission-native.log',141),('PSC1_NESTED_PUBLIC_COMPLETE','nested-public-complete-runtime.log','nested-public-complete-native.log',36)]:\n\
         \  tag=prefix+'_JS: PASS ';r,=[json.loads(line[len(tag):]) for line in pathlib.Path(filename).read_text().splitlines()\
         \ if line.startswith(tag)]\n  nativeTag=prefix+'_ASSERT ';labels=[line[len(nativeTag):] for line in n.read(log).decode().splitlines()\

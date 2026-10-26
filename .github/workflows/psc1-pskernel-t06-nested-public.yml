@@ -24,14 +24,15 @@ jobs:
         node-version: '22'
     - name: Install pinned Lean
       run: bash psc1/scripts/install-lean435-ci.sh
-    - name: Authenticate exact nested case and import only; preserve all private phases/library roots/guards
+    - name: Authenticate exact nested dispatch and definitionally equal named-projection portability edit; retain
+        all earlier statements
       shell: bash
       run: "set -euo pipefail\nmkdir -p \"$RUNNER_TEMP/t06-mutual-public/source\"\ntest \"$(git rev-parse HEAD)\"\
         \ = \"$GITHUB_SHA\"\ntest \"$(cat psc1/lean-toolchain)\" = leanprover/lean4:v4.35.0\n(cd psc1 && test \"\
         $(lean --githash)\" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc)\ngit diff --name-only b07839267aa23eab90b7c60641ed45605999e2a2\
         \ HEAD -- psc1/packages/pskernel-core/src > \"$RUNNER_TEMP/t06-mutual-public/production-delta.txt\"\npython3\
         \ - <<'PYCODE'\nimport pathlib,subprocess,os\nbase='b07839267aa23eab90b7c60641ed45605999e2a2'\nout=pathlib.Path(os.environ['RUNNER_TEMP'])/'t06-mutual-public'\n\
-        assert (out/'production-delta.txt').read_text().splitlines()==['psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean']\n\
+        assert (out/'production-delta.txt').read_text().splitlines()==['psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean','psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagNestedValidation.lean']\n\
         path='psc1/kernel-lakefile.lean';before=subprocess.check_output(['git','show',base+':'+path]).decode();current=pathlib.Path(path).read_text()\n\
         assert current==before\nfor path in ['psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Rebase.lean','psc1/test/PsKernelNestedHeaderProofs.lean','psc1/test/PsKernelNestedPreprocessProofs.lean','psc1/test/PsKernelNestedParamHygieneProofs.lean']:\n\
         \ assert pathlib.Path(path).read_bytes()==subprocess.check_output(['git','show',base+':'+path])\npath='psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean';current=pathlib.Path(path).read_text();before=subprocess.check_output(['git','show',base+':'+path]).decode()\n\
@@ -42,10 +43,18 @@ jobs:
         \      psKernelExprV2NestedAdmitWithFuel execution.session.resources.fuel\\n                    (psKernelKernelSessionEnvironment\
         \ execution.session)\\n                    execution.session.resources.maxRecDepth execution.session.resources.maxNatSize\\\
         n                    input owner value;\\n              psKernelDagRunOrdinaryOwnedWith admit input execution\\\
-        n                levelParams safety arena built request declaration\\n','',1)==before\nPYCODE\ngit archive\
-        \ HEAD psc1/packages/pskernel-core/src psc1/test psc1/kernel-lakefile.lean psc1/lean-toolchain .github/workflows/psc1-pskernel-t06-nested-public.yml\
-        \ | tar -x -C \"$RUNNER_TEMP/t06-mutual-public/source\"\n(cd psc1 && node check-psc1-source.mjs --all-portable)\
-        \ 2>&1 | tee \"$RUNNER_TEMP/t06-mutual-public/portable.log\"\n"
+        n                levelParams safety arena built request declaration\\n','',1)==before\npath='psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagNestedValidation.lean';before=subprocess.check_output(['git','show',base+':'+path]).decode();current=pathlib.Path(path).read_text()\n\
+        assert current.replace('                  let inferredState := Prod.fst oldType;\\n                  match\
+        \ psKernelExprV2OrdinaryExtendDecoded inferredState.whnf.arena oldOwner.built with','                  match\
+        \ psKernelExprV2OrdinaryExtendDecoded (Prod.fst oldType).whnf.arena oldOwner.built with',1)==before\npath='psc1/test/PsKernelNestedValidationProofs.lean';before=subprocess.check_output(['git','show',base+':'+path]).decode();current=pathlib.Path(path).read_text()\n\
+        assert current.replace('theorem named_projection_retains_exact_decoded_extension\\n    (checked : Prod PsKernelExprV2CheckState\
+        \ Nat) (built : PsKernelExprV2Decoded) :\\n    (let inferredState := Prod.fst checked;\\n      psKernelExprV2OrdinaryExtendDecoded\
+        \ inferredState.whnf.arena built) =\\n      psKernelExprV2OrdinaryExtendDecoded (Prod.fst checked).whnf.arena\
+        \ built := rfl\\n\\n','',1).replace('#print axioms PsKernelNestedValidationProofs.named_projection_retains_exact_decoded_extension\\\
+        n','',1)==before\nPYCODE\ngit archive HEAD psc1/packages/pskernel-core/src psc1/test psc1/kernel-lakefile.lean\
+        \ psc1/lean-toolchain .github/workflows/psc1-pskernel-t06-nested-public.yml | tar -x -C \"$RUNNER_TEMP/t06-mutual-public/source\"\
+        \n(cd psc1 && node check-psc1-source.mjs --all-portable) 2>&1 | tee \"$RUNNER_TEMP/t06-mutual-public/portable.log\"\
+        \n"
     - name: Build complete native closure and prove exact recursive worker protocol
       working-directory: psc1
       shell: bash
@@ -169,24 +178,24 @@ jobs:
         \ env lean test/PsKernelNestedValidationProofs.lean 2>&1 | tee \"$RUNNER_TEMP/t06-mutual-public/nested-validation-proofs.log\"\
         \npython3 - <<'PYCODE'\nimport pathlib,os,re\nt=(pathlib.Path(os.environ['RUNNER_TEMP'])/'t06-mutual-public/nested-validation-proofs.log').read_text()\n\
         rows=re.findall(r\"'(PsKernelNestedValidationProofs\\.[^']+)' (?:depends on axioms: \\[([^\\]]*)\\]|does\
-        \ not depend on any axioms)\",t)\nassert len(rows)==len({n for n,_ in rows})==8,rows\nassert not any(x in\
+        \ not depend on any axioms)\",t)\nassert len(rows)==len({n for n,_ in rows})==9,rows\nassert not any(x in\
         \ t for x in ['error:','sorryAx','Lean.ofReduceBool','Lean.trustCompiler'])\nfor name,axioms in rows:assert\
         \ set(x.strip() for x in axioms.split(',') if x.strip())<={'propext','Classical.choice','Quot.sound'}\n\
-        print('PSC1_NESTED_VALIDATION_PROOFS: PASS new=8 retained=790 total=798')\nPYCODE\n\nlake -f kernel-lakefile.lean\
+        print('PSC1_NESTED_VALIDATION_PROOFS: PASS new=9 retained=790 total=799')\nPYCODE\n\nlake -f kernel-lakefile.lean\
         \ env lean test/PsKernelNestedAdmissionProofs.lean 2>&1 | tee \"$RUNNER_TEMP/t06-mutual-public/nested-admission-proofs.log\"\
         \npython3 - <<'PYCODE'\nimport pathlib,os,re\nt=(pathlib.Path(os.environ['RUNNER_TEMP'])/'t06-mutual-public/nested-admission-proofs.log').read_text()\n\
         rows=re.findall(r\"'(PsKernelNestedAdmissionProofs\\.[^']+)' (?:depends on axioms: \\[([^\\]]*)\\]|does\
         \ not depend on any axioms)\",t)\nassert len(rows)==len({n for n,_ in rows})==6,rows\nassert not any(x in\
         \ t for x in ['error:','sorryAx','Lean.ofReduceBool','Lean.trustCompiler'])\nfor name,axioms in rows:assert\
         \ set(x.strip() for x in axioms.split(',') if x.strip())<={'propext','Classical.choice','Quot.sound'}\n\
-        print('PSC1_NESTED_ADMISSION_PROOFS: PASS new=6 retained=798 total=804')\nPYCODE\n\nlake -f kernel-lakefile.lean\
+        print('PSC1_NESTED_ADMISSION_PROOFS: PASS new=6 retained=799 total=805')\nPYCODE\n\nlake -f kernel-lakefile.lean\
         \ env lean test/PsKernelNestedAdmissionPublicProofs.lean 2>&1 | tee \"$RUNNER_TEMP/t06-mutual-public/nested-public-proofs.log\"\
         \npython3 - <<'PYCODE'\nimport pathlib,os,re\nt=(pathlib.Path(os.environ['RUNNER_TEMP'])/'t06-mutual-public/nested-public-proofs.log').read_text()\n\
         rows=re.findall(r\"'(PsKernelNestedAdmissionPublicProofs\\.[^']+)' (?:depends on axioms: \\[([^\\]]*)\\\
         ]|does not depend on any axioms)\",t)\nassert len(rows)==len({n for n,_ in rows})==2,rows\nassert not any(x\
         \ in t for x in ['error:','sorryAx','Lean.ofReduceBool','Lean.trustCompiler'])\nfor name,axioms in rows:assert\
         \ set(x.strip() for x in axioms.split(',') if x.strip())<={'propext','Classical.choice','Quot.sound'}\n\
-        print('PSC1_NESTED_PUBLIC_PROOFS: PASS new=2 retained=804 total=806')\nPYCODE\n"
+        print('PSC1_NESTED_PUBLIC_PROOFS: PASS new=2 retained=805 total=807')\nPYCODE\n"
     - name: Require all1184 controls including public atomicity resources and same-batch recursor ownership
       working-directory: psc1
       shell: bash
@@ -332,7 +341,7 @@ jobs:
         for p in sorted(out.rglob(''*'')) if p.is_file()}
 
         (out/''files.json'').write_text(json.dumps({''source'':os.environ[''GITHUB_SHA''],''run'':os.environ[''GITHUB_RUN_ID''],''attempt'':os.environ[''GITHUB_RUN_ATTEMPT''],''scope'':''Complete
-        nested public route isolated qualification;806reports/60modules1795controls;7actualcompleteoriginalenvironments;directownerwithoutreimport;publicatomicfailureandresources;originalboundaryfallback;not
+        nested public route isolated qualification;807reports/60modules1795controls;7actualcompleteoriginalenvironments;directownerwithoutreimport;publicatomicfailureandresources;originalboundaryfallback;not
         adopted/global/performance qualified'',''files'':files},indent=2)+''\n'')
 
         PYCODE

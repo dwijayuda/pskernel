@@ -74,7 +74,11 @@ for(const engine of ['js','ts','rust','wasm-core']) {
 }
 fs.writeFileSync(${JSON.stringify(records)},JSON.stringify({rows,io,components,negatives}));
 `;
-emit(program);
+// Aggregate CI controller, matching the existing checked-publication matrix.
+// Every compiler/target tool still enforces its own240s and checker120s limit.
+fs.writeFileSync(consumer,program);
+const matrix=spawnSync(process.execPath,[consumer],{cwd:work,env,encoding:'utf8',stdio:['ignore','inherit','inherit'],timeout:1500000,maxBuffer:32*1024*1024});
+assert.equal(matrix.error,undefined,String(matrix.error));assert.equal(matrix.status,0,'checked dispatch matrix failed');
 const actual=JSON.parse(fs.readFileSync(records));
 const pythonDriver=path.join(work,'observe.py'),phpDriver=path.join(work,'observe.php');
 fs.writeFileSync(pythonDriver,'import importlib.util,json,sys\ns=importlib.util.spec_from_file_location("psc1",sys.argv[1]);m=importlib.util.module_from_spec(s);s.loader.exec_module(m)\nprint(json.dumps(eval(sys.argv[2])))\n');

@@ -173,6 +173,19 @@
       "job": 121338816323,
       "status": "failed-replay-report-reader",
       "reason": "loader expected flat kernel record but actual writer uses schema/status/records[]; exact ZIP, source diff and all packaged production-file identity checks had already passed; corrected against actual writer schema"
+    },
+    {
+      "head": "f70b1f357ec4cec5b4e21d2429f6b70579e9d9c8",
+      "run": 40249967674,
+      "job": 121339516043,
+      "status": "failed-aggregate-test-supervisor",
+      "passed": [
+        "exact candidate ZIP and root hashes",
+        "19 packaged production files match current source",
+        "actual kernel report schema and successful assembly evidence",
+        "strict source diff whitelist and formatting"
+      ],
+      "reason": "the test controller ran the entire multi-request matrix under one240s deadline; changed only the aggregate matrix supervisor to the existing1500s profile with live inherited progress; all individual compiler/tools240s, checker120s, fuel/memory/stack and policies unchanged"
     }
   ]
 }

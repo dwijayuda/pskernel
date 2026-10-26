@@ -85,100 +85,136 @@ def psKernelExprV2NestedOverlayFinish
     psKernelDagGeneratedFinish source state
       (psKernelExprV2PagedReplayNode state.arena newNode)
 
+def psKernelExprV2NestedOverlayReadOriginal
+    (original : Nat) (state : PsKernelDagGeneratedState) : Except String PsKernelExprV2Entry :=
+  match psKernelExprV2DecodedRequire state.built original with
+  | Except.error error => Except.error error
+  | Except.ok _ => psKernelExprV2PagedRequire state.arena original
+
 def psKernelExprV2NestedOverlay
     (source : PsKernelExpr) (original : Nat) (state : PsKernelDagGeneratedState) :
     Except String (Prod PsKernelDagGeneratedState Nat) :=
-  match psKernelExprV2DecodedRequire state.built original with
-  | Except.error error => Except.error error
-  | Except.ok _ =>
-      match psKernelExprV2PagedRequire state.arena original with
+  match source with
+  | PsKernelExpr.bvar index =>
+      match psKernelExprV2NestedOverlayReadOriginal original state with
       | Except.error error => Except.error error
       | Except.ok entry =>
-          match source with
-          | PsKernelExpr.bvar index =>
-              psKernelExprV2NestedOverlayFinish source original entry.node
-                (PsKernelExprV2Node.bvar index) state
-          | PsKernelExpr.fvar name =>
-              psKernelExprV2NestedOverlayFinish source original entry.node
-                (PsKernelExprV2Node.fvar name) state
-          | PsKernelExpr.mvar name =>
-              psKernelExprV2NestedOverlayFinish source original entry.node
-                (PsKernelExprV2Node.mvar name) state
-          | PsKernelExpr.sort level =>
-              psKernelExprV2NestedOverlayFinish source original entry.node
-                (PsKernelExprV2Node.sort level) state
-          | PsKernelExpr.const name levels =>
-              psKernelExprV2NestedOverlayFinish source original entry.node
-                (PsKernelExprV2Node.const name levels) state
-          | PsKernelExpr.app fn arg =>
-              match entry.node with
-              | PsKernelExprV2Node.app oldFn oldArg =>
-                  match psKernelExprV2NestedOverlay fn oldFn state with
+          psKernelExprV2NestedOverlayFinish source original entry.node
+            (PsKernelExprV2Node.bvar index) state
+  | PsKernelExpr.fvar name =>
+      match psKernelExprV2NestedOverlayReadOriginal original state with
+      | Except.error error => Except.error error
+      | Except.ok entry =>
+          psKernelExprV2NestedOverlayFinish source original entry.node
+            (PsKernelExprV2Node.fvar name) state
+  | PsKernelExpr.mvar name =>
+      match psKernelExprV2NestedOverlayReadOriginal original state with
+      | Except.error error => Except.error error
+      | Except.ok entry =>
+          psKernelExprV2NestedOverlayFinish source original entry.node
+            (PsKernelExprV2Node.mvar name) state
+  | PsKernelExpr.sort level =>
+      match psKernelExprV2NestedOverlayReadOriginal original state with
+      | Except.error error => Except.error error
+      | Except.ok entry =>
+          psKernelExprV2NestedOverlayFinish source original entry.node
+            (PsKernelExprV2Node.sort level) state
+  | PsKernelExpr.const name levels =>
+      match psKernelExprV2NestedOverlayReadOriginal original state with
+      | Except.error error => Except.error error
+      | Except.ok entry =>
+          psKernelExprV2NestedOverlayFinish source original entry.node
+            (PsKernelExprV2Node.const name levels) state
+  | PsKernelExpr.app fn arg =>
+      match psKernelExprV2NestedOverlayReadOriginal original state with
+      | Except.error error => Except.error error
+      | Except.ok entry =>
+          match entry.node with
+          | PsKernelExprV2Node.app oldFn oldArg =>
+              match psKernelExprV2NestedOverlay fn oldFn state with
+              | Except.error error => Except.error error
+              | Except.ok child0 =>
+                  match psKernelExprV2NestedOverlay arg oldArg (Prod.fst child0) with
                   | Except.error error => Except.error error
-                  | Except.ok child0 =>
-                      match psKernelExprV2NestedOverlay arg oldArg (Prod.fst child0) with
-                      | Except.error error => Except.error error
-                      | Except.ok child1 =>
-                          psKernelExprV2NestedOverlayFinish source original entry.node
-                            (PsKernelExprV2Node.app (Prod.snd child0) (Prod.snd child1)) (Prod.fst child1)
-              | _ => psKernelDagGeneratedImport source state
-          | PsKernelExpr.lam name type body info =>
-              match entry.node with
-              | PsKernelExprV2Node.lam oldName oldType oldBody oldInfo =>
-                  match psKernelExprV2NestedOverlay type oldType state with
-                  | Except.error error => Except.error error
-                  | Except.ok child0 =>
-                      match psKernelExprV2NestedOverlay body oldBody (Prod.fst child0) with
-                      | Except.error error => Except.error error
-                      | Except.ok child1 =>
-                          psKernelExprV2NestedOverlayFinish source original entry.node
-                            (PsKernelExprV2Node.lam name (Prod.snd child0) (Prod.snd child1) info) (Prod.fst child1)
-              | _ => psKernelDagGeneratedImport source state
-          | PsKernelExpr.forallE name type body info =>
-              match entry.node with
-              | PsKernelExprV2Node.forallE oldName oldType oldBody oldInfo =>
-                  match psKernelExprV2NestedOverlay type oldType state with
-                  | Except.error error => Except.error error
-                  | Except.ok child0 =>
-                      match psKernelExprV2NestedOverlay body oldBody (Prod.fst child0) with
-                      | Except.error error => Except.error error
-                      | Except.ok child1 =>
-                          psKernelExprV2NestedOverlayFinish source original entry.node
-                            (PsKernelExprV2Node.forallE name (Prod.snd child0) (Prod.snd child1) info) (Prod.fst child1)
-              | _ => psKernelDagGeneratedImport source state
-          | PsKernelExpr.letE name type value body nondep =>
-              match entry.node with
-              | PsKernelExprV2Node.letE oldName oldType oldValue oldBody oldNondep =>
-                  match psKernelExprV2NestedOverlay type oldType state with
-                  | Except.error error => Except.error error
-                  | Except.ok child0 =>
-                      match psKernelExprV2NestedOverlay value oldValue (Prod.fst child0) with
-                      | Except.error error => Except.error error
-                      | Except.ok child1 =>
-                          match psKernelExprV2NestedOverlay body oldBody (Prod.fst child1) with
-                          | Except.error error => Except.error error
-                          | Except.ok child2 =>
-                              psKernelExprV2NestedOverlayFinish source original entry.node
-                                (PsKernelExprV2Node.letE name (Prod.snd child0) (Prod.snd child1) (Prod.snd child2) nondep) (Prod.fst child2)
-              | _ => psKernelDagGeneratedImport source state
-          | PsKernelExpr.lit value =>
-              psKernelExprV2NestedOverlayFinish source original entry.node
-                (PsKernelExprV2Node.lit value) state
-          | PsKernelExpr.mdata tag body =>
-              match entry.node with
-              | PsKernelExprV2Node.mdata oldTag oldBody =>
-                  match psKernelExprV2NestedOverlay body oldBody state with
-                  | Except.error error => Except.error error
-                  | Except.ok child0 =>
+                  | Except.ok child1 =>
                       psKernelExprV2NestedOverlayFinish source original entry.node
-                        (PsKernelExprV2Node.mdata tag (Prod.snd child0)) (Prod.fst child0)
-              | _ => psKernelDagGeneratedImport source state
-          | PsKernelExpr.proj name index body =>
-              match entry.node with
-              | PsKernelExprV2Node.proj oldName oldIndex oldBody =>
-                  match psKernelExprV2NestedOverlay body oldBody state with
+                        (PsKernelExprV2Node.app (Prod.snd child0) (Prod.snd child1)) (Prod.fst child1)
+          | _ => psKernelDagGeneratedImport source state
+  | PsKernelExpr.lam name type body info =>
+      match psKernelExprV2NestedOverlayReadOriginal original state with
+      | Except.error error => Except.error error
+      | Except.ok entry =>
+          match entry.node with
+          | PsKernelExprV2Node.lam oldName oldType oldBody oldInfo =>
+              match psKernelExprV2NestedOverlay type oldType state with
+              | Except.error error => Except.error error
+              | Except.ok child0 =>
+                  match psKernelExprV2NestedOverlay body oldBody (Prod.fst child0) with
                   | Except.error error => Except.error error
-                  | Except.ok child0 =>
+                  | Except.ok child1 =>
                       psKernelExprV2NestedOverlayFinish source original entry.node
-                        (PsKernelExprV2Node.proj name index (Prod.snd child0)) (Prod.fst child0)
-              | _ => psKernelDagGeneratedImport source state
+                        (PsKernelExprV2Node.lam name (Prod.snd child0) (Prod.snd child1) info) (Prod.fst child1)
+          | _ => psKernelDagGeneratedImport source state
+  | PsKernelExpr.forallE name type body info =>
+      match psKernelExprV2NestedOverlayReadOriginal original state with
+      | Except.error error => Except.error error
+      | Except.ok entry =>
+          match entry.node with
+          | PsKernelExprV2Node.forallE oldName oldType oldBody oldInfo =>
+              match psKernelExprV2NestedOverlay type oldType state with
+              | Except.error error => Except.error error
+              | Except.ok child0 =>
+                  match psKernelExprV2NestedOverlay body oldBody (Prod.fst child0) with
+                  | Except.error error => Except.error error
+                  | Except.ok child1 =>
+                      psKernelExprV2NestedOverlayFinish source original entry.node
+                        (PsKernelExprV2Node.forallE name (Prod.snd child0) (Prod.snd child1) info) (Prod.fst child1)
+          | _ => psKernelDagGeneratedImport source state
+  | PsKernelExpr.letE name type value body nondep =>
+      match psKernelExprV2NestedOverlayReadOriginal original state with
+      | Except.error error => Except.error error
+      | Except.ok entry =>
+          match entry.node with
+          | PsKernelExprV2Node.letE oldName oldType oldValue oldBody oldNondep =>
+              match psKernelExprV2NestedOverlay type oldType state with
+              | Except.error error => Except.error error
+              | Except.ok child0 =>
+                  match psKernelExprV2NestedOverlay value oldValue (Prod.fst child0) with
+                  | Except.error error => Except.error error
+                  | Except.ok child1 =>
+                      match psKernelExprV2NestedOverlay body oldBody (Prod.fst child1) with
+                      | Except.error error => Except.error error
+                      | Except.ok child2 =>
+                          psKernelExprV2NestedOverlayFinish source original entry.node
+                            (PsKernelExprV2Node.letE name (Prod.snd child0) (Prod.snd child1) (Prod.snd child2) nondep) (Prod.fst child2)
+          | _ => psKernelDagGeneratedImport source state
+  | PsKernelExpr.lit value =>
+      match psKernelExprV2NestedOverlayReadOriginal original state with
+      | Except.error error => Except.error error
+      | Except.ok entry =>
+          psKernelExprV2NestedOverlayFinish source original entry.node
+            (PsKernelExprV2Node.lit value) state
+  | PsKernelExpr.mdata tag body =>
+      match psKernelExprV2NestedOverlayReadOriginal original state with
+      | Except.error error => Except.error error
+      | Except.ok entry =>
+          match entry.node with
+          | PsKernelExprV2Node.mdata oldTag oldBody =>
+              match psKernelExprV2NestedOverlay body oldBody state with
+              | Except.error error => Except.error error
+              | Except.ok child0 =>
+                  psKernelExprV2NestedOverlayFinish source original entry.node
+                    (PsKernelExprV2Node.mdata tag (Prod.snd child0)) (Prod.fst child0)
+          | _ => psKernelDagGeneratedImport source state
+  | PsKernelExpr.proj name index body =>
+      match psKernelExprV2NestedOverlayReadOriginal original state with
+      | Except.error error => Except.error error
+      | Except.ok entry =>
+          match entry.node with
+          | PsKernelExprV2Node.proj oldName oldIndex oldBody =>
+              match psKernelExprV2NestedOverlay body oldBody state with
+              | Except.error error => Except.error error
+              | Except.ok child0 =>
+                  psKernelExprV2NestedOverlayFinish source original entry.node
+                    (PsKernelExprV2Node.proj name index (Prod.snd child0)) (Prod.fst child0)
+          | _ => psKernelDagGeneratedImport source state

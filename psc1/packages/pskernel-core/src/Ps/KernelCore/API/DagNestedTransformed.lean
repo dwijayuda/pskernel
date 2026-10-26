@@ -33,7 +33,7 @@ def psKernelExprV2NestedImportConstructorTargets
   match targets with
   | List.nil => Except.ok (Prod.mk state List.nil)
   | List.cons first rest =>
-      let imported :=
+      let imported : Except String (Prod PsKernelDagGeneratedState Nat) :=
         match psKernelExprV2NestedOriginConstructor first.name origins with
         | Option.none => psKernelDagGeneratedImport first.type state
         | Option.some original => psKernelExprV2NestedOverlay first.type original.type state;
@@ -50,14 +50,14 @@ def psKernelExprV2NestedImportTypeTarget
     (state : PsKernelDagGeneratedState) :
     Except String (Prod PsKernelDagGeneratedState PsKernelDagInductive) :=
   let original := psKernelExprV2NestedOriginType target.name origins;
-  let imported :=
+  let imported : Except String (Prod PsKernelDagGeneratedState Nat) :=
     match original with
     | Option.none => psKernelDagGeneratedImport target.type state
     | Option.some old => psKernelExprV2NestedOverlay target.type old.type state;
   match imported with
   | Except.error error => Except.error error
   | Except.ok header =>
-      let constructors := match original with
+      let constructors : List PsKernelDagConstructor := match original with
         | Option.none => List.nil
         | Option.some old => old.ctors;
       match psKernelExprV2NestedImportConstructorTargets target.ctors constructors (Prod.fst header) with

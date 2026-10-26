@@ -58,14 +58,14 @@ def psKernelExprV2NestedRestoreRules
   match rules with
   | List.nil => Except.ok (Prod.mk owner List.nil)
   | List.cons rule rest =>
-      let attempted :=
+      let attempted : Except String (Prod PsKernelDagGeneratedState Nat) :=
         match origins with
         | List.nil => psKernelDagGeneratedImport rule.rhs owner
         | List.cons first _ => psKernelExprV2NestedOverlay rule.rhs first.rhs owner;
       match attempted with
       | Except.error error => Except.error error
       | Except.ok imported =>
-          let tail := match origins with
+          let tail : List PsKernelExprV2RecursorRuleRef := match origins with
             | List.nil => List.nil
             | List.cons _ remaining => remaining;
           match psKernelExprV2NestedRestoreRules rest tail (Prod.fst imported) with
@@ -93,7 +93,7 @@ def psKernelExprV2NestedRestoreReference
             root Option.none PsKernelExprV2DeclarationRefKind.constructorDecl;
           Except.ok (PsKernelDagGeneratedState.mk next.arena next.built (List.cons reference next.declarations))
       | PsKernelConstantInfo.recInfo value =>
-          let origins :=
+          let origins : List PsKernelExprV2RecursorRuleRef :=
             match origin with
             | Option.none => List.nil
             | Option.some reference =>

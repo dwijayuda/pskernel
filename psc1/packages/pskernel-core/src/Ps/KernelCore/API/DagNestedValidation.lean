@@ -65,7 +65,7 @@ def psKernelExprV2NestedValidateTypeWith
       match attempted with
       | Except.error error => Option.some (Except.error error)
       | Except.ok checked =>
-          let sorted :=
+          let sorted : Option (Except String PsKernelExprV2CheckState) :=
             if sortRequired then
               match psKernelExprV2AdmissionEnsureSortOwnedWith (whnf fuel) context (Prod.fst checked) (Prod.snd checked) with
               | Option.none => Option.none

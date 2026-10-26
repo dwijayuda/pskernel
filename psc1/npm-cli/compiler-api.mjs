@@ -115,7 +115,9 @@ function sessionFor(selected, publicationRoot) {
     runnerSha256:
       selected.target === 'js'
         ? d.runner.sha256
-        : d.hostFiles.find((row) => row.path === 'host-tools/execution/unified-candidate-runner.mjs').sha256,
+        : d.hostFiles.find(
+            (row) => row.path === 'host-tools/execution/unified-candidate-runner.mjs',
+          ).sha256,
     checkerExecutable: process.execPath,
     checkerSha256: hash(fs.readFileSync(process.execPath)),
     checkerScriptFile: script,

@@ -105,6 +105,7 @@ for(const m of moves){
  if(m.from.startsWith('scripts/cli-'))expected=relocated(expected,m.from,m.to);
  if(m.from==='npm-cli/universal.mjs')
   for(const [before,after] of Object.entries(literalMoves))expected=expected.split(before).join(after);
+ if(m.from==='npm-cli/universal.mjs')expected=expected.replace("        : d.hostFiles.find((row) => row.path === 'host-tools/execution/unified-candidate-runner.mjs').sha256,","        : d.hostFiles.find(\n            (row) => row.path === 'host-tools/execution/unified-candidate-runner.mjs',\n          ).sha256,");
  if(m.from==='scripts/cli-installed.mjs')expected=expected.replace('proofscript 0.1.0-psc1.8','proofscript 0.1.0-psc1.9');
  assert.equal(read(m.to),expected,'moved implementation bytes changed: '+m.to);
  compared.push({from:m.from,to:m.to,relation:'exact-bytes-except-enumerated-paths-or-package-version'});

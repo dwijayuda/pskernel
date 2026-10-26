@@ -1,0 +1,1506 @@
+{
+  "qualifiedSource": "2f7ee0afc1cc2fbccdf47b4f140b5cf01eb05c89",
+  "auditSource": "417578e4ee7bbb94082c71f828b4d225782f1f0b",
+  "auditRun": 40228636222,
+  "bindings": [
+    {
+      "path": ".github/workflows/psc1-pskernel-t05-header.yml",
+      "gitBlobSha": "e8285e67b0c83d90f6cd4ac67fcc104a68a65f45",
+      "bytes": 207357,
+      "sha256": "ecd4fb47fb4ac9385026d013f1ef4f2a092dc937e96b839ba5fb1232bb2b336c"
+    },
+    {
+      "path": ".github/workflows/psc1-pskernel-transform-lazy-native.yml",
+      "gitBlobSha": "e3e2ebd7bf7288428d29f22dbcf303c9c6f0a52d",
+      "bytes": 2095,
+      "sha256": "0a1ed964ce2947d3d9e116c660d70348ae0175488aa833a4c8dfc57708b42b05"
+    },
+    {
+      "path": "psc1/kernel-lakefile.lean",
+      "gitBlobSha": "f9747aa88a4c242d63ecfd5c29e8e72c51025c60",
+      "bytes": 17834,
+      "sha256": "2d8397ccfbd42bffa0a1cd64af2d3863494b7011f144800b8bbfb41cd59ba461"
+    },
+    {
+      "path": "psc1/lean-toolchain",
+      "gitBlobSha": "a6aff065db2882c535684f8c5bcd4f16e9a23915",
+      "bytes": 25,
+      "sha256": "ca5f1f601d34c49079e38d7e7041eb0f2a9c227fbc1df0f404820069a052330c"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean",
+      "gitBlobSha": "f18cad0f0c305bb80c697cb9c598eb720dca5837",
+      "bytes": 26014,
+      "sha256": "80a8d48df35f9b9b8a045cb6cab932262bf38afea9b065fa04b3231a1e3412f5"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmission.lean",
+      "gitBlobSha": "65038689074c6340513315baa9b5be4b61c40545",
+      "bytes": 23775,
+      "sha256": "be61803c61760b15d3f6674b0174d93692858a788f182676282e4b0a0a13980a"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagAdmissionGuards.lean",
+      "gitBlobSha": "1b91ad80d4c744c5b9db69e71944deada000093b",
+      "bytes": 9542,
+      "sha256": "b07e3cbd2fe0ad1f73e8756514d5be26fbc010fd98e46c6dca31e4a86ad1d728"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagDeclaration.lean",
+      "gitBlobSha": "90b8da60e4b7275fad03963a75b5dc1dca8d206d",
+      "bytes": 11925,
+      "sha256": "e195361d4edfd869e77da9488452259f566b87954a5987c78ffc9fc0029db613"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagGenerated.lean",
+      "gitBlobSha": "aa33d59c6b6a209ceea9243c83ed9d91b77039a4",
+      "bytes": 31020,
+      "sha256": "47defc0dba315bb98e862fb28d74b209e58610fe2e8be459777e7cc6f7de67d3"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryAdmission.lean",
+      "gitBlobSha": "a624ed1ca728df4b418b756341c04e8faf54fe8c",
+      "bytes": 15270,
+      "sha256": "1fbfe6cf734fc169a3bec981309216c29339f543384b20704b597987ed0d596b"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryAnnotations.lean",
+      "gitBlobSha": "a02db21d57591bea86dffadbc598e22c0b77c7e4",
+      "bytes": 3151,
+      "sha256": "de60bb221d618ab944edd2cca4f6c8158fbf2a4de50ab5fc1f52ad48c1093e95"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorAnalysis.lean",
+      "gitBlobSha": "153c74713bf236a400e7f4e3bbd8313bb2f63be9",
+      "bytes": 8414,
+      "sha256": "88669b3dafd4aa88dd1e0a6c12564f24330e61710e16e39ed65400fd2e5ea906"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorFields.lean",
+      "gitBlobSha": "725af49893a367aa561f37dddd4f007579144cff",
+      "bytes": 13332,
+      "sha256": "23a06affee65521b775ce67078068ba89cdedabad7fee80f142d796aaf4ad991"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorLoop.lean",
+      "gitBlobSha": "1a466a222f973a8ab365f89324fca8cb641fee9e",
+      "bytes": 10026,
+      "sha256": "ffd94899878c473a64f621860e76a1ae10b6b07759430381c98ce222091ad1b3"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorParams.lean",
+      "gitBlobSha": "aa451845d1c0c452d49a96f44caa5b5985f8284c",
+      "bytes": 5194,
+      "sha256": "b681c1a2751f15f66edcbba043fc6af83ac13147ff06360fc459f5405fb483d1"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorResult.lean",
+      "gitBlobSha": "632ab0da062959eceeaff28a9f3a420dc89b923f",
+      "bytes": 7877,
+      "sha256": "a44e0ebb823e4cb00a8a9d0b2d6017270ff869e1ebd38a1d344d87b8ac378b91"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryConstructorTypes.lean",
+      "gitBlobSha": "9912bba04804ab636b3be47b0c5de5c4f5b3d14d",
+      "bytes": 1670,
+      "sha256": "c23a76852e6546be680e84721c50597c6f2ba5619463ed5727746431c88648b4"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryElimination.lean",
+      "gitBlobSha": "b0c3915f8cc64026ecc281178d7fa4a14b78fb9f",
+      "bytes": 13587,
+      "sha256": "9dd0799b13f78f52f1ac5b5d18de9fadb94e9396e536b0fde5408dcb184d6e97"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryGenerated.lean",
+      "gitBlobSha": "f1fe7793d6d4b255509b6d1271d6d8ac555b25a7",
+      "bytes": 12837,
+      "sha256": "761ae589a4256a7808dff1883a835ac1f4ef709484c7e256774e48a721ff06c5"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeader.lean",
+      "gitBlobSha": "0a6682c5f7926da926e0d2d659a66fae57f5ba88",
+      "bytes": 8213,
+      "sha256": "11d056e95b93bafaac73d0a713bba688aee12f88e9d3478af9c2487f79b6edc9"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryHeaderTypes.lean",
+      "gitBlobSha": "f811255bd32a6a1b4d644d8a4545a1b2bf6c87f9",
+      "bytes": 1418,
+      "sha256": "147627ac8160e681c57a21c12fd3320868b29abbebd7416d51f2d3cc6ec34056"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryOccurrence.lean",
+      "gitBlobSha": "9bdbdf46c32798f3d71132fc94013156713cc80b",
+      "bytes": 9400,
+      "sha256": "3f5ffae4af048991583563f5962dd28e54d2fde18dc7d1bd4f507bb40c8f54f6"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryParameters.lean",
+      "gitBlobSha": "953963f466f9c3f86311cfbd1e9121c45f3de4eb",
+      "bytes": 13054,
+      "sha256": "e8d676b29d83502c15dff6ffe9eddc926673f8e74612adce420a389b3fb0b680"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryRecursiveArgument.lean",
+      "gitBlobSha": "6f6cf075a12c72aab1b898625c638c880bc73cd2",
+      "bytes": 12184,
+      "sha256": "b17434e2360adfdbcf12870bbd91fc353e3bbde277f058373730bee38e23e1c8"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagOrdinaryRecursorValidation.lean",
+      "gitBlobSha": "9b985ee8599e42ca3d9227c523e38eac53b34d9a",
+      "bytes": 7115,
+      "sha256": "ce27b9f03c298abd2159461341d7aeae8444a6eaf40899f89128160194a9440e"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagQuotAdmission.lean",
+      "gitBlobSha": "6f06163aff11737b8a7b81b04c187871689a4f30",
+      "bytes": 12993,
+      "sha256": "624697322e578ef620a9a5bbf68f67a46e27c45e240ef29de76296892794c16b"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagTypes.lean",
+      "gitBlobSha": "e5237e557abb4e568ccd8b6ebc729c84c782d10f",
+      "bytes": 1896,
+      "sha256": "ae8f3418f401c123f23196acc10d9cc9d88c089266b456898efe92d337adc458"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/Kernel.lean",
+      "gitBlobSha": "955ffc0fcf8b11800aefe13c32e0ef28b767f8e2",
+      "bytes": 6387,
+      "sha256": "9323c39eaa6cfdba90c4a5676facceeeb95ef7f2e5dfaa3594191fff1da848e2"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/KernelContractV1.lean",
+      "gitBlobSha": "33e90b631d86d4b21ce1f4158212ed56d2fa0173",
+      "bytes": 1530,
+      "sha256": "f0d3d91e131e7d21925a95ede81b0fb0c72b0022418e782680b9fa482ed66f94"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/Outcome.lean",
+      "gitBlobSha": "764c3affe4a884903267722114b3bf1c91444b0c",
+      "bytes": 9402,
+      "sha256": "e8f33db0bb2e7f105c7181a3ff7e5e701c4a1f28d81bcce5cb5b24312d9139a3"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/Provider.lean",
+      "gitBlobSha": "7946d76e56bc06bb1386fdc43d4fd0fe4f2c060b",
+      "bytes": 677,
+      "sha256": "6a638a89da7155868cd90ec7bbcd72cc001ebf9d960a376df6203d16940e4bd8"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/Session.lean",
+      "gitBlobSha": "b8fcb03d9538cb8d19ff6d68d9bf602577208e34",
+      "bytes": 2072,
+      "sha256": "157fcf786bed74030418d93ed9ada1cb8f8daef50c02587f9d87ba7df9830b2a"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Declaration/Admission.lean",
+      "gitBlobSha": "468ffb7f9d5a8708266fcef989a324f8aa37ab90",
+      "bytes": 13883,
+      "sha256": "884922be98d94657d2e1b885c4ae01b206713f0a565abab07b41bdb73f5dab62"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Declaration/Validation.lean",
+      "gitBlobSha": "3735c1cf3af085a22fae6ea47b4457da2fca2512",
+      "bytes": 9571,
+      "sha256": "b92d120f315beb472432ebc99a503fbfecc4d70ef38542b54eec005aeea0261e"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Elimination.lean",
+      "gitBlobSha": "7b896a50da30370d3a185b79f9ffeeaa379bbb9b",
+      "bytes": 5909,
+      "sha256": "d238bac7563798b22cf025caf3d4c95fb54ede7b11159988d7e205fc94392949"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Occurrence.lean",
+      "gitBlobSha": "a8b911d20a603b46edcc63a0bf000c1bacec5341",
+      "bytes": 10620,
+      "sha256": "cc160e7cca9436170b64f845b393d0e8aa631ffb9ce61a74c0bedccb9587e9b0"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/Parameters.lean",
+      "gitBlobSha": "918753c154f2ed96d65702494c7374dcd5ec5001",
+      "bytes": 9757,
+      "sha256": "7506663960991724551ae8af806996304a5e196db275fb22e168639028b803a3"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Common/RecursorValidation.lean",
+      "gitBlobSha": "ae0d498305cab3f253bd53f40d66ae0919420027",
+      "bytes": 3730,
+      "sha256": "a7b7893b50aaef173b736b09cd506afee63ecbd505649f25b28116a66a809fcd"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Mutual/Admission.lean",
+      "gitBlobSha": "3fe44ccb42560ebe06f70ec7e2d5990c05371786",
+      "bytes": 16484,
+      "sha256": "0639f6c837a6ad8792553ba36f629c3b81e4aec775e9d048ac5a427b6b5da17c"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Mutual/AdmissionLoops.lean",
+      "gitBlobSha": "90a8974c6dd2755525aa005480616c18f0c790eb",
+      "bytes": 19910,
+      "sha256": "2e3604835cf938c611a4a3d3f6462d34bb6ea2af438698c9cb36f38c003a697b"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Mutual/Analysis.lean",
+      "gitBlobSha": "6ec1b1130a89d2c310fd04b39e1f2f98d98ac21d",
+      "bytes": 25591,
+      "sha256": "a056a1a9346f61c058cf698fe9d3d5934e28a6622845f58860bea77bc1152569"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Mutual/Header.lean",
+      "gitBlobSha": "7aeae09d7d7769c58ceb9ff59f0ead9c54eebf1c",
+      "bytes": 10406,
+      "sha256": "e5ae62478cf927281559b8e266a8fcdec34dfbc1b6f7c414e3d547753fb9c010"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Mutual/Recursor.lean",
+      "gitBlobSha": "edaf57429064cf0f7fd7e737aa81f348393f8c71",
+      "bytes": 16950,
+      "sha256": "4c06455f143fe1d602268372b60b8ca57ce42416f3e57fe97ddb2c63fe1ae433"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Admission.lean",
+      "gitBlobSha": "3e326340f63d2b1cb51d235bcdd05e899b9407fb",
+      "bytes": 8868,
+      "sha256": "0a59f3273b7a385f31889276e1a7a652a839553288215d054f9100dfe50bdd32"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Commit.lean",
+      "gitBlobSha": "8d8349adbfe8e509a2b7d2f21585afcaaee54340",
+      "bytes": 2505,
+      "sha256": "60b1ffd67a9ca9d3fccc35cdd1232079906244fed2fd5ef44640bfa127e243a2"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Discover.lean",
+      "gitBlobSha": "5c0e3ba4e12172faad95a1a5f2bbe9f9d5aad0f5",
+      "bytes": 22575,
+      "sha256": "21a9d6d7594afc7bfff083157078a182d0da5d5b3bee5872d896e3b139b11621"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Flatten.lean",
+      "gitBlobSha": "ae722b2e67286a12e72faa4bfd3e49c8580d26b4",
+      "bytes": 20672,
+      "sha256": "0c96941573aad5ccafe128ce8ae6dbae700b85cfb9e923c4c4a807d852f339fc"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Rebase.lean",
+      "gitBlobSha": "543a4b46c6eb774c465d2df1e193431d2f6ddcf8",
+      "bytes": 14116,
+      "sha256": "a269eee6f29bc4cfba00883abb90418621ff944e00335de8c708932228441a4d"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/ReservedNames.lean",
+      "gitBlobSha": "778f9b118b9326749e03f9aba84ba687bf0fd3a8",
+      "bytes": 3393,
+      "sha256": "1cf18b51f8880ec1ee89a15ed75545f0d28bc0a77bf39eb82fb4c96e3964b810"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Restore.lean",
+      "gitBlobSha": "7e1c88755a5732dfdee809a0ffa9731b49ccb212",
+      "bytes": 13041,
+      "sha256": "1cc863307a01c7cc4cee9ae9e5cb3dab65a6805248ede889d170db05376bd040"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/RestoreExpr.lean",
+      "gitBlobSha": "46c2d4c512982986c73c27423909706fc0c377ec",
+      "bytes": 17877,
+      "sha256": "8b51a88ef6700a7b62c195f5ed221c3d13a56090cae76f85022e1dabaeffb5ed"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Types.lean",
+      "gitBlobSha": "280d78af9d279f4fc35fc6b259c67464ee3cd1ed",
+      "bytes": 827,
+      "sha256": "472cbfbea6ae3615af6227aa313855a41dcd86f581a6d08336fd1551f1a532db"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Validation.lean",
+      "gitBlobSha": "8ff54640f74295c8885a3669798abeefc56eac0f",
+      "bytes": 23994,
+      "sha256": "8afdd864d6574b204d570c4e1d5b1bef82700def18e8713d2e3b1566b942243e"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Admission.lean",
+      "gitBlobSha": "cb2e3a74cbf9ccc8a8484d1bc31d5ed82eda6490",
+      "bytes": 22765,
+      "sha256": "63b3f93af8d1352037d40bbdc793471c3f2f3d80321ad24c680a3a897c402c05"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Constructor.lean",
+      "gitBlobSha": "56a70b8ac94283694bf375a8d5c8e7adfd3859b7",
+      "bytes": 21914,
+      "sha256": "8bd99c203b50315d0e58ba4aebb1cebec7d0331db330163fef341bfe713d9145"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/ConstructorAdmission.lean",
+      "gitBlobSha": "cd3b659ad1e597b95a4ac7b69a1ebf126cab4a17",
+      "bytes": 8245,
+      "sha256": "16cce0a367dfa144a56770f76bcb0605d3a370b360175c4f26583387cf2a1723"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Ordinary/Recursor.lean",
+      "gitBlobSha": "0db1095805c4e6bc4d0025b073fec1807ebf2206",
+      "bytes": 11571,
+      "sha256": "4c607bc336cc56a981feaacbb381b770acb602ba30e331d1a5220c96859a61c6"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Types.lean",
+      "gitBlobSha": "0d967aae1e0b606917dcddab87fd5f595d4eea0a",
+      "bytes": 4184,
+      "sha256": "c166b6dbdd98e5ce419483e964521118f83c1b4d2298b376ebe43347570eb25b"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Admission.lean",
+      "gitBlobSha": "fde190800360c0b5d26368be6c538c2d0ca8ecd3",
+      "bytes": 3326,
+      "sha256": "528860b30e49a78930ab497b72900dba1afc047d2989964e6d88316b8cbebd68"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Quot/Bootstrap.lean",
+      "gitBlobSha": "7152000acbc2f92f6909c5e7969844f512bb0edc",
+      "bytes": 17727,
+      "sha256": "c39796c0358498d0be840372d517be46869efa2683323e2634ed5b924be3287d"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/Context.lean",
+      "gitBlobSha": "a6b2b66c216d1c070645ae289e278d5cbfc213cd",
+      "bytes": 17210,
+      "sha256": "3b1a5a583daf85f336073514894ca529e9e91c8dd02d11b0842870bfa86d402c"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/BinderSpines.lean",
+      "gitBlobSha": "017b318ce0b6a48be30b4f1dcf7dc2529ec90b0e",
+      "bytes": 21006,
+      "sha256": "d4a4e0883dfd56b928b97ef9961dc240425f42bdaf47cd198fd8dfe37413beaf"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/DeltaStep.lean",
+      "gitBlobSha": "e48096b8d95e447a717f862a39e29d602de0cc75",
+      "bytes": 15301,
+      "sha256": "25db0f5840ebceec521789efcfd52fe94ead60836ed892d2ca40d58764121585"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/FinalRules.lean",
+      "gitBlobSha": "c7249d6172d3d48b9c3dec8b889556c9177e5982",
+      "bytes": 17006,
+      "sha256": "8f29b790b964c3b2e48b8456884d4ee6a81ff21cadd2b6940e1cf9fc6d46ab04"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/FullShape.lean",
+      "gitBlobSha": "4d50c7caf2f0cf1360dc57ee7394964a3e4ab3b1",
+      "bytes": 7826,
+      "sha256": "8c70ddc13d3644448d2f0f8cbae0247c34cd71efd3aef222ce8bb650a97530bb"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/LazyDelta.lean",
+      "gitBlobSha": "31c71ca4c548c404a341ad3410aa205794e7abf5",
+      "bytes": 15088,
+      "sha256": "8a4d6a9501a54c791ef9f789b35d098be119395363f3465b34fac3413b77e17e"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/Quick.lean",
+      "gitBlobSha": "67dc797d540e9b1ef05eb90679023b9bea058300",
+      "bytes": 5025,
+      "sha256": "c18750e55c047aec28d148188d3b51aa2940dc3470a2357389565b5b73a3cec3"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/Shortcuts.lean",
+      "gitBlobSha": "e24c98c9d8b0269a1e47aa01818056c562c0b822",
+      "bytes": 7191,
+      "sha256": "fab58dfebd043b63a4df0adc424a6c37df7d8d1c5a5a9606b5b9545d5d96759f"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/DefEq/Support.lean",
+      "gitBlobSha": "e1161373ebd45a4c531fe9a33ef639e91f7ea11c",
+      "bytes": 41,
+      "sha256": "588e0ae8ccf3b805994454b674e0504aa9d7c4be4a0177257f76345da66823df"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/AdmissionHelpers.lean",
+      "gitBlobSha": "0a1209c2406d07c96d4cca1b241ee377c49f28c0",
+      "bytes": 1946,
+      "sha256": "4532206f0bc5fd06fb7b69bcea3c832919dea46f6019ef8cdce2bc0385bbda2b"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Beta.lean",
+      "gitBlobSha": "4af3b9dad14ce7eb5ac12946d6bdb78a529b5f80",
+      "bytes": 4645,
+      "sha256": "e2ec01b4fde6678cf83f528191fa3ae28dc46d01204cd979765d5ea1102a1213"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Check.lean",
+      "gitBlobSha": "44049558d5fda0f006f9d1a86c13aed8adef0d32",
+      "bytes": 4647,
+      "sha256": "3fe40e57ba016e43c45808745d7d079564838af43c5328d03633f30df0852fa1"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckApplication.lean",
+      "gitBlobSha": "1a6fe656411bcf84c52e3a8a11108735d7d6b048",
+      "bytes": 9128,
+      "sha256": "68be97345b3c5b4c7d94c391a6109fdb088c1d5049658f1c502af0ca38406ad0"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckCallbacks.lean",
+      "gitBlobSha": "0b2ace26fed2f2cf760f30b5848af3609dd7ce84",
+      "bytes": 5275,
+      "sha256": "c5c4ecc9fa0860a9b983cc0b3cdfdb6bf1e94541f041c38f34d57af846227574"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckCore.lean",
+      "gitBlobSha": "b4d176cdd6feecbe32d6321ae05d9b1fa56db1bd",
+      "bytes": 12902,
+      "sha256": "5612854b3f2e79272ed758b85d0a98738242cab5e2f1077b0b911597538a5dea"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckHelpers.lean",
+      "gitBlobSha": "d8f01475e201839cdaac89e5d04b7224c48d3cf6",
+      "bytes": 10455,
+      "sha256": "256a9c43ff43f31178ce1342b118c06f60a3feac110106a63318adcdc045a07a"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckLet.lean",
+      "gitBlobSha": "2b1e27100258eeb09e63d52a5656977499622a91",
+      "bytes": 6572,
+      "sha256": "6d1a4b8948a846940fe8e04dda2a9e55ba050bbecf6c832f68db518e8fa07b85"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckProjection.lean",
+      "gitBlobSha": "8d1f22f792cb556c63478a57ddd7b291da0fc6fb",
+      "bytes": 15349,
+      "sha256": "2634049b8c43e276a48edc4ca8b2f3332621efe9fdc07223286385d827f8ad20"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckProjectionHelpers.lean",
+      "gitBlobSha": "231fedbbed4d3644d823a40ae7537445c2bf26a0",
+      "bytes": 17122,
+      "sha256": "7e6ce82ed19a4e590d3e6130725a9e964c972c2032926062db5b676411236f70"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckState.lean",
+      "gitBlobSha": "6c95fd7ae308b5dc04a2cd78e697ad172d3c9476",
+      "bytes": 11606,
+      "sha256": "d78efa4c2762afa1e87c0acc96a380dee40e73ab44200ba2056cc0ec8dd588ba"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/CheckWhnf.lean",
+      "gitBlobSha": "f419e5c599ed3f685707e9e4ead6cc4ce8bd4294",
+      "bytes": 2434,
+      "sha256": "76295d8fddd405795f5da853428814f399a6da4e1a2111b17fc025edcbcaa0c3"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Constant.lean",
+      "gitBlobSha": "106721c16dfa935046dd89bbb0a1f159bbfca6b4",
+      "bytes": 1338,
+      "sha256": "ab111176e2bbb92d0768aa8ed0da5f500a8d8825333f8f589d7b171b455e3ddb"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq.lean",
+      "gitBlobSha": "b559dc1f14916e83b47cd2b8b80a03586bb18f7d",
+      "bytes": 6720,
+      "sha256": "320872629ee2ef877ede316ad3802162a8fc3d88ae00c4e1c56c5c13e7151cbb"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/Args.lean",
+      "gitBlobSha": "cbc31a4f5c35704088c2096b73410f4e254a1e94",
+      "bytes": 3742,
+      "sha256": "0fe74147f8ecfd16d794bc760a20906197c1cfbf615ba1ca4c4872333dbcd72d"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/BinderSpines.lean",
+      "gitBlobSha": "0ea919933b2b741de7e157a3e2ae3f20ae2a3ddb",
+      "bytes": 12149,
+      "sha256": "cbb2e4199693c01510ca457869112c47ffccb52444077f53ef1153c08bc4253d"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/DeltaStep.lean",
+      "gitBlobSha": "c90adbcc17ac0c0fc2e3c3e8ef643f3205f4adf0",
+      "bytes": 22497,
+      "sha256": "c2d83572236be5190413258659be17115526ef86d9f27f8f2c0158ad56ceaebb"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FinalRules.lean",
+      "gitBlobSha": "ef4798e3505c0e83404a1edc77ae69837e691a4e",
+      "bytes": 20077,
+      "sha256": "0017c073848f64958d79f09609976ffee5f34f0209361f01856463659b43b097"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/FullShape.lean",
+      "gitBlobSha": "5448c980c1e7d9ee8beccd7ca49c30b550c3382d",
+      "bytes": 20939,
+      "sha256": "bd66aa2e8cc039406b76d8e24459d3d9107e579c7e17ed5432cf192b38e3e2d2"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/LazyDelta.lean",
+      "gitBlobSha": "e1d9ee326af3fad05920463b9131d8d3a678c69a",
+      "bytes": 7626,
+      "sha256": "59e6d320b0f604bfdb039b07aff979b5ac2fa384d307d750c45ce01a40284928"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/LazyNat.lean",
+      "gitBlobSha": "9a4d978c937f70ac421ab40e7b557de3d723b67c",
+      "bytes": 15407,
+      "sha256": "5ac0eb52bc33b9f755f63d82d3f8e9a1e8e15dc2a04ac35dd2f3c3a8a96daa54"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/LazyProjection.lean",
+      "gitBlobSha": "7bc1c78af6538302923e026fd058c68b29cc6ce7",
+      "bytes": 10809,
+      "sha256": "93f1d25b9dce2de61751a8ee4d401c644c0b3386b60c8adbb4751826464224c0"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/Prefix.lean",
+      "gitBlobSha": "35023566b0a97a9124b7460e385d4672bf1054f8",
+      "bytes": 16693,
+      "sha256": "e68a6a5fabb49c9fb2b30cb9af104902893b3609aa997373d370c9edac2bb162"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/ProofIrrelevance.lean",
+      "gitBlobSha": "47de9cd32af22eaec61d77339f1fa13c2d013298",
+      "bytes": 7679,
+      "sha256": "5993fc23b1e617d687a4702bde42dc63d6d949cc450b989c9cbf343f6d5aa619"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/Quick.lean",
+      "gitBlobSha": "7956bf74119f0d280d062232599c8470990d1871",
+      "bytes": 5881,
+      "sha256": "174f2911c574f7403af10473a476631dcff0c15015a6956a046b4a9c36846f94"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEq/UnarySpines.lean",
+      "gitBlobSha": "6a65f5a3bc3e989f89562cba06c0127ece2be1a9",
+      "bytes": 3754,
+      "sha256": "0a5eb430466bff2fa3f3f00384b5ac7f22dc62bbc0505429ca52494259a8e26e"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/DefEqPair.lean",
+      "gitBlobSha": "7b08cd2d580b6c59c4a85962aad2b250f8151b4b",
+      "bytes": 3354,
+      "sha256": "51f8c5965721c9e33d509077b56fa10fe72a90fabe184ef233779bf7e333895e"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Delta.lean",
+      "gitBlobSha": "8c39b0f140908da00161ed1f723fc589193667b4",
+      "bytes": 3853,
+      "sha256": "7b028da0d2ade7ef3d8c109fcef19f37ccd950e5415cef57212ce5e75d3a0961"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Environment.lean",
+      "gitBlobSha": "164505fbdd395bb18b09b714927cefa32a91da21",
+      "bytes": 5493,
+      "sha256": "424b4b320710698527da3b1973b67cd3a689266e42524ab2ea52d1677d59e083"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/InferApplication.lean",
+      "gitBlobSha": "08e562bb4f06babdea5ec063b4a8135e7604dd37",
+      "bytes": 7822,
+      "sha256": "b71c4b1eafd253081a5ebee2b4e6fe025ea958084f3c30d6b701f05330a93dbd"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Knot.lean",
+      "gitBlobSha": "b0ee17295222c70396229999bf634a8f93e9b5b6",
+      "bytes": 6583,
+      "sha256": "d55107cc93165f7c31b8818ec3fb491d409fba7f31255cd8ac55b885e6218faa"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Nat.lean",
+      "gitBlobSha": "6bec61bfb65e8682af4cc62c62fcb4793bb6cc48",
+      "bytes": 10183,
+      "sha256": "9fc8fd17090c1ff7df9e57f329bc45e5696a083ed88cdfd4336f9d00fbc0e234"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Projection.lean",
+      "gitBlobSha": "92411013d2f849f8af3dcc2282ebb8a776fda16c",
+      "bytes": 2442,
+      "sha256": "839dc956e10d9e47fc780471168dc651b4caf141c885f1a0db7c9405dc6c68f2"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Quot.lean",
+      "gitBlobSha": "6f8217fde9a924ae12db3fabd6da6bc87d4b5547",
+      "bytes": 8401,
+      "sha256": "962a5240e94c2f3d29059751904042219f649837004658b6a9f73e00adf6b1f6"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Recursor.lean",
+      "gitBlobSha": "ede68a352f793c618a8dbb8260eec3f482370a71",
+      "bytes": 19504,
+      "sha256": "1a9c47f381e165d1cd89c376b9bffb0caae08913a468c1f694a1f0cb654709ce"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/RecursorK.lean",
+      "gitBlobSha": "709ce86cdd1af83e35ace84de24e979f94bcaf08",
+      "bytes": 9426,
+      "sha256": "89dc9c3a12dfdc934780dbeb3cdeba5bff247f4f471978f44811dea5e0445e85"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/RecursorMajor.lean",
+      "gitBlobSha": "66b83dcfc8313c8a2608912e9c4782ea5c0fd67c",
+      "bytes": 17241,
+      "sha256": "b14df8895fa796d01042c6a7273421a53d4d0744028110c463b7973f087b47a7"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/String.lean",
+      "gitBlobSha": "a448dd8f4a6d484afc2f207210b8ee92e0d7e86f",
+      "bytes": 5599,
+      "sha256": "b833053703ca28c762e4faa1eca0356250f26df9b4727df293faff307f07cb36"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Terminal.lean",
+      "gitBlobSha": "0706894c8de7f12c6c26aa5eea7eb76221422f67",
+      "bytes": 3993,
+      "sha256": "1d3a29f06b03ed884d24531593a561eb08e1c7d5758572aa895c1647510814c6"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/Whnf.lean",
+      "gitBlobSha": "87cc5487376e1c81af27e31e028f3f67206ca535",
+      "bytes": 20128,
+      "sha256": "d516d0077ae417abe1f0d474231afe771788130b83d9dba48895657a193f280d"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/WhnfOwned.lean",
+      "gitBlobSha": "ed24c93595ef58c5445412ccd4608143ea59d2a3",
+      "bytes": 24613,
+      "sha256": "532a76ea00759b7a3b74a9c50d97a4549e385495c6b2abc1b9f9af066e53dd12"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/WhnfState.lean",
+      "gitBlobSha": "4fc875c8ce8dcf9ca86eeadc9f095313e67b2d43",
+      "bytes": 4811,
+      "sha256": "26f746cb202d015fb1951ffa3ee3a8eab398e892e33fa2472da6304163e5cb45"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/Inference.lean",
+      "gitBlobSha": "6c7514064cef0f42d05320418546d02875b049cb",
+      "bytes": 1616,
+      "sha256": "6d8a6db0fce54a14250d0f71f35df76bc84b189fb1e699dbe58596ba2331fa3d"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/Inference/Constant.lean",
+      "gitBlobSha": "2ab2435421af75df9efcda8f959204cff587e3c7",
+      "bytes": 1903,
+      "sha256": "2755fcb438b6d2ca6edd644c0f3a818f393d47f97601ae61ddbee7a76600001c"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/Inference/Core.lean",
+      "gitBlobSha": "05cfbaeccac75c4e827dd47c97ddf48a07462b58",
+      "bytes": 28995,
+      "sha256": "5412c5e40e0bda11ce7e532f2ed495804aa2343b099c240102c881137fffa633"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/Inference/Helpers.lean",
+      "gitBlobSha": "5d492aefea4965f10b7d5964d9558ca31f867342",
+      "bytes": 6377,
+      "sha256": "51bbf7b65ffd6b333eecd3319a6f06f9ac30e7cc52495e78fa98d2ee5a61f623"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/Knot.lean",
+      "gitBlobSha": "575f65afd2c9f6ffa02b65f2a359fb4d43218268",
+      "bytes": 31465,
+      "sha256": "eabe1e47e631f072da318e8e19a9b77a404e1f0df66695771aedc194d5e71260"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/Ops.lean",
+      "gitBlobSha": "68a30dc6d8d9bc4d30d549bf9cea9e2a028104d2",
+      "bytes": 1088,
+      "sha256": "6f9254234e38eb2504899c9503e6fa45f66f8c5d905c4965959e241e7d63436c"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/Projection.lean",
+      "gitBlobSha": "f02a857dd61ec05d1e228ed70ad9c679c79ed986",
+      "bytes": 20371,
+      "sha256": "7c6efec70b2eca3c1a15869fd29369e315039ab0108be601db4e999199acfbe5"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/Recursor/Analysis.lean",
+      "gitBlobSha": "1d474732ad475b162c344fdb98a9c4ec2699651b",
+      "bytes": 20396,
+      "sha256": "624e37a44fa66e42d6291e290ab5859608fdae981342017141d456f262f9b7c7"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/Recursor/Reduction.lean",
+      "gitBlobSha": "3746ed80c39a474b1ef9c2debce22641cd2ae1db",
+      "bytes": 13595,
+      "sha256": "4a73a802d75b75881bd4f5c84533a952140c6ed06afe327cdafcb905358b6f0a"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/Reduction/KernelReductions.lean",
+      "gitBlobSha": "ce5bed7ed4b245ee3adc61e065a192ba558b8c96",
+      "bytes": 14128,
+      "sha256": "e1564df306e2422cdf6194bed0993239a287a85c3d956cbc9e3c9d866ba2a27f"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/Reduction/PrimitiveData.lean",
+      "gitBlobSha": "15d7a8434599273fb4f951fde37b10267da53d22",
+      "bytes": 5590,
+      "sha256": "cdf17fed00005d81f261de42798237e2befd1521d27cbfbcecabf88c97d1357d"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/Reduction/PrimitiveNat.lean",
+      "gitBlobSha": "1e46375a9e8f63ad954fd60dc2ae929da740afea",
+      "bytes": 10418,
+      "sha256": "4f5ca4fc281db671e8a478239730f28a064481f616ccd1943446f53ecbb0a189"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/Reduction/Primitives.lean",
+      "gitBlobSha": "a334d48599aff4c6c37f93c65e5673e21f2e3cdf",
+      "bytes": 52,
+      "sha256": "bfdf1e52cd5cd2566031dab871d1cbc7585f3f5dacf9f6784907bec725be98c5"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/Reduction/Whnf.lean",
+      "gitBlobSha": "8425eaec1c25f8aefafa1055a01260cc2cb20107",
+      "bytes": 7842,
+      "sha256": "6debd0415ba0230575f5a318ca2018f5f00d5d9756a07e960b7ff84e1254fa58"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/Reduction/WhnfCore.lean",
+      "gitBlobSha": "4b85af705d1b30b8c2b9efca1333bc4847c7a60e",
+      "bytes": 18080,
+      "sha256": "50370999eac56f74ea002104bd155605240d73f45ca7f5b9a4ff3def847b88ac"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ResourcePolicy.lean",
+      "gitBlobSha": "22b9fc51823c4ba291d67fa4185d696318054d4f",
+      "bytes": 6786,
+      "sha256": "ab987570dc85dbbbb020f5220d74dcaf0cf1e47ba1b0f101f992017141e35242"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/Session.lean",
+      "gitBlobSha": "49ae0be9f0a70173c1247f0fabcacd2894632c18",
+      "bytes": 4871,
+      "sha256": "900a2bf56afc5d907713917a92f3a51fb344a06246f55431e3c001994fc1caa6"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/State.lean",
+      "gitBlobSha": "6796645912d31e4c0aac35992349a5adb52d4326",
+      "bytes": 4805,
+      "sha256": "f7d251b16dec00d93222800e4950905005b3b8c1bbc282f5cf6b39a11b8adfba"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Declaration.lean",
+      "gitBlobSha": "e4af5bca51c217f88a7b14dfaf78511649c661d1",
+      "bytes": 6096,
+      "sha256": "44ad038229e36932389c220954b0d55416ce20b4bfe16824f9db71e4b6c53e11"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Expr.lean",
+      "gitBlobSha": "44d01196e8cdbb6d67db8a860dc73827c8cb206c",
+      "bytes": 27573,
+      "sha256": "068312a568ee3b1b86312d9a9e589a32813e45cf703d0830108efc1556666e51"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprScalar.lean",
+      "gitBlobSha": "be1f345af6fd58a82f9ec93ef1fba29e57ff5f83",
+      "bytes": 2246,
+      "sha256": "358a9f76fe942d7846985bb073f26e60599e5b3bc9070a2013e421b5a1d962ea"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Builder.lean",
+      "gitBlobSha": "1e2a03c2a7cbdcca944e59957fab43166f184002",
+      "bytes": 6820,
+      "sha256": "2a990e8a1b23ed0f77ef3eb97e2ab53a151b15c846abdea6543bf3591faebae5"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Decode.lean",
+      "gitBlobSha": "73ef143268f4c0deea2a24fdea250d95b428f5af",
+      "bytes": 6764,
+      "sha256": "efa439588f6b4b80eb6ab25c8311fa221d74971f7e8ad572abd4a6aa57b77d5e"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Equality.lean",
+      "gitBlobSha": "dadb50544dfd70125720aa1d5eb43f0ddf773f13",
+      "bytes": 9922,
+      "sha256": "1d42f29c2559b4615ec42e5d0d4eb5e88f6922f7dd0f2e10c152598ca4b4fe38"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Lift.lean",
+      "gitBlobSha": "50a63d2729088039a3b01f75eda5c6e83f91e036",
+      "bytes": 15071,
+      "sha256": "89e7f81a4d6290b57a57d28f46cbfcf8878bbcc3c91bd1114469251f62fb5fa0"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Node.lean",
+      "gitBlobSha": "24e3809b269526a897bb6c22b8467725bb30af77",
+      "bytes": 4842,
+      "sha256": "2257f156a0b713802ada3b0397b92db747cea44477b767224a9eec494d3e895d"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Paged.lean",
+      "gitBlobSha": "26ba0ae6bfef59a8cedec846f1164c73e468e86c",
+      "bytes": 3522,
+      "sha256": "831715847d992c39f7414c70bc3e06b466032ff6d44556dc552a264c2f5c865f"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/PairMemo.lean",
+      "gitBlobSha": "2990d159b30808a94990e96d63c1a6b3012b41c5",
+      "bytes": 1105,
+      "sha256": "64a7fda1da6a618187fd009a19093ba23190ef271a5417f41864a39597cea4de"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Transform.lean",
+      "gitBlobSha": "64b62aaccbc76995cf7f0d2a315e0ea5fc823cb4",
+      "bytes": 16680,
+      "sha256": "2e6ef5ba46eedfc9317a871ef56854a30ee55502bf7f73c07b41d0af2825cd55"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/TransformSpine.lean",
+      "gitBlobSha": "836a24df03510df82c52b4274629edbbbcfb0243",
+      "bytes": 3252,
+      "sha256": "8def39dbb2e1dc48e013ffba7075b4c0de91a2e40ff122c01ac7d6f8c0a65039"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/TransformSupport.lean",
+      "gitBlobSha": "7957a3aaf87f440b6fb09c2ee98eb574aeab6c72",
+      "bytes": 8802,
+      "sha256": "81024ed9887a0e613f1c672b6449b93feb529d662888acd5e29c805bd058e3a3"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/Validation.lean",
+      "gitBlobSha": "b4b2855cc93ff7b886e283257203c7a4a3ef27ad",
+      "bytes": 6143,
+      "sha256": "8cd60dd58013caef61b398e08ab3797343efac60a82b01f2906f76da06439089"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Level.lean",
+      "gitBlobSha": "1d6e3f7bbf7fa64081f66947b8c032f61859111b",
+      "bytes": 26794,
+      "sha256": "8c45c901530bba582975be7032f00990ccbd38d4568cb8cc932a12df4b698cc7"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/LocalContext.lean",
+      "gitBlobSha": "e45912bcd328cf0ce04ebbdffc58e5e3ea5260ee",
+      "bytes": 3221,
+      "sha256": "42a11f0f2503fcb2b8c9b58bc38b9c950ea541a70bdfbba360739c7c6076b639"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Name.lean",
+      "gitBlobSha": "37f385adeb6a80282dbd596d5ce5a464b0fb30e3",
+      "bytes": 12995,
+      "sha256": "15a2e2249a80101fafb825cb60877c969ad572d54ef82866bb7105dff228056d"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Substitution/Abstract.lean",
+      "gitBlobSha": "51b16280ac682f689a09f729f1efe4aeb0fcb72a",
+      "bytes": 7100,
+      "sha256": "88178a0871886186f0933760de993c9dbc233d0938751489b6da6a27d7f94bc8"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Substitution/Beta.lean",
+      "gitBlobSha": "72696ae8a6981c7cffef72341cde8ac4e8b6b939",
+      "bytes": 6537,
+      "sha256": "5e811c4dc9019761992ec74111d00e1aebde4923d17a0d056c5ffd2e97e098a3"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Substitution/Instantiate.lean",
+      "gitBlobSha": "88872658653651f787e655437d051db39cfc0ef0",
+      "bytes": 18524,
+      "sha256": "1aef1f5a2f3a00b7909163a1342a98cd26f6d40d4cbe582b4643ffe963f88ca2"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Substitution/Lift.lean",
+      "gitBlobSha": "7f2eed38f8230e8a9b9c354e25b1adf9d17c35cd",
+      "bytes": 11395,
+      "sha256": "84544e3def6fea691931eff19b856c0d2ec0e7f7280be556cf9a2048af86af79"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/Substitution/ListOps.lean",
+      "gitBlobSha": "dc36b582f96f578d79d3064a7f61534c42dda69a",
+      "bytes": 2429,
+      "sha256": "a6ac5d397fce57d3b93a40400e5300a8e92b68cb8229f4d11c51f4e07e2aab06"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Environment/Environment.lean",
+      "gitBlobSha": "8b9b9399a4a9737b2d927a39a9e14f7ab4458e26",
+      "bytes": 1222,
+      "sha256": "806fb5d9dfd935bc60e37994f7d19f1e50ae0f0e591f49461ffdae1aedb5611c"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Environment/Lookup.lean",
+      "gitBlobSha": "cf7778eba80bebc29c9b683582fff2589986f723",
+      "bytes": 1392,
+      "sha256": "d86b83dc0b59aad685a8a8cecf29684eff7fe8b0de0ada1c17059a81047fd090"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Environment/Operations.lean",
+      "gitBlobSha": "1fd27577282fb859241b4012b37c37347fa3c1cd",
+      "bytes": 1755,
+      "sha256": "d0bd2fa309e14b2432c79f686a62c2009c6060d905925a6fb77006d5f9cf8f9f"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Environment/Semantic.lean",
+      "gitBlobSha": "cdb5e4de8c7816015d869610c8170f53cdf4fdf3",
+      "bytes": 1961,
+      "sha256": "d91778843ed8e2124558caf0c7681d2084fd0e7562aa27588f9caffff71cde00"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean",
+      "gitBlobSha": "838f40f32baba7791b30484aa926b9e02e6effc2",
+      "bytes": 15152,
+      "sha256": "77562cae6b5e1eec7272f292982fcb39cb9037f2e045a4b962ab8b10cb13d819"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean",
+      "gitBlobSha": "d8f8fd5731d0473370a0028d4f484bcb845d9e57",
+      "bytes": 9740,
+      "sha256": "462d8d839b1e5fd5b5f0620cb18b860d789247aabb4d14c677a0bc69cbc3c16e"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CachePolicy.lean",
+      "gitBlobSha": "8cebe08ae7c88c5a2e45c31f6bdba683ce8c1af7",
+      "bytes": 1784,
+      "sha256": "0894a4c8c7f6ffe232c34201280ff82bbc90ab966df885a56ac40bc5c3803aa5"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/EnvironmentIndex.lean",
+      "gitBlobSha": "e7f990af640dfba48d4220ec11dfa5fae58322e6",
+      "bytes": 8399,
+      "sha256": "81c526655a89474934e953a75ec09cac0b0ea728e0dba012e30ab9f1a4d005b6"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/ScalarHash.lean",
+      "gitBlobSha": "86292c6e3cdf1981682cf8d701dfc972538a04d6",
+      "bytes": 13225,
+      "sha256": "6549195619b22439fd6513af6f12dbfa90cdb9a8bc646237feeee12dff6d80c2"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Capability/Lean434NativeReduction.lean",
+      "gitBlobSha": "1ed612557d9d0b3fef341290d1c32e5d0eaa6184",
+      "bytes": 2885,
+      "sha256": "3f188a8013e386d3924f90a14eb6ac27ba776c557913550fc71b1c1cd2b914bc"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Capability/Types.lean",
+      "gitBlobSha": "b264a33f4c040563352749e34631c07783d2ae10",
+      "bytes": 396,
+      "sha256": "9b64a6e33fef1858b8707dd6c21c327432995b15a15a61783ed16fbe267ad949"
+    },
+    {
+      "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean",
+      "gitBlobSha": "132b2567465c49291fc3cde00feb699c197b18ea",
+      "bytes": 1139,
+      "sha256": "4c0b8ee068921e16b5c823b48b5234cea8ae34f87ec26d8551754f0bbda1e117"
+    },
+    {
+      "path": "psc1/scripts/install-lean435-ci.sh",
+      "gitBlobSha": "b53f59db9e2fbb45feeedea659244cae7e77b64b",
+      "bytes": 1051,
+      "sha256": "0d7bef69b04c5ba426e9c48003e8c34247853c722e116d5185613e11620162c9"
+    },
+    {
+      "path": "psc1/scripts/pskernel-arena-replay.mjs",
+      "gitBlobSha": "398305952aa76c0a33dc6065fa369c7c8f2caf87",
+      "bytes": 29464,
+      "sha256": "4751f15a97288d494354d1bd5d5b2ee7375d0f0ce0f2885929bb0b8e8084a821"
+    },
+    {
+      "path": "psc1/scripts/pskernel-arena435-oracle.py",
+      "gitBlobSha": "5b926e79449505a5d7175242ab81d378b38b22f6",
+      "bytes": 13176,
+      "sha256": "5deb39b9245b05305837cb1a79826c26e7ab05028c7bc489308170eab672f26e"
+    },
+    {
+      "path": "psc1/scripts/pskernel-church-fixture.py",
+      "gitBlobSha": "2f1a27c1344abb7dbbaa43d8c5ce1fb6d82e8d1f",
+      "bytes": 5437,
+      "sha256": "9053ae13a6df9fd542ab9f76177f4daea4835fa68c661b1d1c1b446c06608ddf"
+    },
+    {
+      "path": "psc1/scripts/pskernel-church-stages.mjs",
+      "gitBlobSha": "3a57630956b46f49db36a802e4f968354c2e739e",
+      "bytes": 4798,
+      "sha256": "d008052b8bb6ecab9c0b0fc5c7c43a2de66304da03e34016c0396cfee947f11d"
+    },
+    {
+      "path": "psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs",
+      "gitBlobSha": "494647393a3e4b3bdb7ac11115dac470cef6061a",
+      "bytes": 7826,
+      "sha256": "0cdc843f9fdbe7c0e9a150f3026dcf6ae6cbc75f5441536d687ce6d35d05f736"
+    },
+    {
+      "path": "psc1/scripts/pskernel-empty-semantic-cache-smoke.mjs",
+      "gitBlobSha": "8791063bc6850dec0af726afad8563f78cb63d7e",
+      "bytes": 4508,
+      "sha256": "0cce9ce96ace90dcd6ac9cfe1c7a5352d4aca3f05a842fa76e89112961277721"
+    },
+    {
+      "path": "psc1/scripts/pskernel-expr-v2-dag-smoke.mjs",
+      "gitBlobSha": "065ed4d1de1bdded148a2774de9f13bb8b1a406a",
+      "bytes": 244729,
+      "sha256": "b931f685eb8b1fd8f189e1ce9f0b1ca655ddf1320d801f5b4ace93d64b7660b0"
+    },
+    {
+      "path": "psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs",
+      "gitBlobSha": "529a05c4345983eb96420d17e10415538d645f54",
+      "bytes": 28982,
+      "sha256": "dec5fd091b9d22797c21d146d79fa541cfbc4d1fea1c0d1d648598bcb96128db"
+    },
+    {
+      "path": "psc1/scripts/pskernel-expr-v2-quot-owner-smoke.mjs",
+      "gitBlobSha": "546ee7d03720bc0f476459d1c337b3b4c3137f08",
+      "bytes": 28066,
+      "sha256": "20b3dff6219a7116e456ca6801ebfe9eafbc3d138c48185ed071e7b0445edb27"
+    },
+    {
+      "path": "psc1/scripts/pskernel-expr-v2-transform-delay-smoke.mjs",
+      "gitBlobSha": "e7569e36eb72fdc73f8e5d23b11b839f564ec3bc",
+      "bytes": 8829,
+      "sha256": "6d37adba950f4d77cde78c9c82ef9607f641e25ced9a7e275e005595c1aa8421"
+    },
+    {
+      "path": "psc1/scripts/pskernel-generated-smoke.mjs",
+      "gitBlobSha": "604773a240086eec60997c5e140c95b9e3316cda",
+      "bytes": 12610,
+      "sha256": "2d9b960d57b7a20e09a880bd58e2461fee003a1d4bfbdd75a80c6fde3e7364ab"
+    },
+    {
+      "path": "psc1/scripts/pskernel-invalid-recursor-occurrence-smoke.mjs",
+      "gitBlobSha": "120af542b9c1218f732e1c75faadcdbc66620aa4",
+      "bytes": 5956,
+      "sha256": "a9c7a040d762cd9e8043e5977c736a13e9edef945691b64a9694512d6233766b"
+    },
+    {
+      "path": "psc1/scripts/pskernel-ordinary-admission-private-smoke.mjs",
+      "gitBlobSha": "7cf383baf83d7e21a7ab8aff95375a3a78f55060",
+      "bytes": 27529,
+      "sha256": "c05a5dd714c719aa6d75d7b8b0f5d88ac98afb4dfb6bd6b930d2a608a00f707c"
+    },
+    {
+      "path": "psc1/scripts/pskernel-ordinary-admission-public-smoke.mjs",
+      "gitBlobSha": "266304aee99b2847fd17220b713c6ba0dc437c0f",
+      "bytes": 9402,
+      "sha256": "19216cf873cdc48228da2775c5b6643bc41f66540574fdce19adaf89c7c15128"
+    },
+    {
+      "path": "psc1/scripts/pskernel-ordinary-constructor-analysis-smoke.mjs",
+      "gitBlobSha": "0e2a582617454659ef4dbe52ee7ce95bc533d143",
+      "bytes": 17928,
+      "sha256": "940aefac2570888ea49b9146d7a3c487d47d51b9b31d896c4bdfd037699c04d5"
+    },
+    {
+      "path": "psc1/scripts/pskernel-ordinary-constructor-fields-smoke.mjs",
+      "gitBlobSha": "bb688cc04759d072be3cca7366fed549ecc2c5a9",
+      "bytes": 22405,
+      "sha256": "0b7ee568b7d26bc13691fd85aca6ae73ae70ca164f58386ddeaaafbb6e094a6e"
+    },
+    {
+      "path": "psc1/scripts/pskernel-ordinary-constructor-loop-smoke.mjs",
+      "gitBlobSha": "68cad3d3e9cc847911cf6101dce1f7f59311d695",
+      "bytes": 24687,
+      "sha256": "24bc0276b4fc75a68f3c54ab7fd4fc7e6b50c14d90ec5e9ad5b1f4bb55c9c08e"
+    },
+    {
+      "path": "psc1/scripts/pskernel-ordinary-constructor-params-smoke.mjs",
+      "gitBlobSha": "e414e0d728c05d99e98c53545e20f2514563ee19",
+      "bytes": 18519,
+      "sha256": "05da9fda801a50355b668e559344db52c3e1938ec140d1f621ce3c49a0100660"
+    },
+    {
+      "path": "psc1/scripts/pskernel-ordinary-constructor-result-smoke.mjs",
+      "gitBlobSha": "3d2129860909bdc4dcff16a162bf168badcf1aa7",
+      "bytes": 13348,
+      "sha256": "4fd3188fff0ab33e5d1b4d63fa4f22d506d4a942eff09972abc6149fe2c6854a"
+    },
+    {
+      "path": "psc1/scripts/pskernel-ordinary-elimination-smoke.mjs",
+      "gitBlobSha": "6ca4c68e3266d9b5fd557fcdd0669672eabc460b",
+      "bytes": 27645,
+      "sha256": "6197194c3b7fef20c621e071ffc0df44fb877121a8ec557eba368cc60dbfc248"
+    },
+    {
+      "path": "psc1/scripts/pskernel-ordinary-header-smoke.mjs",
+      "gitBlobSha": "98b68b82566c4171c5fe110f11c9ff72b9e00992",
+      "bytes": 25991,
+      "sha256": "f2f88e23149ebaecd8de4f06b42073f28de295471ac7a2eef6e7056f9b0cb153"
+    },
+    {
+      "path": "psc1/scripts/pskernel-quot-admission-qualification.py",
+      "gitBlobSha": "f2527fe5f654b124da26c374dc32c7084eb7087b",
+      "bytes": 11140,
+      "sha256": "e74262b8bdb571b443f83f952dad7ec5264497bae833cb3f1695fd714b7e4d4d"
+    },
+    {
+      "path": "psc1/scripts/pskernel-quot-session-owner-qualification.py",
+      "gitBlobSha": "c6f3ae743bee392c23fb10d6982461fd0c0d9f30",
+      "bytes": 11044,
+      "sha256": "8775a0c38f2422533f0b300568bdf6721b47e07deadf06bb22607a57f5e8680e"
+    },
+    {
+      "path": "psc1/scripts/pskernel-quot-session-owner-smoke.mjs",
+      "gitBlobSha": "9be2484e659982b6784704d2609b9667b3daa7e0",
+      "bytes": 34105,
+      "sha256": "159077fb8aa10ad351fb9f61e140653e28adaaac5e8278e16152d14168214c05"
+    },
+    {
+      "path": "psc1/scripts/pskernel-scalar-hash-short-entry-smoke.mjs",
+      "gitBlobSha": "11e376e9ea0628aadf9a6f94ddfb2ccf29dcb40c",
+      "bytes": 1126,
+      "sha256": "eccbbb7ba74b84070a9517461326b94495d1da988c2f26eac3256257b38c9eff"
+    },
+    {
+      "path": "psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs",
+      "gitBlobSha": "59fa82e0575b4119aebcf15fe39ed691346f1d06",
+      "bytes": 2546,
+      "sha256": "1323f554a62df24794c361ad920a1df92b1ad7fb929537aa7e37ad2c2cf5695c"
+    },
+    {
+      "path": "psc1/scripts/pskernel-transform-lazy-qualification.py",
+      "gitBlobSha": "e2351a81f779f583eaecc084dfa0891dd391390e",
+      "bytes": 9793,
+      "sha256": "d393112344be16cc721e55e68b664516ed69fef621206e39c27df64e8e44c121"
+    },
+    {
+      "path": "psc1/scripts/pskernel-unary-spine-qualification.py",
+      "gitBlobSha": "ac8547ab62601118835d9456887a58c2e7dd845c",
+      "bytes": 16156,
+      "sha256": "854d365da7c5c4377adc45de5645316d6e71c1e3a0a84da864a8f350d8924ff1"
+    },
+    {
+      "path": "psc1/scripts/pskernel-unary-spine-smoke.mjs",
+      "gitBlobSha": "0bb10e196be1ede43227563f8c197a26152b6773",
+      "bytes": 5583,
+      "sha256": "9053a5bfc66687c7d1529c6f18179bfb97ced1e41ac0dd3d24ae039d60612d2b"
+    },
+    {
+      "path": "psc1/scripts/pskernel-validator-qualification.py",
+      "gitBlobSha": "102949c04eeb72c6686ba7a89bd22176356876a3",
+      "bytes": 14529,
+      "sha256": "adb717f7a183510bb5cfa3baba4f42f8326d6e7e490129141a5fa69fccdc8c2a"
+    },
+    {
+      "path": "psc1/scripts/workspace-layout.mjs",
+      "gitBlobSha": "b6c1118174d685dd174c29c3c41c527f52182234",
+      "bytes": 1030,
+      "sha256": "83cf09f925265952d9efff8bda76d79df52a635cd564be4eec1b743bffe60358"
+    },
+    {
+      "path": "psc1/test/PsKernelCacheScopeProofs.lean",
+      "gitBlobSha": "45cb58a271695bee0ae05330f39c3c1a86f1801f",
+      "bytes": 36771,
+      "sha256": "c44f6929ae59560ca107e548485421a60caaaa8e7fcd2f41a32ddd55038b75a5"
+    },
+    {
+      "path": "psc1/test/PsKernelChurchSource.lean",
+      "gitBlobSha": "717c53d45ee4118b5e9f6cef9979c481faf91588",
+      "bytes": 21080,
+      "sha256": "5f723e4b184c9134128552fe8186064dd0b291a42e54ecc575d210d339dd0a30"
+    },
+    {
+      "path": "psc1/test/PsKernelChurchStageProbe.lean",
+      "gitBlobSha": "97d21dfe6e494c37c19bfa13ded2caf30af78ac3",
+      "bytes": 6043,
+      "sha256": "3601231d19268d33474697a2058a7ada58918ce5a8d11b56da263b4377e41a32"
+    },
+    {
+      "path": "psc1/test/PsKernelClosedCacheAnalysisRegression.lean",
+      "gitBlobSha": "0e137de5672d6b63dd8a157cfadc398ca1691d59",
+      "bytes": 6106,
+      "sha256": "ecb1da642bacc61f60806bf0875d4461ac1b6090058edff9d9cd9b94d7d1c61c"
+    },
+    {
+      "path": "psc1/test/PsKernelDeferredTransformProofs.lean",
+      "gitBlobSha": "b207c23d3b3d88495dad740cda06afee1f54d5ea",
+      "bytes": 10587,
+      "sha256": "7325c591fc9ad1692100d7cb59ce298188d6555a4ddbc3fa3653c3eac7dc22ce"
+    },
+    {
+      "path": "psc1/test/PsKernelEmptySemanticCacheProofs.lean",
+      "gitBlobSha": "57a6e6f2a339fdfddb077baa28e344309812cfc5",
+      "bytes": 1917,
+      "sha256": "abb7e3dd6b93dec51f9e315e6bd6289ce1869c75744da3beb8a9627edac9606d"
+    },
+    {
+      "path": "psc1/test/PsKernelExprEqualityProofs.lean",
+      "gitBlobSha": "a2a81dc10c93c4cdefabaed9be7ce5b07818d0c7",
+      "bytes": 13698,
+      "sha256": "6e15d29e67b0125182e449eca9f22e6adaa1cf99892198c1a9a4b6af5c828664"
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2AdmissionGuardProofs.lean",
+      "gitBlobSha": "de597c70416cc91b3606d72edfbf01e24529588a",
+      "bytes": 10427,
+      "sha256": "c61033f08eb98c70a05a81261e276740d113c012a0104ece7882072fe625c3ba"
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2ArenaModelBridgeProofs.lean",
+      "gitBlobSha": "810485914392c739d2b0b15848d3e893b69c9e90",
+      "bytes": 7663,
+      "sha256": "2699f6a6bd9d8d0d793a8eb2d398293f43255d79bd8f5c84d1033be393d72af3"
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2DecodedBridgeProofs.lean",
+      "gitBlobSha": "b19223eb0d4d15bda070beee98722cf0cee44397",
+      "bytes": 22069,
+      "sha256": "c97baa13eea76cd5ef5076a4277f517a1748014ee3a49d06f4b5ef68765085b3"
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2DecodedNodeProofs.lean",
+      "gitBlobSha": "e41675f3a6eeb09805ca220b9085922828b76d71",
+      "bytes": 4253,
+      "sha256": "0720db5abc1922656c47d1f2b251efa9f4b23fafc8d12932dbaec0a822a25d27"
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2LayoutBoundaryProofs.lean",
+      "gitBlobSha": "923d74270fdc307e58922ad78c44887eaf4041a7",
+      "bytes": 11733,
+      "sha256": "7a56146d72dcd6b6ea8515be962eaba49a1af392d868e76eff6f68ca9fa03c3b"
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2MetadataProofs.lean",
+      "gitBlobSha": "c97466b70bddb9867d05ab4282990a3f3e417779",
+      "bytes": 7319,
+      "sha256": "5c5e14cbdf9aa890640d3dfeb69dcda651aab7cbbfb9da527e500e48daaf1d20"
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2OrdinaryAdmissionRegression.lean",
+      "gitBlobSha": "92af6565e5ccc200fdae222ae171c55013670011",
+      "bytes": 35460,
+      "sha256": "dfbd6eadde415e0cc43c76c943d5770f2861b036eea3699f98a26725fc10383f"
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2OrdinaryConstructorLoopProofs.lean",
+      "gitBlobSha": "1d473c1c107b244bbb5ca9cf2b2041e2f4da9a8d",
+      "bytes": 14890,
+      "sha256": "0998daa5578bb7a49a500a27e546882a7ef60e3924d77afac1d44225dcb366d5"
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2OrdinaryConstructorLoopRegression.lean",
+      "gitBlobSha": "a72253765966dfd701334d2fa027af280b67b7d8",
+      "bytes": 26623,
+      "sha256": "a3adc8d1efb7409eabec5ca9a56db3d3c7c5a29024af4da70838655344d3737b"
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2OwnedStateProofs.lean",
+      "gitBlobSha": "084b4a646af750d56d9259ad8eafbfc0a2c83658",
+      "bytes": 14451,
+      "sha256": "81771cc44028e58b161fb8745c64d6eebfaf83c66113d3cb87112ee119652716"
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2PagedModelProofs.lean",
+      "gitBlobSha": "e9ed760c2394b908fd5632633572fb557261756a",
+      "bytes": 16916,
+      "sha256": "a6b4784e751e1f9fe1cafa8188cefbe413a987bf1e7114f23d5defd7a9040be8"
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2QuotOwnerProofs.lean",
+      "gitBlobSha": "47f7c6d019e798d54797bcc6a87036d9fd485d79",
+      "bytes": 9332,
+      "sha256": "c3f91b5a10bb38d9e5a06bbf0a8d86d485a3a0725fd0429e06a2743ee913bb99"
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2QuotOwnerRegression.lean",
+      "gitBlobSha": "2ffdc6a23f76dbccf67d1ce672e2070a26abfc00",
+      "bytes": 37053,
+      "sha256": "b967ec021389288500a2a5db9ea6c71cb4675971bec6815b8011984bcccc4cf1"
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2RecursorKProofs.lean",
+      "gitBlobSha": "25022eb665c4ec4a26b2d0b63706e2c3b2f23b51",
+      "bytes": 4804,
+      "sha256": "de842c5700f96c1b472d6ca2a3f572ae7b0a2f954cdd79b3ee3ad2f20c85913d"
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2RecursorMajorProofs.lean",
+      "gitBlobSha": "de27dbe6ed55f180947a7e0dc423082a7f2cb2cb",
+      "bytes": 6659,
+      "sha256": "a387dba1a82dbc13897a59373625754e1edb42ec75b99392c0ecba71c48de5e7"
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2RecursorProofs.lean",
+      "gitBlobSha": "f56535ff7344b5d71b626e720a0584522512943d",
+      "bytes": 17392,
+      "sha256": "7269e054a0a7fe2731de7fa0720ec9eefbe5be0eafa0efee34ec0e0254a118e4"
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2ReplayMetadataProofs.lean",
+      "gitBlobSha": "0df4649698e7171d422be1c5b3dfc1a5d817502e",
+      "bytes": 12159,
+      "sha256": "bcf3abfdb5d2cee6513ff7db81000fcf8dd6accb16bf9b4761280f08acd20e46"
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2SemanticPrefixProofs.lean",
+      "gitBlobSha": "fc8fde4fa239f37c39d0766fe14d8111c2002995",
+      "bytes": 24408,
+      "sha256": "358dedf8b06be615d2f86ea3738d91b19966469f72dc33c77047e1af7136ea6e"
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2SessionProofs.lean",
+      "gitBlobSha": "48541d207b6853088c88a61ad0f50ec4b5422232",
+      "bytes": 9567,
+      "sha256": "33b73b9333eea849e44a096a886fdee549504e820072305f9438361ecabb0dd3"
+    },
+    {
+      "path": "psc1/test/PsKernelExprV2WhnfABIProofs.lean",
+      "gitBlobSha": "8363d4794a6c56a46bd790294cc8b8d8709fe139",
+      "bytes": 2300,
+      "sha256": "69f3b43a2a3e7dc6c8105df907fadfac33d7cfa57bb79e16bf9d65857070109c"
+    },
+    {
+      "path": "psc1/test/PsKernelKnotFuelProofs.lean",
+      "gitBlobSha": "197da10ed3a5f2aeb1548511db60a618891912f1",
+      "bytes": 131180,
+      "sha256": "44d21a142bf0164748919eeb4b88a48c68f00cf0b5ff8dc6664e72caa54d399b"
+    },
+    {
+      "path": "psc1/test/PsKernelNameWorkerProofs.lean",
+      "gitBlobSha": "43d280f3d4da3b21f4c67e53da08dbb036b5a30f",
+      "bytes": 5799,
+      "sha256": "a70448dc4a1572ea8d772399d95fd815b155acf68bd66554c6e9544b9b7fbe41"
+    },
+    {
+      "path": "psc1/test/PsKernelNatFuelProofs.lean",
+      "gitBlobSha": "42353e67cbcc5ce5ebafc7e73162cfcb3029c5ef",
+      "bytes": 7545,
+      "sha256": "890171f8907b872ec79286cc06cadc611525d7ee685aedf3d1f73730a28b0bcc"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryAdmissionProofs.lean",
+      "gitBlobSha": "2aa6d6b4ff6361a1bf97593b09e8f3bf4536bd21",
+      "bytes": 19187,
+      "sha256": "c1d2e9bb559c4a3e049daa59a371a668502b09adcc463d9e08135352c9f0db35"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryAdmissionPublicProofs.lean",
+      "gitBlobSha": "b069f4fb9b80a0d402278cda9b692c93372ff105",
+      "bytes": 6077,
+      "sha256": "a1ea7689f2583e73290c167eca8d872d0830a6c5cbce68829d5eec78cc719941"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryAdmissionPublicRegression.lean",
+      "gitBlobSha": "e94df5316c9ea52496099fdb3cbfc68836dedc3c",
+      "bytes": 8508,
+      "sha256": "c6923431382bcef5e2168dd948a428679886e7161e47c53201a7e777bbe9e827"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryConstructorAnalysisProofs.lean",
+      "gitBlobSha": "7c07f9561dd843514b04dda016026c76835946a9",
+      "bytes": 16155,
+      "sha256": "bdbbea7b33e26e73d0c68ed0c7c549a7243c5e4b045be468c18a1fb5f9353c1b"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryConstructorAnalysisRegression.lean",
+      "gitBlobSha": "c7bf86980cce136911ab2f9ea967586debe15e5f",
+      "bytes": 22679,
+      "sha256": "2ad5d9eec2e33b3e48798ac98cd5c11e683d73ea5ee39125239053f55334e18a"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryConstructorFieldsProofs.lean",
+      "gitBlobSha": "82a42c38aaf2b003333cd0701df2131b229f1b66",
+      "bytes": 19729,
+      "sha256": "b11d2b31b94a3d7eeeaf36325a533ae90b11a817c811d931f3b6c26f4820de98"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryConstructorFieldsRegression.lean",
+      "gitBlobSha": "06a20e4d1f61a66fc11c699caba42245ce37c3bc",
+      "bytes": 23456,
+      "sha256": "131657ccbe294ac7aab4224c00df6ea878b6f088d7f4db78bc2ed893b08fd159"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryConstructorParamsProofs.lean",
+      "gitBlobSha": "72168cc434bed09b9cd5624a470d1f672c558354",
+      "bytes": 15184,
+      "sha256": "0d6025a2de973d482975dadc6499a49959fd1a6a53bbc4414acd5eb2bf859019"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryConstructorParamsRegression.lean",
+      "gitBlobSha": "e1705f524315190b2408df86e904ac0bad5ae362",
+      "bytes": 32897,
+      "sha256": "2146408a28b974c4d3992b702e33b205b141d85d99f5f354c02900b896ef4933"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryConstructorResultProofs.lean",
+      "gitBlobSha": "d61dabc38bfb1b8e29da05053c41b96414794ba0",
+      "bytes": 25543,
+      "sha256": "5fb21b0e72978a520a5528f1177825cae4f3b7b5ed1871787b0c34db6cbfced4"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryConstructorResultRegression.lean",
+      "gitBlobSha": "cca28763c968bae0d3cc68f20ef7030556da0792",
+      "bytes": 20510,
+      "sha256": "e9a10eeae8030cc687607956edf631cf5f723538cedc696f5a15eb1ac1474bff"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryEliminationProofs.lean",
+      "gitBlobSha": "0ef74e1f891cf489e3cd78c8622155b4bc11d087",
+      "bytes": 19349,
+      "sha256": "20c41005810df740fea003b18477dd1b499fb6e83b81a6a8e644638618b733a2"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryEliminationRegression.lean",
+      "gitBlobSha": "70290a4d5b24ad4f63f0428367eb35eaf0c704a4",
+      "bytes": 29450,
+      "sha256": "e6e3b89aef58201b91d9fd0e683fd4f3e6971d47b9d909f32f9eb1e5f45c4a3c"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryHeaderRegression.lean",
+      "gitBlobSha": "4c0ada09c1b5f7404e0c8c5672049aed75bcbc77",
+      "bytes": 26890,
+      "sha256": "9f9522e7f14c9a62703ca59dc2ab11b1c5c49cde9dadb1b39599802c7356cad6"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryHeaderStateProofs.lean",
+      "gitBlobSha": "5a6050deb77d66d7440c976a815e5ae8c29f5b0a",
+      "bytes": 31818,
+      "sha256": "4b5dae7cfa9a72d951ddfc53aa5d310738b7943aeef26e59be78febd133f890e"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryOccurrenceProofs.lean",
+      "gitBlobSha": "2034798a4de1b4ca25b2e6366a88020b97beed27",
+      "bytes": 29015,
+      "sha256": "d5140dd507ff7c456d89d7ba08e625d0b72e345e28ae024ab6dc85872104d351"
+    },
+    {
+      "path": "psc1/test/PsKernelOrdinaryRecursiveArgumentProofs.lean",
+      "gitBlobSha": "977d7f669d44647e6164ab645f7f5bd9a360b5b3",
+      "bytes": 17353,
+      "sha256": "035c86cec63c50ea0da4ae83f81f0a03144121ea57fe22638a4816107f895bed"
+    },
+    {
+      "path": "psc1/test/PsKernelQuotAdmissionProofs.lean",
+      "gitBlobSha": "2e263ce3655003e3205988fef35be263bdc1db5a",
+      "bytes": 15698,
+      "sha256": "9ed76158b819bfccf856c7e46f199a796dd7e5c015e364ffb5bfcc629483a3cd"
+    },
+    {
+      "path": "psc1/test/PsKernelQuotAdmissionRegression.lean",
+      "gitBlobSha": "6f0ebd987c819b1b57a203168a3b08e11072281b",
+      "bytes": 5011,
+      "sha256": "3ebdac6dde2d600f4c370a6d9e558a5d9477f6adfc5acb15f01c1cac110963c6"
+    },
+    {
+      "path": "psc1/test/PsKernelQuotSessionOwnerProofs.lean",
+      "gitBlobSha": "f3da3c0ebac4fc398839e8dc65243a5b11f1e2b7",
+      "bytes": 7202,
+      "sha256": "9b819e4c23a98993bc986e10a2720263ace028ed642a33e4a57adc982d8c67fd"
+    },
+    {
+      "path": "psc1/test/PsKernelQuotSessionOwnerRegression.lean",
+      "gitBlobSha": "b9e4103a774f7e42309611bdd383ab111b79b689",
+      "bytes": 6245,
+      "sha256": "21b9dbb299539e7478733d8301054baac36a182ef2f6f985b087d0d28c98dd8a"
+    },
+    {
+      "path": "psc1/test/PsKernelScalarHashWorkerRegression.lean",
+      "gitBlobSha": "aa5dd561cdb3df437c21a61c899f57b160289d0f",
+      "bytes": 10872,
+      "sha256": "22bb4bdb210e79619bb6cc19a2484083bece604b693f339a4633e689466109f2"
+    },
+    {
+      "path": "psc1/test/PsKernelTransformLazyProofs.lean",
+      "gitBlobSha": "c5b40fa6cd6a47ce6bc5feccbaa4887ead681582",
+      "bytes": 3561,
+      "sha256": "a45275e5ef37d0c49dd70ae06cfdd28760351d61ef54895604f10a5a18efbdee"
+    },
+    {
+      "path": "psc1/test/PsKernelUnarySpineProofs.lean",
+      "gitBlobSha": "b9dc90083d49dbed2bfc3a3ade1ec302f7400ad5",
+      "bytes": 11532,
+      "sha256": "4098607f1b2d5874f998d69bb732ab9150a5031c1ab584e4e524b23d0a6340c2"
+    }
+  ],
+  "intentionalNativeQualifiedChanges": {
+    "psc1/kernel-lakefile.lean": "8e407c80c951be77a514b40ea636cf6d2852f7e2",
+    "psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean": "8fefa3776ee99c9a205358bd97f9868376e083be"
+  },
+  "scope": "Private nested initial header:247 unchanged bindings;only already-qualified mutual API and newly native-qualified library roots differ. Public nested route unchanged."
+}

@@ -242,7 +242,7 @@ def psKernelSemanticExprMapGet
           else
             Option.none
   | Option.some index =>
-      let analysis := psKernelExprClosedCacheAnalysis expr;
+      let analysis := psKernelExprClosedCachePackedAnalysis expr;
       if Prod.snd analysis then
         Option.none
       else
@@ -264,7 +264,7 @@ def psKernelSemanticExprMapInsert
       else
         Option.none
   | Option.some index =>
-      let analysis := psKernelExprClosedCacheAnalysis expr;
+      let analysis := psKernelExprClosedCachePackedAnalysis expr;
       if Prod.snd analysis then
         Option.none
       else
@@ -295,11 +295,11 @@ def psKernelSemanticExprPairSetContains
       else
         false
   | Option.some index =>
-      let leftAnalysis := psKernelExprClosedCacheAnalysis left;
+      let leftAnalysis := psKernelExprClosedCachePackedAnalysis left;
       if Prod.snd leftAnalysis then
         false
       else
-        let rightAnalysis := psKernelExprClosedCacheAnalysis right;
+        let rightAnalysis := psKernelExprClosedCachePackedAnalysis right;
         if Prod.snd rightAnalysis then
           false
         else
@@ -324,11 +324,11 @@ def psKernelSemanticExprPairSetInsert
       else
         Option.none
   | Option.some index =>
-      let leftAnalysis := psKernelExprClosedCacheAnalysis left;
+      let leftAnalysis := psKernelExprClosedCachePackedAnalysis left;
       if Prod.snd leftAnalysis then
         Option.none
       else
-        let rightAnalysis := psKernelExprClosedCacheAnalysis right;
+        let rightAnalysis := psKernelExprClosedCachePackedAnalysis right;
         if Prod.snd rightAnalysis then
           Option.none
         else

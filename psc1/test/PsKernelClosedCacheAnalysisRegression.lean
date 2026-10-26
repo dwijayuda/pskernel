@@ -1,3 +1,4 @@
+import PsKernelPackedCacheAnalysisProofs
 import Lean
 import Ps.KernelCore.Runtime.Acceleration.CacheAnalysis
 
@@ -68,7 +69,7 @@ theorem semantic_map_get_eq
       | cons entry rest => rfl
   | some index =>
       cases h : psKernelExprHasFVar expr <;>
-        simp [psKernelSemanticExprMapGet, analysis_eq,
+        simp [psKernelSemanticExprMapGet, PsKernelPackedCacheAnalysisProofs.public_candidate_preserves_entire_original_pair, analysis_eq,
           psKernelSemanticCacheEligible, psKernelExprMapGet, h]
 
 theorem semantic_map_insert_eq
@@ -83,7 +84,7 @@ theorem semantic_map_insert_eq
   | none => rfl
   | some index =>
       cases h : psKernelExprHasFVar expr <;>
-        simp [psKernelSemanticExprMapInsert, analysis_eq,
+        simp [psKernelSemanticExprMapInsert, PsKernelPackedCacheAnalysisProofs.public_candidate_preserves_entire_original_pair, analysis_eq,
           psKernelSemanticCacheEligible, psKernelExprMapInsert, h]
 
 theorem semantic_pair_contains_eq
@@ -99,7 +100,7 @@ theorem semantic_pair_contains_eq
   | some index =>
       cases hLeft : psKernelExprHasFVar left <;>
         cases hRight : psKernelExprHasFVar right <;>
-          simp [psKernelSemanticExprPairSetContains, analysis_eq,
+          simp [psKernelSemanticExprPairSetContains, PsKernelPackedCacheAnalysisProofs.public_candidate_preserves_entire_original_pair, analysis_eq,
             psKernelSemanticPairCacheEligible, psKernelSemanticCacheEligible,
             psKernelExprPairSetContains, psKernelExprPairHash, hLeft, hRight]
 
@@ -116,7 +117,7 @@ theorem semantic_pair_insert_eq
   | some index =>
       cases hLeft : psKernelExprHasFVar left <;>
         cases hRight : psKernelExprHasFVar right <;>
-          simp [psKernelSemanticExprPairSetInsert, analysis_eq,
+          simp [psKernelSemanticExprPairSetInsert, PsKernelPackedCacheAnalysisProofs.public_candidate_preserves_entire_original_pair, analysis_eq,
             psKernelSemanticPairCacheEligible, psKernelSemanticCacheEligible,
             psKernelExprPairSetInsert, psKernelExprPairHash, hLeft, hRight]
       split <;> simp_all

@@ -1,3 +1,4 @@
+import PsKernelPackedCacheAnalysisProofs
 import Lean
 import Ps.KernelCore.Runtime.Acceleration.CacheAnalysis
 
@@ -44,7 +45,9 @@ theorem semantic_map_get_eq_before
             simp [psKernelSemanticExprMapGet,
               Frozen.psKernelSemanticExprMapGet, psKernelExprMapGetIn, h]
       | cons entry rest => rfl
-  | some index => rfl
+  | some index =>
+      simp only [psKernelSemanticExprMapGet, Frozen.psKernelSemanticExprMapGet,
+        PsKernelPackedCacheAnalysisProofs.public_candidate_preserves_entire_original_pair]
 
 theorem empty_lookup_ignores_expression (expr : PsKernelExpr) :
     psKernelSemanticExprMapGet

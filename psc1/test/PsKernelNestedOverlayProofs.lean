@@ -161,62 +161,62 @@ theorem portable_match_retains_every_original_state_and_error (source : PsKernel
       intro original state
       cases decoded : psKernelExprV2DecodedRequire state.built original <;>
         cases found : psKernelExprV2PagedRequire state.arena original <;>
-          simp only [decoded,found,overlayBeforePortableMatch,psKernelExprV2NestedOverlay,psKernelExprV2NestedOverlayReadOriginal]
+          simp only [decoded,found,overlayBeforePortableMatch,psKernelExprV2NestedOverlay,psKernelExprV2NestedOverlayReadOriginal] <;> first | rfl | split <;> rfl
   | fvar name =>
       intro original state
       cases decoded : psKernelExprV2DecodedRequire state.built original <;>
         cases found : psKernelExprV2PagedRequire state.arena original <;>
-          simp only [decoded,found,overlayBeforePortableMatch,psKernelExprV2NestedOverlay,psKernelExprV2NestedOverlayReadOriginal]
+          simp only [decoded,found,overlayBeforePortableMatch,psKernelExprV2NestedOverlay,psKernelExprV2NestedOverlayReadOriginal] <;> first | rfl | split <;> rfl
   | mvar name =>
       intro original state
       cases decoded : psKernelExprV2DecodedRequire state.built original <;>
         cases found : psKernelExprV2PagedRequire state.arena original <;>
-          simp only [decoded,found,overlayBeforePortableMatch,psKernelExprV2NestedOverlay,psKernelExprV2NestedOverlayReadOriginal]
+          simp only [decoded,found,overlayBeforePortableMatch,psKernelExprV2NestedOverlay,psKernelExprV2NestedOverlayReadOriginal] <;> first | rfl | split <;> rfl
   | sort level =>
       intro original state
       cases decoded : psKernelExprV2DecodedRequire state.built original <;>
         cases found : psKernelExprV2PagedRequire state.arena original <;>
-          simp only [decoded,found,overlayBeforePortableMatch,psKernelExprV2NestedOverlay,psKernelExprV2NestedOverlayReadOriginal]
+          simp only [decoded,found,overlayBeforePortableMatch,psKernelExprV2NestedOverlay,psKernelExprV2NestedOverlayReadOriginal] <;> first | rfl | split <;> rfl
   | const name levels =>
       intro original state
       cases decoded : psKernelExprV2DecodedRequire state.built original <;>
         cases found : psKernelExprV2PagedRequire state.arena original <;>
-          simp only [decoded,found,overlayBeforePortableMatch,psKernelExprV2NestedOverlay,psKernelExprV2NestedOverlayReadOriginal]
+          simp only [decoded,found,overlayBeforePortableMatch,psKernelExprV2NestedOverlay,psKernelExprV2NestedOverlayReadOriginal] <;> first | rfl | split <;> rfl
   | lit value =>
       intro original state
       cases decoded : psKernelExprV2DecodedRequire state.built original <;>
         cases found : psKernelExprV2PagedRequire state.arena original <;>
-          simp only [decoded,found,overlayBeforePortableMatch,psKernelExprV2NestedOverlay,psKernelExprV2NestedOverlayReadOriginal]
+          simp only [decoded,found,overlayBeforePortableMatch,psKernelExprV2NestedOverlay,psKernelExprV2NestedOverlayReadOriginal] <;> first | rfl | split <;> rfl
   | app fn arg ihFn ihArg =>
       intro original state
       cases decoded : psKernelExprV2DecodedRequire state.built original <;>
         cases found : psKernelExprV2PagedRequire state.arena original <;>
-          simp only [decoded,found,overlayBeforePortableMatch,psKernelExprV2NestedOverlay,psKernelExprV2NestedOverlayReadOriginal,ihFn,ihArg]
+          simp only [decoded,found,overlayBeforePortableMatch,psKernelExprV2NestedOverlay,psKernelExprV2NestedOverlayReadOriginal,ihFn,ihArg] <;> first | rfl | split <;> rfl
   | lam name domain body info ihDomain ihBody =>
       intro original state
       cases decoded : psKernelExprV2DecodedRequire state.built original <;>
         cases found : psKernelExprV2PagedRequire state.arena original <;>
-          simp only [decoded,found,overlayBeforePortableMatch,psKernelExprV2NestedOverlay,psKernelExprV2NestedOverlayReadOriginal,ihDomain,ihBody]
+          simp only [decoded,found,overlayBeforePortableMatch,psKernelExprV2NestedOverlay,psKernelExprV2NestedOverlayReadOriginal,ihDomain,ihBody] <;> first | rfl | split <;> rfl
   | forallE name domain body info ihDomain ihBody =>
       intro original state
       cases decoded : psKernelExprV2DecodedRequire state.built original <;>
         cases found : psKernelExprV2PagedRequire state.arena original <;>
-          simp only [decoded,found,overlayBeforePortableMatch,psKernelExprV2NestedOverlay,psKernelExprV2NestedOverlayReadOriginal,ihDomain,ihBody]
+          simp only [decoded,found,overlayBeforePortableMatch,psKernelExprV2NestedOverlay,psKernelExprV2NestedOverlayReadOriginal,ihDomain,ihBody] <;> first | rfl | split <;> rfl
   | letE name domain value body nondep ihDomain ihValue ihBody =>
       intro original state
       cases decoded : psKernelExprV2DecodedRequire state.built original <;>
         cases found : psKernelExprV2PagedRequire state.arena original <;>
-          simp only [decoded,found,overlayBeforePortableMatch,psKernelExprV2NestedOverlay,psKernelExprV2NestedOverlayReadOriginal,ihDomain,ihValue,ihBody]
+          simp only [decoded,found,overlayBeforePortableMatch,psKernelExprV2NestedOverlay,psKernelExprV2NestedOverlayReadOriginal,ihDomain,ihValue,ihBody] <;> first | rfl | split <;> rfl
   | mdata tag body ihBody =>
       intro original state
       cases decoded : psKernelExprV2DecodedRequire state.built original <;>
         cases found : psKernelExprV2PagedRequire state.arena original <;>
-          simp only [decoded,found,overlayBeforePortableMatch,psKernelExprV2NestedOverlay,psKernelExprV2NestedOverlayReadOriginal,ihBody]
+          simp only [decoded,found,overlayBeforePortableMatch,psKernelExprV2NestedOverlay,psKernelExprV2NestedOverlayReadOriginal,ihBody] <;> first | rfl | split <;> rfl
   | proj name index body ihBody =>
       intro original state
       cases decoded : psKernelExprV2DecodedRequire state.built original <;>
         cases found : psKernelExprV2PagedRequire state.arena original <;>
-          simp only [decoded,found,overlayBeforePortableMatch,psKernelExprV2NestedOverlay,psKernelExprV2NestedOverlayReadOriginal,ihBody]
+          simp only [decoded,found,overlayBeforePortableMatch,psKernelExprV2NestedOverlay,psKernelExprV2NestedOverlayReadOriginal,ihBody] <;> first | rfl | split <;> rfl
 
 end PsKernelNestedOverlayProofs
 #print axioms PsKernelNestedOverlayProofs.original_decoded_error_is_first

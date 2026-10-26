@@ -1,6 +1,6 @@
 """Read/record the authentic completed193 result; never replays or executes a kernel."""
 from pathlib import Path
-import os,json,hashlib,zipfile,io,importlib.util
+import os,json,hashlib,zipfile,io,importlib.util,urllib.request,urllib.error,urllib.parse
 assert os.environ.get('GITHUB_ACTIONS')=='true' and os.environ.get('RUNNER_OS')=='Linux'
 repo=Path(os.environ['GITHUB_WORKSPACE'])
 spec=importlib.util.spec_from_file_location('download',repo/'psc1/scripts/pskernel-church-stage-ci.py')
@@ -10,7 +10,20 @@ sha='6712fb97ddda6d99bd5f06f65ad003b5c479dc25047c8b82e783dfd6b27b1c55'
 a=json.loads(C.github('/actions/artifacts/'+str(artifact)))
 assert a['workflow_run']['head_sha']==source and a['workflow_run']['id']==run and not a['expired']
 assert a['size_in_bytes']==13913110 and a['digest']=='sha256:'+sha
-raw=C.github('/actions/artifacts/'+str(artifact)+'/zip');assert len(raw)==13913110 and hashlib.sha256(raw).hexdigest()==sha
+def read_exact_pinned_archive():
+ limit=13_913_110
+ request=urllib.request.Request('https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/'+str(artifact)+'/zip',headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','User-Agent':'psc1-saved193-receipt'})
+ opener=urllib.request.build_opener(C.NoRedirect)
+ try:
+  with opener.open(request,timeout=30) as response:data=response.read(limit+1)
+ except urllib.error.HTTPError as error:
+  assert error.code in [301,302,303,307,308]
+  location=error.headers.get('Location','');parsed=urllib.parse.urlsplit(location)
+  assert parsed.scheme=='https' and parsed.hostname and not parsed.username and not parsed.password and parsed.port in [None,443] and (parsed.hostname.endswith('.blob.core.windows.net') or parsed.hostname.endswith('.githubusercontent.com'))
+  with opener.open(urllib.request.Request(location),timeout=30) as response:data=response.read(limit+1)
+ assert len(data)==limit and hashlib.sha256(data).hexdigest()==sha
+ return data
+raw=read_exact_pinned_archive()
 z=zipfile.ZipFile(io.BytesIO(raw));assert z.testzip() is None and len(z.namelist())==len(set(z.namelist()))==589
 prefix='_temp/arena435-independent/'
 report=json.loads(z.read(prefix+'report.json'));origin=json.loads(z.read(prefix+'kernel-provenance.json'))

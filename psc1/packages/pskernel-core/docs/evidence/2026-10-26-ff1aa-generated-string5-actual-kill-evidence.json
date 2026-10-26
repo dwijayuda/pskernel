@@ -1,0 +1,14 @@
+{
+  "source": "ff1aa23dc2c95785f5349dd7b7a022dac893f5ac",
+  "run": 40251383616,
+  "job": 121352663835,
+  "actualCompletedJobLogRead": true,
+  "exactBudgetSeconds": 1500,
+  "exitCode": 137,
+  "lines": [
+    "2026-10-26T01:46:12.1734970Z \u001b[36;1mtimeout --signal=KILL 1500s node scripts/pskernel-t01f-shards.mjs run generated \\\u001b[0m",
+    "2026-10-26T02:11:12.2643187Z /home/runner/work/_temp/d31395b6-5d52-4c64-82b6-9d67723e6501.sh: line 6:  2334 Killed                  timeout --signal=KILL 1500s node scripts/pskernel-t01f-shards.mjs run generated \"$RUNNER_TEMP/psc1-t01f-generated-producer\" \"$RUNNER_TEMP/psc1-t01f-generated-5\" \"5\"",
+    "2026-10-26T02:11:12.2681816Z ##[error]Process completed with exit code 137."
+  ],
+  "status": "FAIL: actual 1500-second limit, no final 1400-assertion receipt"
+}

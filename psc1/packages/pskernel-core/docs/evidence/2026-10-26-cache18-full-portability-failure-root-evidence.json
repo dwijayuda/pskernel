@@ -1,0 +1,27 @@
+{
+  "source": "18b59d4e3a0b8e0cd7421c738059fba1a46e60ef",
+  "run": 40251712462,
+  "bothRoutesFailBeforeBuildOrRuntime": true,
+  "artifacts": [
+    {
+      "artifact": 12620466967,
+      "bytes": 4309256,
+      "sha256": "4800a752963dead35484e785e86c718882ebf4dc788fd725d277ef709c5179e5",
+      "members": 225,
+      "all224DigestsVerified": true,
+      "actualCompilerFailure": "psKernelExprMapGetIn4: structuralRecursionNotDecreasing",
+      "native742StillPasses": true,
+      "productionAdopted": false
+    },
+    {
+      "artifact": 12620831497,
+      "bytes": 4309257,
+      "sha256": "8641e91aa82b2ac633401939e59f297db619b891edb4f0967ee5b1b462a838df",
+      "members": 225,
+      "all224DigestsVerified": true,
+      "actualCompilerFailure": "psKernelExprMapGetIn4: structuralRecursionNotDecreasing",
+      "native742StillPasses": true,
+      "productionAdopted": false
+    }
+  ]
+}

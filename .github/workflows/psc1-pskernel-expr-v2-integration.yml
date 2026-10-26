@@ -84,6 +84,9 @@ on:
       - psc1/npm-runtime/canonical-admissions-wire.mjs
       - psc1/kernel-lakefile.lean
       - .github/workflows/psc1-pskernel-expr-v2-integration.yml
+      - psc1/test/PsKernelNestedParamHygieneProofs.lean
+      - psc1/test/PsKernelNestedParamHygieneRegression.lean
+      - psc1/scripts/pskernel-nested-param-hygiene-smoke.mjs
 
 permissions:
   contents: read
@@ -868,6 +871,28 @@ jobs:
           grep -Fqx 'PSC1_V2_DAG_RECURSOR_MAJOR_STATE_JS: PASS sequence=4 propagated=40' "$RUNNER_TEMP/psc1-recursor-generated.log"
           grep -Fqx 'PSC1_V2_DAG_RECURSOR_MAJOR_FAMILY_JS: PASS comparisons=70 fields=20' "$RUNNER_TEMP/psc1-recursor-generated.log"
           grep -Fqx 'PSC1_V2_DAG_RECURSOR_MAJOR_STRING_JS: PASS callbacks=24 propagated=48' "$RUNNER_TEMP/psc1-recursor-generated.log"
+      - name: Require generated-source nested constructor capture rejection
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_DAG_RUN_DIR="$RUNNER_TEMP/psc1-dag-standalone"
+          test -s "$PSC1_DAG_RUN_DIR/kernel.mjs"
+          cp scripts/pskernel-nested-param-hygiene-smoke.mjs "$PSC1_DAG_RUN_DIR/hygiene-smoke.mjs"
+          cd "$PSC1_DAG_RUN_DIR"
+          timeout --signal=KILL 300s env -i PATH= "$PSC1_NODE_BIN" --max-old-space-size=2048 hygiene-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-hygiene-generated.log"
+          python3 - <<'PYCODE'
+          import pathlib,os,json
+          t=(pathlib.Path(os.environ['RUNNER_TEMP'])/'psc1-hygiene-generated.log').read_text()
+          tag='PSC1_NESTED_PARAM_HYGIENE_JS: PASS '
+          r,=[json.loads(line[len(tag):]) for line in t.splitlines() if line.startswith(tag)]
+          assert r['assertions']==len(r['labels'])==len(set(r['labels']))==17
+          assert r['labels']==['actual-Lean-and-original-public-closure-parity', 'exact-rejection-and-no-publication', 'capture-leaf', 'capture-app-fn', 'capture-app-arg', 'capture-lambda-domain', 'capture-lambda-body', 'capture-forall-domain', 'capture-forall-body', 'capture-let-domain', 'capture-let-value', 'capture-let-body', 'capture-metadata', 'capture-projection', 'exact-namespace-arbitrary-indices-zero-fastpath', 'original-shape-error-precedes-capture-guard', 'public-DAG-original-fallback-rejects-atomically']
+          assert r['validInputsAccepted'] and r['publicDagRejects'] and not r['fullKernel'] and not r['performanceQualified']
+          print('PSC1_NESTED_PARAM_HYGIENE_GENERATED_PERMANENT: PASS nativeEqual=17')
+          PYCODE
       - name: Check generated mutual and nested prefix owners in detached Node
         working-directory: psc1
         run: |
@@ -1443,5 +1468,6 @@ jobs:
           path: ${{ runner.temp }}/psc1-t01f-generated-complete/
           if-no-files-found: error
           retention-days: 30
+
 
 

@@ -1,0 +1,57 @@
+[
+  {
+    "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean",
+    "old": "f18cad0f0c305bb80c697cb9c598eb720dca5837",
+    "sha": "8fefa3776ee99c9a205358bd97f9868376e083be"
+  },
+  {
+    "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagMutualAdmission.lean",
+    "old": null,
+    "sha": "ba7b54cfc1abf3838f1df0ac6eb3719ae6852190"
+  },
+  {
+    "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagMutualConstructorAnalysis.lean",
+    "old": null,
+    "sha": "2103c404f97e2d8ab54d9af484bd95a9adc6c2c0"
+  },
+  {
+    "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagMutualConstructorFields.lean",
+    "old": null,
+    "sha": "b77cf5601c07dff6a08a9ee408c8f47ba7927dac"
+  },
+  {
+    "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagMutualConstructorLoop.lean",
+    "old": null,
+    "sha": "e7e8b46b8f3a1f674ab86433e291bddc7605fe3c"
+  },
+  {
+    "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagMutualConstructorResult.lean",
+    "old": null,
+    "sha": "122435c55baa5198989508951aa6d36b0cf92588"
+  },
+  {
+    "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagMutualGenerated.lean",
+    "old": null,
+    "sha": "9247ff0467102eb0bd8bdd5775030903da361c64"
+  },
+  {
+    "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagMutualHeader.lean",
+    "old": null,
+    "sha": "a289eaa53b02da0d40b45ad2c2b8e3db7ba97486"
+  },
+  {
+    "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagMutualRecursiveArgument.lean",
+    "old": null,
+    "sha": "5bb96c718c99bdd3fd6b07d8a285a2c15f8e4aaf"
+  },
+  {
+    "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagMutualRecursorValidation.lean",
+    "old": null,
+    "sha": "3274064671784e0e9345aa965344386cebd70820"
+  },
+  {
+    "path": "psc1/packages/pskernel-core/src/Ps/KernelCore/Core/ExprV2/ExpandedSize.lean",
+    "old": null,
+    "sha": "c5c3e8bd5d3ce5a74a0331162def059e3b8d6d63"
+  }
+]

@@ -1,0 +1,103 @@
+{
+  "source": "aed07022222c8330b17636c3f894874058bfe571",
+  "run": 40233314029,
+  "artifact": 12615207534,
+  "archiveBytes": 1141557,
+  "archiveSha256": "a26eaa5428d9ba93c9e6d37e36c5910c51dfdeb7d40f4109dff490e0f647e2ed",
+  "uniqueMembers": 586,
+  "crc": "pass",
+  "kernelBytes": 10393520,
+  "kernelSha256": "7087dca9590782117a7569cb2222c76d73882c1fe9a91966eef08b99995b01c4",
+  "all193InputAdaptationsAndClassificationsMatchPriorQualifiedReplay": true,
+  "all176CompletedRawEnvelopesExactlyMatchPriorQualifiedReplay": true,
+  "strictMatches": 174,
+  "timeouts": [
+    {
+      "index": 23,
+      "name": "perf/refute-cheap-last.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 72,
+      "name": "init-prelude.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 78,
+      "name": "perf/app-lam.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 80,
+      "name": "perf/beta-ladder.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 82,
+      "name": "perf/discarded-argument-match.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 83,
+      "name": "perf/discarded-argument.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 84,
+      "name": "perf/folded-constant-first.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 85,
+      "name": "perf/folded-constant-last.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 86,
+      "name": "perf/fueled-chain.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 87,
+      "name": "perf/grind-ring-5.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 90,
+      "name": "perf/let-ladder.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 91,
+      "name": "perf/magma-list-deep-n21.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 92,
+      "name": "perf/magma-list-deep-n36.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 93,
+      "name": "perf/magma-list-pair-n21.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 94,
+      "name": "perf/magma-list-pair-n7.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 96,
+      "name": "perf/shared-subterm.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 98,
+      "name": "perf/unroll-versus-evaluate.ndjson",
+      "returncode": -9
+    }
+  ],
+  "separateSafetyAgreements": 2,
+  "strictStatus": "FAIL"
+}

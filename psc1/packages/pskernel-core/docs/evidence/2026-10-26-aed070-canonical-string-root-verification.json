@@ -1,0 +1,67 @@
+{
+  "source": "aed07022222c8330b17636c3f894874058bfe571",
+  "run": 40233313959,
+  "collectorArtifact": 12616737024,
+  "allSixIndependentLeafArchivesDownloadedAndRead": true,
+  "allSixReceiptBytesAndDigestsMatchActualCollector": true,
+  "assertions": 8400,
+  "samples": [
+    {
+      "sampleIndex": 0,
+      "artifact": 12615502473,
+      "archiveBytes": 5644,
+      "archiveSha256": "3845d16a6af1b94a40218a5baa712897044fdead3f446f9cd08cfc8e9ad3aea1",
+      "receiptSha256": "11a5cd554293f0370e7e0008529a1a80dd35f0f6ac43df87d46fbec33cf1596b",
+      "wallSeconds": 295.41,
+      "assertions": 1400
+    },
+    {
+      "sampleIndex": 1,
+      "artifact": 12615856638,
+      "archiveBytes": 5633,
+      "archiveSha256": "de1ecc91282e086a0c6f9c68dd49de9d4ff898c9e5a85c2fc753e04fa2201464",
+      "receiptSha256": "b123f23fffa5456b4cecd5dc77274d7a8d971fa4bfad893b808c2fc7dbfc9bca",
+      "wallSeconds": 434.33,
+      "assertions": 1400
+    },
+    {
+      "sampleIndex": 2,
+      "artifact": 12615298545,
+      "archiveBytes": 5641,
+      "archiveSha256": "54169eb6f6bf98a2e1f8c66a0645b4cec2ace09ff752785f5045f45159cf466d",
+      "receiptSha256": "2a08f75a761bc14167e75bab4e32ed01d58d689d4f038fae70bf6be0e144b6b0",
+      "wallSeconds": 321.58,
+      "assertions": 1400
+    },
+    {
+      "sampleIndex": 3,
+      "artifact": 12615093899,
+      "archiveBytes": 5644,
+      "archiveSha256": "80a4d0a4a8c93fdde0aa99e9187034e9d1caea1170d938395293f2fe30f75109",
+      "receiptSha256": "aff62b0e6ec5fe080478c8610a6fad9c29952728f1d3ba4379aacd8e0d6d3fb5",
+      "wallSeconds": 396.58,
+      "assertions": 1400
+    },
+    {
+      "sampleIndex": 4,
+      "artifact": 12614929739,
+      "archiveBytes": 5653,
+      "archiveSha256": "afbb9da715ffc2ba59aefa95bbfa2019b6ef6f1f3615d49e0574466d0d4ef978",
+      "receiptSha256": "d125769b8df3940df8daeb5584ccff8db575f6f138ff62d15d8e5b0353524d3f",
+      "wallSeconds": 409.09,
+      "assertions": 1400
+    },
+    {
+      "sampleIndex": 5,
+      "artifact": 12616096940,
+      "archiveBytes": 5679,
+      "archiveSha256": "95e453937267ebe3611adddc679d654f80423903a22abbcb6ccb24766826d7fe",
+      "receiptSha256": "a90546151c15a603578f44fa2b70fd4cdf87d40ae88759aa04cfef8647e16340",
+      "wallSeconds": 1476.15,
+      "assertions": 1400
+    }
+  ],
+  "performanceQualified": false,
+  "generatedRouteStillFailsSample5": true,
+  "scope": "Canonical correctness only; slowest sample1476.15s is marginal under unchanged1500s limit. Generated counterpart killed137 and has no final1400assertion receipt."
+}

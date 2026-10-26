@@ -1,0 +1,28 @@
+{
+  "source": "3dd7756d56ebdfef6799d9d8c63875522f158248",
+  "run": 40271803308,
+  "job": 121406024344,
+  "artifact": 12628278712,
+  "archiveBytes": 3920,
+  "archiveSha256": "43650a760fe32509bcdc2f65f8c4db44deb8bc4a05284dfa269cb8fb0537e14b",
+  "all3ActualMembersRead": true,
+  "productionTree": "7471f228b9bbc1eb5b9c0b78b85bf326aac72929",
+  "productionUnchanged": true,
+  "finding": "Confirmed original nested preprocessing captures an input free variable matching nestedCtorParam0 during parameter opening/closing. Actual pinned Lean and ordinary routes reject it; nested publishes a different closed constructor. Admission conformance mismatch; no global soundness claim.",
+  "actualDiagnostic": {
+    "source": "3dd7756d56ebdfef6799d9d8c63875522f158248",
+    "schema": "psc1-original-nested-hygiene-diagnostic-v1",
+    "publishedConstructorMatchesDifferentClosedInput": true,
+    "pinnedLean": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "ordinaryValid": "accepted",
+    "ordinaryFreeVariable": "rejectedInvalid: declaration has free variables",
+    "officialValidAccepted": true,
+    "officialFreeVariableRejected": true,
+    "observedCapturedFreeVariableAccepted": true,
+    "nestedValid": "accepted",
+    "nestedCollidingFreeVariable": "accepted",
+    "kernelQualified": false,
+    "diagnosticOnly": true
+  },
+  "status": "CONFIRMED;correction required before nested adoption"
+}

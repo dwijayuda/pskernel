@@ -1,0 +1,311 @@
+{
+  "schema": "psc1-cli-qualification/1",
+  "status": "qualified-linux-host-cli; independent-human-trial-pending",
+  "baseCommit": "10db75c3bb45725c259d4549228dbe6a7ecc1d00",
+  "implementationCommit": "9b251a971819ecfc5450ac71e1caca967ec6c947",
+  "pullRequest": "https://github.com/dwijayuda/pskernel/pull/191",
+  "sourceBoundary": {
+    "newHostModules": [
+      "npm-cli/proofscript-cli.mjs",
+      "npm-cli/cli-project.mjs"
+    ],
+    "existingCheckedCommand": "byte unchanged",
+    "existingSevenHostAstGuards": "retained",
+    "projectSchema": "proofscript-project/1",
+    "projectAuthority": "source metadata only; host options on argv",
+    "maxDeclaredFiles": 4096,
+    "maxInputAggregateAndEncodedProjectBytes": 134217728,
+    "compilerAndToolSeconds": 240,
+    "checkerSeconds": 120,
+    "otherResources": "unchanged"
+  },
+  "features": [
+    "help and safe init",
+    "explicit file projects and current-directory selection",
+    "-p/-o and equals forms",
+    "showConfig without admission/publication",
+    "JSON/text stderr diagnostics; original compiler failure retained",
+    "human version with stable verified --identity",
+    "three local/global aliases",
+    "npm scripts and exec"
+  ],
+  "versionPresentationChange": "--version now text; JSON automation uses unchanged --identity",
+  "package": {
+    "version": "0.1.0-psc1.8",
+    "compilerSourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+    "compilerModules": 122,
+    "coreMembers": 4742,
+    "compilerAndKernelExecutablePayloads": "unchanged exact qualified G3 inputs",
+    "retainedRootPayloadFiles": 126,
+    "optionalDispatchMetadata": "three .8 repacks; no reverse root peer; every other file byte-identical",
+    "optionalCompatibilityAuthority": "root exact version, inventory and hashes remain required",
+    "sourceSnapshotForApplications": "8383c6983e5fa2f2d945b02ba4b349ab64522c64",
+    "sourceSnapshotScope": "unchanged original application/census/closure assertions; later123-module tree not promoted",
+    "applicationStorePolicy": "physical stores; symlink refusal unchanged",
+    "root": {
+      "version": "0.1.0-psc1.8",
+      "tarball": "proofscript-0.1.0-psc1.8.tgz",
+      "bytes": 3822242,
+      "sha256": "c9cae0ba95d3f55f1d4e88d03b9247b97f8c88895588867828e514e55513de67"
+    },
+    "artifact": {
+      "id": 12648248091,
+      "name": "psc1-cli-toolchain-9b251a971819ecfc5450ac71e1caca967ec6c947",
+      "sha256": "dfee107e7615ebb2e3f2d7bcbff831369509fe166c936086e448d9f76d08c54f",
+      "bytes": 206720713,
+      "expiresAt": "2027-01-24T11:20:09Z"
+    },
+    "receiptPhases": "package-receipt.status retains assembly-time label; cliQualification:passed and this dated receipt own final qualification"
+  },
+  "attempts": [
+    {
+      "head": "da8067705a13a245984baaca633896d6432bb5aa",
+      "run": 40307024640,
+      "job": 121518938292,
+      "status": "failed-assembly",
+      "reason": "assembler assumed npm-shrinkwrap exists in packed .7 root; actual artifact omits it; preserve absence and update DEPENDENCY_LOCK only",
+      "preflight": "19 groups and all7 historical host checks passed"
+    },
+    {
+      "head": "123ab8175cb5e261a0d90d402d48c102e6d10341",
+      "run": 40307377851,
+      "job": 121519985373,
+      "status": "failed-test-shell-setup",
+      "reason": "SDK-free PATH intentionally omitted sh; npm run needs explicit /bin/sh; preserve restricted PATH and choose npm script shell",
+      "passed": [
+        "host-only assembly;126 retained files identical",
+        "actual local/global both-grammar init/check/compile/build/edit/illtyped-preservation groups",
+        "multi-module checked build"
+      ],
+      "root": {
+        "sha256": "9d0b7e8367cedcd38073974d1b4e9a65722531593564af5fd02d668a2b8eb43c",
+        "bytes": 3822139,
+        "status": "not-yet-qualified-all-installed"
+      }
+    },
+    {
+      "head": "25d5ab07625b299ea43a68c680b822ddc3df2f1c",
+      "run": 40307833435,
+      "job": 121521566248,
+      "status": "failed-optional-install-topology",
+      "passed": [
+        "all55 new installed CLI requests;bothgrammars local/global plus npm run/exec/multimodule/optionalRustWasm/tamper refusal",
+        "componentgrammar and alltransactionfault/SIGKILL tests"
+      ],
+      "reason": "installing optional emit-only packages with reverse exact .7 root peer causes npm to prune .8 root; decouple metadata, retain root exactpins and all worker/runtimebytes"
+    },
+    {
+      "head": "7c27d754550ed92cd8ab19a51f8c768a919963b0",
+      "run": 40309042179,
+      "job": 121525978105,
+      "status": "failed-application-harness-store",
+      "reason": "frozen-source supervisor used a symlink for shared output; existing PSC1_SERVICE_STORE_INVALID correctly refused; use a physical store and archive evidence",
+      "passed": [
+        "19 source groups",
+        "all7 historical host checks",
+        "55 actual newCLI requests",
+        "transactional/SIGKILL regressions",
+        "40provider corpus/16 IO/8component/98refusals",
+        "all original offline installed/kernel/candidate/negative gates",
+        "checked publication32scalar/24IO/143refusals/16Rust consumers"
+      ],
+      "root": {
+        "version": "0.1.0-psc1.8",
+        "bytes": 3822247,
+        "sha256": "9a5b24dbddb04c6ac1b7fa6508d803cf499517a80afad54bc32646af0d41a1ab",
+        "status": "remaining-application/type-gates-not-qualified"
+      }
+    }
+  ],
+  "humanTrial": {
+    "status": "participant can be arranged; no result received",
+    "qualified": false,
+    "automatedRehearsalIsNotHumanEvidence": true
+  },
+  "boundaries": {
+    "officialLean": "4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "independentChecking": "unchanged",
+    "strictOriginalAndTransformedIr": "unchanged",
+    "defaultKernel": "genuine C++/Emscripten linear-memory Wasm",
+    "compilerWasm": "GC",
+    "newG2G3Qualification": false,
+    "wholeCompilerSemanticPreservation": false,
+    "fullUniversalRelease": false,
+    "merge": false,
+    "npmPublication": false
+  },
+  "remaining": [
+    "independent human task evidence",
+    "compiler-origin structured diagnostics and editor integration",
+    "watch/incremental dependency/cancellation/stale-publication qualification",
+    "automatic source-package resolution and general extensions",
+    "additional platform publication and final authorized release"
+  ],
+  "ordinarySource": {
+    "status": "passed",
+    "head": "9b251a971819ecfc5450ac71e1caca967ec6c947",
+    "run": 40314305497,
+    "testedMerge": "c5cc78f21539bd3c21a9cba966f1aabc4f891d92",
+    "tree": "15cbc27d2bf52c1bb43da369b6ef56cf0797ec67",
+    "fullJob": 121548383462,
+    "gateJob": 121559536094,
+    "criteria": {
+      "qualified": 37,
+      "blocked": 0,
+      "releaseReady": true,
+      "scope": "finite Practical Core source contract only"
+    },
+    "everySelectedDependency": "success",
+    "benchmark": "skipped-unqualified",
+    "currentSource": {
+      "modules": 123,
+      "coreMembers": 4742,
+      "leanClosureDigest": "e698ddecca4f57308472e261be880edded425d9ddae58c9ead43ed1973647c0f",
+      "psClosureDigest": "37b5dfa292376274a3b5ebe3f3bdb29c3e61327889743cd8eeff65737dbdb013",
+      "integrationJob": 121545423582,
+      "executedArtifacts": 28,
+      "tracingScope": "recorded term bases; complete IDE tracing not claimed"
+    },
+    "artifact": {
+      "id": 12648311504,
+      "sha256": "f570b214c5602824fa5562ebdb8bdc3104a29fda9fdaec038805d80687132428",
+      "bytes": 121473387
+    }
+  },
+  "qualification": {
+    "status": "passed",
+    "head": "9b251a971819ecfc5450ac71e1caca967ec6c947",
+    "run": 40314294152,
+    "job": 121543173394,
+    "root": {
+      "version": "0.1.0-psc1.8",
+      "tarball": "proofscript-0.1.0-psc1.8.tgz",
+      "bytes": 3822242,
+      "sha256": "c9cae0ba95d3f55f1d4e88d03b9247b97f8c88895588867828e514e55513de67"
+    },
+    "artifact": {
+      "id": 12648248091,
+      "name": "psc1-cli-toolchain-9b251a971819ecfc5450ac71e1caca967ec6c947",
+      "sha256": "dfee107e7615ebb2e3f2d7bcbff831369509fe166c936086e448d9f76d08c54f",
+      "bytes": 206720713,
+      "expiresAt": "2027-01-24T11:20:09Z"
+    },
+    "sourceGroups": 19,
+    "installed": {
+      "requests": 55,
+      "positiveCheckedCommands": 21,
+      "cases": [
+        {
+          "scope": "local",
+          "grammar": "lean",
+          "independentlyChecked": true,
+          "initialValue": 42,
+          "editedValue": 43,
+          "illTypedReplacementPreservedPrior": true
+        },
+        {
+          "scope": "local",
+          "grammar": "ps",
+          "independentlyChecked": true,
+          "initialValue": 42,
+          "editedValue": 43,
+          "illTypedReplacementPreservedPrior": true
+        },
+        {
+          "scope": "global",
+          "grammar": "lean",
+          "independentlyChecked": true,
+          "initialValue": 42,
+          "editedValue": 43,
+          "illTypedReplacementPreservedPrior": true
+        },
+        {
+          "scope": "global",
+          "grammar": "ps",
+          "independentlyChecked": true,
+          "initialValue": 42,
+          "editedValue": 43,
+          "illTypedReplacementPreservedPrior": true
+        }
+      ],
+      "npmRunAndExec": true,
+      "optionalFileProjectEngines": [
+        "rust",
+        "wasm-core"
+      ],
+      "multiModuleFileProject": true,
+      "changedCliResourceRefused": true
+    },
+    "preserved": {
+      "compilerCases": 20,
+      "cliCases": 12,
+      "candidateMappings": 48,
+      "kernelComparisons": 14,
+      "negativeCases": 37,
+      "byteCaptureCases": 1,
+      "dispatch": {
+        "source": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+        "providers": 40,
+        "io": 16,
+        "components": 8,
+        "refusals": 98
+      },
+      "publication": {
+        "cases": 32,
+        "negatives": 143,
+        "callbackIoGroups": 24,
+        "rustLinkedAndExecuted": 16
+      },
+      "actualApplications": {
+        "status": "passed",
+        "applications": 16,
+        "cases": 264,
+        "globalCases": 8
+      },
+      "ioMappings": {
+        "executed": 24,
+        "refused": 8
+      },
+      "packedPublicTypes": "passed-offline-7.0.2"
+    },
+    "frozenSource": {
+      "schema": "psc1-cli-frozen-application-source/1",
+      "status": "passed",
+      "testedCommit": "9b251a971819ecfc5450ac71e1caca967ec6c947",
+      "snapshotCommit": "8383c6983e5fa2f2d945b02ba4b349ab64522c64",
+      "compilerSourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+      "testScriptSha256": "9489a149693868a615f77f4600ab431d0706ddc335bc2d25aa6107103125a1ce",
+      "evidenceSha256": "6dd5b63f50f935f2d52c998687090b5abd7dd8aece26787662ad4a89cd926c2d",
+      "originalSourceAndCensusAssertions": "unchanged and passed",
+      "currentDevelopmentCompilerPromotion": false
+    },
+    "compilerAndKernelCode": "unchanged",
+    "humanQualified": false,
+    "preflight": {
+      "job": 121542887875,
+      "groups": [
+        "help and empty invocation succeed without distribution, compiler or kernel",
+        "version is human readable without verifying/executing a compiler",
+        "unknown command/option, duplicates, aliases and values refuse",
+        "build requires explicit output before touching a project",
+        "missing project is actionable",
+        "init creates editable .ps source and source-only project",
+        "second init preserves exact files; no force/overwrite option",
+        "init Lean variant and existing source refusal",
+        "showConfig captures hashes, never claims admission or creates output",
+        "directory project, aliases, equals and explicit files",
+        "no parent directory discovery",
+        "files resolve from config location, preserve order and source bytes",
+        "source authority injection and unknown schema refuse",
+        "absolute, traversal, backslash and drive source paths refuse",
+        "source and parent symlinks, project symlinks and FIFO refuse",
+        "bounded actual reads, invalid UTF8 and BOM capture",
+        "duplicates, missing entry, extra source fields and module types refuse",
+        "legacy inline project accepted without host-option authority",
+        "malformed JSON and comments refuse with useful project code"
+      ],
+      "sevenHistoricalAstAndFormatGuards": "passed"
+    }
+  }
+}

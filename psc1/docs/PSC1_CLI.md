@@ -1,19 +1,50 @@
 # ProofScript CLI
 
-This guide describes the new host CLI candidate (proofscript0.1.0-psc1.8).
+This guide describes the new host CLI candidate (`proofscript@0.1.0-psc1.8`).
 It does not describe the unchanged .7 artifact. Use the exact tarballs from the
-qualified Linux Actions run; nothing has been published to the npm registry.
+[qualified Linux run](https://github.com/dwijayuda/pskernel/actions/runs/40314294152),
+artifact psc1-cli-toolchain-9b251a971819ecfc5450ac71e1caca967ec6c947.
+GitHub Actions artifact downloads require GitHub sign-in. Extract the archive
+and find slim-universal/tarballs/ plus slim-universal/package-receipt.json.
+Nothing has been published to the npm registry.
+
+The root tarball is proofscript-0.1.0-psc1.8.tgz, 3,822,242 bytes; SHA256:
+c9cae0ba95d3f55f1d4e88d03b9247b97f8c88895588867828e514e55513de67.
+The package receipt lists all eleven tarballs and the exact optional versions.
 
 ## Start a project
 
-After installing the candidate tarball into your project, run:
+With Node 22.23.3, copy the root tarball into your project directory. Initialize
+package.json if needed, then install and run:
 
 ```sh
+npm init -y
+npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1.8.tgz
 npm exec -- psc init
 npm exec -- psc --showConfig
 npm exec -- psc check
 npm exec -- psc build --out dist/app --publication-protocol portable-file
 ```
+
+For the default JS output, save this as observe.mjs after building:
+
+```js
+import {readPublication} from 'proofscript';
+import {pathToFileURL} from 'node:url';
+
+const current = readPublication({
+  out: 'dist/app',
+  publicationProtocol: 'portable-file',
+});
+if (!current) throw new Error('Build the project first.');
+const app = await import(pathToFileURL(current.target).href);
+console.log(String(app.answer)); // 42
+```
+
+Run node observe.mjs from the project directory. The lookup verifies the
+publication inventory and returns its immutable generation. Manifest integrity
+does not replace the original independent checking. Executing your application
+is a separate explicit action from compiling it.
 
 init creates Main.ps and proofscript.json. Use init --kind lean for Main.lean.
 Existing files refuse initialization; there is no force overwrite option.
@@ -67,7 +98,14 @@ wasm-core, wasm-component, python or php. Selecting the TS engine does not
 implicitly select TS output. --kernel wasm (default), native or both selects
 independent Lean checking. --provider remains a checker alias.
 
-The default checker is the genuine official Lean4.35 C++ kernel compiled with
+| Command | Executing compiler | Output | Independent checker |
+| --- | --- | --- | --- |
+| psc compile Main.ps | JS | JS | Lean Wasm |
+| psc compile Main.ps --engine ts | TS | JS | Lean Wasm |
+| psc build Main.ps --target ts --out dist/ts | JS | TS, with the explicit pinned SDK | Lean Wasm |
+| psc compile Main.ps --engine rust --kernel both | Optional Rust engine | JS | Wasm and native Lean |
+
+The default checker is the genuine official Lean 4.35 C++ kernel compiled with
 Emscripten to linear-memory Wasm. Compiler Wasm uses GC. No frontend or proof
 checking is replaced by this adapter.
 
@@ -109,6 +147,8 @@ compile returns checked source and receipt as JSON on stdout and publishes no
 generation. build requires explicit --out, returns immutable artifact and
 runtimeArtifact paths, and retains existing Linux-qualified transactions.
 Read build's artifact path from its receipt; do not guess current symlink names.
+Publication stores retain the existing non-symlink directory policy. A helper
+cannot bypass it by sharing an output root through a symlink.
 The build receipt and publication manifest remain the existing schemas.
 
 --showConfig prints project location, declared source paths, exact byte
@@ -127,7 +167,7 @@ proofscript-cli-diagnostic/1 JSON diagnostic containing code, original message
 and an optional actionable hint. --diagnostics text is the default. No source
 location, type explanation or admission result is fabricated by the host.
 The original compiler diagnostic remains present. Process interruption maps
-SIGINT/SIGTERM to130/143. Diagnostics retain a32MiB cap; stdout is streamed.
+SIGINT/SIGTERM to 130/143. Diagnostics retain a 32 MiB cap; stdout is streamed.
 
 A publication error can occur after commitment. In particular,
 PSC1_SERVICE_PUBLICATION_COMMITTED_DURABILITY_UNCERTAIN means inspect the
@@ -137,23 +177,42 @@ The CLI does not take over stale locks or remove prior generations.
 
 ## Bounds and scope
 
-File projects allow at most4096 explicitly declared sources. Every input and
-total captured source text are bounded by128MiB, and the encoded source project
-must also fit128MiB. Existing inner request/response bounds still apply.
+File projects allow at most 4,096 explicitly declared sources. Every input and
+total captured source text are bounded by 128 MiB, and the encoded source project
+must also fit 128 MiB. Existing inner request/response bounds still apply.
+Both grammars are tested separately; the adapter adds no mixed-grammar semantics.
 Files use fatal UTF8 decoding with BOM preservation, regular-file checks,
 bounded reads, snapshot change checks and relative non-symlink path traversal.
 A same-user hostile directory owner racing path components is not an OS
 sandbox threat model; use a stable host-owned project directory.
 
-The project adapter does not change independent checker120s, per compiler/tool
-request240s, semantic fuel, original/transformed strict IR, source/body pairing,
+The project adapter does not change independent checker 120s, per compiler/tool
+request 240s, semantic fuel, original/transformed strict IR, source/body pairing,
 memory/stack, optional-tool lifetime policies or negative tests. It does not
-promote the current123-module development compiler into the frozen122-module
+promote the current 123-module development compiler into the frozen 122-module
 G3 payloads. It does not qualify a new G2/G3 chain.
 
-Actual Linux npm execution is required before marking this candidate usable.
+Actual Linux npm qualification passed in the linked run, including all existing
+application/kernel/dispatch/publication/type regressions and the new CLI tasks.
 Portable Node implementation does not establish actual Windows/macOS
 publication. A public arbitrary extension SDK, watch/incremental compilation,
 richer compiler-origin structured diagnostics and final registry publication
 remain separate work. The independent human maintainer trial remains pending
 its arranged participant; CLI automation is not human usability evidence.
+
+## Find the implementation
+
+The developer adapter is deliberately separate from checking authority:
+
+| Responsibility | Source |
+| --- | --- |
+| Help, diagnostics, child transport and signals | [proofscript-cli.mjs](https://github.com/dwijayuda/pskernel/blob/7c27d754550ed92cd8ab19a51f8c768a919963b0/psc1/npm-cli/proofscript-cli.mjs#L66) |
+| Finite options and source-only project capture | [cli-project.mjs](https://github.com/dwijayuda/pskernel/blob/7c27d754550ed92cd8ab19a51f8c768a919963b0/psc1/npm-cli/cli-project.mjs#L62) |
+| Bounded exact-byte file snapshots | [readInput](https://github.com/dwijayuda/pskernel/blob/7c27d754550ed92cd8ab19a51f8c768a919963b0/psc1/npm-cli/cli-project.mjs#L19) |
+| Exclusive initialization | [initializeProject](https://github.com/dwijayuda/pskernel/blob/7c27d754550ed92cd8ab19a51f8c768a919963b0/psc1/npm-cli/cli-project.mjs#L205) |
+| Existing checked command and API, unchanged | [universal-cli.mjs](https://github.com/dwijayuda/pskernel/blob/7c27d754550ed92cd8ab19a51f8c768a919963b0/psc1/npm-cli/universal-cli.mjs), [universal.mjs](https://github.com/dwijayuda/pskernel/blob/7c27d754550ed92cd8ab19a51f8c768a919963b0/psc1/npm-cli/universal.mjs) |
+
+The source snapshot is passed as private source data to the existing command.
+It cannot nominate a checker, SDK or service executable. Follow the existing
+compilation walkthrough/pass contracts for the inner independent admission,
+strict IR, target validation and publication boundaries.

@@ -1,6 +1,6 @@
 # TypeScript workflow research and ProofScript CLI decisions
 
-Researched2026-10-26 from official TypeScript, npm, Node and VSCode documentation.
+Researched 2026-10-26 from official TypeScript, npm, Node and VS Code documentation.
 This is an implementation decision record, not a survey of all developers.
 The behavior hypotheses below are inferences from supported workflows; real
 user testing is still needed. The unassisted maintainer exercise is separate.
@@ -117,3 +117,29 @@ Do not retroactively assign new CLI behavior to the old tarball.
 5. Add general package resolution/extensions only under the existing closed
    authority constraints. Keep platform release execution and authorization
    distinct from Linux development qualification.
+
+## Exact source during application replay
+
+The installed application regression originally captures compiler sources from
+its working directory and checks their exact closure against the package.
+The new development tree already has the PR #190 body-preserving module extraction;
+it has 123 modules, while the unchanged packaged G3 has 122. Comparing these as
+if they were one source identity would be incorrect.
+
+The CLI application supervisor extracts the exact ancestral commit 8383c698 compiler
+source in Linux CI, checks its ancestry, and invokes the unchanged current
+application test there against the new installed package. All existing source,
+census, contract, admission and runtime assertions remain. A separate receipt
+records snapshot and tested commits. The ordinary source workflow continues to
+test the actual current 123-module tree. Neither route promotes that tree to G3.
+
+## Qualified result
+
+[CLI/toolchain run 40314294152](https://github.com/dwijayuda/pskernel/actions/runs/40314294152)
+passes 19 source groups, 55 installed requests and every preserved installed,
+application, kernel, dispatch, publication and packed-type gate. The exact
+[dated receipt](PSC1_CLI_QUALIFICATION_2026-10-26.json) records source/package
+identities and failed attempts. [Ordinary source 40314305497](https://github.com/dwijayuda/pskernel/actions/runs/40314305497)
+passes all 37 finite Practical Core criteria. This is a Linux engineering
+qualification; independent human comprehension, watch/editor features and final
+universal release remain separate.

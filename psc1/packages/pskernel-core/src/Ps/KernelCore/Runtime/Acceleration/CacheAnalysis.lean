@@ -119,6 +119,113 @@ def psKernelExprClosedCacheAnalysis
             (Prod.fst bodyAnalysis))
           false
 
+/- Experimental scalar result:65521 marks a free variable; every actual hash
+   is strictly below65521. The original recursive Prod worker and all public
+   consumers remain byte-preserved. No host cache or equality authority is added.
+   This helper is unused until exact refinement, portability and real timing pass. -/
+def psKernelExprClosedCachePackedWorker
+    (expr : PsKernelExpr) :
+    Nat :=
+  match expr with
+  | PsKernelExpr.bvar index =>
+      (psKernelCacheMix 21 index)
+  | PsKernelExpr.fvar _ =>
+      psKernelCacheHashModulus
+  | PsKernelExpr.mvar name =>
+              (psKernelCacheMix 23 (psKernelCacheNameHash name))
+  | PsKernelExpr.sort level =>
+              (psKernelCacheMix 24 (psKernelCacheLevelHash level))
+  | PsKernelExpr.const name levels =>
+              (psKernelCacheMix
+          (psKernelCacheMix 25 (psKernelCacheNameHash name))
+          (psKernelCacheLevelListHash levels))
+  | PsKernelExpr.app fn arg =>
+      let fnAnalysis := psKernelExprClosedCachePackedWorker fn;
+      if Nat.beq fnAnalysis psKernelCacheHashModulus then
+        psKernelCacheHashModulus
+      else
+        let argAnalysis := psKernelExprClosedCachePackedWorker arg;
+        if Nat.beq argAnalysis psKernelCacheHashModulus then
+          psKernelCacheHashModulus
+        else
+                      (psKernelCacheMix
+              (psKernelCacheMix 26 fnAnalysis)
+              argAnalysis)
+  | PsKernelExpr.lam _ type body _ =>
+      let typeAnalysis := psKernelExprClosedCachePackedWorker type;
+      if Nat.beq typeAnalysis psKernelCacheHashModulus then
+        psKernelCacheHashModulus
+      else
+        let bodyAnalysis := psKernelExprClosedCachePackedWorker body;
+        if Nat.beq bodyAnalysis psKernelCacheHashModulus then
+          psKernelCacheHashModulus
+        else
+                      (psKernelCacheMix
+              (psKernelCacheMix 27 typeAnalysis)
+              bodyAnalysis)
+  | PsKernelExpr.forallE _ type body _ =>
+      let typeAnalysis := psKernelExprClosedCachePackedWorker type;
+      if Nat.beq typeAnalysis psKernelCacheHashModulus then
+        psKernelCacheHashModulus
+      else
+        let bodyAnalysis := psKernelExprClosedCachePackedWorker body;
+        if Nat.beq bodyAnalysis psKernelCacheHashModulus then
+          psKernelCacheHashModulus
+        else
+                      (psKernelCacheMix
+              (psKernelCacheMix 28 typeAnalysis)
+              bodyAnalysis)
+  | PsKernelExpr.letE _ type value body nondep =>
+      let typeAnalysis := psKernelExprClosedCachePackedWorker type;
+      if Nat.beq typeAnalysis psKernelCacheHashModulus then
+        psKernelCacheHashModulus
+      else
+        let valueAnalysis := psKernelExprClosedCachePackedWorker value;
+        if Nat.beq valueAnalysis psKernelCacheHashModulus then
+          psKernelCacheHashModulus
+        else
+          let bodyAnalysis := psKernelExprClosedCachePackedWorker body;
+          if Nat.beq bodyAnalysis psKernelCacheHashModulus then
+            psKernelCacheHashModulus
+          else
+            let flag := if nondep then 1 else 0;
+                          (psKernelCacheMix
+                (psKernelCacheMix
+                  (psKernelCacheMix
+                    (psKernelCacheMix 29 typeAnalysis)
+                    valueAnalysis)
+                  bodyAnalysis)
+                flag)
+  | PsKernelExpr.lit literal =>
+              (psKernelCacheMix 30 (psKernelCacheLiteralHash literal))
+  | PsKernelExpr.mdata metadata body =>
+      let bodyAnalysis := psKernelExprClosedCachePackedWorker body;
+      if Nat.beq bodyAnalysis psKernelCacheHashModulus then
+        psKernelCacheHashModulus
+      else
+                  (psKernelCacheMix
+            (psKernelCacheMix 31 metadata)
+            bodyAnalysis)
+  | PsKernelExpr.proj typeName index body =>
+      let bodyAnalysis := psKernelExprClosedCachePackedWorker body;
+      if Nat.beq bodyAnalysis psKernelCacheHashModulus then
+        psKernelCacheHashModulus
+      else
+                  (psKernelCacheMix
+            (psKernelCacheMix
+              (psKernelCacheMix 32 (psKernelCacheNameHash typeName))
+              index)
+            bodyAnalysis)
+
+def psKernelExprClosedCachePackedDecode (value : Nat) : Prod Nat Bool :=
+  if Nat.beq value psKernelCacheHashModulus then
+    Prod.mk 0 true
+  else
+    Prod.mk value false
+
+def psKernelExprClosedCachePackedAnalysis (expr : PsKernelExpr) : Prod Nat Bool :=
+  psKernelExprClosedCachePackedDecode (psKernelExprClosedCachePackedWorker expr)
+
 /- Nonempty small caches retain their original eligibility scan and promotion path.
    Indexed caches share the scan/hash traversal and retain exact collisions. -/
 def psKernelSemanticExprMapGet

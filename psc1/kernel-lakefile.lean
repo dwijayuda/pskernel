@@ -37,6 +37,7 @@ lean_lib PsKernelCore where
     `Ps.KernelCore.API.DagNestedTransformed,
     `Ps.KernelCore.API.DagNestedRestoration,
     `Ps.KernelCore.API.DagNestedValidation,
+    `Ps.KernelCore.API.DagNestedAdmission,
     `Ps.KernelCore.API.DagMutualConstructorResult,
     `Ps.KernelCore.API.DagMutualRecursiveArgument,
     `Ps.KernelCore.API.DagMutualConstructorFields,

@@ -1,0 +1,5 @@
+## Public mutual admission adopted — 2026-10-26
+
+This scoped integration adopts the eleven-path production delta to tree `7471f228b9bbc1eb5b9c0b78b85bf326aac72929`, matching native-qualified library roots and tests. Evidence was committed first at `f845c993b8dfdd1a6f875be3cf1f5847b9d7667a` on the primary work branch. Native source4d627280 passed738 reports and1184 controls; coherent source2708d07d passed both complete-program routes with853 controls plus21 retained runtime harnesses; independent audit f0f0e530 passed. All247 other audited bindings remain unchanged.
+
+The unchanged full193 comparison remains strict FAIL:174 strict matches,17 timeouts,2 separate safety agreements. All193 classifications and176 completed raw semantic envelopes match the qualified baseline. Saved-report collector437a15aa passed without replay and preserves this failure. The separate cache717 experiment is excluded. Global B OPEN / C FAIL / D OPEN; generated String sample5 still has a1500s failure; nested admission, T07/T04/T09/T10/global proofs and release remain open. Main is not merged and npm is not published. Automatic integration CI must be evaluated on this adopted commit.

@@ -1,3 +1,7 @@
+## Public mutual admission adopted into scoped integration
+
+Integration commit `ff1aa23dc2c95785f5349dd7b7a022dac893f5ac` (parent aed070) adopts the exact qualified production tree `7471f228b9bbc1eb5b9c0b78b85bf326aac72929`, matching library roots,23new Lean test/entry files, qualification scripts/manifests and reproducible workflows. Evidence was committed first at `f845c993b8dfdd1a6f875be3cf1f5847b9d7667a`. Integration ref and production tree were read back. The primary work branch is being aligned to this same production slice. Cache717 production/proof-body changes remain excluded. All older pending adoption notices below are historical. Automatic integration CI is pending; strict193 remains FAIL174/17/2 and the generated String1500s blocker remains open. B OPEN / C FAIL / D OPEN.
+
 ## Qualified public mutual slice — paired programs/audit PASS; unchanged strict193 FAIL; scoped adoption next
 
 Recorded2026-10-26UTC. Integration is still `aed07022222c8330b17636c3f894874058bfe571` /tree `65d5b9c3d0431a8b86961b6d1aec398f7169d223` at this evidence checkpoint. The exact public mutual candidate production tree is `7471f228b9bbc1eb5b9c0b78b85bf326aac72929`: ten new core files and only API/Dag.lean modified, plus qualified library roots. The independent cache experiment is excluded. Older pending statuses below are historical.

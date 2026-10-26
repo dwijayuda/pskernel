@@ -1,0 +1,132 @@
+{
+  "source": "2f7ee0afc1cc2fbccdf47b4f140b5cf01eb05c89",
+  "run": 40228598527,
+  "helpers": [
+    {
+      "path": "psc1/scripts/pskernel-empty-semantic-cache-smoke.mjs",
+      "bytes": 4508,
+      "sha256": "0cce9ce96ace90dcd6ac9cfe1c7a5352d4aca3f05a842fa76e89112961277721",
+      "requiredFinalPassPrefix": "PSC1_EMPTY_SEMANTIC_CACHE_JS: PASS "
+    },
+    {
+      "path": "psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs",
+      "bytes": 7826,
+      "sha256": "0cdc843f9fdbe7c0e9a150f3026dcf6ae6cbc75f5441536d687ce6d35d05f736",
+      "requiredFinalPassPrefix": "PSC1_CLOSED_CACHE_ANALYSIS_JS: PASS "
+    },
+    {
+      "path": "psc1/scripts/pskernel-expr-v2-dag-smoke.mjs",
+      "bytes": 244729,
+      "sha256": "b931f685eb8b1fd8f189e1ce9f0b1ca655ddf1320d801f5b4ace93d64b7660b0",
+      "requiredFinalPassPrefix": "PSC1_V2_DAG_JS_MUTUAL_FRESH_MEMBER: PASS"
+    },
+    {
+      "path": "psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs",
+      "bytes": 28982,
+      "sha256": "dec5fd091b9d22797c21d146d79fa541cfbc4d1fea1c0d1d648598bcb96128db",
+      "requiredFinalPassPrefix": "PSC1_V2_SESSION_OWNERS_JS: PASS kinds=8 direct=7 privateIDs=5 forks=2"
+    },
+    {
+      "path": "psc1/scripts/pskernel-expr-v2-quot-owner-smoke.mjs",
+      "bytes": 28066,
+      "sha256": "20b3dff6219a7116e456ca6801ebfe9eafbc3d138c48185ed071e7b0445edb27",
+      "requiredFinalPassPrefix": "PSC1_V2_QUOT_OWNER_JS_PASS owners=4 cases=10 checks=180 whnf=180 defeq=180 invalidChecks=90 admissions=17 plans=10 repairs=5 private=13 independentPositive=10 independentNegative=7 assertions="
+    },
+    {
+      "path": "psc1/scripts/pskernel-expr-v2-transform-delay-smoke.mjs",
+      "bytes": 8829,
+      "sha256": "6d37adba950f4d77cde78c9c82ef9607f641e25ced9a7e275e005595c1aa8421",
+      "requiredFinalPassPrefix": "PSC1_TRANSFORM_DELAY_RAW_JS: PASS assertions=23 exports=3 stagedArrows=11"
+    },
+    {
+      "path": "psc1/scripts/pskernel-generated-smoke.mjs",
+      "bytes": 12610,
+      "sha256": "2d9b960d57b7a20e09a880bd58e2461fee003a1d4bfbdd75a80c6fde3e7364ab",
+      "requiredFinalPassPrefix": "PSKERNEL_GENERATED_SMOKE: PASS"
+    },
+    {
+      "path": "psc1/scripts/pskernel-invalid-recursor-occurrence-smoke.mjs",
+      "bytes": 5956,
+      "sha256": "a9c7a040d762cd9e8043e5977c736a13e9edef945691b64a9694512d6233766b",
+      "requiredFinalPassPrefix": "PSC1_INVALID_RECURSOR_OCCURRENCE_JS: PASS "
+    },
+    {
+      "path": "psc1/scripts/pskernel-ordinary-admission-private-smoke.mjs",
+      "bytes": 27529,
+      "sha256": "c05a5dd714c719aa6d75d7b8b0f5d88ac98afb4dfb6bd6b930d2a608a00f707c",
+      "requiredFinalPassPrefix": "PSC1_ORDINARY_ADMISSION_PRIVATE_JS: PASS assertions=143 privateAdmission=true fullAdmission=false"
+    },
+    {
+      "path": "psc1/scripts/pskernel-ordinary-admission-public-smoke.mjs",
+      "bytes": 9402,
+      "sha256": "19216cf873cdc48228da2775c5b6643bc41f66540574fdce19adaf89c7c15128",
+      "requiredFinalPassPrefix": "PSC1_ORDINARY_ADMISSION_PUBLIC_JS: PASS assertions=12 publicRoutingChanged=true ordinaryAdmission=true"
+    },
+    {
+      "path": "psc1/scripts/pskernel-ordinary-constructor-analysis-smoke.mjs",
+      "bytes": 17928,
+      "sha256": "940aefac2570888ea49b9146d7a3c487d47d51b9b31d896c4bdfd037699c04d5",
+      "requiredFinalPassPrefix": "PSC1_ORDINARY_CONSTRUCTOR_ANALYSIS_JS: PASS assertions=93 fullAdmission=false"
+    },
+    {
+      "path": "psc1/scripts/pskernel-ordinary-constructor-loop-smoke.mjs",
+      "bytes": 24687,
+      "sha256": "24bc0276b4fc75a68f3c54ab7fd4fc7e6b50c14d90ec5e9ad5b1f4bb55c9c08e",
+      "requiredFinalPassPrefix": "PSC1_ORDINARY_CONSTRUCTOR_LOOP_JS: PASS assertions=69 fullAdmission=false"
+    },
+    {
+      "path": "psc1/scripts/pskernel-ordinary-constructor-fields-smoke.mjs",
+      "bytes": 22405,
+      "sha256": "0b7ee568b7d26bc13691fd85aca6ae73ae70ca164f58386ddeaaafbb6e094a6e",
+      "requiredFinalPassPrefix": "PSC1_ORDINARY_CONSTRUCTOR_FIELDS_JS: PASS assertions=268 fullAdmission=false"
+    },
+    {
+      "path": "psc1/scripts/pskernel-ordinary-constructor-params-smoke.mjs",
+      "bytes": 18519,
+      "sha256": "05da9fda801a50355b668e559344db52c3e1938ec140d1f621ce3c49a0100660",
+      "requiredFinalPassPrefix": "PSC1_ORDINARY_CONSTRUCTOR_PARAMS_JS: PASS assertions=268 fullAdmission=false"
+    },
+    {
+      "path": "psc1/scripts/pskernel-ordinary-constructor-result-smoke.mjs",
+      "bytes": 13348,
+      "sha256": "4fd3188fff0ab33e5d1b4d63fa4f22d506d4a942eff09972abc6149fe2c6854a",
+      "requiredFinalPassPrefix": "PSC1_ORDINARY_CONSTRUCTOR_RESULT_JS: PASS assertions=432 fullAdmission=false"
+    },
+    {
+      "path": "psc1/scripts/pskernel-ordinary-elimination-smoke.mjs",
+      "bytes": 27645,
+      "sha256": "6197194c3b7fef20c621e071ffc0df44fb877121a8ec557eba368cc60dbfc248",
+      "requiredFinalPassPrefix": "PSC1_ORDINARY_ELIMINATION_JS: PASS assertions=116 fullAdmission=false"
+    },
+    {
+      "path": "psc1/scripts/pskernel-ordinary-header-smoke.mjs",
+      "bytes": 25991,
+      "sha256": "f2f88e23149ebaecd8de4f06b42073f28de295471ac7a2eef6e7056f9b0cb153",
+      "requiredFinalPassPrefix": "PSC1_ORDINARY_HEADER_JS: PASS "
+    },
+    {
+      "path": "psc1/scripts/pskernel-quot-session-owner-smoke.mjs",
+      "bytes": 34105,
+      "sha256": "159077fb8aa10ad351fb9f61e140653e28adaaac5e8278e16152d14168214c05",
+      "requiredFinalPassPrefix": "PSC1_QUOT_SESSION_OWNER_JS: PASS "
+    },
+    {
+      "path": "psc1/scripts/pskernel-scalar-hash-short-entry-smoke.mjs",
+      "bytes": 1126,
+      "sha256": "eccbbb7ba74b84070a9517461326b94495d1da988c2f26eac3256257b38c9eff",
+      "requiredFinalPassPrefix": "PSC1_SCALAR_HASH_SHORT_ENTRY_JS: PASS "
+    },
+    {
+      "path": "psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs",
+      "bytes": 2546,
+      "sha256": "1323f554a62df24794c361ad920a1df92b1ad7fb929537aa7e37ad2c2cf5695c",
+      "requiredFinalPassPrefix": "PSC1_SCALAR_HASH_WORKER_JS: PASS "
+    },
+    {
+      "path": "psc1/scripts/pskernel-unary-spine-smoke.mjs",
+      "bytes": 5583,
+      "sha256": "9053a5bfc66687c7d1529c6f18179bfb97ced1e41ac0dd3d24ae039d60612d2b",
+      "requiredFinalPassPrefix": "PSC1_UNARY_SPINE_JS: PASS "
+    }
+  ]
+}

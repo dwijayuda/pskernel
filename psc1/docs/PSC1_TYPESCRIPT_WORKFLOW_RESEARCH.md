@@ -87,8 +87,15 @@ official Lean4.35, strict IR, negative tests, resource bounds and fixed-point
 identities remain unchanged. The .8 candidate changes host entry points and
 package documentation only. A fast assembler verifies a previously successful
 exact .7 installed artifact, compares every retained production host source
-against the current checkout, preserves every payload byte, and rebuilds only
-the host root manifest/package. Canonical full assembly uses the same new CLI.
+against the current checkout, preserves every executable payload byte, and rebuilds only
+the host root manifest/package. Real installed testing also exposed reverse
+optional peers from the three emit-only component/Python/PHP tools to exactly
+the .7 root. Installing these after a .8 root let npm prune that root. The .8
+tool metadata repacks remove this unnecessary reverse dependency; workers,
+runtimes and all other tool files remain byte-identical. The root still
+requires each exact optional tool version, manifest and resource hash. This
+separates npm installation topology from checking authority. Canonical full
+assembly uses the same new CLI and decoupled emit-only package metadata.
 
 The older seven-target capability document deliberately continues describing
 the qualified .7 artifact; the new CLI guide explicitly labels the .8 candidate.

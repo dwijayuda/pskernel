@@ -76,7 +76,10 @@ exact package and platform requirements. Missing optional dependencies refuse
 with their existing pinned package diagnostic. The CLI does not install them
 or download an SDK. --rust-toolchain-root remains an explicit host-owned path.
 See the existing checked-dispatch installation guide for those dependencies;
-use this candidate's root tarball with the retained pinned optional tarballs.
+use this candidate's root and optional tarballs from its package receipt.
+Rust/Wasm engines retain .7 payload packages. The component/Python/PHP tools
+are .8 metadata-only repacks: identical workers/runtimes, without a reverse
+root peer dependency that could make npm prune the installed compiler.
 
 Projects contain sources and optional assurance only. They cannot choose
 engine, kernel, output, SDKs, checkers, services or publication policy. Pass

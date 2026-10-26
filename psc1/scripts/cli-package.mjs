@@ -66,8 +66,49 @@ const version = '0.1.0-psc1.8';
 const added = ['npm-cli/proofscript-cli.mjs', 'npm-cli/cli-project.mjs'];
 for (const file of added) fs.copyFileSync(file, path.join(stage, file));
 fs.chmodSync(path.join(stage, added[0]), 0o755);
+// Emit-only providers do not import the root. Their reverse optional root peer
+// was version-coupled to .7 and npm can prune a .8 root when adding them.
+// Compatibility authority remains the root's exact file/manifest pins.
+const repackagedTools = [];
+for (const [target, descriptor] of Object.entries(d.dispatchPackages)) {
+  const oldTar = path.join(out, 'tarballs', descriptor.tarball);
+  assert.equal(sha256(fs.readFileSync(oldTar)), descriptor.tarballSha256);
+  const directory = path.join(out, 'cli-tools', target);
+  fs.mkdirSync(directory, {recursive: true});
+  for (const name of run('tar', ['tzf', oldTar]).split('\n').filter(Boolean))
+    assert.ok(name.startsWith('package/') && !name.includes('\\') && !name.split('/').includes('..'));
+  run('tar', ['xzf', oldTar, '-C', directory]);
+  const tool = path.join(directory, 'package'), prior = inventory(tool);
+  assert.deepEqual(prior, descriptor.files);
+  const packageFile = path.join(tool, 'package.json');
+  const toolMeta = JSON.parse(fs.readFileSync(packageFile));
+  assert.equal(toolMeta.name, descriptor.package);
+  assert.equal(toolMeta.version, descriptor.version);
+  assert.deepEqual(toolMeta.peerDependencies, {proofscript: '0.1.0-psc1.7'});
+  assert.deepEqual(toolMeta.peerDependenciesMeta, {proofscript: {optional: true}});
+  toolMeta.version = version;
+  delete toolMeta.peerDependencies;
+  delete toolMeta.peerDependenciesMeta;
+  fs.writeFileSync(packageFile, JSON.stringify(toolMeta, null, 2) + '\n');
+  const next = inventory(tool);
+  assert.deepEqual(next.filter(p => p.path !== 'package.json'),
+    prior.filter(p => p.path !== 'package.json'), 'only optional package metadata may change');
+  const packedTool = JSON.parse(run('npm', ['pack', tool, '--ignore-scripts', '--json',
+    '--pack-destination', path.join(out, 'tarballs')]));
+  assert.equal(packedTool.length, 1);
+  const nextTar = packedTool[0].filename;
+  descriptor.version = version; descriptor.files = next;
+  descriptor.tarball = nextTar;
+  descriptor.tarballSha256 = sha256(fs.readFileSync(path.join(out, 'tarballs', nextTar)));
+  repackagedTools.push({target, package: descriptor.package, version,
+    unchangedPayloadFiles: prior.length - 1, metadataOnly: true,
+    tarball: nextTar, sha256: descriptor.tarballSha256});
+  fs.unlinkSync(oldTar);
+}
 const metaFile = path.join(stage, 'package.json'), meta = JSON.parse(fs.readFileSync(metaFile));
 meta.version = version;
+for (const descriptor of Object.values(d.dispatchPackages))
+  meta.peerDependencies[descriptor.package] = descriptor.version;
 meta.bin = {proofscript: './npm-cli/proofscript-cli.mjs',
   psc: './npm-cli/proofscript-cli.mjs', psc1: './npm-cli/proofscript-cli.mjs'};
 fs.writeFileSync(metaFile, JSON.stringify(meta, null, 2) + '\n');
@@ -77,6 +118,7 @@ for (const name of ['npm-shrinkwrap.json', 'DEPENDENCY_LOCK.json']) {
   if (name === 'npm-shrinkwrap.json' && !fs.existsSync(file)) continue;
   const lock = JSON.parse(fs.readFileSync(file));
   lock.version = version; lock.packages[''].version = version;
+  lock.packages[''].peerDependencies = meta.peerDependencies;
   fs.writeFileSync(file, JSON.stringify(lock, null, 2) + '\n');
 }
 const guide = fs.readFileSync('docs/PSC1_CLI.md', 'utf8');
@@ -100,7 +142,8 @@ const packed = JSON.parse(run('npm', ['pack', stage, '--ignore-scripts', '--json
   '--pack-destination', path.join(out, 'tarballs')]));
 assert.equal(packed.length, 1);
 const packedFile = path.join(out, 'tarballs', packed[0].filename), packedBytes = fs.readFileSync(packedFile);
-const receipt = {...original, sourceCommit: process.env.GITHUB_SHA, version,
+fs.unlinkSync(tar); // Retain the original only in its immutable input archive.
+const receipt = {...original, dispatchPackages: d.dispatchPackages, repackagedTools, sourceCommit: process.env.GITHUB_SHA, version,
   tarball: packed[0].filename, sha256: sha256(packedBytes), bytes: packedBytes.length,
   hostOnly: true, hostInput: input, preservedPayloadFiles: before.filter(row => !changed.has(row.path)).length,
   sizeRatio: packedBytes.length / original.previousRootBytes,

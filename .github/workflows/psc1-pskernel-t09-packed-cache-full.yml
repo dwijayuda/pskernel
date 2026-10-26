@@ -1,0 +1,246 @@
+name: PSC1 scalar cache analysis complete generated and canonical qualification
+'on':
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-t09-packed-cache-full-20261026
+    paths:
+    - .github/workflows/psc1-pskernel-t09-packed-cache-full.yml
+    - psc1/scripts/pskernel-packed-cache-smoke.mjs
+    - psc1/test/packed-cache-retained-249-manifest.json
+    - psc1/packages/pskernel-core/src/**
+permissions:
+  contents: read
+  actions: read
+jobs:
+  complete-routes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        fetch-depth: 0
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Authenticate750 reports1201 controls342 source snapshots and243 unchanged audited bindings
+      env:
+        GH_TOKEN: ${{ github.token }}
+      shell: bash
+      run: "set -euo pipefail\npython3 - <<'PYCODE'\nimport hashlib,io,json,os,pathlib,subprocess,urllib.request,urllib.error,zipfile\n\
+        out=pathlib.Path(os.environ['RUNNER_TEMP'])/'mutual-generated';out.mkdir()\nbase='https://api.github.com/repos/dwijayuda/pskernel'\n\
+        class NoRedirect(urllib.request.HTTPRedirectHandler):\n    def redirect_request(self,req,fp,code,msg,headers,newurl):return\
+        \ None\ndef get(route):\n    req=urllib.request.Request(base+route,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})\n\
+        \    try:return urllib.request.build_opener(NoRedirect()).open(req,timeout=120).read()\n    except urllib.error.HTTPError\
+        \ as error:\n        assert error.code in (301,302,303,307,308)\n        url=error.headers['Location'];assert\
+        \ url.startswith('https://')\n        return urllib.request.urlopen(urllib.request.Request(url),timeout=120).read()\n\
+        def archive(source,run,artifact,size,sha,members,name):\n    r=json.loads(get('/actions/runs/'+str(run)));assert\
+        \ r['head_sha']==source and r['status']=='completed' and r['conclusion']=='success' and r['run_attempt']==1\n\
+        \    a=json.loads(get('/actions/artifacts/'+str(artifact)));assert a['workflow_run']['id']==run and a['workflow_run']['head_sha']==source\
+        \ and not a['expired']\n    assert a['size_in_bytes']==size and a['digest']=='sha256:'+sha\n    raw=get('/actions/artifacts/'+str(artifact)+'/zip');assert\
+        \ len(raw)==size and hashlib.sha256(raw).hexdigest()==sha\n    z=zipfile.ZipFile(io.BytesIO(raw));assert\
+        \ len(z.namelist())==len(set(z.namelist()))==members and z.testzip() is None\n    (out/name).write_bytes(raw);return\
+        \ z\nnative_source='f675f3c286c966c4d2f37c5e565052f107613e24'\nn=archive(native_source,40306586749,12643406416,1005234,'ed8c06513686eb938a4092d645fe611664d42b1942d71d8f9fa6321cba1f471f',415,'authenticated-native750.zip')\n\
+        manifest=json.loads(n.read('files.json'));assert manifest['source']==native_source\nsources=0\nfor path,pin\
+        \ in manifest['files'].items():\n    data=n.read(path);assert len(data)==pin['bytes'] and hashlib.sha256(data).hexdigest()==pin['sha256']\n\
+        \    if path.startswith('source/'):\n        p=path.removeprefix('source/');assert data==subprocess.check_output(['git','show','HEAD:'+p]),p\n\
+        \        sources+=1\nassert sources==342\nsubprocess.run(['git','diff','--exit-code',native_source,'HEAD','--','psc1/packages/pskernel-core/src','psc1/kernel-lakefile.lean','psc1/lean-toolchain'],check=True)\n\
+        import re\nproofs=[('packed-cache-proofs.log','PsKernelPackedCacheAnalysisProofs',2),('nested-hygiene-proofs.log','PsKernelNestedParamHygieneProofs',10),('public-proofs.log','PsKernelMutualAdmissionPublicProofs',2),('admission-proofs.log','PsKernelMutualAdmissionProofs',20),('recursor-proofs.log','PsKernelMutualRecursorValidationProofs',31),('generated-proofs.log','PsKernelMutualGeneratedProofs',15),('proofs.log','PsKernelMutualConstructorLoopProofs',16),('retained-constructor-proofs.log','PsKernelMutualConstructorAnalysisProofs',22),('retained-fields-proofs.log','PsKernelMutualConstructorFieldsProofs',18),('retained-recursive-proofs.log','PsKernelMutualRecursiveArgumentProofs',15),('retained-count-proofs.log','PsKernelExpandedSizeProofs',11),('header-proofs.log','PsKernelMutualHeaderProofs',17),('family-proofs.log','PsKernelMutualConstructorResultProofs',10)]\n\
+        for filename,namespace,count in proofs:\n    text=n.read(filename).decode();assert not any(x in text for\
+        \ x in ['error:','sorryAx','Lean.ofReduceBool','Lean.trustCompiler'])\n    rows=re.findall(r\"'(\"+namespace+r\"\
+        \\.[^']+)' (?:depends on axioms: \\[([^\\]]*)\\]|does not depend on any axioms)\",text)\n    assert len(rows)==len({name\
+        \ for name,_ in rows})==count,(filename,rows)\n    for name,axioms in rows:assert set(x.strip() for x in\
+        \ axioms.split(',') if x.strip())<={'propext','Classical.choice','Quot.sound'}\nretained=json.loads(n.read('retained561/receipt.json'))\n\
+        assert retained['source']==native_source and retained['all38OtherProofSourceFilesByteIdenticalToQualifiedBaseline']\
+        \ and retained['twoExactPackedProofBodyRepairsOnly'] and retained['all561TheoremStatementsAndNamesUnchanged']\
+        \ and retained['all561NamesExactlyRetainedAndKernelChecked']\nmanifest561=json.loads(n.read('source/psc1/test/retained-561-proof-manifest.json'))\n\
+        assert len(manifest561['modules'])==40 and len(manifest561['expectedNames'])==561\nactual561=[]\nfor module,names\
+        \ in manifest561['modules'].items():\n    text=n.read('retained561/'+module+'.log').decode()\n    assert\
+        \ not any(x in text for x in ['error:','sorryAx','Lean.ofReduceBool','Lean.trustCompiler'])\n    rows=re.findall(r\"\
+        '([^']+)' (?:depends on axioms: \\[([^\\]]*)\\]|does not depend on any axioms)\",text)\n    assert len(rows)==len({name\
+        \ for name,_ in rows})==len(names) and {name for name,_ in rows}==set(names)\n    for name,axioms in rows:assert\
+        \ set(x.strip() for x in axioms.split(',') if x.strip())<={'propext','Classical.choice','Quot.sound'}\n\
+        \    actual561+=[name for name,_ in rows]\nassert len(actual561)==len(set(actual561))==561 and set(actual561)==set(manifest561['expectedNames'])\n\
+        controls=[('public-native.log','PSC1_MUTUAL_PUBLIC_ASSERT ',12),('admission-native.log','PSC1_MUTUAL_ADMISSION_ASSERT\
+        \ ',240),('recursor-native.log','PSC1_MUTUAL_RECURSOR_ASSERT ',169),('generated-native.log','PSC1_MUTUAL_GENERATED_ASSERT\
+        \ ',162),('native.log','PSC1_MUTUAL_LOOP_ASSERT ',52),('retained-constructor-native.log','PSC1_MUTUAL_CONSTRUCTOR_ASSERT\
+        \ ',189),('retained-fields-native.log','PSC1_MUTUAL_FIELDS_ASSERT ',83),('retained-recursive-native.log','PSC1_MUTUAL_RECURSIVE_ASSERT\
+        \ ',88),('count-native.log','PSC1_EXPANDED_SIZE_ASSERT ',26),('header-native.log','PSC1_MUTUAL_HEADER_ASSERT\
+        \ ',49),('family-native.log','PSC1_MUTUAL_RESULT_ASSERT ',114)]\nnative_labels={}\nfor filename,tag,count\
+        \ in controls:\n    text=n.read(filename).decode();labels=[line[len(tag):] for line in text.splitlines()\
+        \ if line.startswith(tag)]\n    assert len(labels)==len(set(labels))==count\n    native_labels[tag.split('_ASSERT')[0]]=labels\n\
+        assert sum(map(len,native_labels.values()))==1184\nassert len([label for label in native_labels['PSC1_MUTUAL_HEADER']\
+        \ if label.startswith('actual-retained-mutual-error-')])==16\n# Pure-plan162 and isolated-recursor169 remain\
+        \ independently native-qualified.\n# Fresh generated cohort exercises the complete transaction240 plus retained601.\n\
+        del native_labels['PSC1_MUTUAL_GENERATED'];del native_labels['PSC1_MUTUAL_RECURSOR']\nassert sum(map(len,native_labels.values()))==853\n\
+        (out/'native-labels.json').write_text(json.dumps(native_labels,indent=2)+'\\n')\n\nt=n.read('nested-hygiene-native.log').decode()\n\
+        hygiene_labels=[s.removeprefix('PSC1_NESTED_PARAM_HYGIENE_ASSERT ') for s in t.splitlines() if s.startswith('PSC1_NESTED_PARAM_HYGIENE_ASSERT\
+        \ ')]\nassert len(hygiene_labels)==len(set(hygiene_labels))==17\nd=json.loads(n.read('hygiene-diagnostic.json'))\n\
+        assert d['source']==native_source and d['officialValidAccepted'] and d['officialFreeVariableRejected']\n\
+        assert not d['observedCapturedFreeVariableAccepted'] and not d['publishedConstructorMatchesDifferentClosedInput']\n\
+        assert d['nestedCollidingFreeVariable']=='rejectedInvalid: nested preprocessing: declaration has free variables'\n\
+        (out/'hygiene-native-labels.json').write_text(json.dumps(hygiene_labels,indent=2)+'\\n')\n\ncompiler_source='14dad2ce6eaef9fa71170f28650a5c626eca4a76'\n\
+        c=archive(compiler_source,40213489105,12606866673,2561674,'c28da8d4d57a5a59a1ff686b2ce671102b20073bd00bf32450fae37cf2ab8dec',40,'authenticated-compiler.zip')\n\
+        receipt=json.loads(c.read('compiler-receipt.json'));assert receipt['sourceSha']==compiler_source\nfor path,sha\
+        \ in receipt['files'].items():assert hashlib.sha256(c.read(path)).hexdigest()==sha,path\nbinary=c.read('psc1');assert\
+        \ hashlib.sha256(binary).hexdigest()==receipt['compilerSha256']=='13635a423d1343e9a4770be0b7e02d859a6b845b221a0363d19bfdfab8e3cc1c'\n\
+        packages=[str(p) for p in pathlib.Path('psc1/packages').iterdir() if p.is_dir() and p.name!='pskernel-core']\n\
+        stable=packages+['psc1/lakefile.lean','psc1/lake-manifest.json','psc1/lean-toolchain','psc1/host','psc1/stdlib','psc1/psconfig.json']\n\
+        subprocess.run(['git','diff','--exit-code',compiler_source,'HEAD','--',*stable],check=True)\nexe=pathlib.Path(os.environ['RUNNER_TEMP'])/'mutual-psc1';exe.write_bytes(binary);exe.chmod(0o700)\n\
+        baseline249=json.loads(pathlib.Path('psc1/test/packed-cache-retained-249-manifest.json').read_text())\n\
+        assert len(baseline249['bindings'])==249 and len(baseline249['intentionalNativeQualifiedChanges'])==6\n\
+        for spec in baseline249['bindings']:\n    path=spec['path'];wanted=baseline249['intentionalNativeQualifiedChanges'].get(path,spec['gitBlobSha'])\n\
+        \    assert subprocess.check_output(['git','rev-parse','HEAD:'+path]).decode().strip()==wanted,(path,'audited249binding')\n\
+        snapshots=[]\npaths=['psc1/scripts/pskernel-packed-cache-smoke.mjs','psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean','psc1/scripts/pskernel-nested-param-hygiene-smoke.mjs','psc1/test/packed-cache-retained-249-manifest.json','psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Rebase.lean','psc1/packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean',\n\
+        \    'psc1/scripts/pskernel-mutual-complete-smoke.mjs','psc1/scripts/pskernel-mutual-public-smoke.mjs',\n\
+        \    'psc1/scripts/pskernel-mutual-retained-runtime-audit.py','psc1/test/retained-21-generated-helper-manifest.json','psc1/test/retained-249-audited-input-manifest.json',\n\
+        \    '.github/workflows/psc1-pskernel-t09-packed-cache-full.yml',\n    'psc1/scripts/bootstrap-project.mjs','psc1/scripts/bootstrap-manifest.mjs','psc1/scripts/workspace-layout.mjs','psc1/scripts/pskernel-authenticated-translate-lake.sh']\n\
+        paths+=['psc1/packages/pskernel-core/src/Ps/KernelCore/'+p+'.lean' for p in ['API/Dag','API/DagMutualHeader','API/DagMutualConstructorResult','Core/ExprV2/ExpandedSize','API/DagMutualRecursiveArgument','API/DagMutualConstructorFields','API/DagMutualConstructorAnalysis','API/DagMutualConstructorLoop','API/DagMutualGenerated','API/DagMutualRecursorValidation','API/DagMutualAdmission']]\n\
+        legacy=json.loads(pathlib.Path('psc1/test/retained-21-generated-helper-manifest.json').read_text());assert\
+        \ len(legacy['helpers'])==21\nfor spec in legacy['helpers']:\n    path=spec['path'];data=pathlib.Path(path).read_bytes()\n\
+        \    assert len(data)==spec['bytes'] and hashlib.sha256(data).hexdigest()==spec['sha256']\n    assert data==subprocess.check_output(['git','show',legacy['source']+':'+path])\n\
+        \    paths.append(path)\nfor path in ['psc1/scripts/bootstrap-project.mjs','psc1/scripts/bootstrap-manifest.mjs','psc1/scripts/workspace-layout.mjs']:\n\
+        \    assert pathlib.Path(path).read_bytes()==subprocess.check_output(['git','show','2f7ee0afc1cc2fbccdf47b4f140b5cf01eb05c89:'+path])\n\
+        for p in paths:\n    data=pathlib.Path(p).read_bytes();assert data==subprocess.check_output(['git','show','HEAD:'+p]);dest=out/'sources'/p;dest.parent.mkdir(parents=True,exist_ok=True);dest.write_bytes(data);snapshots.append({'path':p,'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()})\n\
+        record={'schema':'psc1-corrected-mutual-parity-generated-preflight-v1','source':os.environ['GITHUB_SHA'],'run':os.environ['GITHUB_RUN_ID'],'nativeSource':native_source,'nativeRun':40306586749,'nativeReports':750,'nativeAssertions':1184,'generatedAssertions':853,'all342NativeSourceSnapshotsMatchActualGit':True,'all16NegativeErrorsCompareActualOriginalAdmission':True,'compilerSource':compiler_source,'compilerSha256':receipt['compilerSha256'],'allCompilerBuildSourcesUnchanged':True,'entry':'packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean','route':os.environ['PSC1_MUTUAL_ROUTE'],'snapshots':snapshots,'nestedCaptureReports':10,'nestedCaptureControls':17,'unchangedAuditedInputs':243,'qualifiedAuditedChanges':6,'packedCacheReports':2,'packedRuntimeControls':2400,'scope':'Isolated\
+        \ scalar cache analysis:750 reports/342 source snapshots,870 retained controls and2400 actual original worker\
+        \ comparisons plus21 legacy harnesses. Corrected Rebase preserved. No performance or adoption/global qualification.','privateRuntimeFuel':256,'publicRuntimeFuel':4096,'retainedRuntimeFuel':'unchanged\
+        \ per authenticated harness','runtimeDeadlineSeconds':600,'oldSpaceMiB':2048,'emptyPATH':True,'priorCopiedReferenceErrorClaimsSuperseded':True}\n\
+        (out/'inputs.json').write_text(json.dumps(record,indent=2)+'\\n');print(json.dumps(record))\nPYCODE\n"
+    - name: Install exact retained TypeScript7.0.2
+      shell: bash
+      run: 'set -euo pipefail
+
+        mkdir -p "$RUNNER_TEMP/mutual-ts"
+
+        printf ''%s\n'' ''{"name":"psc1-mutual-ts","private":true,"version":"0.0.0"}'' > "$RUNNER_TEMP/mutual-ts/package.json"
+
+        npm install --prefix "$RUNNER_TEMP/mutual-ts" --no-save --ignore-scripts --no-audit --no-fund typescript@7.0.2
+
+        TSC_PATH="$RUNNER_TEMP/mutual-ts/node_modules/typescript/bin/tsc"
+
+        test "$(node "$TSC_PATH" --version)" = ''Version 7.0.2''
+
+        printf ''PSC0_TSC=%s\n'' "$TSC_PATH" >> "$GITHUB_ENV"
+
+        '
+    - name: Check fresh complete Lean and canonical closure and build whole production program
+      working-directory: psc1
+      shell: bash
+      run: "set -euo pipefail\nOUT=\"$RUNNER_TEMP/mutual-generated\"\nexport PSC1_T05_DIR=\"$OUT\" PSC1_T05_ROUTE=\"\
+        $PSC1_MUTUAL_ROUTE\"\nnode --input-type=module <<'NODE'\nimport {readFileSync,writeFileSync,mkdirSync,copyFileSync}\
+        \ from 'node:fs';\nimport {createHash} from 'node:crypto';\nimport path from 'node:path';\nimport {packageBySection,parseImports}\
+        \ from './scripts/workspace-layout.mjs';\nconst entry='packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean',visited=new\
+        \ Set();\nfunction visit(source){\n if(visited.has(source))return;visited.add(source);\n for(const imported\
+        \ of parseImports(readFileSync(source,'utf8'))){\n  const parts=imported.split('.');let dependency;\n  if(parts[0]==='ProofScript')dependency=path.posix.join('stdlib',...parts)+'.lean';\n\
+        \  else if(parts[0]==='Ps'&&packageBySection.has(parts[1]))dependency=path.posix.join('packages',packageBySection.get(parts[1]),'src',...parts)+'.lean';\n\
+        \  else throw Error('UNKNOWN_IMPORT '+imported);\n  visit(dependency);\n }\n}\nvisit(entry);\nfor(const\
+        \ module of ['API/DagMutualHeader','API/DagMutualConstructorResult','Core/ExprV2/ExpandedSize','API/DagMutualRecursiveArgument','API/DagMutualConstructorFields','API/DagMutualConstructorAnalysis','API/DagMutualConstructorLoop','API/DagMutualGenerated','API/DagMutualRecursorValidation','API/DagMutualAdmission'])\n\
+        \ if(!visited.has('packages/pskernel-core/src/Ps/KernelCore/'+module+'.lean'))throw Error('Missing mutual\
+        \ module '+module);\nconst files=[...visited].sort().map(source=>{\n const bytes=readFileSync(source),target=path.join(process.env.PSC1_T05_DIR,'lean-source',source);\n\
+        \ mkdirSync(path.dirname(target),{recursive:true});copyFileSync(source,target);\n return {path:source,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')};\n\
+        });\nwriteFileSync(process.env.PSC1_T05_DIR+'/lean-source-manifest.json',JSON.stringify({source:process.env.GITHUB_SHA,entry,files},null,2)+'\\\
+        n');\nconsole.log('PSC1_MUTUAL_FULL_LEAN_CLOSURE: PASS modules='+files.length);\nNODE\ntar -czf \"$OUT/lean-source.tar.gz\"\
+        \ -C \"$OUT/lean-source\" .\ntimeout --signal=KILL 1800s \"$RUNNER_TEMP/mutual-psc1\" check packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean\
+        \ 2>&1 | tee \"$OUT/complete-lean-check.log\"\nif [ \"$PSC1_MUTUAL_ROUTE\" = canonical ]; then\n  mkdir\
+        \ -p \"$RUNNER_TEMP/mutual-translate-bin\"\n  cp scripts/pskernel-authenticated-translate-lake.sh \"$RUNNER_TEMP/mutual-translate-bin/lake\"\
+        \n  chmod 700 \"$RUNNER_TEMP/mutual-translate-bin/lake\"\n  cp scripts/pskernel-authenticated-translate-lake.sh\
+        \ \"$OUT/lake-translate-adapter.sh\"\n  PSC1_MUTUAL_COMPILER=\"$RUNNER_TEMP/mutual-psc1\" PATH=\"$RUNNER_TEMP/mutual-translate-bin:$PATH\"\
+        \ node scripts/bootstrap-project.mjs packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean dist/mutual-public/workspace\n\
+        \  node --input-type=module <<'NODE'\nimport {readFileSync} from 'node:fs';\nimport {assertBootstrapWorkspaceManifest}\
+        \ from './scripts/bootstrap-manifest.mjs';\nconst workspace='dist/mutual-public/workspace';\nconst manifest=JSON.parse(readFileSync(workspace+'/.proofscript-bootstrap.json','utf8'));\n\
+        const lean=JSON.parse(readFileSync(process.env.PSC1_T05_DIR+'/lean-source-manifest.json','utf8'));\nconst\
+        \ expected=new Set(lean.files.map(x=>x.path.replace(/\\.lean$/u,'.ps')));\nif(manifest.entry!==lean.entry.replace(/\\\
+        .lean$/u,'.ps')||manifest.sourceCount!==expected.size||manifest.generated.length!==expected.size||new Set(manifest.generated).size!==expected.size||!manifest.generated.every(x=>expected.has(x)))throw\
+        \ Error('Complete canonical closure required');\nawait assertBootstrapWorkspaceManifest(workspace,manifest,'bootstrap');\n\
+        console.log('PSC1_MUTUAL_FULL_CANONICAL_CLOSURE: PASS modules='+expected.size);\nNODE\n  cp dist/mutual-public/workspace/.proofscript-bootstrap.json\
+        \ \"$OUT/canonical-manifest.json\"\n  tar -czf \"$OUT/canonical-source.tar.gz\" -C dist/mutual-public/workspace\
+        \ .\n  entry=dist/mutual-public/workspace/packages/pskernel-core/src/Ps/KernelCore/SelfHost.ps\n  timeout\
+        \ --signal=KILL 1800s \"$RUNNER_TEMP/mutual-psc1\" check \"$entry\" 2>&1 | tee \"$OUT/complete-canonical-check.log\"\
+        \nelse\n  test \"$PSC1_MUTUAL_ROUTE\" = generated\n  entry=packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean\n\
+        fi\ntimeout --signal=KILL 1800s \"$RUNNER_TEMP/mutual-psc1\" build \"$entry\" --out dist/mutual-public/kernel.js\
+        \ 2>&1 | tee \"$OUT/build.log\"\nmkdir -p \"$OUT/production\"\nfor suffix in js ts d.ts js.map; do test\
+        \ -s \"dist/mutual-public/kernel.$suffix\"; cp \"dist/mutual-public/kernel.$suffix\" \"$OUT/production/kernel.$suffix\"\
+        ; done\ncp dist/mutual-public/kernel.js \"$OUT/kernel.mjs\"\ncp scripts/pskernel-mutual-complete-smoke.mjs\
+        \ scripts/pskernel-mutual-public-smoke.mjs scripts/pskernel-nested-param-hygiene-smoke.mjs scripts/pskernel-packed-cache-smoke.mjs\
+        \ \"$OUT/\"\n"
+    - name: Require853 retained mutual17 capture controls and all21 unchanged legacy harnesses
+      shell: bash
+      run: "set -euo pipefail\nNODE_BIN=\"$(command -v node)\"\ncd \"$RUNNER_TEMP/mutual-generated\"\n\"$NODE_BIN\"\
+        \ --check kernel.mjs\n\"$NODE_BIN\" --check pskernel-mutual-complete-smoke.mjs\nset +e\n/usr/bin/time -f\
+        \ 'peak_rss_kib=%M wall_seconds=%e exit_status=%x' -o runtime.memory \\\n timeout --signal=KILL 600s env\
+        \ -i PATH= \"$NODE_BIN\" --max-old-space-size=2048 \\\n pskernel-mutual-complete-smoke.mjs ./kernel.mjs\
+        \ > runtime.log 2>&1\nstatus=$?\nset -e\ncat runtime.log\ntest \"$status\" -eq 0\npython3 - <<'PYCODE'\n\
+        import pathlib,json\ntext=pathlib.Path('runtime.log').read_text();native=json.loads(pathlib.Path('native-labels.json').read_text());total=0\n\
+        for prefix,labels in native.items():\n    if prefix=='PSC1_MUTUAL_PUBLIC':continue\n    marker=prefix+'_JS:\
+        \ PASS '\n    r,=[json.loads(line[len(marker):]) for line in text.splitlines() if line.startswith(marker)]\n\
+        \    assert r['assertions']==len(r['labels'])==len(set(r['labels']))==len(labels)\n    assert r['labels']==labels,(prefix,'actual\
+        \ native labels')\n    assert r.get('fullAdmission',False)==(prefix=='PSC1_MUTUAL_ADMISSION')\n    assert\
+        \ not r['fullKernel'] and not r['performanceQualified']\n    if prefix=='PSC1_MUTUAL_ADMISSION':assert r['privateOnly']\
+        \ and not r['publicRoute'] and r['completeComparisons']==168\n    total+=r['assertions']\nassert total==841\n\
+        marker='PSC1_MUTUAL_HEADER_JS: PASS ';r,=[json.loads(line[len(marker):]) for line in text.splitlines() if\
+        \ line.startswith(marker)]\nassert r['assertions']==49 and r['originalErrors']==16\nprint('PSC1_MUTUAL_COMPLETE_JS_ALL:\
+        \ PASS controls=841 completeComparisons=168 actualOriginalErrors=16')\nPYCODE\n\nset -euo pipefail\nNODE_BIN=\"\
+        $(command -v node)\"\ncd \"$RUNNER_TEMP/mutual-generated\"\n\"$NODE_BIN\" --check pskernel-mutual-public-smoke.mjs\n\
+        env -i PATH= \"$NODE_BIN\" --max-old-space-size=2048 pskernel-mutual-public-smoke.mjs ./kernel.mjs > public-runtime.log\
+        \ 2>&1\ncat public-runtime.log\npython3 - <<'PYCODE'\nimport json,pathlib\ntext=pathlib.Path('public-runtime.log').read_text();native=json.loads(pathlib.Path('native-labels.json').read_text())\n\
+        rows=[json.loads(line) for line in text.splitlines() if line.startswith('{')]\nr,=[x for x in rows if x.get('schema')=='psc1-mutual-admission-public-v1']\n\
+        assert r['assertions']==12 and r['assertionLabels']==native['PSC1_MUTUAL_PUBLIC']\nassert r['mutualAdmission']\
+        \ and r['publicRoutingChanged'] and not r['fullKernel'] and not r['performanceQualified']\nprint('PSC1_MUTUAL_PUBLIC_JS_ALL:\
+        \ PASS newNativeEqual=853 completeComparisons=168 publicControls=12')\nPYCODE\ncd \"$GITHUB_WORKSPACE\"\n\
+        python3 psc1/scripts/pskernel-mutual-retained-runtime-audit.py psc1/test/retained-21-generated-helper-manifest.json\
+        \ \"$NODE_BIN\" \"$RUNNER_TEMP/mutual-generated/kernel.mjs\" \"$RUNNER_TEMP/mutual-generated/retained-runtime\"\
+        \n\nset -euo pipefail\nNODE_BIN=\"$(command -v node)\"\ncd \"$RUNNER_TEMP/mutual-generated\"\n\"$NODE_BIN\"\
+        \ --check pskernel-nested-param-hygiene-smoke.mjs\n/usr/bin/time -f 'peak_rss_kib=%M wall_seconds=%e exit_status=%x'\
+        \ -o hygiene-runtime.memory \\\n timeout --signal=KILL 600s env -i PATH= \"$NODE_BIN\" --max-old-space-size=2048\
+        \ \\\n pskernel-nested-param-hygiene-smoke.mjs ./kernel.mjs > hygiene-runtime.log 2>&1\ncat hygiene-runtime.log\n\
+        python3 - <<'PYCODE'\nimport pathlib,json\ntag='PSC1_NESTED_PARAM_HYGIENE_JS: PASS '\nt=pathlib.Path('hygiene-runtime.log').read_text();r,=[json.loads(s[len(tag):])\
+        \ for s in t.splitlines() if s.startswith(tag)]\nassert r['assertions']==len(r['labels'])==len(set(r['labels']))==17\n\
+        assert r['labels']==json.loads(pathlib.Path('hygiene-native-labels.json').read_text())\nassert r['validInputsAccepted']\
+        \ and r['publicDagRejects'] and not r['fullKernel'] and not r['performanceQualified']\nprint('PSC1_NESTED_PARAM_HYGIENE_COMPLETE:\
+        \ PASS nativeEqual=17 retained=853 legacyHarnesses=21')\nPYCODE\n\nset -euo pipefail\nNODE_BIN=\"$(command\
+        \ -v node)\"\ncd \"$RUNNER_TEMP/mutual-generated\"\n\"$NODE_BIN\" --check pskernel-packed-cache-smoke.mjs\n\
+        /usr/bin/time -f 'peak_rss_kib=%M wall_seconds=%e exit_status=%x' -o packed-runtime.memory \\\n timeout\
+        \ --signal=KILL 600s env -i PATH= \"$NODE_BIN\" --max-old-space-size=2048 \\\n pskernel-packed-cache-smoke.mjs\
+        \ ./kernel.mjs > packed-runtime.log 2>&1\ncat packed-runtime.log\npython3 - <<'PYCODE'\nimport pathlib,json\n\
+        tag='PSC1_PACKED_CACHE_JS: PASS '\nt=pathlib.Path('packed-runtime.log').read_text();r,=[json.loads(s[len(tag):])\
+        \ for s in t.splitlines() if s.startswith(tag)]\nassert r['assertions']==len(r['labels'])==len(set(r['labels']))==2400\
+        \ and r['open']>0 and r['closed']>0\nassert r['reference']=='actual byte-preserved original psKernelExprClosedCacheAnalysis\
+        \ export in same complete program'\nassert r['exactPairEquality'] and not r['fullKernel'] and not r['performanceQualified']\n\
+        print('PSC1_PACKED_CACHE_ACTUAL_ORIGINAL: PASS controls=2400 retained=870 legacyHarnesses=21')\nPYCODE\n"
+    - name: Preserve exact actual generated evidence
+      if: always()
+      shell: bash
+      run: 'set -euo pipefail
+
+        python3 - <<''PYCODE''
+
+        import pathlib,os,json,hashlib
+
+        out=pathlib.Path(os.environ[''RUNNER_TEMP''])/''mutual-generated''
+
+        files={str(p.relative_to(out)):{''bytes'':p.stat().st_size,''sha256'':hashlib.sha256(p.read_bytes()).hexdigest()}
+        for p in out.rglob(''*'') if p.is_file()}
+
+        (out/''files.json'').write_text(json.dumps({''source'':os.environ[''GITHUB_SHA''],''files'':files},indent=2)+''\n'')
+
+        PYCODE
+
+        '
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-packed-cache-full-${{ matrix.route }}
+        include-hidden-files: true
+        path: ${{ runner.temp }}/mutual-generated/
+        retention-days: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        route:
+        - generated
+        - canonical
+    env:
+      PSC1_MUTUAL_ROUTE: ${{ matrix.route }}

@@ -13,12 +13,11 @@ for module in modules:
  path='psc1/test/'+module+'.lean'
  raw=Path('test',module+'.lean').read_bytes()
  original=subprocess.check_output(['git','show',manifest['qualifiedSource']+':'+path])
- if module=='PsKernelCacheScopeProofs':
-  oldBody='      exact psKernelExprV2WhnfCacheFindWorker_eq_before\n        (List.cons first rest) arena source hash'
-  newBody='      exact (PsKernelCacheScan4Proofs.whnf_curried_wrapper_preserves_all_inputs_and_exact_errors\n        (List.cons first rest) arena source hash).trans\n          (psKernelExprV2WhnfCacheFindWorker_eq_before (List.cons first rest) arena source hash)'
+ if module in {'PsKernelCacheScopeProofs': ('      exact psKernelExprV2WhnfCacheFindWorker_eq_before\n        (List.cons first rest) arena source hash', '      exact (PsKernelCacheScan4Proofs.whnf_curried_wrapper_preserves_all_inputs_and_exact_errors\n        (List.cons first rest) arena source hash).trans\n          (psKernelExprV2WhnfCacheFindWorker_eq_before (List.cons first rest) arena source hash)'), 'PsKernelEmptySemanticCacheProofs': ('      | cons entry rest => rfl\n  | some index => rfl', '      | cons entry rest =>\n          simp only [psKernelSemanticExprMapGet, Frozen.psKernelSemanticExprMapGet,\n            PsKernelCacheScan4Proofs.map_scan_four_preserves_every_expression_list_and_order]\n  | some index =>\n      simp only [psKernelSemanticExprMapGet, Frozen.psKernelSemanticExprMapGet,\n        PsKernelCacheScan4Proofs.map_scan_four_preserves_every_expression_list_and_order]')}:
+  oldBody,newBody={'PsKernelCacheScopeProofs': ('      exact psKernelExprV2WhnfCacheFindWorker_eq_before\n        (List.cons first rest) arena source hash', '      exact (PsKernelCacheScan4Proofs.whnf_curried_wrapper_preserves_all_inputs_and_exact_errors\n        (List.cons first rest) arena source hash).trans\n          (psKernelExprV2WhnfCacheFindWorker_eq_before (List.cons first rest) arena source hash)'), 'PsKernelEmptySemanticCacheProofs': ('      | cons entry rest => rfl\n  | some index => rfl', '      | cons entry rest =>\n          simp only [psKernelSemanticExprMapGet, Frozen.psKernelSemanticExprMapGet,\n            PsKernelCacheScan4Proofs.map_scan_four_preserves_every_expression_list_and_order]\n  | some index =>\n      simp only [psKernelSemanticExprMapGet, Frozen.psKernelSemanticExprMapGet,\n        PsKernelCacheScan4Proofs.map_scan_four_preserves_every_expression_list_and_order]')}[module]
   before=original.decode();assert before.count(oldBody)==1
   expected=('import PsKernelCacheScan4Proofs\n'+before.replace(oldBody,newBody)).encode()
-  assert raw==expected,(path,'only exact import+one proof-body repair allowed; statements unchanged')
+  assert raw==expected,(path,'only exact import+proof-body repair allowed; statements unchanged')
  else:assert raw==original,path
  texts[module]=raw.decode()
 pending=set(modules);order=[]
@@ -42,6 +41,6 @@ for module in order:
   assert set(x.strip() for x in axioms.split(',') if x.strip())<={'propext','Classical.choice','Quot.sound'},(name,axioms)
  all_names+=names;reports[module]=names
 assert len(all_names)==len(set(all_names))==561 and set(all_names)==expected
-record={'source':os.environ['GITHUB_SHA'],'qualifiedBaseline':manifest['qualifiedSource'],'all40ProofSourceFilesByteIdenticalToQualifiedBaseline':False,'all39OtherProofSourceFilesByteIdenticalToQualifiedBaseline':True,'oneExactCacheWrapperProofBodyRepairOnly':True,'all561TheoremStatementsAndNamesUnchanged':True,'all561NamesExactlyRetainedAndKernelChecked':True,'reports':reports,'totalUniqueWithPrivate175AndNewPublic2':738,'globalSoundness':False}
+record={'source':os.environ['GITHUB_SHA'],'qualifiedBaseline':manifest['qualifiedSource'],'all40ProofSourceFilesByteIdenticalToQualifiedBaseline':False,'all38OtherProofSourceFilesByteIdenticalToQualifiedBaseline':True,'twoExactCacheWrapperProofBodyRepairsOnly':True,'all561TheoremStatementsAndNamesUnchanged':True,'all561NamesExactlyRetainedAndKernelChecked':True,'reports':reports,'totalUniqueWithPrivate175AndNewPublic2':738,'globalSoundness':False}
 (out/'receipt.json').write_text(json.dumps(record,indent=2)+'\n')
 print('PSC1_MUTUAL_PUBLIC_RETAINED_PROOFS_PASS retained561=561 totalUnique=738 modules=51')

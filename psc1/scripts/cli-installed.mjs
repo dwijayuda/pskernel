@@ -16,7 +16,10 @@ const consumer = path.join(temporary, 'consumer with spaces'), prefix = path.joi
 fs.mkdirSync(consumer);
 fs.writeFileSync(path.join(consumer, 'package.json'), JSON.stringify({private: true, type: 'module',
   scripts: {check: 'psc check'}}));
-const env = {...process.env, PATH: path.dirname(process.execPath)};
+// npm intentionally executes user-owned package scripts through the OS shell.
+// Keep SDK-free PATH and choose that shell explicitly instead of restoring tools.
+const env = {...process.env, PATH: path.dirname(process.execPath),
+  npm_config_script_shell: '/bin/sh'};
 for (const key of Object.keys(env))
   if (key === 'NODE_OPTIONS' || key.startsWith('PSC1_') || key === 'LEAN_PATH' ||
       key === 'ELAN_TOOLCHAIN' || key === 'LD_LIBRARY_PATH' || key === 'DYLD_LIBRARY_PATH')

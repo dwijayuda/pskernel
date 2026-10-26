@@ -33,7 +33,7 @@ jobs:
         \ HEAD -- psc1/packages/pskernel-core/src > \"$RUNNER_TEMP/t06-mutual-public/production-delta.txt\"\npython3\
         \ - <<'PYCODE'\nimport os,pathlib,subprocess\nout=pathlib.Path(os.environ['RUNNER_TEMP'])/'t06-mutual-public'\n\
         path='psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Rebase.lean'\nassert (out/'production-delta.txt').read_text().splitlines()==[path,'psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean']\n\
-        base='ff1aa23dc2c95785f5349dd7b7a022dac893f5ac'\nfor stable in ['psc1/kernel-lakefile.lean','psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean','psc1/test/PsKernelCacheScopeProofs.lean','psc1/test/PsKernelEmptySemanticCacheProofs.lean']:\n\
+        base='ff1aa23dc2c95785f5349dd7b7a022dac893f5ac'\nfor stable in ['psc1/kernel-lakefile.lean','psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean','psc1/test/PsKernelCacheScopeProofs.lean']:\n\
         \ assert pathlib.Path(stable).read_bytes()==subprocess.check_output(['git','show',base+':'+stable])\ncache='psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean'\n\
         assert pathlib.Path(cache).read_text().replace('/- Experimental scalar result:65521 marks a free variable;\
         \ every actual hash\\n   is strictly below65521. The original recursive Prod worker and all public\\n  \
@@ -80,7 +80,12 @@ jobs:
         n  else\\n    Prod.mk value false\\n\\ndef psKernelExprClosedCachePackedAnalysis (expr : PsKernelExpr) :\
         \ Prod Nat Bool :=\\n  psKernelExprClosedCachePackedDecode (psKernelExprClosedCachePackedWorker expr)\\\
         n\\n','',1).replace('psKernelExprClosedCachePackedAnalysis','psKernelExprClosedCacheAnalysis')==subprocess.check_output(['git','show',base+':'+cache]).decode()\n\
-        before=subprocess.check_output(['git','show',base+':'+path]).decode();current=pathlib.Path(path).read_text()\n\
+        for module,(oldBody,newBody) in {'PsKernelClosedCacheAnalysisRegression': (', analysis_eq,', ', PsKernelPackedCacheAnalysisProofs.public_candidate_preserves_entire_original_pair,\
+        \ analysis_eq,'), 'PsKernelEmptySemanticCacheProofs': ('  | some index => rfl', '  | some index =>\\n  \
+        \    simp only [psKernelSemanticExprMapGet, Frozen.psKernelSemanticExprMapGet,\\n        PsKernelPackedCacheAnalysisProofs.public_candidate_preserves_entire_original_pair]')}.items():\n\
+        \ p='psc1/test/'+module+'.lean'\n beforeProof=subprocess.check_output(['git','show',base+':'+p]).decode()\n\
+        \ assert pathlib.Path(p).read_text()=='import PsKernelPackedCacheAnalysisProofs\\n'+beforeProof.replace(oldBody,newBody),(p,'exact\
+        \ proof-body repair only')\nbefore=subprocess.check_output(['git','show',base+':'+path]).decode();current=pathlib.Path(path).read_text()\n\
         assert current.replace('/- Input constructor expressions are untrusted and may contain free variables.\\\
         n   The deterministic temporary names used below must never capture one of\\n   those input variables when\
         \ the opened binders are closed again. Check only\\n   names this operation would introduce, after its original\

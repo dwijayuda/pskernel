@@ -67,15 +67,20 @@ def psKernelExprV2NestedValidateTypeWith
       | Except.ok checked =>
           let sorted :=
             if sortRequired then
-              psKernelExprV2AdmissionEnsureSortOwnedWith (whnf fuel) context (Prod.fst checked) (Prod.snd checked)
-            else Option.some (Except.ok checked);
+              match psKernelExprV2AdmissionEnsureSortOwnedWith (whnf fuel) context (Prod.fst checked) (Prod.snd checked) with
+              | Option.none => Option.none
+              | Option.some attemptedSort =>
+                  match attemptedSort with
+                  | Except.error error => Option.some (Except.error error)
+                  | Except.ok result => Option.some (Except.ok (Prod.fst result))
+            else Option.some (Except.ok (Prod.fst checked));
           match sorted with
           | Option.none => Option.none
           | Option.some attemptedSort =>
               match attemptedSort with
               | Except.error error => Option.some (Except.error error)
               | Except.ok result =>
-                  match psKernelExprV2NestedValidateRulesWith check rules fuel context (Prod.fst result) with
+                  match psKernelExprV2NestedValidateRulesWith check rules fuel context result with
                   | Option.none => Option.none
                   | Option.some attemptedRules =>
                       match attemptedRules with
@@ -141,9 +146,9 @@ def psKernelExprV2NestedValidateOriginalsWith
       | Option.none => Option.some (Except.error "restored inductive missing during validation")
       | Option.some info =>
           match info with
-          | PsKernelConstantInfo.inductInfo inductive =>
+          | PsKernelConstantInfo.inductInfo inductiveInfo =>
               let context := psKernelExprV2OrdinaryFreshContext environment levels isUnsafe maxRecDepth maxNatSize;
-              match psKernelExprV2NestedValidateConstructorsWith check whnf inductive.ctors fuel environment context owner with
+              match psKernelExprV2NestedValidateConstructorsWith check whnf inductiveInfo.ctors fuel environment context owner with
               | Option.none => Option.none
               | Option.some attemptedConstructors =>
                   match attemptedConstructors with

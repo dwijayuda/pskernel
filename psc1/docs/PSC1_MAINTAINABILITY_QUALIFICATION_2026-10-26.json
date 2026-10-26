@@ -1,0 +1,239 @@
+{
+  "schema": "psc1-maintainability-qualification/1",
+  "status": "qualified-automated-maintainability-milestone; independent-human-trial-pending",
+  "baseCommit": "7fc146ef50ff5ba28bae033e334c49d1a9cd5637",
+  "bodyPreservingExtraction": {
+    "baseline": "7fc146ef50ff5ba28bae033e334c49d1a9cd5637",
+    "source": "packages/backend-wasm/src/Ps/BackendWasm/Lower.lean",
+    "destination": "packages/backend-wasm/src/Ps/BackendWasm/Lower/RuntimeNeeds.lean",
+    "definitions": 30,
+    "lines": 640,
+    "movedBodyBytes": "identical",
+    "remainingLowerBytes": "identical",
+    "beforeLines": 5537,
+    "afterLines": 4898,
+    "algorithmsAndFuel": "unchanged",
+    "retainedPrefixGuards": 52,
+    "historicalProof": "original3089cbc3 to446a0f21 retained against immutable history"
+  },
+  "packagedG3": "unchanged qualified .7 source/bytes; no new G2/G3 claim",
+  "automatedDocumentation": {
+    "status": "passed",
+    "checkedTargetCount": 7,
+    "sourceEntries": 11,
+    "scope": "qualified installed .7 package distinguished from current development",
+    "contracts": "status labels reconciled; acceptance/resource criteria unchanged",
+    "generatedSourceLinkAnchors": 10,
+    "extraNativeWrapperLinks": "verified against current ProjectCompiler source; shared API landmarks distinguished from native call path"
+  },
+  "actualWalkthrough": {
+    "status": "passed",
+    "checkedBuilds": 4,
+    "grammars": [
+      "lean",
+      "ps"
+    ],
+    "programs": [
+      "invert",
+      "identity"
+    ],
+    "priorGenerationRefusals": 2,
+    "actualIndependentCanonicalGraphReplay": true,
+    "malformedCheckerTransportRefused": true,
+    "manifestInventoryHashes": true,
+    "publicExportsAndRuntimeValues": true
+  },
+  "currentSourceG1": {
+    "target": "wasm-core",
+    "profile": {
+      "name": "performance-240s",
+      "g1TimeoutMs": 240000,
+      "corpusTimeoutMs": 240000,
+      "toolTimeoutMs": 240000,
+      "selfCompileTimeoutMs": 240000,
+      "correctnessAndPerformanceSeparate": true
+    },
+    "correctnessQualification": "G1-only",
+    "performanceQualification": "not-run-in-this-profile",
+    "status": "passed",
+    "sourceModules": 123,
+    "sourceClosureDigest": "e698ddecca4f57308472e261be880edded425d9ddae58c9ead43ed1973647c0f",
+    "generations": [
+      1
+    ],
+    "fixedPoint": "not-requested",
+    "attempts": [],
+    "run": 40272793607,
+    "job": 121409056260,
+    "census": {
+      "grammars": [
+        "lean",
+        "ps"
+      ],
+      "modules": 123,
+      "refusals": 0
+    },
+    "runtimeCases": 20,
+    "semanticRefusals": 20,
+    "envelopeRefusals": 9,
+    "nativeCompilerExecutablesRemoved": true,
+    "sourceMembers": 4742
+  },
+  "ordinarySource": {
+    "status": "passed",
+    "head": "e760e95b534a8b344314d87939113abfbdd948da",
+    "testedMerge": "489aa897b170cd0ae65cbcf7e97585af942ab56b",
+    "tree": "8c898353c1f80df974adf2c2a71a77363842329e",
+    "run": 40272797072,
+    "fullJob": 121412886837,
+    "gateJob": 121420619466,
+    "criteria": {
+      "counts": {
+        "implemented": 0,
+        "tested": 0,
+        "qualified": 37,
+        "blocked": 0
+      },
+      "releaseReady": true,
+      "scope": "finite Practical Core source contract only"
+    },
+    "artifact": {
+      "id": 12630860452,
+      "sha256": "a8b0284c65938eed8af7570e6638252c8103a8602bca3a254d0d23d51cd4648e",
+      "bytes": 121473410
+    },
+    "everySelectedDependency": "passed",
+    "benchmark": "skipped-unqualified",
+    "currentSource": {
+      "modules": 123,
+      "coreMembers": 4742,
+      "leanClosureDigest": "e698ddecca4f57308472e261be880edded425d9ddae58c9ead43ed1973647c0f",
+      "psClosureDigest": "37b5dfa292376274a3b5ebe3f3bdb29c3e61327889743cd8eeff65737dbdb013",
+      "integrationRun": 40272797072,
+      "integrationJob": 121410549177,
+      "executedArtifacts": 28,
+      "tracingScope": "recorded-term-bases; complete tracing not claimed",
+      "traces": 2935,
+      "complete": 2170
+    }
+  },
+  "humanTrial": {
+    "status": "pending-independent-human-participant",
+    "qualified": false,
+    "automatedRehearsalIsNotHumanEvidence": true
+  },
+  "soundness": "official Lean4.35 trust0, source/body pairing, strict IR, resources and negatives required",
+  "merge": false,
+  "npmPublication": false,
+  "attempts": [
+    {
+      "head": "1581b1f198a159a9414d01394a238cbc5e9940cf",
+      "run": 40272480824,
+      "job": 121408081788,
+      "status": "failed-walkthrough-example",
+      "passed": [
+        "docs/capability/source-link consistency",
+        "historical/current byte-identical extraction",
+        "all52 retained recursive-prefix checks",
+        "seven host AST/format checks",
+        "actual native compiler/unified seed build"
+      ],
+      "reason": "native CLI requires .js output; correct tutorial/harness extension, preserve refusal guard",
+      "compilerAlgorithmChange": false
+    },
+    {
+      "head": "1581b1f198a159a9414d01394a238cbc5e9940cf",
+      "run": 40272509345,
+      "status": "cancelled",
+      "scope": "initial ordinary source run",
+      "reason": "superseded by the corrected native .js walkthrough harness; final source selection retains all required gate debt"
+    }
+  ],
+  "implementationCommit": "e760e95b534a8b344314d87939113abfbdd948da",
+  "qualification": {
+    "run": 40272793607,
+    "job": 121409056260,
+    "status": "passed",
+    "artifact": {
+      "id": 12629405533,
+      "name": "psc1-maintainability-e760e95b534a8b344314d87939113abfbdd948da",
+      "size_in_bytes": 6487076,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12629405533",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12629405533/zip",
+      "expired": false,
+      "created_at": "2026-10-26T05:13:45Z",
+      "expires_at": "2027-01-24T05:10:17Z",
+      "updated_at": "2026-10-26T05:13:45Z",
+      "digest": "sha256:ac6bb27d654026a765b18bdc8d7f919185bd0e54052d1bcca62cd17615d25516",
+      "workflow_run": {
+        "id": 40272793607,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "refactor/psc1-maintainability-20261026",
+        "head_sha": "e760e95b534a8b344314d87939113abfbdd948da"
+      }
+    }
+  },
+  "automatedMaintainerRehearsal": {
+    "status": "passed",
+    "actualCheckedExampleAndSmallSourceChange": true,
+    "referenceLeafRegression": "official Lean accepted",
+    "deliberatelyWrongExpectedValue": "official Lean rejected",
+    "freshCheckout": true,
+    "humanQualified": false
+  },
+  "currentSource": {
+    "modules": 123,
+    "coreMembers": 4742,
+    "leanClosureDigest": "e698ddecca4f57308472e261be880edded425d9ddae58c9ead43ed1973647c0f",
+    "psClosureDigest": "37b5dfa292376274a3b5ebe3f3bdb29c3e61327889743cd8eeff65737dbdb013",
+    "integrationRun": 40272797072,
+    "integrationJob": 121410549177,
+    "executedArtifacts": 28,
+    "tracingScope": "recorded-term-bases; complete tracing not claimed",
+    "traces": 2935,
+    "complete": 2170
+  },
+  "sourceAndPackageScope": {
+    "currentDevelopmentSource": {
+      "modules": 123,
+      "coreMembers": 4742,
+      "leanClosureDigest": "e698ddecca4f57308472e261be880edded425d9ddae58c9ead43ed1973647c0f",
+      "psClosureDigest": "37b5dfa292376274a3b5ebe3f3bdb29c3e61327889743cd8eeff65737dbdb013",
+      "integrationRun": 40272797072,
+      "integrationJob": 121410549177,
+      "executedArtifacts": 28,
+      "tracingScope": "recorded-term-bases; complete tracing not claimed",
+      "traces": 2935,
+      "complete": 2170
+    },
+    "packagedG3Source": {
+      "modules": 122,
+      "leanClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+      "rootSha256": "d4a0e963375366ac9b417dd1e9eb5372168c25c5230d3ce69f694274daa87043",
+      "package": "proofscript@0.1.0-psc1.7",
+      "unchanged": true
+    },
+    "changedSourceG2G3": "not requested or qualified",
+    "payloadPromotion": false
+  },
+  "documentationBoundaries": {
+    "nativeHostWrappers": "actual call path shown separately from shared semantic API landmarks",
+    "logicalAdmission": "actual official Lean4.35; not backend preservation",
+    "irWrappers": "constructible data; revalidation required",
+    "nativeLegacyPublication": "a final flush error can occur after pointer commitment; do not assume rollback",
+    "generatedPublication": "explicit committedPublication outcome retained",
+    "generalExtensions": "closed/pinned optional providers; public arbitrary extension SDK remains incomplete"
+  },
+  "resources": {
+    "compilerToolG1Seconds": 240,
+    "checkerSeconds": 120,
+    "runtimeNeedsTypeFuel": 64,
+    "runtimeNeedsExpressionFuel": 4096,
+    "otherFuelAndMemoryStackLifetimePolicies": "unchanged",
+    "G2G3CorrectnessProfiles": "unchanged",
+    "original240SecondSelfCompilationPerformance": "unqualified"
+  },
+  "formalWholeCompilerPreservation": false,
+  "fullUniversalRelease": false
+}

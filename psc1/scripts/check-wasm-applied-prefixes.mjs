@@ -141,27 +141,27 @@ const entries=[
     "name": "psWasmLowerDeclarationsWorker"
   },
   {
-    "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower.lean",
+    "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower/RuntimeNeeds.lean",
     "name": "psWasmTypeUsesNatWithFuel"
   },
   {
-    "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower.lean",
+    "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower/RuntimeNeeds.lean",
     "name": "psWasmExprUsesNatWithFuel"
   },
   {
-    "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower.lean",
+    "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower/RuntimeNeeds.lean",
     "name": "psWasmTypeUsesIntWithFuel"
   },
   {
-    "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower.lean",
+    "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower/RuntimeNeeds.lean",
     "name": "psWasmExprUsesIntWithFuel"
   },
   {
-    "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower.lean",
+    "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower/RuntimeNeeds.lean",
     "name": "psWasmTypeUsesStringWithFuel"
   },
   {
-    "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower.lean",
+    "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower/RuntimeNeeds.lean",
     "name": "psWasmExprUsesStringWithFuel"
   },
   {

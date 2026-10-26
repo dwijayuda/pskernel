@@ -11,6 +11,9 @@ from immutable evidence; dated records remain preserved.
 | How do I install/use the current slim toolchain? | [Slim package guide](PSC1_SLIM_UNIVERSAL_PACKAGE.md) |
 | How do checked component/Python/PHP outputs work? | [Dispatch architecture](PSC1_CHECKED_DISPATCH.md), [exact receipt](PSC1_CHECKED_DISPATCH_QUALIFICATION_2026-10-26.json), [install](PSC1_CHECKED_DISPATCH_INSTALL.md) |
 | How do checked targets and transactions work? | [Guide](PSC1_CHECKED_PUBLICATION.md), [receipt](PSC1_CHECKED_PUBLICATION_QUALIFICATION_2026-10-26.json), [install](PSC1_CHECKED_PUBLICATION_INSTALL.md) |
+| How does a tiny program become checked output? | [Source-linked walkthrough](PSC1_COMPILATION_WALKTHROUGH.md), [pass contracts](PSC1_PASS_CONTRACTS.md) |
+| Which capabilities are actually qualified? | [Current package scope](PSC1_CAPABILITIES.md) |
+| How can a new maintainer work without AI? | [Exercise and evidence rubric](PSC1_MAINTAINER_EXERCISE.md) |
 | What remains unfinished? | [One development roadmap](PSC1_DEVELOPMENT_ROADMAP.md) |
 | What must Practical Core v1 support? | [Finite language contract](PSC1_PRACTICAL_CORE_V1_CONTRACT.json) |
 | What must npm distribution qualify? | [Finite distribution contract](../NPM_DISTRIBUTION_CONTRACT.json) |
@@ -105,3 +108,11 @@ source37/37 and all selected dependencies40238649527. See the current receipt
 and installation guide above. Other-platform publication remains disabled.
 The new BEFORE_CHECKED_PUBLICATION snapshots reproduce563ee855 verbatim;
 resolve their original relative links at that commit and original paths.
+
+## Qualified automated maintainability slice
+
+[Exact receipt](PSC1_MAINTAINABILITY_QUALIFICATION_2026-10-26.json): current source
+123 modules / 4742 members, exact RuntimeNeeds extraction, actual walkthrough and
+current-source Wasm G1 in 40272793607; all 37 finite source criteria in 40272797072.
+Packaged .7 G3 payloads retain their separate 122-module source and fixed points.
+The independent human trial remains pending; CI is a reference-command rehearsal.

@@ -211,7 +211,7 @@
   },
   "activeMilestone": {
     "name": "checked-seven-target-generated-host-dispatch",
-    "status": "implementation; exact Linux qualification pending in linked receipt",
+    "status": "qualified-Linux-x64 at the exact package source in linked receipt; final universal release incomplete",
     "version": "0.1.0-psc1.7",
     "base": "9c13f2f2f11bda05a9274e27453d1e275bef1222",
     "compilerSourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
@@ -349,7 +349,8 @@
       "python": "@proofscript/backend-python@0.1.0-psc1.7",
       "php": "@proofscript/backend-php@0.1.0-psc1.7"
     },
-    "newDispatchPlatform": "actual Ubuntu Linux x64; other platforms refuse"
+    "newDispatchPlatform": "actual Ubuntu Linux x64; other platforms refuse",
+    "compilerSourceUnchangedScope": "existing qualified installed package/G3 payloads; current development source and its qualification are tracked separately in AI_WORK_STATE.md"
   },
   "previousActiveMilestone": {
     "name": "slim-universal-root-and-optional-execution-integration",

@@ -72,7 +72,10 @@ meta.bin = {proofscript: './npm-cli/proofscript-cli.mjs',
   psc: './npm-cli/proofscript-cli.mjs', psc1: './npm-cli/proofscript-cli.mjs'};
 fs.writeFileSync(metaFile, JSON.stringify(meta, null, 2) + '\n');
 for (const name of ['npm-shrinkwrap.json', 'DEPENDENCY_LOCK.json']) {
-  const file = path.join(stage, name), lock = JSON.parse(fs.readFileSync(file));
+  const file = path.join(stage, name);
+  // npm's exact qualified tarball omits npm-shrinkwrap.json; preserve that absence.
+  if (name === 'npm-shrinkwrap.json' && !fs.existsSync(file)) continue;
+  const lock = JSON.parse(fs.readFileSync(file));
   lock.version = version; lock.packages[''].version = version;
   fs.writeFileSync(file, JSON.stringify(lock, null, 2) + '\n');
 }
@@ -99,7 +102,9 @@ assert.equal(packed.length, 1);
 const packedFile = path.join(out, 'tarballs', packed[0].filename), packedBytes = fs.readFileSync(packedFile);
 const receipt = {...original, sourceCommit: process.env.GITHUB_SHA, version,
   tarball: packed[0].filename, sha256: sha256(packedBytes), bytes: packedBytes.length,
-  hostOnly: true, hostInput: input, preservedPayloadFiles: before.length - changed.size,
+  hostOnly: true, hostInput: input, preservedPayloadFiles: before.filter(row => !changed.has(row.path)).length,
+  sizeRatio: packedBytes.length / original.previousRootBytes,
+  removedBytes: original.previousRootBytes - packedBytes.length,
   originalRootSha256: old.rootSha256,
   scope: 'host CLI only; unchanged qualified G3s/kernels/providers; installed qualification pending'};
 fs.writeFileSync(path.join(out, 'package-receipt.json'), JSON.stringify(receipt, null, 2) + '\n');

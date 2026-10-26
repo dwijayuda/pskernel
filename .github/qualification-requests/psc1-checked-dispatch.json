@@ -1,0 +1,6 @@
+{
+  "schema": "psc1-checked-dispatch-request/1",
+  "branch": "qualification/psc1-checked-dispatch-20261026",
+  "parentCommit": "42da3c967c7a8154e18822283daa7c54c2846060",
+  "action": "qualify-unpublished-checked-dispatch"
+}

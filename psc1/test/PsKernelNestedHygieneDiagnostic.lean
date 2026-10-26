@@ -19,9 +19,11 @@ private def officialDeclaration (malformed : Bool) : Lean.Declaration :=
   let n := officialName name
   let u := Lean.Expr.sort (.succ .zero)
   let domain := if malformed then Lean.Expr.fvar (Lean.FVarId.mk (officialName capturedName)) else .bvar 0
-  .inductDecl [] 1 [{name := n,type := .forallE `A u u .default,
-    ctors := [{name := officialName ctorName,type := .forallE `A u
-      (.forallE `x domain (.app (.const n []) (.bvar 1)) .default) .default}]}] false
+  let header : Lean.Expr := .forallE `A u u .default
+  let constructorType : Lean.Expr := .forallE `A u (.forallE `x domain (.app (.const n []) (.bvar 1)) .default) .default
+  let ctorValue : Lean.Constructor := { name := officialName ctorName, type := constructorType }
+  let declaration : Lean.InductiveType := { name := n, type := header, ctors := [ctorValue] }
+  .inductDecl [] 1 [declaration] false
 private def verdict {α : Type} : Except PsKernelError α → String
   | .ok _ => "accepted"
   | .error (.rejectedInvalid e) => "rejectedInvalid: " ++ e

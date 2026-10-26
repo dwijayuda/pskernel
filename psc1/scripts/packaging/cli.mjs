@@ -1,6 +1,7 @@
 // Host-only .9 layout assembly from exact .7 artifacts that passed the installed replay.
 // Do not rebuild or relabel any compiler/kernel/provider payload or G3 evidence.
 import fs from 'node:fs';
+import {renderSourceGuide} from './render-guide.mjs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
@@ -127,7 +128,8 @@ for (const name of ['npm-shrinkwrap.json', 'DEPENDENCY_LOCK.json']) {
   lock.packages[''].peerDependencies = meta.peerDependencies;
   fs.writeFileSync(file, JSON.stringify(lock, null, 2) + '\n');
 }
-const guide = fs.readFileSync('docs/guides/cli.md', 'utf8');
+const guide = renderSourceGuide(fs.readFileSync('docs/guides/cli.md', 'utf8'),
+  {commit:process.env.GITHUB_SHA,sourcePath:'psc1/docs/guides/cli.md'});
 fs.appendFileSync(path.join(stage, 'README.md'), '\n\n' + guide);
 d.version = version; d.packageBuildCommit = process.env.GITHUB_SHA;
 const pin = file => {const b = fs.readFileSync(path.join(stage, file));

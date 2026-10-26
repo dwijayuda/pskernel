@@ -1,16 +1,15 @@
 # ProofScript CLI
 
-This guide describes the new host CLI candidate (`proofscript@0.1.0-psc1.8`).
-It does not describe the unchanged .7 artifact. Use the exact tarballs from the
-[qualified Linux run](https://github.com/dwijayuda/pskernel/actions/runs/40314294152),
-artifact psc1-cli-toolchain-9b251a971819ecfc5450ac71e1caca967ec6c947.
-GitHub Actions artifact downloads require GitHub sign-in. Extract the archive
-and find slim-universal/tarballs/ plus slim-universal/package-receipt.json.
-Nothing has been published to the npm registry.
-
-The root tarball is proofscript-0.1.0-psc1.8.tgz, 3,822,242 bytes; SHA256:
-c9cae0ba95d3f55f1d4e88d03b9247b97f8c88895588867828e514e55513de67.
-The package receipt lists all eleven tarballs and the exact optional versions.
+This guide covers the layout candidate `proofscript@0.1.0-psc1.9` and its unchanged
+CLI behavior. [The layout receipt](../PSC1_LAYOUT_QUALIFICATION_2026-10-26.json)
+records actual CI status, exact source/package identities and artifact information.
+Use its root and matching optional tarballs only after its installed gate passes.
+The preceding .8 qualification remains in the
+[original CLI receipt](../PSC1_CLI_QUALIFICATION_2026-10-26.json).
+GitHub Actions artifact downloads require GitHub sign-in. Extract the archive and
+find slim-universal/tarballs/ plus slim-universal/package-receipt.json. Its receipt
+contains the root hash/size and all exact optional versions; never mix tarballs
+from different receipts. Nothing is published to the npm registry.
 
 ## Start a project
 
@@ -19,7 +18,7 @@ package.json if needed, then install and run:
 
 ```sh
 npm init -y
-npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1.8.tgz
+npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1.9.tgz
 npm exec -- psc init
 npm exec -- psc --showConfig
 npm exec -- psc check
@@ -189,10 +188,10 @@ sandbox threat model; use a stable host-owned project directory.
 The project adapter does not change independent checker 120s, per compiler/tool
 request 240s, semantic fuel, original/transformed strict IR, source/body pairing,
 memory/stack, optional-tool lifetime policies or negative tests. It does not
-promote the current 123-module development compiler into the frozen 122-module
+promote the later development compiler into the frozen 122-module
 G3 payloads. It does not qualify a new G2/G3 chain.
 
-Actual Linux npm qualification passed in the linked run, including all existing
+The preceding CLI behavior passed its recorded Linux run, including all existing
 application/kernel/dispatch/publication/type regressions and the new CLI tasks.
 Portable Node implementation does not establish actual Windows/macOS
 publication. A public arbitrary extension SDK, watch/incremental compilation,

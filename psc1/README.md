@@ -16,6 +16,10 @@ The [documentation index](docs/README.md) links current contracts and exact rece
 The [roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) owns remaining work;
 [AI_WORK_STATE.md](AI_WORK_STATE.md) records the engineering checkpoint.
 
+The next host CLI candidate adds [project initialization, source files and diagnostics](docs/PSC1_CLI.md).
+Its new .8 package requires its own Linux qualification; the .7 example below remains historical.
+[TypeScript workflow research and decisions](docs/PSC1_TYPESCRIPT_WORKFLOW_RESEARCH.md) explain the scope.
+
 ## Programs and installed use
 
 ```lean

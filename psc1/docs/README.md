@@ -8,6 +8,7 @@ from immutable evidence; dated records remain preserved.
 
 | Question | Read |
 | --- | --- |
+| How do I use the new project-oriented CLI candidate? | [CLI guide](PSC1_CLI.md), [workflow research](PSC1_TYPESCRIPT_WORKFLOW_RESEARCH.md) |
 | How do I install/use the current slim toolchain? | [Slim package guide](PSC1_SLIM_UNIVERSAL_PACKAGE.md) |
 | How do checked component/Python/PHP outputs work? | [Dispatch architecture](PSC1_CHECKED_DISPATCH.md), [exact receipt](PSC1_CHECKED_DISPATCH_QUALIFICATION_2026-10-26.json), [install](PSC1_CHECKED_DISPATCH_INSTALL.md) |
 | How do checked targets and transactions work? | [Guide](PSC1_CHECKED_PUBLICATION.md), [receipt](PSC1_CHECKED_PUBLICATION_QUALIFICATION_2026-10-26.json), [install](PSC1_CHECKED_PUBLICATION_INSTALL.md) |

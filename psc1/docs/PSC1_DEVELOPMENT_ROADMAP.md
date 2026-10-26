@@ -5,6 +5,16 @@ Practical Core v1 remains frozen at 14 feature families and 37 finite criteria.
 One semantic compiler serves both grammars and all seven native backend mappings.
 No merge or npm publication is authorized.
 
+## Current project CLI slice
+
+The successor to PR#190 researches TypeScript/npm workflows and adds a developer
+adapter around the unchanged checked command. Help/init, explicit file projects,
+-p/-o, effective-input inspection and structured diagnostics are implemented;
+actual offline installed and all preserved regressions are pending Linux CI.
+[CLI guide](PSC1_CLI.md), [research/decisions](PSC1_TYPESCRIPT_WORKFLOW_RESEARCH.md).
+The new .8 host candidate preserves the frozen .7 compiler/kernel/provider
+payloads. It does not promote the later123-module compiler source.
+
 ## Current maintainability slice
 
 The successor to PR #189 reconciles current documentation/capability scopes,
@@ -218,6 +228,7 @@ qualification receipts supply exact CI evidence.
 | 0e | Bounded binding-aware rename (R2b) | Qualified finite relation in 40219590598:23/62 focused;28 seven-target artifacts;full122-module compiler indexed/renamed under both grammars;new-source WasmG1 passes 40218467242. [Receipt](PSC1_SOURCE_BINDINGS_QUALIFICATION_2026-10-26.json). Complete tracing and broader edits remain outside this boundary. |
 | 0f | R4 behavioral/definitional obligations | Deferred. Require explicit effect/evaluation/divergence/foreign obligations before broader simplification; never infer equivalence from parsing or runtime tests alone. |
 | 0g | Maintainer walkthrough and next body-preserving extraction | Automated slice qualified: 40272793607 passes source links/capability scopes, exact 640-line/30-definition RuntimeNeeds extraction, retained historical proof/all 52 prefix guards, four real checked example/change builds, two refusals and the reference exercise. Current 123-module Wasm G1 passes 20 runtime cases/20 semantic refusals/9 envelopes; source 40272797072 passes all selected gates and 37/37 criteria. Independent human comprehension remains pending an actual unassisted trial. [Receipt](PSC1_MAINTAINABILITY_QUALIFICATION_2026-10-26.json). |
+| 0h | Project-oriented installed CLI | Implemented; Linux qualification pending. Safe init, complete help, file-source project capture, -p/-o, showConfig and JSON diagnostics; all existing checked paths and negative policies retained. Actual human usability remains pending the participant the user can arrange. |
 | 1 | Slim real applications and source-package coverage | G1 checked host sessions qualified: 264 cases through four engines/both grammars; native reference 66 and target mappings 24/8 pass. Public IO adapter/types and dynamic source pins pass offline frozen-G3 preflight. All four new fixed points and new-source installed package/application/consumer qualification pass 40230101814. Root proofscript 0.1.0-psc1.5 is 3,723,061 bytes. Source-only package data is captured explicitly; automatic npm source resolution remains unimplemented. Source-only package JS must never execute or grant authority. |
 | 2 | Portable transactional publication | File-pointer and legacy layouts qualified in40238538092,including actual fault/SIGKILL/readback tests. Immutable returned paths, sealed inventory, stale-writer refusal and explicit committed-but-durability-uncertain outcomes are required. Actual macOS/Windows publication remains blocked on platform release evidence; Linux-only tests cannot qualify it. The native legacy publisher can throw on its final flush after pointer commitment; structured committed-outcome parity is a separate maintenance item. The installed generated publisher already reports committed uncertainty explicitly. |
 | 3 | Checked generated TS publication | Qualified for Linux x64 in40238538092,including four executors/both grammars and actual strict consumers. Optional TypeScript 7.0.2 requires its separately pinned Linux x64 native dependency for offline execution. Same private admission and strict IR boundary; no SDK in default root. |

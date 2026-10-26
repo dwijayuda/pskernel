@@ -1,0 +1,121 @@
+name: PSC1 project CLI and installed toolchain qualification
+on:
+  push:
+    branches: [feat/psc1-cli-project-workflow-20261026]
+    paths:
+      - .github/workflows/psc1-cli.yml
+      - psc1/npm-cli/**
+      - psc1/scripts/cli-*.mjs
+      - psc1/scripts/slim-universal-package.mjs
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: psc1-cli-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    defaults:
+      run:
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Exercise actual source capture and CLI subprocesses before assembly
+        run: |
+          node --check npm-cli/proofscript-cli.mjs
+          node --check npm-cli/cli-project.mjs
+          node --check scripts/cli-package.mjs
+          node --check scripts/cli-installed.mjs
+          node scripts/cli-source-tests.mjs
+      - name: Preserve historical host AST and strict formatting checks
+        run: |
+          npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
+          node scripts/readability-host-check.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-cli-source-${{ github.sha }}
+          path: |
+            psc1/dist/cli/
+            psc1/dist/readability/
+          retention-days: 90
+  installed:
+    needs: preflight
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Assemble host-only candidate with every existing payload byte unchanged
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/cli-package.mjs
+      - name: Real offline local/global project workflow and npm script execution
+        run: node scripts/cli-installed.mjs
+      - name: Prepare unchanged external consumers for existing full regression gates
+        run: |
+          npm ci --prefix .. --ignore-scripts --include=optional
+          rustup toolchain install 1.90.0 --profile minimal
+          rustup default 1.90.0
+          mkdir -p "$RUNNER_TEMP/wasmtime"
+          curl --fail --location --retry 3 'https://github.com/bytecodealliance/wasmtime/releases/download/v49.0.4/wasmtime-v49.0.4-x86_64-linux.tar.xz' -o "$RUNNER_TEMP/wasmtime.tar.xz"
+          echo "6561abd54bdf941b6519cce883e0857cc9bce94d92c65287ed838d895a27f5a9  $RUNNER_TEMP/wasmtime.tar.xz" | sha256sum -c -
+          tar xJf "$RUNNER_TEMP/wasmtime.tar.xz" -C "$RUNNER_TEMP/wasmtime"
+          install -m 755 "$(find "$RUNNER_TEMP/wasmtime" -type f -name wasmtime -print -quit)" "$RUNNER_TEMP/wasmtime/wasmtime"
+          echo "PSC1_WASMTIME=$RUNNER_TEMP/wasmtime/wasmtime" >> "$GITHUB_ENV"
+      - name: Preserve every existing installed dispatch and publication regression
+        run: |
+          node scripts/checked-component-tests.mjs
+          node scripts/transactional-publication-tests.mjs
+          node scripts/checked-dispatch-installed.mjs
+          node scripts/slim-universal-installed.mjs
+          node scripts/slim-universal-io-preflight.mjs
+          node scripts/checked-publication-installed.mjs
+      - name: Preserve all actual application and target consumer regressions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node scripts/generated-io-installed-applications.mjs
+          node scripts/generated-io-installed-candidates.mjs
+          node scripts/checked-publication-types.mjs
+      - name: Qualify candidate only after all previous and new gates pass
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import assert from 'node:assert/strict';
+          const file='dist/slim-universal/package-receipt.json',r=JSON.parse(fs.readFileSync(file));
+          assert.equal(JSON.parse(fs.readFileSync('dist/cli/installed.json')).status,'passed');
+          for(const f of ['installed-qualification.json','checked-dispatch.json','checked-publication.json','checked-publication-types.json'])
+            assert.equal(JSON.parse(fs.readFileSync('dist/slim-universal/'+f)).status,'passed');
+          r.scope='qualified Linux host CLI milestone; unchanged compiler/kernel/provider payloads; human trial pending';
+          r.cliQualification='passed';r.previousInstalledAndApplicationGates='passed';
+          fs.writeFileSync(file,JSON.stringify(r,null,2)+'\n');
+          console.log('PSC1_CLI_QUALIFIED '+JSON.stringify({commit:process.env.GITHUB_SHA,sha256:r.sha256,bytes:r.bytes,version:r.version}));
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-cli-toolchain-${{ github.sha }}
+          path: |
+            psc1/dist/cli/
+            psc1/dist/slim-universal/tarballs/
+            psc1/dist/slim-universal/*qualification*.json
+            psc1/dist/slim-universal/checked-*.json
+            psc1/dist/slim-universal/package-receipt.json
+            psc1/dist/slim-universal/io-adapter-preflight.json
+            psc1/dist/slim-universal/compiler-kernel-admission.json
+            psc1/dist/transactional-publication/
+          retention-days: 90

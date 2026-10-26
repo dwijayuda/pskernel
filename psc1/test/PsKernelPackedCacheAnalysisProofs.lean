@@ -7,7 +7,9 @@ private theorem mixed_hash_ne_marker (left right : Nat) :
   have bound : psKernelCacheMix left right < psKernelCacheHashModulus :=
     Nat.mod_lt _ (by decide)
   have distinct : psKernelCacheMix left right ≠ psKernelCacheHashModulus := Nat.ne_of_lt bound
-  simpa only [Nat.beq_eq_false] using distinct
+  cases flag : Nat.beq (psKernelCacheMix left right) psKernelCacheHashModulus with
+  | false => rfl
+  | true => exact False.elim (distinct (Nat.eq_of_beq_eq_true flag))
 
 theorem scalar_worker_decodes_to_exact_original_for_every_expression (expr : PsKernelExpr) :
     psKernelExprClosedCachePackedDecode (psKernelExprClosedCachePackedWorker expr) =

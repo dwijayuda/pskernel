@@ -64,7 +64,13 @@ for(const pin of productionFiles){
  assert.equal(sha(fs.readFileSync(pin.path)),pin.sha256,'packed production file differs from current source: '+pin.path);
  assert.equal(sha(fs.readFileSync(path.join(snapshot,'package',pin.path))),pin.sha256);
 }
-const crosscheck=JSON.parse(fs.readFileSync(path.join(out,'compiler-kernel-admission.json')));
+const report=JSON.parse(fs.readFileSync(path.join(out,'compiler-kernel-admission.json')));
+assert.equal(report.schema,'psc1-compiler-kernel-admission/1');
+assert.equal(report.testedCommit,input.sourceCommit);assert.equal(report.status,'passed');
+assert.equal(report.sourceClosureDigest,receipt.compilerSourceClosureDigest);
+assert.equal(report.leanVersion,'4.35.0');assert.equal(report.leanCommit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
+assert.equal(report.defaultKernelMemoryModel,'linear');assert.equal(report.records.length,1);
+const crosscheck=report.records[0];
 assert.equal(crosscheck.admissionsSha256,'a1c75ace20b2071d66ea4a9263b98980c39bea92b5b4f459d26978f46c66f213');
 assert.equal(crosscheck.agreement,true);
 for(const provider of ['wasm','native']){assert.equal(crosscheck.providers[provider].accepted,true);assert.equal(crosscheck.providers[provider].invalidTypeRejected,true);}

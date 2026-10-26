@@ -132,10 +132,17 @@
   },
   "sourceRun": {
     "head": "71f10258d79a43aacd272fb277c4360df7b766ee",
+    "testedMerge": "a894087aa8abd38540e33da272593199732f5a07",
     "run": 40246082420,
     "fullJob": 121330707717,
-    "status": "in-progress",
-    "focusedDependencies": "all passed",
+    "gateJob": 121337501126,
+    "status": "passed",
+    "criteria": {
+      "qualified": 37,
+      "blocked": 0,
+      "releaseReady": true,
+      "scope": "finite Practical Core source contract only"
+    },
     "benchmark": "skipped-not-qualified"
   },
   "manualQualification": {
@@ -158,5 +165,14 @@
     "status": "pending all installed tests",
     "productionSourceMustRemainIdentical": true,
     "qualifiedArtifactReaderUnchanged": true
-  }
+  },
+  "replayAttempts": [
+    {
+      "head": "974fd8780bb80f50e838f3bd322e74a9d8c18bcd",
+      "run": 40249743048,
+      "job": 121338816323,
+      "status": "failed-replay-report-reader",
+      "reason": "loader expected flat kernel record but actual writer uses schema/status/records[]; exact ZIP, source diff and all packaged production-file identity checks had already passed; corrected against actual writer schema"
+    }
+  ]
 }

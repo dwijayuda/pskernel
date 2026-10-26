@@ -22,13 +22,18 @@ const closedEngines = ['js', 'rust', 'ts', 'wasm-core'];
 // Resolve only a pinned regular file under its declared package root.
 // Walking every path component keeps parent-directory symlinks out of the boundary.
 export function verifyFile(root, record, maxBytes = 128 * 1024 * 1024, allowEmptyData = false) {
+  const emptyPackageData =
+    allowEmptyData &&
+    record?.bytes === 0 &&
+    /^runtime\/lib\/python3\.14\/[A-Za-z0-9_\/]+\/__init__\.py$/.test(record?.path || '') &&
+    record?.sha256 === 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
   if (
     !record ||
     typeof record.path !== 'string' ||
     !/^[A-Za-z0-9_@.+\/-]+$/.test(record.path) ||
     !/^[0-9a-f]{64}$/.test(record.sha256 || '') ||
     !Number.isSafeInteger(record.bytes) ||
-    record.bytes < (allowEmptyData ? 0 : 1) ||
+    record.bytes < (emptyPackageData ? 0 : 1) ||
     record.bytes > maxBytes
   )
     fail('INVALID_PIN');

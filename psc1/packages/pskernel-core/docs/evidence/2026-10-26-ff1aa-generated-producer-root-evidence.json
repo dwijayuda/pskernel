@@ -1,0 +1,345 @@
+{
+  "source": "ff1aa23dc2c95785f5349dd7b7a022dac893f5ac",
+  "run": 40251383616,
+  "job": 121343853332,
+  "artifact": 12620904633,
+  "archiveBytes": 3781052,
+  "archiveSha256": "6e9b9d7d5b14a5640163fc27dac8952bfc5d62fb605121cf8e5efe03ce659639",
+  "members": 69,
+  "all69ActualMembersReadAndCrcVerified": true,
+  "all8ActualProviderManifestDigestsVerified": true,
+  "actualWholeProgramByteIdenticalToIndependentlyQualified2708Program": true,
+  "program": {
+    "bytes": 10601802,
+    "sha256": "9e81e1323aefacb71f3db71eb8698922e747160b051eff8ef82e1daa61679e9d"
+  },
+  "actualFixtureByteIdenticalToPreviousRootVerifiedFixture": true,
+  "fixture": {
+    "bytes": 2791525,
+    "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+  },
+  "nativeAll6StringSamplesAndSingletonsAnd294Requests377MetadataActualLogsVerified": true,
+  "sourceMapV3": true,
+  "provenance": {
+    "schema": "psc1-t01f-source-provenance-v1",
+    "sourceSha": "ff1aa23dc2c95785f5349dd7b7a022dac893f5ac",
+    "runId": "40251383616",
+    "runAttempt": "1",
+    "job": "generated-dag-integration",
+    "route": "generated",
+    "leanVersion": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "node": "v22.23.3",
+    "requests": 294,
+    "metadata": 377,
+    "samples": [
+      "",
+      "a",
+      "\u00e9",
+      "\u20ac",
+      "\ud83d\ude00",
+      "A\u00e9\u20ac\ud83d\ude00"
+    ],
+    "kernelFuel": 4096,
+    "nodeOldSpaceLimitMiB": 2048,
+    "authority": "Raw declaration requests only; generated consumers independently admit from empty.",
+    "fixture": {
+      "bytes": 2791525,
+      "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+    },
+    "kernel": {
+      "bytes": 10601802,
+      "sha256": "9e81e1323aefacb71f3db71eb8698922e747160b051eff8ef82e1daa61679e9d"
+    },
+    "fixtureProducer": {
+      "bytes": 39734,
+      "sha256": "63577d336c41727d82d746d49b0144ae212ae7501953e20c3b6df57be73bb663"
+    },
+    "generatedRunner": {
+      "bytes": 27140,
+      "sha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2"
+    }
+  },
+  "allActualFileDigests": {
+    "_temp/psc1-t01f-generated/fixture.json": {
+      "bytes": 2791525,
+      "sha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d"
+    },
+    "_temp/psc1-t01f-generated/fixture.sha256": {
+      "bytes": 123,
+      "sha256": "d976a1e153065a032dcba986bbefb2b3c262a816811960f6d1541f5ecb44e28a"
+    },
+    "_temp/psc1-t01f-generated/lean-githash.txt": {
+      "bytes": 41,
+      "sha256": "3210a17608d78e1841a0a504c21167150e6a388cf44a077f06e3fcd3a823fe31"
+    },
+    "_temp/psc1-t01f-generated/lean-version.txt": {
+      "bytes": 106,
+      "sha256": "eb22144228dd41cd51a0c84af4f976cd0cef473102dcf99b60be756b11f2b95a"
+    },
+    "_temp/psc1-t01f-generated/native.log": {
+      "bytes": 25860,
+      "sha256": "8218c1988126cc4930d4f71cb619c5badafe5dab18e6a0e946c9d1813d2dbe82"
+    },
+    "_temp/psc1-t01f-generated/provenance.json": {
+      "bytes": 1209,
+      "sha256": "179bbade79c59d483381a8cddcfa54cf2dcd77b49c2dae72b90e4294db8cc0eb"
+    },
+    "_temp/psc1-generated-provider.log": {
+      "bytes": 11417,
+      "sha256": "9373314e48a1ee85a45f3a0c204eb37de41b5a9a5c2e3d54a86dace7bbc100fe"
+    },
+    "_temp/psc1-proof-irrelevance-generated.log": {
+      "bytes": 136,
+      "sha256": "fd5516fb73a0997dac2ac8eb66faae9de8f21cb6d1438d85b2f86b3ea01b4639"
+    },
+    "_temp/psc1-lazy-nat-generated.log": {
+      "bytes": 73,
+      "sha256": "5f179494fb60eb798345c313f524be3121283654d19150c09b6923c5a8c1e8e0"
+    },
+    "_temp/psc1-lazy-delta-generated.log": {
+      "bytes": 291,
+      "sha256": "7dca8562d566ea5094b3f8c769c16ef0f188c91a81f446fbb98958d077ed05f8"
+    },
+    "_temp/psc1-invalid-occurrence-generated.log": {
+      "bytes": 126,
+      "sha256": "891795597a3ee6ff40085108f2d96af03791d186280805a234adf98992a537d3"
+    },
+    "_temp/psc1-full-shape-generated.log": {
+      "bytes": 89,
+      "sha256": "5eb0426733a625f6ffd436ba04295a36bb8550e65bdad967377eae89bfac1506"
+    },
+    "_temp/psc1-final-rules-generated.log": {
+      "bytes": 208,
+      "sha256": "fb8be8d449e8686f69d92695e72feda1818c1a26859350b6652e023734f4f63a"
+    },
+    "_temp/psc1-admission-guard-generated.log": {
+      "bytes": 120,
+      "sha256": "62c9fac53dfff1b44e4f4540d5cd8f0c7477c6e6366c1753822eb5abd22cfcc0"
+    },
+    "_temp/psc1-quot-generated.log": {
+      "bytes": 81,
+      "sha256": "4aa385ff1cdae5919049a32a41eda194cad24b818d9c453f779ea7bc8cfd3afe"
+    },
+    "_temp/psc1-recursor-generated.log": {
+      "bytes": 601,
+      "sha256": "ad28f997dadc4078d843f23daad20f461937db6fe0341bca503a49d660e30d38"
+    },
+    "_temp/psc1-generated-prefix-js.log": {
+      "bytes": 225,
+      "sha256": "c3883dde04a04615e753c20481e28fc09491065f7bdf097308fe281329d0d555"
+    },
+    "_temp/psc1-quot-owner-generated.log": {
+      "bytes": 197,
+      "sha256": "bf548c8c25b6f5eb0b69a0119645933486dcd51004d2071badb8b2afe7f698ae"
+    },
+    "_temp/psc1-name-worker-generated.log": {
+      "bytes": 339,
+      "sha256": "8ed6f494eb67256fcbe261ea78840993cf08e962947b8e7ca6cde6cd9dc173ed"
+    },
+    "_temp/psc1-scalar-hash-short-entry-generated.log": {
+      "bytes": 108,
+      "sha256": "6112ede396f0f4ee0ea32db09ae334f659b63b5f8371277bbc2253099a2b25d5"
+    },
+    "_temp/psc1-scalar-hash-generated.log": {
+      "bytes": 176,
+      "sha256": "dd2991294e560ae826461c38ad9a545b677dea70e632a5c16fd03c3515c88353"
+    },
+    "_temp/psc1-closed-cache-analysis-generated.log": {
+      "bytes": 184,
+      "sha256": "51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda"
+    },
+    "_temp/psc1-owned-state-generated.log": {
+      "bytes": 215,
+      "sha256": "18d90014492e918eea7105b9ce1dd2d2c4657aa2df502bea1998474736c6cba2"
+    },
+    "_temp/psc1-recursor-k-generated.log": {
+      "bytes": 392,
+      "sha256": "934df6ba1948f95ed9ca2b0775ef73cc562d7597de495697e89aa012ad936f4c"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/integration/provider/README.md": {
+      "bytes": 11813,
+      "sha256": "03c3ec27aa1362c631ff8049f02ec61ce494800d3c855457901857937bbc50e0"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/integration/provider/artifacts.json": {
+      "bytes": 2205,
+      "sha256": "ca7ca8222420c3e63fb037b2c612e3d249be9d08d0b2e6d79250486c28042d93"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/integration/provider/kernel.d.ts": {
+      "bytes": 458139,
+      "sha256": "fd40462bebe59dbda561f12580dc11cf30e2a7e01ccffe1792a257fcdf1df1b5"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/integration/provider/kernel.js": {
+      "bytes": 10601802,
+      "sha256": "9e81e1323aefacb71f3db71eb8698922e747160b051eff8ef82e1daa61679e9d"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/integration/provider/kernel.js.map": {
+      "bytes": 8682544,
+      "sha256": "979a600f2aa8bde121d206a489e3f471a3079d1d3d09f89d9b4dedfdf938085f"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/integration/provider/kernel.ts": {
+      "bytes": 9981193,
+      "sha256": "f669113fedd8fe98c25467d6dd886c896ea0bdb85eebbbd08ab71ea85115db43"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/integration/provider/npm-runtime/canonical-admissions-wire.mjs": {
+      "bytes": 5462,
+      "sha256": "f572555a3fec4578ee41a5a0fdcbf7c5fcb95a05caebb6deb328fe1746b32b02"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/integration/provider/package.json": {
+      "bytes": 42,
+      "sha256": "609158e6c5fbc237939fa3ddf7faab80ab690bdc0c8d584414a885130103c4e8"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/integration/provider/scripts/pskernel-canonical-provider.mjs": {
+      "bytes": 12759,
+      "sha256": "b65e6806ca50cdbcf89f9789b593a12aac131db911cfc191d39b18fb2e510001"
+    },
+    "_temp/psc1-dag-generated-js.log": {
+      "bytes": 2287879,
+      "sha256": "100947284bc9154e40cf4c3c720149640ca59d3c29f8ca3fb09f53d573644167"
+    },
+    "_temp/psc1-nat-generated.log": {
+      "bytes": 234,
+      "sha256": "caa113dae39e2f5d5bfc19d6276f6ff0a09174fb41f97f2a72136fed8e9ff9c5"
+    },
+    "_temp/psc1-infer-only-generated.log": {
+      "bytes": 65,
+      "sha256": "228d3a73e3d81783ed7380667f22313144b7db49bef9c00f59627cc9f6ff4041"
+    },
+    "_temp/psc1-dag-generated-bench.log": {
+      "bytes": 147025,
+      "sha256": "7e53bc9f1af0c7512c17f8780854ff156529292755378e059fe91fe542481d53"
+    },
+    "_temp/psc1-whole-strict.log": {
+      "bytes": 4113,
+      "sha256": "37e390b187e97a47d4e4102b2a93efd19491fdd2844f434f2b12c7553846834a"
+    },
+    "_temp/psc1-admission-generated-bench.log": {
+      "bytes": 54079,
+      "sha256": "19fe6150ea523b2924310efd224a0cd32c62183ebecf2a438704c1dd0b33e5e7"
+    },
+    "_temp/psc1-memory-strict.log": {
+      "bytes": 1183,
+      "sha256": "451122348ca8f507a64b41118c8e759d675fa74620e93aac4cf56075b62ba464"
+    },
+    "_temp/psc1-dag-profile.log": {
+      "bytes": 273750,
+      "sha256": "6b96bec88aecc5f4501e3cea6d7e33873200dc12f84863f46249be244d209097"
+    },
+    "_temp/psc1-dag-profiles/dag-fn-collision-128-whnf.allocations.heapprofile": {
+      "bytes": 3115352,
+      "sha256": "d670be5b8f40614de9207e9ea55cd42a31fe5e4eb499fa8f38fde232a94a5351"
+    },
+    "_temp/psc1-dag-profiles/dag-fn-collision-128-whnf.cpuprofile": {
+      "bytes": 109416,
+      "sha256": "48fac8745bae2ba161368c4f2c2beaf62b66b19312a647be2fdb77c24bd65733"
+    },
+    "_temp/psc1-dag-profiles/dag-fn-collision-128-whnf.summary.json": {
+      "bytes": 164523,
+      "sha256": "efec315897e45ace7f685f529eb0172a885ac8c69dea0dbfdb15ea5716664a32"
+    },
+    "_temp/psc1-dag-profiles/dag-fn-collision-128-whnf.survivors.heapprofile": {
+      "bytes": 18845,
+      "sha256": "1ae71e762438bb5b6c805483f37a6538635a8045d8f66ed1b5af427585697e3a"
+    },
+    "_temp/psc1-dag-profiles/dag-fn-unique-128-whnf.allocations.heapprofile": {
+      "bytes": 896486,
+      "sha256": "4d2e5b34ac96e372f4c78629aeee004c15fa517c64196b6d187bd68edcd73e66"
+    },
+    "_temp/psc1-dag-profiles/dag-fn-unique-128-whnf.cpuprofile": {
+      "bytes": 76188,
+      "sha256": "b06fffa1c6061a601d40da7fe32eb5e5b3ed43e1202268d0293a14e7c3f1bbb5"
+    },
+    "_temp/psc1-dag-profiles/dag-fn-unique-128-whnf.summary.json": {
+      "bytes": 167710,
+      "sha256": "6bf4b987ffe3197466c16d8af3f4bdfb4902913f016f392562b6a754e2a71efa"
+    },
+    "_temp/psc1-dag-profiles/dag-fn-unique-128-whnf.survivors.heapprofile": {
+      "bytes": 17204,
+      "sha256": "fcb1ce877bb8a582aa0cb6a1218e7bb6ff24a35f38252bd73db4e5ecdf92e3af"
+    },
+    "_temp/psc1-dag-profiles/dag-zeta-24-check.allocations.heapprofile": {
+      "bytes": 119718,
+      "sha256": "7ae47ca5c66f38c40bf8662e5f90c922274cd581adfdedfde50ecfe367f3137a"
+    },
+    "_temp/psc1-dag-profiles/dag-zeta-24-check.cpuprofile": {
+      "bytes": 11181,
+      "sha256": "cd7d393816e5675990270c17b0c5921602c47fed8e1bf5a80cc7072f4707292a"
+    },
+    "_temp/psc1-dag-profiles/dag-zeta-24-check.summary.json": {
+      "bytes": 125596,
+      "sha256": "3b1a9c158757924eed424e97513037a007afe26cb13229db4c2c6b587e4f0a96"
+    },
+    "_temp/psc1-dag-profiles/dag-zeta-24-check.survivors.heapprofile": {
+      "bytes": 3702,
+      "sha256": "6c305a133adc70774c75bc82d478f0f6e9d077f8ac74ecf7a1bd6e2440ac199e"
+    },
+    "_temp/psc1-dag-profiles/legacy-fn-collision-128-whnf.allocations.heapprofile": {
+      "bytes": 3714831,
+      "sha256": "a9700036df0941acb1d3d0f8d51a82f98cd5e9221918d5a42e81d850ab5f84a0"
+    },
+    "_temp/psc1-dag-profiles/legacy-fn-collision-128-whnf.cpuprofile": {
+      "bytes": 91289,
+      "sha256": "78a7e4d060c8e7aaf81fad1e281e45b32cafa233705734479a010b04d82371fd"
+    },
+    "_temp/psc1-dag-profiles/legacy-fn-collision-128-whnf.summary.json": {
+      "bytes": 117295,
+      "sha256": "24dcf4d37e7c5cbec13cb4bd3faf08c85450ab83886b180edf21905a20dea6ed"
+    },
+    "_temp/psc1-dag-profiles/legacy-fn-collision-128-whnf.survivors.heapprofile": {
+      "bytes": 5566,
+      "sha256": "3512aef0144d8fd5096c9098d94f6e890e03bed066313f00582775e6d53cf37c"
+    },
+    "_temp/psc1-dag-profiles/legacy-fn-unique-128-whnf.allocations.heapprofile": {
+      "bytes": 1579080,
+      "sha256": "699074a3caeaea5d01bca933ac383a60d78427e333890a1e4f722f27f1015445"
+    },
+    "_temp/psc1-dag-profiles/legacy-fn-unique-128-whnf.cpuprofile": {
+      "bytes": 60193,
+      "sha256": "50dc7be1da419a1b526acaaee5a89433ba6cd6b6784507f18e019b1cb98a7afb"
+    },
+    "_temp/psc1-dag-profiles/legacy-fn-unique-128-whnf.summary.json": {
+      "bytes": 141206,
+      "sha256": "51bfb61dea71bf070906435997f472949e5ec0eaa882a32e97c6e353e1254bbd"
+    },
+    "_temp/psc1-dag-profiles/legacy-fn-unique-128-whnf.survivors.heapprofile": {
+      "bytes": 12438,
+      "sha256": "d006e00c8ca19b8cfb6b02a7a5ee53685615c62b9aec3cd9061b3b9a932e8847"
+    },
+    "_temp/psc1-dag-profiles/legacy-zeta-24-check.allocations.heapprofile": {
+      "bytes": 97634,
+      "sha256": "b2d8fd94054c4c07b687adf1ba6907e5420ce87c270c6e2a8972bfded9fca226"
+    },
+    "_temp/psc1-dag-profiles/legacy-zeta-24-check.cpuprofile": {
+      "bytes": 9687,
+      "sha256": "9c6df1cb73ed679cd96b774fd0aa1a0fe65f0dd0c7e2c9936be7fe22087f9234"
+    },
+    "_temp/psc1-dag-profiles/legacy-zeta-24-check.summary.json": {
+      "bytes": 112411,
+      "sha256": "031e62f5f0b71e5cde70ac3c4c87f362c33d518919fa99d162ef476ce2f4975d"
+    },
+    "_temp/psc1-dag-profiles/legacy-zeta-24-check.survivors.heapprofile": {
+      "bytes": 4024,
+      "sha256": "499f95c9d1e4d10ad8300f77821034599848ce409a57c56c32ef59108929f3e5"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/integration/kernel.js": {
+      "bytes": 10601802,
+      "sha256": "9e81e1323aefacb71f3db71eb8698922e747160b051eff8ef82e1daa61679e9d"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/integration/kernel.d.ts": {
+      "bytes": 458139,
+      "sha256": "fd40462bebe59dbda561f12580dc11cf30e2a7e01ccffe1792a257fcdf1df1b5"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/integration/kernel.ts": {
+      "bytes": 9981193,
+      "sha256": "f669113fedd8fe98c25467d6dd886c896ea0bdb85eebbbd08ab71ea85115db43"
+    },
+    "pskernel/pskernel/psc1/dist/expr-v2/integration/kernel.js.map": {
+      "bytes": 8682544,
+      "sha256": "979a600f2aa8bde121d206a489e3f471a3079d1d3d09f89d9b4dedfdf938085f"
+    }
+  },
+  "fullGeneratedStringQualification": false,
+  "performanceQualified": false,
+  "full193Qualified": false,
+  "scope": "Adopted mutual integration producer actually passes; full generated String shards and aggregate are separate pending gates."
+}

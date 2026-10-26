@@ -1,5 +1,6 @@
 import Ps.KernelCore.API.DagNestedOverlay
 import Ps.KernelCore.API.DagMutualAdmission
+import Ps.KernelCore.API.DagOrdinaryAdmission
 
 /- Private transformed nested admission. Original named headers/constructors
    supply only origin IDs for the syntax overlay; every resulting target is

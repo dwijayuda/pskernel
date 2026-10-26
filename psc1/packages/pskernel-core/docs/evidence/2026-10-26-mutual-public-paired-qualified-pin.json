@@ -1,0 +1,44 @@
+{
+  "rootVerified": true,
+  "bothActualJobsPass": true,
+  "source": "2708d07d5827b8aca72497a1ea3de989700b6996",
+  "run": 40246049646,
+  "productionTree": "7471f228b9bbc1eb5b9c0b78b85bf326aac72929",
+  "native": {
+    "source": "4d6272807b3b168ab2d222ce942f92f7d7792cb8",
+    "run": 40244424044,
+    "job": 121322877883,
+    "artifact": 12617842824,
+    "bytes": 969954,
+    "sha256": "b2cfa1f927d0dd768029814fdf9ad7555713ab336015fdd34a3ce37a7c6131bf",
+    "members": 405,
+    "proofs": 738
+  },
+  "routes": {
+    "generated": {
+      "artifact": 12619111746,
+      "job": 121327719585,
+      "bytes": 6117258,
+      "sha256": "5eb867f62c8637d98f1f73b8ec419aa9c108b80c441a8a1fac346bff8791b761",
+      "members": 274,
+      "program": {
+        "bytes": 10601802,
+        "sha256": "9e81e1323aefacb71f3db71eb8698922e747160b051eff8ef82e1daa61679e9d"
+      }
+    },
+    "canonical": {
+      "artifact": 12620165966,
+      "job": 121327719432,
+      "bytes": 6267493,
+      "sha256": "c6e636e1a9d81db4cc54cae48b6f3bf1db3a292b31dbedc56c6f60beb071b37a",
+      "members": 278,
+      "program": {
+        "bytes": 10601802,
+        "sha256": "9e81e1323aefacb71f3db71eb8698922e747160b051eff8ef82e1daa61679e9d"
+      }
+    }
+  },
+  "bothCompleteProgramsByteIdentical": true,
+  "full193Qualified": false,
+  "performanceQualified": false
+}

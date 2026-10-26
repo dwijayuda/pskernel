@@ -1,0 +1,274 @@
+{
+  "source": "2708d07d5827b8aca72497a1ea3de989700b6996",
+  "productionTree": "7471f228b9bbc1eb5b9c0b78b85bf326aac72929",
+  "run": 40246049646,
+  "job": 121327719432,
+  "artifact": 12620165966,
+  "route": "canonical",
+  "archiveBytes": 6267493,
+  "archiveSha256": "c6e636e1a9d81db4cc54cae48b6f3bf1db3a292b31dbedc56c6f60beb071b37a",
+  "members": 278,
+  "allManifestEntriesActuallyReadAndVerified": 277,
+  "allActualGitSnapshotsVerified": 43,
+  "all169LeanClosureFilesMatchActualImmutableGitBlobs": true,
+  "exact169ModuleImportClosureReconstructed": true,
+  "sourceTarByteMatchesAllIndividualSources": true,
+  "nestedNative738AndCompilerArchivesByteMatchActualRootReadOriginals": true,
+  "program": {
+    "bytes": 10601802,
+    "sha256": "9e81e1323aefacb71f3db71eb8698922e747160b051eff8ef82e1daa61679e9d"
+  },
+  "newNativeEqualControls": 853,
+  "allPrivate841AndPublic12LabelsEqualActualNative": true,
+  "actualOriginalComparisons": 168,
+  "all21RetainedHarnessSourcesAndLogsReadAndVerified": true,
+  "separateActualGitHubCollectorMarkersVerified": true,
+  "privateControlMemory": "peak_rss_kib=357480 wall_seconds=31.51 exit_status=0",
+  "publicControlReceipt": {
+    "schema": "psc1-mutual-admission-public-v1",
+    "kernel": "./kernel.mjs",
+    "assertions": 12,
+    "sectionAssertions": {
+      "harness": 1,
+      "routing": 7,
+      "boundary": 4
+    },
+    "assertionLabels": [
+      "harness/rejection-active",
+      "routing/direct-owner-retained",
+      "routing/finish-carries-injected-suffix",
+      "routing/decline-restarts-original",
+      "routing/hard-error-does-not-fallback",
+      "routing/resource-limit-failure",
+      "routing/same-batch-recursor-check",
+      "routing/cross-call-checked-recursor",
+      "boundary/private-generated-id-not-external",
+      "boundary/later-command-failure-atomic",
+      "boundary/fallback-original-bounds",
+      "boundary/preflight-precedence"
+    ],
+    "publicRoutingChanged": true,
+    "mutualAdmission": true,
+    "fullKernel": false,
+    "performanceQualified": false
+  },
+  "retainedRuntimeReceipt": {
+    "source": "2708d07d5827b8aca72497a1ea3de989700b6996",
+    "baseline": "2f7ee0afc1cc2fbccdf47b4f140b5cf01eb05c89",
+    "all21QualifiedRetainedHarnessesUnchangedAndPassed": true,
+    "kernel": {
+      "bytes": 10601802,
+      "sha256": "9e81e1323aefacb71f3db71eb8698922e747160b051eff8ef82e1daa61679e9d"
+    },
+    "harnesses": [
+      {
+        "path": "psc1/scripts/pskernel-empty-semantic-cache-smoke.mjs",
+        "sourceBytesAndDigestExact": true,
+        "qualifiedBaselineBytesExact": true,
+        "exitCode": 0,
+        "passMarker": "PSC1_EMPTY_SEMANTIC_CACHE_JS: PASS ",
+        "logBytes": 1257,
+        "logSha256": "bf10453c3092eee7e3843a9dee4c01a581858096131a50dfa25268395e8b399c"
+      },
+      {
+        "path": "psc1/scripts/pskernel-closed-cache-analysis-smoke.mjs",
+        "sourceBytesAndDigestExact": true,
+        "qualifiedBaselineBytesExact": true,
+        "exitCode": 0,
+        "passMarker": "PSC1_CLOSED_CACHE_ANALYSIS_JS: PASS ",
+        "logBytes": 184,
+        "logSha256": "51b53326454b4ab04df0b3d6a1bdaeddb2f62ea05a2cf63fe27a5a2686ceccda"
+      },
+      {
+        "path": "psc1/scripts/pskernel-expr-v2-dag-smoke.mjs",
+        "sourceBytesAndDigestExact": true,
+        "qualifiedBaselineBytesExact": true,
+        "exitCode": 0,
+        "passMarker": "PSC1_V2_DAG_JS_MUTUAL_FRESH_MEMBER: PASS",
+        "logBytes": 2287879,
+        "logSha256": "adb8ad70bb50434eccfd16d8a9094fbe31379b794ab071793594f52039900276"
+      },
+      {
+        "path": "psc1/scripts/pskernel-expr-v2-generated-prefix-smoke.mjs",
+        "sourceBytesAndDigestExact": true,
+        "qualifiedBaselineBytesExact": true,
+        "exitCode": 0,
+        "passMarker": "PSC1_V2_SESSION_OWNERS_JS: PASS kinds=8 direct=7 privateIDs=5 forks=2",
+        "logBytes": 225,
+        "logSha256": "c3883dde04a04615e753c20481e28fc09491065f7bdf097308fe281329d0d555"
+      },
+      {
+        "path": "psc1/scripts/pskernel-expr-v2-quot-owner-smoke.mjs",
+        "sourceBytesAndDigestExact": true,
+        "qualifiedBaselineBytesExact": true,
+        "exitCode": 0,
+        "passMarker": "PSC1_V2_QUOT_OWNER_JS_PASS owners=4 cases=10 checks=180 whnf=180 defeq=180 invalidChecks=90 admissions=17 plans=10 repairs=5 private=13 independentPositive=10 independentNegative=7 assertions=",
+        "logBytes": 197,
+        "logSha256": "bf548c8c25b6f5eb0b69a0119645933486dcd51004d2071badb8b2afe7f698ae"
+      },
+      {
+        "path": "psc1/scripts/pskernel-expr-v2-transform-delay-smoke.mjs",
+        "sourceBytesAndDigestExact": true,
+        "qualifiedBaselineBytesExact": true,
+        "exitCode": 0,
+        "passMarker": "PSC1_TRANSFORM_DELAY_RAW_JS: PASS assertions=23 exports=3 stagedArrows=11",
+        "logBytes": 1571,
+        "logSha256": "de97a1b2ad1e1851627033646199e6f7df0296359a3a45436a14e0a47430db3d"
+      },
+      {
+        "path": "psc1/scripts/pskernel-generated-smoke.mjs",
+        "sourceBytesAndDigestExact": true,
+        "qualifiedBaselineBytesExact": true,
+        "exitCode": 0,
+        "passMarker": "PSKERNEL_GENERATED_SMOKE: PASS",
+        "logBytes": 4855,
+        "logSha256": "18073af6a90f8f2e688e5fe6587914a3d7dba82ccd6970e74b714fc3ed4210c1"
+      },
+      {
+        "path": "psc1/scripts/pskernel-invalid-recursor-occurrence-smoke.mjs",
+        "sourceBytesAndDigestExact": true,
+        "qualifiedBaselineBytesExact": true,
+        "exitCode": 0,
+        "passMarker": "PSC1_INVALID_RECURSOR_OCCURRENCE_JS: PASS ",
+        "logBytes": 126,
+        "logSha256": "891795597a3ee6ff40085108f2d96af03791d186280805a234adf98992a537d3"
+      },
+      {
+        "path": "psc1/scripts/pskernel-ordinary-admission-private-smoke.mjs",
+        "sourceBytesAndDigestExact": true,
+        "qualifiedBaselineBytesExact": true,
+        "exitCode": 0,
+        "passMarker": "PSC1_ORDINARY_ADMISSION_PRIVATE_JS: PASS assertions=143 privateAdmission=true fullAdmission=false",
+        "logBytes": 414,
+        "logSha256": "14872e0bf0d09f45c417c5cc88b7bf44b0d362b4f4ea6360af54d2d595bbc5fe"
+      },
+      {
+        "path": "psc1/scripts/pskernel-ordinary-admission-public-smoke.mjs",
+        "sourceBytesAndDigestExact": true,
+        "qualifiedBaselineBytesExact": true,
+        "exitCode": 0,
+        "passMarker": "PSC1_ORDINARY_ADMISSION_PUBLIC_JS: PASS assertions=12 publicRoutingChanged=true ordinaryAdmission=true",
+        "logBytes": 1724,
+        "logSha256": "f1c5b98071f299439b529d1aeabb11c5354732ed22e953341b13280fb50e0028"
+      },
+      {
+        "path": "psc1/scripts/pskernel-ordinary-constructor-analysis-smoke.mjs",
+        "sourceBytesAndDigestExact": true,
+        "qualifiedBaselineBytesExact": true,
+        "exitCode": 0,
+        "passMarker": "PSC1_ORDINARY_CONSTRUCTOR_ANALYSIS_JS: PASS assertions=93 fullAdmission=false",
+        "logBytes": 369,
+        "logSha256": "cf8c9457134c5d6996c4ef46ac0550c6ad19b106cc9ba6a4a908b81d03223f56"
+      },
+      {
+        "path": "psc1/scripts/pskernel-ordinary-constructor-loop-smoke.mjs",
+        "sourceBytesAndDigestExact": true,
+        "qualifiedBaselineBytesExact": true,
+        "exitCode": 0,
+        "passMarker": "PSC1_ORDINARY_CONSTRUCTOR_LOOP_JS: PASS assertions=69 fullAdmission=false",
+        "logBytes": 361,
+        "logSha256": "e02cb49d3a0663daaba77fa89ad3a51502b9825ef2d3a5cabef8a1ba1c6647fc"
+      },
+      {
+        "path": "psc1/scripts/pskernel-ordinary-constructor-fields-smoke.mjs",
+        "sourceBytesAndDigestExact": true,
+        "qualifiedBaselineBytesExact": true,
+        "exitCode": 0,
+        "passMarker": "PSC1_ORDINARY_CONSTRUCTOR_FIELDS_JS: PASS assertions=268 fullAdmission=false",
+        "logBytes": 486,
+        "logSha256": "1fa6ca54007ff11e0aa3e19aedd68fcad10cb996b0721f6dd51ed4ce8fd7340b"
+      },
+      {
+        "path": "psc1/scripts/pskernel-ordinary-constructor-params-smoke.mjs",
+        "sourceBytesAndDigestExact": true,
+        "qualifiedBaselineBytesExact": true,
+        "exitCode": 0,
+        "passMarker": "PSC1_ORDINARY_CONSTRUCTOR_PARAMS_JS: PASS assertions=268 fullAdmission=false",
+        "logBytes": 439,
+        "logSha256": "f94577d7972eba780952b65ff819194991c339fb399ef4557e10ba3cf33073cc"
+      },
+      {
+        "path": "psc1/scripts/pskernel-ordinary-constructor-result-smoke.mjs",
+        "sourceBytesAndDigestExact": true,
+        "qualifiedBaselineBytesExact": true,
+        "exitCode": 0,
+        "passMarker": "PSC1_ORDINARY_CONSTRUCTOR_RESULT_JS: PASS assertions=432 fullAdmission=false",
+        "logBytes": 443,
+        "logSha256": "c4442103824a320a63e29e6b53e06581ccd48172f6aa7e62892765cf83c47d02"
+      },
+      {
+        "path": "psc1/scripts/pskernel-ordinary-elimination-smoke.mjs",
+        "sourceBytesAndDigestExact": true,
+        "qualifiedBaselineBytesExact": true,
+        "exitCode": 0,
+        "passMarker": "PSC1_ORDINARY_ELIMINATION_JS: PASS assertions=116 fullAdmission=false",
+        "logBytes": 366,
+        "logSha256": "33b2539be4dc23d1374f12ecfaf428db7d716a60c335105f1d99aa2d3e0a5c14"
+      },
+      {
+        "path": "psc1/scripts/pskernel-ordinary-header-smoke.mjs",
+        "sourceBytesAndDigestExact": true,
+        "qualifiedBaselineBytesExact": true,
+        "exitCode": 0,
+        "passMarker": "PSC1_ORDINARY_HEADER_JS: PASS ",
+        "logBytes": 373,
+        "logSha256": "e2035d5e648256b29f7d549e980a45b0b85e11b20d5fdefb802d6076d63516de"
+      },
+      {
+        "path": "psc1/scripts/pskernel-quot-session-owner-smoke.mjs",
+        "sourceBytesAndDigestExact": true,
+        "qualifiedBaselineBytesExact": true,
+        "exitCode": 0,
+        "passMarker": "PSC1_QUOT_SESSION_OWNER_JS: PASS ",
+        "logBytes": 1129,
+        "logSha256": "e2d0b4d1bc8b44e1bb6c23ee09132fcf93666dbced8f1b2f2aa31b4d5d1012ee"
+      },
+      {
+        "path": "psc1/scripts/pskernel-scalar-hash-short-entry-smoke.mjs",
+        "sourceBytesAndDigestExact": true,
+        "qualifiedBaselineBytesExact": true,
+        "exitCode": 0,
+        "passMarker": "PSC1_SCALAR_HASH_SHORT_ENTRY_JS: PASS ",
+        "logBytes": 108,
+        "logSha256": "6112ede396f0f4ee0ea32db09ae334f659b63b5f8371277bbc2253099a2b25d5"
+      },
+      {
+        "path": "psc1/scripts/pskernel-scalar-hash-worker-smoke.mjs",
+        "sourceBytesAndDigestExact": true,
+        "qualifiedBaselineBytesExact": true,
+        "exitCode": 0,
+        "passMarker": "PSC1_SCALAR_HASH_WORKER_JS: PASS ",
+        "logBytes": 176,
+        "logSha256": "dd2991294e560ae826461c38ad9a545b677dea70e632a5c16fd03c3515c88353"
+      },
+      {
+        "path": "psc1/scripts/pskernel-unary-spine-smoke.mjs",
+        "sourceBytesAndDigestExact": true,
+        "qualifiedBaselineBytesExact": true,
+        "exitCode": 0,
+        "passMarker": "PSC1_UNARY_SPINE_JS: PASS ",
+        "logBytes": 1533,
+        "logSha256": "4179cbf1831a39b0998a858505e6bd52aba2388f5332669b1ec6e24be11f48b7"
+      }
+    ],
+    "emptyPATH": true,
+    "oldSpaceMiB": 2048,
+    "fullKernel": false,
+    "performanceQualified": false
+  },
+  "coherentPairPassed": true,
+  "scope": "Complete public-mutual generated/canonical route evidence; producer sibling status is explicit. Independent global soundness/backend preservation, full193 and String qualification are not implied.",
+  "integrationAdopted": false,
+  "full193Qualified": false,
+  "StringQualification": false,
+  "globalSoundness": false,
+  "performanceQualified": false,
+  "validWholeProgramSourceMapV3": true,
+  "canonicalClosure": {
+    "actual169PsFilesAndManifestRead": true,
+    "exact169ModulePsClosure": true,
+    "actualCanonicalClosureDigestRecomputed": "13c0c594640fe537cdd42aa1c311c13a5c57a350877476c06ed718ce65c6c887",
+    "strictAuthenticatedCompilerTranslationAdapterGitBound": true,
+    "actual2046CanonicalDeclarationsChecked": true
+  }
+}

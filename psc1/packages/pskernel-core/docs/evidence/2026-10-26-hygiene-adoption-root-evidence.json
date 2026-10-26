@@ -1,0 +1,116 @@
+{
+  "schema": "psc1-original-nested-parameter-capture-adoption-v1",
+  "status": "adopted",
+  "evidenceBeforeAdoptionCommit": "295b636cb137492032d159090d1b8493a525e73d",
+  "integrationAdoptionCommit": "d746fb8cdcb47f2031ac6db483cf63b7debbcbef",
+  "primaryAdoptionCommit": "6c5ad25f414dd59c0c9097a5eec7fb20f58eecb4",
+  "bothAdoptionRefsReadBackExactly": true,
+  "bothAdoptionWholeTreesIdentical": "ff2f6ca66857f2faf817d8002ff107be30990d6b",
+  "productionTree": "cada4884b4250a708dccadca42b8ef5bddbd04a3",
+  "previousProductionTree": "7471f228b9bbc1eb5b9c0b78b85bf326aac72929",
+  "productionDelta": [
+    "psc1/packages/pskernel-core/src/Ps/KernelCore/Admission/Inductive/Nested/Rebase.lean"
+  ],
+  "qualifiedRebaseGitBlob": "5fafe78f8d81b1246d5d4e20895fdef37c2eff48",
+  "actualAll340NativeSourceBindingsVerifiedAtAdoptingCommit": true,
+  "actualAll46FullRouteSourceBindingsVerifiedAtAdoptingCommit": true,
+  "actualAll249AuditedBindingsVerifiedAtAdoptingCommit": true,
+  "unchangedAuditedInputs": 246,
+  "intentionalAuditedInputChanges": 3,
+  "all9AdoptionTargetsExactlyMatchQualifiedFilesOrPreparedPermanentCi": true,
+  "permanentIntegrationGates": {
+    "nativeProofs": 10,
+    "nativeControls": 17,
+    "generatedControls": 17,
+    "canonicalControls": 17,
+    "allTheoremStatementsAndRuntimeControlsExactQualifiedSources": true
+  },
+  "native": {
+    "source": "945d2c06b22c59e2bf4502e329403df62ae5915c",
+    "run": 40303319691,
+    "artifact": 12640944810,
+    "archiveSha256": "582a93b1c52b424ab2578ae990e12b9ff6799fd680714e02154dc18eaa38685d",
+    "reports": 748,
+    "modules": 52,
+    "controls": 1201,
+    "allActualMembersAndGitBindingsVerified": true
+  },
+  "paired": {
+    "rootVerified": true,
+    "bothActualJobsPass": true,
+    "source": "86d27f71dd1340d5f3d37a851f0ac85a40649b6a",
+    "run": 40304110450,
+    "productionTree": "cada4884b4250a708dccadca42b8ef5bddbd04a3",
+    "native": {
+      "source": "945d2c06b22c59e2bf4502e329403df62ae5915c",
+      "run": 40303319691,
+      "job": 121506227524,
+      "artifact": 12640944810,
+      "bytes": 999888,
+      "sha256": "582a93b1c52b424ab2578ae990e12b9ff6799fd680714e02154dc18eaa38685d",
+      "members": 412,
+      "proofs": 748
+    },
+    "routes": {
+      "generated": {
+        "artifact": 12642078456,
+        "job": 121508849440,
+        "bytes": 6178572,
+        "sha256": "4430461a46133e2014df1798b55cd0c912a16575cdd9025a9b14b502fbb4d8cc",
+        "members": 281,
+        "program": {
+          "bytes": 10607234,
+          "sha256": "21cd36644cdb4baa0e0beb4cac1337f4ea6092c1c930b72a670ab0c2909765b0"
+        }
+      },
+      "canonical": {
+        "artifact": 12643381412,
+        "job": 121508849752,
+        "bytes": 6329114,
+        "sha256": "a04f3944db8e117175f4e5df9e4f9300b58da91e666bbce84ba92cb9ddc4822a",
+        "members": 285,
+        "program": {
+          "bytes": 10607234,
+          "sha256": "21cd36644cdb4baa0e0beb4cac1337f4ea6092c1c930b72a670ab0c2909765b0"
+        }
+      }
+    },
+    "bothCompleteProgramsByteIdentical": true,
+    "full193Qualified": false,
+    "performanceQualified": false
+  },
+  "independentAudit": {
+    "source": "6506f3316ad5a3b707ed043f2c03f211886e943b",
+    "run": 40307603400,
+    "artifact": 12643457078,
+    "archiveSha256": "a5de8884fda7019febbbeba5cb88b62e729e8d56aba810e99c75a2a18f6baef4",
+    "allThreeReportsExactlyMatchSeparateRootReports": true
+  },
+  "unchanged193": {
+    "source": "acf342285c9faad4cdbd3a17fc49397e9c9d5465",
+    "run": 40307610399,
+    "artifact": 12643676595,
+    "archiveSha256": "cc469c806cfc5834d90b1c61adb7564de3627be6c566d9882a6041962f721a93",
+    "all193ClassificationsMatch": true,
+    "all176CompletedRawSemanticEnvelopesMatch": true,
+    "strictPasses": 174,
+    "timeouts": 17,
+    "separateSafetyAgreements": 2,
+    "strictStatus": "FAIL",
+    "allBudgetsAndExclusionsUnchanged": true
+  },
+  "cacheExperimentsAdopted": false,
+  "privateNestedHelpersAdopted": false,
+  "mainMerged": false,
+  "npmPublished": false,
+  "forceUpdates": false,
+  "fullKernelQualified": false,
+  "performanceQualified": false,
+  "backendPreservationProved": false,
+  "globalGates": {
+    "B": "OPEN",
+    "C": "FAIL",
+    "D": "OPEN"
+  },
+  "scope": "Isolated correctness correction adopted after immutable native/paired/audit/unchanged193 evidence. Fixed names cannot capture original free variables into accepted constructors. Exact prior result for every closed constructor and original shape/budget error precedence proved. Post-adoption automatic integration results are separate and still require inspection."
+}

@@ -1,0 +1,38 @@
+name: PSC1 cache independent paired program and249input audit
+'on':
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-t09-cache-independent-audit-20261026
+    paths:
+    - .github/workflows/psc1-pskernel-cache-paired-independent-audit.yml
+    - psc1/scripts/pskernel-cache-paired-independent-audit.py
+    - psc1/scripts/pskernel-cache-native-root-audit.py
+    - psc1/scripts/pskernel-cache-full-root-audit.py
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        fetch-depth: 0
+        persist-credentials: false
+    - name: Read actual source-bound archives, all proof/runtime logs and actual Git bytes without compiler/kernel
+        execution
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: python3 psc1/scripts/pskernel-cache-paired-independent-audit.py
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-cache-paired-independent-audit
+        path: '${{ runner.temp }}/mutual-independent-audit/audit.json
+
+          ${{ runner.temp }}/mutual-independent-audit/review/*-report.json'
+        if-no-files-found: warn
+        retention-days: 90

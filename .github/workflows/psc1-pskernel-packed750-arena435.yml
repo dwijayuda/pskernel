@@ -1,0 +1,95 @@
+name: PSC1 scalar cache unchanged full193 Arena
+'on':
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-t09-packed-arena-20261026
+    paths:
+    - .github/workflows/psc1-pskernel-packed750-arena435.yml
+    - psc1/scripts/pskernel-packed750-arena-artifact.py
+permissions:
+  contents: read
+  actions: read
+jobs:
+  generated-arena-comparison:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        fetch-depth: 0
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Authenticate paired scalar750 cohort and exact official193 reference
+      env:
+        GH_TOKEN: ${{ github.token }}
+      working-directory: psc1
+      run: python3 scripts/pskernel-packed750-arena-artifact.py
+    - name: Retain exact progress protocol controls
+      working-directory: psc1
+      run: 'set -euo pipefail
+
+        python3 scripts/pskernel-arena435-progress-controls.py | tee "$RUNNER_TEMP/arena435-progress-controls.log"
+
+        grep -q ''PSC1_ARENA_PROGRESS_CONTROLS: PASS count=24'' "$RUNNER_TEMP/arena435-progress-controls.log"
+
+        '
+    - name: Exercise positive, negative, exact-integer, and forged-recursors controls
+      shell: bash
+      working-directory: psc1
+      run: "set -euo pipefail\nPSC1_ARENA_NODE=\"$(command -v node)\"\nPSC1_ARENA_DETACHED=\"$RUNNER_TEMP/arena435-detached\"\
+        \nmkdir -p \"$PSC1_ARENA_DETACHED\"\ncp dist/arena435/kernel.js \"$PSC1_ARENA_DETACHED/kernel.mjs\"\ncp\
+        \ scripts/pskernel-arena-replay.mjs scripts/pskernel-arena-replay-controls.mjs \"$PSC1_ARENA_DETACHED/\"\
+        \ncd \"$PSC1_ARENA_DETACHED\"\nenv PATH=\"\" \"$PSC1_ARENA_NODE\" --max-old-space-size=2048 pskernel-arena-replay-controls.mjs\
+        \ kernel.mjs \\\n  | tee \"$RUNNER_TEMP/arena435-controls.log\"\ngrep -q 'PSC1_ARENA_REPLAY_CONTROLS: PASS'\
+        \ \"$RUNNER_TEMP/arena435-controls.log\"\n"
+    - name: Compare all 193 cases without exclusions and without changing kernel fuel
+      shell: bash
+      working-directory: psc1
+      run: "set -euo pipefail\ncurl -fL --retry 3 --retry-delay 2 \\\n  -o \"$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz\"\
+        \ \\\n  https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz\n\
+        mkdir -p \"$RUNNER_TEMP/arena435-independent\"\npython3 scripts/pskernel-arena435-compare.py \\\n  --archive\
+        \ \"$RUNNER_TEMP/lean-arena-round-2026-09-tests.tar.gz\" \\\n  --oracle-report \"$RUNNER_TEMP/arena435-official/report.json\"\
+        \ \\\n  --kernel dist/arena435/kernel.js \\\n  --out \"$RUNNER_TEMP/arena435-independent/report.json\" \\\
+        \n  --timeout 60 --workers 2 \\\n  | tee \"$RUNNER_TEMP/arena435-independent/run.log\"\n"
+    - name: Record all saved case bodies and verdicts without replay
+      if: always()
+      run: "python3 - <<'PY'\nimport json, os, pathlib\npath = pathlib.Path(os.environ[\"RUNNER_TEMP\"]) / \"arena435-independent/report.json\"\
+        \nif not path.is_file():\n    raise SystemExit(\"No completed comparison report was produced\")\nreport\
+        \ = json.loads(path.read_text())\ncases = report[\"tests\"]\nassert len(cases) == 193\nassert report[\"\
+        kernel_fuel\"] == 4096\nassert report[\"host_timeout_seconds_per_case\"] == 60\nassert report[\"node_heap_limit_mib\"\
+        ] == 2048\nassert report[\"host_workers\"] == 2\nassert report[\"excluded_cases\"] == []\nassert all(c[\"\
+        adaptation\"][\"body_bytes_identical\"] and\n           c[\"adaptation\"][\"original_body_sha256\"] == c[\"\
+        adaptation\"][\"adapted_body_sha256\"]\n           for c in cases)\norigin = json.loads((path.parent/\"\
+        kernel-provenance.json\").read_text())\nassert origin[\"kernelSourceSha\"] == \"2ca1b7ecff8632c710d5aa21aa9ff4174aa3979c\"\
+        \nassert origin[\"kernel\"][\"sha256\"] == report[\"kernel_module_sha256\"]\nassert origin[\"nativeReports\"\
+        ] == 750 and origin[\"proofModules\"] == 53\nprint(\"ARENA_KERNEL_PROVENANCE \" + json.dumps(origin,sort_keys=True))\n\
+        print(\"ARENA_EXACT_SOURCE \" + os.environ[\"GITHUB_SHA\"])\nprint(\"ARENA_REPORT_HEADER \" + json.dumps(\n\
+        \    {key: value for key, value in report.items() if key != \"tests\"}, sort_keys=True))\nfor case in cases:\n\
+        \    print(\"ARENA_COMPLETE_CASE \" + json.dumps(case, sort_keys=True))\nprint(\"PSC1_ARENA_FULL_REPORT_RECORDED\
+        \ source=\" + os.environ[\"GITHUB_SHA\"] +\n      \" cases=193 unchangedBodies=193 replayedCases=0\")\n\
+        PY\n"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-arena435-generated-comparison
+        path: '${{ runner.temp }}/arena435-independent
+
+          ${{ runner.temp }}/arena435-controls.log
+
+          ${{ runner.temp }}/arena435-progress-controls.log
+
+          psc1/dist/arena435/kernel.js
+
+          psc1/dist/arena435/kernel.d.ts
+
+          psc1/dist/arena435/kernel.js.map
+
+          psc1/dist/arena435/workspace/.proofscript-bootstrap.json
+
+          '
+        if-no-files-found: warn
+        retention-days: 30

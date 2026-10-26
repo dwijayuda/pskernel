@@ -18,6 +18,7 @@ for(const target of ['wasm-component','python','php']){
  refusals.push({target,kind:'absent-by-default'});
 }
 install(Object.values(assembly.dispatchPackages).map(d=>d.tarball));
+emit(base+"\nimport {verifyFile} from './node_modules/proofscript/host-tools/installed-engine-resolver.mjs';\nconst empty=path.resolve('empty-executable');fs.writeFileSync(empty,'');\nconst record={path:'empty-executable',bytes:0,sha256:'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'};\nassert.throws(()=>verifyFile(process.cwd(),record),/INVALID_PIN/);\nassert.throws(()=>verifyFile(process.cwd(),record,128*1024*1024,true),/INVALID_PIN/);\nfor(const target of ['wasm-component','python','php']){\n const result=compile({target,entryModule:'Entry',sources:[{module:'Entry',kind:'lean',text:'def truth : Bool := true\\n'}]});\n assert.equal(result.logicalAdmission,'accepted');assert.equal(result.target,target);\n console.log('PSC1_DISPATCH_SMOKE '+target);\n}\n");
 const sources=corpus.map(c=>({...c,sources:c.sources.map(s=>({...s,kind:c.grammar}))}));
 const program=base+`
 const rows=[],io=[],components=[],negatives=[];

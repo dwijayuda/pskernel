@@ -15,7 +15,7 @@ const cleanupCommit = '446a0f21c6288a7c20b843bbeadcd18ba1460fa2';
 // Intentional checked-target/publication features have separate behavior qualification.
 // Preserve the original cleanup proof; do not call these features formatting.
 const featureBaselines = {
-  'host-tools/installed-engine-resolver.mjs': 'dc0f1a3225ea5fa34a7edcbb9a2d66595db274a3',
+  'host-tools/installed-engine-resolver.mjs': '943057c61fd3a3fce7caa0760d5a8e3a89b4e337',
   'npm-cli/universal.mjs': 'dc0f1a3225ea5fa34a7edcbb9a2d66595db274a3',
   'npm-cli/universal-cli.mjs': 'dc0f1a3225ea5fa34a7edcbb9a2d66595db274a3',
 };

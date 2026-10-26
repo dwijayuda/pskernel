@@ -1,7 +1,7 @@
 name: PSC1 checked component and optional-provider dispatch
 on:
   push:
-    branches: [feat/psc1-checked-component-providers-20261026]
+    branches: [qualification/psc1-checked-dispatch-20261026]
     paths: ['psc1/host-tools/**','psc1/npm-cli/**','psc1/scripts/checked-*','psc1/scripts/optional-*','psc1/scripts/prepare-checked-dispatch-tools.mjs','psc1/scripts/slim-universal-package.mjs','psc1/host/src/Ps/Host/*Provider*.lean','psc1/host/src/Ps/Host/PortableIr.lean','.github/workflows/psc1-checked-dispatch.yml']
 concurrency:
   group: psc1-checked-dispatch-${{ github.ref }}-${{ github.sha }}
@@ -112,7 +112,7 @@ jobs:
       - name: Preserve historical cleanup and explicit feature AST correspondence
         run: |
           npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
-          node scripts/readability-host-check.mjs
+          node scripts/readability-host-check.mjs --propose
       - name: Install locked target consumer for assembly only
         run: npm ci --prefix .. --ignore-scripts --include=optional
       - name: Prepare locked optional Rust target consumer
@@ -131,14 +131,14 @@ jobs:
           node --check host-tools/generated-compiler-session.mjs
           node --check host-tools/checked-targets.mjs
           node scripts/slim-universal-package.mjs
+      - name: Qualify all new checked dispatch paths with actual runtimes and refusals
+        run: node scripts/checked-dispatch-installed.mjs
       - name: Preserve every existing installed regression
         run: |
           node scripts/slim-universal-installed.mjs
           node scripts/slim-universal-io-preflight.mjs
       - name: Execute checked target publication and transaction boundaries
         run: node scripts/checked-publication-installed.mjs
-      - name: Qualify all new checked dispatch paths with actual runtimes and refusals
-        run: node scripts/checked-dispatch-installed.mjs
       - name: Preserve actual installed application and target mapping regressions
         env:
           GH_TOKEN: ${{ github.token }}

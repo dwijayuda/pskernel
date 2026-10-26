@@ -62,6 +62,26 @@
         },
         "sourceImportClosure": "passed"
       }
+    },
+    {
+      "head": "71f10258d79a43aacd272fb277c4360df7b766ee",
+      "run": 40246079012,
+      "job": 121327951153,
+      "status": "failed-new-dispatch-only",
+      "passed": [
+        "full compiler actual native/Wasm acceptance and invalid-type rejection",
+        "old offline local/global/CLI/candidate/kernel/negative/BOM gates",
+        "32 scalar groups",
+        "24 IO groups",
+        "143 checked-publication refusals",
+        "16 actual Rust links/executions"
+      ],
+      "reason": "strict resource pin guard did not classify pinned empty Python __init__.py package data or C++ library filenames; exact nonempty executable policy retained",
+      "root": {
+        "bytes": 3811340,
+        "sha256": "f87ea49f3be6ccd820734b286cb98ec922edc067e4e755ee8f418b1d5cb71eae",
+        "status": "not-qualified-new-dispatch"
+      }
     }
   ],
   "scope": {
@@ -74,5 +94,9 @@
     "formalPreservation": false,
     "releaseQualified": false,
     "npmPublication": false
-  }
+  },
+  "activeQualificationBranch": "qualification/psc1-checked-dispatch-20261026",
+  "developmentBranch": "feat/psc1-checked-component-providers-20261026",
+  "developmentHead": "71f10258d79a43aacd272fb277c4360df7b766ee",
+  "promotion": "After actual installed qualification, non-force expected-HEAD fast-forward PR branch; final normal source gate remains required."
 }

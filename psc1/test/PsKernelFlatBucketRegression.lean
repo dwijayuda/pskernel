@@ -86,8 +86,8 @@ def main : IO Unit := do
   let mut failed := false
   try require "forced-failure" false catch _ => failed := true
   require "harness-rejection-active" failed
-  let a : List (Prod PsKernelExpr PsKernelExpr) := [(.lit (.natVal 1),.lit (.natVal 2))]
-  let b : List (Prod PsKernelExpr PsKernelExpr) := [(.lit (.natVal 3),.lit (.natVal 4)),(.lit (.natVal 5),.lit (.natVal 6))]
+  let a : List (Prod PsKernelExpr PsKernelExpr) := [(.lit (.nat 1),.lit (.nat 2))]
+  let b : List (Prod PsKernelExpr PsKernelExpr) := [(.lit (.nat 3),.lit (.nat 4)),(.lit (.nat 5),.lit (.nat 6))]
   let ma := PsKernelExprMapIndex.bucket a
   let mb := PsKernelExprMapIndex.bucket b
   let pa := PsKernelExprPairSetIndex.bucket a

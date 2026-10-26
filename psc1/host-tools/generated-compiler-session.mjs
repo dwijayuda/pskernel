@@ -7,7 +7,7 @@ import {
   createCompilerHostSession,
   compilerSourceClosureDigest,
 } from './compiler-host-protocol.mjs';
-import { validateClosureCounts } from '../scripts/compiler-closure-contract.mjs';
+import { validateClosureCounts } from './contracts/compiler-closure.mjs';
 
 import { openPublicationStore } from './transactional-publication.mjs';
 import { prepareCheckedTarget } from './checked-targets.mjs';

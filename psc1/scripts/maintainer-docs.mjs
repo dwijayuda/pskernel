@@ -97,7 +97,7 @@ const links=sources.slice(0,-1).map(([id,file,symbol,description])=>{
  const lines=fs.readFileSync(file,'utf8').split('\n');
  const i=lines.findIndex(l=>l.startsWith('def '+symbol)||l.startsWith('private def '+symbol)||l.startsWith(symbol));
  assert.ok(i>=0,'missing documented symbol '+file+':'+symbol);
- return '| '+id+' | ['+symbol+'](../'+file+'#L'+(i+1)+') | '+description+' |';
+ return '| '+id+' | ['+symbol+'](../../'+file+'#L'+(i+1)+') | '+description+' |';
 }).join('\n');
 function block(file,name,content){
  let text=fs.readFileSync(file,'utf8');
@@ -109,11 +109,11 @@ function block(file,name,content){
  assert.equal(text.slice(a,b),expected,'documentation drift: '+file+'; regenerate in Linux CI with --write');
 }
 block('docs/PSC1_CAPABILITIES.md','generated-capabilities','| Requested target | Compiler target | Explicit output consumer |\n| --- | --- | --- |\n'+rows);
-block('docs/PSC1_COMPILATION_WALKTHROUGH.md','generated-pass-links','| Step | Source entry | Responsibility |\n| --- | --- | --- |\n'+links);
+block('docs/guides/compilation-walkthrough.md','generated-pass-links','| Step | Source entry | Responsibility |\n| --- | --- | --- |\n'+links);
 const architecture=fs.readFileSync('ARCHITECTURE.md','utf8');
 assert.ok(!architecture.includes('current slim checked API publishes JS;'));
 assert.ok(architecture.includes('seven checked output'));
-const exercise=fs.readFileSync('docs/PSC1_MAINTAINER_EXERCISE.md','utf8');
+const exercise=fs.readFileSync('docs/development/maintainer-exercise.md','utf8');
 assert.ok(exercise.includes('human trial remains pending'));
 assert.ok(exercise.includes('without AI'));
 fs.mkdirSync('dist/maintainability',{recursive:true});

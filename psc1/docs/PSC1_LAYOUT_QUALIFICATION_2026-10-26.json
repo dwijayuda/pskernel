@@ -1,0 +1,22 @@
+{
+  "schema": "psc1-layout-qualification/1",
+  "status": "implemented-qualification-pending",
+  "base": "b426f9763ed2a576135ed2089671d48e21f1ff32",
+  "branch": "refactor/psc1-layout-20261026",
+  "sourceAndFrozenPackageDistinct": true,
+  "preservedFrozenCompilerClosure": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+  "implemented": {
+    "purposeSpecificGuides": 6,
+    "packageGuides": 18,
+    "compatibilityDelegates": 12,
+    "typescriptRuntimeDefinitions": 3,
+    "generatedSourceViews": 2
+  },
+  "checks": {
+    "source": "pending",
+    "maintainability": "pending",
+    "installed": "pending"
+  },
+  "humanQualified": false,
+  "mergeOrPublicationAuthorized": false
+}

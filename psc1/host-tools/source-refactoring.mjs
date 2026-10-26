@@ -8,7 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { compilerSourceClosureDigest, runIndependentChecker } from './compiler-host-protocol.mjs';
-import { supervisorLimit } from '../scripts/selfhost-qualification-profiles.mjs';
+import { supervisorLimit } from './process/resource-profiles.mjs';
 
 export const losslessProfile = 'psc1-practical-core-v1/lean4.35.0/lossless-1';
 export const losslessLimits = Object.freeze({
@@ -21,7 +21,7 @@ const ownershipTools = new WeakMap();
 const hash = value => crypto.createHash('sha256').update(value).digest('hex');
 const refuse = code => { throw new Error('PSC1_LOSSLESS_' + code); };
 const decoder = new TextDecoder('utf-8', { fatal: true, ignoreBOM: true });
-const supervisor = fileURLToPath(new URL('../scripts/bounded-process.py', import.meta.url));
+const supervisor = fileURLToPath(new URL('./process/bounded-process.py', import.meta.url));
 
 function exactKeys(value, keys) {
   if (!value || typeof value !== 'object' || Array.isArray(value) ||

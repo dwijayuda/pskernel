@@ -6,7 +6,7 @@ import os from 'node:os';
 import crypto from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
-import {compilerRequestLimit,supervisorLimit,PERFORMANCE_PROFILE} from '../scripts/selfhost-qualification-profiles.mjs';
+import {compilerRequestLimit,supervisorLimit,PERFORMANCE_PROFILE} from './process/resource-profiles.mjs';
 import {generatedTarget,compilerService} from './generated-target-profiles.mjs';
 import {decodeWasmHex} from './generated-wasm-transport.mjs';
 export const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -18,7 +18,7 @@ export function boundedRun(executable,args,options={}) {
  fs.appendFileSync(path.join(directory,'tool-events.jsonl'),JSON.stringify({
   state:'started',executable,args,at:new Date(started).toISOString()})+'\n');
  const limits=supervisorLimit(options.timeoutMs,options.timeoutPolicy);
- const control=spawnSync('python3',[path.resolve('scripts/bounded-process.py'),JSON.stringify({
+ const control=spawnSync('python3',[path.resolve('host-tools/process/bounded-process.py'),JSON.stringify({
   command:[executable,...args],directory,...limits,maxBuffer:32*1024*1024})],
   {encoding:'utf8',stdio:['ignore','pipe','inherit'],timeout:limits.supervisorGuardMs,killSignal:'SIGKILL',maxBuffer:1024*1024,
    cwd:options.cwd,env:options.env||process.env});

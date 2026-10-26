@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 const cases = [
-  ['Module', [
+  ['RuntimeSupport', [
     'Generator<__ps$Request, R, unknown>',
     'new WeakMap<Function, Function>()',
     'while (pending.length !== 0)',

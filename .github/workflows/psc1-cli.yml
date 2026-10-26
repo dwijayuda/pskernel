@@ -7,6 +7,16 @@ on:
       - psc1/npm-cli/**
       - psc1/scripts/cli-*.mjs
       - psc1/scripts/slim-universal-package.mjs
+  pull_request:
+    paths:
+      - psc1/npm-cli/**
+      - psc1/host-tools/**
+      - psc1/scripts/cli-*.mjs
+      - psc1/scripts/ci/repository-layout.mjs
+      - psc1/scripts/packaging/**
+      - psc1/test/host/**
+      - psc1/test/installed/**
+      - .github/workflows/psc1-cli.yml
 permissions:
   contents: read
   actions: read
@@ -29,6 +39,7 @@ jobs:
           node-version: '22.23.3'
       - name: Exercise actual source capture and CLI subprocesses before assembly
         run: |
+          node scripts/ci/repository-layout.mjs
           node --check npm-cli/proofscript-cli.mjs
           node --check npm-cli/cli-project.mjs
           node --check scripts/cli-package.mjs
@@ -100,7 +111,7 @@ jobs:
           assert.equal(JSON.parse(fs.readFileSync('dist/cli/installed.json')).status,'passed');
           for(const f of ['installed-qualification.json','checked-dispatch.json','checked-publication.json','checked-publication-types.json'])
             assert.equal(JSON.parse(fs.readFileSync('dist/slim-universal/'+f)).status,'passed');
-          r.scope='qualified Linux host CLI milestone; unchanged compiler/kernel/provider payloads; human trial pending';
+          r.scope='qualified Linux host layout/CLI milestone; unchanged compiler/kernel/provider payloads; human trial pending';
           r.cliQualification='passed';r.previousInstalledAndApplicationGates='passed';
           fs.writeFileSync(file,JSON.stringify(r,null,2)+'\n');
           console.log('PSC1_CLI_QUALIFIED '+JSON.stringify({commit:process.env.GITHUB_SHA,sha256:r.sha256,bytes:r.bytes,version:r.version}));

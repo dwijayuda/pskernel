@@ -69,3 +69,20 @@ assert.ok(fs.readFileSync(path.join(root,'lakefile.lean'),'utf8').includes(Strin
 const current={schema:'psc1-runtime-needs-extraction/1',testedCommit:process.env.GITHUB_SHA,baseline:currentBaseline,originalPath,extractedPath:runtimePath,movedDeclarations:[...moved.matchAll(/^def ([^\s{(]+)/gm)].map(m=>m[1]),movedLines:moved.split('\n').length-1,bodies:'byte-identical',remainingDeclarations:'byte-identical',historicalExtraction:'original proof retained against immutable446a0f21',newCompilerGenerationQualification:'separate; packaged G3 unchanged'};
 fs.writeFileSync(path.join(out,'runtime-needs.json'),JSON.stringify(current,null,2)+'\n');
 console.log('PSC1_RUNTIME_NEEDS_EXTRACTION: PASS '+JSON.stringify(current));
+
+// Third extraction: only the three TypeScript runtime definitions and their comments.
+const tsBaseline='b426f9763ed2a576135ed2089671d48e21f1ff32';
+const tsPath='packages/backend-ts/src/Ps/BackendTs/Module.lean';
+const tsOriginal=spawnSync('git',['show',tsBaseline+':psc1/'+tsPath],{cwd:root,encoding:'utf8',timeout:10000,maxBuffer:1024*1024});
+assert.equal(tsOriginal.status,0,tsOriginal.stderr);
+const tsBegin=tsOriginal.stdout.indexOf('-- Each recursive call suspends its generator;');
+const tsEnd=tsOriginal.stdout.indexOf('-- Eta parameters are already evaluated variables.',tsBegin);
+assert.ok(tsBegin>=0&&tsEnd>tsBegin);
+const tsMoved=tsOriginal.stdout.slice(tsBegin,tsEnd);
+const tsRuntime='packages/backend-ts/src/Ps/BackendTs/RuntimeSupport.lean';
+assert.equal(fs.readFileSync(path.join(root,tsRuntime),'utf8'),'import Ps.BackendTs.Type\n\n'+tsMoved);
+assert.equal(fs.readFileSync(path.join(root,tsPath),'utf8'),'import Ps.BackendTs.RuntimeSupport\n'+tsOriginal.stdout.replace(tsMoved,''));
+assert.deepEqual([...tsMoved.matchAll(/^def (\\S+)/gm)].map(x=>x[1]),['psTsStackRuntimeSupport','psTsUtf8RuntimeSupport','psTsRuntimeSupport']);
+assert.ok(fs.readFileSync(path.join(root,'lakefile.lean'),'utf8').includes(String.fromCharCode(96)+'Ps.BackendTs.RuntimeSupport,'));
+fs.writeFileSync(path.join(out,'typescript-runtime.json'),JSON.stringify({schema:'psc1-typescript-runtime-extraction/1',testedCommit:process.env.GITHUB_SHA,baseline:tsBaseline,movedDefinitions:3,movedUtf8Bytes:Buffer.byteLength(tsMoved),bodies:'byte-identical',remainingModule:'byte-identical-except-import-and-removal',wholeCompilerPreservation:'not-claimed',newFrozenG3:'not-claimed'},null,2)+'\n');
+console.log('PSC1_TYPESCRIPT_RUNTIME_EXTRACTION: PASS');

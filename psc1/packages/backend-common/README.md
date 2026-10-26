@@ -1,0 +1,15 @@
+# backend-common
+
+Closed shared target planning. Start at [src/Ps/BackendCommon/Plan.lean](src/Ps/BackendCommon/Plan.lean).
+
+- Representation: Strict executable IR → target plan.
+- Boundary: No frontend duplication; unsupported ABI stays explicit.
+- Focused guard: [scripts/backend-architecture-tests.mjs](../../scripts/backend-architecture-tests.mjs). This guard alone is not release qualification.
+- Refusal/resources: preserve explicit fuel, error order, source/body identities,
+  and negative cases. See [pass contracts](../../docs/reference/pass-contracts.md).
+
+For a change, locate the responsible operation here, preserve both grammars/shared
+semantics, and run the focused guard plus selected source/package gates from
+[the contributor guide](../../CONTRIBUTING.md). Source imports/Lake roots and the
+[generated map](../../docs/reference/repository-map.md) determine exact dependencies.
+Do not infer installed capability or independent admission from this package's presence.

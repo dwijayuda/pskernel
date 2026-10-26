@@ -1,8 +1,8 @@
 # PSC1 architecture
 
 This document describes responsibilities. Exact source identities and passing
-runs belong to the qualification receipts linked from [the documentation index](docs/README.md).
-The previous architecture snapshot is [preserved](docs/history/ARCHITECTURE_BEFORE_READABILITY_2026-10-25.md).
+runs belong to the qualification receipts linked from [the documentation index](../docs/README.md).
+The previous architecture snapshot is [preserved](../docs/history/ARCHITECTURE_BEFORE_READABILITY_2026-10-25.md).
 
 ## Follow one compilation
 
@@ -58,7 +58,7 @@ One source/compiler pipeline supplies the engines. They are not four handwritten
 The qualified slim host supports seven checked output selections through four G3 engines.
 Python/PHP remain explicit optional providers; component output has the bounded Bool ABI.
 The candidate-only API retains four targets and grants no admission/publication authority.
-See [current capability and evidence scope](docs/PSC1_CAPABILITIES.md).
+See [current capability and evidence scope](../docs/PSC1_CAPABILITIES.md).
 Never infer installed capability from a backend enum or an available source file.
 
 ## Authority and trust
@@ -71,8 +71,8 @@ checker, tool path, plugin, output directory or publication policy.
 The generated host's private session state ties together captured sources,
 actual compiler execution, strict response validation, actual independent checker
 acceptance, staged target bytes and the publication transaction. See
-[`host-tools/generated-compiler-session.mjs`](host-tools/generated-compiler-session.mjs)
-and [host guide](host-tools/README.md).
+[`host-tools/generated-compiler-session.mjs`](../host-tools/generated-compiler-session.mjs)
+and [host guide](../host-tools/README.md).
 
 Independent admission establishes logical acceptance under the pinned Lean rules.
 Typed IR is not a proof of source-to-target preservation. Cross-backend tests and
@@ -112,9 +112,9 @@ is refused pending equivalent implementation and release tests.
 Frozen compiler qualification remains attached to its original source closure.
 A native-source refactor does not retroactively requalify generated frozen payloads;
 changed compiler sources need their own source/closure/release evidence.
-See [current roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md), [contracts and receipts](docs/README.md).
+See [current roadmap](../docs/PSC1_DEVELOPMENT_ROADMAP.md), [contracts and receipts](../docs/README.md).
 
-[Follow one tiny program](docs/PSC1_COMPILATION_WALKTHROUGH.md) through actual source
-owners. [Pass contracts](docs/PSC1_PASS_CONTRACTS.md) record invariants, refusal and
-resource behavior. [Maintainer exercise](docs/PSC1_MAINTAINER_EXERCISE.md) distinguishes
+[Follow one tiny program](../docs/guides/compilation-walkthrough.md) through actual source
+owners. [Pass contracts](../docs/reference/pass-contracts.md) record invariants, refusal and
+resource behavior. [Maintainer exercise](../docs/development/maintainer-exercise.md) distinguishes
 an executable CI rehearsal from a pending independent human trial.

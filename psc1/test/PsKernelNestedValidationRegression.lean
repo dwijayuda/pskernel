@@ -235,9 +235,11 @@ private def compare (label : String) (session : PsKernelKernelSession)
     let origin := psKernelExprV2DeclarationRefFind restored.owner.declarations name
     let badOwner ← expect (psKernelExprV2NestedRestoreReference (.recInfo badRecursor) origin restored.owner)
     let bad := {restored with environment := badEnvironment, owner := badOwner}
-    actualNegative := (psKernelSimpleNestedValidateRestored 256 checked.admitted.environment badEnvironment decl
+    actualNegative := match psKernelSimpleNestedValidateRestored 256 checked.admitted.environment badEnvironment decl
       checked.preprocessed.canonicalParams checked.preprocessed.processed.state.aux restored.renames
-      0 psKernelLeanNatMaxSizeDefault).isError
+      0 psKernelLeanNatMaxSizeDefault with
+      | .error _ => true
+      | .ok _ => false
     owningNegative := match psKernelExprV2NestedValidateRestoredWithFuel 256 0 psKernelLeanNatMaxSizeDefault bad with
       | some (.error _) => true
       | _ => false

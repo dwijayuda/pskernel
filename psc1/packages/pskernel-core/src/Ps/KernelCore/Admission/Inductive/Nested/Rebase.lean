@@ -289,16 +289,66 @@ def psKernelSimpleNestedOpenConstructorParamsWithFuel
                 Except.error
                   "nested preprocessing constructor parameter mismatch"
 
+/- Input constructor expressions are untrusted and may contain free variables.
+   The deterministic temporary names used below must never capture one of
+   those input variables when the opened binders are closed again. Check only
+   names this operation would introduce, after its original shape/budget check.
+   Closed inputs and all noncolliding inputs retain the exact previous result. -/
+def psKernelSimpleNestedCtorParamCaptureWorker
+    (type : PsKernelExpr) (count : Nat) : Bool :=
+  match type with
+  | PsKernelExpr.fvar name =>
+      match name with
+      | PsKernelName.num parent index =>
+          if psKernelNameEq parent (psKernelSimpleInternalName "nestedCtorParam") then
+            Nat.ble (Nat.succ index) count
+          else false
+      | _ => false
+  | PsKernelExpr.app fn arg =>
+      if psKernelSimpleNestedCtorParamCaptureWorker fn count then true
+      else psKernelSimpleNestedCtorParamCaptureWorker arg count
+  | PsKernelExpr.lam _ domain body _ =>
+      if psKernelSimpleNestedCtorParamCaptureWorker domain count then true
+      else psKernelSimpleNestedCtorParamCaptureWorker body count
+  | PsKernelExpr.forallE _ domain body _ =>
+      if psKernelSimpleNestedCtorParamCaptureWorker domain count then true
+      else psKernelSimpleNestedCtorParamCaptureWorker body count
+  | PsKernelExpr.letE _ domain value body _ =>
+      if psKernelSimpleNestedCtorParamCaptureWorker domain count then true
+      else if psKernelSimpleNestedCtorParamCaptureWorker value count then true
+      else psKernelSimpleNestedCtorParamCaptureWorker body count
+  | PsKernelExpr.mdata _ body => psKernelSimpleNestedCtorParamCaptureWorker body count
+  | PsKernelExpr.proj _ _ body => psKernelSimpleNestedCtorParamCaptureWorker body count
+  | _ => false
+
+def psKernelSimpleNestedCtorParamCapture
+    (type : PsKernelExpr) (count : Nat) : Bool :=
+  match count with
+  | Nat.zero => false
+  | Nat.succ _ => psKernelSimpleNestedCtorParamCaptureWorker type count
+
+def psKernelSimpleNestedFinishConstructorParams
+    (type : PsKernelExpr) (count : Nat)
+    (attempt : Except String PsKernelSimpleNestedOpenParamsResult) :
+    Except String PsKernelSimpleNestedOpenParamsResult :=
+  match attempt with
+  | Except.error error => Except.error error
+  | Except.ok opened =>
+      if psKernelSimpleNestedCtorParamCapture type count then
+        Except.error "declaration has free variables"
+      else Except.ok opened
+
 def psKernelSimpleNestedOpenConstructorParams
     (type : PsKernelExpr)
     (count : Nat) :
     Except String PsKernelSimpleNestedOpenParamsResult :=
-  psKernelSimpleNestedOpenConstructorParamsWithFuel
-    (Nat.succ count)
-    type
-    count
-    0
-    List.nil
+  psKernelSimpleNestedFinishConstructorParams type count
+    (psKernelSimpleNestedOpenConstructorParamsWithFuel
+      (Nat.succ count)
+      type
+      count
+      0
+      List.nil)
 
 inductive PsKernelSimpleNestedBinderKind where
   | forallK

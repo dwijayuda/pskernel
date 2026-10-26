@@ -16,6 +16,9 @@ on:
       - psc1/packages/pskernel-core/**
       - psc1/packages/pskernel-core/AI_WORK_STATE.md
       - psc1/test/PsKernelCoreRegression.lean
+      - psc1/test/PsKernelNestedParamHygieneProofs.lean
+      - psc1/test/PsKernelNestedParamHygieneRegression.lean
+      - psc1/scripts/pskernel-nested-param-hygiene-smoke.mjs
       - psc1/test/PsKernelExprV2WhnfABIProofs.lean
       - psc1/test/PsKernelInstantiatePerformance.lean
       - psc1/test/PsKernelMultiInstantiatePerformance.lean
@@ -92,6 +95,39 @@ jobs:
           test "$(lean --githash)" = "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
           lean --version
           lake -f kernel-lakefile.lean build PsKernelCore psc1_kernel_regression psc1_kernel_perf psc1_kernel_instantiate_perf psc1_kernel_multi_perf psc1_kernel_lift_perf
+      - name: Require original nested constructor parameter capture correction
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT="$RUNNER_TEMP/nested-hygiene"
+          mkdir -p "$OUT"
+          lake -f kernel-lakefile.lean env lean test/PsKernelNestedParamHygieneProofs.lean 2>&1 | tee "$OUT/proofs.log"
+          timeout --signal=KILL 300s lake -f kernel-lakefile.lean env lean --run test/PsKernelNestedParamHygieneRegression.lean 2>&1 | tee "$OUT/native.log"
+          python3 - <<'PYCODE'
+          import pathlib,os,re,json
+          out=pathlib.Path(os.environ['RUNNER_TEMP'])/'nested-hygiene'
+          t=(out/'proofs.log').read_text()
+          rows=re.findall(r"'(PsKernelNestedParamHygieneProofs\.[^']+)' (?:depends on axioms: \[([^\]]*)\]|does not depend on any axioms)",t)
+          assert len(rows)==len({n for n,_ in rows})==10
+          assert not any(s in t for s in ['error:','sorryAx','Lean.ofReduceBool','Lean.trustCompiler'])
+          for name,axioms in rows:assert set(x.strip() for x in axioms.split(',') if x.strip())<={'propext','Classical.choice','Quot.sound'}
+          t=(out/'native.log').read_text();tag='PSC1_NESTED_PARAM_HYGIENE_ASSERT '
+          labels=[line[len(tag):] for line in t.splitlines() if line.startswith(tag)]
+          assert len(labels)==len(set(labels))==17
+          d=json.loads((out/'diagnostic.json').read_text())
+          assert d['source']==os.environ['GITHUB_SHA'] and d['officialValidAccepted'] and d['officialFreeVariableRejected']
+          assert not d['observedCapturedFreeVariableAccepted'] and not d['publishedConstructorMatchesDifferentClosedInput']
+          assert d['nestedCollidingFreeVariable']=='rejectedInvalid: nested preprocessing: declaration has free variables'
+          print('PSC1_NESTED_PARAM_HYGIENE_PERMANENT: PASS proofs=10 controls=17 actualPinnedLean=true')
+          PYCODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-nested-param-hygiene-permanent
+          path: ${{ runner.temp }}/nested-hygiene/
+          if-no-files-found: warn
+          retention-days: 90
       - name: Run native safety and semantics regression
         shell: bash
         working-directory: psc1
@@ -480,6 +516,28 @@ jobs:
           grep -Fqx 'PSC1_V2_DAG_RECURSOR_MAJOR_STATE_JS: PASS sequence=4 propagated=40' "$RUNNER_TEMP/psc1-recursor-canonical.log"
           grep -Fqx 'PSC1_V2_DAG_RECURSOR_MAJOR_FAMILY_JS: PASS comparisons=70 fields=20' "$RUNNER_TEMP/psc1-recursor-canonical.log"
           grep -Fqx 'PSC1_V2_DAG_RECURSOR_MAJOR_STRING_JS: PASS callbacks=24 propagated=48' "$RUNNER_TEMP/psc1-recursor-canonical.log"
+      - name: Require canonical-source nested constructor capture rejection
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          PSC1_NODE_BIN="$(command -v node)"
+          PSC1_PS_RUN_DIR="$RUNNER_TEMP/psc1-ps-standalone"
+          test -s "$PSC1_PS_RUN_DIR/kernel.mjs"
+          cp scripts/pskernel-nested-param-hygiene-smoke.mjs "$PSC1_PS_RUN_DIR/hygiene-smoke.mjs"
+          cd "$PSC1_PS_RUN_DIR"
+          timeout --signal=KILL 300s env -i PATH= "$PSC1_NODE_BIN" --max-old-space-size=2048 hygiene-smoke.mjs kernel.mjs \
+            | tee "$RUNNER_TEMP/psc1-hygiene-canonical.log"
+          python3 - <<'PYCODE'
+          import pathlib,os,json
+          t=(pathlib.Path(os.environ['RUNNER_TEMP'])/'psc1-hygiene-canonical.log').read_text()
+          tag='PSC1_NESTED_PARAM_HYGIENE_JS: PASS '
+          r,=[json.loads(line[len(tag):]) for line in t.splitlines() if line.startswith(tag)]
+          assert r['assertions']==len(r['labels'])==len(set(r['labels']))==17
+          assert r['labels']==['actual-Lean-and-original-public-closure-parity', 'exact-rejection-and-no-publication', 'capture-leaf', 'capture-app-fn', 'capture-app-arg', 'capture-lambda-domain', 'capture-lambda-body', 'capture-forall-domain', 'capture-forall-body', 'capture-let-domain', 'capture-let-value', 'capture-let-body', 'capture-metadata', 'capture-projection', 'exact-namespace-arbitrary-indices-zero-fastpath', 'original-shape-error-precedes-capture-guard', 'public-DAG-original-fallback-rejects-atomically']
+          assert r['validInputsAccepted'] and r['publicDagRejects'] and not r['fullKernel'] and not r['performanceQualified']
+          print('PSC1_NESTED_PARAM_HYGIENE_CANONICAL_PERMANENT: PASS nativeEqual=17')
+          PYCODE
       - name: Check canonical-source mutual and nested prefix owners in detached Node
         working-directory: psc1
         run: |
@@ -749,5 +807,6 @@ jobs:
           path: ${{ runner.temp }}/psc1-t01f-canonical-complete/
           if-no-files-found: error
           retention-days: 30
+
 
 

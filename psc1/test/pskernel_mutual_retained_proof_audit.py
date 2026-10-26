@@ -3,7 +3,7 @@ from pathlib import Path
 import json,subprocess,re,os
 
 assert os.environ.get('GITHUB_ACTIONS')=='true','GitHub Actions execution only'
-out=Path(os.environ['RUNNER_TEMP'])/'t06-mutual-public'/'retained561'
+out=Path(os.environ['RUNNER_TEMP'])/'t09-cache-scan4'/'retained561'
 out.mkdir(parents=True,exist_ok=True)
 manifest=json.loads(Path('test/retained-561-proof-manifest.json').read_text())
 modules=manifest['modules'];assert len(modules)==40
@@ -16,8 +16,8 @@ for module in modules:
  if module in {'PsKernelCacheScopeProofs': ('      exact psKernelExprV2WhnfCacheFindWorker_eq_before\n        (List.cons first rest) arena source hash', '      exact (PsKernelCacheScan4Proofs.whnf_curried_wrapper_preserves_all_inputs_and_exact_errors\n        (List.cons first rest) arena source hash).trans\n          (psKernelExprV2WhnfCacheFindWorker_eq_before (List.cons first rest) arena source hash)'), 'PsKernelEmptySemanticCacheProofs': ('      | cons entry rest => rfl\n  | some index => rfl', '      | cons entry rest =>\n          simp only [psKernelSemanticExprMapGet, Frozen.psKernelSemanticExprMapGet,\n            PsKernelCacheScan4Proofs.map_scan_four_preserves_every_expression_list_and_order]\n  | some index =>\n      simp only [psKernelSemanticExprMapGet, Frozen.psKernelSemanticExprMapGet,\n        PsKernelCacheScan4Proofs.map_scan_four_preserves_every_expression_list_and_order]')}:
   oldBody,newBody={'PsKernelCacheScopeProofs': ('      exact psKernelExprV2WhnfCacheFindWorker_eq_before\n        (List.cons first rest) arena source hash', '      exact (PsKernelCacheScan4Proofs.whnf_curried_wrapper_preserves_all_inputs_and_exact_errors\n        (List.cons first rest) arena source hash).trans\n          (psKernelExprV2WhnfCacheFindWorker_eq_before (List.cons first rest) arena source hash)'), 'PsKernelEmptySemanticCacheProofs': ('      | cons entry rest => rfl\n  | some index => rfl', '      | cons entry rest =>\n          simp only [psKernelSemanticExprMapGet, Frozen.psKernelSemanticExprMapGet,\n            PsKernelCacheScan4Proofs.map_scan_four_preserves_every_expression_list_and_order]\n  | some index =>\n      simp only [psKernelSemanticExprMapGet, Frozen.psKernelSemanticExprMapGet,\n        PsKernelCacheScan4Proofs.map_scan_four_preserves_every_expression_list_and_order]')}[module]
   before=original.decode();assert before.count(oldBody)==1
-  expected=('import PsKernelCacheScan4Proofs\n'+before.replace(oldBody,newBody)).encode()
-  assert raw==expected,(path,'only exact import+proof-body repair allowed; statements unchanged')
+  expectedRaw=('import PsKernelCacheScan4Proofs\n'+before.replace(oldBody,newBody)).encode()
+  assert raw==expectedRaw,(path,'only exact import+proof-body repair allowed; statements unchanged')
  else:assert raw==original,path
  texts[module]=raw.decode()
 pending=set(modules);order=[]

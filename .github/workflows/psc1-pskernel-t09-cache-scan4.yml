@@ -143,8 +143,7 @@ jobs:
         \ build PsKernelClosedCacheAnalysisProofs PsKernelExprV2PagedModelNativeProofs PsKernelExprV2MetadataNativeProofs\
         \ 2>&1 | tee \"$RUNNER_TEMP/t09-cache-scan4/retained-import-build.log\"\npython3 test/pskernel_mutual_retained_proof_audit.py\n\
         \npython3 - <<'PYCODE'\nprint('PSC1_CACHE_SCAN4_ALL_PROOFS_PASS totalUnique=742 modules=52 retained=738\
-        \ new=4')\nPYCODE\n\ncp -a \"$RUNNER_TEMP/t06-mutual-public/retained561\" \"$RUNNER_TEMP/t09-cache-scan4/retained561\"\
-        \n"
+        \ new=4')\nPYCODE\n"
     - name: Retain all1184 native controls after universal exact worker and wrapper equality
       working-directory: psc1
       shell: bash

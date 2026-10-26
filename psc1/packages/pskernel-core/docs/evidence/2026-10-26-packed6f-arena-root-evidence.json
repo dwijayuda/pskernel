@@ -1,0 +1,112 @@
+{
+  "source": "6f9bc3e876a36d0665b33789be801ef5f8dbeca0",
+  "run": 40315041798,
+  "job": 121545395498,
+  "artifact": 12647425573,
+  "archiveBytes": 14023999,
+  "archiveSha256": "7ff2f52507025faf84daa7e70438f6efd8260d4292287fb0a13016e6a94000c8",
+  "uniqueMembers": 589,
+  "all589ActualMembersReadAndCrcVerified": true,
+  "kernelBytes": 10614366,
+  "kernelSha256": "2cea5560f2f04f1ba871b277ccc1eb80d0e317c24a4afb74ac2d8a49b59a7067",
+  "all193InputAdaptationsAndClassificationsMatchPriorQualifiedReplay": true,
+  "all176CompletedRawEnvelopesExactlyMatchPriorQualifiedReplay": true,
+  "strictMatches": 174,
+  "timeouts": [
+    {
+      "index": 23,
+      "name": "perf/refute-cheap-last.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 72,
+      "name": "init-prelude.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 78,
+      "name": "perf/app-lam.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 80,
+      "name": "perf/beta-ladder.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 82,
+      "name": "perf/discarded-argument-match.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 83,
+      "name": "perf/discarded-argument.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 84,
+      "name": "perf/folded-constant-first.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 85,
+      "name": "perf/folded-constant-last.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 86,
+      "name": "perf/fueled-chain.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 87,
+      "name": "perf/grind-ring-5.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 90,
+      "name": "perf/let-ladder.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 91,
+      "name": "perf/magma-list-deep-n21.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 92,
+      "name": "perf/magma-list-deep-n36.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 93,
+      "name": "perf/magma-list-pair-n21.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 94,
+      "name": "perf/magma-list-pair-n7.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 96,
+      "name": "perf/shared-subterm.ndjson",
+      "returncode": -9
+    },
+    {
+      "index": 98,
+      "name": "perf/unroll-versus-evaluate.ndjson",
+      "returncode": -9
+    }
+  ],
+  "separateSafetyAgreements": 2,
+  "strictStatus": "FAIL",
+  "kernelSource": "2ca1b7ecff8632c710d5aa21aa9ff4174aa3979c",
+  "productionTree": "95eb4b321befe5f9458b5ef64c876a0c0fcca1d9",
+  "allFourActualNestedArchivesByteMatchPreviouslyRootReadOriginals": true,
+  "postReplayMetadataRecorderSucceededWithoutReplay": true,
+  "allActualKernelResourceLimitsUnchanged": true,
+  "scalarCacheAdopted": false,
+  "performanceQualified": false,
+  "scope": "Scalar cache candidate unchanged193 replay: all193 classifications and176 completed raw semantic envelopes exactly equal qualified replay;174strict/17timeouts/2safety; no semantic regression or timeout improvement. All budgets unchanged;strict gate FAIL. String A-B-B-A and performance/adoption remain separate."
+}

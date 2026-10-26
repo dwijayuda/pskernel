@@ -1,0 +1,306 @@
+{
+  "source": "d746fb8cdcb47f2031ac6db483cf63b7debbcbef",
+  "run": 40310003411,
+  "qualificationArtifact": 12646973218,
+  "qualificationArchiveSha256": "389f331454b2f6b1aa94eaf2fe63fb6cddaf2edd6b54a637231575ef6b09b022",
+  "all6ActualFourMemberArchivesReadAndCRCVerified": true,
+  "all6ActualLogAndMemoryDigestsVerified": true,
+  "all6ReceiptsExactlyMatchAggregateDigestsAndRuntime": true,
+  "actualExecutedAssertions": 8400,
+  "sameCompleteProgramAndFixtureAll6": true,
+  "unchanged1500SecondDeadlineAnd4096Fuel": true,
+  "rawShards": [
+    {
+      "artifact": 12646535210,
+      "archiveBytes": 5625,
+      "archiveSha256": "15f04a843dc9a5e8b0d386f693dc63b969a96fe7d7a64c4f716ab87d19ec2d4e",
+      "sampleIndex": 0,
+      "sample": "",
+      "measurement": "peak_rss_kib=888688 wall_seconds=285.56 exit_status=0",
+      "assertions": 1400,
+      "rawRuntimeReceipt": {
+        "kernelSha256": "21cd36644cdb4baa0e0beb4cac1337f4ea6092c1c930b72a670ab0c2909765b0",
+        "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+        "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+        "requests": 294,
+        "metadata": 377,
+        "declarations": "377",
+        "samples": 1,
+        "availableSamples": 6,
+        "executedSamples": 1,
+        "fuel": 4096,
+        "independentAdmission": true,
+        "assertions": 1400,
+        "constructionMs": 51.92644999999999,
+        "admissionMs": 47633.111791,
+        "metadataMs": 1499.9872650000034,
+        "totalMs": 285399.188495,
+        "diagnosticTracing": false,
+        "measurements": [
+          {
+            "sample": "",
+            "utf8Bytes": 0,
+            "owners": 224,
+            "ownerAndConstructionMs": 6190.061217000002,
+            "totalMs": 236039.032209,
+            "arenaNodes": "32",
+            "ownedArenaNodes": "10220",
+            "memory": {
+              "rss": 908963840,
+              "heapTotal": 527974400,
+              "heapUsed": 491777584,
+              "external": 4807645,
+              "arrayBuffers": 2810496
+            }
+          }
+        ],
+        "sampleIndex": 0,
+        "sample": ""
+      }
+    },
+    {
+      "artifact": 12646335722,
+      "archiveBytes": 5629,
+      "archiveSha256": "23b125f2c38944ce22701e0e13fd5fc54b9c2c4343f1e8a4c5dedea083eac4b3",
+      "sampleIndex": 1,
+      "sample": "a",
+      "measurement": "peak_rss_kib=858648 wall_seconds=479.50 exit_status=0",
+      "assertions": 1400,
+      "rawRuntimeReceipt": {
+        "kernelSha256": "21cd36644cdb4baa0e0beb4cac1337f4ea6092c1c930b72a670ab0c2909765b0",
+        "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+        "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+        "requests": 294,
+        "metadata": 377,
+        "declarations": "377",
+        "samples": 1,
+        "availableSamples": 6,
+        "executedSamples": 1,
+        "fuel": 4096,
+        "independentAdmission": true,
+        "assertions": 1400,
+        "constructionMs": 54.131042000000036,
+        "admissionMs": 60874.334663,
+        "metadataMs": 1908.3837179999973,
+        "totalMs": 479360.859023,
+        "diagnosticTracing": false,
+        "measurements": [
+          {
+            "sample": "a",
+            "utf8Bytes": 1,
+            "owners": 224,
+            "ownerAndConstructionMs": 7366.168383999997,
+            "totalMs": 416323.983315,
+            "arenaNodes": "72",
+            "ownedArenaNodes": "10260",
+            "memory": {
+              "rss": 877936640,
+              "heapTotal": 499519488,
+              "heapUsed": 126413368,
+              "external": 4807637,
+              "arrayBuffers": 2810488
+            }
+          }
+        ],
+        "sampleIndex": 1,
+        "sample": "a"
+      }
+    },
+    {
+      "artifact": 12645728830,
+      "archiveBytes": 5628,
+      "archiveSha256": "7f4f76a8b60d516e0877bdda4f8e4b32a3e25f4d9477c21ba4f4185e942203b6",
+      "sampleIndex": 2,
+      "sample": "\u00e9",
+      "measurement": "peak_rss_kib=791316 wall_seconds=413.63 exit_status=0",
+      "assertions": 1400,
+      "rawRuntimeReceipt": {
+        "kernelSha256": "21cd36644cdb4baa0e0beb4cac1337f4ea6092c1c930b72a670ab0c2909765b0",
+        "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+        "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+        "requests": 294,
+        "metadata": 377,
+        "declarations": "377",
+        "samples": 1,
+        "availableSamples": 6,
+        "executedSamples": 1,
+        "fuel": 4096,
+        "independentAdmission": true,
+        "assertions": 1400,
+        "constructionMs": 42.541079999999994,
+        "admissionMs": 42842.420503,
+        "metadataMs": 1427.2637729999988,
+        "totalMs": 413531.219774,
+        "diagnosticTracing": false,
+        "measurements": [
+          {
+            "sample": "\u00e9",
+            "utf8Bytes": 2,
+            "owners": 224,
+            "ownerAndConstructionMs": 5787.766679,
+            "totalMs": 369071.826607,
+            "arenaNodes": "88",
+            "ownedArenaNodes": "10276",
+            "memory": {
+              "rss": 809099264,
+              "heapTotal": 554831872,
+              "heapUsed": 332562176,
+              "external": 4807637,
+              "arrayBuffers": 2810488
+            }
+          }
+        ],
+        "sampleIndex": 2,
+        "sample": "\u00e9"
+      }
+    },
+    {
+      "artifact": 12645539689,
+      "archiveBytes": 5632,
+      "archiveSha256": "5702735b9fdcfde115b02279efd3b95ed993ba75a9170954d9d0b81d66e3396c",
+      "sampleIndex": 3,
+      "sample": "\u20ac",
+      "measurement": "peak_rss_kib=819220 wall_seconds=381.34 exit_status=0",
+      "assertions": 1400,
+      "rawRuntimeReceipt": {
+        "kernelSha256": "21cd36644cdb4baa0e0beb4cac1337f4ea6092c1c930b72a670ab0c2909765b0",
+        "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+        "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+        "requests": 294,
+        "metadata": 377,
+        "declarations": "377",
+        "samples": 1,
+        "availableSamples": 6,
+        "executedSamples": 1,
+        "fuel": 4096,
+        "independentAdmission": true,
+        "assertions": 1400,
+        "constructionMs": 28.92228999999999,
+        "admissionMs": 34696.84826,
+        "metadataMs": 1122.0121070000023,
+        "totalMs": 381198.833027,
+        "diagnosticTracing": false,
+        "measurements": [
+          {
+            "sample": "\u20ac",
+            "utf8Bytes": 3,
+            "owners": 224,
+            "ownerAndConstructionMs": 4438.831744000003,
+            "totalMs": 345247.68619900005,
+            "arenaNodes": "104",
+            "ownedArenaNodes": "10292",
+            "memory": {
+              "rss": 837586944,
+              "heapTotal": 541200384,
+              "heapUsed": 382043184,
+              "external": 4807577,
+              "arrayBuffers": 2810428
+            }
+          }
+        ],
+        "sampleIndex": 3,
+        "sample": "\u20ac"
+      }
+    },
+    {
+      "artifact": 12646652529,
+      "archiveBytes": 5635,
+      "archiveSha256": "0801cb197d641ed2c13eb865a7aeb0eb8464a5447d201d6684e4839bc2286586",
+      "sampleIndex": 4,
+      "sample": "\ud83d\ude00",
+      "measurement": "peak_rss_kib=906536 wall_seconds=671.07 exit_status=0",
+      "assertions": 1400,
+      "rawRuntimeReceipt": {
+        "kernelSha256": "21cd36644cdb4baa0e0beb4cac1337f4ea6092c1c930b72a670ab0c2909765b0",
+        "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+        "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+        "requests": 294,
+        "metadata": 377,
+        "declarations": "377",
+        "samples": 1,
+        "availableSamples": 6,
+        "executedSamples": 1,
+        "fuel": 4096,
+        "independentAdmission": true,
+        "assertions": 1400,
+        "constructionMs": 55.26521199999999,
+        "admissionMs": 54600.10111,
+        "metadataMs": 1744.9289229999995,
+        "totalMs": 670933.13488,
+        "diagnosticTracing": false,
+        "measurements": [
+          {
+            "sample": "\ud83d\ude00",
+            "utf8Bytes": 4,
+            "owners": 224,
+            "ownerAndConstructionMs": 7410.164859999997,
+            "totalMs": 614338.142127,
+            "arenaNodes": "120",
+            "ownedArenaNodes": "10308",
+            "memory": {
+              "rss": 926924800,
+              "heapTotal": 551424000,
+              "heapUsed": 362240624,
+              "external": 4806249,
+              "arrayBuffers": 2809100
+            }
+          }
+        ],
+        "sampleIndex": 4,
+        "sample": "\ud83d\ude00"
+      }
+    },
+    {
+      "artifact": 12647515786,
+      "archiveBytes": 5650,
+      "archiveSha256": "cf2a205f5c51f773acb46561cb1e7497f0e88641424c0bb02d1f994b19b50c88",
+      "sampleIndex": 5,
+      "sample": "A\u00e9\u20ac\ud83d\ude00",
+      "measurement": "peak_rss_kib=1175336 wall_seconds=942.43 exit_status=0",
+      "assertions": 1400,
+      "rawRuntimeReceipt": {
+        "kernelSha256": "21cd36644cdb4baa0e0beb4cac1337f4ea6092c1c930b72a670ab0c2909765b0",
+        "fixtureSha256": "563d6ef138271a13039764257407ee8b66190bca02c8057489d3b1c45f51e71d",
+        "harnessSha256": "d3672e6105a0ddf04b52774cb841df6f26e755d66915f6cf764929faaddf69a2",
+        "requests": 294,
+        "metadata": 377,
+        "declarations": "377",
+        "samples": 1,
+        "availableSamples": 6,
+        "executedSamples": 1,
+        "fuel": 4096,
+        "independentAdmission": true,
+        "assertions": 1400,
+        "constructionMs": 33.642427,
+        "admissionMs": 35741.932081,
+        "metadataMs": 1126.696484,
+        "totalMs": 942295.57153,
+        "diagnosticTracing": false,
+        "measurements": [
+          {
+            "sample": "A\u00e9\u20ac\ud83d\ude00",
+            "utf8Bytes": 10,
+            "owners": 224,
+            "ownerAndConstructionMs": 4668.217469000003,
+            "totalMs": 905279.521915,
+            "arenaNodes": "288",
+            "ownedArenaNodes": "10476",
+            "memory": {
+              "rss": 1201963008,
+              "heapTotal": 568606720,
+              "heapUsed": 359858184,
+              "external": 4808077,
+              "arrayBuffers": 2810928
+            }
+          }
+        ],
+        "sampleIndex": 5,
+        "sample": "A\u00e9\u20ac\ud83d\ude00"
+      }
+    }
+  ],
+  "canonicalRun": 40310003421,
+  "canonicalStrictFailSample5Deadline1500": true,
+  "performanceQualified": false,
+  "releaseQualified": false
+}

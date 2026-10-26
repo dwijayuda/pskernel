@@ -1,29 +1,5 @@
-import Lean
-import Ps.BackendCommon.Plan
-
--- Native transport adapters stay outside every portable compiler closure.
-deriving instance Lean.ToJson, Lean.FromJson for PsVerifiedIrPrimitiveType
-deriving instance Lean.ToJson, Lean.FromJson for PsVerifiedIrType
-deriving instance Lean.ToJson, Lean.FromJson for PsVerifiedIrMachineIntegerType
-deriving instance Lean.ToJson, Lean.FromJson for PsVerifiedIrIntegerBinaryOp
-deriving instance Lean.ToJson, Lean.FromJson for PsVerifiedIrIntegerCompareOp
-deriving instance Lean.ToJson, Lean.FromJson for PsVerifiedIrFloatingType
-deriving instance Lean.ToJson, Lean.FromJson for PsVerifiedIrFloatBinaryOp
-deriving instance Lean.ToJson, Lean.FromJson for PsVerifiedIrFloatCompareOp
-deriving instance Lean.ToJson, Lean.FromJson for PsVerifiedIrLiteral
-deriving instance Lean.ToJson, Lean.FromJson for PsVerifiedIrIntrinsic
-deriving instance Lean.ToJson, Lean.FromJson for PsVerifiedIrParameter
-deriving instance Lean.ToJson, Lean.FromJson for PsVerifiedIrMatchBinding
-deriving instance Lean.ToJson, Lean.FromJson for PsVerifiedIrExpr
-deriving instance Lean.ToJson, Lean.FromJson for PsVerifiedIrTypeParameter
-deriving instance Lean.ToJson, Lean.FromJson for PsVerifiedIrStructureField
-deriving instance Lean.ToJson, Lean.FromJson for PsVerifiedIrStructure
-deriving instance Lean.ToJson, Lean.FromJson for PsVerifiedIrConstructorField
-deriving instance Lean.ToJson, Lean.FromJson for PsVerifiedIrConstructor
-deriving instance Lean.ToJson, Lean.FromJson for PsVerifiedIrInductive
-deriving instance Lean.ToJson, Lean.FromJson for PsVerifiedIrDeclaration
-deriving instance Lean.ToJson, Lean.FromJson for PsVerifiedIrExternalImport
-deriving instance Lean.ToJson, Lean.FromJson for PsVerifiedIrModule
+import Ps.Host.BackendProviderInstances
+import Ps.Host.PortableIr
 
 def psBackendProviderProtocol : String := "psc1-backend-provider/1"
 def psBackendProviderMaxBytes : Nat := 67108864
@@ -87,9 +63,28 @@ def psBackendProviderRun (target : PsBackendTarget)
         ("leanVersion", Lean.toJson Lean.versionString),
         ("leanCommit", Lean.toJson Lean.githash),
         ("candidateOnly", Lean.toJson true)]).compress)
-  | ["emit", input] =>
+  | [command, input] =>
+      if command != "emit" && command != "emit-portable" then
+        throw (IO.userError "PSC1_PROVIDER_COMMAND")
       let text ← IO.FS.readFile input
-      let (request, validated) ← match psBackendProviderDecode text target with
+      let decoded := if command == "emit" then psBackendProviderDecode text target else do
+        if text.utf8ByteSize > 33554432 then throw "PSC1_PORTABLE_PROVIDER_REQUEST_LIMIT"
+        let value ← Lean.Json.parse text
+        let [.str "psc1-portable-backend-provider/1", .str selected, ir, names, abi] ←
+            Ps.Host.PortableIr.rows value | throw "PSC1_PORTABLE_PROVIDER_REQUEST_SCHEMA"
+        if selected != psBackendTargetName target then throw "PSC1_PORTABLE_PROVIDER_TARGET"
+        let raw ← Ps.Host.PortableIr.decode ir
+        let publicNames ← (← Ps.Host.PortableIr.rows names).mapM Ps.Host.PortableIr.string
+        if publicNames.isEmpty || publicNames.eraseDups.length != publicNames.length then
+          throw "PSC1_PORTABLE_PROVIDER_PUBLIC_NAMES"
+        let ioAbi ← abi.getBool?
+        let request : PsBackendProviderRequest := {
+          protocol := psBackendProviderProtocol, target := selected,
+          leanVersion := Lean.versionString, leanCommit := Lean.githash,
+          ir := raw, publicNames, ioDispatcherAbi := ioAbi }
+        -- Reuse the identical strict IR and target-specific ABI checks.
+        psBackendProviderDecode (Lean.toJson request).compress target
+      let (request, validated) ← match decoded with
         | .ok result => pure result
         | .error reason => throw (IO.userError reason)
       let some digest ← IO.getEnv "PSC1_BACKEND_REQUEST_SHA256"

@@ -210,6 +210,196 @@
     "fullCrossPlatformRelease": false
   },
   "activeMilestone": {
+    "name": "checked-seven-target-generated-host-dispatch",
+    "status": "implementation; exact Linux qualification pending in linked receipt",
+    "version": "0.1.0-psc1.7",
+    "base": "9c13f2f2f11bda05a9274e27453d1e275bef1222",
+    "compilerSourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+    "embeddedEngines": [
+      "js",
+      "ts"
+    ],
+    "mandatoryKernel": "@proofscript/pskernel-lean-wasm@4.35.0",
+    "optionalExecutionPackages": [
+      "@proofscript/compiler-rust-linux-x64@0.1.0-psc1.7",
+      "@proofscript/compiler-wasm@0.1.0-psc1.7"
+    ],
+    "checkedTargets": [
+      "js",
+      "ts",
+      "rust",
+      "wasm-core",
+      "wasm-component",
+      "python",
+      "php"
+    ],
+    "candidateTargets": [
+      "js",
+      "ts",
+      "rust",
+      "wasm-core"
+    ],
+    "candidateApiAuthority": false,
+    "publicationProtocols": [
+      "legacy-symlink",
+      "portable-file"
+    ],
+    "publicationPlatforms": [
+      "linux"
+    ],
+    "otherPlatformPublication": "explicitly refused; actual platform durability qualification remains required",
+    "defaultCompilerSdkRequired": false,
+    "outputConsumers": {
+      "ts": {
+        "optional": true,
+        "typescript": "7.0.2",
+        "platformDependency": "@typescript/typescript-linux-x64@7.0.2",
+        "qualifiedPlatformBoundary": "Linux x64 only; consult receipt"
+      },
+      "rust": {
+        "optional": true,
+        "package": "@proofscript/rust-target-consumer-linux-x64@0.1.0-psc1.6",
+        "externalToolchain": "official Rust1.90.0 Linux x64, exact full selected resource inventory",
+        "noSourceSuppliedCargo": true
+      },
+      "wasm-core": {
+        "additionalSdk": false,
+        "memoryArchitecture": "existing PSC1 Wasm GC",
+        "standaloneAbi": [
+          "nat",
+          "int",
+          "bool",
+          "string",
+          "unit"
+        ],
+        "unsupportedAbi": "explicit refusal"
+      },
+      "wasm-component": {
+        "optional": true,
+        "package": "@proofscript/wasm-component-tools-linux-x64@0.1.0-psc1.7",
+        "abi": "Bool only, <=16 parameters; imports and callback IO refused",
+        "compilerInstructions": "unchanged qualified Wasm GC core",
+        "validator": "wasm-tools1.254.0"
+      },
+      "python": {
+        "optional": true,
+        "package": "@proofscript/backend-python@0.1.0-psc1.7",
+        "targetRuntime": "Python3.14.8 bundled; no install-time download/build",
+        "input": "already admitted portable specialized IR only"
+      },
+      "php": {
+        "optional": true,
+        "package": "@proofscript/backend-php@0.1.0-psc1.7",
+        "targetRuntime": "PHP8.5.12 with GMP bundled; FFI disabled during checking",
+        "input": "already admitted portable specialized IR only"
+      }
+    },
+    "priorNativeDistributionPreserved": true,
+    "compilerSourceUnchanged": true,
+    "fullCrossPlatformRelease": false,
+    "qualificationReceipt": "docs/PSC1_CHECKED_DISPATCH_QUALIFICATION_2026-10-26.json",
+    "projectAuthority": "Project JSON remains entryModule/sources/assurance only; target/protocol/toolchain/output/checker selections are explicit host capabilities.",
+    "acceptance": [
+      "root-less-than-half-previous-size",
+      "no-platform-native-default-payload",
+      "offline-local-and-global-install",
+      "default-js-ts-without-sdk-or-optional-payloads",
+      "explicit-hash-pinned-rust-wasm-discovery",
+      "same-frozen-compiler-source-and-IR-admission-boundary",
+      "both-grammars-and-all-four-installed-engines",
+      "negative-policy-tamper-version-and-publication-fault-preservation",
+      "genuine-optional-native-wasm-cross-checks",
+      "actual-packed-public-types",
+      "normal-dependency-selected-source-gate",
+      "project-data-cannot-select-host-tools-or-output-paths",
+      "root-only-js-ts-can-emit-all-four-candidate-targets-without-optional-executors",
+      "both-pointer-layout-real-filesystem-fault-and-SIGKILL-tests",
+      "immutable-returned-reader-paths",
+      "stale-writer-and-sealed-tamper-refusal",
+      "precommit-prior-output-preservation",
+      "explicit-postcommit-durability-and-cleanup-uncertainty",
+      "all-four-executors-both-grammars-four-checked-targets",
+      "actual-scalar-unicode-and-callback-IO-consumers",
+      "Rust-rlib-actual-link-and-execution",
+      "SDK-absence-and-corruption-fail-closed",
+      "actual-native-and-linear-Wasm-kernel-acceptance-and-rejection",
+      "preserved-264-installed-application-cases-and-target-regressions",
+      "packed-public-types-and-exact-source-qualification",
+      "existing-qualified-G3-bytes-unchanged",
+      "exact-core-instructions-in-direct-Bool-component-container",
+      "actual-wasm-tools-component-validation-and-exact-WIT",
+      "actual-Wasmtime-Bool-application-execution",
+      "optional-providers-absent-by-default-offline-explicit-install",
+      "emit-only-workers-exclude-PSC1-frontend-checker-publisher",
+      "canonical-portable-IR-roundtrip-and-native-strict-target-ABI-recheck",
+      "actual-Python3148-and-PHP8512-GMP-consumers",
+      "four-G3-executors-real-provider-corpus-and-callback-IO",
+      "local-both-grammar-and-global-new-target-CLI",
+      "malformed-and-noncanonical-provider-requests-refuse",
+      "pinned-optional-package-metadata-binary-and-symlink-refusals",
+      "new-tools-240s-32MiB-4GiB-address-space-8MiB-stack-parent-lifetime"
+    ],
+    "compilerTargetMapping": {
+      "wasm-component": "wasm-core",
+      "python": "js",
+      "php": "js"
+    },
+    "optionalDispatchPackages": {
+      "wasm-component": "@proofscript/wasm-component-tools-linux-x64@0.1.0-psc1.7",
+      "python": "@proofscript/backend-python@0.1.0-psc1.7",
+      "php": "@proofscript/backend-php@0.1.0-psc1.7"
+    },
+    "newDispatchPlatform": "actual Ubuntu Linux x64; other platforms refuse"
+  },
+  "previousActiveMilestone": {
+    "name": "slim-universal-root-and-optional-execution-integration",
+    "status": "implementation; qualification evidence is maintained separately",
+    "version": "0.1.0-psc1.4",
+    "base": "ba3bfb045619ceb2948820f874357b2058f79868",
+    "embeddedEngines": [
+      "js",
+      "ts"
+    ],
+    "mandatoryKernel": "@proofscript/pskernel-lean-wasm@4.35.0",
+    "optionalExecutionPackages": [
+      "@proofscript/compiler-rust-linux-x64@0.1.0-psc1.3",
+      "@proofscript/compiler-wasm@0.1.0-psc1.3"
+    ],
+    "nativeKernel": "optional explicit @proofscript/pskernel-lean@4.35.0",
+    "checkedTargets": [
+      "js"
+    ],
+    "candidateOnlyTargets": [
+      "js",
+      "ts",
+      "rust",
+      "wasm-core"
+    ],
+    "publicationPlatforms": [
+      "linux"
+    ],
+    "otherPlatformPublication": "explicitly refused; actual release tests pending",
+    "priorNativeDistributionPreserved": true,
+    "compilerSourceUnchanged": true,
+    "acceptance": [
+      "root-less-than-half-previous-size",
+      "no-platform-native-default-payload",
+      "offline-local-and-global-install",
+      "default-js-ts-without-sdk-or-optional-payloads",
+      "explicit-hash-pinned-rust-wasm-discovery",
+      "same-frozen-compiler-source-and-IR-admission-boundary",
+      "both-grammars-and-all-four-installed-engines",
+      "negative-policy-tamper-version-and-publication-fault-preservation",
+      "genuine-optional-native-wasm-cross-checks",
+      "actual-packed-public-types",
+      "normal-dependency-selected-source-gate",
+      "project-data-cannot-select-host-tools-or-output-paths",
+      "root-only-js-ts-can-emit-all-four-candidate-targets-without-optional-executors"
+    ],
+    "qualificationReceipt": "docs/PSC1_SLIM_UNIVERSAL_QUALIFICATION_2026-10-25.json",
+    "projectAuthority": "Project JSON is restricted to entryModule/sources/assurance; output paths/executors/checkers come only from explicit host options."
+  },
+  "precedingCheckedPublicationMilestone": {
     "name": "checked-targets-and-transactional-file-publication",
     "status": "implementation; exact qualification states and results are maintained in the linked receipt",
     "version": "0.1.0-psc1.6",
@@ -304,53 +494,5 @@
       "preserved-264-installed-application-cases-and-target-regressions",
       "packed-public-types-and-exact-source-qualification"
     ]
-  },
-  "previousActiveMilestone": {
-    "name": "slim-universal-root-and-optional-execution-integration",
-    "status": "implementation; qualification evidence is maintained separately",
-    "version": "0.1.0-psc1.4",
-    "base": "ba3bfb045619ceb2948820f874357b2058f79868",
-    "embeddedEngines": [
-      "js",
-      "ts"
-    ],
-    "mandatoryKernel": "@proofscript/pskernel-lean-wasm@4.35.0",
-    "optionalExecutionPackages": [
-      "@proofscript/compiler-rust-linux-x64@0.1.0-psc1.3",
-      "@proofscript/compiler-wasm@0.1.0-psc1.3"
-    ],
-    "nativeKernel": "optional explicit @proofscript/pskernel-lean@4.35.0",
-    "checkedTargets": [
-      "js"
-    ],
-    "candidateOnlyTargets": [
-      "js",
-      "ts",
-      "rust",
-      "wasm-core"
-    ],
-    "publicationPlatforms": [
-      "linux"
-    ],
-    "otherPlatformPublication": "explicitly refused; actual release tests pending",
-    "priorNativeDistributionPreserved": true,
-    "compilerSourceUnchanged": true,
-    "acceptance": [
-      "root-less-than-half-previous-size",
-      "no-platform-native-default-payload",
-      "offline-local-and-global-install",
-      "default-js-ts-without-sdk-or-optional-payloads",
-      "explicit-hash-pinned-rust-wasm-discovery",
-      "same-frozen-compiler-source-and-IR-admission-boundary",
-      "both-grammars-and-all-four-installed-engines",
-      "negative-policy-tamper-version-and-publication-fault-preservation",
-      "genuine-optional-native-wasm-cross-checks",
-      "actual-packed-public-types",
-      "normal-dependency-selected-source-gate",
-      "project-data-cannot-select-host-tools-or-output-paths",
-      "root-only-js-ts-can-emit-all-four-candidate-targets-without-optional-executors"
-    ],
-    "qualificationReceipt": "docs/PSC1_SLIM_UNIVERSAL_QUALIFICATION_2026-10-25.json",
-    "projectAuthority": "Project JSON is restricted to entryModule/sources/assurance; output paths/executors/checkers come only from explicit host options."
   }
 }

@@ -15,11 +15,11 @@ const cleanupCommit = '446a0f21c6288a7c20b843bbeadcd18ba1460fa2';
 // Intentional checked-target/publication features have separate behavior qualification.
 // Preserve the original cleanup proof; do not call these features formatting.
 const featureBaselines = {
-  'host-tools/installed-engine-resolver.mjs': '9c9e8ef4c337d51caa4d7075829f56ebfd75e153',
-  'npm-cli/universal.mjs': '0c2c70b910f864cd87a19185843bb38e3d2ca653',
-  'npm-cli/universal-cli.mjs': '0c2c70b910f864cd87a19185843bb38e3d2ca653',
+  'host-tools/installed-engine-resolver.mjs': '943057c61fd3a3fce7caa0760d5a8e3a89b4e337',
+  'npm-cli/universal.mjs': 'dc0f1a3225ea5fa34a7edcbb9a2d66595db274a3',
+  'npm-cli/universal-cli.mjs': 'dc0f1a3225ea5fa34a7edcbb9a2d66595db274a3',
 };
-const featureQualification = 'docs/PSC1_CHECKED_PUBLICATION_QUALIFICATION_2026-10-26.json';
+const featureQualification = 'docs/PSC1_CHECKED_DISPATCH_QUALIFICATION_2026-10-26.json';
 const files = [
   'host-tools/installed-engine-resolver.mjs',
   'npm-cli/universal.mjs',
@@ -68,6 +68,34 @@ for (const file of files) {
     featureQualification, executableAstMatchesBaseline: true,
     formatted: source === formatted, lines: source.split('\n').length});
 }
+
+const newModules = [
+  'host-tools/checked-component.mjs',
+  'host-tools/checked-optional-provider.mjs',
+  'host-tools/checked-targets.mjs',
+  'host-tools/generated-compiler-session.mjs',
+];
+for (const file of newModules) {
+  const featureBaseline = file === 'host-tools/checked-component.mjs'
+    ? 'ad1bf8b008b4173c4c2f595f950614771d9fdc4f'
+    : '7062f6823b434657e433caae21a03238f6bbb685';
+  const feature = spawnSync('git', ['show', featureBaseline + ':psc1/' + file], {
+    cwd: root, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024,
+  });
+  assert.equal(feature.status, 0, file + '\n' + feature.stderr);
+  const source = fs.readFileSync(path.join(root, file), 'utf8');
+  assert.deepEqual(executableAst(source), executableAst(feature.stdout),
+    file + ': new dispatch module changed from its explicit feature baseline');
+  const formatted = await prettier.format(source, formatOptions);
+  assert.deepEqual(executableAst(formatted), executableAst(source),
+    file + ': formatter changed executable AST');
+  if (propose) proposal[file] = formatted;
+  else assert.equal(source, formatted, file + ': run pinned scoped formatter');
+  results.push({file, originalCleanupAstCorrespondence: 'not-claimed-new-module',
+    featureBaseline, featureQualification, executableAstMatchesBaseline: true,
+    formatted: source === formatted, lines: source.split('\n').length});
+}
+
 const out = path.join(root, 'dist/readability');
 fs.mkdirSync(out, {recursive: true});
 fs.writeFileSync(path.join(out, 'host.json'), JSON.stringify({

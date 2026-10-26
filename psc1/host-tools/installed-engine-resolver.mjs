@@ -21,14 +21,19 @@ const require = createRequire(path.join(installationRoot, 'package.json'));
 const closedEngines = ['js', 'rust', 'ts', 'wasm-core'];
 // Resolve only a pinned regular file under its declared package root.
 // Walking every path component keeps parent-directory symlinks out of the boundary.
-export function verifyFile(root, record, maxBytes = 128 * 1024 * 1024) {
+export function verifyFile(root, record, maxBytes = 128 * 1024 * 1024, allowEmptyData = false) {
+  const emptyPackageData =
+    allowEmptyData &&
+    record?.bytes === 0 &&
+    /^runtime\/lib\/python3\.14\/[A-Za-z0-9_\/]+\/__init__\.py$/.test(record?.path || '') &&
+    record?.sha256 === 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
   if (
     !record ||
     typeof record.path !== 'string' ||
-    !/^[A-Za-z0-9_@.\/-]+$/.test(record.path) ||
+    !/^[A-Za-z0-9_@.+\/-]+$/.test(record.path) ||
     !/^[0-9a-f]{64}$/.test(record.sha256 || '') ||
     !Number.isSafeInteger(record.bytes) ||
-    record.bytes < 1 ||
+    record.bytes < (emptyPackageData ? 0 : 1) ||
     record.bytes > maxBytes
   )
     fail('INVALID_PIN');
@@ -118,7 +123,20 @@ function packagePins(descriptor) {
     fail('OPTIONAL_PACKAGE_MISSING: npm install ' + descriptor.package + '@' + descriptor.version);
   }
   const root = fs.realpathSync(path.dirname(file));
-  const pins = descriptor.files.map((p) => verifyFile(root, p));
+  // Empty Python package markers are data, not executable entries. Keep the
+  // ordinary nonempty tool/SDK policy and every exact hash/symlink/path check.
+  const pins = descriptor.files.map((p) =>
+    verifyFile(
+      root,
+      p,
+      128 * 1024 * 1024,
+      descriptor.package === '@proofscript/backend-python' &&
+        descriptor.target === 'python' &&
+        p.bytes === 0 &&
+        /^runtime\/lib\/python3\.14\/[A-Za-z0-9_\/]+\/__init__\.py$/.test(p.path) &&
+        p.sha256 === 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+    ),
+  );
   const meta = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
   if (meta.name !== descriptor.package || meta.version !== descriptor.version)
     fail('OPTIONAL_PACKAGE_VERSION');
@@ -187,6 +205,37 @@ export function resolveCheckedTarget(
   distribution = loadDistribution(),
   { rustToolchainRoot } = {},
 ) {
+  if (['wasm-component', 'python', 'php'].includes(target)) {
+    if (process.platform !== 'linux' || process.arch !== 'x64')
+      fail('DISPATCH_PLATFORM_UNQUALIFIED');
+    const descriptor = distribution.dispatchPackages?.[target];
+    if (
+      !descriptor ||
+      descriptor.target !== target ||
+      descriptor.platform !== 'linux-x64' ||
+      descriptor.entry !== 'tool' ||
+      !/^[a-f0-9]{40}$/.test(descriptor.sourceCommit || '') ||
+      descriptor.limits?.timeoutMs !== 240000 ||
+      descriptor.limits?.addressSpaceBytes !== 4294967296 ||
+      descriptor.limits?.stackBytes !== 8388608 ||
+      descriptor.limits?.responseBytes !== 33554432
+    )
+      fail('DISPATCH_DESCRIPTOR');
+    const selected = packagePins(descriptor);
+    const meta = JSON.parse(fs.readFileSync(path.join(selected.root, 'package.json')));
+    if (
+      meta.proofscript?.schema !== 'psc1-checked-dispatch-package/1' ||
+      meta.proofscript.target !== target ||
+      meta.proofscript.sourceCommit !== descriptor.sourceCommit ||
+      meta.proofscript.authority !== 'candidate-only' ||
+      meta.proofscript.compilerFrontend !== false ||
+      meta.proofscript.admissionAuthority !== false ||
+      meta.proofscript.publicationAuthority !== false
+    )
+      fail('DISPATCH_AUTHORITY');
+    const tool = { ...descriptor, executable: selected.entry.path, pins: selected.pins };
+    return target === 'wasm-component' ? { componentTools: tool } : { optionalProvider: tool };
+  }
   if (target === 'rust') {
     const descriptor = distribution.targetConsumers?.rust;
     if (
@@ -337,7 +386,7 @@ export function describeInstallation() {
     leanVersion: '4.35.0',
     leanCommit,
     engines,
-    checkedTargets: ['js', 'ts', 'rust', 'wasm-core'],
+    checkedTargets: ['js', 'ts', 'rust', 'wasm-core', 'wasm-component', 'python', 'php'],
     publicationProtocols: ['legacy-symlink', 'portable-file'],
     candidateTargets: ['js', 'ts', 'rust', 'wasm-core'],
     publicationPlatforms: ['linux'],

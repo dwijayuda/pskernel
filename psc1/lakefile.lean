@@ -214,6 +214,8 @@ lean_lib PsHost where
     `Ps.Host.LeanChecked,
     `Ps.Host.DirectSourceMap,
     `Ps.Host.DirectBackend,
+    `Ps.Host.BackendProviderInstances,
+    `Ps.Host.PortableIr,
     `Ps.Host.BackendProviderProtocol,
     `Ps.Host.ScriptBackend,
     `Ps.Host.WasmComponent,

@@ -1,0 +1,15 @@
+{
+  "schema": "psc1-checked-dispatch-replay-request/1",
+  "branch": "qualification/psc1-checked-dispatch-20261026",
+  "parentCommit": "f415a784280f0aa3c4915e6df342995c25384dca",
+  "action": "qualify-exact-unpublished-candidate",
+  "input": {
+    "runId": 40248368107,
+    "jobId": 121334810951,
+    "artifactId": 12620121772,
+    "artifactSha256": "9e9c50843b68dd3257524e449c8ff0d42a4e3238897306d46435e390754addbb",
+    "sourceCommit": "7e63615b0d0713db8b252f194d5740bbb5c5893f",
+    "rootSha256": "d4a0e963375366ac9b417dd1e9eb5372168c25c5230d3ce69f694274daa87043",
+    "rootBytes": 3811703
+  }
+}

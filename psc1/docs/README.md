@@ -9,6 +9,7 @@ from immutable evidence; dated records remain preserved.
 | Question | Read |
 | --- | --- |
 | How do I install/use the current slim toolchain? | [Slim package guide](PSC1_SLIM_UNIVERSAL_PACKAGE.md) |
+| How do checked component/Python/PHP outputs work? | [Dispatch architecture](PSC1_CHECKED_DISPATCH.md), [exact receipt](PSC1_CHECKED_DISPATCH_QUALIFICATION_2026-10-26.json), [install](PSC1_CHECKED_DISPATCH_INSTALL.md) |
 | How do checked targets and transactions work? | [Guide](PSC1_CHECKED_PUBLICATION.md), [receipt](PSC1_CHECKED_PUBLICATION_QUALIFICATION_2026-10-26.json), [install](PSC1_CHECKED_PUBLICATION_INSTALL.md) |
 | What remains unfinished? | [One development roadmap](PSC1_DEVELOPMENT_ROADMAP.md) |
 | What must Practical Core v1 support? | [Finite language contract](PSC1_PRACTICAL_CORE_V1_CONTRACT.json) |
@@ -28,6 +29,14 @@ results to exact source/artifact identities. Work state and this index point to
 those authorities; they do not create qualification.
 
 ## Exact existing qualification
+
+- [Checked seven-target dispatch](PSC1_CHECKED_DISPATCH_QUALIFICATION_2026-10-26.json):
+  four unchanged genuine G3 engines, optional Python/PHP runtime consumers,
+  actual Bool-component validation/execution, both grammars and immutable
+  publication. The receipt separates producer bytes from installed-test/source
+  commits and retains every prior gate. Linux x64 scope; final universal release
+  remains incomplete.
+
 
 - [Bounded source binding and local rename (R2b)](PSC1_SOURCE_BINDINGS_QUALIFICATION_2026-10-26.json):
   implementation 9d07ae36/source 1714b8cf;40219590598 passes 23 renames/62 refusals,
@@ -87,7 +96,7 @@ Read [generated IO applications](PSC1_GENERATED_IO_APPLICATIONS.md) and the exac
 
 Qualified new-G3 packages: [installation and exact artifact](PSC1_GENERATED_IO_INSTALL.md).
 [Executable continuation](PSC1_SOURCE_REFACTOR_CONTINUATION.md) starts with the next
-release item; the current generated IO/npm milestone is qualified.
+release item; the preceding generated IO/npm milestone remains qualified.
 
 ## Qualified checked publication
 

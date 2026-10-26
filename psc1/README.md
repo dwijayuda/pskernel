@@ -6,7 +6,7 @@ uses genuine self-hosted JS/TS executors with optional Rust/compiler-Wasm execut
 and the official Lean4.35.0 independent C++ kernel compiled to linear-memory Wasm.
 Compiler execution, output target and checking are separate choices.
 
-Start with the [installation guide](docs/PSC1_SLIM_UNIVERSAL_PACKAGE.md),
+Start with the [installation guide](docs/PSC1_CHECKED_DISPATCH_INSTALL.md),
 [architecture](ARCHITECTURE.md) and [contributor guide](CONTRIBUTING.md).
 The [documentation index](docs/README.md) links current contracts and exact receipts.
 The [roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) owns remaining work;
@@ -27,7 +27,7 @@ def invert(flag : Bool) : Bool := if (flag) { false } else { true }
 With Node22.23.3 and the qualified local unpublished tarball:
 
 ```sh
-npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1.6.tgz
+npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1.7.tgz
 npx --no-install psc check Main.lean
 npx --no-install psc compile Main.ps --engine ts
 npx --no-install psc build Main.ps --target wasm-core --publication-protocol portable-file --out dist/app
@@ -38,7 +38,10 @@ consumers are explicit: TypeScript7.0.2 plus its pinned platform binary for TS;
 the pinned Rust1.90.0 SDK and separate consumer package for Rust. JS/Wasm output
 requires neither. [Checked targets and publication](docs/PSC1_CHECKED_PUBLICATION.md)
 documents immutable artifacts, runtime loaders, source encoding, ABI bounds and
-failure handling. Python/PHP remain optional in the preserved native distribution.
+failure handling. Checked component output uses an explicit optional validator
+and the bounded Bool ABI. Python/PHP are explicit optional emit-only providers
+with bundled isolated runtimes. [Dispatch architecture](docs/PSC1_CHECKED_DISPATCH.md)
+describes the additional packages, checks and limitations.
 
 ## Qualification and evidence boundaries
 
@@ -48,10 +51,12 @@ All four genuine G1/G2/G3 chains and exact fixed points passed for this source:
 JS/TS/Wasm40223062370; Rust40223086966.
 [Current generated-IO receipt](docs/PSC1_GENERATED_IO_QUALIFICATION_2026-10-26.json)
 retains the source, generation and preceding installed-application evidence.
-Current source CI40238649527 passes all37 finite criteria,zero blocked.
+The [current dispatch receipt](docs/PSC1_CHECKED_DISPATCH_QUALIFICATION_2026-10-26.json)
+records the exact installed replay and source gate, including all 37 finite criteria.
+The current root is 3,811,703 bytes; optional native payloads remain separate.
 
 [Checked-publication receipt](docs/PSC1_CHECKED_PUBLICATION_QUALIFICATION_2026-10-26.json)
-owns the new host/package qualification. Older frozen120-module and refactored121-module
+retains the preceding four-target host/package qualification. Older frozen120-module and refactored121-module
 results remain distinct in dated receipts; they are not relabeled current.
 
 The [Practical Core contract](docs/PSC1_PRACTICAL_CORE_V1_CONTRACT.json) defines

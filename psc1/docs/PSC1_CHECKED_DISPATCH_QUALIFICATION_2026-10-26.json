@@ -1,0 +1,499 @@
+{
+  "schema": "psc1-checked-dispatch-qualification/1",
+  "status": "qualified-linux-x64-checked-dispatch",
+  "baseCommit": "9c13f2f2f11bda05a9274e27453d1e275bef1222",
+  "compilerSourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+  "compilerGenerations": "unchanged qualified four-engine G3 inputs",
+  "nativeTransport": {
+    "commit": "dfb26a02401acb33bbaef77bb651b1c632e1c38b",
+    "run": 40244821125,
+    "job": 121324054005,
+    "status": "passed",
+    "retainedPayloadEquality": [
+      "python",
+      "php"
+    ],
+    "legacyNegativeCases": 16
+  },
+  "attempts": [
+    {
+      "head": "30fdd28e810c2f78b790d84b7b6cce3507c57a1c",
+      "run": 40244572685,
+      "job": 121323314299,
+      "status": "failed",
+      "reason": "native record-field layout",
+      "fixedAt": "dfb26a02401acb33bbaef77bb651b1c632e1c38b"
+    },
+    {
+      "head": "b3dfa700d1bf63abb889b3522da1a7d56dcf3f9f",
+      "run": 40244990464,
+      "job": 121324671513,
+      "status": "failed",
+      "reason": "C launcher signed comparison diagnosed by -Werror"
+    },
+    {
+      "head": "7062f6823b434657e433caae21a03238f6bbb685",
+      "run": 40245181668,
+      "job": 121325281157,
+      "status": "failed",
+      "reason": "nm symbol audit exhausted the 32MiB capture buffer; replaced full-buffer collection with bounded line streaming, preserving all forbidden-symbol checks and runtime limits"
+    },
+    {
+      "head": "6b4c9a906439765a895573a8538a432bc4840154",
+      "run": 40245482617,
+      "job": 121326148590,
+      "status": "failed",
+      "reason": "public-initializer positive symbol check is invalid for optimized workers; full symbol streaming and explicit source-import closure now enforce the provider boundary"
+    },
+    {
+      "head": "a579d358e2e361338e8a48bab1abbfb623cb6bbf",
+      "run": 40245843536,
+      "job": 121327218798,
+      "status": "failed",
+      "reason": "setup-php installed actual8.5.12 despite requested8.5.11; require and bundle exact8.5.12, matching retained generated-runtime profile",
+      "symbolAudits": {
+        "python": {
+          "symbols": 298952,
+          "owned": 421
+        },
+        "php": {
+          "symbols": 299011,
+          "owned": 472
+        },
+        "sourceImportClosure": "passed"
+      }
+    },
+    {
+      "head": "71f10258d79a43aacd272fb277c4360df7b766ee",
+      "run": 40246079012,
+      "job": 121327951153,
+      "status": "failed-new-dispatch-only",
+      "passed": [
+        "full compiler actual native/Wasm acceptance and invalid-type rejection",
+        "old offline local/global/CLI/candidate/kernel/negative/BOM gates",
+        "32 scalar groups",
+        "24 IO groups",
+        "143 checked-publication refusals",
+        "16 actual Rust links/executions"
+      ],
+      "reason": "strict resource pin guard did not classify pinned empty Python __init__.py package data or C++ library filenames; exact nonempty executable policy retained",
+      "root": {
+        "bytes": 3811340,
+        "sha256": "f87ea49f3be6ccd820734b286cb98ec922edc067e4e755ee8f418b1d5cb71eae",
+        "status": "not-qualified-new-dispatch"
+      }
+    },
+    {
+      "head": "0b4c82d04c445610d5e5ba85a998014abb474a33",
+      "run": 40247629514,
+      "job": 121332631460,
+      "status": "failed-component-smoke",
+      "reason": "WIT token precedence split -> into - and >; fixed with longest operator before identifier matching and direct grammar positive/negative regressions",
+      "formatting": "all seven host files already match pinned formatter; executable AST checks passed"
+    },
+    {
+      "head": "7e63615b0d0713db8b252f194d5740bbb5c5893f",
+      "run": 40248368107,
+      "job": 121334810951,
+      "status": "failed-test-fixture",
+      "passed": [
+        "all three new dispatch smoke requests",
+        "JS-engine five Python and five PHP checked corpus builds",
+        "four JS-engine callback IO checked builds",
+        "strict seven-module host formatting",
+        "actual full compiler native/Wasm kernel acceptance and rejection"
+      ],
+      "reason": "component fixture used Bool.not, absent from registered Practical Core prelude; replace only that expression with the existing checked conditional form",
+      "runtimeObservations": "full-loop consumer observations not yet executed; do not label partial builds as completed qualification"
+    }
+  ],
+  "scope": {
+    "targets": [
+      "wasm-component",
+      "python",
+      "php"
+    ],
+    "platform": "Linux x64 only",
+    "formalPreservation": false,
+    "releaseQualified": false,
+    "npmPublication": false,
+    "checkedTargets": [
+      "js",
+      "ts",
+      "rust",
+      "wasm-core",
+      "wasm-component",
+      "python",
+      "php"
+    ],
+    "compilerEngines": [
+      "js",
+      "ts",
+      "rust",
+      "wasm-core"
+    ],
+    "grammars": [
+      "lean",
+      "ps"
+    ],
+    "newNativeDispatchPlatform": "actual Linux x64 only; other platforms refuse",
+    "componentPublicAbi": "closed Bool, at most16 direct parameters, supported names, no imports/callback IO",
+    "optionalProviderInput": "already independently admitted specialized portable IR; canonical roundtrip, native strict IR and target ABI recheck",
+    "providerAuthority": "candidate-only; no PSC1 source frontend/checker/publisher; official Lean support libraries remain linked",
+    "fullProviderApplicationAcceptance": "pending",
+    "merge": false,
+    "compilerTargetMapping": {
+      "wasm-component": "wasm-core",
+      "python": "js",
+      "php": "js"
+    }
+  },
+  "activeQualificationBranch": "qualification/psc1-checked-dispatch-20261026",
+  "developmentBranch": "feat/psc1-checked-component-providers-20261026",
+  "developmentHead": "8383c6983e5fa2f2d945b02ba4b349ab64522c64",
+  "promotion": "Qualified implementation/test head; later documentation and receipt changes must remain descendants. Verify live HEAD and selected terminal CI before writes.",
+  "sourceRun": {
+    "status": "passed",
+    "head": "8383c6983e5fa2f2d945b02ba4b349ab64522c64",
+    "testedMerge": "0a69cde9c15479e3cc92554726996afe5abcc7a2",
+    "tree": "d690e096bcabf62ca0867b371b285217aabbb17c",
+    "run": 40250678016,
+    "fullJob": 121344226050,
+    "gateJob": 121348898046,
+    "criteria": {
+      "counts": {
+        "implemented": 0,
+        "tested": 0,
+        "qualified": 37,
+        "blocked": 0
+      },
+      "releaseReady": true,
+      "scope": "finite Practical Core source contract only"
+    },
+    "artifact": {
+      "id": 12621323742,
+      "sha256": "fb78e32fa4ba70297cad152d1b55b0f7cd379df7e3cdfb58e3c0f9dc3ebeed3e",
+      "bytes": 121474703
+    },
+    "benchmark": "skipped-not-qualified",
+    "everySelectedDependency": "success"
+  },
+  "manualQualification": {
+    "branch": "qualification/psc1-checked-dispatch-20261026",
+    "requestPath": ".github/qualification-requests/psc1-checked-dispatch.json",
+    "protocol": "psc1-checked-dispatch-request/1",
+    "singleRequestOnlyCommit": true,
+    "expectedParentRequired": true,
+    "cancelObsoleteRequests": true,
+    "allPreviousGatesRetained": true
+  },
+  "exactCandidateReplay": {
+    "sourceCommit": "7e63615b0d0713db8b252f194d5740bbb5c5893f",
+    "producerRun": 40248368107,
+    "producerJob": 121334810951,
+    "artifactId": 12620121772,
+    "artifactSha256": "9e9c50843b68dd3257524e449c8ff0d42a4e3238897306d46435e390754addbb",
+    "rootSha256": "d4a0e963375366ac9b417dd1e9eb5372168c25c5230d3ce69f694274daa87043",
+    "rootBytes": 3811703,
+    "status": "qualified-exact-candidate-installed",
+    "productionSourceMustRemainIdentical": true,
+    "qualifiedArtifactReaderUnchanged": true,
+    "testCommit": "8383c6983e5fa2f2d945b02ba4b349ab64522c64",
+    "run": 40250645368,
+    "job": 121341566743,
+    "newDispatchStep": {
+      "name": "Execute new checked dispatch through actual installed runtimes and consumers",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 8
+    },
+    "conclusion": "success",
+    "artifact": {
+      "id": 12622001061,
+      "name": "psc1-checked-dispatch-replay-8383c6983e5fa2f2d945b02ba4b349ab64522c64",
+      "bytes": 211957705,
+      "sha256": "d2f0221c06736636731a4b102a88e56abd3cb6242713d510dca42673704e162e",
+      "expiresAt": "2027-01-24T00:42:24Z"
+    },
+    "originalProducerConclusionUnchanged": true,
+    "productionFilesByteIdentical": 19,
+    "sourceDiff": "strict test/controller/docs-only whitelist; production change requires new assembly",
+    "actualNewDispatch": {
+      "providerCorpus": 40,
+      "callbackIo": 16,
+      "componentGroups": 8,
+      "refusals": 98,
+      "localCliExecuted": 6,
+      "globalCliCheckedBuilds": 3,
+      "actualRuntimes": [
+        "Python3.14.8",
+        "PHP8.5.12-GMP",
+        "Wasmtime49.0.4"
+      ],
+      "resourceAndLifetime": {
+        "addressSpaceBytes": 4294967296,
+        "stackBytes": 8388608,
+        "ownerExitKills": true,
+        "wrongParentRefused": true
+      }
+    },
+    "preservedInstalled": {
+      "compilerCases": 20,
+      "cliCases": 12,
+      "candidateMappings": 48,
+      "kernelComparisons": 14,
+      "negativeCases": 37,
+      "byteCaptureCases": 1,
+      "rootOnlyWithoutOptionalPayloads": true,
+      "noCompilerSdkOnExecutionPath": true,
+      "offlineEmptyCache": true,
+      "installScriptsDisabled": true,
+      "checkedPublication": {
+        "scalarGroups": 32,
+        "callbackIoGroups": 24,
+        "refusals": 143,
+        "rustActualLinks": 16
+      },
+      "applications": {
+        "builds": 16,
+        "cases": 264,
+        "globalIoCases": 8
+      },
+      "ioTargetConsumers": {
+        "executed": 24,
+        "wasmAbiRefusals": 8
+      },
+      "packedPublicTypes": "passed"
+    },
+    "packedPublicTypes": "passed-offline-typescript-7.0.2",
+    "qualifiedMarker": "written only after every installed/application/type gate passes"
+  },
+  "replayAttempts": [
+    {
+      "head": "974fd8780bb80f50e838f3bd322e74a9d8c18bcd",
+      "run": 40249743048,
+      "job": 121338816323,
+      "status": "failed-replay-report-reader",
+      "reason": "loader expected flat kernel record but actual writer uses schema/status/records[]; exact ZIP, source diff and all packaged production-file identity checks had already passed; corrected against actual writer schema"
+    },
+    {
+      "head": "f70b1f357ec4cec5b4e21d2429f6b70579e9d9c8",
+      "run": 40249967674,
+      "job": 121339516043,
+      "status": "failed-aggregate-test-supervisor",
+      "passed": [
+        "exact candidate ZIP and root hashes",
+        "19 packaged production files match current source",
+        "actual kernel report schema and successful assembly evidence",
+        "strict source diff whitelist and formatting"
+      ],
+      "reason": "the test controller ran the entire multi-request matrix under one240s deadline; changed only the aggregate matrix supervisor to the existing1500s profile with live inherited progress; all individual compiler/tools240s, checker120s, fuel/memory/stack and policies unchanged"
+    }
+  ],
+  "precedingSourceRun": {
+    "head": "71f10258d79a43aacd272fb277c4360df7b766ee",
+    "testedMerge": "a894087aa8abd38540e33da272593199732f5a07",
+    "run": 40246082420,
+    "fullJob": 121330707717,
+    "gateJob": 121337501126,
+    "status": "passed",
+    "criteria": {
+      "qualified": 37,
+      "blocked": 0,
+      "releaseReady": true,
+      "scope": "finite Practical Core source contract only"
+    },
+    "benchmark": "skipped-not-qualified"
+  },
+  "candidateProducer": {
+    "sourceCommit": "7e63615b0d0713db8b252f194d5740bbb5c5893f",
+    "run": 40248368107,
+    "job": 121334810951,
+    "overallConclusion": "failure",
+    "assemblyAndFullCompilerKernelStep": "success",
+    "failure": "later test-only component fixture used unsupported Bool.not; fixed to existing checked conditional",
+    "artifact": {
+      "id": 12620121772,
+      "bytes": 203572651,
+      "sha256": "9e9c50843b68dd3257524e449c8ff0d42a4e3238897306d46435e390754addbb"
+    },
+    "productionBytesReusedWithoutRebuild": true
+  },
+  "root": {
+    "package": "proofscript",
+    "version": "0.1.0-psc1.7",
+    "tarball": "proofscript-0.1.0-psc1.7.tgz",
+    "bytes": 3811703,
+    "sha256": "d4a0e963375366ac9b417dd1e9eb5372168c25c5230d3ce69f694274daa87043",
+    "embeddedEngines": [
+      "js",
+      "ts"
+    ],
+    "defaultKernel": "genuine official Lean4.35 C++/Emscripten linear-memory Wasm",
+    "optionalNativePayloadsAbsentByDefault": true
+  },
+  "tarballs": [
+    {
+      "package": "proofscript",
+      "version": "0.1.0-psc1.7",
+      "tarball": "proofscript-0.1.0-psc1.7.tgz",
+      "bytes": 3811703,
+      "sha256": "d4a0e963375366ac9b417dd1e9eb5372168c25c5230d3ce69f694274daa87043"
+    },
+    {
+      "package": "@proofscript/pskernel-lean-wasm",
+      "version": "4.35.0",
+      "tarball": "proofscript-pskernel-lean-wasm-4.35.0.tgz",
+      "sha256": "b203982eeb851b797f7a35a8a66f883472a6130f24f36c26b8931bd5e0881511"
+    },
+    {
+      "package": "@proofscript/pskernel-lean",
+      "version": "4.35.0",
+      "tarball": "proofscript-pskernel-lean-4.35.0.tgz",
+      "sha256": "c8ffd49220328ec2a96ac1c4388d828df255cc21537b2484b523710fe6c17371"
+    },
+    {
+      "package": "@proofscript/compiler-rust-linux-x64",
+      "version": "0.1.0-psc1.7",
+      "tarball": "proofscript-compiler-rust-linux-x64-0.1.0-psc1.7.tgz",
+      "sha256": "c09533b046eb213e38b679d8aa7d0bb2705d6d25a3bd253d83c94f120992106c"
+    },
+    {
+      "package": "@proofscript/compiler-wasm",
+      "version": "0.1.0-psc1.7",
+      "tarball": "proofscript-compiler-wasm-0.1.0-psc1.7.tgz",
+      "sha256": "90a98bb920b0dfc72f8c72783119454544d2f2497db8df131559cd462cc36689"
+    },
+    {
+      "package": "typescript",
+      "version": "7.0.2",
+      "tarball": "typescript-7.0.2.tgz",
+      "sha256": "da2513f4b95176d6dde8b51aab7afe8a927656c9d277369793f77f7e59371c08"
+    },
+    {
+      "package": "@typescript/typescript-linux-x64",
+      "version": "7.0.2",
+      "tarball": "typescript-typescript-linux-x64-7.0.2.tgz",
+      "sha256": "7ecad6f67377e831856367ab062ef394f21506a611405bf8ac0ff039348637d3"
+    },
+    {
+      "package": "@proofscript/rust-target-consumer-linux-x64",
+      "version": "0.1.0-psc1.6",
+      "tarball": "proofscript-rust-target-consumer-linux-x64-0.1.0-psc1.6.tgz",
+      "sha256": "0b57758a5bb074593f699f93d2267d8a80d2fcdeba19f4c61222cbb517e04309"
+    },
+    {
+      "package": "@proofscript/backend-python",
+      "version": "0.1.0-psc1.7",
+      "tarball": "proofscript-backend-python-0.1.0-psc1.7.tgz",
+      "sha256": "258bb15d9f42fd96ae7099cedc6c69d354b78562d39899960d2fde0ec861c715"
+    },
+    {
+      "package": "@proofscript/backend-php",
+      "version": "0.1.0-psc1.7",
+      "tarball": "proofscript-backend-php-0.1.0-psc1.7.tgz",
+      "sha256": "b54f3d4b9dfb1bd557b9da79b0d4c1620605c4df0e4004a01e824651318dec10"
+    },
+    {
+      "package": "@proofscript/wasm-component-tools-linux-x64",
+      "version": "0.1.0-psc1.7",
+      "tarball": "proofscript-wasm-component-tools-linux-x64-0.1.0-psc1.7.tgz",
+      "sha256": "763983698af82ddd0350fa584f4324004cd9d44e39e285e353af0e5449c390f2"
+    }
+  ],
+  "compilerSource": {
+    "unchanged": true,
+    "modules": 122,
+    "coreMembers": 4742,
+    "leanClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+    "psClosureDigest": "e9131ed0e67d229184babca0ade81174bfed98ce9e2a149769ce9a459aaaea53"
+  },
+  "qualifiedCompilerGenerations": {
+    "schema": "psc1-qualified-compiler-generation-inputs/1",
+    "sourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+    "engines": {
+      "js": {
+        "run": 40223062370,
+        "job": 121258729566,
+        "artifact": 12611622480,
+        "zipSha256": "1c18b578e110f96545a91ba6f520eed436826206f556243695261b72e68ede45",
+        "commit": "4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98",
+        "manifestSha256": "6f55b61fcaf69e9eb1ac790bd85f31d900a4baced97dbb73fb5ccd2a3359e2af",
+        "executableSha256": "e7d9c7b6eb9ea22aaaecad2bbf21adcf9856a0518dba0079eb63e8db0d03a0aa"
+      },
+      "ts": {
+        "run": 40223062370,
+        "job": 121258729656,
+        "artifact": 12612640406,
+        "zipSha256": "60e453cfbfd42d63533adb1014b3e255b69c522ce63eeebed55753ae2817607d",
+        "commit": "4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98",
+        "manifestSha256": "b8eb2279226222cb79f8b90234d4b5c6d8b9a2920352703c3827c78ec762ea44",
+        "executableSha256": "9a7c60fc9d02a596d2a3a2aa725dfce653e3babea2585e116ef809d8144ecdc2"
+      },
+      "wasm-core": {
+        "run": 40223062370,
+        "job": 121258729664,
+        "artifact": 12611662030,
+        "zipSha256": "4bc22aed89ba9fd494a7044bb503ec8f0a8592ea4b26fffd0aaa56d378533c27",
+        "commit": "4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98",
+        "manifestSha256": "c02be90d27cca4861ca2b9f98b9b5193c38fcd7f9e15a9e496e207a1ebd7fb78",
+        "executableSha256": "53e30eac21add83fd1b7eb8635530d16a4d0af54f8dbe7bb995d24590f3bc137"
+      },
+      "rust": {
+        "run": 40223086966,
+        "job": 121258808523,
+        "artifact": 12612555500,
+        "zipSha256": "d33f5329203ed41fb3503e1d3cdccf6bc4f833023a456c91976494a1db005ca0",
+        "commit": "4c88681f6fef70e6dcac7e990ffaac83b78b45be",
+        "manifestSha256": "5ac54e9006aab1de9eea9fd46d4d5a8637938d3d1a24809af37ef1e0a67a783e",
+        "executableSha256": "29078960566487cbd33b2504af6a71b777e72c92f68f7bf4733e7eb45e966bab"
+      }
+    }
+  },
+  "fullCompilerIndependentChecking": {
+    "status": "passed-in-actual-producer-assembly; exact report verified before replay",
+    "sourceCommit": "7e63615b0d0713db8b252f194d5740bbb5c5893f",
+    "leanVersion": "4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "canonicalGraph": {
+      "sha256": "a1c75ace20b2071d66ea4a9263b98980c39bea92b5b4f459d26978f46c66f213",
+      "bytes": 29887093,
+      "records": 3465
+    },
+    "providers": [
+      "official-native",
+      "official-C++-Emscripten-linear-Wasm"
+    ],
+    "bothAccept": true,
+    "bothRejectInvalidTypeVariant": true,
+    "wholeCompilerSemanticPreservation": false
+  },
+  "resourcePolicies": {
+    "compilerAndToolRequestSeconds": 240,
+    "independentCheckerSeconds": 120,
+    "requestAndResponseBytes": 33554432,
+    "newOptionalToolsAddressSpaceBytes": 4294967296,
+    "newOptionalToolsStackBytes": 8388608,
+    "parentLifetime": "Linux parent-death signal plus host parent PID binding",
+    "semanticFuel": "unchanged",
+    "legacyProviderLimits": "unchanged",
+    "aggregateTestMatrixSeconds": 1500,
+    "aggregateSupervisorIsNotCompilerRequestTimeout": true,
+    "manualG2G3CorrectnessProfiles": "unchanged",
+    "original240SecondSelfCompilationPerformance": "unqualified"
+  },
+  "readability": {
+    "allSevenHostModules": "pinned Prettier3.6.2 and Babel7.28.0 pass",
+    "originalCleanup": "3089cbc3 to446a0f21 executable AST correspondence preserved",
+    "intentionalFeatureChanges": "separate explicit feature/new-module baselines; not claimed formatting-only"
+  },
+  "remaining": [
+    "generated component String/IO and export selection",
+    "full optional-provider real-application acceptance",
+    "automatic bounded source-package capture/resolution as data",
+    "additional SDK/Rust/provider runtime platforms and actual macOS/Windows publication durability",
+    "final source/package/platform clean reproduction and user authorization",
+    "original240-second compiler self-compilation performance target"
+  ],
+  "globalReleaseStatus": "incomplete; this receipt qualifies the stated Linux dispatch milestone and finite source contract only"
+}

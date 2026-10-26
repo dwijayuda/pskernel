@@ -82,7 +82,7 @@ const tsMoved=tsOriginal.stdout.slice(tsBegin,tsEnd);
 const tsRuntime='packages/backend-ts/src/Ps/BackendTs/RuntimeSupport.lean';
 assert.equal(fs.readFileSync(path.join(root,tsRuntime),'utf8'),'import Ps.BackendTs.Type\n\n'+tsMoved);
 assert.equal(fs.readFileSync(path.join(root,tsPath),'utf8'),'import Ps.BackendTs.RuntimeSupport\n'+tsOriginal.stdout.replace(tsMoved,''));
-assert.deepEqual([...tsMoved.matchAll(/^def (\\S+)/gm)].map(x=>x[1]),['psTsStackRuntimeSupport','psTsUtf8RuntimeSupport','psTsRuntimeSupport']);
+assert.deepEqual([...tsMoved.matchAll(/^def (\S+)/gm)].map(x=>x[1]),['psTsStackRuntimeSupport','psTsUtf8RuntimeSupport','psTsRuntimeSupport']);
 assert.ok(fs.readFileSync(path.join(root,'lakefile.lean'),'utf8').includes(String.fromCharCode(96)+'Ps.BackendTs.RuntimeSupport,'));
 fs.writeFileSync(path.join(out,'typescript-runtime.json'),JSON.stringify({schema:'psc1-typescript-runtime-extraction/1',testedCommit:process.env.GITHUB_SHA,baseline:tsBaseline,movedDefinitions:3,movedUtf8Bytes:Buffer.byteLength(tsMoved),bodies:'byte-identical',remainingModule:'byte-identical-except-import-and-removal',wholeCompilerPreservation:'not-claimed',newFrozenG3:'not-claimed'},null,2)+'\n');
 console.log('PSC1_TYPESCRIPT_RUNTIME_EXTRACTION: PASS');

@@ -1,0 +1,38 @@
+name: PSC1 refined scalar cache unchanged String sample5 actual A-B-B-A
+'on':
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-t09-packed-string-abba-20261026
+    paths:
+    - .github/workflows/psc1-pskernel-packed-string-abba.yml
+    - psc1/scripts/pskernel-packed-string-abba.py
+permissions:
+  contents: read
+  actions: read
+jobs:
+  abba:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        fetch-depth: 0
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Authenticate actual paired programs and current native String fixture then retain all1400 sample5 assertions
+        in fresh A-B-B-A processes
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: python3 psc1/scripts/pskernel-packed-string-abba.py
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-packed-string-abba
+        include-hidden-files: true
+        path: ${{ runner.temp }}/cache-string-abba/
+        if-no-files-found: warn
+        retention-days: 90

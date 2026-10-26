@@ -1,0 +1,711 @@
+name: PSC1 complete nested owning public fresh paired whole-program qualification
+'on':
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-t06-nested-public-full-20261026
+    paths:
+    - psc1/**
+    - .github/workflows/psc1-pskernel-t06-nested-public-full.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  complete-routes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        fetch-depth: 0
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Authenticate all806 exact proof names364 native snapshots and249 actual audited bindings
+      env:
+        GH_TOKEN: ${{ github.token }}
+      shell: bash
+      run: "set -euo pipefail\npython3 - <<'PYCODE'\nimport hashlib,io,json,os,pathlib,subprocess,urllib.request,urllib.error,zipfile\n\
+        out=pathlib.Path(os.environ['RUNNER_TEMP'])/'mutual-generated';out.mkdir()\nbase='https://api.github.com/repos/dwijayuda/pskernel'\n\
+        class NoRedirect(urllib.request.HTTPRedirectHandler):\n    def redirect_request(self,req,fp,code,msg,headers,newurl):return\
+        \ None\ndef get(route):\n    req=urllib.request.Request(base+route,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})\n\
+        \    try:return urllib.request.build_opener(NoRedirect()).open(req,timeout=120).read()\n    except urllib.error.HTTPError\
+        \ as error:\n        assert error.code in (301,302,303,307,308)\n        url=error.headers['Location'];assert\
+        \ url.startswith('https://')\n        return urllib.request.urlopen(urllib.request.Request(url),timeout=120).read()\n\
+        def archive(source,run,artifact,size,sha,members,name):\n    r=json.loads(get('/actions/runs/'+str(run)));assert\
+        \ r['head_sha']==source and r['status']=='completed' and r['conclusion']=='success' and r['run_attempt']==1\n\
+        \    a=json.loads(get('/actions/artifacts/'+str(artifact)));assert a['workflow_run']['id']==run and a['workflow_run']['head_sha']==source\
+        \ and not a['expired']\n    assert a['size_in_bytes']==size and a['digest']=='sha256:'+sha\n    raw=get('/actions/artifacts/'+str(artifact)+'/zip');assert\
+        \ len(raw)==size and hashlib.sha256(raw).hexdigest()==sha\n    z=zipfile.ZipFile(io.BytesIO(raw));assert\
+        \ len(z.namelist())==len(set(z.namelist()))==members and z.testzip() is None\n    (out/name).write_bytes(raw);return\
+        \ z\nnative_source='f2ffc9d7bd5219c51956c13e11c7f2bee3ccd220'\nn=archive(native_source,40325910230,12650804167,1070413,'49f685c64423b234e6439abdefb0c5cb051f54c36f00ab85b5d4b40ef5381952',453,'authenticated-native806.zip')\n\
+        manifest=json.loads(n.read('files.json'));assert manifest['source']==native_source\nsources=0\nfor path,pin\
+        \ in manifest['files'].items():\n    data=n.read(path);assert len(data)==pin['bytes'] and hashlib.sha256(data).hexdigest()==pin['sha256']\n\
+        \    if path.startswith('source/'):\n        p=path.removeprefix('source/');assert data==subprocess.check_output(['git','show','HEAD:'+p]),p\n\
+        \        sources+=1\nassert sources==364\nsubprocess.run(['git','diff','--exit-code',native_source,'HEAD','--','psc1/packages/pskernel-core/src','psc1/kernel-lakefile.lean','psc1/lean-toolchain'],check=True)\n\
+        import re\nexpectedReports={'nested-admission-proofs.log': ['PsKernelNestedAdmissionProofs.late_decline_never_returns_partial_environment',\
+        \ 'PsKernelNestedAdmissionProofs.late_error_never_returns_partial_environment', 'PsKernelNestedAdmissionProofs.success_retains_exact_restored_environment_and_checked_owner',\
+        \ 'PsKernelNestedAdmissionProofs.validation_decline_is_not_restarted', 'PsKernelNestedAdmissionProofs.validation_error_has_exact_original_prefix',\
+        \ 'PsKernelNestedAdmissionProofs.validation_success_retains_entire_checked_owner'], 'nested-validation-proofs.log':\
+        \ ['PsKernelNestedValidationProofs.empty_rule_list_retains_complete_checking_state', 'PsKernelNestedValidationProofs.rule_decline_never_restarts_or_validates_tail',\
+        \ 'PsKernelNestedValidationProofs.rule_hard_error_keeps_exact_error_and_no_owner', 'PsKernelNestedValidationProofs.rule_success_passes_the_complete_returned_owner_to_next_rule',\
+        \ 'PsKernelNestedValidationProofs.empty_template_list_retains_entire_owner', 'PsKernelNestedValidationProofs.empty_constructor_list_retains_entire_owner',\
+        \ 'PsKernelNestedValidationProofs.type_decline_never_restarts_or_checks_sort_or_rules', 'PsKernelNestedValidationProofs.type_hard_error_precedes_sort_and_rule_callbacks'],\
+        \ 'nested-restoration-proofs.log': ['PsKernelNestedRestorationProofs.no_rename_retains_original_name', 'PsKernelNestedRestorationProofs.matching_rename_selects_actual_transformed_origin',\
+        \ 'PsKernelNestedRestorationProofs.empty_rule_list_preserves_exact_owner', 'PsKernelNestedRestorationProofs.empty_prefix_preserves_exact_owner',\
+        \ 'PsKernelNestedRestorationProofs.retained_base_constant_never_reimports_its_type', 'PsKernelNestedRestorationProofs.existing_origin_uses_exact_id_preserving_overlay',\
+        \ 'PsKernelNestedRestorationProofs.missing_origin_uses_existing_generated_syntax_importer', 'PsKernelNestedRestorationProofs.failed_restoration_returns_no_private_owner'],\
+        \ 'nested-transformed-proofs.log': ['PsKernelNestedTransformedProofs.empty_target_list_preserves_entire_owner',\
+        \ 'PsKernelNestedTransformedProofs.transformed_decline_is_not_restarted', 'PsKernelNestedTransformedProofs.transformed_success_retains_exact_checked_environment_and_owner',\
+        \ 'PsKernelNestedTransformedProofs.no_aux_error_has_no_transformed_prefix', 'PsKernelNestedTransformedProofs.auxiliary_error_keeps_exact_original_transformed_prefix',\
+        \ 'PsKernelNestedTransformedProofs.auxiliary_route_is_always_the_owning_mutual_callback', 'PsKernelNestedTransformedProofs.no_aux_empty_group_keeps_original_error_before_callbacks',\
+        \ 'PsKernelNestedTransformedProofs.no_aux_single_group_uses_exact_owning_ordinary_callback'], 'nested-overlay-proofs.log':\
+        \ ['PsKernelNestedOverlayProofs.original_decoded_error_is_first', 'PsKernelNestedOverlayProofs.original_arena_error_is_preserved',\
+        \ 'PsKernelNestedOverlayProofs.unchanged_node_reuses_entire_owner_and_original_id', 'PsKernelNestedOverlayProofs.novel_node_uses_exact_existing_smart_replay',\
+        \ 'PsKernelNestedOverlayProofs.novel_smart_construction_error_never_returns_an_owner', 'PsKernelNestedOverlayProofs.changed_node_kind_uses_exact_generated_import',\
+        \ 'PsKernelNestedOverlayProofs.portable_match_retains_every_original_state_and_error'], 'nested-hygiene-proofs.log':\
+        \ ['PsKernelNestedParamHygieneProofs.capture_worker_false_for_every_closed_input', 'PsKernelNestedParamHygieneProofs.capture_guard_false_for_every_closed_input',\
+        \ 'PsKernelNestedParamHygieneProofs.finish_keeps_original_shape_error_first', 'PsKernelNestedParamHygieneProofs.finish_keeps_entire_success_when_no_capture',\
+        \ 'PsKernelNestedParamHygieneProofs.opening_keeps_original_shape_and_budget_error', 'PsKernelNestedParamHygieneProofs.every_closed_input_keeps_exact_original_open_result',\
+        \ 'PsKernelNestedParamHygieneProofs.zero_parameter_input_keeps_exact_original_result', 'PsKernelNestedParamHygieneProofs.successful_open_cannot_close_a_colliding_input_variable',\
+        \ 'PsKernelNestedParamHygieneProofs.other_free_variable_namespaces_do_not_change_the_guard', 'PsKernelNestedParamHygieneProofs.only_introduced_parameter_indices_are_capturable'],\
+        \ 'nested-preprocess-proofs.log': ['PsKernelNestedPreprocessProofs.synchronization_error_precedes_parameter_decode_and_queue',\
+        \ 'PsKernelNestedPreprocessProofs.parameter_decode_error_precedes_discovery', 'PsKernelNestedPreprocessProofs.original_queue_error_keeps_exact_preprocessing_prefix',\
+        \ 'PsKernelNestedPreprocessProofs.original_queue_success_keeps_exact_metadata_and_owner', 'PsKernelNestedPreprocessProofs.empty_original_queue_keeps_original_syntax_state_at_zero_fuel',\
+        \ 'PsKernelNestedPreprocessProofs.header_decline_precedes_suffix_decode_and_discovery', 'PsKernelNestedPreprocessProofs.header_error_precedes_suffix_decode_and_discovery',\
+        \ 'PsKernelNestedPreprocessProofs.actual_wrapper_preserves_owned_check_public_whnf_and_entry_fuel'], 'nested-header-proofs.log':\
+        \ ['PsKernelNestedHeaderProofs.check_decline_precedes_sort_and_parameter_work', 'PsKernelNestedHeaderProofs.check_error_precedes_sort_and_parameter_work',\
+        \ 'PsKernelNestedHeaderProofs.mandatory_public_sort_decline_precedes_parameter_work', 'PsKernelNestedHeaderProofs.mandatory_public_sort_error_precedes_parameter_work',\
+        \ 'PsKernelNestedHeaderProofs.parameter_result_returns_without_index_or_final_sort_work', 'PsKernelNestedHeaderProofs.reserved_error_precedes_uniform_occurrence_analysis',\
+        \ 'PsKernelNestedHeaderProofs.actual_original_reserved_error_precedes_every_checker', 'PsKernelNestedHeaderProofs.original_boundary_table_error_precedes_all_guards_and_callbacks',\
+        \ 'PsKernelNestedHeaderProofs.guard_error_precedes_fresh_owner_and_checking', 'PsKernelNestedHeaderProofs.empty_group_keeps_original_error_after_guards',\
+        \ 'PsKernelNestedHeaderProofs.actual_wrapper_uses_owned_check_and_public_whnf_at_entry_fuel'], 'public-proofs.log':\
+        \ ['PsKernelMutualAdmissionPublicProofs.original_boundary_decode_failure_precedes_all_mutual_work', 'PsKernelMutualAdmissionPublicProofs.complete_mutual_result_enters_original_public_transaction'],\
+        \ 'public-retained-proofs.log': ['PsKernelOrdinaryAdmissionPublicProofs.preflight_error_precedes_private_worker',\
+        \ 'PsKernelOrdinaryAdmissionPublicProofs.decline_restarts_original_session_arena_input_and_request', 'PsKernelOrdinaryAdmissionPublicProofs.private_error_returns_no_owner_or_environment',\
+        \ 'PsKernelOrdinaryAdmissionPublicProofs.private_success_reaches_resource_gate_with_complete_result', 'PsKernelOrdinaryAdmissionPublicProofs.declaration_limit_returns_no_checked_owner',\
+        \ 'PsKernelOrdinaryAdmissionPublicProofs.successful_publication_retains_exact_owner_and_clears_evaluator',\
+        \ 'PsKernelOrdinaryAdmissionPublicProofs.fallback_failure_precedes_generated_metadata_import', 'PsKernelOrdinaryAdmissionPublicProofs.original_input_decode_failure_precedes_ordinary_admission'],\
+        \ 'admission-proofs.log': ['PsKernelMutualAdmissionProofs.empty_type_reference_prefix_preserves_original_owners',\
+        \ 'PsKernelMutualAdmissionProofs.type_reference_keeps_original_closed_root_kind_and_order', 'PsKernelMutualAdmissionProofs.header_decode_suffix_error_precedes_provisional_metadata',\
+        \ 'PsKernelMutualAdmissionProofs.header_metadata_read_error_precedes_environment_extension', 'PsKernelMutualAdmissionProofs.preparation_retains_first_parameter_scope_caches_and_freshness',\
+        \ 'PsKernelMutualAdmissionProofs.constructor_owner_sync_error_precedes_data_flags_and_recursors', 'PsKernelMutualAdmissionProofs.constructor_data_error_precedes_final_flags_and_recursors',\
+        \ 'PsKernelMutualAdmissionProofs.recursor_plan_error_returns_no_private_admission', 'PsKernelMutualAdmissionProofs.plan_success_requires_all_generated_type_and_rule_checks',\
+        \ 'PsKernelMutualAdmissionProofs.prepare_failure_precedes_constructor_checking', 'PsKernelMutualAdmissionProofs.constructor_decline_is_an_atomic_private_transaction_step',\
+        \ 'PsKernelMutualAdmissionProofs.constructor_error_is_an_atomic_private_transaction_step', 'PsKernelMutualAdmissionProofs.constructor_success_is_an_atomic_private_transaction_step',\
+        \ 'PsKernelMutualAdmissionProofs.unsynchronized_owner_rejected_before_decode_and_all_callbacks', 'PsKernelMutualAdmissionProofs.missing_original_prefix_rejected_before_decode_and_all_callbacks',\
+        \ 'PsKernelMutualAdmissionProofs.boundary_group_decode_error_precedes_header_attempt', 'PsKernelMutualAdmissionProofs.header_decline_preserves_original_transaction_order',\
+        \ 'PsKernelMutualAdmissionProofs.header_error_preserves_original_transaction_order', 'PsKernelMutualAdmissionProofs.header_success_preserves_original_transaction_order',\
+        \ 'PsKernelMutualAdmissionProofs.actual_wrapper_uses_owned_callbacks_at_unchanged_entry_fuel'], 'recursor-proofs.log':\
+        \ ['PsKernelMutualRecursorValidationProofs.empty_shapes_and_rules_keep_exact_owner_even_at_zero', 'PsKernelMutualRecursorValidationProofs.extra_pending_rule_is_original_count_error',\
+        \ 'PsKernelMutualRecursorValidationProofs.nonowner_shape_skips_callbacks_and_preserves_pending_and_fuel',\
+        \ 'PsKernelMutualRecursorValidationProofs.matching_shape_requires_rule_before_check', 'PsKernelMutualRecursorValidationProofs.rule_check_decline_precedes_expected_syntax',\
+        \ 'PsKernelMutualRecursorValidationProofs.rule_check_error_precedes_expected_syntax', 'PsKernelMutualRecursorValidationProofs.expected_syntax_error_uses_checked_owner_before_defeq',\
+        \ 'PsKernelMutualRecursorValidationProofs.rule_defeq_decline_preserves_original_result', 'PsKernelMutualRecursorValidationProofs.rule_defeq_error_preserves_original_result',\
+        \ 'PsKernelMutualRecursorValidationProofs.rule_defeq_false_preserves_original_result', 'PsKernelMutualRecursorValidationProofs.rule_success_threads_whole_owner_and_known_decoded_prefix_at_fixed_fuel',\
+        \ 'PsKernelMutualRecursorValidationProofs.empty_staging_keeps_exact_private_environment_and_owner', 'PsKernelMutualRecursorValidationProofs.staging_type_import_error_precedes_rule_import_and_metadata',\
+        \ 'PsKernelMutualRecursorValidationProofs.staging_rule_import_error_precedes_metadata', 'PsKernelMutualRecursorValidationProofs.staging_success_binds_exact_live_metadata_type_root_and_rule_refs',\
+        \ 'PsKernelMutualRecursorValidationProofs.staging_tail_error_returns_no_partial_environment', 'PsKernelMutualRecursorValidationProofs.staging_keeps_task_family_source_order',\
+        \ 'PsKernelMutualRecursorValidationProofs.resuming_next_fresh_owner_keeps_only_arena_prefix_and_authoritative_refs',\
+        \ 'PsKernelMutualRecursorValidationProofs.empty_tasks_succeed_at_zero_without_checking', 'PsKernelMutualRecursorValidationProofs.task_check_error_precedes_mandatory_sort_and_rules',\
+        \ 'PsKernelMutualRecursorValidationProofs.all_staging_precedes_any_type_check', 'PsKernelMutualRecursorValidationProofs.task_failure_returns_no_successful_private_environment',\
+        \ 'PsKernelMutualRecursorValidationProofs.all_task_success_returns_exact_final_staged_environment_and_owner',\
+        \ 'PsKernelMutualRecursorValidationProofs.actual_wrapper_uses_owned_check_whnf_and_defeq_callbacks', 'PsKernelMutualRecursorValidationProofs.task_check_decline_precedes_sort_and_rules',\
+        \ 'PsKernelMutualRecursorValidationProofs.task_sort_decline_precedes_rule_checks', 'PsKernelMutualRecursorValidationProofs.task_sort_error_precedes_rule_checks',\
+        \ 'PsKernelMutualRecursorValidationProofs.task_rules_decline_precedes_next_fresh_task', 'PsKernelMutualRecursorValidationProofs.task_rules_error_precedes_next_fresh_task',\
+        \ 'PsKernelMutualRecursorValidationProofs.task_resume_error_uses_authoritative_refs_and_fixed_fuel', 'PsKernelMutualRecursorValidationProofs.task_resume_success_uses_authoritative_refs_and_fixed_fuel'],\
+        \ 'proofs.log': ['PsKernelMutualConstructorLoopProofs.empty_constructors_succeed_at_zero', 'PsKernelMutualConstructorLoopProofs.empty_constructors_keep_exact_owner',\
+        \ 'PsKernelMutualConstructorLoopProofs.analysis_decline_precedes_metadata', 'PsKernelMutualConstructorLoopProofs.analysis_error_precedes_metadata',\
+        \ 'PsKernelMutualConstructorLoopProofs.metadata_error_precedes_tail', 'PsKernelMutualConstructorLoopProofs.tail_decline_returns_no_partial_result',\
+        \ 'PsKernelMutualConstructorLoopProofs.tail_error_returns_no_partial_result', 'PsKernelMutualConstructorLoopProofs.tail_success_keeps_fuel_and_source_order',\
+        \ 'PsKernelMutualConstructorLoopProofs.metadata_lookup_error_keeps_original_root', 'PsKernelMutualConstructorLoopProofs.install_owner_and_original_root',\
+        \ 'PsKernelMutualConstructorLoopProofs.empty_types_succeed_at_zero', 'PsKernelMutualConstructorLoopProofs.type_empty_constructors_keep_same_fuel',\
+        \ 'PsKernelMutualConstructorLoopProofs.type_decline_precedes_later_family', 'PsKernelMutualConstructorLoopProofs.type_error_precedes_later_family',\
+        \ 'PsKernelMutualConstructorLoopProofs.type_success_resets_ctor_index_and_orders_families', 'PsKernelMutualConstructorLoopProofs.shape_append_nil'],\
+        \ 'generated-proofs.log': ['PsKernelMutualGeneratedProofs.empty_constructor_metadata_never_reads_input',\
+        \ 'PsKernelMutualGeneratedProofs.constructor_metadata_head_error_precedes_tail', 'PsKernelMutualGeneratedProofs.constructor_metadata_keeps_exact_original_root_and_order',\
+        \ 'PsKernelMutualGeneratedProofs.type_original_input_error_precedes_constructors_and_opened_indices', 'PsKernelMutualGeneratedProofs.recursive_field_error_precedes_arguments_and_indices',\
+        \ 'PsKernelMutualGeneratedProofs.recursive_field_preserves_target_and_all_checked_binders', 'PsKernelMutualGeneratedProofs.shape_original_input_error_precedes_opened_fields',\
+        \ 'PsKernelMutualGeneratedProofs.shape_preserves_owner_original_metadata_and_checked_opened_ids', 'PsKernelMutualGeneratedProofs.data_parameter_error_precedes_type_and_constructor_metadata',\
+        \ 'PsKernelMutualGeneratedProofs.data_success_retains_all_component_order_and_values', 'PsKernelMutualGeneratedProofs.type_names_are_exact_original_family_order',\
+        \ 'PsKernelMutualGeneratedProofs.expected_rule_motive_error_precedes_closing', 'PsKernelMutualGeneratedProofs.expected_rule_closes_exact_original_rule_binders_and_fields',\
+        \ 'PsKernelMutualGeneratedProofs.expected_rule_error_precedes_generated_syntax_import', 'PsKernelMutualGeneratedProofs.expected_rule_success_imports_only_expected_generated_syntax'],\
+        \ 'retained-constructor-proofs.log': ['PsKernelMutualConstructorAnalysisProofs.closed_context_is_fresh_and_retains_established_declaration_inputs',\
+        \ 'PsKernelMutualConstructorAnalysisProofs.closed_state_is_fresh_with_same_arena_and_owned_references',\
+        \ 'PsKernelMutualConstructorAnalysisProofs.resume_retains_only_closed_arena_and_every_original_semantic_field',\
+        \ 'PsKernelMutualConstructorAnalysisProofs.resume_discards_closed_freshness_even_when_it_grew', 'PsKernelMutualConstructorAnalysisProofs.result_validation_error_precedes_shape_return',\
+        \ 'PsKernelMutualConstructorAnalysisProofs.result_validation_success_retains_exact_shape_and_complete_owner',\
+        \ 'PsKernelMutualConstructorAnalysisProofs.static_error_precedes_fresh_owner_and_all_callbacks', 'PsKernelMutualConstructorAnalysisProofs.closed_check_decline_precedes_sort_and_opening',\
+        \ 'PsKernelMutualConstructorAnalysisProofs.closed_check_error_precedes_sort_and_opening', 'PsKernelMutualConstructorAnalysisProofs.mandatory_sort_uses_closed_returned_owner_and_unchanged_phase_fuel',\
+        \ 'PsKernelMutualConstructorAnalysisProofs.mandatory_sort_decline_precedes_parameter_owner_resume', 'PsKernelMutualConstructorAnalysisProofs.mandatory_sort_error_precedes_parameter_owner_resume',\
+        \ 'PsKernelMutualConstructorAnalysisProofs.mandatory_sort_success_resumes_header_against_final_closed_owner',\
+        \ 'PsKernelMutualConstructorAnalysisProofs.parameter_decline_uses_resumed_owner_and_original_constructor_type',\
+        \ 'PsKernelMutualConstructorAnalysisProofs.parameter_error_precedes_fields_and_result_validation', 'PsKernelMutualConstructorAnalysisProofs.field_decline_uses_complete_parameter_owner_and_same_phase_fuel',\
+        \ 'PsKernelMutualConstructorAnalysisProofs.field_error_precedes_result_validation', 'PsKernelMutualConstructorAnalysisProofs.field_success_validates_original_result_with_final_field_owner',\
+        \ 'PsKernelMutualConstructorAnalysisProofs.actual_wrapper_selects_checked_callbacks_without_outer_fuel_change',\
+        \ 'PsKernelMutualConstructorAnalysisProofs.invalid_family_result_precedes_owner_comparison', 'PsKernelMutualConstructorAnalysisProofs.wrong_family_has_distinct_error',\
+        \ 'PsKernelMutualConstructorAnalysisProofs.matching_family_retains_original_index_ids'], 'retained-fields-proofs.log':\
+        \ ['PsKernelMutualConstructorFieldsProofs.zero_fuel_precedes_lookup_and_every_callback', 'PsKernelMutualConstructorFieldsProofs.lookup_error_precedes_field_callbacks',\
+        \ 'PsKernelMutualConstructorFieldsProofs.syntactic_nonforall_finishes_without_whnf_or_body_change', 'PsKernelMutualConstructorFieldsProofs.field_step_decline_uses_predecessor_fuel',\
+        \ 'PsKernelMutualConstructorFieldsProofs.field_step_error_precedes_next_field', 'PsKernelMutualConstructorFieldsProofs.field_step_success_threads_complete_owner_and_ordered_descriptors',\
+        \ 'PsKernelMutualConstructorFieldsProofs.prepare_check_decline_precedes_whnf_and_local_allocation', 'PsKernelMutualConstructorFieldsProofs.prepare_check_error_precedes_whnf_and_local_allocation',\
+        \ 'PsKernelMutualConstructorFieldsProofs.prepare_mandatory_sort_uses_checked_owner_and_type', 'PsKernelMutualConstructorFieldsProofs.prepare_sort_decline_precedes_universe_and_annotations',\
+        \ 'PsKernelMutualConstructorFieldsProofs.prepare_sort_error_precedes_universe_and_annotations', 'PsKernelMutualConstructorFieldsProofs.universe_rejection_precedes_annotations_and_freshness',\
+        \ 'PsKernelMutualConstructorFieldsProofs.annotation_error_precedes_local_allocation', 'PsKernelMutualConstructorFieldsProofs.prop_universe_exception_still_consumes_annotations',\
+        \ 'PsKernelMutualConstructorFieldsProofs.preparation_allocates_only_local_and_freshness_before_analysis',\
+        \ 'PsKernelMutualConstructorFieldsProofs.analysis_decline_precedes_body_instantiation', 'PsKernelMutualConstructorFieldsProofs.analysis_error_precedes_body_instantiation',\
+        \ 'PsKernelMutualConstructorFieldsProofs.analysis_success_uses_post_field_owner_original_domain_and_original_body'],\
+        \ 'retained-recursive-proofs.log': ['PsKernelMutualRecursiveArgumentProofs.original_applied_accumulator_irrelevant',\
+        \ 'PsKernelMutualRecursiveArgumentProofs.structural_zero_precedes_lookup', 'PsKernelMutualRecursiveArgumentProofs.direct_selection_precedes_whnf',\
+        \ 'PsKernelMutualRecursiveArgumentProofs.direct_error_precedes_whnf', 'PsKernelMutualRecursiveArgumentProofs.whnf_decline_is_preserved',\
+        \ 'PsKernelMutualRecursiveArgumentProofs.whnf_error_is_preserved', 'PsKernelMutualRecursiveArgumentProofs.whnf_owner_and_fixed_checker_fuel',\
+        \ 'PsKernelMutualRecursiveArgumentProofs.post_whnf_selection_keeps_owner', 'PsKernelMutualRecursiveArgumentProofs.negative_domain_precedes_opening',\
+        \ 'PsKernelMutualRecursiveArgumentProofs.opened_binder_keeps_exact_owner', 'PsKernelMutualRecursiveArgumentProofs.terminal_original_hit_precedes_reduced',\
+        \ 'PsKernelMutualRecursiveArgumentProofs.terminal_no_occurrences_keeps_owner', 'PsKernelMutualRecursiveArgumentProofs.selected_retains_field_and_index_ids',\
+        \ 'PsKernelMutualRecursiveArgumentProofs.count_error_precedes_checker', 'PsKernelMutualRecursiveArgumentProofs.wrapper_uses_exact_original_tree_budget'],\
+        \ 'retained-count-proofs.log': ['PsKernelExpandedSizeProofs.empty_memo_sound', 'PsKernelExpandedSizeProofs.child_ids_match_existing_traversal',\
+        \ 'PsKernelExpandedSizeProofs.child_sum_is_exact_tree_size', 'PsKernelExpandedSizeProofs.child_depth_bound',\
+        \ 'PsKernelExpandedSizeProofs.memo_hit_is_exact', 'PsKernelExpandedSizeProofs.insert_preserves_sound', 'PsKernelExpandedSizeProofs.children_correspondence',\
+        \ 'PsKernelExpandedSizeProofs.worker_correspondence', 'PsKernelExpandedSizeProofs.canonical_count_is_exact',\
+        \ 'PsKernelExpandedSizeProofs.structural_zero_precedes_memo', 'PsKernelExpandedSizeProofs.successful_hit_keeps_exact_memo'],\
+        \ 'header-proofs.log': ['PsKernelMutualHeaderProofs.closed_state_resets_all_semantic_fields', 'PsKernelMutualHeaderProofs.closed_context_has_no_shared_locals',\
+        \ 'PsKernelMutualHeaderProofs.resume_keeps_every_shared_semantic_field', 'PsKernelMutualHeaderProofs.resume_discards_all_other_owner_state',\
+        \ 'PsKernelMutualHeaderProofs.closed_check_decline_precedes_all_shared_work', 'PsKernelMutualHeaderProofs.closed_check_error_precedes_all_shared_work',\
+        \ 'PsKernelMutualHeaderProofs.closed_public_sort_decline_precedes_alignment', 'PsKernelMutualHeaderProofs.closed_public_sort_error_precedes_alignment',\
+        \ 'PsKernelMutualHeaderProofs.finish_requires_owning_sort', 'PsKernelMutualHeaderProofs.finish_universe_mismatch_preserves_exact_error',\
+        \ 'PsKernelMutualHeaderProofs.empty_tail_keeps_exact_arena', 'PsKernelMutualHeaderProofs.group_error_precedes_first_check',\
+        \ 'PsKernelMutualHeaderProofs.first_finish_preserves_original_mutual_non_sort_error', 'PsKernelMutualHeaderProofs.first_finish_retains_exact_parameter_index_owners',\
+        \ 'PsKernelMutualHeaderProofs.retained_original_duplicate_bundle_error', 'PsKernelMutualHeaderProofs.direct_duplicate_bundle_retains_original_error',\
+        \ 'PsKernelMutualHeaderProofs.first_phase_check_error_precedes_sort_and_opening'], 'family-proofs.log':\
+        \ ['PsKernelMutualConstructorResultProofs.contains_zero_precedes_lookup', 'PsKernelMutualConstructorResultProofs.contains_projection_name_precedes_receiver',\
+        \ 'PsKernelMutualConstructorResultProofs.contains_application_hit_precedes_argument', 'PsKernelMutualConstructorResultProofs.contains_application_error_precedes_argument',\
+        \ 'PsKernelMutualConstructorResultProofs.contains_const_with_fuel_correspondence', 'PsKernelMutualConstructorResultProofs.contains_const_on_canonical_correspondence',\
+        \ 'PsKernelMutualConstructorResultProofs.indices_contain_target_correspondence', 'PsKernelMutualConstructorResultProofs.selector_empty',\
+        \ 'PsKernelMutualConstructorResultProofs.selector_first_hit_keeps_exact_header_and_index', 'PsKernelMutualConstructorResultProofs.selector_miss_advances_once'],\
+        \ 'retained561/PsKernelCacheScopeProofs.log': ['PsKernelCacheScopeProofs.exit_scope_restores_all_caches',\
+        \ 'PsKernelCacheScopeProofs.exit_scope_caches_independent_of_child', 'PsKernelCacheScopeProofs.exit_scope_counter_exact',\
+        \ 'PsKernelCacheScopeProofs.exit_scope_counter_ge_parent', 'PsKernelCacheScopeProofs.exit_scope_counter_ge_child',\
+        \ 'PsKernelCacheScopeProofs.exit_scope_counter_retains_monotone_child', 'PsKernelCacheScopeProofs.semantic_eligible_iff_no_fvar_flag',\
+        \ 'PsKernelCacheScopeProofs.semantic_fvar_ineligible', 'PsKernelCacheScopeProofs.semantic_pair_eligible_iff_no_fvar_flags',\
+        \ 'PsKernelCacheScopeProofs.inference_ineligible_of_fvar_flag', 'PsKernelCacheScopeProofs.dag_whnf_starts_without_cache',\
+        \ 'PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_lookup', 'PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_publication',\
+        \ 'PsKernelCacheScopeProofs.dag_whnf_starts_without_public_cache', 'PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_public_lookup',\
+        \ 'PsKernelCacheScopeProofs.dag_whnf_fvar_flag_prevents_public_publication', 'PsKernelCacheScopeProofs.dag_quick_defeq_zero_fuel_precedes_syntax',\
+        \ 'PsKernelCacheScopeProofs.dag_quick_defeq_depth_error_precedes_syntax', 'PsKernelCacheScopeProofs.dag_whnf_declaration_initialization_has_no_core_cache',\
+        \ 'PsKernelCacheScopeProofs.dag_whnf_declaration_initialization_has_no_public_cache', 'PsKernelCacheScopeProofs.dag_whnf_arena_update_preserves_declaration_references',\
+        \ 'PsKernelCacheScopeProofs.dag_check_scope_retains_child_arena', 'PsKernelCacheScopeProofs.dag_check_scope_restores_semantic_caches',\
+        \ 'PsKernelCacheScopeProofs.dag_check_scope_counter_exact', 'PsKernelCacheScopeProofs.dag_check_starts_without_inference_cache',\
+        \ 'PsKernelCacheScopeProofs.dag_check_fvar_flag_prevents_lookup', 'PsKernelCacheScopeProofs.dag_check_fvar_flag_prevents_publication',\
+        \ 'PsKernelCacheScopeProofs.dag_check_zero_fuel_precedes_cache', 'PsKernelCacheScopeProofs.dag_check_depth_error_precedes_cached_judgment',\
+        \ 'PsKernelCacheScopeProofs.constant_reference_factorization_preserves', 'PsKernelCacheScopeProofs.constant_reference_factorization_extensional',\
+        \ 'PsKernelCacheScopeProofs.dag_check_starts_without_success_cache', 'PsKernelCacheScopeProofs.dag_check_scope_restores_success_cache',\
+        \ 'PsKernelCacheScopeProofs.dag_check_arena_update_preserves_success_cache', 'PsKernelCacheScopeProofs.dag_defeq_false_does_not_publish',\
+        \ 'PsKernelCacheScopeProofs.dag_defeq_fvar_flag_prevents_pair_lookup', 'PsKernelCacheScopeProofs.dag_defeq_fvar_flag_prevents_publication',\
+        \ 'PsKernelCacheScopeProofs.dag_defeq_zero_fuel_precedes_success_cache', 'PsKernelCacheScopeProofs.dag_defeq_depth_error_precedes_success_cache',\
+        \ 'PsKernelCacheScopeProofs.dag_infer_only_update_preserves_checked_cache', 'PsKernelCacheScopeProofs.dag_infer_only_scope_restores_parent_cache',\
+        \ 'PsKernelCacheScopeProofs.dag_infer_only_starts_without_cache', 'PsKernelCacheScopeProofs.dag_inference_fvar_flag_prevents_lookup',\
+        \ 'PsKernelCacheScopeProofs.dag_inference_fvar_flag_prevents_publication', 'PsKernelCacheScopeProofs.dag_infer_only_publication_preserves_checked_cache',\
+        \ 'PsKernelCacheScopeProofs.dag_checked_publication_preserves_infer_only_cache', 'PsKernelCacheScopeProofs.dag_inference_zero_fuel_precedes_cache',\
+        \ 'PsKernelCacheScopeProofs.dag_inference_depth_error_precedes_cached_judgment', 'PsKernelCacheScopeProofs.psKernelExprV2WhnfCacheFindWorker_eq_before',\
+        \ 'PsKernelCacheScopeProofs.psKernelExprV2WhnfCacheFindIn_eq_before', 'PsKernelCacheScopeProofs.inference_cache_eligibility_preserves',\
+        \ 'PsKernelCacheScopeProofs.inference_cache_eligibility_extensional', 'PsKernelCacheScopeProofs.dag_lazy_nat_zero_fuel_precedes_callbacks',\
+        \ 'PsKernelCacheScopeProofs.dag_lazy_nat_discards_unmatched_predecessor_owner', 'PsKernelCacheScopeProofs.dag_delta_scope_restores_unfold_and_failure',\
+        \ 'PsKernelCacheScopeProofs.dag_delta_arena_update_preserves_caches', 'PsKernelCacheScopeProofs.dag_lazy_delta_zero_fuel_precedes_callbacks',\
+        \ 'PsKernelCacheScopeProofs.dag_delta_argument_zero_fuel_precedes_callbacks', 'PsKernelCacheScopeProofs.psKernelExprV2DeclarationRefFindWorker_eq_before',\
+        \ 'PsKernelCacheScopeProofs.psKernelExprV2DeclarationRefFind_eq_before'], 'retained561/PsKernelClosedCacheAnalysisRegression.log':\
+        \ ['PsKernelClosedCacheAnalysisRegression.analysis_eq', 'PsKernelClosedCacheAnalysisRegression.semantic_map_get_eq',\
+        \ 'PsKernelClosedCacheAnalysisRegression.semantic_map_insert_eq', 'PsKernelClosedCacheAnalysisRegression.semantic_pair_contains_eq',\
+        \ 'PsKernelClosedCacheAnalysisRegression.semantic_pair_insert_eq', 'PsKernelClosedCacheAnalysisRegression.infer_map_get_eq',\
+        \ 'PsKernelClosedCacheAnalysisRegression.infer_map_insert_eq'], 'retained561/PsKernelDeferredTransformProofs.log':\
+        \ ['PsKernelDeferredTransformProofs.transform_with_fuel_eq', 'PsKernelDeferredTransformProofs.count_with_fuel_eq',\
+        \ 'PsKernelDeferredTransformProofs.lift_with_fuel_eq'], 'retained561/PsKernelEmptySemanticCacheProofs.log':\
+        \ ['PsKernelEmptySemanticCacheProofs.semantic_map_get_eq_before', 'PsKernelEmptySemanticCacheProofs.empty_lookup_ignores_expression'],\
+        \ 'retained561/PsKernelExprEqualityProofs.log': ['PsKernelExprEqualityProofs.exprEq_delayed_recursion_preserves',\
+        \ 'PsKernelExprEqualityProofs.exprEqual_delayed_recursion_preserves', 'PsKernelExprEqualityProofs.exprEq_pointwise_preserves',\
+        \ 'PsKernelExprEqualityProofs.exprEqual_pointwise_preserves'], 'retained561/PsKernelExprV2AdmissionGuardProofs.log':\
+        \ ['PsKernelExprV2AdmissionGuardProofs.id_member_exact', 'PsKernelExprV2AdmissionGuardProofs.bucket_set_same',\
+        \ 'PsKernelExprV2AdmissionGuardProofs.inserted_id_is_found', 'PsKernelExprV2AdmissionGuardProofs.hit_requires_exact_id',\
+        \ 'PsKernelExprV2AdmissionGuardProofs.empty_owner_has_no_hits', 'PsKernelExprV2AdmissionGuardProofs.first_undef_kept',\
+        \ 'PsKernelExprV2AdmissionGuardProofs.first_undef_from_next', 'PsKernelExprV2AdmissionGuardProofs.expression_mvar_implies_full_mvar',\
+        \ 'PsKernelExprV2AdmissionGuardProofs.sort_universe_mvar_precedes_param', 'PsKernelExprV2AdmissionGuardProofs.constant_universe_mvar_precedes_param',\
+        \ 'PsKernelExprV2AdmissionGuardProofs.free_variable_precedes_undefined_param', 'PsKernelExprV2AdmissionGuardProofs.finish_matches_reference',\
+        \ 'PsKernelExprV2AdmissionGuardProofs.scan_zero_precedes_memo', 'PsKernelExprV2AdmissionGuardProofs.validated_root_expression_mvar',\
+        \ 'PsKernelExprV2AdmissionGuardProofs.canonical_guard_matches_reference_conditionally', 'PsKernelExprV2AdmissionGuardProofs.checked_boundary_preserves_validation_error',\
+        \ 'PsKernelExprV2AdmissionGuardProofs.header_existing_name_precedes_arena', 'PsKernelExprV2AdmissionGuardProofs.header_duplicate_params_precedes_arena'],\
+        \ 'retained561/PsKernelExprV2ArenaModelBridgeProofs.log': ['PsKernelExprV2ArenaModelBridgeProofs.interpret_eq_node_expr',\
+        \ 'PsKernelExprV2ArenaModelBridgeProofs.children_before_child_ids', 'PsKernelExprV2ArenaModelBridgeProofs.semantic_prefix_establishes_arena_model',\
+        \ 'PsKernelExprV2ArenaModelBridgeProofs.validate_ok_establishes_arena_models', 'PsKernelExprV2ArenaModelBridgeProofs.decode_checked_ok_establishes_arena_model',\
+        \ 'PsKernelExprV2ArenaModelBridgeProofs.validated_uniform_occurrence_correspondence', 'PsKernelExprV2ArenaModelBridgeProofs.decoded_annotations_correspondence'],\
+        \ 'retained561/PsKernelExprV2DecodedNodeProofs.log': ['PsKernelExprV2DecodedNodeProofs.decoded_node_interprets',\
+        \ 'PsKernelExprV2DecodedNodeProofs.decoded_entry_interprets'], 'retained561/PsKernelExprV2DecodedBridgeProofs.log':\
+        \ ['PsKernelExprV2DecodedBridgeProofs.decoded_empty_layout', 'PsKernelExprV2DecodedBridgeProofs.decoded_push_size',\
+        \ 'PsKernelExprV2DecodedBridgeProofs.decoded_push_layout', 'PsKernelExprV2DecodedBridgeProofs.decoded_push_require_old',\
+        \ 'PsKernelExprV2DecodedBridgeProofs.decoded_push_require_new', 'PsKernelExprV2DecodedBridgeProofs.decoded_empty_prefix',\
+        \ 'PsKernelExprV2DecodedBridgeProofs.decoded_prefix_push', 'PsKernelExprV2DecodedBridgeProofs.decoded_prefix_metadata',\
+        \ 'PsKernelExprV2DecodedBridgeProofs.decode_canonical_fuel_ok_preserves', 'PsKernelExprV2DecodedBridgeProofs.decode_canonical_fuel_succeeds',\
+        \ 'PsKernelExprV2DecodedBridgeProofs.decode_checked_succeeds_after_validate', 'PsKernelExprV2DecodedBridgeProofs.decode_checked_ok_corresponds'],\
+        \ 'retained561/PsKernelExprV2LayoutBoundaryProofs.log': ['PsKernelExprV2LayoutBoundaryProofs.shape_valid_establishes_layout',\
+        \ 'PsKernelExprV2LayoutBoundaryProofs.validate_ok_establishes_source_layout', 'PsKernelExprV2LayoutBoundaryProofs.replay_node_ok_preserves_layout',\
+        \ 'PsKernelExprV2LayoutBoundaryProofs.validate_fuel_ok_preserves_layout', 'PsKernelExprV2LayoutBoundaryProofs.validate_ok_establishes_canonical_layout'],\
+        \ 'retained561/PsKernelExprV2MetadataProofs.log': ['PsKernelExprV2MetadataProofs.app_preserves', 'PsKernelExprV2MetadataProofs.lam_preserves',\
+        \ 'PsKernelExprV2MetadataProofs.forall_preserves', 'PsKernelExprV2MetadataProofs.let_preserves', 'PsKernelExprV2MetadataProofs.mdata_preserves',\
+        \ 'PsKernelExprV2MetadataProofs.proj_preserves', 'PsKernelExprV2MetadataProofs.legacy_depth_le_count', 'PsKernelExprV2MetadataProofs.legacy_default_budget_caps_to_depth'],\
+        \ 'retained561/PsKernelExprV2OrdinaryConstructorLoopProofs.log': ['PsKernelExprV2OrdinaryConstructorLoopProofs.zero',\
+        \ 'PsKernelExprV2OrdinaryConstructorLoopProofs.successor_nil', 'PsKernelExprV2OrdinaryConstructorLoopProofs.successor_cons_equation',\
+        \ 'PsKernelExprV2OrdinaryConstructorLoopProofs.analysis_decline', 'PsKernelExprV2OrdinaryConstructorLoopProofs.analysis_error',\
+        \ 'PsKernelExprV2OrdinaryConstructorLoopProofs.installation_error', 'PsKernelExprV2OrdinaryConstructorLoopProofs.tail_decline',\
+        \ 'PsKernelExprV2OrdinaryConstructorLoopProofs.tail_error', 'PsKernelExprV2OrdinaryConstructorLoopProofs.tail_success_order',\
+        \ 'PsKernelExprV2OrdinaryConstructorLoopProofs.fuel_one_tail_exhausted', 'PsKernelExprV2OrdinaryConstructorLoopProofs.singleton_success',\
+        \ 'PsKernelExprV2OrdinaryConstructorLoopProofs.install_lookup_error', 'PsKernelExprV2OrdinaryConstructorLoopProofs.install_owner_and_original_root',\
+        \ 'PsKernelExprV2OrdinaryConstructorLoopProofs.binder_count_length'], 'retained561/PsKernelExprV2OwnedStateProofs.log':\
+        \ ['PsKernelExprV2OwnedStateProofs.lift_success_preserves_six_outer_fields', 'PsKernelExprV2OwnedStateProofs.optional_lift_success_preserves_six_outer_fields',\
+        \ 'PsKernelExprV2OwnedStateProofs.lower_lift_identity', 'PsKernelExprV2OwnedStateProofs.optional_lower_lift_identity',\
+        \ 'PsKernelExprV2OwnedStateProofs.lift_decline_and_error_preserved', 'PsKernelExprV2OwnedStateProofs.owned_core_zero_precedes_callbacks_and_syntax',\
+        \ 'PsKernelExprV2OwnedStateProofs.owned_public_zero_precedes_callbacks_and_syntax', 'PsKernelExprV2OwnedStateProofs.owned_recursor_zero_precedes_callbacks_and_syntax',\
+        \ 'PsKernelExprV2OwnedStateProofs.owned_inference_zero_precedes_callbacks_and_cache', 'PsKernelExprV2OwnedStateProofs.owned_defeq_zero_precedes_syntax_and_cache',\
+        \ 'PsKernelExprV2OwnedStateProofs.admission_sort_keeps_complete_returned_owner', 'PsKernelExprV2OwnedStateProofs.admission_sort_decline_precedes_lookup',\
+        \ 'PsKernelExprV2OwnedStateProofs.admission_sort_error_precedes_lookup', 'PsKernelExprV2OwnedStateProofs.admission_prop_keeps_both_callback_owners',\
+        \ 'PsKernelExprV2OwnedStateProofs.admission_prop_inference_decline_precedes_whnf', 'PsKernelExprV2OwnedStateProofs.admission_prop_inference_error_precedes_whnf',\
+        \ 'PsKernelExprV2OwnedStateProofs.admission_prop_whnf_decline_keeps_order', 'PsKernelExprV2OwnedStateProofs.admission_prop_whnf_error_keeps_order',\
+        \ 'PsKernelExprV2OwnedStateProofs.full_state_whnf_zero_precedes_syntax_and_cache', 'PsKernelExprV2OwnedStateProofs.admission_sort_zero_precedes_syntactic_sort',\
+        \ 'PsKernelExprV2OwnedStateProofs.admission_prop_zero_preserves_inference_failure'], 'retained561/PsKernelExprV2PagedModelProofs.log':\
+        \ ['PsKernelExprV2PagedModelProofs.array_getD_push_old', 'PsKernelExprV2PagedModelProofs.array_getD_push_new',\
+        \ 'PsKernelExprV2PagedModelProofs.paged_get_eq_optional_get', 'PsKernelExprV2PagedModelProofs.paged_get_push_old',\
+        \ 'PsKernelExprV2PagedModelProofs.paged_get_push_new', 'PsKernelExprV2PagedModelProofs.empty_layout', 'PsKernelExprV2PagedModelProofs.push_id_and_size',\
+        \ 'PsKernelExprV2PagedModelProofs.push_layout', 'PsKernelExprV2PagedModelProofs.valid_id_location', 'PsKernelExprV2PagedModelProofs.find_out_of_bounds',\
+        \ 'PsKernelExprV2PagedModelProofs.found_id_is_in_bounds', 'PsKernelExprV2PagedModelProofs.valid_id_is_found',\
+        \ 'PsKernelExprV2PagedModelProofs.push_find_old', 'PsKernelExprV2PagedModelProofs.push_find_new', 'PsKernelExprV2PagedModelProofs.push_find',\
+        \ 'PsKernelExprV2PagedModelProofs.push_require_old', 'PsKernelExprV2PagedModelProofs.mk_app_preserves_layout_and_metadata'],\
+        \ 'retained561/PsKernelExprV2QuotOwnerProofs.log': ['PsKernelExprV2QuotOwnerProofs.kind_reflexive', 'PsKernelExprV2QuotOwnerProofs.quotient_kind_matches_exact',\
+        \ 'PsKernelExprV2QuotOwnerProofs.quotient_kind_refuses_axiom', 'PsKernelExprV2QuotOwnerProofs.find_missing',\
+        \ 'PsKernelExprV2QuotOwnerProofs.find_wrong_kind', 'PsKernelExprV2QuotOwnerProofs.plan_uninitialized', 'PsKernelExprV2QuotOwnerProofs.plan_missing_first',\
+        \ 'PsKernelExprV2QuotOwnerProofs.plan_incomplete_last', 'PsKernelExprV2QuotOwnerProofs.plan_complete', 'PsKernelExprV2QuotOwnerProofs.owner_missing',\
+        \ 'PsKernelExprV2QuotOwnerProofs.owner_delta_refused', 'PsKernelExprV2QuotOwnerProofs.owner_type_error_refused',\
+        \ 'PsKernelExprV2QuotOwnerProofs.owner_type_exact_comparison', 'PsKernelExprV2QuotOwnerProofs.install_missing_plan',\
+        \ 'PsKernelExprV2QuotOwnerProofs.install_existing_plan', 'PsKernelExprV2QuotOwnerProofs.install_incomplete_owners',\
+        \ 'PsKernelExprV2QuotOwnerProofs.quotient_info_imports_only_header', 'PsKernelExprV2QuotOwnerProofs.quotient_command_uses_checked_plan',\
+        \ 'PsKernelExprV2QuotOwnerProofs.quotient_previous_command_uses_checked_plan', 'PsKernelExprV2QuotOwnerProofs.private_check_reference_stays_invalid',\
+        \ 'PsKernelExprV2QuotOwnerProofs.private_whnf_reference_stays_invalid'], 'retained561/PsKernelExprV2RecursorKProofs.log':\
+        \ ['PsKernelExprV2RecursorKProofs.inferNone', 'PsKernelExprV2RecursorKProofs.inferError', 'PsKernelExprV2RecursorKProofs.whnfNone',\
+        \ 'PsKernelExprV2RecursorKProofs.whnfError', 'PsKernelExprV2RecursorKProofs.candidateDecisionRetainsFullState',\
+        \ 'PsKernelExprV2RecursorKProofs.candidateFalseRetainsFullState'], 'retained561/PsKernelExprV2RecursorMajorProofs.log':\
+        \ ['PsKernelExprV2RecursorMajorProofs.major_family_zero_precedes_root', 'PsKernelExprV2RecursorMajorProofs.structure_fields_zero_preserves_arena',\
+        \ 'PsKernelExprV2RecursorMajorProofs.no_type_owner_in_empty_index', 'PsKernelExprV2RecursorMajorProofs.constructor_shortcut_precedes_owner_and_callbacks',\
+        \ 'PsKernelExprV2RecursorMajorProofs.missing_family_owner_declines', 'PsKernelExprV2RecursorMajorProofs.non_structure_major_is_supported_unchanged',\
+        \ 'PsKernelExprV2RecursorMajorProofs.structure_inference_decline_preserved', 'PsKernelExprV2RecursorMajorProofs.structure_inference_error_precedes_type_whnf',\
+        \ 'PsKernelExprV2RecursorMajorProofs.string_uses_public_callback_after_exact_construction', 'PsKernelExprV2RecursorMajorProofs.is_prop_retains_complete_last_callback_state'],\
+        \ 'retained561/PsKernelExprV2RecursorProofs.log': ['PsKernelExprV2RecursorProofs.generated_type_reuses_current_command_ref',\
+        \ 'PsKernelExprV2RecursorProofs.generated_prefix_empty', 'PsKernelExprV2RecursorProofs.generated_prefix_stops_at_old_name',\
+        \ 'PsKernelExprV2RecursorProofs.generated_prefix_first_import_error', 'PsKernelExprV2RecursorProofs.generated_prefix_threads_complete_state',\
+        \ 'PsKernelExprV2RecursorProofs.generated_import_error_prevents_batch_publication', 'PsKernelExprV2RecursorProofs.generated_late_command_error_prevents_batch_publication',\
+        \ 'PsKernelExprV2RecursorProofs.check_uses_input_namespace', 'PsKernelExprV2RecursorProofs.whnf_uses_input_namespace',\
+        \ 'PsKernelExprV2RecursorProofs.defeq_left_uses_input_namespace_first', 'PsKernelExprV2RecursorProofs.admission_uses_input_namespace',\
+        \ 'PsKernelExprV2RecursorProofs.generated_finish_synchronizes_append', 'PsKernelExprV2RecursorProofs.generated_finish_refuses_wrong_root',\
+        \ 'PsKernelExprV2RecursorProofs.no_owner_from_empty_batch', 'PsKernelExprV2RecursorProofs.insufficient_fields_precede_owner',\
+        \ 'PsKernelExprV2RecursorProofs.wrong_universe_arity_precedes_owner', 'PsKernelExprV2RecursorProofs.missing_owner_never_claims_reduction',\
+        \ 'PsKernelExprV2RecursorProofs.K_refuses_before_callbacks', 'PsKernelExprV2RecursorProofs.constructor_skips_major_callback',\
+        \ 'PsKernelExprV2RecursorProofs.nonconstructor_callback_error_precedes_normalization', 'PsKernelExprV2RecursorProofs.recursor_zero_before_syntax',\
+        \ 'PsKernelExprV2RecursorProofs.generated_fallback_import_error_returns_no_owner', 'PsKernelExprV2RecursorProofs.owned_command_error_prevents_batch_publication'],\
+        \ 'retained561/PsKernelExprV2ReplayMetadataProofs.log': ['PsKernelExprV2ReplayMetadataProofs.replay_node_builds_corresponding_entry',\
+        \ 'PsKernelExprV2ReplayMetadataProofs.replay_node_preserves_layout_and_metadata', 'PsKernelExprV2ReplayMetadataProofs.bool_eq_true_iff',\
+        \ 'PsKernelExprV2ReplayMetadataProofs.portable_same_metadata_transfers_correspondence'], 'retained561/PsKernelExprV2SemanticPrefixProofs.log':\
+        \ ['PsKernelExprV2SemanticPrefixProofs.interpret_congr_below', 'PsKernelExprV2SemanticPrefixProofs.extend_meaning_preserves_old',\
+        \ 'PsKernelExprV2SemanticPrefixProofs.empty_semantic_prefix', 'PsKernelExprV2SemanticPrefixProofs.replay_success_inputs',\
+        \ 'PsKernelExprV2SemanticPrefixProofs.replay_preserves_semantic_prefix', 'PsKernelExprV2SemanticPrefixProofs.aligned_prefix_transfers_semantics',\
+        \ 'PsKernelExprV2SemanticPrefixProofs.validate_fuel_preserves_semantic_prefix', 'PsKernelExprV2SemanticPrefixProofs.validate_ok_establishes_semantic_prefixes'],\
+        \ 'retained561/PsKernelExprV2SessionProofs.log': ['PsKernelExprV2SessionProofs.collect_zero_preserves_pending',\
+        \ 'PsKernelExprV2SessionProofs.collect_invalid_node_stops', 'PsKernelExprV2SessionProofs.next_demand_skips_owned_name',\
+        \ 'PsKernelExprV2SessionProofs.next_demand_skips_missing_name', 'PsKernelExprV2SessionProofs.next_demand_returns_exact_live_info',\
+        \ 'PsKernelExprV2SessionProofs.complete_no_demand_preserves_state', 'PsKernelExprV2SessionProofs.complete_zero_bound_refuses_needed_import',\
+        \ 'PsKernelExprV2SessionProofs.complete_import_error_returns_no_state', 'PsKernelExprV2SessionProofs.complete_success_consumes_one_authority_cons',\
+        \ 'PsKernelExprV2SessionProofs.from_session_starts_with_private_empty_owners', 'PsKernelExprV2SessionProofs.session_import_error_prevents_command_publication',\
+        \ 'PsKernelExprV2SessionProofs.session_import_preserves_original_input_namespace', 'PsKernelExprV2SessionProofs.post_command_import_error_prevents_publication',\
+        \ 'PsKernelExprV2SessionProofs.append_demands_preserves_order'], 'retained561/PsKernelExprV2WhnfABIProofs.log':\
+        \ ['PsKernelExprV2WhnfABIProofs.core_wrapper_keeps_exact_operation', 'PsKernelExprV2WhnfABIProofs.public_wrapper_keeps_exact_operation'],\
+        \ 'retained561/PsKernelKnotFuelProofs.log': ['PsKernelKnotFuelProofs.ReduceRecursorBoundedWithFuel_delayed_recursion_preserves',\
+        \ 'PsKernelKnotFuelProofs.IsDefEqWithFuel_delayed_recursion_preserves', 'PsKernelKnotFuelProofs.WhnfWithFuel_delayed_recursion_preserves',\
+        \ 'PsKernelKnotFuelProofs.WhnfCoreWithFuel_delayed_recursion_preserves', 'PsKernelKnotFuelProofs.WhnfCoreWithFuel_full_mode_preserves_historical',\
+        \ 'PsKernelKnotFuelProofs.InferCoreWithFuel_delayed_recursion_preserves', 'PsKernelKnotFuelProofs.InferAppOnlyLoopWithFuel_delayed_recursion_preserves',\
+        \ 'PsKernelKnotFuelProofs.DefEqLazyReductionWithFuel_delayed_recursion_preserves', 'PsKernelKnotFuelProofs.DefEqLazyProjReductionWithFuel_delayed_recursion_preserves',\
+        \ 'PsKernelKnotFuelProofs.DefEqArgsWithFuel_delayed_recursion_preserves', 'PsKernelKnotFuelProofs.DefEqLambdaSpineWithFuel_delayed_recursion_preserves',\
+        \ 'PsKernelKnotFuelProofs.DefEqForallSpineWithFuel_delayed_recursion_preserves', 'PsKernelKnotFuelProofs.DefEqCompareExprListsWithFuel_delayed_recursion_preserves',\
+        \ 'PsKernelKnotFuelProofs.DefEqEtaStructFieldsWithFuel_delayed_recursion_preserves', 'PsKernelKnotFuelProofs.WhnfCountLambdasWithFuel_delayed_recursion_preserves',\
+        \ 'PsKernelKnotFuelProofs.StringConstructorDataWithFuel_delayed_recursion_preserves'], 'retained561/PsKernelNameWorkerProofs.log':\
+        \ ['PsKernelNameWorkerProofs.raw_worker_exact', 'PsKernelNameWorkerProofs.raw_public_exact', 'PsKernelNameWorkerProofs.string_public_exact',\
+        \ 'PsKernelNameWorkerProofs.name_worker_exact', 'PsKernelNameWorkerProofs.name_public_exact', 'PsKernelNameWorkerProofs.raw_partial_application_exact',\
+        \ 'PsKernelNameWorkerProofs.name_partial_application_exact', 'PsKernelNameWorkerProofs.raw_zero_fuel_exact'],\
+        \ 'retained561/PsKernelOrdinaryAdmissionProofs.log': ['PsKernelOrdinaryAdmissionProofs.rules_empty_identity_at_any_fuel',\
+        \ 'PsKernelOrdinaryAdmissionProofs.rules_excess_precedes_callbacks', 'PsKernelOrdinaryAdmissionProofs.rules_missing_precedes_callbacks',\
+        \ 'PsKernelOrdinaryAdmissionProofs.rule_check_decline_precedes_import', 'PsKernelOrdinaryAdmissionProofs.rule_check_error_precedes_import',\
+        \ 'PsKernelOrdinaryAdmissionProofs.expected_import_error_uses_complete_checked_owner', 'PsKernelOrdinaryAdmissionProofs.rule_defeq_decline_uses_complete_imported_owner',\
+        \ 'PsKernelOrdinaryAdmissionProofs.rule_defeq_error_uses_complete_imported_owner', 'PsKernelOrdinaryAdmissionProofs.rule_defeq_false_prevents_tail_and_publication',\
+        \ 'PsKernelOrdinaryAdmissionProofs.rule_success_returns_tail_with_same_fuel_and_full_owner', 'PsKernelOrdinaryAdmissionProofs.synchronize_returns_current_arena_and_references',\
+        \ 'PsKernelOrdinaryAdmissionProofs.generated_import_preserves_complete_semantic_owner', 'PsKernelOrdinaryAdmissionProofs.recursor_staging_ignores_type_phase_semantic_and_reference_mutations',\
+        \ 'PsKernelOrdinaryAdmissionProofs.recursor_staging_uses_parent_owner_and_adds_generated_reference', 'PsKernelOrdinaryAdmissionProofs.fresh_rule_phase_decline_prevents_publication',\
+        \ 'PsKernelOrdinaryAdmissionProofs.fresh_rule_phase_error_prevents_publication', 'PsKernelOrdinaryAdmissionProofs.fresh_rule_phase_success_still_requires_final_synchronization',\
+        \ 'PsKernelOrdinaryAdmissionProofs.final_synchronization_error_prevents_success', 'PsKernelOrdinaryAdmissionProofs.final_success_contains_only_synchronized_owner',\
+        \ 'PsKernelOrdinaryAdmissionProofs.fresh_rule_state_resets_every_semantic_collection', 'PsKernelOrdinaryAdmissionProofs.recursor_type_check_decline_precedes_sort',\
+        \ 'PsKernelOrdinaryAdmissionProofs.recursor_type_check_error_precedes_sort', 'PsKernelOrdinaryAdmissionProofs.recursor_type_sort_decline_uses_complete_checked_owner',\
+        \ 'PsKernelOrdinaryAdmissionProofs.recursor_type_sort_error_uses_complete_checked_owner', 'PsKernelOrdinaryAdmissionProofs.recursor_type_success_hands_off_only_after_sort_and_staging',\
+        \ 'PsKernelOrdinaryAdmissionProofs.unsynchronized_input_owner_rejects_before_decoding', 'PsKernelOrdinaryAdmissionProofs.original_namespace_error_precedes_header_check'],\
+        \ 'retained561/PsKernelNatFuelProofs.log': ['PsKernelNatFuelProofs.NatGcdWithFuel_delayed_recursion_preserves',\
+        \ 'PsKernelNatFuelProofs.NatHeapWordCountWithFuel_delayed_recursion_preserves', 'PsKernelNatFuelProofs.NatPowWithFuel_delayed_recursion_preserves',\
+        \ 'PsKernelNatFuelProofs.NatBitwiseWithFuel_delayed_recursion_preserves', 'PsKernelNatFuelProofs.NatShiftRightWithFuel_delayed_recursion_preserves'],\
+        \ 'retained561/PsKernelOrdinaryAdmissionPublicProofs.log': ['PsKernelOrdinaryAdmissionPublicProofs.preflight_error_precedes_private_worker',\
+        \ 'PsKernelOrdinaryAdmissionPublicProofs.decline_restarts_original_session_arena_input_and_request', 'PsKernelOrdinaryAdmissionPublicProofs.private_error_returns_no_owner_or_environment',\
+        \ 'PsKernelOrdinaryAdmissionPublicProofs.private_success_reaches_resource_gate_with_complete_result', 'PsKernelOrdinaryAdmissionPublicProofs.declaration_limit_returns_no_checked_owner',\
+        \ 'PsKernelOrdinaryAdmissionPublicProofs.successful_publication_retains_exact_owner_and_clears_evaluator',\
+        \ 'PsKernelOrdinaryAdmissionPublicProofs.fallback_failure_precedes_generated_metadata_import', 'PsKernelOrdinaryAdmissionPublicProofs.original_input_decode_failure_precedes_ordinary_admission'],\
+        \ 'retained561/PsKernelOrdinaryConstructorAnalysisProofs.log': ['PsKernelOrdinaryConstructorAnalysisProofs.closed_context_is_fresh_and_retains_established_declaration_inputs',\
+        \ 'PsKernelOrdinaryConstructorAnalysisProofs.closed_state_is_fresh_with_same_arena_and_owned_references',\
+        \ 'PsKernelOrdinaryConstructorAnalysisProofs.resume_retains_only_closed_arena_and_every_original_semantic_field',\
+        \ 'PsKernelOrdinaryConstructorAnalysisProofs.resume_discards_closed_freshness_even_when_it_grew', 'PsKernelOrdinaryConstructorAnalysisProofs.result_validation_error_precedes_shape_return',\
+        \ 'PsKernelOrdinaryConstructorAnalysisProofs.result_validation_success_retains_exact_shape_and_complete_owner',\
+        \ 'PsKernelOrdinaryConstructorAnalysisProofs.static_error_precedes_fresh_owner_and_all_callbacks', 'PsKernelOrdinaryConstructorAnalysisProofs.closed_check_decline_precedes_sort_and_opening',\
+        \ 'PsKernelOrdinaryConstructorAnalysisProofs.closed_check_error_precedes_sort_and_opening', 'PsKernelOrdinaryConstructorAnalysisProofs.mandatory_sort_uses_closed_returned_owner_and_unchanged_phase_fuel',\
+        \ 'PsKernelOrdinaryConstructorAnalysisProofs.mandatory_sort_decline_precedes_parameter_owner_resume', 'PsKernelOrdinaryConstructorAnalysisProofs.mandatory_sort_error_precedes_parameter_owner_resume',\
+        \ 'PsKernelOrdinaryConstructorAnalysisProofs.mandatory_sort_success_resumes_header_against_final_closed_owner',\
+        \ 'PsKernelOrdinaryConstructorAnalysisProofs.parameter_decline_uses_resumed_owner_and_original_constructor_type',\
+        \ 'PsKernelOrdinaryConstructorAnalysisProofs.parameter_error_precedes_fields_and_result_validation', 'PsKernelOrdinaryConstructorAnalysisProofs.field_decline_uses_complete_parameter_owner_and_same_phase_fuel',\
+        \ 'PsKernelOrdinaryConstructorAnalysisProofs.field_error_precedes_result_validation', 'PsKernelOrdinaryConstructorAnalysisProofs.field_success_validates_original_result_with_final_field_owner',\
+        \ 'PsKernelOrdinaryConstructorAnalysisProofs.actual_wrapper_selects_checked_callbacks_without_outer_fuel_change'],\
+        \ 'retained561/PsKernelOrdinaryConstructorFieldsProofs.log': ['PsKernelOrdinaryConstructorFieldsProofs.zero_fuel_precedes_lookup_and_every_callback',\
+        \ 'PsKernelOrdinaryConstructorFieldsProofs.lookup_error_precedes_field_callbacks', 'PsKernelOrdinaryConstructorFieldsProofs.syntactic_nonforall_finishes_without_whnf_or_body_change',\
+        \ 'PsKernelOrdinaryConstructorFieldsProofs.field_step_decline_uses_predecessor_fuel', 'PsKernelOrdinaryConstructorFieldsProofs.field_step_error_precedes_next_field',\
+        \ 'PsKernelOrdinaryConstructorFieldsProofs.field_step_success_threads_complete_owner_and_ordered_descriptors',\
+        \ 'PsKernelOrdinaryConstructorFieldsProofs.prepare_check_decline_precedes_whnf_and_local_allocation', 'PsKernelOrdinaryConstructorFieldsProofs.prepare_check_error_precedes_whnf_and_local_allocation',\
+        \ 'PsKernelOrdinaryConstructorFieldsProofs.prepare_mandatory_sort_uses_checked_owner_and_type', 'PsKernelOrdinaryConstructorFieldsProofs.prepare_sort_decline_precedes_universe_and_annotations',\
+        \ 'PsKernelOrdinaryConstructorFieldsProofs.prepare_sort_error_precedes_universe_and_annotations', 'PsKernelOrdinaryConstructorFieldsProofs.universe_rejection_precedes_annotations_and_freshness',\
+        \ 'PsKernelOrdinaryConstructorFieldsProofs.annotation_error_precedes_local_allocation', 'PsKernelOrdinaryConstructorFieldsProofs.prop_universe_exception_still_consumes_annotations',\
+        \ 'PsKernelOrdinaryConstructorFieldsProofs.preparation_allocates_only_local_and_freshness_before_analysis',\
+        \ 'PsKernelOrdinaryConstructorFieldsProofs.analysis_decline_precedes_body_instantiation', 'PsKernelOrdinaryConstructorFieldsProofs.analysis_error_precedes_body_instantiation',\
+        \ 'PsKernelOrdinaryConstructorFieldsProofs.analysis_success_uses_post_field_owner_original_domain_and_original_body',\
+        \ 'PsKernelOrdinaryConstructorFieldsProofs.body_instantiation_error_uses_retained_child_arena_and_field_name',\
+        \ 'PsKernelOrdinaryConstructorFieldsProofs.finish_restores_post_field_semantics_and_keeps_child_arena_freshness',\
+        \ 'PsKernelOrdinaryConstructorFieldsProofs.successful_last_field_still_reaches_zero_fuel', 'PsKernelOrdinaryConstructorFieldsProofs.wrapper_adds_one_and_uses_owned_recursive_analysis',\
+        \ 'PsKernelOrdinaryConstructorFieldsProofs.with_fuel_uses_actual_complete_owner_callbacks'], 'retained561/PsKernelOrdinaryConstructorParamsProofs.log':\
+        \ ['PsKernelOrdinaryConstructorParamsProofs.worker_zero_precedes_parameters_lookup_and_callbacks', 'PsKernelOrdinaryConstructorParamsProofs.successor_empty_keeps_complete_owner_without_lookup',\
+        \ 'PsKernelOrdinaryConstructorParamsProofs.lookup_error_precedes_defeq', 'PsKernelOrdinaryConstructorParamsProofs.syntactic_nonforall_precedes_defeq',\
+        \ 'PsKernelOrdinaryConstructorParamsProofs.forall_uses_predecessor_fuel_and_constructor_domain_left', 'PsKernelOrdinaryConstructorParamsProofs.defeq_decline_precedes_fvar_and_instantiation',\
+        \ 'PsKernelOrdinaryConstructorParamsProofs.defeq_error_precedes_fvar_and_instantiation', 'PsKernelOrdinaryConstructorParamsProofs.defeq_false_precedes_fvar_and_instantiation',\
+        \ 'PsKernelOrdinaryConstructorParamsProofs.fvar_error_uses_returned_owner_and_existing_parameter_name',\
+        \ 'PsKernelOrdinaryConstructorParamsProofs.instantiation_error_precedes_recursive_continuation', 'PsKernelOrdinaryConstructorParamsProofs.success_keeps_context_and_complete_returned_owner',\
+        \ 'PsKernelOrdinaryConstructorParamsProofs.success_preserves_every_semantic_field_and_freshness', 'PsKernelOrdinaryConstructorParamsProofs.one_unit_successful_step_still_reaches_zero_before_empty_tail',\
+        \ 'PsKernelOrdinaryConstructorParamsProofs.two_or_more_units_finish_one_parameter_with_returned_owner',\
+        \ 'PsKernelOrdinaryConstructorParamsProofs.wrapper_adds_one_before_empty_or_callbacks', 'PsKernelOrdinaryConstructorParamsProofs.wrapper_zero_empty_is_identity',\
+        \ 'PsKernelOrdinaryConstructorParamsProofs.with_fuel_uses_full_owner_defeq_without_fallback'], 'retained561/PsKernelOrdinaryConstructorResultProofs.log':\
+        \ ['PsKernelOrdinaryConstructorResultProofs.consume_empty_preserves_exact_tail', 'PsKernelOrdinaryConstructorResultProofs.consume_missing_argument_is_mismatch',\
+        \ 'PsKernelOrdinaryConstructorResultProofs.consume_fvar_compares_only_internal_name', 'PsKernelOrdinaryConstructorResultProofs.contains_zero_precedes_lookup',\
+        \ 'PsKernelOrdinaryConstructorResultProofs.contains_projection_name_precedes_receiver', 'PsKernelOrdinaryConstructorResultProofs.contains_application_hit_precedes_argument',\
+        \ 'PsKernelOrdinaryConstructorResultProofs.contains_application_error_precedes_argument', 'PsKernelOrdinaryConstructorResultProofs.contains_const_with_fuel_correspondence',\
+        \ 'PsKernelOrdinaryConstructorResultProofs.contains_const_on_canonical_correspondence', 'PsKernelOrdinaryConstructorResultProofs.indices_contain_target_correspondence',\
+        \ 'PsKernelOrdinaryConstructorResultProofs.validate_shape_mismatch_precedes_occurrence', 'PsKernelOrdinaryConstructorResultProofs.validate_recursive_index_rejected',\
+        \ 'PsKernelOrdinaryConstructorResultProofs.validate_preserves_exact_index_ids', 'PsKernelOrdinaryConstructorResultProofs.consume_result_params_correspondence',\
+        \ 'PsKernelOrdinaryConstructorResultProofs.inductive_app_indices_correspondence', 'PsKernelOrdinaryConstructorResultProofs.validate_constructor_result_correspondence'],\
+        \ 'retained561/PsKernelOrdinaryEliminationProofs.log': ['PsKernelOrdinaryEliminationProofs.member_nil',\
+        \ 'PsKernelOrdinaryEliminationProofs.member_cons_equation', 'PsKernelOrdinaryEliminationProofs.all_members_nil',\
+        \ 'PsKernelOrdinaryEliminationProofs.all_members_cons_equation', 'PsKernelOrdinaryEliminationProofs.member_lifts_pointwise_structural_equality',\
+        \ 'PsKernelOrdinaryEliminationProofs.all_members_lifts_pointwise_membership', 'PsKernelOrdinaryEliminationProofs.after_sort_annotation_error_precedes_allocation',\
+        \ 'PsKernelOrdinaryEliminationProofs.after_sort_keeps_owner_actual_fvar_and_original_body', 'PsKernelOrdinaryEliminationProofs.step_check_decline_precedes_sort',\
+        \ 'PsKernelOrdinaryEliminationProofs.step_check_error_precedes_sort', 'PsKernelOrdinaryEliminationProofs.step_sort_decline_uses_complete_checked_owner',\
+        \ 'PsKernelOrdinaryEliminationProofs.step_sort_error_uses_complete_checked_owner', 'PsKernelOrdinaryEliminationProofs.step_success_passes_sorted_owner_and_original_domain',\
+        \ 'PsKernelOrdinaryEliminationProofs.worker_zero_precedes_every_callback', 'PsKernelOrdinaryEliminationProofs.worker_whnf_decline_uses_predecessor',\
+        \ 'PsKernelOrdinaryEliminationProofs.worker_whnf_error_precedes_lookup', 'PsKernelOrdinaryEliminationProofs.worker_lookup_error_uses_returned_arena',\
+        \ 'PsKernelOrdinaryEliminationProofs.worker_forall_composes_predecessor_step_and_complete_owner', 'PsKernelOrdinaryEliminationProofs.worker_terminal_membership_uses_reduced_owner_and_all_arguments',\
+        \ 'PsKernelOrdinaryEliminationProofs.parameter_decline_precedes_telescope_whnf', 'PsKernelOrdinaryEliminationProofs.parameter_error_precedes_telescope_whnf',\
+        \ 'PsKernelOrdinaryEliminationProofs.parameter_success_preserves_owner_and_adds_one_worker_step', 'PsKernelOrdinaryEliminationProofs.policy_nonprop_shortcut',\
+        \ 'PsKernelOrdinaryEliminationProofs.policy_empty_shortcut', 'PsKernelOrdinaryEliminationProofs.policy_multiple_shortcut',\
+        \ 'PsKernelOrdinaryEliminationProofs.policy_singleton_composition_preserves_decline_error_and_negation'],\
+        \ 'retained561/PsKernelOrdinaryHeaderStateProofs.log': ['PsKernelOrdinaryHeaderStateProofs.reverse_worker_eq',\
+        \ 'PsKernelOrdinaryHeaderStateProofs.reverse_eq', 'PsKernelOrdinaryHeaderStateProofs.finish_keeps_complete_returned_owner',\
+        \ 'PsKernelOrdinaryHeaderStateProofs.finish_decline', 'PsKernelOrdinaryHeaderStateProofs.finish_error',\
+        \ 'PsKernelOrdinaryHeaderStateProofs.mandatory_sort_keeps_complete_returned_owner', 'PsKernelOrdinaryHeaderStateProofs.binder_check_decline_precedes_whnf_and_opening',\
+        \ 'PsKernelOrdinaryHeaderStateProofs.binder_check_error_precedes_whnf_and_opening', 'PsKernelOrdinaryHeaderStateProofs.binder_public_whnf_decline_precedes_annotations',\
+        \ 'PsKernelOrdinaryHeaderStateProofs.binder_public_whnf_error_precedes_annotations', 'PsKernelOrdinaryHeaderStateProofs.binder_annotation_error_precedes_allocation',\
+        \ 'PsKernelOrdinaryHeaderStateProofs.binder_opening_error_preserved', 'PsKernelOrdinaryHeaderStateProofs.binder_success_keeps_post_opening_owner_and_original_domain',\
+        \ 'PsKernelOrdinaryHeaderStateProofs.binder_allocation_preserves_every_semantic_field', 'PsKernelOrdinaryHeaderStateProofs.param_step_whnf_decline_precedes_lookup',\
+        \ 'PsKernelOrdinaryHeaderStateProofs.param_step_whnf_error_precedes_lookup', 'PsKernelOrdinaryHeaderStateProofs.param_step_lookup_error_precedes_check',\
+        \ 'PsKernelOrdinaryHeaderStateProofs.param_step_uses_returned_owner_and_original_fuel', 'PsKernelOrdinaryHeaderStateProofs.params_zero_still_performs_final_whnf',\
+        \ 'PsKernelOrdinaryHeaderStateProofs.params_successor_keeps_original_fuel', 'PsKernelOrdinaryHeaderStateProofs.params_successor_decline',\
+        \ 'PsKernelOrdinaryHeaderStateProofs.params_successor_error', 'PsKernelOrdinaryHeaderStateProofs.params_wrapper_starts_empty',\
+        \ 'PsKernelOrdinaryHeaderStateProofs.indices_zero_precedes_callbacks_and_lookup', 'PsKernelOrdinaryHeaderStateProofs.indices_successor_whnf_decline_uses_predecessor',\
+        \ 'PsKernelOrdinaryHeaderStateProofs.indices_successor_whnf_error_uses_predecessor', 'PsKernelOrdinaryHeaderStateProofs.indices_successor_lookup_error_precedes_check',\
+        \ 'PsKernelOrdinaryHeaderStateProofs.indices_successor_binder_threads_post_opening_owner', 'PsKernelOrdinaryHeaderStateProofs.indices_successor_binder_decline',\
+        \ 'PsKernelOrdinaryHeaderStateProofs.indices_successor_binder_error', 'PsKernelOrdinaryHeaderStateProofs.indices_terminal_sort_keeps_complete_returned_owner',\
+        \ 'PsKernelOrdinaryHeaderStateProofs.indices_wrapper_adds_one_before_callbacks', 'PsKernelOrdinaryHeaderStateProofs.constructor_context_is_parameter_context',\
+        \ 'PsKernelOrdinaryHeaderStateProofs.constructor_fork_preserves_parameter_semantics_and_freshness', 'PsKernelOrdinaryHeaderStateProofs.constructor_fork_ignores_index_semantic_state',\
+        \ 'PsKernelOrdinaryHeaderStateProofs.header_finish_sort_keeps_both_owners', 'PsKernelOrdinaryHeaderStateProofs.header_finish_lookup_error',\
+        \ 'PsKernelOrdinaryHeaderStateProofs.header_finish_nonsort_error', 'PsKernelOrdinaryHeaderStateProofs.header_check_decline_precedes_whnf',\
+        \ 'PsKernelOrdinaryHeaderStateProofs.header_check_error_precedes_whnf', 'PsKernelOrdinaryHeaderStateProofs.header_public_whnf_decline_precedes_opening',\
+        \ 'PsKernelOrdinaryHeaderStateProofs.header_public_whnf_error_precedes_opening', 'PsKernelOrdinaryHeaderStateProofs.header_after_sort_composition',\
+        \ 'PsKernelOrdinaryHeaderStateProofs.header_guard_error_precedes_callbacks', 'PsKernelOrdinaryHeaderStateProofs.header_duplicate_levels_precede_all_other_guards',\
+        \ 'PsKernelOrdinaryHeaderStateProofs.header_duplicate_names_precede_freshness_and_types', 'PsKernelOrdinaryHeaderStateProofs.header_freshness_error_precedes_uniform_and_header',\
+        \ 'PsKernelOrdinaryHeaderStateProofs.header_uniform_error_precedes_static_header', 'PsKernelOrdinaryHeaderStateProofs.header_successful_guards_initialize_one_fresh_owner'],\
+        \ 'retained561/PsKernelOrdinaryOccurrenceProofs.log': ['PsKernelOrdinaryOccurrenceProofs.app_spine_with_fuel_correspondence',\
+        \ 'PsKernelOrdinaryOccurrenceProofs.app_spine_on_canonical_correspondence', 'PsKernelOrdinaryOccurrenceProofs.uniform_argument_count_correspondence',\
+        \ 'PsKernelOrdinaryOccurrenceProofs.uniform_arguments_correspondence', 'PsKernelOrdinaryOccurrenceProofs.declared_names_correspondence',\
+        \ 'PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_head_correspondence', 'PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_with_fuel_correspondence',\
+        \ 'PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_structural_adequacy', 'PsKernelOrdinaryOccurrenceProofs.uniform_occurrence_on_canonical_correspondence',\
+        \ 'PsKernelOrdinaryOccurrenceProofs.uniform_occurrences_correspondence', 'PsKernelOrdinaryOccurrenceProofs.legacy_depth_le_expanded_count',\
+        \ 'PsKernelOrdinaryOccurrenceProofs.annotation_target_depth', 'PsKernelOrdinaryOccurrenceProofs.annotation_structural_adequacy',\
+        \ 'PsKernelOrdinaryOccurrenceProofs.annotations_with_fuel_correspondence', 'PsKernelOrdinaryOccurrenceProofs.annotations_on_canonical_correspondence'],\
+        \ 'retained561/PsKernelOrdinaryRecursiveArgumentProofs.log': ['PsKernelOrdinaryRecursiveArgumentProofs.zero_precedes_lookup_and_callbacks',\
+        \ 'PsKernelOrdinaryRecursiveArgumentProofs.wrapper_adds_one_and_starts_empty_arguments', 'PsKernelOrdinaryRecursiveArgumentProofs.with_fuel_uses_full_owner_callbacks',\
+        \ 'PsKernelOrdinaryRecursiveArgumentProofs.whnf_decline_stops_before_selector', 'PsKernelOrdinaryRecursiveArgumentProofs.whnf_error_stops_before_selector',\
+        \ 'PsKernelOrdinaryRecursiveArgumentProofs.selector_error_uses_whnf_owner', 'PsKernelOrdinaryRecursiveArgumentProofs.selected_branch_retains_complete_whnf_owner',\
+        \ 'PsKernelOrdinaryRecursiveArgumentProofs.lookup_error_after_selector_miss', 'PsKernelOrdinaryRecursiveArgumentProofs.original_occurrence_error_precedes_reduced_scan',\
+        \ 'PsKernelOrdinaryRecursiveArgumentProofs.original_occurrence_hit_skips_reduced_scan', 'PsKernelOrdinaryRecursiveArgumentProofs.original_occurrence_miss_uses_reduced_scan',\
+        \ 'PsKernelOrdinaryRecursiveArgumentProofs.unsafe_recursion_guard_skips_arena_and_environment', 'PsKernelOrdinaryRecursiveArgumentProofs.absent_reduced_occurrence_skips_head_metadata',\
+        \ 'PsKernelOrdinaryRecursiveArgumentProofs.terminal_nonrecursive_preserves_context_and_complete_owner',\
+        \ 'PsKernelOrdinaryRecursiveArgumentProofs.terminal_safe_invalid_rec_head_rejects', 'PsKernelOrdinaryRecursiveArgumentProofs.terminal_other_occurrence_retains_nested_error',\
+        \ 'PsKernelOrdinaryRecursiveArgumentProofs.selected_success_preserves_owner_names_and_exact_indices', 'PsKernelOrdinaryRecursiveArgumentProofs.selected_recursive_index_rejects',\
+        \ 'PsKernelOrdinaryRecursiveArgumentProofs.forall_domain_whnf_decline_precedes_occurrence_and_check', 'PsKernelOrdinaryRecursiveArgumentProofs.forall_domain_whnf_error_precedes_occurrence_and_check',\
+        \ 'PsKernelOrdinaryRecursiveArgumentProofs.negative_domain_precedes_check_sort_allocation_and_recursion',\
+        \ 'PsKernelOrdinaryRecursiveArgumentProofs.binder_decline_uses_domain_whnf_owner', 'PsKernelOrdinaryRecursiveArgumentProofs.binder_error_stops_before_recursion',\
+        \ 'PsKernelOrdinaryRecursiveArgumentProofs.binder_success_threads_complete_owner_body_name_and_predecessor'],\
+        \ 'retained561/PsKernelQuotAdmissionProofs.log': ['PsKernelQuotAdmissionProofs.match_shape_correspondence',\
+        \ 'PsKernelQuotAdmissionProofs.eq_shape_correspondence', 'PsKernelQuotAdmissionProofs.refl_shape_correspondence',\
+        \ 'PsKernelQuotAdmissionProofs.initialized_returns_exact_environment', 'PsKernelQuotAdmissionProofs.declined_check_does_not_install',\
+        \ 'PsKernelQuotAdmissionProofs.failed_check_does_not_install', 'PsKernelQuotAdmissionProofs.shared_install_preserves_frozen_admission',\
+        \ 'PsKernelQuotAdmissionProofs.missing_owner_declines', 'PsKernelQuotAdmissionProofs.wrong_owner_declines'],\
+        \ 'retained561/PsKernelQuotSessionOwnerProofs.log': ['PsKernelQuotSessionOwnerProofs.preflight_error_precedes_prepare',\
+        \ 'PsKernelQuotSessionOwnerProofs.prepare_error_publishes_no_owner', 'PsKernelQuotSessionOwnerProofs.decline_discards_prepared_owner_and_restarts_original',\
+        \ 'PsKernelQuotSessionOwnerProofs.hard_rejection_never_invokes_original_admission', 'PsKernelQuotSessionOwnerProofs.success_keeps_exact_prepared_owner_for_atomic_publication',\
+        \ 'PsKernelQuotSessionOwnerProofs.declaration_limit_precedes_generated_header_import', 'PsKernelQuotSessionOwnerProofs.initialized_preparation_is_exact_identity',\
+        \ 'PsKernelQuotSessionOwnerProofs.missing_eq_preparation_is_exact_identity', 'PsKernelQuotSessionOwnerProofs.wrong_eq_kind_does_not_import',\
+        \ 'PsKernelQuotSessionOwnerProofs.explicit_public_quot_routes_to_owned_worker'], 'retained561/PsKernelScalarHashWorkerRegression.log':\
+        \ ['PsKernelScalarHashWorkerRegression.short_pairs_eq', 'PsKernelScalarHashWorkerRegression.entry_pairs_eq',\
+        \ 'PsKernelScalarHashWorkerRegression.level_list_hash_eq_worker', 'PsKernelScalarHashWorkerRegression.pairs_eq_before',\
+        \ 'PsKernelScalarHashWorkerRegression.state_eq_before', 'PsKernelScalarHashWorkerRegression.state_succ',\
+        \ 'PsKernelScalarHashWorkerRegression.state_step_commutes', 'PsKernelScalarHashWorkerRegression.state_fixed',\
+        \ 'PsKernelScalarHashWorkerRegression.scan_eq_before', 'PsKernelScalarHashWorkerRegression.worker_eq_before',\
+        \ 'PsKernelScalarHashWorkerRegression.hash_eq_before'], 'retained561/PsKernelTransformLazyProofs.log': ['psKernelTransformLazyPreservesAllInputs'],\
+        \ 'retained561/PsKernelUnarySpineProofs.log': ['psKernelUnaryPlanZero', 'psKernelUnaryPlanStops', 'psKernelUnaryPlanPreserves',\
+        \ 'psKernelUnaryPlanSkippedBound', 'psKernelUnaryViewHasSharedHead', 'psKernelUnaryPlanExpressionCongruence',\
+        \ 'psKernelUnaryContextZero', 'psKernelUnaryPlanTerminates', 'psKernelUnaryCallbackOwner'], 'nested-public-proofs.log':\
+        \ ['PsKernelNestedAdmissionPublicProofs.original_boundary_decode_failure_precedes_all_nested_work', 'PsKernelNestedAdmissionPublicProofs.complete_nested_result_enters_original_public_transaction']}\n\
+        actualNames=set()\nfor filename,expected in expectedReports.items():\n text=n.read(filename).decode();assert\
+        \ not any(x in text for x in ['error:','sorryAx','Lean.ofReduceBool','Lean.trustCompiler'])\n rows=re.findall(r\"\
+        '([^']+)' (?:depends on axioms: \\[([^\\]]*)\\]|does not depend on any axioms)\",text)\n assert len(rows)==len({name\
+        \ for name,_ in rows})==len(expected) and {name for name,_ in rows}==set(expected),(filename,rows)\n for\
+        \ name,axioms in rows:assert set(x.strip() for x in axioms.split(',') if x.strip())<={'propext','Classical.choice','Quot.sound'}\n\
+        \ actualNames.update(name for name,_ in rows)\nassert len(actualNames)==806\nretained=json.loads(n.read('retained561/receipt.json'))\n\
+        assert retained['source']==native_source and retained['all40ProofSourceFilesByteIdenticalToQualifiedBaseline']\
+        \ and retained['all561NamesExactlyRetainedAndKernelChecked']\ncontrols=[('public-native.log','PSC1_MUTUAL_PUBLIC_ASSERT\
+        \ ',12),('admission-native.log','PSC1_MUTUAL_ADMISSION_ASSERT ',240),('recursor-native.log','PSC1_MUTUAL_RECURSOR_ASSERT\
+        \ ',169),('generated-native.log','PSC1_MUTUAL_GENERATED_ASSERT ',162),('native.log','PSC1_MUTUAL_LOOP_ASSERT\
+        \ ',52),('retained-constructor-native.log','PSC1_MUTUAL_CONSTRUCTOR_ASSERT ',189),('retained-fields-native.log','PSC1_MUTUAL_FIELDS_ASSERT\
+        \ ',83),('retained-recursive-native.log','PSC1_MUTUAL_RECURSIVE_ASSERT ',88),('count-native.log','PSC1_EXPANDED_SIZE_ASSERT\
+        \ ',26),('header-native.log','PSC1_MUTUAL_HEADER_ASSERT ',49),('family-native.log','PSC1_MUTUAL_RESULT_ASSERT\
+        \ ',114)]\nnative_labels={}\nfor filename,tag,count in controls:\n    text=n.read(filename).decode();labels=[line[len(tag):]\
+        \ for line in text.splitlines() if line.startswith(tag)]\n    assert len(labels)==len(set(labels))==count\n\
+        \    native_labels[tag.split('_ASSERT')[0]]=labels\nassert sum(map(len,native_labels.values()))==1184\n\
+        assert len([label for label in native_labels['PSC1_MUTUAL_HEADER'] if label.startswith('actual-retained-mutual-error-')])==16\n\
+        # Pure-plan162 and isolated-recursor169 remain independently native-qualified.\n# Fresh generated cohort\
+        \ exercises the complete transaction240 plus retained601.\ndel native_labels['PSC1_MUTUAL_GENERATED'];del\
+        \ native_labels['PSC1_MUTUAL_RECURSOR']\nassert sum(map(len,native_labels.values()))==853\n(out/'native-labels.json').write_text(json.dumps(native_labels,indent=2)+'\\\
+        n')\ncompiler_source='14dad2ce6eaef9fa71170f28650a5c626eca4a76'\nc=archive(compiler_source,40213489105,12606866673,2561674,'c28da8d4d57a5a59a1ff686b2ce671102b20073bd00bf32450fae37cf2ab8dec',40,'authenticated-compiler.zip')\n\
+        receipt=json.loads(c.read('compiler-receipt.json'));assert receipt['sourceSha']==compiler_source\nfor path,sha\
+        \ in receipt['files'].items():assert hashlib.sha256(c.read(path)).hexdigest()==sha,path\nbinary=c.read('psc1');assert\
+        \ hashlib.sha256(binary).hexdigest()==receipt['compilerSha256']=='13635a423d1343e9a4770be0b7e02d859a6b845b221a0363d19bfdfab8e3cc1c'\n\
+        packages=[str(p) for p in pathlib.Path('psc1/packages').iterdir() if p.is_dir() and p.name!='pskernel-core']\n\
+        stable=packages+['psc1/lakefile.lean','psc1/lake-manifest.json','psc1/lean-toolchain','psc1/host','psc1/stdlib','psc1/psconfig.json']\n\
+        subprocess.run(['git','diff','--exit-code',compiler_source,'HEAD','--',*stable],check=True)\nexe=pathlib.Path(os.environ['RUNNER_TEMP'])/'mutual-psc1';exe.write_bytes(binary);exe.chmod(0o700)\n\
+        baseline249=json.loads(pathlib.Path('psc1/test/nested-public-retained-249-manifest.json').read_text())\n\
+        assert len(baseline249['bindings'])==249 and len(baseline249['intentionalNativeQualifiedChanges'])==3\n\
+        for spec in baseline249['bindings']:\n    path=spec['path'];wanted=baseline249['intentionalNativeQualifiedChanges'].get(path,spec['gitBlobSha'])\n\
+        \    assert subprocess.check_output(['git','rev-parse','HEAD:'+path]).decode().strip()==wanted,(path,'audited249binding')\n\
+        snapshots=[]\npaths=['psc1/scripts/pskernel-nested-admission-smoke.mjs', 'psc1/scripts/pskernel-nested-public-smoke.mjs',\
+        \ 'psc1/scripts/pskernel-nested-public-complete-smoke.mjs', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagNestedTransformed.lean',\
+        \ 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagNestedRestoration.lean', 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagNestedValidation.lean',\
+        \ 'psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagNestedAdmission.lean','psc1/scripts/pskernel-nested-overlay-smoke.mjs','psc1/scripts/pskernel-nested-param-hygiene-smoke.mjs','psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagNestedOverlay.lean','psc1/scripts/pskernel-nested-preprocess-smoke.mjs','psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagNestedPreprocess.lean','psc1/test/PsKernelNestedAdmissionSelfHost.lean','psc1/scripts/pskernel-nested-header-smoke.mjs','psc1/test/nested-public-retained-249-manifest.json','psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagNestedHeader.lean','psc1/packages/pskernel-core/src/Ps/KernelCore/SelfHost.lean',\n\
+        \    'psc1/scripts/pskernel-mutual-complete-smoke.mjs','psc1/scripts/pskernel-mutual-public-smoke.mjs',\n\
+        \    'psc1/scripts/pskernel-mutual-retained-runtime-audit.py','psc1/test/retained-21-generated-helper-manifest.json','psc1/test/retained-249-audited-input-manifest.json',\n\
+        \    '.github/workflows/psc1-pskernel-t06-nested-public-full.yml',\n    'psc1/scripts/bootstrap-project.mjs','psc1/scripts/bootstrap-manifest.mjs','psc1/scripts/workspace-layout.mjs','psc1/scripts/pskernel-authenticated-translate-lake.sh']\n\
+        paths+=['psc1/packages/pskernel-core/src/Ps/KernelCore/'+p+'.lean' for p in ['API/Dag','API/DagMutualHeader','API/DagMutualConstructorResult','Core/ExprV2/ExpandedSize','API/DagMutualRecursiveArgument','API/DagMutualConstructorFields','API/DagMutualConstructorAnalysis','API/DagMutualConstructorLoop','API/DagMutualGenerated','API/DagMutualRecursorValidation','API/DagMutualAdmission']]\n\
+        legacy=json.loads(pathlib.Path('psc1/test/retained-21-generated-helper-manifest.json').read_text());assert\
+        \ len(legacy['helpers'])==21\nfor spec in legacy['helpers']:\n    path=spec['path'];data=pathlib.Path(path).read_bytes()\n\
+        \    assert len(data)==spec['bytes'] and hashlib.sha256(data).hexdigest()==spec['sha256']\n    assert data==subprocess.check_output(['git','show',legacy['source']+':'+path])\n\
+        \    paths.append(path)\nfor path in ['psc1/scripts/bootstrap-project.mjs','psc1/scripts/bootstrap-manifest.mjs','psc1/scripts/workspace-layout.mjs']:\n\
+        \    assert pathlib.Path(path).read_bytes()==subprocess.check_output(['git','show','2f7ee0afc1cc2fbccdf47b4f140b5cf01eb05c89:'+path])\n\
+        for p in paths:\n    data=pathlib.Path(p).read_bytes();assert data==subprocess.check_output(['git','show','HEAD:'+p]);dest=out/'sources'/p;dest.parent.mkdir(parents=True,exist_ok=True);dest.write_bytes(data);snapshots.append({'path':p,'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()})\n\
+        record={'schema':'psc1-corrected-mutual-parity-generated-preflight-v1','source':os.environ['GITHUB_SHA'],'run':os.environ['GITHUB_RUN_ID'],'nativeSource':native_source,'nativeRun':40325910230,'nativeReports':806,'nativeAssertions':1184,'generatedAssertions':853,'all364NativeSourceSnapshotsMatchActualGit':True,'all16NegativeErrorsCompareActualOriginalAdmission':True,'compilerSource':compiler_source,'compilerSha256':receipt['compilerSha256'],'allCompilerBuildSourcesUnchanged':True,'entry':'test/PsKernelNestedAdmissionSelfHost.lean','route':os.environ['PSC1_MUTUAL_ROUTE'],'snapshots':snapshots,'privateNestedControls':35,'privateNestedReports':11,'privateNestedPreprocessReports':8,'privateNestedPreprocessControls':26,'nestedCaptureReports':10,'nestedCaptureControls':17,'nestedOverlayReports':7,'nestedOverlayControls':68,'publicNestedRouteChanged':True,'completeNestedReports':32,'completeNestedGeneratedControls':189,'all806ProofNamesExactlyVerified':True,'scope':'Complete\
+        \ nested owning public transaction;806native reports;fresh completeSelfHost plus all7nested phases;1188native-equal\
+        \ controls(999retained+141completeprivate+48public) and21legacy. Isolated paired qualification,not production-adopted/global/performance\
+        \ qualified.','privateRuntimeFuel':256,'publicRuntimeFuel':4096,'retainedRuntimeFuel':'unchanged per authenticated\
+        \ harness','runtimeDeadlineSeconds':600,'oldSpaceMiB':2048,'emptyPATH':True,'priorCopiedReferenceErrorClaimsSuperseded':True}\n\
+        (out/'inputs.json').write_text(json.dumps(record,indent=2)+'\\n');print(json.dumps(record))\nPYCODE\n"
+    - name: Install exact retained TypeScript7.0.2
+      shell: bash
+      run: 'set -euo pipefail
+
+        mkdir -p "$RUNNER_TEMP/mutual-ts"
+
+        printf ''%s\n'' ''{"name":"psc1-mutual-ts","private":true,"version":"0.0.0"}'' > "$RUNNER_TEMP/mutual-ts/package.json"
+
+        npm install --prefix "$RUNNER_TEMP/mutual-ts" --no-save --ignore-scripts --no-audit --no-fund typescript@7.0.2
+
+        TSC_PATH="$RUNNER_TEMP/mutual-ts/node_modules/typescript/bin/tsc"
+
+        test "$(node "$TSC_PATH" --version)" = ''Version 7.0.2''
+
+        printf ''PSC0_TSC=%s\n'' "$TSC_PATH" >> "$GITHUB_ENV"
+
+        '
+    - name: Check fresh complete177-module Lean and canonical closures and build whole program
+      working-directory: psc1
+      shell: bash
+      run: "set -euo pipefail\nOUT=\"$RUNNER_TEMP/mutual-generated\"\nexport PSC1_T05_DIR=\"$OUT\" PSC1_T05_ROUTE=\"\
+        $PSC1_MUTUAL_ROUTE\"\nnode --input-type=module <<'NODE'\nimport {readFileSync,writeFileSync,mkdirSync,copyFileSync}\
+        \ from 'node:fs';\nimport {createHash} from 'node:crypto';\nimport path from 'node:path';\nimport {packageBySection,parseImports}\
+        \ from './scripts/workspace-layout.mjs';\nconst entry='test/PsKernelNestedAdmissionSelfHost.lean',visited=new\
+        \ Set();\nfunction visit(source){\n if(visited.has(source))return;visited.add(source);\n for(const imported\
+        \ of parseImports(readFileSync(source,'utf8'))){\n  const parts=imported.split('.');let dependency;\n  if(parts[0]==='ProofScript')dependency=path.posix.join('stdlib',...parts)+'.lean';\n\
+        \  else if(parts[0]==='Ps'&&packageBySection.has(parts[1]))dependency=path.posix.join('packages',packageBySection.get(parts[1]),'src',...parts)+'.lean';\n\
+        \  else throw Error('UNKNOWN_IMPORT '+imported);\n  visit(dependency);\n }\n}\nvisit(entry);\nfor(const\
+        \ module of ['API/DagNestedHeader','API/DagNestedPreprocess','API/DagNestedOverlay','API/DagNestedTransformed','API/DagNestedRestoration','API/DagNestedValidation','API/DagNestedAdmission','API/DagMutualHeader','API/DagMutualConstructorResult','Core/ExprV2/ExpandedSize','API/DagMutualRecursiveArgument','API/DagMutualConstructorFields','API/DagMutualConstructorAnalysis','API/DagMutualConstructorLoop','API/DagMutualGenerated','API/DagMutualRecursorValidation','API/DagMutualAdmission'])\n\
+        \ if(!visited.has('packages/pskernel-core/src/Ps/KernelCore/'+module+'.lean'))throw Error('Missing mutual\
+        \ module '+module);\nconst files=[...visited].sort().map(source=>{\n const bytes=readFileSync(source),target=path.join(process.env.PSC1_T05_DIR,'lean-source',source);\n\
+        \ mkdirSync(path.dirname(target),{recursive:true});copyFileSync(source,target);\n return {path:source,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex')};\n\
+        });\nwriteFileSync(process.env.PSC1_T05_DIR+'/lean-source-manifest.json',JSON.stringify({source:process.env.GITHUB_SHA,entry,files},null,2)+'\\\
+        n');\nconsole.log('PSC1_MUTUAL_FULL_LEAN_CLOSURE: PASS modules='+files.length);\nNODE\ntar -czf \"$OUT/lean-source.tar.gz\"\
+        \ -C \"$OUT/lean-source\" .\ntimeout --signal=KILL 1800s \"$RUNNER_TEMP/mutual-psc1\" check test/PsKernelNestedAdmissionSelfHost.lean\
+        \ 2>&1 | tee \"$OUT/complete-lean-check.log\"\nif [ \"$PSC1_MUTUAL_ROUTE\" = canonical ]; then\n  mkdir\
+        \ -p \"$RUNNER_TEMP/mutual-translate-bin\"\n  cp scripts/pskernel-authenticated-translate-lake.sh \"$RUNNER_TEMP/mutual-translate-bin/lake\"\
+        \n  chmod 700 \"$RUNNER_TEMP/mutual-translate-bin/lake\"\n  cp scripts/pskernel-authenticated-translate-lake.sh\
+        \ \"$OUT/lake-translate-adapter.sh\"\n  PSC1_MUTUAL_COMPILER=\"$RUNNER_TEMP/mutual-psc1\" PATH=\"$RUNNER_TEMP/mutual-translate-bin:$PATH\"\
+        \ node scripts/bootstrap-project.mjs test/PsKernelNestedAdmissionSelfHost.lean dist/mutual-public/workspace\n\
+        \  node --input-type=module <<'NODE'\nimport {readFileSync} from 'node:fs';\nimport {assertBootstrapWorkspaceManifest}\
+        \ from './scripts/bootstrap-manifest.mjs';\nconst workspace='dist/mutual-public/workspace';\nconst manifest=JSON.parse(readFileSync(workspace+'/.proofscript-bootstrap.json','utf8'));\n\
+        const lean=JSON.parse(readFileSync(process.env.PSC1_T05_DIR+'/lean-source-manifest.json','utf8'));\nconst\
+        \ expected=new Set(lean.files.map(x=>x.path.replace(/\\.lean$/u,'.ps')));\nif(manifest.entry!==lean.entry.replace(/\\\
+        .lean$/u,'.ps')||manifest.sourceCount!==expected.size||manifest.generated.length!==expected.size||new Set(manifest.generated).size!==expected.size||!manifest.generated.every(x=>expected.has(x)))throw\
+        \ Error('Complete canonical closure required');\nawait assertBootstrapWorkspaceManifest(workspace,manifest,'bootstrap');\n\
+        console.log('PSC1_MUTUAL_FULL_CANONICAL_CLOSURE: PASS modules='+expected.size);\nNODE\n  cp dist/mutual-public/workspace/.proofscript-bootstrap.json\
+        \ \"$OUT/canonical-manifest.json\"\n  tar -czf \"$OUT/canonical-source.tar.gz\" -C dist/mutual-public/workspace\
+        \ .\n  entry=dist/mutual-public/workspace/test/PsKernelNestedAdmissionSelfHost.ps\n  timeout --signal=KILL\
+        \ 1800s \"$RUNNER_TEMP/mutual-psc1\" check \"$entry\" 2>&1 | tee \"$OUT/complete-canonical-check.log\"\n\
+        else\n  test \"$PSC1_MUTUAL_ROUTE\" = generated\n  entry=test/PsKernelNestedAdmissionSelfHost.lean\nfi\n\
+        timeout --signal=KILL 1800s \"$RUNNER_TEMP/mutual-psc1\" build \"$entry\" --out dist/mutual-public/kernel.js\
+        \ 2>&1 | tee \"$OUT/build.log\"\nmkdir -p \"$OUT/production\"\nfor suffix in js ts d.ts js.map; do test\
+        \ -s \"dist/mutual-public/kernel.$suffix\"; cp \"dist/mutual-public/kernel.$suffix\" \"$OUT/production/kernel.$suffix\"\
+        ; done\ncp dist/mutual-public/kernel.js \"$OUT/kernel.mjs\"\ncp scripts/pskernel-mutual-complete-smoke.mjs\
+        \ scripts/pskernel-mutual-public-smoke.mjs scripts/pskernel-nested-header-smoke.mjs scripts/pskernel-nested-preprocess-smoke.mjs\
+        \ scripts/pskernel-nested-param-hygiene-smoke.mjs scripts/pskernel-nested-overlay-smoke.mjs scripts/pskernel-nested-admission-smoke.mjs\
+        \ scripts/pskernel-nested-public-smoke.mjs scripts/pskernel-nested-public-complete-smoke.mjs \"$OUT/\"\n"
+    - name: Require complete841 plus public12 native-equal controls and all21 retained runtime harnesses
+      shell: bash
+      run: "set -euo pipefail\nNODE_BIN=\"$(command -v node)\"\ncd \"$RUNNER_TEMP/mutual-generated\"\n\"$NODE_BIN\"\
+        \ --check kernel.mjs\n\"$NODE_BIN\" --check pskernel-mutual-complete-smoke.mjs\nset +e\n/usr/bin/time -f\
+        \ 'peak_rss_kib=%M wall_seconds=%e exit_status=%x' -o runtime.memory \\\n timeout --signal=KILL 600s env\
+        \ -i PATH= \"$NODE_BIN\" --max-old-space-size=2048 \\\n pskernel-mutual-complete-smoke.mjs ./kernel.mjs\
+        \ > runtime.log 2>&1\nstatus=$?\nset -e\ncat runtime.log\ntest \"$status\" -eq 0\npython3 - <<'PYCODE'\n\
+        import pathlib,json\ntext=pathlib.Path('runtime.log').read_text();native=json.loads(pathlib.Path('native-labels.json').read_text());total=0\n\
+        for prefix,labels in native.items():\n    if prefix=='PSC1_MUTUAL_PUBLIC':continue\n    marker=prefix+'_JS:\
+        \ PASS '\n    r,=[json.loads(line[len(marker):]) for line in text.splitlines() if line.startswith(marker)]\n\
+        \    assert r['assertions']==len(r['labels'])==len(set(r['labels']))==len(labels)\n    assert r['labels']==labels,(prefix,'actual\
+        \ native labels')\n    assert r.get('fullAdmission',False)==(prefix=='PSC1_MUTUAL_ADMISSION')\n    assert\
+        \ not r['fullKernel'] and not r['performanceQualified']\n    if prefix=='PSC1_MUTUAL_ADMISSION':assert r['privateOnly']\
+        \ and not r['publicRoute'] and r['completeComparisons']==168\n    total+=r['assertions']\nassert total==841\n\
+        marker='PSC1_MUTUAL_HEADER_JS: PASS ';r,=[json.loads(line[len(marker):]) for line in text.splitlines() if\
+        \ line.startswith(marker)]\nassert r['assertions']==49 and r['originalErrors']==16\nprint('PSC1_MUTUAL_COMPLETE_JS_ALL:\
+        \ PASS controls=841 completeComparisons=168 actualOriginalErrors=16')\nPYCODE\n\nset -euo pipefail\nNODE_BIN=\"\
+        $(command -v node)\"\ncd \"$RUNNER_TEMP/mutual-generated\"\n\"$NODE_BIN\" --check pskernel-mutual-public-smoke.mjs\n\
+        env -i PATH= \"$NODE_BIN\" --max-old-space-size=2048 pskernel-mutual-public-smoke.mjs ./kernel.mjs > public-runtime.log\
+        \ 2>&1\ncat public-runtime.log\npython3 - <<'PYCODE'\nimport json,pathlib\ntext=pathlib.Path('public-runtime.log').read_text();native=json.loads(pathlib.Path('native-labels.json').read_text())\n\
+        rows=[json.loads(line) for line in text.splitlines() if line.startswith('{')]\nr,=[x for x in rows if x.get('schema')=='psc1-mutual-admission-public-v1']\n\
+        assert r['assertions']==12 and r['assertionLabels']==native['PSC1_MUTUAL_PUBLIC']\nassert r['mutualAdmission']\
+        \ and r['publicRoutingChanged'] and not r['fullKernel'] and not r['performanceQualified']\nprint('PSC1_MUTUAL_PUBLIC_JS_ALL:\
+        \ PASS newNativeEqual=853 completeComparisons=168 publicControls=12')\nPYCODE\ncd \"$GITHUB_WORKSPACE\"\n\
+        python3 psc1/scripts/pskernel-mutual-retained-runtime-audit.py psc1/test/retained-21-generated-helper-manifest.json\
+        \ \"$NODE_BIN\" \"$RUNNER_TEMP/mutual-generated/kernel.mjs\" \"$RUNNER_TEMP/mutual-generated/retained-runtime\"\
+        \n\nset -euo pipefail\nNODE_BIN=\"$(command -v node)\"\ncd \"$RUNNER_TEMP/mutual-generated\"\n\"$NODE_BIN\"\
+        \ --check pskernel-nested-header-smoke.mjs\n/usr/bin/time -f 'peak_rss_kib=%M wall_seconds=%e exit_status=%x'\
+        \ -o nested-runtime.memory \\\n timeout --signal=KILL 600s env -i PATH= \"$NODE_BIN\" --max-old-space-size=2048\
+        \ \\\n pskernel-nested-header-smoke.mjs ./kernel.mjs > nested-runtime.log 2>&1\ncat nested-runtime.log\n\
+        python3 - <<'PYCODE'\nimport pathlib,json,zipfile\ntag='PSC1_NESTED_HEADER_JS: PASS '\nr,=[json.loads(s[len(tag):])\
+        \ for s in pathlib.Path('nested-runtime.log').read_text().splitlines() if s.startswith(tag)]\nassert r['assertions']==len(r['labels'])==len(set(r['labels']))==35\
+        \ and r['actualOriginalNegativeComparisons']==10\nwith zipfile.ZipFile('authenticated-native806.zip') as\
+        \ n:\n    labels=[s.removeprefix('PSC1_NESTED_HEADER_ASSERT ') for s in n.read('nested-header-native.log').decode().splitlines()\
+        \ if s.startswith('PSC1_NESTED_HEADER_ASSERT ')]\nassert r['labels']==labels and r['privateOnly'] and not\
+        \ r['publicRouteChanged'] and not r['fullKernel'] and not r['performanceQualified']\nprint('PSC1_NESTED_HEADER_NATIVE_EQUAL_ALL:\
+        \ PASS controls=35 actualOriginalErrors=10')\nPYCODE\n\nset -euo pipefail\nNODE_BIN=\"$(command -v node)\"\
+        \ncd \"$RUNNER_TEMP/mutual-generated\"\n\"$NODE_BIN\" --check pskernel-nested-preprocess-smoke.mjs\n/usr/bin/time\
+        \ -f 'peak_rss_kib=%M wall_seconds=%e exit_status=%x' -o nested-preprocess-runtime.memory \\\n timeout --signal=KILL\
+        \ 600s env -i PATH= \"$NODE_BIN\" --max-old-space-size=2048 \\\n pskernel-nested-preprocess-smoke.mjs ./kernel.mjs\
+        \ > nested-preprocess-runtime.log 2>&1\ncat nested-preprocess-runtime.log\npython3 - <<'PYCODE'\nimport\
+        \ pathlib,json,zipfile\ntag='PSC1_NESTED_PREPROCESS_JS: PASS '\nr,=[json.loads(s[len(tag):]) for s in pathlib.Path('nested-preprocess-runtime.log').read_text().splitlines()\
+        \ if s.startswith(tag)]\nassert r['assertions']==len(r['labels'])==len(set(r['labels']))==26 and r['actualOriginalCompleteNestedAcceptedPlanFixtures']==5\n\
+        with zipfile.ZipFile('authenticated-native806.zip') as n:\n    labels=[s.removeprefix('PSC1_NESTED_PREPROCESS_ASSERT\
+        \ ') for s in n.read('nested-preprocess-native.log').decode().splitlines() if s.startswith('PSC1_NESTED_PREPROCESS_ASSERT\
+        \ ')]\nassert r['labels']==labels and r['privateOnly'] and not r['publicRouteChanged'] and not r['fullKernel']\
+        \ and not r['performanceQualified']\nprint('PSC1_NESTED_PREPROCESS_NATIVE_EQUAL_ALL: PASS controls=26 actualOriginalFixtures=5')\n\
+        PYCODE\n\nset -euo pipefail\nNODE_BIN=\"$(command -v node)\"\ncd \"$RUNNER_TEMP/mutual-generated\"\nfor\
+        \ name in nested-param-hygiene nested-overlay; do\n  \"$NODE_BIN\" --check \"pskernel-$name-smoke.mjs\"\n\
+        \  /usr/bin/time -f 'peak_rss_kib=%M wall_seconds=%e exit_status=%x' -o \"$name-runtime.memory\" \\\n  \
+        \  timeout --signal=KILL 600s env -i PATH= \"$NODE_BIN\" --max-old-space-size=2048 \\\n    \"pskernel-$name-smoke.mjs\"\
+        \ ./kernel.mjs > \"$name-runtime.log\" 2>&1\n  cat \"$name-runtime.log\"\ndone\npython3 - <<'PYCODE'\nimport\
+        \ pathlib,json,zipfile\nwith zipfile.ZipFile('authenticated-native806.zip') as n:\n for prefix,filename,log,count\
+        \ in [('PSC1_NESTED_PARAM_HYGIENE','nested-param-hygiene-runtime.log','nested-hygiene-native.log',17),('PSC1_NESTED_OVERLAY','nested-overlay-runtime.log','nested-overlay-native.log',68)]:\n\
+        \  tag=prefix+'_JS: PASS ';r,=[json.loads(line[len(tag):]) for line in pathlib.Path(filename).read_text().splitlines()\
+        \ if line.startswith(tag)]\n  labels=[line.removeprefix(prefix+'_ASSERT ') for line in n.read(log).decode().splitlines()\
+        \ if line.startswith(prefix+'_ASSERT ')]\n  assert r['assertions']==len(r['labels'])==len(set(r['labels']))==count\
+        \ and r['labels']==labels\n  assert not r['fullKernel'] and not r['performanceQualified']\n  if prefix=='PSC1_NESTED_OVERLAY':assert\
+        \ r['privateOnly'] and not r['publicRouteChanged']\n  else:assert r['validInputsAccepted'] and r['publicDagRejects']\n\
+        print('PSC1_NESTED_OVERLAY_ALL_NATIVE_EQUAL: PASS controls=999 overlay=68 capture=17 header=35 plan=26 mutual=853\
+        \ legacy=21')\nPYCODE\n\nset -euo pipefail\nNODE_BIN=\"$(command -v node)\"\ncd \"$RUNNER_TEMP/mutual-generated\"\
+        \nfor name in nested-admission nested-public nested-public-complete; do\n \"$NODE_BIN\" --check \"pskernel-$name-smoke.mjs\"\
+        \n /usr/bin/time -f 'peak_rss_kib=%M wall_seconds=%e exit_status=%x' -o \"$name-runtime.memory\" \\\n  timeout\
+        \ --signal=KILL 600s env -i PATH= \"$NODE_BIN\" --max-old-space-size=2048 \\\n  \"pskernel-$name-smoke.mjs\"\
+        \ ./kernel.mjs > \"$name-runtime.log\" 2>&1\n cat \"$name-runtime.log\"\ndone\npython3 - <<'PYCODE'\nimport\
+        \ pathlib,json,zipfile\nwith zipfile.ZipFile('authenticated-native806.zip') as n:\n for prefix,filename,log,count\
+        \ in [('PSC1_NESTED_ADMISSION','nested-admission-runtime.log','nested-admission-native.log',141),('PSC1_NESTED_PUBLIC_COMPLETE','nested-public-complete-runtime.log','nested-public-complete-native.log',36)]:\n\
+        \  tag=prefix+'_JS: PASS ';r,=[json.loads(line[len(tag):]) for line in pathlib.Path(filename).read_text().splitlines()\
+        \ if line.startswith(tag)]\n  nativeTag=prefix+'_ASSERT ';labels=[line[len(nativeTag):] for line in n.read(log).decode().splitlines()\
+        \ if line.startswith(nativeTag)]\n  assert r['assertions']==len(r['labels'])==len(set(r['labels']))==count\
+        \ and r['labels']==labels\n  assert not r['fullKernel'] and not r['performanceQualified'] and r['actualOriginalCompleteEnvironments']==7\n\
+        \  if prefix=='PSC1_NESTED_ADMISSION':assert r['completePrivateTransaction'] and r['restorationValidated']\
+        \ and r['corruptedRuleRejections']==5\n  else:assert r['publicBoundary'] and r['directOwnerNoReimport']\
+        \ and r['atomicFailure'] and r['resourceLimit']\n text=pathlib.Path('nested-public-runtime.log').read_text()\n\
+        \ r,=[json.loads(line) for line in text.splitlines() if line.startswith('{') and json.loads(line).get('schema')=='psc1-nested-admission-public-v1']\n\
+        \ tag='PSC1_NESTED_PUBLIC_ASSERT ';labels=[line[len(tag):] for line in n.read('nested-public-native.log').decode().splitlines()\
+        \ if line.startswith(tag)]\n assert r['assertions']==len(r['assertionLabels'])==len(set(r['assertionLabels']))==12\
+        \ and r['assertionLabels']==labels\n assert r['publicRoutingChanged'] and r['nestedAdmission'] and not r['fullKernel']\
+        \ and not r['performanceQualified']\nprint('PSC1_NESTED_PUBLIC_ALL_NATIVE_EQUAL: PASS controls=1188 completePrivate=141\
+        \ public=48 retained=999 legacy=21')\nPYCODE\n"
+    - name: Preserve exact actual generated evidence
+      if: always()
+      shell: bash
+      run: 'set -euo pipefail
+
+        python3 - <<''PYCODE''
+
+        import pathlib,os,json,hashlib
+
+        out=pathlib.Path(os.environ[''RUNNER_TEMP''])/''mutual-generated''
+
+        files={str(p.relative_to(out)):{''bytes'':p.stat().st_size,''sha256'':hashlib.sha256(p.read_bytes()).hexdigest()}
+        for p in out.rglob(''*'') if p.is_file()}
+
+        (out/''files.json'').write_text(json.dumps({''source'':os.environ[''GITHUB_SHA''],''files'':files},indent=2)+''\n'')
+
+        PYCODE
+
+        '
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-nested-public-complete-${{ matrix.route }}
+        include-hidden-files: true
+        path: ${{ runner.temp }}/mutual-generated/
+        retention-days: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        route:
+        - generated
+        - canonical
+    env:
+      PSC1_MUTUAL_ROUTE: ${{ matrix.route }}

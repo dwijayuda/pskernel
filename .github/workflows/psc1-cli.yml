@@ -117,5 +117,6 @@ jobs:
             psc1/dist/slim-universal/package-receipt.json
             psc1/dist/slim-universal/io-adapter-preflight.json
             psc1/dist/slim-universal/compiler-kernel-admission.json
+            psc1/dist/slim-universal/cli-frozen-application-stores.tar.gz
             psc1/dist/transactional-publication/
           retention-days: 90

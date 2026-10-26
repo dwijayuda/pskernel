@@ -25,21 +25,30 @@ run('git', ['archive', '--format=tar', '--output=' + archive, snapshotCommit, 'p
   {cwd: path.resolve(current, '..')});
 run('tar', ['xf', archive, '-C', temporary]);
 const frozen = path.join(temporary, 'psc1');
-fs.mkdirSync(path.join(frozen, 'dist'));
-fs.symlinkSync(out, path.join(frozen, 'dist/slim-universal'), 'dir');
+const frozenOut = path.join(frozen, 'dist/slim-universal');
+fs.mkdirSync(frozenOut, {recursive: true});
+// Publication rejects symlinked path components. Use a physical replay store;
+// neither this harness nor its source snapshot may weaken that guard.
+fs.cpSync(path.join(out, 'tarballs'), path.join(frozenOut, 'tarballs'), {recursive: true});
+fs.copyFileSync(path.join(out, 'package-receipt.json'), path.join(frozenOut, 'package-receipt.json'));
 const script = path.join(current, 'scripts/generated-io-installed-applications.mjs');
 const scriptHash = sha256(fs.readFileSync(script));
 // Only this aggregate supervisor is25min. All original inner compiler/tool240s,
 // independent checker120s, exact source/census/hash/contract assertions remain.
 run(process.execPath, [script], {cwd: frozen, stdio: 'inherit', timeout: 1500000});
-const result = JSON.parse(fs.readFileSync(path.join(out, 'application-qualification.json')));
+const resultFile = path.join(frozenOut, 'application-qualification.json');
+const result = JSON.parse(fs.readFileSync(resultFile));
 assert.equal(result.status, 'passed');
 assert.equal(result.compilerSourceClosureDigest, assembly.compilerSourceClosureDigest);
 assert.equal(sha256(fs.readFileSync(script)), scriptHash);
+fs.copyFileSync(resultFile, path.join(out, 'application-qualification.json'));
+const evidence = path.join(out, 'cli-frozen-application-stores.tar.gz');
+run('tar', ['czf', evidence, '-C', frozenOut, 'installed-applications']);
+const evidenceSha256 = sha256(fs.readFileSync(evidence));
 const report = {schema: 'psc1-cli-frozen-application-source/1', status: 'passed',
   testedCommit: process.env.GITHUB_SHA, snapshotCommit,
   compilerSourceClosureDigest: assembly.compilerSourceClosureDigest,
-  testScriptSha256: scriptHash, originalSourceAndCensusAssertions: 'unchanged and passed',
+  testScriptSha256: scriptHash, evidenceSha256, originalSourceAndCensusAssertions: 'unchanged and passed',
   currentDevelopmentCompilerPromotion: false};
 fs.writeFileSync(path.resolve('dist/cli/frozen-application-source.json'),
   JSON.stringify(report, null, 2) + '\n');

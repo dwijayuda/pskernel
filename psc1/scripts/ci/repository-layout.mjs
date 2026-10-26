@@ -114,6 +114,9 @@ for(const m of moves){
 for(const file of ['host-tools/source-refactoring.mjs','host-tools/generated-target-tools.mjs','host-tools/generated-compiler-session.mjs']){
  let expected=historical(file);
  for(const [before,after] of Object.entries(literalMoves))expected=expected.split(before).join(after);
+ if(file==='host-tools/generated-target-tools.mjs')expected=expected
+  .replace("import {pathToFileURL} from 'node:url';","import {fileURLToPath,pathToFileURL} from 'node:url';")
+  .replace("path.resolve('host-tools/process/bounded-process.py')","fileURLToPath(new URL('./process/bounded-process.py',import.meta.url))");
  assert.equal(read(file),expected,'host relocation changed non-path bytes: '+file);
  compared.push({from:file,to:file,relation:'only-enumerated-runtime-path-literals'});
 }

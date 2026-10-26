@@ -38,6 +38,7 @@ jobs:
       - name: Exercise actual source capture and CLI subprocesses before assembly
         run: |
           node scripts/ci/repository-layout.mjs
+          node test/host/process-location.test.mjs
           node --check npm-cli/proofscript-cli.mjs
           node --check npm-cli/cli-project.mjs
           node --check scripts/cli-package.mjs

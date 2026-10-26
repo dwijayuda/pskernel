@@ -49,7 +49,8 @@ jobs:
       - name: Typecheck the actual packed public API
         run: |
           npm install --prefix "$RUNNER_TEMP/slim-types" --ignore-scripts --no-audit --no-fund typescript@7.0.2
-          npm install --prefix "$RUNNER_TEMP/slim-types" --offline --ignore-scripts --no-audit --no-fund "$GITHUB_WORKSPACE/psc1/dist/slim-universal/tarballs/proofscript-0.1.0-psc1.6.tgz"
+          PSC1_ROOT_TARBALL="$(node --input-type=module -e "import fs from 'node:fs'; process.stdout.write(JSON.parse(fs.readFileSync('dist/slim-universal/package-receipt.json','utf8')).tarball)")"
+          npm install --prefix "$RUNNER_TEMP/slim-types" --offline --ignore-scripts --no-audit --no-fund "$GITHUB_WORKSPACE/psc1/dist/slim-universal/tarballs/$PSC1_ROOT_TARBALL"
           cat > "$RUNNER_TEMP/slim-types/consumer.mts" <<'TS'
           import {compile,build,compileCandidate,getCompilerMetadata,createIndependentKernelToolchain,checkCanonicalAdmissions,type Source,type CompilerEngine} from 'proofscript';
           const sources:readonly Source[]=[{module:'Entry',kind:'lean',text:'def answer : Nat := 42\n'}];

@@ -1,5 +1,11 @@
 # Current capabilities and evidence scope
 
+The newer [.8 project CLI](PSC1_CLI.md) is qualified separately in its
+[exact receipt](PSC1_CLI_QUALIFICATION_2026-10-26.json). It retains the same frozen
+G3 compiler/kernel executables and seven-target ABI scope. Three optional tools
+have metadata-only .8 repacks; all worker/runtime files remain identical. The
+.7 package table below keeps its original identity.
+
 This page describes the **qualified installed .7 package**, not automatic
 qualification of every later development commit. The distribution/provider
 contracts define requirements; dated receipts bind actual runs to exact source

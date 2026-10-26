@@ -6,7 +6,7 @@ uses genuine self-hosted JS/TS executors with optional Rust/compiler-Wasm execut
 and the official Lean 4.35.0 independent C++ kernel compiled to linear-memory Wasm.
 Compiler execution, output target and checking are separate choices.
 
-Start with the [installation guide](docs/PSC1_CHECKED_DISPATCH_INSTALL.md),
+Start with the [project CLI/install guide](docs/PSC1_CLI.md),
 [architecture](ARCHITECTURE.md) and [contributor guide](CONTRIBUTING.md).
 Follow the [source-linked compilation walkthrough](docs/PSC1_COMPILATION_WALKTHROUGH.md)
 and [maintainer exercise](docs/PSC1_MAINTAINER_EXERCISE.md).
@@ -15,6 +15,10 @@ installed packages from later development source.
 The [documentation index](docs/README.md) links current contracts and exact receipts.
 The [roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) owns remaining work;
 [AI_WORK_STATE.md](AI_WORK_STATE.md) records the engineering checkpoint.
+
+The .8 host CLI adds [project initialization, source files and diagnostics](docs/PSC1_CLI.md).
+Its [exact Linux qualification](docs/PSC1_CLI_QUALIFICATION_2026-10-26.json) preserves the frozen G3 executables.
+[TypeScript workflow research and decisions](docs/PSC1_TYPESCRIPT_WORKFLOW_RESEARCH.md) explain the scope.
 
 ## Programs and installed use
 
@@ -31,7 +35,7 @@ def invert(flag : Bool) : Bool := if (flag) { false } else { true }
 With Node22.23.3 and the qualified local unpublished tarball:
 
 ```sh
-npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1.7.tgz
+npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1.8.tgz
 npx --no-install psc check Main.lean
 npx --no-install psc compile Main.ps --engine ts
 npx --no-install psc build Main.ps --target wasm-core --publication-protocol portable-file --out dist/app

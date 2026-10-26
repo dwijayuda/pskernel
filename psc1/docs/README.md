@@ -8,6 +8,7 @@ from immutable evidence; dated records remain preserved.
 
 | Question | Read |
 | --- | --- |
+| How do I use the qualified project-oriented CLI? | [CLI guide](PSC1_CLI.md), [workflow research](PSC1_TYPESCRIPT_WORKFLOW_RESEARCH.md) |
 | How do I install/use the current slim toolchain? | [Slim package guide](PSC1_SLIM_UNIVERSAL_PACKAGE.md) |
 | How do checked component/Python/PHP outputs work? | [Dispatch architecture](PSC1_CHECKED_DISPATCH.md), [exact receipt](PSC1_CHECKED_DISPATCH_QUALIFICATION_2026-10-26.json), [install](PSC1_CHECKED_DISPATCH_INSTALL.md) |
 | How do checked targets and transactions work? | [Guide](PSC1_CHECKED_PUBLICATION.md), [receipt](PSC1_CHECKED_PUBLICATION_QUALIFICATION_2026-10-26.json), [install](PSC1_CHECKED_PUBLICATION_INSTALL.md) |
@@ -32,6 +33,11 @@ results to exact source/artifact identities. Work state and this index point to
 those authorities; they do not create qualification.
 
 ## Exact existing qualification
+
+- [Project CLI and npm toolchain](PSC1_CLI_QUALIFICATION_2026-10-26.json):
+  qualified .8 host with all original kernel/dispatch/publication/application/type
+  gates, 19 source groups and 55 real installed requests. G3 payloads unchanged;
+  optional emit-only metadata decoupled; independent human trial pending.
 
 - [Checked seven-target dispatch](PSC1_CHECKED_DISPATCH_QUALIFICATION_2026-10-26.json):
   four unchanged genuine G3 engines, optional Python/PHP runtime consumers,

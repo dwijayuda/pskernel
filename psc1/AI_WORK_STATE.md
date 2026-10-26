@@ -1,122 +1,109 @@
 # PSC1 AI work state
 
-Updated 2026-10-26 Asia/Jakarta. Active draft [PR #190](https://github.com/dwijayuda/pskernel/pull/190):
-refactor/psc1-maintainability-20261026, based on PR #189 at
-7fc146ef50ff5ba28bae033e334c49d1a9cd5637.
-Qualified implementation/test head: e760e95b534a8b344314d87939113abfbdd948da.
-Later checkpoint commits contain documentation/receipt changes only.
-Fetch live HEAD and actual CI before writes. Preserve single-parent,
-expected-HEAD non-force history. Use connected GitHub/Linux Actions only.
-No merge or npm publication is authorized.
+Updated 2026-10-26 Asia/Jakarta. Active draft [PR#191](https://github.com/dwijayuda/pskernel/pull/191),
+feat/psc1-cli-project-workflow-20261026, follows PR#190 at
+10db75c3bb45725c259d4549228dbe6a7ecc1d00.
+Qualified implementation/test head: 9b251a971819ecfc5450ac71e1caca967ec6c947.
+Later checkpoint commits contain documentation/receipts only. Fetch live HEAD
+and actual terminal CI before writes. Preserve expected-HEAD, single-parent,
+non-force history. Use connected GitHub/Linux Actions only.
+No merge or npm registry publication is authorized.
 
-[One roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md),
-[exact maintainability receipt](docs/PSC1_MAINTAINABILITY_QUALIFICATION_2026-10-26.json),
-[walkthrough](docs/PSC1_COMPILATION_WALKTHROUGH.md),
-[pass contracts](docs/PSC1_PASS_CONTRACTS.md),
-[qualified package capabilities](docs/PSC1_CAPABILITIES.md),
-[independent maintainer exercise](docs/PSC1_MAINTAINER_EXERCISE.md).
-The [preceding checkpoint](docs/history/AI_WORK_STATE_BEFORE_MAINTAINABILITY_2026-10-26.md)
-preserves PR #189 verbatim; resolve its original relative links at 7fc146ef.
+[One roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md), [CLI guide](docs/PSC1_CLI.md),
+[research and decisions](docs/PSC1_TYPESCRIPT_WORKFLOW_RESEARCH.md),
+[exact CLI receipt](docs/PSC1_CLI_QUALIFICATION_2026-10-26.json),
+[preceding work state](docs/history/AI_WORK_STATE_BEFORE_CLI_2026-10-26.md).
 
-## Implemented and automatically qualified
+## Implemented and qualified on Linux
 
-Current guides now distinguish the qualified installed .7 package from later
-development source. Stale JS-only checked-output and pending-provider labels
-are reconciled with actual seven-target Linux qualification. The native legacy
-publisher's possible postcommit flush error is distinguished from early source
-refusal and from the generated publisher's explicit committedPublication result.
+The installed proofscript/psc/psc1 aliases use a small developer adapter around
+the unchanged checked command. Help and no-argument help, safe init/--init,
+a conventional text version, -p/-o/equals forms, source-only file projects,
+current-directory project selection, --showConfig and text/JSON diagnostics
+are implemented. Existing source commands, legacy inline projects, success
+JSON receipts and verified --identity remain. --version deliberately changes
+from JSON to text; machine callers use --identity.
 
-The source-linked walkthrough follows a tiny Bool program through native host
-wrappers and shared semantic API landmarks, canonical admission, erasure,
-strict IR, target emission, actual consumption and immutable output inspection.
-It also locates the installed generated host separately. Pass contracts explain
-input/output invariants, refusal/resource behavior and assurance boundaries.
+Projects cannot choose engine, kernel, SDK, output, service or checker tools.
+File projects capture declared relative regular non-symlink sources in order,
+preserving exact UTF8/BOM bytes and checking snapshot changes. At most 4,096
+files; 128 MiB per input/aggregate source/encoded project; inner limits unchanged.
+init never overwrites. A late config failure can leave its new source file.
+showConfig has logicalAdmission:not-run and publication:not-requested.
+The adapter does not fabricate compiler spans or introduce another frontend.
+Compiler execution, output target and independent checking remain separate.
 
-Wasm Lower now imports Lower/RuntimeNeeds.lean for Nat/Int/String runtime
-dependency analysis. **30 definitions / 640 lines moved with exact bodies,
-names, order and fuel retained**. Lower is 4,898 lines under newline counting,
-down from 5,537; the added import accounts for the one-line difference.
-The leaf module imports only IR models and foundation lists. Type fuel 64 and
-expression fuel 4096 retain their false-on-exhaustion behavior; this is a
-selection hint, not a proof of runtime absence.
+The source-linked guide contains init/check/build/explicit JS consumption,
+npm scripts, source configuration, engine/target/checker mapping, failure and
+resource boundaries. Research uses official TypeScript/npm/Node/VSCode sources;
+developer behavior hypotheses are not presented as survey results.
 
-All52 recursive-prefix guards remain. The historical TypeInventory extraction
-is checked against immutable 3089cbc3→446a0f21, while the new move and every
-remaining Lower byte are checked against 7fc146ef. These are scoped structural
-correspondence checks, not a whole-compiler preservation proof.
+## Exact Linux evidence
 
-## Actual Linux evidence
+CLI/toolchain run **40314294152 /121543173394** passes at the qualified head:
+- 19 source/CLI subprocess groups and all seven historical host AST/format gates.
+- 55 actual installed requests, including21 positive checked commands;
+ both grammars, local and global, all three aliases, npm run/exec, a multi-module
+ file project, optional Rust/Wasm engines and installed-resource tamper refusal.
+- Four full example/edit/refusal flows observe42 then43; ill-typed replacement
+ preserves each prior generation pointer and artifact bytes.
+- All existing offline installed/kernel/candidate/negative, component/provider,
+ transaction/SIGKILL, checked publication, actual application/IO consumer and
+ packed-TypeScript declaration gates remain and pass. Exact counts and hashes
+ are in the receipt and immutable Actions artifact.
 
-Maintainer/G1 run **40272793607 /121409056260** passes at e760e95b:
-- Documentation/capability/source-link checks; historical/current body extraction;
-  seven host AST/format checks and all 52 prefix assertions.
-- Four actual checked builds: invert and identity, each under .lean/.ps.
-  Public exports/runtime results, exact captured sources, manifest inventories,
-  actual independent graph replay and malformed checker-input refusal pass.
-- Two ill-typed replacements preserve the prior generation and artifact bytes.
-- The reference focused Lean regression is accepted; a deliberately wrong
-  expected value is rejected. This is an automated exercise rehearsal.
-- Both complete source grammar censuses accept all123 modules.
-- Genuine unified Wasm G1 executes after native compiler executables are removed:
-  **20 actual runtime cases +20 semantic refusals across four output targets,
-  plus9 envelope refusals**. No G2/G3/fixed point is requested in this slice.
+Ordinary source **40314305497**, full **121548383462**, gate **121559536094**
+passes every selected dependency and **37/37 finite Practical Core criteria**.
+The optional benchmark remains skipped/unqualified. This is finite source
+qualification, not a final universal release or a whole-compiler proof.
+Current source integration executes 28 before/after artifacts across both
+grammars/seven targets; 123 modules / 4,742 Core members remain separate from G3.
 
-Artifact **12629405533**, ZIP SHA256
-ac6bb27d654026a765b18bdc8d7f919185bd0e54052d1bcca62cd17615d25516,
-6,487,076 bytes, contains actual walkthrough stores/graphs/manifests,
-reference-exercise evidence, correspondence reports and G1 artifacts.
-The failed first harness attempt40272480824 remains recorded; it incorrectly
-used .mjs where native JS output requires .js. The guard was preserved.
+## Installable artifact and preserved payloads
 
-Ordinary source **40272797072** passes all selected dependencies, full
-**121412886837**, gate **121420619466**, **37/37 finite Practical Core criteria,
-zero blocked**. Tested merge: 489aa897b170cd0ae65cbcf7e97585af942ab56b; its tree equals the qualified
-head tree. The optional benchmark remains skipped/unqualified.
-This qualifies the finite source contract, not a final universal release.
+Root `proofscript@0.1.0-psc1.8`: **3822242 bytes**, SHA256
+c9cae0ba95d3f55f1d4e88d03b9247b97f8c88895588867828e514e55513de67.
+Actions artifact **12648248091**, ZIP SHA256
+dfee107e7615ebb2e3f2d7bcbff831369509fe166c936086e448d9f76d08c54f.
+Use its eleven exact tarballs and package-receipt.json. Nothing is published
+to the registry. Default JS/TS execution and the genuine official Lean4.35
+linear-memory Wasm checker remain in the root; optional engines/SDKs/providers
+are explicit. Root installation remains offline, script-free and SDK-free.
 
-## Source and package identities remain distinct
+All 126 retained root payload files are byte-identical. Component/Python/PHP
+tools are .8 metadata-only repacks: every non-package.json file is identical.
+Remove their unnecessary reverse optional peer to exactly the .7 root; it let
+npm prune a .8 compiler when installing the tools. The root still requires
+exact optional versions, complete inventories and resource hashes. Rust/Wasm
+compiler payload packages remain .7. No worker/runtime/compiler/kernel is rebuilt.
+Canonical full assembly selects the same new CLI and decoupled tool metadata;
+the qualified bytes in this slice are the explicitly recorded host-only assembly.
 
-Current development source: **123 modules**, Lean closure
-e698ddecca4f57308472e261be880edded425d9ddae58c9ead43ed1973647c0f.
-Actual integrated source members: 4742.
-PS closure: 37b5dfa292376274a3b5ebe3f3bdb29c3e61327889743cd8eeff65737dbdb013.
+Frozen packaged G3 source: 122 modules / 4,742 members, closure
+073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9.
+Four original G3 fixed points remain JS/TS/Wasm 40223062370 and Rust 40223086966.
+Application replay uses physical output stores and the exact ancestral
+8383c6983e5fa2f2d945b02ba4b349ab64522c64 source snapshot, retaining every original
+source/census/closure/contract/admission/runtime assertion. A separate receipt
+records source/test commits and archived stores. A symlinked harness output
+was correctly refused; the production store guard was not weakened.
+Failed attempts remain in the receipt, never relabelled successful.
 
-The qualified .7 npm payload remains attached to the previous 122-module
-closure 073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9,
-not the refactored source. Root SHA256
-d4a0e963375366ac9b417dd1e9eb5372168c25c5230d3ce69f694274daa87043,
-3,811,703 bytes. Original package replay40250645368 and source40250678016 remain
-qualified at their own identities. Four genuine G3 fixed points remain
-JS/TS/Wasm40223062370 and Rust40223086966.
-No frozen compiler/kernel executable or scripts/slim-universal-input.json changed.
-Promotion of a new compiler payload requires its own generation/release evidence.
+## Continue and remaining boundaries
 
-## Independent human trial is not qualified
+The user can arrange an independent maintainer. No unassisted result has been
+received: humanQualified:false. CI and the AI-authored exercise rehearsal are
+not human comprehension evidence. Gather the participant result and fix actual
+ambiguities. Next CLI work is compiler-origin structured diagnostics/editor
+integration, then qualified watch/incremental dependency/cancellation behavior.
+Automatic source packages/general extensions and additional platform publication
+remain separate roadmap items. Source projects must never grant host authority.
 
-The executable protocol, source-owner questions, small regression/change tasks,
-reference solution and evidence rubric are ready. CI passes the command/reference
-rehearsal, including a negative assertion. It is AI-authored engineering work.
-No independent fresh human participant has completed the unassisted trial here.
-**humanQualified:false** remains explicit; no timing, automated checkbox or
-successful CI may be used to invent a human result. Retain anonymous participant
-experience, exact commit/runs/diff, answers, help used, time and ambiguities in a
-separate dated receipt when an actual trial occurs.
-
-## Continue
-
-Start with live HEAD, this receipt and actual CI. Obtain the unassisted human
-exercise result when a participant is available; fix observed documentation
-ambiguities. Further readability work should extract one responsibility at a
-time, retaining bodies before naming/algorithm changes. Use the roadmap for
-component String/IO, provider application coverage, automatic bounded source
-package resolution, native legacy committed-outcome classification, additional
-platforms, final clean release reproduction and authorization.
-
-Official Lean 4.35.0 /eb6cafb7290e8bd5f2937522d8d804f58f02bafc, trust 0,
-independent admission, strict original/transformed IR, source/body pairing,
-semantic fuel, negatives and memory/stack/lifetime policies are unchanged.
-Compiler/tools/G1/corpus requests 240 seconds; checker 120 seconds; existing manual G2/G3
-correctness and original 240-second performance profiles remain separate.
-Default kernel stays genuine official C++/Emscripten linear-memory Wasm;
-compiler-Wasm stays GC. Runtime observations, hashes, admission and fixed points
-are distinct evidence and do not establish whole-compiler semantic preservation.
+Official Lean 4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc, trust0,
+independent admission, strict original/transformed IR, source/body pairing and
+semantic fuel, negatives, memory/stack/lifetime policies remain unchanged.
+Compiler/tool requests 240s; checker 120s. Manual G2/G3 correctness and original
+240-second performance targets remain separate. No new G2/G3 qualification,
+compiler-source promotion, whole-compiler preservation theorem, macOS/Windows
+publication or final universal release is claimed. Kernel Wasm stays official
+C++/Emscripten linear memory; compiler Wasm stays GC.

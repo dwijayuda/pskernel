@@ -1,6 +1,6 @@
 // CI-only assembly: exact shared emitters, isolated target runtimes and pinned tools.
 import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';import {spawnSync,spawn} from 'node:child_process';import {createHash} from 'node:crypto';
-const version='0.1.0-psc1.7',out=path.resolve('dist/dispatch-tools');fs.mkdirSync(out,{recursive:true});
+const version='0.1.0-psc1.8',out=path.resolve('dist/dispatch-tools');fs.mkdirSync(out,{recursive:true});
 const sha=b=>createHash('sha256').update(b).digest('hex');
 const run=(exe,args)=>{const r=spawnSync(exe,args,{encoding:'utf8',timeout:240000,maxBuffer:32*1024*1024});assert.equal(r.error,undefined,String(r.error));assert.equal(r.status,0,r.stdout+r.stderr);return r.stdout.trim();};
 function copy(from,to){fs.mkdirSync(path.dirname(to),{recursive:true});fs.cpSync(fs.realpathSync(from),to,{recursive:true,dereference:true,filter:src=>!/(^|\/)(__pycache__|site-packages|test|tests)(\/|$)/.test(src)&&!src.endsWith('.pyc')});}
@@ -81,7 +81,7 @@ for(const target of ['python','php','wasm-component']){
    }
  }
  fs.writeFileSync(path.join(stage,'index.mjs'),'export const target='+JSON.stringify(target)+';\n');
- fs.writeFileSync(path.join(stage,'package.json'),JSON.stringify({name:packageName,version,type:'module',private:true,os:['linux'],cpu:['x64'],main:'index.mjs',exports:{'.':'./index.mjs','./package.json':'./package.json'},peerDependencies:{proofscript:version},peerDependenciesMeta:{proofscript:{optional:true}},proofscript:{schema:'psc1-checked-dispatch-package/1',target,sourceCommit:process.env.GITHUB_SHA,authority:'candidate-only',compilerFrontend:false,admissionAuthority:false,publicationAuthority:false}},null,2)+'\n');
+ fs.writeFileSync(path.join(stage,'package.json'),JSON.stringify({name:packageName,version,type:'module',private:true,os:['linux'],cpu:['x64'],main:'index.mjs',exports:{'.':'./index.mjs','./package.json':'./package.json'},proofscript:{schema:'psc1-checked-dispatch-package/1',target,sourceCommit:process.env.GITHUB_SHA,authority:'candidate-only',compilerFrontend:false,admissionAuthority:false,publicationAuthority:false}},null,2)+'\n');
  descriptors[target]={package:packageName,version,entry:'tool',target,sourceCommit:process.env.GITHUB_SHA,files:inventory(stage),platform:'linux-x64',limits:{timeoutMs:240000,addressSpaceBytes:4294967296,stackBytes:8388608,responseBytes:33554432}};
 }
 fs.writeFileSync(path.join(out,'descriptors.json'),JSON.stringify(descriptors,null,2)+'\n');

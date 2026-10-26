@@ -2,15 +2,16 @@ name: PSC1 checked component and optional-provider dispatch
 on:
   push:
     branches: [qualification/psc1-checked-dispatch-20261026]
-    paths: ['psc1/host-tools/**','psc1/npm-cli/**','psc1/scripts/checked-*','psc1/scripts/optional-*','psc1/scripts/prepare-checked-dispatch-tools.mjs','psc1/scripts/slim-universal-package.mjs','psc1/host/src/Ps/Host/*Provider*.lean','psc1/host/src/Ps/Host/PortableIr.lean','.github/workflows/psc1-checked-dispatch.yml']
+    paths: [.github/qualification-requests/psc1-checked-dispatch.json]
 concurrency:
-  group: psc1-checked-dispatch-${{ github.ref }}-${{ github.sha }}
-  cancel-in-progress: false
+  group: psc1-checked-dispatch-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
   actions: read
 jobs:
   preflight:
+    if: ${{ github.event.commits[1] == null }}
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     defaults:
@@ -18,9 +19,28 @@ jobs:
         working-directory: psc1
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
       - uses: actions/setup-node@v4
         with:
           node-version: '22.23.3'
+      - name: Require exact parent and an explicit request-only commit
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import assert from 'node:assert/strict';import {spawnSync} from 'node:child_process';
+          const file='.github/qualification-requests/psc1-checked-dispatch.json';
+          const r=JSON.parse(fs.readFileSync('../'+file)),event=JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH));
+          assert.deepEqual(Object.keys(r).sort(),['schema','branch','parentCommit','action'].sort());
+          assert.equal(r.schema,'psc1-checked-dispatch-request/1');
+          assert.equal(r.branch,'qualification/psc1-checked-dispatch-20261026');
+          assert.equal(r.action,'qualify-unpublished-checked-dispatch');
+          assert.equal(process.env.GITHUB_REF,'refs/heads/'+r.branch);
+          assert.equal(r.parentCommit,event.before);assert.equal(event.after,process.env.GITHUB_SHA);
+          const parent=spawnSync('git',['rev-parse','HEAD^'],{encoding:'utf8'});assert.equal(parent.status,0);assert.equal(parent.stdout.trim(),r.parentCommit);
+          const diff=spawnSync('git',['diff','--name-only','-z',r.parentCommit,process.env.GITHUB_SHA],{encoding:'utf8'});assert.equal(diff.status,0);
+          assert.deepEqual(diff.stdout.split(String.fromCharCode(0)).filter(Boolean),[file]);
+          console.log('PSC1_EXPLICIT_CHECKED_DISPATCH_REQUEST '+JSON.stringify(r));
+          JS
       - name: Reject syntax and launcher diagnostics before expensive preparation
         run: |
           node --check host-tools/checked-component.mjs
@@ -29,6 +49,7 @@ jobs:
           node --check host-tools/installed-engine-resolver.mjs
           node --check scripts/prepare-checked-dispatch-tools.mjs
           node --check scripts/checked-dispatch-installed.mjs
+          node scripts/checked-component-tests.mjs
           cc -O2 -Wall -Wextra -Werror scripts/optional-tool-launcher.c -o "$RUNNER_TEMP/psc1-optional-tool"
   transactions:
     runs-on: ubuntu-24.04

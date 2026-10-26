@@ -139,11 +139,12 @@ export function observedBoolWit(text) {
     text
       .replace(/\/\*[\s\S]*?\*\//g, '')
       .replace(/\/\/[^\n]*/g, '')
-      .match(/[%a-zA-Z0-9_-]+|->|[^\s]/g) || [];
+      .match(/->|[%a-zA-Z0-9_-]+|[^\s]/g) || [];
   let i = 0;
   const take = () => tokens[i++],
     expect = (s) => {
-      if (take() !== s) fail('WIT_SIGNATURE');
+      const observed = take();
+      if (observed !== s) fail('WIT_SIGNATURE:expected=' + s + ':observed=' + JSON.stringify(observed));
     };
   if (tokens[i] === 'package') {
     while (i < tokens.length && take() !== ';') {}
@@ -195,8 +196,8 @@ export function prepareComponent(stage, candidate, coreArtifact, tools, run) {
   run('component-core-validate', ['validate', path.join(stage, 'target.wasm')], tools.executable);
   run('component-validate', ['validate', file], tools.executable);
   const observed = run('component-wit', ['component', 'wit', file], tools.executable);
-  if (!isDeepStrictEqual(observedBoolWit(observed), schema)) fail('WIT_SIGNATURE_MISMATCH');
   fs.writeFileSync(path.join(stage, 'observed.wit'), observed);
+  if (!isDeepStrictEqual(observedBoolWit(observed), schema)) fail('WIT_SIGNATURE_MISMATCH');
   return {
     targetFile: 'target.component.wasm',
     runtimeFile: 'target.component.wasm',

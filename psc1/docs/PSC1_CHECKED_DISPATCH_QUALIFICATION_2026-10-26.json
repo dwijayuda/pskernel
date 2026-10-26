@@ -98,5 +98,21 @@
   "activeQualificationBranch": "qualification/psc1-checked-dispatch-20261026",
   "developmentBranch": "feat/psc1-checked-component-providers-20261026",
   "developmentHead": "71f10258d79a43aacd272fb277c4360df7b766ee",
-  "promotion": "After actual installed qualification, non-force expected-HEAD fast-forward PR branch; final normal source gate remains required."
+  "promotion": "After actual installed qualification, non-force expected-HEAD fast-forward PR branch; final normal source gate remains required.",
+  "candidateRun": {
+    "head": "0b4c82d04c445610d5e5ba85a998014abb474a33",
+    "run": 40247629514,
+    "preflightJob": 121332467318,
+    "transactionJob": 121332467454,
+    "installedJob": 121332631460,
+    "status": "in-progress"
+  },
+  "sourceRun": {
+    "head": "71f10258d79a43aacd272fb277c4360df7b766ee",
+    "run": 40246082420,
+    "fullJob": 121330707717,
+    "status": "in-progress",
+    "focusedDependencies": "all passed",
+    "benchmark": "skipped-not-qualified"
+  }
 }

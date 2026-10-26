@@ -1,0 +1,26 @@
+{
+  "schema": "psc1-maintainability-qualification/1",
+  "status": "implementation-in-progress",
+  "baseCommit": "7fc146ef50ff5ba28bae033e334c49d1a9cd5637",
+  "bodyPreservingExtraction": {
+    "source": "packages/backend-wasm/src/Ps/BackendWasm/Lower.lean",
+    "destination": "packages/backend-wasm/src/Ps/BackendWasm/Lower/RuntimeNeeds.lean",
+    "definitions": 30,
+    "lines": 640,
+    "algorithmsAndFuel": "unchanged",
+    "qualification": "pending"
+  },
+  "packagedG3": "unchanged qualified .7 source/bytes; no new G2/G3 claim",
+  "automatedDocumentation": "pending",
+  "actualWalkthrough": "pending",
+  "currentSourceG1": "pending",
+  "ordinarySource": "pending",
+  "humanTrial": {
+    "status": "pending-independent-human-participant",
+    "qualified": false,
+    "automatedRehearsalIsNotHumanEvidence": true
+  },
+  "soundness": "official Lean4.35 trust0, source/body pairing, strict IR, resources and negatives required",
+  "merge": false,
+  "npmPublication": false
+}

@@ -5,6 +5,15 @@ Practical Core v1 remains frozen at 14 feature families and 37 finite criteria.
 One semantic compiler serves both grammars and all seven native backend mappings.
 No merge or npm publication is authorized.
 
+## Current maintainability slice
+
+The successor to PR #189 reconciles current documentation/capability scopes,
+adds a source-linked checked compilation walkthrough and pass contracts, and
+extracts Wasm Nat/Int/String runtime-dependency analysis with exact retained bodies.
+Automated source/G1/rehearsal qualification is pending its dated receipt.
+Actual fresh-maintainer comprehension requires a separate unassisted human trial;
+CI alone cannot mark it passed. Installed .7 compiler payloads remain frozen.
+
 ## Current checked-dispatch milestone
 
 PR #189 follows PR #188 at 9c13f2f2. The Linux x64 checked-dispatch
@@ -208,6 +217,7 @@ qualification receipts supply exact CI evidence.
 | 0d | Checked grammar conversion (R3) | Finite gates passed at fa265940: 40206625342 passes 11 conversions/14 refusals, real CLI JSON/file IO and complete compiler forward/reverse exact bytes/ownership/comments. New-source Wasm G1 40206504499 passes. Redundant provisional checks removed; observed full export 360,068ms/1,197,708KiB host RSS versus earlier 526,720ms/1,620,508KiB (different runs/source; not a controlled benchmark). Ordinary source 40206628424 passes all selected dependencies and 37/37, zero blocked. [Receipt](PSC1_SOURCE_CONVERSION_QUALIFICATION_2026-10-25.json). |
 | 0e | Bounded binding-aware rename (R2b) | Qualified finite relation in 40219590598:23/62 focused;28 seven-target artifacts;full122-module compiler indexed/renamed under both grammars;new-source WasmG1 passes 40218467242. [Receipt](PSC1_SOURCE_BINDINGS_QUALIFICATION_2026-10-26.json). Complete tracing and broader edits remain outside this boundary. |
 | 0f | R4 behavioral/definitional obligations | Deferred. Require explicit effect/evaluation/divergence/foreign obligations before broader simplification; never infer equivalence from parsing or runtime tests alone. |
+| 0g | Maintainer walkthrough and next body-preserving extraction | In progress. Require live documentation/capability agreement, actual both-grammar checked output and refusal preservation, exact640-line/30-definition RuntimeNeeds extraction, unchanged operational guards, current-source G1 and full selected source gates. Human comprehension remains pending independent trial. |
 | 1 | Slim real applications and source-package coverage | G1 checked host sessions qualified: 264 cases through four engines/both grammars; native reference 66 and target mappings 24/8 pass. Public IO adapter/types and dynamic source pins pass offline frozen-G3 preflight. All four new fixed points and new-source installed package/application/consumer qualification pass 40230101814. Root proofscript 0.1.0-psc1.5 is 3,723,061 bytes. Source-only package data is captured explicitly; automatic npm source resolution remains unimplemented. Source-only package JS must never execute or grant authority. |
 | 2 | Portable transactional publication | File-pointer and legacy layouts qualified in40238538092,including actual fault/SIGKILL/readback tests. Immutable returned paths, sealed inventory, stale-writer refusal and explicit committed-but-durability-uncertain outcomes are required. Actual macOS/Windows publication remains blocked on platform release evidence; Linux-only tests cannot qualify it. |
 | 3 | Checked generated TS publication | Qualified for Linux x64 in40238538092,including four executors/both grammars and actual strict consumers. Optional TypeScript 7.0.2 requires its separately pinned Linux x64 native dependency for offline execution. Same private admission and strict IR boundary; no SDK in default root. |

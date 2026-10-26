@@ -1,3 +1,29 @@
+# Current maintainability slice — qualification in progress
+
+Continue from PR #189 at7fc146ef50ff5ba28bae033e334c49d1a9cd5637.
+Active branch: refactor/psc1-maintainability-20261026. This slice reconciles
+current guides/contracts, adds a source-linked actual compilation walkthrough,
+and extracts30 runtime-dependency analysis definitions(640 lines) unchanged from
+Wasm Lower into Lower/RuntimeNeeds.lean. No naming/algorithm/fuel change is intended.
+
+Use connected GitHub/Linux Actions only. Preserve expected-HEAD, single-parent,
+non-force history and all official Lean4.35 admission/strict IR/resource/negative
+gates. No merge or publication. Preserve the complete PR #189 checkpoint below.
+
+Required evidence: documentation consistency, both historical/current extraction
+correspondence, recursive-prefix guards, actual both-grammar native walkthrough
+and refusal preservation, reference maintainer-test rehearsal, current-source
+unified Wasm G1 and the ordinary full selected source gates. All are pending
+until exact terminal CI is recorded. A new source closure is not a new qualified
+G2/G3 or fixed point; retain the installed .7 payloads and their identities.
+
+Read docs/PSC1_COMPILATION_WALKTHROUGH.md, docs/PSC1_PASS_CONTRACTS.md,
+docs/PSC1_CAPABILITIES.md and docs/PSC1_MAINTAINER_EXERCISE.md.
+The last document defines an unassisted human exercise. Automated rehearsal
+cannot qualify fresh-maintainer comprehension; human trial remains pending.
+
+---
+
 # PSC1 AI work state
 
 Updated 2026-10-26 Asia/Jakarta. Active draft [PR #189](https://github.com/dwijayuda/pskernel/pull/189)

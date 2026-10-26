@@ -69,7 +69,7 @@
     "providerAuthority": "candidate-only",
     "publicationAuthority": "single-use checked core host",
     "defaultPackageAbsence": true,
-    "platformQualification": "pending exact Linux x64 evidence",
+    "platformQualification": "qualified actual Linux x64 at the exact package source in docs/PSC1_CHECKED_DISPATCH_QUALIFICATION_2026-10-26.json; other platforms refuse",
     "arbitraryProviderRegistration": false
   }
 }

@@ -11,6 +11,9 @@ from immutable evidence; dated records remain preserved.
 | How do I install/use the current slim toolchain? | [Slim package guide](PSC1_SLIM_UNIVERSAL_PACKAGE.md) |
 | How do checked component/Python/PHP outputs work? | [Dispatch architecture](PSC1_CHECKED_DISPATCH.md), [exact receipt](PSC1_CHECKED_DISPATCH_QUALIFICATION_2026-10-26.json), [install](PSC1_CHECKED_DISPATCH_INSTALL.md) |
 | How do checked targets and transactions work? | [Guide](PSC1_CHECKED_PUBLICATION.md), [receipt](PSC1_CHECKED_PUBLICATION_QUALIFICATION_2026-10-26.json), [install](PSC1_CHECKED_PUBLICATION_INSTALL.md) |
+| How does a tiny program become checked output? | [Source-linked walkthrough](PSC1_COMPILATION_WALKTHROUGH.md), [pass contracts](PSC1_PASS_CONTRACTS.md) |
+| Which capabilities are actually qualified? | [Current package scope](PSC1_CAPABILITIES.md) |
+| How can a new maintainer work without AI? | [Exercise and evidence rubric](PSC1_MAINTAINER_EXERCISE.md) |
 | What remains unfinished? | [One development roadmap](PSC1_DEVELOPMENT_ROADMAP.md) |
 | What must Practical Core v1 support? | [Finite language contract](PSC1_PRACTICAL_CORE_V1_CONTRACT.json) |
 | What must npm distribution qualify? | [Finite distribution contract](../NPM_DISTRIBUTION_CONTRACT.json) |

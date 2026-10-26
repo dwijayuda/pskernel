@@ -18,7 +18,8 @@ The previous architecture snapshot is [preserved](docs/history/ARCHITECTURE_BEFO
 6. The host requires actual independent official Lean 4.35.0 acceptance of the exact
    admission graph, validates response/source/tool identities and runs target/API checks.
 7. For publication, seal a complete immutable generation and commit its current pointer
-   through the existing transaction. Failures preserve the previous published generation.
+   through the existing transaction. Precommit failures preserve the previous generation;
+   committed durability/cleanup uncertainty is reported explicitly.
 
 This is a dependency description. Generated execution can produce the candidate
 before the external checker runs; candidate production never grants publication authority.
@@ -52,8 +53,10 @@ Existing semantic-boundary guards remain in force.
   optionally native or explicit comparison of both.
 
 One source/compiler pipeline supplies the engines. They are not four handwritten compilers.
-The current slim checked API publishes JS; its other target API is explicitly candidate-only.
-The retained native distribution exposes the existing seven mappings with optional Python/PHP.
+The qualified slim host supports seven checked output selections through four G3 engines.
+Python/PHP remain explicit optional providers; component output has the bounded Bool ABI.
+The candidate-only API retains four targets and grants no admission/publication authority.
+See [current capability and evidence scope](docs/PSC1_CAPABILITIES.md).
 Never infer installed capability from a backend enum or an available source file.
 
 ## Authority and trust
@@ -108,3 +111,8 @@ Frozen compiler qualification remains attached to its original source closure.
 A native-source refactor does not retroactively requalify generated frozen payloads;
 changed compiler sources need their own source/closure/release evidence.
 See [current roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md), [contracts and receipts](docs/README.md).
+
+[Follow one tiny program](docs/PSC1_COMPILATION_WALKTHROUGH.md) through actual source
+owners. [Pass contracts](docs/PSC1_PASS_CONTRACTS.md) record invariants, refusal and
+resource behavior. [Maintainer exercise](docs/PSC1_MAINTAINER_EXERCISE.md) distinguishes
+an executable CI rehearsal from a pending independent human trial.

@@ -72,4 +72,15 @@ scope/pins. Their green CI does not qualify PSC1 changes.
 
 Use [the docs index](docs/README.md) for current contracts versus dated receipts.
 The [source-refactoring design](docs/PSC1_SOURCE_REFACTOR_ARCHITECTURE.md) describes
-future lossless editing; current parse/print translation does not preserve trivia.
+qualified bounded capture/ownership/conversion/rename candidates and their deliberate
+refusals. General parse/print translation alone does not preserve trivia or grant
+semantic editing authority.
+
+## A first change without AI assistance
+
+Start with the [compilation walkthrough](docs/PSC1_COMPILATION_WALKTHROUGH.md), then
+complete the [maintainer exercise](docs/PSC1_MAINTAINER_EXERCISE.md). Record source
+owners, evidence, elapsed time, confusing instructions and help used. CI checks the
+commands and a reference small change; it cannot qualify human comprehension.
+For pass changes consult [the contracts](docs/PSC1_PASS_CONTRACTS.md). Keep exact
+body movement separate from naming or algorithm changes.

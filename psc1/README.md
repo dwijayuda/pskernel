@@ -8,6 +8,10 @@ Compiler execution, output target and checking are separate choices.
 
 Start with the [installation guide](docs/PSC1_CHECKED_DISPATCH_INSTALL.md),
 [architecture](ARCHITECTURE.md) and [contributor guide](CONTRIBUTING.md).
+Follow the [source-linked compilation walkthrough](docs/PSC1_COMPILATION_WALKTHROUGH.md)
+and [maintainer exercise](docs/PSC1_MAINTAINER_EXERCISE.md).
+[Current capability scope](docs/PSC1_CAPABILITIES.md) distinguishes qualified
+installed packages from later development source.
 The [documentation index](docs/README.md) links current contracts and exact receipts.
 The [roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) owns remaining work;
 [AI_WORK_STATE.md](AI_WORK_STATE.md) records the engineering checkpoint.

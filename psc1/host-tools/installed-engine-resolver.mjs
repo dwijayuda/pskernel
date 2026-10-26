@@ -21,14 +21,14 @@ const require = createRequire(path.join(installationRoot, 'package.json'));
 const closedEngines = ['js', 'rust', 'ts', 'wasm-core'];
 // Resolve only a pinned regular file under its declared package root.
 // Walking every path component keeps parent-directory symlinks out of the boundary.
-export function verifyFile(root, record, maxBytes = 128 * 1024 * 1024) {
+export function verifyFile(root, record, maxBytes = 128 * 1024 * 1024, allowEmptyData = false) {
   if (
     !record ||
     typeof record.path !== 'string' ||
-    !/^[A-Za-z0-9_@.\/-]+$/.test(record.path) ||
+    !/^[A-Za-z0-9_@.+\/-]+$/.test(record.path) ||
     !/^[0-9a-f]{64}$/.test(record.sha256 || '') ||
     !Number.isSafeInteger(record.bytes) ||
-    record.bytes < 1 ||
+    record.bytes < (allowEmptyData ? 0 : 1) ||
     record.bytes > maxBytes
   )
     fail('INVALID_PIN');
@@ -118,7 +118,20 @@ function packagePins(descriptor) {
     fail('OPTIONAL_PACKAGE_MISSING: npm install ' + descriptor.package + '@' + descriptor.version);
   }
   const root = fs.realpathSync(path.dirname(file));
-  const pins = descriptor.files.map((p) => verifyFile(root, p));
+  // Empty Python package markers are data, not executable entries. Keep the
+  // ordinary nonempty tool/SDK policy and every exact hash/symlink/path check.
+  const pins = descriptor.files.map((p) =>
+    verifyFile(
+      root,
+      p,
+      128 * 1024 * 1024,
+      descriptor.package === '@proofscript/backend-python' &&
+        descriptor.target === 'python' &&
+        p.bytes === 0 &&
+        /^runtime\/lib\/python3\.14\/[A-Za-z0-9_\/]+\/__init__\.py$/.test(p.path) &&
+        p.sha256 === 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+    ),
+  );
   const meta = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'));
   if (meta.name !== descriptor.package || meta.version !== descriptor.version)
     fail('OPTIONAL_PACKAGE_VERSION');

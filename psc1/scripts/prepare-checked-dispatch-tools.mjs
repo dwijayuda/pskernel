@@ -32,6 +32,7 @@ function auditSourceClosure(target){
  const seen=new Set(),rows=[];
  function visit(module){
   if(module==='Lean')return;
+  if(module.startsWith('Ps.Host.'))assert.ok(['Ps.Host.BackendProviderProtocol','Ps.Host.BackendProviderInstances','Ps.Host.PortableIr'].includes(module),'provider host import must remain closed: '+module);
   if(seen.has(module))return;seen.add(module);
   assert.doesNotMatch(module,/^Ps\.(Compiler\.|CompilerUnified\.|Elab\.|Host\.(DirectBackend|LeanChecked|ArtifactBundle|CompilerDriver))/);
   assert.doesNotMatch(module,/^PsKernelLean\./);

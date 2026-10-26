@@ -21,6 +21,7 @@ int main(int argc,char **argv){
   char root[PATH_MAX],binary[PATH_MAX+64],libs[PATH_MAX*3],script[PATH_MAX+64],extension[PATH_MAX+64];
   ssize_t size=readlink("/proc/self/exe",root,sizeof(root)-1);if(size<1)die();root[size]=0;
   char *slash=strrchr(root,'/');if(!slash)return 125;*slash=0;
+  if(strchr(root,':'))return 125; /* LD_LIBRARY_PATH cannot represent this root. */
   int libraryLength=snprintf(libs,sizeof(libs),"%s/lib:%s/runtime/lib",root,root);
   if(libraryLength<0||(size_t)libraryLength>=sizeof(libs))return 125;
   unsetenv("LD_PRELOAD");unsetenv("PYTHONPATH");unsetenv("PYTHONHOME");unsetenv("PHPRC");unsetenv("PHP_INI_SCAN_DIR");

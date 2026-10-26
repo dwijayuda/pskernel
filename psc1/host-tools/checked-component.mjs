@@ -144,7 +144,8 @@ export function observedBoolWit(text) {
   const take = () => tokens[i++],
     expect = (s) => {
       const observed = take();
-      if (observed !== s) fail('WIT_SIGNATURE:expected=' + s + ':observed=' + JSON.stringify(observed));
+      if (observed !== s)
+        fail('WIT_SIGNATURE:expected=' + s + ':observed=' + JSON.stringify(observed));
     };
   if (tokens[i] === 'package') {
     while (i < tokens.length && take() !== ';') {}

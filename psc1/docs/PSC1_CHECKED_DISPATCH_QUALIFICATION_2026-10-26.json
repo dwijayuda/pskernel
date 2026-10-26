@@ -82,6 +82,14 @@
         "sha256": "f87ea49f3be6ccd820734b286cb98ec922edc067e4e755ee8f418b1d5cb71eae",
         "status": "not-qualified-new-dispatch"
       }
+    },
+    {
+      "head": "0b4c82d04c445610d5e5ba85a998014abb474a33",
+      "run": 40247629514,
+      "job": 121332631460,
+      "status": "failed-component-smoke",
+      "reason": "WIT token precedence split -> into - and >; fixed with longest operator before identifier matching and direct grammar positive/negative regressions",
+      "formatting": "all seven host files already match pinned formatter; executable AST checks passed"
     }
   ],
   "scope": {
@@ -114,5 +122,14 @@
     "status": "in-progress",
     "focusedDependencies": "all passed",
     "benchmark": "skipped-not-qualified"
+  },
+  "manualQualification": {
+    "branch": "qualification/psc1-checked-dispatch-20261026",
+    "requestPath": ".github/qualification-requests/psc1-checked-dispatch.json",
+    "protocol": "psc1-checked-dispatch-request/1",
+    "singleRequestOnlyCommit": true,
+    "expectedParentRequired": true,
+    "cancelObsoleteRequests": true,
+    "allPreviousGatesRetained": true
   }
 }

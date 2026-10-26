@@ -76,7 +76,9 @@ const newModules = [
   'host-tools/generated-compiler-session.mjs',
 ];
 for (const file of newModules) {
-  const featureBaseline = '7062f6823b434657e433caae21a03238f6bbb685';
+  const featureBaseline = file === 'host-tools/checked-component.mjs'
+    ? 'ad1bf8b008b4173c4c2f595f950614771d9fdc4f'
+    : '7062f6823b434657e433caae21a03238f6bbb685';
   const feature = spawnSync('git', ['show', featureBaseline + ':psc1/' + file], {
     cwd: root, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024,
   });

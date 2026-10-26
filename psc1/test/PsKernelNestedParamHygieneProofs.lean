@@ -52,7 +52,7 @@ theorem finish_keeps_entire_success_when_no_capture
     (type : PsKernelExpr) (count : Nat) (opened : PsKernelSimpleNestedOpenParamsResult)
     (safe : psKernelSimpleNestedCtorParamCapture type count = false) :
     psKernelSimpleNestedFinishConstructorParams type count (.ok opened) = .ok opened := by
-  simp only [psKernelSimpleNestedFinishConstructorParams,safe]
+  simp only [psKernelSimpleNestedFinishConstructorParams,safe] <;> rfl
 
 theorem opening_keeps_original_shape_and_budget_error
     (type : PsKernelExpr) (count : Nat) (error : String)
@@ -68,14 +68,14 @@ theorem every_closed_input_keeps_exact_original_open_result
   have guard := capture_guard_false_for_every_closed_input type count closed
   cases h : psKernelSimpleNestedOpenConstructorParamsWithFuel (count+1) type count 0 [] <;>
     simp only [psKernelSimpleNestedOpenConstructorParams,h,
-      psKernelSimpleNestedFinishConstructorParams,guard]
+      psKernelSimpleNestedFinishConstructorParams,guard] <;> rfl
 
 theorem zero_parameter_input_keeps_exact_original_result (type : PsKernelExpr) :
     psKernelSimpleNestedOpenConstructorParams type 0 =
       psKernelSimpleNestedOpenConstructorParamsWithFuel 1 type 0 0 [] := by
   cases h : psKernelSimpleNestedOpenConstructorParamsWithFuel 1 type 0 0 [] <;>
     simp only [psKernelSimpleNestedOpenConstructorParams,h,
-      psKernelSimpleNestedFinishConstructorParams,psKernelSimpleNestedCtorParamCapture]
+      psKernelSimpleNestedFinishConstructorParams,psKernelSimpleNestedCtorParamCapture] <;> rfl
 
 theorem successful_open_cannot_close_a_colliding_input_variable
     (type : PsKernelExpr) (count : Nat) (opened : PsKernelSimpleNestedOpenParamsResult)
@@ -83,13 +83,13 @@ theorem successful_open_cannot_close_a_colliding_input_variable
     (capture : psKernelSimpleNestedCtorParamCapture type count = true) :
     psKernelSimpleNestedOpenConstructorParams type count = .error "declaration has free variables" := by
   simp only [psKernelSimpleNestedOpenConstructorParams,original,
-    psKernelSimpleNestedFinishConstructorParams,capture]
+    psKernelSimpleNestedFinishConstructorParams,capture] <;> rfl
 
 theorem other_free_variable_namespaces_do_not_change_the_guard
     (parent : PsKernelName) (index count : Nat)
     (other : psKernelNameEq parent (psKernelSimpleInternalName "nestedCtorParam") = false) :
     psKernelSimpleNestedCtorParamCaptureWorker (.fvar (.num parent index)) count = false := by
-  simp only [psKernelSimpleNestedCtorParamCaptureWorker,other]
+  simp only [psKernelSimpleNestedCtorParamCaptureWorker,other] <;> rfl
 
 theorem only_introduced_parameter_indices_are_capturable
     (parent : PsKernelName) (index count : Nat)

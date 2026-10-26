@@ -1,22 +1,20 @@
 name: PSC1 project CLI and installed toolchain qualification
 on:
+  workflow_dispatch:
   push:
-    branches: [feat/psc1-cli-project-workflow-20261026]
+    branches: ['**']
     paths:
       - .github/workflows/psc1-cli.yml
-      - psc1/npm-cli/**
-      - psc1/scripts/cli-*.mjs
-      - psc1/scripts/slim-universal-package.mjs
-  pull_request:
-    paths:
       - psc1/npm-cli/**
       - psc1/host-tools/**
-      - psc1/scripts/cli-*.mjs
-      - psc1/scripts/ci/repository-layout.mjs
-      - psc1/scripts/packaging/**
+      - psc1/scripts/**/*.mjs
       - psc1/test/host/**
       - psc1/test/installed/**
-      - .github/workflows/psc1-cli.yml
+      - psc1/docs/guides/cli.md
+      - psc1/docs/PSC1_CHECKED_DISPATCH_QUALIFICATION_2026-10-26.json
+      - psc1/scripts/slim-universal-input.json
+      - psc1/NPM_DISTRIBUTION_CONTRACT.json
+      - psc1/BACKEND_PROVIDER_CONTRACT.json
 permissions:
   contents: read
   actions: read

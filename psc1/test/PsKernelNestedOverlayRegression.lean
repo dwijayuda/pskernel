@@ -23,9 +23,9 @@ private def prefixStable (beforeOwner afterOwner : PsKernelDagGeneratedState) : 
     let y ← force (psKernelExprV2DecodedRequire afterOwner.built id)
     stable := stable && entrySame a b && psKernelExprEqual x y
   pure stable
-private def errorText {α : Type} : Except String α → String
-  | .error error => error
-  | .ok _ => "unexpected success"
+private def sameError {α β : Type} : Except String α → Except String β → Bool
+  | .error left, .error right => left == right
+  | _, _ => false
 
 def main : IO Unit := do
   let n := nm "OverlayOrigin"
@@ -71,13 +71,13 @@ def main : IO Unit := do
   let before ← force (psKernelDagGeneratedImport (.bvar 0) empty)
   let badRoot := before.fst.built.size
   require "missing-original-decoded-error-first"
-    (errorText (psKernelExprV2NestedOverlay (.app s1 s1) badRoot before.fst) == errorText (psKernelExprV2DecodedRequire before.fst.built badRoot))
+    (sameError (psKernelExprV2NestedOverlay (.app s1 s1) badRoot before.fst) (psKernelExprV2DecodedRequire before.fst.built badRoot))
   let stale := { before.fst with built := psKernelExprV2DecodedEmpty }
   require "stale-decoded-continuation-rejected"
-    (errorText (psKernelExprV2NestedOverlay (.bvar 0) 0 stale) == errorText (psKernelExprV2DecodedRequire stale.built 0))
+    (sameError (psKernelExprV2NestedOverlay (.bvar 0) 0 stale) (psKernelExprV2DecodedRequire stale.built 0))
   let absent := { before.fst with arena := psKernelExprV2PagedEmpty }
   require "missing-original-arena-error-preserved"
-    (errorText (psKernelExprV2NestedOverlay (.bvar 0) 0 absent) == errorText (psKernelExprV2PagedRequire absent.arena 0))
+    (sameError (psKernelExprV2NestedOverlay (.bvar 0) 0 absent) (psKernelExprV2PagedRequire absent.arena 0))
   let target := PsKernelExpr.app s1 (.bvar 1)
   let after ← force (psKernelExprV2NestedOverlay target before.snd before.fst)
   let originalImport ← force (psKernelDagGeneratedImport target before.fst)

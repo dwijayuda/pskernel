@@ -1,0 +1,42 @@
+{
+  "source": "1e39dde7f939291ffc9df4d422b1a42b02c9384d",
+  "run": 40329883587,
+  "job": 121596171194,
+  "artifact": 12657000051,
+  "archiveBytes": 43199491,
+  "archiveSha256": "ee7bbbc534b1b8c12e232048e7e0dee362337427242ffcda499cb41671475ad3",
+  "members": 11,
+  "all10ManifestEntriesActuallyReadAndVerified": true,
+  "exactQualifiedProgramFixtureRunnerAndNestedArchivesVerified": true,
+  "all1400UnchangedSample5AssertionsPass": true,
+  "actualTickLogBytes": 218210425,
+  "actualTickLogSha256": "b9e75a215e871c795d238bf378fd80ab8cad31fbddfdea3e5e2470174d3bd106",
+  "actualTickCount": 1259071,
+  "processedSummaryMatchesRecordedDigest": true,
+  "sampledSummaryCounts": {
+    "JavaScript": 384576,
+    "C++": 14926,
+    "GC": 168494,
+    "Shared libraries": 854966,
+    "Unaccounted": 4603
+  },
+  "gcSamplePercent": 13.382406552132485,
+  "gcIsOverlappingAnnotationNotAnAdditionalPartition": true,
+  "profileObservedWallSeconds": 1463.450709125,
+  "profileTimingIsNotPerformanceQualification": true,
+  "observedSymbolizationLimits": [
+    "64.6% of all samples attributed to the Node executable, not individual C++ functions",
+    "4603 samples unaccounted",
+    "processor reported dropped unknown overflow frame",
+    "bottom-up caller percentages are local to their parent; do not sum as global percentages"
+  ],
+  "measuredPriorityCandidates": [
+    "generator/trampoline invocation and closure registration",
+    "polymorphic property access",
+    "cache/hash/name operations including bucket traversal",
+    "allocation/GC, with 13.4% of sampled ticks flagged GC"
+  ],
+  "nextIsolatedExperiment": "Keep cache semantics and public curried ABI; assess flat internal map/pair bucket workers to remove per-level closure creation. Prove all-fuel equality, retain original proof sources and runtime controls, and measure emitted loops/microbenchmarks before any adoption.",
+  "performanceQualified": false,
+  "kernelOrCompilerChangedForProfile": false
+}

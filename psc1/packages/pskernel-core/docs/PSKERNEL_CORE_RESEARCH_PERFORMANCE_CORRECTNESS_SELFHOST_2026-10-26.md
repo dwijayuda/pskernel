@@ -12,14 +12,14 @@ The adopted production tree is `cada4884b4250a708dccadca42b8ef5bddbd04a3`. The i
 
 | Axis | Verified evidence | Remaining limitation |
 |---|---|---|
-| Correctness | Isolated source `f2ffc9d7bd5219c51956c13e11c7f2bee3ccd220`: 806 distinct native proof reports, 60 proof source modules, 1,795 controls; all 364 actual Git snapshots and all 452 archive digests verified | Many reports establish structural correspondence or conditional protocols; their count is not a global soundness theorem |
-| Nested execution | All seven complete original-environment fixtures match; five corrupted restored-rule fixtures are rejected by both original and owning validators; public atomicity, resources, original bounds and no-reimport ownership pass | Its fresh complete generated and canonical programs both encountered a PSC1 parser portability failure, so this source is not paired-qualified |
+| Correctness | Isolated source `307faacf0de9132841f04850fedb35b69286fe7d`: 807 distinct native proof reports, 60 proof source modules, 1,795 controls; all 364 actual Git snapshots and all 452 archive digests verified | Many reports establish structural correspondence or conditional protocols; their count is not a global soundness theorem |
+| Nested execution | All seven complete original-environment fixtures match; five corrupted restored-rule fixtures are rejected by both original and owning validators; public atomicity, resources, original bounds and no-reimport ownership pass | Successive fresh generated and canonical programs exposed parser and local match-type portability failures; the next single-Bool annotation is under native qualification |
 | Compiler portability | Earlier overlay source `abdce8b4a22eb5b5037611746689a2baea856b68` passed fresh compilation of 173 modules/2,070 declarations, 999 native-equal controls and 21 retained runtime harnesses; raw archive/Git/closure verification passed | This earlier program does not contain the newer complete transaction |
 | Current adopted String | All six generated raw shard archives independently read and checked: 8,400 assertions; same complete program and authentic 294-declaration/377-metadata fixture | Canonical mixed-Unicode sample 5 hit the unchanged 1,500-second deadline; five other canonical samples passed |
 | Full Arena | All 193 classifications/adaptations and 176 completed raw semantic envelopes retained exactly by the scalar experiment | 174 strict passes, 17 timeouts and two separately classified safety-contract differences; strict gate remains failed |
 | Scalar cache experiment | Both complete compiler routes and 2,400 comparisons with the actual old worker passed; original worker preserved; native refinement and independent artifact audit passed | Real same-runner A-B-B-A did not establish a performance win; do not adopt |
 
-The new portability correction is source `94ffdcb92d74a3a7d95a1a0d6f2d625efe0aeda8`: introduce a named local before a projected field access in `DagNestedValidation.lean`. The corresponding all-state equality lemma is added without changing earlier statements. It requires a new **807-report** cohort and a new complete paired build; old 806 results cannot qualify changed production bytes.
+The named-projection correction `94ffdcb92d74a3a7d95a1a0d6f2d625efe0aeda8` and subsequent seven explicit let-result annotations `307faacf0de9132841f04850fedb35b69286fe7d` are each independently ROOT verified at **807 reports/1,795 controls**, all 364 actual Git bindings. Every proof-source byte and earlier theorem statement is retained by the seven annotations. Their exact-source fresh pair `e312c6241e18cc155b677b8ff4a3b0aeb397b175`, run `40335273986`, then failed in both routes at `psKernelExprV2NestedCheckPreparedWith: matchExpectedType`. Source `ddde8df81cc32c61394eeca22c1e22a09fd47c04` adds the remaining explicit `Bool` on the auxiliary-presence match. Its new native cohort is ROOT verified, and exact-source paired qualification is active. These annotations change no branch, operation, cache policy or resource rule; no old artifact qualifies changed source bytes.
 
 ### The completed scalar A-B-B-A
 
@@ -33,6 +33,18 @@ The actual 17-member, 16,587,898-byte archive `12651426975` has SHA-256 `93fae7a
 | A2 | Corrected adopted baseline | At least 1,500 | Deadline; exit 137; no complete receipt |
 
 There are **2,800 completed assertions**, not 5,600. The completed candidate observation is about 0.75 seconds longer, which is not evidence of a stable regression or improvement. Two right-censored observations prevent the intended complete four-run comparison. Do not compute a passing median or infer a speedup by dropping them. The killed timeout wrapper's tiny RSS and `exit=0` text are not Node peak-memory measurements. The actual process result and missing completion receipts govern classification.
+
+### The 17 Arena failures are a specific optimization backlog
+
+The already verified raw 193-case replay records all 17 timeout cases reaching `kernel-admission`. This localizes them beyond initial transport; it does **not** distinguish validation, materialization, checking, reduction, cache lookup or original-operation fallback inside that boundary.
+
+| Investigation group | Cases | Examples |
+|---|---:|---|
+| Reduction, equality and sharing | 11 | `refute-cheap-last`, `app-lam`, `beta-ladder`, discarded-argument variants, folded-constant variants, `fueled-chain`, `let-ladder`, `shared-subterm`, `unroll-versus-evaluate` |
+| Large declaration streams | 2 | `init-prelude`, `grind-ring-5` |
+| Magma/inductive workloads | 4 | `magma-list-deep-n21/n36`, `magma-list-pair-n21/n7` |
+
+Start the focused performance reproducer with `discarded-argument` (case 83: 309 distinct input nodes, six admission commands) and `discarded-argument-match` (case 82: 490 nodes, 15 commands). Both reach the kernel boundary early and then exceed 60 seconds. Their size makes repeated work or expansion an investigation worth testing, rather than an established diagnosis. Preserve their actual bodies, original oracle outcomes and budgets. A focused diagnostic can accelerate iteration, but only the unchanged complete 193-case gate can close the original acceptance requirement.
 
 ## Findings from primary sources
 
@@ -60,7 +72,20 @@ The official [Lean 4.33 release notes](https://lean-lang.org/doc/reference/lates
 
 Con-leche's [`PERF.md`](https://github.com/leanprover/con-leche/blob/0d2f467bbe576f21e42ea861d246abef718f1c13/PERF.md) separates parse/install/check costs and warns against treating shared-machine wall times as controlled comparisons. Its profiles also identify allocation/reference counting as substantial work. Those measurements use a different implementation/runtime and do not predict a PSKernel JavaScript speed ratio.
 
-**Application:** obtain PSKernel's own CPU samples, allocation/GC evidence, phase costs and decline/restart counts before choosing another optimization. A source-preserving V8 diagnostic branch `1e39dde7f939291ffc9df4d422b1a42b02c9384d` is submitted against the exact adopted complete program and sample-5 fixture. It retains all original 1,400 assertions and the 1,500-second/4,096-fuel/2,048-MiB/empty-PATH policy. Profiling changes timing, so its output cannot qualify performance. [Node 22.23.3 documents `--prof`/`--prof-process`](https://nodejs.org/download/release/v22.23.3/docs/api/cli.html#--prof); tick-log processing is confined to Linux Actions.
+**Project measurement completed:** the exact adopted complete program, authentic sample-5 fixture and unchanged runner passed all 1,400 assertions with V8 tick profiling in run `40329883587`. The 43,199,491-byte artifact `12657000051` has SHA-256 `ee7bbbc534b1b8c12e232048e7e0dee362337427242ffcda499cb41671475ad3`. All ten manifest digests and both nested input archives were actually read. The actual 218,210,425-byte tick log contains 1,259,071 ticks and matches the processed CPU summary. The original 1,500-second/4,096-fuel/2,048-MiB/empty-PATH policy and all assertions remain unchanged. [Node 22.23.3 documents `--prof`/`--prof-process`](https://nodejs.org/download/release/v22.23.3/docs/api/cli.html#--prof); processing ran in Linux Actions.
+
+| Sample partition | Ticks | Share |
+|---|---:|---:|
+| JavaScript | 384,576 | 30.5% |
+| C++ symbols | 14,926 | 1.2% |
+| Shared libraries | 854,966 | 67.9% |
+| Unaccounted | 4,603 | 0.4% |
+
+GC flags appear on **168,494 ticks (13.4%)**, an overlapping annotation, not another partition to add to 100%. A large fraction of shared-library ticks is attributed to the Node executable without finer symbolization. The processor also reported an unknown overflow frame. Bottom-up caller percentages are relative to their parent and must not be summed as global time.
+
+The JavaScript samples include generator dispatch, `__ps$invoke`, `__ps$run`, cache/string/hash helpers and polymorphic accesses. Bottom-up stacks connect weak-map registration and `__ps$wrap` with curried cache-bucket/name/level helpers. Inspection of the actual emitted runtime confirms that `__ps$wrap` constructs and registers closures, while recursive source helpers can create another closure at each level. This supports testing call shape and allocation; it does not establish that any single helper dominates whole-process time. The observed 1,463.45-second profiled run is diagnostic, not a valid speed comparison.
+
+**Next isolated implementation:** `fda216a64a28bdb8d4159b5421b6fc8c797d3a37` changes only map/pair cache-bucket bodies and adds flat internal workers, retaining the public curried ABI and every fuel/path result. Qualification requires six all-input equivalence reports plus 2,521 frozen-original controls; all 748 previous reports and 1,201 controls remain. Positive fuel at a premature bucket must still return the original empty result. Six new equivalence reports and all retained proofs passed in the first run. A fixture-only literal-constructor error was corrected in source `75007e264a11d50cf8f7d469738dfbcd24204d0c`; its complete native cohort is active. No speedup or production adoption is established. Inspect the actual emitted worker and use a matched targeted microbenchmark before spending another long full-workload comparison. Adoption still requires complete semantics and unchanged full gates.
 
 ### Source proofs, compiled behavior and bootstrapping need separate evidence
 
@@ -75,7 +100,7 @@ The [CakeML backend paper](https://cakeml.org/jfp19.pdf) connects compiler passe
 | Order | Concrete work | Evidence required to finish |
 |---|---|---|
 | 1 | Finish the portable complete nested owning public route | New 807 native reports/1,795 controls; actual 364 Git bindings; both fresh complete compiler routes; all 1,188 native-equal compiled controls and 21 unchanged legacy harnesses; independent raw-artifact audit |
-| 2 | Profile the adopted mixed-Unicode workload | Authenticated original program/fixture/runner; retained full assertions; actual tick log and processed CPU summary; censored/diagnostic status explicit |
+| 2 | Use completed adopted profile to qualify a small cache-worker experiment | Profile ROOT complete; next: six all-input reports/2,521 controls, actual emitted flat worker, matched complete microbenchmark; then full paired and unchanged String/Arena gates |
 | 3 | Remove repeated original-operation work where profiling demonstrates it | Per-entry-path decline reason/coverage inventory; implement supported missing cases; preserve exact owner, error order, fuel and external-ID boundaries; original-state restart only where still required |
 | 4 | Reduce materialization/import cost | Preserve full required input validation; demand-based expression materialization and one-owner metadata worklists; no repeated recursor import; reference parity on shared and deeply nested inputs |
 | 5 | Close the checker refinement chain | Every transition preserves arena/decoded/declaration/cache/local-context relations; successful Check/WHNF/DefEq/admission implies the intended logical judgment; no unproved global output premise |
@@ -86,7 +111,7 @@ The [CakeML backend paper](https://cakeml.org/jfp19.pdf) connects compiler passe
 
 These are hypotheses, not measured conclusions:
 
-1. Repeated decoding, generated metadata import and original-operation restarts may dominate the benefit available from scalar hash-analysis allocation changes. Profile these boundaries separately and count them on the actual workload.
+1. The actual profile justifies an isolated flat cache-bucket worker experiment to reduce per-level closure construction while keeping its public curried ABI. Measure it before extrapolating to other helpers. Repeated decoding, generated metadata import and original-operation restarts may dominate the benefit available from scalar hash-analysis allocation changes. Profile these boundaries separately and count them on the actual workload.
 2. DAG traversal should do work proportional to distinct reachable nodes/edges whenever the operation permits memoization. Deep sharing must not silently become traversal of an exponentially expanded tree. Keep structural budgets and logical expression-size checks distinct.
 3. Binder telescopes and application spines can accumulate substitutions and rebuild once rather than traverse a growing spine repeatedly. Require a whole-input refinement statement covering binder indices, fresh names, errors and fuel before considering adoption.
 4. Cache hits must be scoped to the correct immutable environment, local context and operation mode. Infer-only results cannot become checked-inference certificates; hash equality cannot replace exact key equality.
@@ -116,11 +141,15 @@ The [Lean project's October 2026 verified-kernel update](https://leodemoura.gith
 
 ## Evidence and active work
 
-- Public native806 archive: `12650804167`, 1,070,413 bytes, SHA-256 `49f685c64423b234e6439abdefb0c5cb051f54c36f00ab85b5d4b40ef5381952`; all 453 members/452 manifest entries actually read. A new 807 cohort is required for the named-projection change.
+- Public native806 archive: `12650804167`, 1,070,413 bytes, SHA-256 `49f685c64423b234e6439abdefb0c5cb051f54c36f00ab85b5d4b40ef5381952`; all 453 members/452 manifest entries actually read. Both later 807 native cohorts have now been ROOT verified; historical archive remains valid only for its own source.
 - Earlier overlay complete archive: `12650870720`, SHA-256 `d8cee1cc2d6cf4b9e84768f931e1e91c60e3f30f25c064875790d52290816a45`.
 - Scalar A-B-B-A: run `40314241978`; static root audit records no adoption and no performance qualification.
 - Failed first complete public pair: source `5a4a3471ec56f8a443df511fdd43fe9b49c37f1b`, run `40328260710`; both failed on the same parenthesized-projection parser limitation. A passing native cohort cannot substitute for these failures.
-- Named-projection native continuation: `94ffdcb92d74a3a7d95a1a0d6f2d625efe0aeda8`; next full pair must authenticate its exact successful native artifact.
-- V8 diagnostic continuation: `1e39dde7f939291ffc9df4d422b1a42b02c9384d`, run `40329883587`; never a qualification-timing result.
+- Named-projection native continuation: `94ffdcb92d74a3a7d95a1a0d6f2d625efe0aeda8`, run `40330198655`, artifact `12654877019`/1,070,830 bytes/SHA-256 `7c46c2ae081acf73a9a2c2b00593f1f5df17e2966aae9d91877a4254a2fa42c8`; ROOT807/1,795. This artifact does not qualify later changed source bytes.
+- Second pair portability failure: both `489cf179` routes fail at `psKernelExprV2NestedImportConstructorTargets: matchExpectedType`; explicit let-result types are being qualified rather than changing branch behavior.
+- Seven-annotation native cohort: `307faacf0de9132841f04850fedb35b69286fe7d`, run `40333185269`, artifact `12655636595`/1,071,172 bytes/SHA-256 `1760656c64cace86479bf90e3fea4769924b398d931359f4f196cc3c45d7cc26`; ROOT807/1,795 with all earlier proof-source bytes identical.
+- Third pair: `e312c6241e18cc155b677b8ff4a3b0aeb397b175`, run `40335273986`, both failed at the remaining unannotated auxiliary-presence match. Correction `ddde8df81cc32c61394eeca22c1e22a09fd47c04` changes only that result annotation; native run `40336911250` is ROOT verified. Exact-source full pair `e58ef33ad14b26dcc85231801b1322551cf34614`, run `40337754189`, is active.
+- V8 diagnostic: `1e39dde7f939291ffc9df4d422b1a42b02c9384d`, run `40329883587`; ROOT complete, all 1,400 assertions pass, actual raw ticks and processed summary authenticated; never a qualification-timing result.
+- Flat bucket candidate `fda216a64a28bdb8d4159b5421b6fc8c797d3a37`: only two bucket rewrites/two internal workers; unchanged original code copied verbatim into proof/test files; no production adoption.
 
 All execution remains GitHub Linux Actions only. Research and evidence updates do not authorize a main-branch merge, package publication, forced ref update or a relaxed correctness/resource gate.

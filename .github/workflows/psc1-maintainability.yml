@@ -1,10 +1,13 @@
 name: PSC1 maintainer walkthrough and body-preserving extraction
 on:
   push:
-    branches: [refactor/psc1-maintainability-20261026]
+    branches: [refactor/psc1-maintainability-20261026, refactor/psc1-layout-20261026]
     paths:
       - psc1/**/*.lean
-      - psc1/scripts/*.mjs
+      - psc1/scripts/**/*.mjs
+      - psc1/host-tools/**
+      - psc1/npm-cli/**
+      - psc1/test/**/*.mjs
       - psc1/*CONTRACT.json
       - psc1/lakefile.lean
       - .github/workflows/psc1-maintainability.yml
@@ -33,6 +36,7 @@ jobs:
       - name: Check current guides, exact extraction and retained recursive guards
         run: |
           set -euo pipefail
+          node scripts/ci/repository-layout.mjs
           node scripts/maintainer-docs.mjs
           node scripts/readability-module-check.mjs
           node scripts/check-wasm-applied-prefixes.mjs

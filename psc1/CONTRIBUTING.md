@@ -1,6 +1,6 @@
 # Contributing to PSC1
 
-Read [the architecture](ARCHITECTURE.md), then follow the source for one small
+Read [the architecture](./ARCHITECTURE.md), then follow the source for one small
 program through parsing, elaboration, canonical admission, erasure, strict IR,
 target emission and host checking/publication.
 
@@ -10,7 +10,8 @@ Language syntax belongs in `packages/syntax`; shared meaning belongs in
 `environment`, `meta` and `elab`. Runtime IR belongs in `compiler-ir`; proof
 erasure belongs in `erasure`. Target code belongs in `backend-*`.
 Host filesystem/process/package authority belongs in `host` or `host-tools`.
-Installed commands and APIs begin in `npm-cli/universal-cli.mjs` and `universal.mjs`.
+Installed commands/API begin in `npm-cli/proofscript-cli.mjs`,
+`checked-command-cli.mjs` and `compiler-api.mjs`; historical paths delegate.
 
 Do not implement a language feature separately in each backend. Define shared
 semantics, cover both grammars, then qualify relevant mappings and explicit ABI refusals.
@@ -70,17 +71,26 @@ the new identity. Never hand-edit a qualified generated executable.
 The root TypeScript kernel, PSC0, PSCV and PSKernel-Core research have separate
 scope/pins. Their green CI does not qualify PSC1 changes.
 
-Use [the docs index](docs/README.md) for current contracts versus dated receipts.
-The [source-refactoring design](docs/PSC1_SOURCE_REFACTOR_ARCHITECTURE.md) describes
+Use [the docs index](./docs/README.md) for current contracts versus dated receipts.
+The [source-refactoring design](./docs/PSC1_SOURCE_REFACTOR_ARCHITECTURE.md) describes
 qualified bounded capture/ownership/conversion/rename candidates and their deliberate
 refusals. General parse/print translation alone does not preserve trivia or grant
 semantic editing authority.
 
 ## A first change without AI assistance
 
-Start with the [compilation walkthrough](docs/PSC1_COMPILATION_WALKTHROUGH.md), then
-complete the [maintainer exercise](docs/PSC1_MAINTAINER_EXERCISE.md). Record source
+Start with the [compilation walkthrough](./docs/guides/compilation-walkthrough.md), then
+complete the [maintainer exercise](./docs/development/maintainer-exercise.md). Record source
 owners, evidence, elapsed time, confusing instructions and help used. CI checks the
 commands and a reference small change; it cannot qualify human comprehension.
-For pass changes consult [the contracts](docs/PSC1_PASS_CONTRACTS.md). Keep exact
+For pass changes consult [the contracts](./docs/reference/pass-contracts.md). Keep exact
 body movement separate from naming or algorithm changes.
+
+## Navigation and mechanical refactors
+
+Use [the repository map](docs/reference/repository-map.md) and
+[naming/ownership rules](docs/reference/naming-and-ownership.md).
+Run node scripts/ci/repository-layout.mjs for exact-head imports, ownership labels,
+compatibility/body/path checks and generated runtime views. It is navigation and
+bounded correspondence, not semantic preservation. General semantic refactors
+still need explicit obligations and actual source/package qualification.

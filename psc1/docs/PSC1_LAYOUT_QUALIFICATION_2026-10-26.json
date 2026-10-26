@@ -1,0 +1,511 @@
+{
+  "schema": "psc1-layout-qualification/1",
+  "status": "qualified-linux-readability-milestone",
+  "base": "b426f9763ed2a576135ed2089671d48e21f1ff32",
+  "implementationHead": "03729a50f1ef352e47fd3d566e1459ffae93c2af",
+  "branch": "refactor/psc1-layout-20261026",
+  "sourceAndFrozenPackageDistinct": true,
+  "implementation": {
+    "guideMoves": [
+      {
+        "from": "docs/PSC1_CLI.md",
+        "to": "docs/guides/cli.md",
+        "compatibility": "historical URL delegates to canonical guide"
+      },
+      {
+        "from": "docs/PSC1_COMPILATION_WALKTHROUGH.md",
+        "to": "docs/guides/compilation-walkthrough.md",
+        "compatibility": "historical URL delegates to canonical guide"
+      },
+      {
+        "from": "docs/PSC1_PASS_CONTRACTS.md",
+        "to": "docs/reference/pass-contracts.md",
+        "compatibility": "historical URL delegates to canonical guide"
+      },
+      {
+        "from": "docs/PSC1_MAINTAINER_EXERCISE.md",
+        "to": "docs/development/maintainer-exercise.md",
+        "compatibility": "historical URL delegates to canonical guide"
+      },
+      {
+        "from": "docs/PSC1_MAINTAINER_REFERENCE.md",
+        "to": "docs/development/maintainer-reference.md",
+        "compatibility": "historical URL delegates to canonical guide"
+      },
+      {
+        "from": "docs/PSC1_TYPESCRIPT_WORKFLOW_RESEARCH.md",
+        "to": "docs/development/typescript-workflows.md",
+        "compatibility": "historical URL delegates to canonical guide"
+      }
+    ],
+    "codeMoves": [
+      {
+        "from": "scripts/bounded-process.py",
+        "to": "host-tools/process/bounded-process.py",
+        "kind": "python"
+      },
+      {
+        "from": "scripts/selfhost-qualification-profiles.mjs",
+        "to": "host-tools/process/resource-profiles.mjs",
+        "kind": "exports"
+      },
+      {
+        "from": "scripts/compiler-closure-contract.mjs",
+        "to": "host-tools/contracts/compiler-closure.mjs",
+        "kind": "exports"
+      },
+      {
+        "from": "scripts/generated-compiler-runner.mjs",
+        "to": "host-tools/execution/generated-service-runner.mjs",
+        "kind": "command"
+      },
+      {
+        "from": "scripts/universal-candidate-runner.mjs",
+        "to": "host-tools/execution/unified-candidate-runner.mjs",
+        "kind": "command"
+      },
+      {
+        "from": "npm-cli/psc.js",
+        "to": "npm-cli/native-workspace-cli.mjs",
+        "kind": "command"
+      },
+      {
+        "from": "npm-cli/universal-cli.mjs",
+        "to": "npm-cli/checked-command-cli.mjs",
+        "kind": "command"
+      },
+      {
+        "from": "npm-cli/universal.mjs",
+        "to": "npm-cli/compiler-api.mjs",
+        "kind": "exports"
+      },
+      {
+        "from": "scripts/cli-package.mjs",
+        "to": "scripts/packaging/cli.mjs",
+        "kind": "command"
+      },
+      {
+        "from": "scripts/cli-source-tests.mjs",
+        "to": "test/host/cli.test.mjs",
+        "kind": "command"
+      },
+      {
+        "from": "scripts/cli-installed.mjs",
+        "to": "test/installed/cli.test.mjs",
+        "kind": "command"
+      },
+      {
+        "from": "scripts/cli-application-regressions.mjs",
+        "to": "test/installed/applications.mjs",
+        "kind": "command"
+      }
+    ],
+    "packageOwnerGuides": 18,
+    "roadmap": "remaining-work-only; previous bytes archived",
+    "historicalStatus": "explicit current navigation; exact old bytes archived",
+    "importMap": "derived from tracked files and actual static Lean/relative JavaScript imports; read-only navigation",
+    "runtimeViews": "two generated TypeScript files from the single Lean definitions",
+    "publicCommands": "proofscript/psc/psc1 preserved; native workspace and checked command compatibility headers preserved",
+    "controllerAudit": {
+      "filesRead": 359,
+      "canonicalRunnerControllers": 8,
+      "protectedInventories": "canonical process/profile/validator resources retained alongside compatibility resources"
+    },
+    "installedWorkflow": "package-input branch pushes plus workflow_dispatch; assertions, limits and all installed regression steps unchanged",
+    "moduleOwnedSupervisor": {
+      "status": "passed-preflight",
+      "job": 121648465979,
+      "test": "test/host/process-location.test.mjs",
+      "childAndSourceDirectoriesDistinct": true,
+      "timeoutCeilingPreserved": true
+    }
+  },
+  "boundedCorrespondence": {
+    "baseline": "b426f9763ed2a576135ed2089671d48e21f1ff32",
+    "exactRelations": 14,
+    "currentLinks": 265,
+    "trackedNodes": 2261,
+    "staticImportEdges": 1128,
+    "typescriptRuntime": {
+      "definitions": [
+        "psTsStackRuntimeSupport",
+        "psTsUtf8RuntimeSupport",
+        "psTsRuntimeSupport"
+      ],
+      "movedCharacters": 5996,
+      "movedLines": 15,
+      "bodies": "byte-identical",
+      "remainingModule": "byte-identical-except-new-import-and-extraction"
+    },
+    "historicalHostAst": "original cleanup and feature baselines retained; only finite runtime path literals normalized",
+    "historicalWasmExtractions": "retained with original immutable correspondence and recursive guards",
+    "semanticPreservationTheorem": false,
+    "runtimeResourceResolution": "explicit import of fileURLToPath and module-relative supervisor selection; policy/body otherwise retained"
+  },
+  "maintainability": {
+    "status": "passed",
+    "run": 40344458240,
+    "job": 121648015847,
+    "testedCommit": "03729a50f1ef352e47fd3d566e1459ffae93c2af",
+    "checkedWalkthroughBuilds": 4,
+    "illTypedRefusals": 2,
+    "grammars": [
+      "lean",
+      "ps"
+    ],
+    "compilerModules": 124,
+    "sourceClosureDigest": "9d6dd14bffa5e358d86d7b73776d9348fcaeda3e3fb8630803622f8728347099",
+    "g1": {
+      "engine": "wasm-core",
+      "status": "passed",
+      "nativeExecutablesRemoved": true,
+      "generations": [
+        1
+      ],
+      "fixedPoint": "not-requested",
+      "performanceQualification": "not-run"
+    },
+    "artifact": {
+      "id": 12661730327,
+      "name": "psc1-maintainability-03729a50f1ef352e47fd3d566e1459ffae93c2af",
+      "bytes": 6530430,
+      "sha256": "9f936f0dc5f52434274ec70c496f2763ac71dffa77b826e22305957f5e31d179",
+      "expiresAt": "2027-01-24T14:56:55Z"
+    }
+  },
+  "source": {
+    "status": "passed",
+    "run": 40344469855,
+    "boundaryRegression": {
+      "status": "passed",
+      "job": 121652107340,
+      "allAssertionsRetained": true
+    },
+    "integration": {
+      "status": "passed",
+      "job": 121650993204,
+      "executedArtifacts": 28,
+      "grammars": 2,
+      "backends": 7,
+      "compilerModules": 124,
+      "sourceCoreMembers": 4742,
+      "leanSourceClosure": "9d6dd14bffa5e358d86d7b73776d9348fcaeda3e3fb8630803622f8728347099",
+      "psSourceClosure": "0fcbe8568a7a37bd4cc0322b65e040b67e4aef637d8069cc821bce83b53d3e66",
+      "traceScope": "recorded term bases; no complete general tracing claim"
+    },
+    "lossless": {
+      "status": "passed",
+      "job": 121649069676,
+      "captures": 365,
+      "negativeCases": 49,
+      "sourceOwnership": {
+        "grammars": 2,
+        "modules": 124,
+        "members": 4742
+      }
+    },
+    "jsG1": {
+      "status": "passed-selected-corpus",
+      "job": 121652107379,
+      "cases": 10,
+      "modules": 88,
+      "unifiedCompiler": false,
+      "fixedPoint": "not-requested"
+    },
+    "headCommit": "03729a50f1ef352e47fd3d566e1459ffae93c2af",
+    "testedMerge": "4c1c5ca2bb4dc5b783b2857688edd33ccce518bf",
+    "tree": "17b952f41ba3c612387a7d8fffd691d4e84e5b3a",
+    "headAndMergeTreesEqual": true,
+    "fullJob": 121654010070,
+    "gateJob": 121669878787,
+    "finitePracticalCore": {
+      "qualified": 37,
+      "blocked": 0,
+      "releaseReady": true,
+      "scope": "finite Practical Core contract only; not a final universal release"
+    },
+    "benchmark": "skipped-unqualified",
+    "jobs": [
+      {
+        "id": 121648561684,
+        "name": "static",
+        "conclusion": "success"
+      },
+      {
+        "id": 121649069090,
+        "name": "focused / php-application",
+        "conclusion": "success"
+      },
+      {
+        "id": 121649069127,
+        "name": "native / native",
+        "conclusion": "success"
+      },
+      {
+        "id": 121649069201,
+        "name": "focused / focused (core)",
+        "conclusion": "success"
+      },
+      {
+        "id": 121649069319,
+        "name": "focused / focused (applications)",
+        "conclusion": "success"
+      },
+      {
+        "id": 121649069676,
+        "name": "lossless / lossless",
+        "conclusion": "success"
+      },
+      {
+        "id": 121649069697,
+        "name": "source-bindings / trace",
+        "conclusion": "success"
+      },
+      {
+        "id": 121649070789,
+        "name": "benchmark",
+        "conclusion": "skipped"
+      },
+      {
+        "id": 121650993204,
+        "name": "source-bindings / integration",
+        "conclusion": "success"
+      },
+      {
+        "id": 121652107340,
+        "name": "g1 / host-session-boundary",
+        "conclusion": "success"
+      },
+      {
+        "id": 121652107379,
+        "name": "g1 / generated-js",
+        "conclusion": "success"
+      },
+      {
+        "id": 121652107407,
+        "name": "closures / selected-closure (rust-compiler, ordinary-checked)",
+        "conclusion": "success"
+      },
+      {
+        "id": 121652107502,
+        "name": "closures / selected-closure (directjs-compiler, ordinary-checked)",
+        "conclusion": "success"
+      },
+      {
+        "id": 121652107506,
+        "name": "closures / selected-closure (semantic-compiler, checked)",
+        "conclusion": "success"
+      },
+      {
+        "id": 121654010070,
+        "name": "full / linux-scoped",
+        "conclusion": "success"
+      },
+      {
+        "id": 121669878787,
+        "name": "gate",
+        "conclusion": "success"
+      }
+    ],
+    "artifact": {
+      "id": 12663766969,
+      "name": "psc1-scoped-correctness-4c1c5ca2bb4dc5b783b2857688edd33ccce518bf",
+      "bytes": 121480671,
+      "sha256": "e23f6efd851a6d3b8db9dfb9a98ea447fd53ce55c6bdbccf2074b0608ebc2780",
+      "expiresAt": "2026-11-09T15:35:00Z"
+    }
+  },
+  "installed": {
+    "status": "passed",
+    "run": 40344458391,
+    "job": 121648812859,
+    "testedCommit": "03729a50f1ef352e47fd3d566e1459ffae93c2af",
+    "root": {
+      "package": "proofscript",
+      "version": "0.1.0-psc1.9",
+      "tarball": "proofscript-0.1.0-psc1.9.tgz",
+      "sha256": "b7087e3cf4941849167704c085006cb0b782ea604f5187cdaf0ccc71118f444c",
+      "bytes": 3823980,
+      "preservedPayloadFiles": 120
+    },
+    "cliRequests": 55,
+    "positiveCheckedCommands": 21,
+    "localGlobalGrammars": [
+      {
+        "scope": "local",
+        "grammar": "lean",
+        "independentlyChecked": true,
+        "initialValue": 42,
+        "editedValue": 43,
+        "illTypedReplacementPreservedPrior": true
+      },
+      {
+        "scope": "local",
+        "grammar": "ps",
+        "independentlyChecked": true,
+        "initialValue": 42,
+        "editedValue": 43,
+        "illTypedReplacementPreservedPrior": true
+      },
+      {
+        "scope": "global",
+        "grammar": "lean",
+        "independentlyChecked": true,
+        "initialValue": 42,
+        "editedValue": 43,
+        "illTypedReplacementPreservedPrior": true
+      },
+      {
+        "scope": "global",
+        "grammar": "ps",
+        "independentlyChecked": true,
+        "initialValue": 42,
+        "editedValue": 43,
+        "illTypedReplacementPreservedPrior": true
+      }
+    ],
+    "optionalFileProjectEngines": [
+      "rust",
+      "wasm-core"
+    ],
+    "allThreeAliasesLocalGlobal": true,
+    "sourceMetadataCannotSelectOutput": true,
+    "changedResourceRefused": true,
+    "applications": {
+      "status": "passed",
+      "applications": 16,
+      "cases": 264,
+      "globalCases": 8
+    },
+    "frozenSourceReplay": {
+      "schema": "psc1-cli-frozen-application-source/1",
+      "status": "passed",
+      "testedCommit": "03729a50f1ef352e47fd3d566e1459ffae93c2af",
+      "snapshotCommit": "8383c6983e5fa2f2d945b02ba4b349ab64522c64",
+      "compilerSourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+      "testScriptSha256": "9489a149693868a615f77f4600ab431d0706ddc335bc2d25aa6107103125a1ce",
+      "evidenceSha256": "6cf0a2115f32ec1c248bc3e06c26c52ee57a46706f597033d66daa16a28d4774",
+      "originalSourceAndCensusAssertions": "unchanged and passed",
+      "currentDevelopmentCompilerPromotion": false
+    },
+    "artifact": {
+      "id": 12662912295,
+      "name": "psc1-cli-toolchain-03729a50f1ef352e47fd3d566e1459ffae93c2af",
+      "bytes": 206729498,
+      "sha256": "f81f679f16050729c01a87fdb734ab1249307ff86c29c7a237d0adf572516483",
+      "expiresAt": "2027-01-24T14:56:55Z"
+    }
+  },
+  "preserved": {
+    "frozenG3": {
+      "modules": 122,
+      "sourceCoreMembers": 4742,
+      "sourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+      "priorRuns": [
+        40223062370,
+        40223086966
+      ],
+      "newG2G3": false
+    },
+    "lean": {
+      "version": "4.35.0",
+      "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "trustLevel": 0,
+      "checker": "official C++/Emscripten linear-memory Wasm default; explicit native optional"
+    },
+    "compilerWasm": "existing GC architecture",
+    "policies": [
+      "independent admission",
+      "exact source/logical-body pairing",
+      "strict original and transformed IR",
+      "semantic fuel",
+      "memory/stack/lifetime policies",
+      "negative tests",
+      "explicit unsupported ABI refusals"
+    ],
+    "compilerG1ToolTimeoutMs": 240000,
+    "checkerTimeoutMs": 120000,
+    "correctnessAndPerformanceProfilesSeparate": true
+  },
+  "attemptHistory": [
+    {
+      "head": "36a23c9e43c8a9c8a15b5a33b95fda655a48a3b6",
+      "runs": [
+        40333897931,
+        40333934949,
+        40333935336
+      ],
+      "result": "failed",
+      "cause": "root Markdown relative-link migration added one parent segment",
+      "fix": "052cb3326617b4253ce04fa33aabe6274acb038e"
+    },
+    {
+      "head": "052cb3326617b4253ce04fa33aabe6274acb038e",
+      "run": 40334096174,
+      "result": "failed",
+      "cause": "long relocated API runner lookup needed pinned formatter wrapping",
+      "fix": "c8d69bf3154e55ed4f3034a9233779074296212e"
+    },
+    {
+      "head": "c8d69bf3154e55ed4f3034a9233779074296212e",
+      "run": 40334328072,
+      "result": "failed",
+      "cause": "overescaped declaration-name matcher in the new correspondence test",
+      "fix": "428e285dc7cf90c351dbd8af542c4cf165a8cc82"
+    },
+    {
+      "head": "8a3dfa89fd85ba97a533595866f78d1c2f79bec2",
+      "result": "review-fix",
+      "cause": "retained package flavors needed canonical runtime dependencies copied/pinned"
+    },
+    {
+      "head": "c107d20234dff24cbb5682262c4ffe4533761ccd",
+      "result": "review-fix",
+      "cause": "restore original shebang headers on legacy executable CLI delegates"
+    },
+    {
+      "head": "c107d20234dff24cbb5682262c4ffe4533761ccd",
+      "run": 40336461447,
+      "job": 121624293501,
+      "result": "failed",
+      "cause": "isolated host-boundary fixture copied a relative delegate instead of canonical executable implementation",
+      "fixes": [
+        "0442ff2e4a1c945e65c9d086e434618e5b5ccc40",
+        "3d76bade93fd940e258eaf20085f003bc8ff60ad"
+      ],
+      "assertionsRemoved": 0
+    },
+    {
+      "head": "3523d9cc0d3f4b70ec5e697a3aeaba831952518e",
+      "result": "ci-scheduling-change",
+      "cause": "pull-request three-dot path filters replayed all installed tests on evidence-only checkpoint commits",
+      "fix": "trigger actual package-input pushes plus explicit manual execution; preserve every job assertion"
+    },
+    {
+      "head": "3523d9cc0d3f4b70ec5e697a3aeaba831952518e",
+      "run": 40339713227,
+      "job": 121631141939,
+      "result": "failed-final-application-replay",
+      "cause": "new supervisor path was resolved from archived source cwd, not the owning host module",
+      "fix": "559725b4031f94bbb4e89a5f734313bcac785e6b",
+      "originalFrozenSourceAndApplicationAssertionsUnchanged": true
+    }
+  ],
+  "humanTrial": {
+    "status": "pending-independent-human-participant",
+    "humanQualified": false,
+    "participantCanBeArrangedByUser": true,
+    "report": "docs/development/maintainer-trial-report.md",
+    "noAiRehearsalClaim": true
+  },
+  "remaining": [
+    "independent human comprehension trial",
+    "canonical full source assembly not newly executed; actual candidate is the recorded host-only reuse",
+    "separate actual platform publication/release qualification",
+    "broader semantic refactoring and general extensions remain outside this milestone"
+  ],
+  "merged": false,
+  "published": false,
+  "pr": "https://github.com/dwijayuda/pskernel/pull/192",
+  "documentationCheckpoint": "follows qualified implementation; documentation-only commit recorded by Git history, final CI separately linked in PR"
+}

@@ -48,6 +48,8 @@ jobs:
         working-directory: psc1
         run: |
           set -euo pipefail
+          node scripts/ci/repository-layout.mjs
+          node test/host/process-location.test.mjs
           node scripts/maintainer-docs.mjs
           node scripts/unified-selfhost-request-tests.mjs
           node scripts/development-selection-tests.mjs
@@ -76,7 +78,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: psc1-development-${{ github.sha }}
-          path: psc1/dist/development/
+          path: |
+            psc1/dist/development/
+            psc1/dist/readability/
           retention-days: 30
 
   lossless:

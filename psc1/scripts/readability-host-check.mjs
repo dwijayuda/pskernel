@@ -30,6 +30,22 @@ const ignoredMetadata = new Set([
   'start', 'end', 'loc', 'extra', 'comments',
   'leadingComments', 'trailingComments', 'innerComments',
 ]);
+const pathRelocations = {
+  "../scripts/selfhost-qualification-profiles.mjs": "./process/resource-profiles.mjs",
+  "../scripts/compiler-closure-contract.mjs": "./contracts/compiler-closure.mjs",
+  "../scripts/bounded-process.py": "./process/bounded-process.py",
+  "scripts/bounded-process.py": "host-tools/process/bounded-process.py",
+  "scripts/generated-compiler-runner.mjs": "host-tools/execution/generated-service-runner.mjs",
+  "scripts/universal-candidate-runner.mjs": "host-tools/execution/unified-candidate-runner.mjs"
+};
+// Compare executable AST after only this finite, reviewed runtime path relocation.
+const relocated = source => {
+  for (const [before, after] of Object.entries(pathRelocations))
+    source = source.split(before).join(after);
+  return source;
+};
+const canonicalFiles = {'npm-cli/universal.mjs':'npm-cli/compiler-api.mjs',
+  'npm-cli/universal-cli.mjs':'npm-cli/checked-command-cli.mjs'};
 const executableAst = source => JSON.parse(JSON.stringify(
   parse(source, {sourceType: 'module'}),
   (key, value) => ignoredMetadata.has(key) ? undefined : value,
@@ -56,8 +72,8 @@ for (const file of files) {
     cwd: root, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024,
   });
   assert.equal(feature.status, 0, file + '\n' + feature.stderr);
-  const source = fs.readFileSync(path.join(root, file), 'utf8');
-  assert.deepEqual(executableAst(source), executableAst(feature.stdout),
+  const source = fs.readFileSync(path.join(root, canonicalFiles[file] ?? file), 'utf8');
+  assert.deepEqual(executableAst(source), executableAst(relocated(feature.stdout)),
     file + ': executable AST changed from the explicit feature baseline');
   const formatted = await prettier.format(source, formatOptions);
   assert.deepEqual(executableAst(formatted), executableAst(source),
@@ -83,8 +99,8 @@ for (const file of newModules) {
     cwd: root, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024,
   });
   assert.equal(feature.status, 0, file + '\n' + feature.stderr);
-  const source = fs.readFileSync(path.join(root, file), 'utf8');
-  assert.deepEqual(executableAst(source), executableAst(feature.stdout),
+  const source = fs.readFileSync(path.join(root, canonicalFiles[file] ?? file), 'utf8');
+  assert.deepEqual(executableAst(source), executableAst(relocated(feature.stdout)),
     file + ': new dispatch module changed from its explicit feature baseline');
   const formatted = await prettier.format(source, formatOptions);
   assert.deepEqual(executableAst(formatted), executableAst(source),

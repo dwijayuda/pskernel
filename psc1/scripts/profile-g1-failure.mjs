@@ -31,7 +31,7 @@ const directory=path.join(root,'failure-cpu-profile');
 fs.mkdirSync(directory,{recursive:true});
 const input=path.join(directory,'request.json'),output=path.join(directory,'diagnostic-candidate.json');
 fs.writeFileSync(input,requestBytes,{flag:'wx'});
-const runner=path.resolve('scripts/generated-compiler-runner.mjs');
+const runner=path.resolve('host-tools/execution/generated-service-runner.mjs');
 const args=['--prof','--logfile='+path.join(directory,'v8.log'),runner,service,sha(serviceBytes),input,output];
 const start=performance.now();
 const result=spawnSync(process.execPath,args,{encoding:'utf8',timeout:240000,maxBuffer:32*1024*1024});

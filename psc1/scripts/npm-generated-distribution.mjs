@@ -95,7 +95,8 @@ for(const qfile of qfiles){
   executableSha256:pins[engine].executable,adapter:filePin(prefix+'/adapter.mjs'),
   dependencies:['artifact.json',...m.files.map(r=>r.path),'qualification.json'].map(p=>filePin(prefix+'/'+p))};
 }
-for(const file of ['scripts/compiler-closure-contract.mjs','scripts/generated-compiler-runner.mjs','scripts/selfhost-qualification-profiles.mjs','scripts/bounded-process.py',
+for(const file of ['host-tools/contracts/compiler-closure.mjs','host-tools/process/resource-profiles.mjs','host-tools/process/bounded-process.py','host-tools/execution/generated-service-runner.mjs',
+ 'scripts/compiler-closure-contract.mjs','scripts/generated-compiler-runner.mjs','scripts/selfhost-qualification-profiles.mjs','scripts/bounded-process.py',
  'host-tools/generated-rust-transport.mjs','host-tools/generated-rust-guard.mjs','host-tools/generated-compiler-session.mjs','host-tools/compiler-host-protocol.mjs','host-tools/generated-wasm-transport.mjs','host-tools/generated-target-profiles.mjs'])
  copy(path.join(root,file),path.join(stage,file));
 for(const file of ['npm-cli/generated.mjs','npm-cli/generated-entry.mjs'])copy(path.join(root,file),path.join(stage,file));
@@ -103,9 +104,9 @@ copy(path.join(root,'.lake/build/bin/psc1_independent_checker'),path.join(stage,
 fs.chmodSync(path.join(stage,'native/bin/psc1_independent_checker'),0o755);
 const distribution={schema:'psc1-installed-generated-engines/1',packageBuildCommit:process.env.GITHUB_SHA,
  nativeCoreSourceCommit:nativeDistribution.sourceCommit,checkerCommit,engines,
- checker:filePin('native/bin/psc1_independent_checker'),runner:filePin('scripts/generated-compiler-runner.mjs'),
+ checker:filePin('native/bin/psc1_independent_checker'),runner:filePin('host-tools/execution/generated-service-runner.mjs'),
  session:filePin('host-tools/generated-compiler-session.mjs'),
- hostDependencies:['host-tools/generated-rust-transport.mjs','host-tools/generated-rust-guard.mjs','host-tools/compiler-host-protocol.mjs','scripts/compiler-closure-contract.mjs','host-tools/generated-wasm-transport.mjs'].map(filePin),
+ hostDependencies:['host-tools/contracts/compiler-closure.mjs','host-tools/process/resource-profiles.mjs','host-tools/process/bounded-process.py','host-tools/execution/generated-service-runner.mjs','host-tools/generated-rust-transport.mjs','host-tools/generated-rust-guard.mjs','host-tools/compiler-host-protocol.mjs','scripts/compiler-closure-contract.mjs','host-tools/generated-wasm-transport.mjs'].map(filePin),
  nativeLibraries:nativeDistribution.bundledNativeLibraries.map(r=>filePin('native/lib/'+r.name)),
  generatedPublicationTargets:['js'],nativeOutputTargets:nativeDistribution.builtInTargets,
  unavailableGeneratedEngines:{},sharedSourceClosureDigest:"07eedac1888aad3d4192664cea8d21a515d23985f3befd6cb365d0194fee53af",allFourEngineSelfHostQualified:true,

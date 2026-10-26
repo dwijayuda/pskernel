@@ -111,6 +111,7 @@ lean_lib PsBackendTs where
   roots := #[
     `Ps.BackendTs.Type,
     `Ps.BackendTs.Expr,
+    `Ps.BackendTs.RuntimeSupport,
     `Ps.BackendTs.Module,
     `Ps.BackendTs.Checked,
     `Ps.BackendTs.Sh1Target,

@@ -1,12 +1,20 @@
 name: PSC1 project CLI and installed toolchain qualification
 on:
+  workflow_dispatch:
   push:
-    branches: [feat/psc1-cli-project-workflow-20261026]
+    branches: ['**']
     paths:
       - .github/workflows/psc1-cli.yml
       - psc1/npm-cli/**
-      - psc1/scripts/cli-*.mjs
-      - psc1/scripts/slim-universal-package.mjs
+      - psc1/host-tools/**
+      - psc1/scripts/**/*.mjs
+      - psc1/test/host/**
+      - psc1/test/installed/**
+      - psc1/docs/guides/cli.md
+      - psc1/docs/PSC1_CHECKED_DISPATCH_QUALIFICATION_2026-10-26.json
+      - psc1/scripts/slim-universal-input.json
+      - psc1/NPM_DISTRIBUTION_CONTRACT.json
+      - psc1/BACKEND_PROVIDER_CONTRACT.json
 permissions:
   contents: read
   actions: read
@@ -29,6 +37,8 @@ jobs:
           node-version: '22.23.3'
       - name: Exercise actual source capture and CLI subprocesses before assembly
         run: |
+          node scripts/ci/repository-layout.mjs
+          node test/host/process-location.test.mjs
           node --check npm-cli/proofscript-cli.mjs
           node --check npm-cli/cli-project.mjs
           node --check scripts/cli-package.mjs
@@ -77,6 +87,10 @@ jobs:
           tar xJf "$RUNNER_TEMP/wasmtime.tar.xz" -C "$RUNNER_TEMP/wasmtime"
           install -m 755 "$(find "$RUNNER_TEMP/wasmtime" -type f -name wasmtime -print -quit)" "$RUNNER_TEMP/wasmtime/wasmtime"
           echo "PSC1_WASMTIME=$RUNNER_TEMP/wasmtime/wasmtime" >> "$GITHUB_ENV"
+      - name: Execute unchanged real applications against the exact frozen source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/cli-application-regressions.mjs
       - name: Preserve every existing installed dispatch and publication regression
         run: |
           node scripts/checked-component-tests.mjs
@@ -89,7 +103,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          node scripts/cli-application-regressions.mjs
           node scripts/generated-io-installed-candidates.mjs
           node scripts/checked-publication-types.mjs
       - name: Qualify candidate only after all previous and new gates pass
@@ -100,7 +113,7 @@ jobs:
           assert.equal(JSON.parse(fs.readFileSync('dist/cli/installed.json')).status,'passed');
           for(const f of ['installed-qualification.json','checked-dispatch.json','checked-publication.json','checked-publication-types.json'])
             assert.equal(JSON.parse(fs.readFileSync('dist/slim-universal/'+f)).status,'passed');
-          r.scope='qualified Linux host CLI milestone; unchanged compiler/kernel/provider payloads; human trial pending';
+          r.scope='qualified Linux host layout/CLI milestone; unchanged compiler/kernel/provider payloads; human trial pending';
           r.cliQualification='passed';r.previousInstalledAndApplicationGates='passed';
           fs.writeFileSync(file,JSON.stringify(r,null,2)+'\n');
           console.log('PSC1_CLI_QUALIFIED '+JSON.stringify({commit:process.env.GITHUB_SHA,sha256:r.sha256,bytes:r.bytes,version:r.version}));

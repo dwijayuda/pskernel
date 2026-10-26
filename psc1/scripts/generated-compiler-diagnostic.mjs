@@ -26,12 +26,13 @@ const checker = path.join(root, '.lake/build/bin/psc1_independent_checker');
 const checkerHash = sha(fs.readFileSync(checker));
 const seed = path.join(root, '.lake/build/bin/psc1_js_service_seed');
 const seedHash = sha(fs.readFileSync(seed));
-const runner = path.join(root, 'scripts/generated-compiler-runner.mjs');
+const runner = path.join(root, 'host-tools/execution/generated-service-runner.mjs');
 const runnerHash = sha(fs.readFileSync(runner));
 const nodeHash = sha(fs.readFileSync(process.execPath));
 const hostModuleInventory = ['scripts/generated-compiler-diagnostic.mjs',
   'host-tools/generated-compiler-session.mjs','host-tools/js-generation-manifest.mjs',
-  'host-tools/compiler-host-protocol.mjs','scripts/compiler-closure-contract.mjs'].map(file =>
+  'host-tools/compiler-host-protocol.mjs','scripts/compiler-closure-contract.mjs',
+  'host-tools/contracts/compiler-closure.mjs','host-tools/execution/generated-service-runner.mjs'].map(file =>
     ({path:file,sha256:sha(fs.readFileSync(path.join(root,file)))}));
 const hostControllerHash = sha(JSON.stringify(hostModuleInventory));
 function verifyFixedTools() {

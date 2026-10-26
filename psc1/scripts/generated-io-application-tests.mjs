@@ -82,8 +82,8 @@ try {
       const session = createGeneratedJsCompilerSession({
         requestId: wire[1], sources, entryModule: wire[5], assurance: wire[4],
         outputAbi: 'io-dispatcher', serviceFile: adapter, serviceSha256: sha(fs.readFileSync(adapter)),
-        runnerFile: path.resolve('scripts/generated-compiler-runner.mjs'),
-        runnerSha256: sha(fs.readFileSync('scripts/generated-compiler-runner.mjs')),
+        runnerFile: path.resolve('host-tools/execution/generated-service-runner.mjs'),
+        runnerSha256: sha(fs.readFileSync('host-tools/execution/generated-service-runner.mjs')),
         checkerExecutable: checker, checkerSha256, publicationRoot: store, serviceDependencies: dependencies,
       });
       const receipt = session.execute();

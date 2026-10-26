@@ -1,109 +1,98 @@
 # PSC1 AI work state
 
-Updated 2026-10-26 Asia/Jakarta. Active draft [PR#191](https://github.com/dwijayuda/pskernel/pull/191),
-feat/psc1-cli-project-workflow-20261026, follows PR#190 at
-10db75c3bb45725c259d4549228dbe6a7ecc1d00.
-Qualified implementation/test head: 9b251a971819ecfc5450ac71e1caca967ec6c947.
-Later checkpoint commits contain documentation/receipts only. Fetch live HEAD
-and actual terminal CI before writes. Preserve expected-HEAD, single-parent,
-non-force history. Use connected GitHub/Linux Actions only.
-No merge or npm registry publication is authorized.
+Updated 2026-10-26 Asia/Jakarta. Active draft [PR #192](https://github.com/dwijayuda/pskernel/pull/192),
+refactor/psc1-layout-20261026, follows PR #191 at b426f9763ed2a576135ed2089671d48e21f1ff32.
+Qualified implementation: 03729a50f1ef352e47fd3d566e1459ffae93c2af.
+Later checkpoint changes are documentation/evidence only. Fetch live HEAD and
+terminal CI before writes; preserve single-parent expected-HEAD non-force history.
+Use connected GitHub/Linux Actions only. No merge or npm publication is authorized.
 
-[One roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md), [CLI guide](docs/PSC1_CLI.md),
-[research and decisions](docs/PSC1_TYPESCRIPT_WORKFLOW_RESEARCH.md),
-[exact CLI receipt](docs/PSC1_CLI_QUALIFICATION_2026-10-26.json),
-[preceding work state](docs/history/AI_WORK_STATE_BEFORE_CLI_2026-10-26.md).
+[One roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md),
+[repository navigation](docs/reference/repository-map.md),
+[names/ownership](docs/reference/naming-and-ownership.md),
+[exact receipt](docs/PSC1_LAYOUT_QUALIFICATION_2026-10-26.json),
+[prior checkpoint](docs/history/AI_WORK_STATE_BEFORE_LAYOUT_2026-10-26.md).
 
-## Implemented and qualified on Linux
+## Implemented and Linux-qualified
 
-The installed proofscript/psc/psc1 aliases use a small developer adapter around
-the unchanged checked command. Help and no-argument help, safe init/--init,
-a conventional text version, -p/-o/equals forms, source-only file projects,
-current-directory project selection, --showConfig and text/JSON diagnostics
-are implemented. Existing source commands, legacy inline projects, success
-JSON receipts and verified --identity remain. --version deliberately changes
-from JSON to text; machine callers use --identity.
+Six current guides have purpose-specific canonical locations and old URL pointers.
+Historical STATUS/NPM work-state bytes and the previous roadmap are preserved.
+The roadmap now contains unfinished work; eighteen compiler package guides identify
+representations, source entries, dependency boundaries, refusals/resources and tests.
 
-Projects cannot choose engine, kernel, SDK, output, service or checker tools.
-File projects capture declared relative regular non-symlink sources in order,
-preserving exact UTF8/BOM bytes and checking snapshot changes. At most 4,096
-files; 128 MiB per input/aggregate source/encoded project; inner limits unchanged.
-init never overwrites. A late config failure can leave its new source file.
-showConfig has logicalAdmission:not-run and publication:not-requested.
-The adapter does not fabricate compiler spans or introduce another frontend.
-Compiler execution, output target and independent checking remain separate.
+Runtime supervisor/policy/validators/runners have host-owned process/contracts/
+execution locations. Canonical compiler-api, checked-command and native-workspace
+CLI names distinguish roles; old command/API paths delegate with original shebangs.
+CLI assembly and behavior tests have purpose-specific implementation locations.
+Every existing assertion and public command/API remains.
 
-The source-linked guide contains init/check/build/explicit JS consumption,
-npm scripts, source configuration, engine/target/checker mapping, failure and
-resource boundaries. Research uses official TypeScript/npm/Node/VSCode sources;
-developer behavior hypotheses are not presented as survey results.
+Three TypeScript stack/UTF-8 runtime definitions/comments move unchanged into
+RuntimeSupport.lean with an explicit Lake root. Remaining Module bytes are unchanged
+except the import/extraction. Both generated readable runtime views derive from
+these single source definitions. Original Wasm extraction and host AST/format
+baselines remain; finite path/import-expression changes are separately recorded.
+This is bounded correspondence, not a whole-compiler preservation theorem.
 
-## Exact Linux evidence
+CI maps 2,261 tracked paths/1,128 static import edges, checks 265 current links and
+14 finite move/path relationships. Its map is navigation, not semantic authority.
+A 359-file automation audit corrected eight runner consumers and protected tool
+inventories. Isolated copies use canonical implementations, not relative delegates.
+The supervisor now resolves from its owning module, independently of source cwd.
+A real child process from distinct source/child directories verifies this and the
+original timeout ceiling. Policies and supervisor implementation bytes are unchanged.
 
-CLI/toolchain run **40314294152 /121543173394** passes at the qualified head:
-- 19 source/CLI subprocess groups and all seven historical host AST/format gates.
-- 55 actual installed requests, including21 positive checked commands;
- both grammars, local and global, all three aliases, npm run/exec, a multi-module
- file project, optional Rust/Wasm engines and installed-resource tamper refusal.
-- Four full example/edit/refusal flows observe42 then43; ill-typed replacement
- preserves each prior generation pointer and artifact bytes.
-- All existing offline installed/kernel/candidate/negative, component/provider,
- transaction/SIGKILL, checked publication, actual application/IO consumer and
- packed-TypeScript declaration gates remain and pass. Exact counts and hashes
- are in the receipt and immutable Actions artifact.
+## Exact completed evidence
 
-Ordinary source **40314305497**, full **121548383462**, gate **121559536094**
-passes every selected dependency and **37/37 finite Practical Core criteria**.
-The optional benchmark remains skipped/unqualified. This is finite source
-qualification, not a final universal release or a whole-compiler proof.
-Current source integration executes 28 before/after artifacts across both
-grammars/seven targets; 123 modules / 4,742 Core members remain separate from G3.
+Source run 40344469855 passes every selected dependency, full121654010070 and
+gate121669878787: 37/37 finite Practical Core criteria, zero blocked.
+Benchmark remains skipped/unqualified. Tested merge
+4c1c5ca2bb4dc5b783b2857688edd33ccce518bf and implementation share tree
+17b952f41ba3c612387a7d8fffd691d4e84e5b3a.
+Source integration executes 28 before/after artifacts across both grammars/seven
+backends. Both compiler inventories have 124 modules/4742 Core members:
+Lean 9d6dd14bffa5e358d86d7b73776d9348fcaeda3e3fb8630803622f8728347099,
+PS 0fcbe8568a7a37bd4cc0322b65e040b67e4aef637d8069cc821bce83b53d3e66.
+Lossless365 captures/49 refusals and both complete source-ownership inventories pass.
+Tracing remains recorded term bases; broader edits still refuse.
+Current-source Wasm G1/run 40344458240 and the checked walkthrough (4 builds/2 refusals)
+pass. Normal source also passes actual JS G1 and all 36 host-boundary checks.
 
-## Installable artifact and preserved payloads
+Installed run 40344458391/job 121648812859 passes 55 actual local/global CLI requests,
+all three aliases, both grammars, optional engines and unchanged-source refusal
+preservation. All existing installed/kernel/candidate/provider/component/publication/
+IO/application/type regressions pass; actual applications:16 builds/264 cases/
+8 global groups. The application replay preserves exact ancestral8383c698 source,
+census/closure/admission assertions and physical output stores.
+Failed attempts and their fixes remain in the receipt and Git history.
 
-Root `proofscript@0.1.0-psc1.8`: **3822242 bytes**, SHA256
-c9cae0ba95d3f55f1d4e88d03b9247b97f8c88895588867828e514e55513de67.
-Actions artifact **12648248091**, ZIP SHA256
-dfee107e7615ebb2e3f2d7bcbff831369509fe166c936086e448d9f76d08c54f.
-Use its eleven exact tarballs and package-receipt.json. Nothing is published
-to the registry. Default JS/TS execution and the genuine official Lean4.35
-linear-memory Wasm checker remain in the root; optional engines/SDKs/providers
-are explicit. Root installation remains offline, script-free and SDK-free.
+## Selected unpublished package
 
-All 126 retained root payload files are byte-identical. Component/Python/PHP
-tools are .8 metadata-only repacks: every non-package.json file is identical.
-Remove their unnecessary reverse optional peer to exactly the .7 root; it let
-npm prune a .8 compiler when installing the tools. The root still requires
-exact optional versions, complete inventories and resource hashes. Rust/Wasm
-compiler payload packages remain .7. No worker/runtime/compiler/kernel is rebuilt.
-Canonical full assembly selects the same new CLI and decoupled tool metadata;
-the qualified bytes in this slice are the explicitly recorded host-only assembly.
+proofscript@0.1.0-psc1.9: 3,823,980 bytes, SHA256
+b7087e3cf4941849167704c085006cb0b782ea604f5187cdaf0ccc71118f444c.
+Artifact 12662912295, ZIP SHA256
+f81f679f16050729c01a87fdb734ab1249307ff86c29c7a237d0adf572516483,
+contains eleven exact tarballs, detached receipts and application evidence.
+Use matching receipt versions/hashes. GitHub artifact downloads require sign-in.
+This qualifies host-only reuse/overlays; canonical full source assembly was not
+newly executed. Retained native packaging is tested by the full source job.
 
-Frozen packaged G3 source: 122 modules / 4,742 members, closure
+All compiler/kernel/provider executable payloads retain their original identities.
+Frozen G3 source remains122 modules/4742 members, closure
 073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9.
-Four original G3 fixed points remain JS/TS/Wasm 40223062370 and Rust 40223086966.
-Application replay uses physical output stores and the exact ancestral
-8383c6983e5fa2f2d945b02ba4b349ab64522c64 source snapshot, retaining every original
-source/census/closure/contract/admission/runtime assertion. A separate receipt
-records source/test commits and archived stores. A symlinked harness output
-was correctly refused; the production store guard was not weakened.
-Failed attempts remain in the receipt, never relabelled successful.
+Original JS/TS/Wasm 40223062370 and Rust 40223086966 fixed points are preserved.
+Current124-module source is distinct: no new G2/G3 or frozen-source promotion.
 
-## Continue and remaining boundaries
+## Remaining boundaries
 
-The user can arrange an independent maintainer. No unassisted result has been
-received: humanQualified:false. CI and the AI-authored exercise rehearsal are
-not human comprehension evidence. Gather the participant result and fix actual
-ambiguities. Next CLI work is compiler-origin structured diagnostics/editor
-integration, then qualified watch/incremental dependency/cancellation behavior.
-Automatic source packages/general extensions and additional platform publication
-remain separate roadmap items. Source projects must never grant host authority.
+The user can arrange an independent maintainer; no unassisted result is received.
+humanQualified:false. Use the exercise and blank report; AI/CI rehearsal is not
+human comprehension evidence. Historical controllers retain stable paths.
+Broader semantic refactors/extensions, final reproduction and actual additional
+platform publication remain separate roadmap work. No final universal release.
 
-Official Lean 4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc, trust0,
-independent admission, strict original/transformed IR, source/body pairing and
-semantic fuel, negatives, memory/stack/lifetime policies remain unchanged.
-Compiler/tool requests 240s; checker 120s. Manual G2/G3 correctness and original
-240-second performance targets remain separate. No new G2/G3 qualification,
-compiler-source promotion, whole-compiler preservation theorem, macOS/Windows
-publication or final universal release is claimed. Kernel Wasm stays official
-C++/Emscripten linear memory; compiler Wasm stays GC.
+Official Lean 4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/trust 0,
+independent checking, exact source/body pairing, strict original/transformed IR,
+fuel/negative/memory/stack/lifetime policies remain. Compiler/tools/G1 stay 240s;
+checker120s; manual correctness profiles and 240s performance remain separate.
+Kernel-Wasm stays official C++/Emscripten linear memory; compiler-Wasm stays GC.
+Python/PHP remain optional. All seven mappings and prior qualifications remain.

@@ -17,7 +17,7 @@ assert.equal(diagnostic.commit,process.env.GITHUB_SHA);
 assert.ok(diagnostic.completedCorpusGenerations.includes(1));
 const service=path.resolve('dist/generated-compiler/G1.mjs');
 const checker=path.resolve('.lake/build/bin/psc1_independent_checker');
-const runner=path.resolve('scripts/generated-compiler-runner.mjs');
+const runner=path.resolve('host-tools/execution/generated-service-runner.mjs');
 assert.equal(sha(fs.readFileSync(service)),manifest.serviceSha256);
 assert.equal(sha(fs.readFileSync(checker)),manifest.checkerSha256);
 assert.equal(sha(fs.readFileSync(runner)),manifest.runnerSha256);

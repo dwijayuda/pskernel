@@ -46,11 +46,13 @@ const native = path.join(root, '.lake/build/bin/psc1');
 const nativeIdentity = identity(native);
 copy(native, path.join(stage, 'native/bin/psc1'));
 fs.chmodSync(path.join(stage, 'native/bin/psc1'), 0o755);
-for (const file of ['psc.js', 'libraries.mjs']) copy(path.join(root, 'npm-cli', file), path.join(stage, 'npm-cli', file));
+for (const file of ['psc.js', 'native-workspace-cli.mjs', 'libraries.mjs']) copy(path.join(root, 'npm-cli', file), path.join(stage, 'npm-cli', file));
 fs.chmodSync(path.join(stage, 'npm-cli/psc.js'), 0o755);
 copy(path.join(root, 'NATIVE_SOURCE_PIN.json'), path.join(stage, 'NATIVE_SOURCE_PIN.json'));
 copy(path.join(root,'BACKEND_PROVIDER_CONTRACT.json'),path.join(stage,'BACKEND_PROVIDER_CONTRACT.json'));
 copy(path.join(root, 'profile.json'), path.join(stage, 'profile.json'));
+for (const directory of ['process','contracts','execution'])
+  copy(path.join(root,'host-tools',directory),path.join(stage,'host-tools',directory));
 for (const item of fs.readdirSync(path.join(root, 'host-tools'), { withFileTypes: true })) {
   if (item.isFile() && !optionalHostResources.includes(item.name) && item.name !== '.npmrc' && item.name !== 'package-lock.json' && !item.name.startsWith('test-')) {
     copy(path.join(root, 'host-tools', item.name), path.join(stage, 'host-tools', item.name));

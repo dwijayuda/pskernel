@@ -1,7 +1,7 @@
 # Current capabilities and evidence scope
 
 The newer [.9 layout milestone](PSC1_LAYOUT_QUALIFICATION_2026-10-26.json) passes
-source40344469855 (37/37 finite criteria), current-source WasmG1/40344458240 and
+source 40344469855 (37/37 finite criteria), current-source WasmG1/40344458240 and
 installed40344458391. It preserves the frozen122-module G3 source/executables;
 current124-module source and its new ownership/module paths are qualified separately.
 There is no new G2/G3, whole-compiler preservation or final cross-platform claim.
@@ -35,7 +35,7 @@ development source from packaged compilers. Historical receipts stay immutable.
 
 All rows describe actual Linux qualification in the
 [dispatch receipt](PSC1_CHECKED_DISPATCH_QUALIFICATION_2026-10-26.json).
-Actual installed run40250645368 and source run40250678016 pass. Final docs
+Actual installed run 40250645368 and source run 40250678016 pass. Final docs
 40254268130 pass using that source baseline. These IDs are evidence for their
 exact commits, not a moving latest-HEAD claim.
 

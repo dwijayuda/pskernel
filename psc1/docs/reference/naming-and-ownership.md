@@ -16,7 +16,7 @@ over utils/common/manager. Existing backend-common identities remain. Python/Car
 follow their own language/tool naming; do not force one spelling across languages.
 
 Distinguish execution engine, seven output targets, optional provider and independent
-official Lean4.35 checker. Candidate is unadmitted output; validated IR is not a
+official Lean 4.35 checker. Candidate is unadmitted output; validated IR is not a
 preservation theorem; admission requires actual acceptance of exact canonical bytes.
 PsVerifiedIr/PsValidatedIr wrappers are data, not unforgeable certificates.
 

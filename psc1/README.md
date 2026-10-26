@@ -8,7 +8,7 @@ Compiler execution, output target and checking are separate choices.
 
 The [qualified .9 layout milestone](./docs/PSC1_LAYOUT_QUALIFICATION_2026-10-26.json)
 adds explicit runtime/CLI ownership, categorized guides, package navigation and a
-body-preserving TypeScript runtime extraction. The selected root is3,823,980 bytes;
+body-preserving TypeScript runtime extraction. The selected root is 3,823,980 bytes;
 its frozen G3/compiler/kernel/provider payloads retain their original identities.
 
 Start with the [project CLI/install guide](./docs/guides/cli.md),
@@ -37,7 +37,7 @@ The supported ProofScript spelling is:
 def invert(flag : Bool) : Bool := if (flag) { false } else { true }
 ```
 
-With Node22.23.3 and the qualified local unpublished tarball:
+With Node 22.23.3 and the qualified local unpublished tarball:
 
 ```sh
 npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1.9.tgz
@@ -48,7 +48,7 @@ npx --no-install psc build Main.ps --target wasm-core --publication-protocol por
 
 The default root requires no compiler SDK or install-time build. Optional output
 consumers are explicit: TypeScript7.0.2 plus its pinned platform binary for TS;
-the pinned Rust1.90.0 SDK and separate consumer package for Rust. JS/Wasm output
+the pinned Rust 1.90.0 SDK and separate consumer package for Rust. JS/Wasm output
 requires neither. [Checked targets and publication](./docs/PSC1_CHECKED_PUBLICATION.md)
 documents immutable artifacts, runtime loaders, source encoding, ABI bounds and
 failure handling. Checked component output uses an explicit optional validator
@@ -61,12 +61,12 @@ describes the additional packages, checks and limitations.
 Qualified packaged G3 source:122 modules/4742 Core members, closure
 `073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9`.
 All four genuine G1/G2/G3 chains and exact fixed points passed for this source:
-JS/TS/Wasm40223062370; Rust40223086966.
+JS/TS/Wasm 40223062370; Rust 40223086966.
 [Current generated-IO receipt](./docs/PSC1_GENERATED_IO_QUALIFICATION_2026-10-26.json)
 retains the source, generation and preceding installed-application evidence.
 The [current dispatch receipt](./docs/PSC1_CHECKED_DISPATCH_QUALIFICATION_2026-10-26.json)
 records the exact installed replay and source gate, including all 37 finite criteria.
-The preceding .7 root was3,811,703 bytes; the selected .9 root is3,823,980 bytes.
+The preceding .7 root was3,811,703 bytes; the selected .9 root is 3,823,980 bytes.
 Optional native payloads remain separate. Use the exact layout receipt.
 Later development refactors have distinct source inventories and qualification;
 see AI_WORK_STATE.md and the maintainability receipt.

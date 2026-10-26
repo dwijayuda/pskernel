@@ -59,7 +59,7 @@ those authorities; they do not create qualification.
 
 - [Checked grammar conversion (R3)](./PSC1_SOURCE_CONVERSION_QUALIFICATION_2026-10-25.json):
   implementation fa265940, source closure 77e2173d; conversion40206625342,
-  genuine WasmG1 40206504499 and readable source artifact40206663537.
+  genuine WasmG1 40206504499 and readable source artifact 40206663537.
   Ordinary source 40206628424 passes 37/37, zero blocked. Exact source/publication boundaries and artifacts are in the receipt.
 
 - [Read-only declaration ownership (R2a)](./PSC1_SOURCE_OWNERSHIP_QUALIFICATION_2026-10-25.json):
@@ -115,7 +115,7 @@ release item; the preceding generated IO/npm milestone remains qualified.
 ## Qualified checked publication
 
 PR #188:Linux transaction and four-target installed qualification40238538092,
-source37/37 and all selected dependencies40238649527. See the current receipt
+source 37/37 and all selected dependencies40238649527. See the current receipt
 and installation guide above. Other-platform publication remains disabled.
 The new BEFORE_CHECKED_PUBLICATION snapshots reproduce563ee855 verbatim;
 resolve their original relative links at that commit and original paths.

@@ -1,7 +1,7 @@
 # PSC1 development roadmap
 
 Updated 2026-10-26 Asia/Jakarta. This is the authoritative remaining-work queue.
-Practical Core v1 remains frozen at14 feature families and37 finite criteria.
+Practical Core v1 remains frozen at14 feature families and 37 finite criteria.
 Completed detail is preserved in [the previous roadmap](history/ROADMAP_BEFORE_LAYOUT_2026-10-26.md)
 and [dated evidence](evidence/README.md).
 
@@ -12,8 +12,8 @@ Runtime path/entry-point changes and a body-preserving TypeScript runtime extrac
 passed Linux qualification. [The checkpoint](../AI_WORK_STATE.md) distinguishes
 implementation from qualification.
 
-The preceding .8 host passed installed run40314294152 at9b251a97.
-Source run40314305497 passed37/37 finite Practical Core criteria.
+The preceding .8 host passed installed run 40314294152 at9b251a97.
+Source run 40314305497 passed37/37 finite Practical Core criteria.
 Frozen G3 executors retain122 modules/4742 Core members and closure
 073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9.
 Before this extraction, development source has123 modules. Later source builds
@@ -26,7 +26,7 @@ own exact prior scope, identities and limitations.
 
 | Order | Work | Status and finite acceptance |
 | --- | --- | --- |
-| 1 | Repository organization | Qualified: [receipt](PSC1_LAYOUT_QUALIFICATION_2026-10-26.json). Source40344469855 passes37/37; installed40344458391 and current-source WasmG1/40344458240 pass. Canonical owners/compatibility paths, exact move/path checks, generated navigation and unchanged frozen payloads. Human understanding is separate. |
+| 1 | Repository organization | Qualified: [receipt](PSC1_LAYOUT_QUALIFICATION_2026-10-26.json). Source 40344469855 passes 37/37; installed40344458391 and current-source WasmG1/40344458240 pass. Canonical owners/compatibility paths, exact move/path checks, generated navigation and unchanged frozen payloads. Human understanding is separate. |
 | 2 | Independent maintainer trial | Pending human participation; the user can arrange a maintainer. Record commit, navigation mistakes, elapsed time, assistance and a real small change. No AI/CI comprehension claim. |
 | 3 | Compiler-origin structured diagnostics/editor integration | Pending: actual spans/provenance, both grammars, machine/human consumers and malformed-input refusals. |
 | 4 | Qualified watch/incremental behavior | Pending: dependency changes, cancellation, stale results, resource bounds and publication preservation. No second semantic compiler. |
@@ -41,10 +41,10 @@ own exact prior scope, identities and limitations.
 
 ## Fixed policies
 
-Official Lean4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc, trust0,
+Official Lean 4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc, trust 0,
 independent admission, exact source/logical-body pairing, strict original/transformed
 IR, semantic fuel, memory/stack/lifetime policies, negatives and ABI refusals remain.
-G1/compiler/tools/corpus remain240 seconds; checking remains120 seconds.
+G1/compiler/tools/corpus remain 240 seconds; checking remains120 seconds.
 Manual G2/G3 correctness profiles remain separate from240-second performance.
 Kernel-Wasm remains official C++/Emscripten linear memory; compiler-Wasm retains GC.
 PSKernel-Core remains independent. Use dependency-selected CI/exact artifacts;

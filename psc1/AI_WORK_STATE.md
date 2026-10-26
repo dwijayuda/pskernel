@@ -43,21 +43,21 @@ original timeout ceiling. Policies and supervisor implementation bytes are uncha
 
 ## Exact completed evidence
 
-Source run40344469855 passes every selected dependency, full121654010070 and
+Source run 40344469855 passes every selected dependency, full121654010070 and
 gate121669878787: 37/37 finite Practical Core criteria, zero blocked.
 Benchmark remains skipped/unqualified. Tested merge
 4c1c5ca2bb4dc5b783b2857688edd33ccce518bf and implementation share tree
 17b952f41ba3c612387a7d8fffd691d4e84e5b3a.
-Source integration executes28 before/after artifacts across both grammars/seven
-backends. Both compiler inventories have124 modules/4742 Core members:
-Lean9d6dd14bffa5e358d86d7b73776d9348fcaeda3e3fb8630803622f8728347099,
-PS0fcbe8568a7a37bd4cc0322b65e040b67e4aef637d8069cc821bce83b53d3e66.
+Source integration executes 28 before/after artifacts across both grammars/seven
+backends. Both compiler inventories have 124 modules/4742 Core members:
+Lean 9d6dd14bffa5e358d86d7b73776d9348fcaeda3e3fb8630803622f8728347099,
+PS 0fcbe8568a7a37bd4cc0322b65e040b67e4aef637d8069cc821bce83b53d3e66.
 Lossless365 captures/49 refusals and both complete source-ownership inventories pass.
 Tracing remains recorded term bases; broader edits still refuse.
-Current-source Wasm G1/run40344458240 and the checked walkthrough (4 builds/2 refusals)
-pass. Normal source also passes actual JS G1 and all36 host-boundary checks.
+Current-source Wasm G1/run 40344458240 and the checked walkthrough (4 builds/2 refusals)
+pass. Normal source also passes actual JS G1 and all 36 host-boundary checks.
 
-Installed run40344458391/job121648812859 passes55 actual local/global CLI requests,
+Installed run 40344458391/job 121648812859 passes 55 actual local/global CLI requests,
 all three aliases, both grammars, optional engines and unchanged-source refusal
 preservation. All existing installed/kernel/candidate/provider/component/publication/
 IO/application/type regressions pass; actual applications:16 builds/264 cases/
@@ -69,7 +69,7 @@ Failed attempts and their fixes remain in the receipt and Git history.
 
 proofscript@0.1.0-psc1.9: 3,823,980 bytes, SHA256
 b7087e3cf4941849167704c085006cb0b782ea604f5187cdaf0ccc71118f444c.
-Artifact12662912295, ZIP SHA256
+Artifact 12662912295, ZIP SHA256
 f81f679f16050729c01a87fdb734ab1249307ff86c29c7a237d0adf572516483,
 contains eleven exact tarballs, detached receipts and application evidence.
 Use matching receipt versions/hashes. GitHub artifact downloads require sign-in.
@@ -79,7 +79,7 @@ newly executed. Retained native packaging is tested by the full source job.
 All compiler/kernel/provider executable payloads retain their original identities.
 Frozen G3 source remains122 modules/4742 members, closure
 073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9.
-Original JS/TS/Wasm40223062370 and Rust40223086966 fixed points are preserved.
+Original JS/TS/Wasm 40223062370 and Rust 40223086966 fixed points are preserved.
 Current124-module source is distinct: no new G2/G3 or frozen-source promotion.
 
 ## Remaining boundaries
@@ -90,9 +90,9 @@ human comprehension evidence. Historical controllers retain stable paths.
 Broader semantic refactors/extensions, final reproduction and actual additional
 platform publication remain separate roadmap work. No final universal release.
 
-Official Lean4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/trust0,
+Official Lean 4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/trust 0,
 independent checking, exact source/body pairing, strict original/transformed IR,
-fuel/negative/memory/stack/lifetime policies remain. Compiler/tools/G1 stay240s;
-checker120s; manual correctness profiles and240s performance remain separate.
+fuel/negative/memory/stack/lifetime policies remain. Compiler/tools/G1 stay 240s;
+checker120s; manual correctness profiles and 240s performance remain separate.
 Kernel-Wasm stays official C++/Emscripten linear memory; compiler-Wasm stays GC.
 Python/PHP remain optional. All seven mappings and prior qualifications remain.

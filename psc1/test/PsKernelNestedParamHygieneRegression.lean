@@ -91,10 +91,10 @@ def main : IO Unit := do
     unless psKernelSimpleNestedCtorParamCapture type 1 do
       throw (IO.userError ("missed capture at " ++ label))
     IO.println ("PSC1_NESTED_PARAM_HYGIENE_ASSERT capture-" ++ label)
-  let prefix := psKernelSimpleInternalName "nestedCtorParam"
-  unless !psKernelSimpleNestedCtorParamCapture (.fvar (.num prefix 1)) 1 &&
-      psKernelSimpleNestedCtorParamCapture (.fvar (.num prefix 1)) 2 &&
-      !psKernelSimpleNestedCtorParamCapture (.fvar (.num prefix 1000000000000000000)) 1 &&
+  let paramNamespace :=  psKernelSimpleInternalName "nestedCtorParam"
+  unless !psKernelSimpleNestedCtorParamCapture (.fvar (.num paramNamespace 1)) 1 &&
+      psKernelSimpleNestedCtorParamCapture (.fvar (.num paramNamespace 1)) 2 &&
+      !psKernelSimpleNestedCtorParamCapture (.fvar (.num paramNamespace 1000000000000000000)) 1 &&
       !psKernelSimpleNestedCtorParamCapture (.fvar (nm "other")) 1 &&
       !psKernelSimpleNestedCtorParamCapture f 0 do
     throw (IO.userError "parameter namespace/index scope changed")

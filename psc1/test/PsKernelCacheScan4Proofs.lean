@@ -6,60 +6,58 @@ import Lean
    Equality covers arbitrary lists and arenas, including malformed
    references; it does not assert that malformed internal state is authorized. -/
 namespace PsKernelCacheScan4Proofs
-theorem map_scan_four_preserves_every_expression_list_and_order
+private theorem map_scheduler_equals_actual_original
+    (scheduler : List (Prod PsKernelExpr PsKernelExpr))
     (expr : PsKernelExpr) (entries : List (Prod PsKernelExpr PsKernelExpr)) :
-    psKernelExprMapGetIn4 expr entries = psKernelExprMapGetIn expr entries := by
-  have allLengths : ∀ n, ∀ (xs : List (Prod PsKernelExpr PsKernelExpr)),
-      xs.length = n → ∀ query, psKernelExprMapGetIn4 query xs = psKernelExprMapGetIn query xs := by
-    intro n
-    induction n using Nat.strongRecOn with
-    | ind n ih =>
-      intro xs lengthEq query
-      cases xs with
+    psKernelExprMapScanFour scheduler expr entries = psKernelExprMapGetIn expr entries := by
+  induction scheduler generalizing entries with
+  | nil => rfl
+  | cons first rest ih =>
+      cases entries with
       | nil => rfl
       | cons a as =>
         cases as with
-        | nil => rfl
+        | nil => simp only [psKernelExprMapScanFour,psKernelExprMapGetIn]
         | cons b bs =>
           cases bs with
-          | nil => rfl
+          | nil => simp only [psKernelExprMapScanFour,psKernelExprMapGetIn]
           | cons c cs =>
             cases cs with
-            | nil => rfl
-            | cons d tail =>
-              have smaller : tail.length < n := by simp_all; omega
-              have recurse := ih tail.length smaller tail rfl query
-              rw [psKernelExprMapGetIn4]
-              simp only [recurse, psKernelExprMapGetIn]
-  exact allLengths entries.length entries rfl expr
+            | nil => simp only [psKernelExprMapScanFour,psKernelExprMapGetIn]
+            | cons d tail => simp only [psKernelExprMapScanFour,ih,psKernelExprMapGetIn]
+
+private theorem whnf_scheduler_equals_actual_original
+    (scheduler entries : List PsKernelExprV2WhnfCacheEntry)
+    (arena : PsKernelExprV2PagedArena) (source hash : Nat) :
+    psKernelExprV2WhnfCacheScanFour scheduler entries arena source hash =
+      psKernelExprV2WhnfCacheFindWorker entries arena source hash := by
+  induction scheduler generalizing entries with
+  | nil => rfl
+  | cons first rest ih =>
+      cases entries with
+      | nil => rfl
+      | cons a as =>
+        cases as with
+        | nil => simp only [psKernelExprV2WhnfCacheScanFour,psKernelExprV2WhnfCacheFindWorker]
+        | cons b bs =>
+          cases bs with
+          | nil => simp only [psKernelExprV2WhnfCacheScanFour,psKernelExprV2WhnfCacheFindWorker]
+          | cons c cs =>
+            cases cs with
+            | nil => simp only [psKernelExprV2WhnfCacheScanFour,psKernelExprV2WhnfCacheFindWorker]
+            | cons d tail => simp only [psKernelExprV2WhnfCacheScanFour,ih,psKernelExprV2WhnfCacheFindWorker]
+
+theorem map_scan_four_preserves_every_expression_list_and_order
+    (expr : PsKernelExpr) (entries : List (Prod PsKernelExpr PsKernelExpr)) :
+    psKernelExprMapGetIn4 expr entries = psKernelExprMapGetIn expr entries :=
+  map_scheduler_equals_actual_original entries expr entries
 
 theorem whnf_scan_four_preserves_every_arena_error_hash_and_first_hit
     (entries : List PsKernelExprV2WhnfCacheEntry)
     (arena : PsKernelExprV2PagedArena) (source hash : Nat) :
-    psKernelExprV2WhnfCacheFindWorker4 entries arena source hash = psKernelExprV2WhnfCacheFindWorker entries arena source hash := by
-  have allLengths : ∀ n, ∀ (xs : List PsKernelExprV2WhnfCacheEntry), xs.length = n →
-      ∀ owner root key, psKernelExprV2WhnfCacheFindWorker4 xs owner root key = psKernelExprV2WhnfCacheFindWorker xs owner root key := by
-    intro n
-    induction n using Nat.strongRecOn with
-    | ind n ih =>
-      intro xs lengthEq owner root key
-      cases xs with
-      | nil => simp only [psKernelExprV2WhnfCacheFindWorker4, psKernelExprV2WhnfCacheFindWorker]
-      | cons a as =>
-        cases as with
-        | nil => simp only [psKernelExprV2WhnfCacheFindWorker4, psKernelExprV2WhnfCacheFindWorker]
-        | cons b bs =>
-          cases bs with
-          | nil => simp only [psKernelExprV2WhnfCacheFindWorker4, psKernelExprV2WhnfCacheFindWorker]
-          | cons c cs =>
-            cases cs with
-            | nil => simp only [psKernelExprV2WhnfCacheFindWorker4, psKernelExprV2WhnfCacheFindWorker]
-            | cons d tail =>
-              have smaller : tail.length < n := by simp_all; omega
-              have recurse := ih tail.length smaller tail rfl owner root key
-              rw [psKernelExprV2WhnfCacheFindWorker4]
-              simp only [recurse, psKernelExprV2WhnfCacheFindWorker]
-  exact allLengths entries.length entries rfl arena source hash
+    psKernelExprV2WhnfCacheFindWorker4 entries arena source hash =
+      psKernelExprV2WhnfCacheFindWorker entries arena source hash :=
+  whnf_scheduler_equals_actual_original entries entries arena source hash
 
 #print axioms map_scan_four_preserves_every_expression_list_and_order
 #print axioms whnf_scan_four_preserves_every_arena_error_hash_and_first_hit

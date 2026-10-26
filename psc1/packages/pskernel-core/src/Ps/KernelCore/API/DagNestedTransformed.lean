@@ -141,7 +141,7 @@ def psKernelExprV2NestedCheckPreparedWith
     (fuel : Nat) (environment : PsKernelEnvironment) (maxRecDepth maxNatSize : Nat)
     (prepared : PsKernelExprV2NestedPreparedTransformed) :
     Option (Except String PsKernelExprV2NestedCheckedTransformed) :=
-  let hasAux := match prepared.preprocessed.processed.state.aux with
+  let hasAux : Bool := match prepared.preprocessed.processed.state.aux with
     | List.nil => false
     | List.cons _ _ => true;
   match psKernelExprV2NestedAdmitModeWith

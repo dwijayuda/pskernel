@@ -55,7 +55,9 @@ jobs:
         n','',1)==before\npath='psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagNestedTransformed.lean';before=subprocess.check_output(['git','show',base+':'+path]).decode();current=pathlib.Path(path).read_text()\n\
         current=current.replace('let imported : Except String (Prod PsKernelDagGeneratedState Nat) :=','let imported\
         \ :=')\ncurrent=current.replace('let constructors : List PsKernelDagConstructor := match original with','let\
-        \ constructors := match original with')\nassert current==before\npath='psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagNestedRestoration.lean';before=subprocess.check_output(['git','show',base+':'+path]).decode();current=pathlib.Path(path).read_text()\n\
+        \ constructors := match original with')\ncurrent=current.replace('let hasAux : Bool := match prepared.preprocessed.processed.state.aux\
+        \ with','let hasAux := match prepared.preprocessed.processed.state.aux with',1)\nassert current==before\n\
+        path='psc1/packages/pskernel-core/src/Ps/KernelCore/API/DagNestedRestoration.lean';before=subprocess.check_output(['git','show',base+':'+path]).decode();current=pathlib.Path(path).read_text()\n\
         current=current.replace('let attempted : Except String (Prod PsKernelDagGeneratedState Nat) :=','let attempted\
         \ :=')\ncurrent=current.replace('let tail : List PsKernelExprV2RecursorRuleRef := match origins with','let\
         \ tail := match origins with')\ncurrent=current.replace('let origins : List PsKernelExprV2RecursorRuleRef\

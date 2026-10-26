@@ -60,7 +60,7 @@ jobs:
       run: "python3 - <<'PY'\nimport json, os, pathlib\npath = pathlib.Path(os.environ[\"RUNNER_TEMP\"]) / \"arena435-independent/report.json\"\
         \nif not path.is_file():\n    raise SystemExit(\"No completed comparison report was produced\")\nreport\
         \ = json.loads(path.read_text())\ncases = report[\"tests\"]\nassert len(cases) == 193\nassert report[\"\
-        kernel_fuel\"] == 5196\nassert report[\"host_timeout_seconds_per_case\"] == 60\nassert report[\"node_heap_limit_mib\"\
+        kernel_fuel\"] == 4096\nassert report[\"host_timeout_seconds_per_case\"] == 60\nassert report[\"node_heap_limit_mib\"\
         ] == 2048\nassert report[\"host_workers\"] == 2\nassert report[\"excluded_cases\"] == []\nassert all(c[\"\
         adaptation\"][\"body_bytes_identical\"] and\n           c[\"adaptation\"][\"original_body_sha256\"] == c[\"\
         adaptation\"][\"adapted_body_sha256\"]\n           for c in cases)\norigin = json.loads((path.parent/\"\

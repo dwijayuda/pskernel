@@ -1,0 +1,32 @@
+name: PSC1 mutual saved193 receipt collection without replay strict result preserved
+'on':
+  push:
+    branches:
+    - work/psc1-pskernel-t06-mutual-arena-receipt-20261026
+    paths:
+    - .github/workflows/psc1-pskernel-mutual193-saved-receipt.yml
+    - psc1/scripts/pskernel-mutual193-saved-receipt.py
+  workflow_dispatch: null
+permissions:
+  contents: read
+  actions: read
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        fetch-depth: 0
+        persist-credentials: false
+    - name: Record actual saved193 facts at4096 without rerunning or reclassifying
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: python3 psc1/scripts/pskernel-mutual193-saved-receipt.py
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-mutual193-saved-receipt
+        path: ${{ runner.temp }}/mutual193-saved-receipt/
+        retention-days: 90

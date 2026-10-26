@@ -1,0 +1,35 @@
+name: PSC1 adopted exact String sample5 V8 diagnostic profile
+'on':
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-t09-adopted-v8-profile-20261026
+    paths:
+    - psc1/**
+    - .github/workflows/psc1-pskernel-t09-adopted-v8-profile.yml
+permissions:
+  contents: read
+jobs:
+  profile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        fetch-depth: 0
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Authenticate actual adopted complete program and fixture then collect unchanged sample5 with V8 sampling
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: python3 psc1/scripts/pskernel-adopted-string-v8-profile.py
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-adopted-string-v8-profile-attempt-${{ github.run_attempt }}
+        path: ${{ runner.temp }}/string-v8-profile/
+        include-hidden-files: true
+        if-no-files-found: error

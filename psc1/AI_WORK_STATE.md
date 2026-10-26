@@ -3,10 +3,10 @@
 Updated2026-10-26 Asia/Jakarta. Active draft [PR #189](https://github.com/dwijayuda/pskernel/pull/189)
 is `feat/psc1-checked-component-providers-20261026`, based on qualified PR #188
 at`9c13f2f2f11bda05a9274e27453d1e275bef1222`. Its current development head is
-`71f10258d79a43aacd272fb277c4360df7b766ee`.
+`8383c6983e5fa2f2d945b02ba4b349ab64522c64`.
 Candidate fixes are being qualified on
 `qualification/psc1-checked-dispatch-20261026`, implementation/test head
-`0b4c82d04c445610d5e5ba85a998014abb474a33`.
+`8383c6983e5fa2f2d945b02ba4b349ab64522c64`.
 This update is documentation only; fetch live heads and actual CI before writes.
 
 Use connected GitHub/Linux Actions only. Preserve expected-HEAD non-force
@@ -17,6 +17,31 @@ owns results and failed attempts; [dispatch guide](docs/PSC1_CHECKED_DISPATCH.md
 defines the new ABI/authority boundaries.
 The [complete preceding checkpoint](docs/history/AI_WORK_STATE_BEFORE_CHECKED_DISPATCH_2026-10-26.md)
 preserves PR #188 verbatim; resolve its original relative links at9c13f2f2.
+
+## Current actual progress
+
+The new dispatch step in **40250645368 / 121341566743 passes**:
+40 Python/PHP corpus cases, 16 callback IO cases, eight component groups,
+local/global CLI, malformed/tampered/unsupported refusals and actual resource/
+parent-lifetime guards. All four real G3 engines participate.
+This is the new focused step only; every original installed/application/type
+gate is still running before the exact package can be marked qualified.
+
+The replay tests the unchanged candidate produced at
+7e63615b0d0713db8b252f194d5740bbb5c5893f:
+root proofscript0.1.0-psc1.7, 3,811,703 bytes, SHA256
+d4a0e963375366ac9b417dd1e9eb5372168c25c5230d3ce69f694274daa87043.
+ZIP12620121772 /9e9c50843b68dd3257524e449c8ff0d42a4e3238897306d46435e390754addbb
+was verified along with19 identical current production files.
+The original producer's failed overall conclusion is not relabeled.
+
+Source40246082420 at71f10258 now passes every dependency, full121330707717,
+gate121337501126 and all37 finite Practical Core criteria,zero blocked.
+Final promoted source8383c698 has its own run40250678016/full121344226050
+still in progress. Benchmark remains skipped/unqualified.
+
+For the current state use this section and the exact receipt; the older progress
+notes below retain their original step boundaries and are superseded here.
 
 ## Implemented, qualification still pending
 

@@ -162,9 +162,18 @@
     "artifactSha256": "9e9c50843b68dd3257524e449c8ff0d42a4e3238897306d46435e390754addbb",
     "rootSha256": "d4a0e963375366ac9b417dd1e9eb5372168c25c5230d3ce69f694274daa87043",
     "rootBytes": 3811703,
-    "status": "pending all installed tests",
+    "status": "new-dispatch-suite-passed; original-installed/application/type gates pending",
     "productionSourceMustRemainIdentical": true,
-    "qualifiedArtifactReaderUnchanged": true
+    "qualifiedArtifactReaderUnchanged": true,
+    "testCommit": "8383c6983e5fa2f2d945b02ba4b349ab64522c64",
+    "run": 40250645368,
+    "job": 121341566743,
+    "newDispatchStep": {
+      "name": "Execute new checked dispatch through actual installed runtimes and consumers",
+      "status": "completed",
+      "conclusion": "success",
+      "number": 8
+    }
   },
   "replayAttempts": [
     {
@@ -187,5 +196,11 @@
       ],
       "reason": "the test controller ran the entire multi-request matrix under one240s deadline; changed only the aggregate matrix supervisor to the existing1500s profile with live inherited progress; all individual compiler/tools240s, checker120s, fuel/memory/stack and policies unchanged"
     }
-  ]
+  ],
+  "latestSourceRun": {
+    "head": "8383c6983e5fa2f2d945b02ba4b349ab64522c64",
+    "run": 40250678016,
+    "status": "running",
+    "fullJob": 121344226050
+  }
 }

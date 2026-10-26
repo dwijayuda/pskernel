@@ -96,9 +96,10 @@ function relocated(source,from,to){
 }
 const compared=[];
 for(const m of moves){
+ const header=m.kind==='command'&&historical(m.from).startsWith('#!')?historical(m.from).split('\n')[0]+'\n':'';
  const wrapper=m.kind==='python'
   ? '# Compatibility command; canonical bounded supervisor lives with host runtime policy.\nfrom pathlib import Path\nimport runpy\nrunpy.run_path(str(Path(__file__).resolve().parent.parent / "host-tools/process/bounded-process.py"), run_name="__main__")\n'
-  : '// Compatibility entry point. Canonical implementation: '+m.to+'.\n'+(m.kind==='exports'?'export * from ':'import ')+JSON.stringify(relative(m.from,m.to))+';\n';
+  : header+'// Compatibility entry point. Canonical implementation: '+m.to+'.\n'+(m.kind==='exports'?'export * from ':'import ')+JSON.stringify(relative(m.from,m.to))+';\n';
  assert.equal(read(m.from),wrapper,'compatibility entry must only delegate: '+m.from);
  if(m.from==='scripts/cli-package.mjs')continue; // Intentional packaging overlays have installed qualification.
  let expected=historical(m.from);

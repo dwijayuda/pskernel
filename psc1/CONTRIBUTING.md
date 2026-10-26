@@ -1,6 +1,6 @@
 # Contributing to PSC1
 
-Read [the architecture](../ARCHITECTURE.md), then follow the source for one small
+Read [the architecture](./ARCHITECTURE.md), then follow the source for one small
 program through parsing, elaboration, canonical admission, erasure, strict IR,
 target emission and host checking/publication.
 
@@ -71,19 +71,19 @@ the new identity. Never hand-edit a qualified generated executable.
 The root TypeScript kernel, PSC0, PSCV and PSKernel-Core research have separate
 scope/pins. Their green CI does not qualify PSC1 changes.
 
-Use [the docs index](../docs/README.md) for current contracts versus dated receipts.
-The [source-refactoring design](../docs/PSC1_SOURCE_REFACTOR_ARCHITECTURE.md) describes
+Use [the docs index](./docs/README.md) for current contracts versus dated receipts.
+The [source-refactoring design](./docs/PSC1_SOURCE_REFACTOR_ARCHITECTURE.md) describes
 qualified bounded capture/ownership/conversion/rename candidates and their deliberate
 refusals. General parse/print translation alone does not preserve trivia or grant
 semantic editing authority.
 
 ## A first change without AI assistance
 
-Start with the [compilation walkthrough](../docs/guides/compilation-walkthrough.md), then
-complete the [maintainer exercise](../docs/development/maintainer-exercise.md). Record source
+Start with the [compilation walkthrough](./docs/guides/compilation-walkthrough.md), then
+complete the [maintainer exercise](./docs/development/maintainer-exercise.md). Record source
 owners, evidence, elapsed time, confusing instructions and help used. CI checks the
 commands and a reference small change; it cannot qualify human comprehension.
-For pass changes consult [the contracts](../docs/reference/pass-contracts.md). Keep exact
+For pass changes consult [the contracts](./docs/reference/pass-contracts.md). Keep exact
 body movement separate from naming or algorithm changes.
 
 ## Navigation and mechanical refactors

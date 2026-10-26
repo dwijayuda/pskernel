@@ -51,179 +51,192 @@ def psKernelExprV2WhnfCacheFindWorker
             else psKernelExprV2WhnfCacheFindWorker rest arena source hash
       else psKernelExprV2WhnfCacheFindWorker rest arena source hash
 
-/- Scan at most four ordered entries per recursive call. Representation,
-   first-match semantics, comparisons and error ordering are unchanged.
-   Exact all-input equality is an independent native proof obligation. -/
+/- Scan at most four ordered entries per recursive call. The structural
+   scheduler follows one direct tail, independently of the four consumed
+   entries, so the portable compiler needs no nested-subterm recursion rule.
+   The original worker is the exact fallback when any internal scheduler is
+   exhausted. The public wrapper seeds it with the entries themselves: there
+   is no upfront length pass, copied list, checker-fuel change or new cache.
+   All-input equality includes every arbitrary scheduler, error and order. -/
+def psKernelExprV2WhnfCacheScanFour
+    (scheduler entries : List PsKernelExprV2WhnfCacheEntry)
+    (arena : PsKernelExprV2PagedArena) (source hash : Nat) :
+    Except String (Option Nat) :=
+  match scheduler with
+  | List.nil => psKernelExprV2WhnfCacheFindWorker entries arena source hash
+  | List.cons _ rest =>
+      match entries with
+      | List.nil => Except.ok Option.none
+      | List.cons first0 rest0 =>
+          if Nat.beq first0.hash hash then
+            match psKernelExprV2PagedEqOnCanonical arena first0.source source with
+            | Except.error error => Except.error error
+            | Except.ok equal =>
+                if equal then Except.ok (Option.some first0.result)
+                else
+                  match rest0 with
+                  | List.nil => Except.ok Option.none
+                  | List.cons first1 rest1 =>
+                      if Nat.beq first1.hash hash then
+                        match psKernelExprV2PagedEqOnCanonical arena first1.source source with
+                        | Except.error error => Except.error error
+                        | Except.ok equal =>
+                            if equal then Except.ok (Option.some first1.result)
+                            else
+                              match rest1 with
+                              | List.nil => Except.ok Option.none
+                              | List.cons first2 rest2 =>
+                                  if Nat.beq first2.hash hash then
+                                    match psKernelExprV2PagedEqOnCanonical arena first2.source source with
+                                    | Except.error error => Except.error error
+                                    | Except.ok equal =>
+                                        if equal then Except.ok (Option.some first2.result)
+                                        else
+                                          match rest2 with
+                                          | List.nil => Except.ok Option.none
+                                          | List.cons first3 rest3 =>
+                                              if Nat.beq first3.hash hash then
+                                                match psKernelExprV2PagedEqOnCanonical arena first3.source source with
+                                                | Except.error error => Except.error error
+                                                | Except.ok equal =>
+                                                    if equal then Except.ok (Option.some first3.result)
+                                                    else
+                                                      psKernelExprV2WhnfCacheScanFour rest rest3 arena source hash
+                                              else
+                                                psKernelExprV2WhnfCacheScanFour rest rest3 arena source hash
+                                  else
+                                    match rest2 with
+                                    | List.nil => Except.ok Option.none
+                                    | List.cons first3 rest3 =>
+                                        if Nat.beq first3.hash hash then
+                                          match psKernelExprV2PagedEqOnCanonical arena first3.source source with
+                                          | Except.error error => Except.error error
+                                          | Except.ok equal =>
+                                              if equal then Except.ok (Option.some first3.result)
+                                              else
+                                                psKernelExprV2WhnfCacheScanFour rest rest3 arena source hash
+                                        else
+                                          psKernelExprV2WhnfCacheScanFour rest rest3 arena source hash
+                      else
+                        match rest1 with
+                        | List.nil => Except.ok Option.none
+                        | List.cons first2 rest2 =>
+                            if Nat.beq first2.hash hash then
+                              match psKernelExprV2PagedEqOnCanonical arena first2.source source with
+                              | Except.error error => Except.error error
+                              | Except.ok equal =>
+                                  if equal then Except.ok (Option.some first2.result)
+                                  else
+                                    match rest2 with
+                                    | List.nil => Except.ok Option.none
+                                    | List.cons first3 rest3 =>
+                                        if Nat.beq first3.hash hash then
+                                          match psKernelExprV2PagedEqOnCanonical arena first3.source source with
+                                          | Except.error error => Except.error error
+                                          | Except.ok equal =>
+                                              if equal then Except.ok (Option.some first3.result)
+                                              else
+                                                psKernelExprV2WhnfCacheScanFour rest rest3 arena source hash
+                                        else
+                                          psKernelExprV2WhnfCacheScanFour rest rest3 arena source hash
+                            else
+                              match rest2 with
+                              | List.nil => Except.ok Option.none
+                              | List.cons first3 rest3 =>
+                                  if Nat.beq first3.hash hash then
+                                    match psKernelExprV2PagedEqOnCanonical arena first3.source source with
+                                    | Except.error error => Except.error error
+                                    | Except.ok equal =>
+                                        if equal then Except.ok (Option.some first3.result)
+                                        else
+                                          psKernelExprV2WhnfCacheScanFour rest rest3 arena source hash
+                                  else
+                                    psKernelExprV2WhnfCacheScanFour rest rest3 arena source hash
+          else
+            match rest0 with
+            | List.nil => Except.ok Option.none
+            | List.cons first1 rest1 =>
+                if Nat.beq first1.hash hash then
+                  match psKernelExprV2PagedEqOnCanonical arena first1.source source with
+                  | Except.error error => Except.error error
+                  | Except.ok equal =>
+                      if equal then Except.ok (Option.some first1.result)
+                      else
+                        match rest1 with
+                        | List.nil => Except.ok Option.none
+                        | List.cons first2 rest2 =>
+                            if Nat.beq first2.hash hash then
+                              match psKernelExprV2PagedEqOnCanonical arena first2.source source with
+                              | Except.error error => Except.error error
+                              | Except.ok equal =>
+                                  if equal then Except.ok (Option.some first2.result)
+                                  else
+                                    match rest2 with
+                                    | List.nil => Except.ok Option.none
+                                    | List.cons first3 rest3 =>
+                                        if Nat.beq first3.hash hash then
+                                          match psKernelExprV2PagedEqOnCanonical arena first3.source source with
+                                          | Except.error error => Except.error error
+                                          | Except.ok equal =>
+                                              if equal then Except.ok (Option.some first3.result)
+                                              else
+                                                psKernelExprV2WhnfCacheScanFour rest rest3 arena source hash
+                                        else
+                                          psKernelExprV2WhnfCacheScanFour rest rest3 arena source hash
+                            else
+                              match rest2 with
+                              | List.nil => Except.ok Option.none
+                              | List.cons first3 rest3 =>
+                                  if Nat.beq first3.hash hash then
+                                    match psKernelExprV2PagedEqOnCanonical arena first3.source source with
+                                    | Except.error error => Except.error error
+                                    | Except.ok equal =>
+                                        if equal then Except.ok (Option.some first3.result)
+                                        else
+                                          psKernelExprV2WhnfCacheScanFour rest rest3 arena source hash
+                                  else
+                                    psKernelExprV2WhnfCacheScanFour rest rest3 arena source hash
+                else
+                  match rest1 with
+                  | List.nil => Except.ok Option.none
+                  | List.cons first2 rest2 =>
+                      if Nat.beq first2.hash hash then
+                        match psKernelExprV2PagedEqOnCanonical arena first2.source source with
+                        | Except.error error => Except.error error
+                        | Except.ok equal =>
+                            if equal then Except.ok (Option.some first2.result)
+                            else
+                              match rest2 with
+                              | List.nil => Except.ok Option.none
+                              | List.cons first3 rest3 =>
+                                  if Nat.beq first3.hash hash then
+                                    match psKernelExprV2PagedEqOnCanonical arena first3.source source with
+                                    | Except.error error => Except.error error
+                                    | Except.ok equal =>
+                                        if equal then Except.ok (Option.some first3.result)
+                                        else
+                                          psKernelExprV2WhnfCacheScanFour rest rest3 arena source hash
+                                  else
+                                    psKernelExprV2WhnfCacheScanFour rest rest3 arena source hash
+                      else
+                        match rest2 with
+                        | List.nil => Except.ok Option.none
+                        | List.cons first3 rest3 =>
+                            if Nat.beq first3.hash hash then
+                              match psKernelExprV2PagedEqOnCanonical arena first3.source source with
+                              | Except.error error => Except.error error
+                              | Except.ok equal =>
+                                  if equal then Except.ok (Option.some first3.result)
+                                  else
+                                    psKernelExprV2WhnfCacheScanFour rest rest3 arena source hash
+                            else
+                              psKernelExprV2WhnfCacheScanFour rest rest3 arena source hash
+
 def psKernelExprV2WhnfCacheFindWorker4
     (entries : List PsKernelExprV2WhnfCacheEntry)
     (arena : PsKernelExprV2PagedArena) (source hash : Nat) :
     Except String (Option Nat) :=
-  match entries with
-  | List.nil => Except.ok Option.none
-  | List.cons first0 rest0 =>
-      if Nat.beq first0.hash hash then
-        match psKernelExprV2PagedEqOnCanonical arena first0.source source with
-        | Except.error error => Except.error error
-        | Except.ok equal =>
-            if equal then Except.ok (Option.some first0.result)
-            else
-              match rest0 with
-              | List.nil => Except.ok Option.none
-              | List.cons first1 rest1 =>
-                  if Nat.beq first1.hash hash then
-                    match psKernelExprV2PagedEqOnCanonical arena first1.source source with
-                    | Except.error error => Except.error error
-                    | Except.ok equal =>
-                        if equal then Except.ok (Option.some first1.result)
-                        else
-                          match rest1 with
-                          | List.nil => Except.ok Option.none
-                          | List.cons first2 rest2 =>
-                              if Nat.beq first2.hash hash then
-                                match psKernelExprV2PagedEqOnCanonical arena first2.source source with
-                                | Except.error error => Except.error error
-                                | Except.ok equal =>
-                                    if equal then Except.ok (Option.some first2.result)
-                                    else
-                                      match rest2 with
-                                      | List.nil => Except.ok Option.none
-                                      | List.cons first3 rest3 =>
-                                          if Nat.beq first3.hash hash then
-                                            match psKernelExprV2PagedEqOnCanonical arena first3.source source with
-                                            | Except.error error => Except.error error
-                                            | Except.ok equal =>
-                                                if equal then Except.ok (Option.some first3.result)
-                                                else
-                                                  psKernelExprV2WhnfCacheFindWorker4 rest3 arena source hash
-                                          else
-                                            psKernelExprV2WhnfCacheFindWorker4 rest3 arena source hash
-                              else
-                                match rest2 with
-                                | List.nil => Except.ok Option.none
-                                | List.cons first3 rest3 =>
-                                    if Nat.beq first3.hash hash then
-                                      match psKernelExprV2PagedEqOnCanonical arena first3.source source with
-                                      | Except.error error => Except.error error
-                                      | Except.ok equal =>
-                                          if equal then Except.ok (Option.some first3.result)
-                                          else
-                                            psKernelExprV2WhnfCacheFindWorker4 rest3 arena source hash
-                                    else
-                                      psKernelExprV2WhnfCacheFindWorker4 rest3 arena source hash
-                  else
-                    match rest1 with
-                    | List.nil => Except.ok Option.none
-                    | List.cons first2 rest2 =>
-                        if Nat.beq first2.hash hash then
-                          match psKernelExprV2PagedEqOnCanonical arena first2.source source with
-                          | Except.error error => Except.error error
-                          | Except.ok equal =>
-                              if equal then Except.ok (Option.some first2.result)
-                              else
-                                match rest2 with
-                                | List.nil => Except.ok Option.none
-                                | List.cons first3 rest3 =>
-                                    if Nat.beq first3.hash hash then
-                                      match psKernelExprV2PagedEqOnCanonical arena first3.source source with
-                                      | Except.error error => Except.error error
-                                      | Except.ok equal =>
-                                          if equal then Except.ok (Option.some first3.result)
-                                          else
-                                            psKernelExprV2WhnfCacheFindWorker4 rest3 arena source hash
-                                    else
-                                      psKernelExprV2WhnfCacheFindWorker4 rest3 arena source hash
-                        else
-                          match rest2 with
-                          | List.nil => Except.ok Option.none
-                          | List.cons first3 rest3 =>
-                              if Nat.beq first3.hash hash then
-                                match psKernelExprV2PagedEqOnCanonical arena first3.source source with
-                                | Except.error error => Except.error error
-                                | Except.ok equal =>
-                                    if equal then Except.ok (Option.some first3.result)
-                                    else
-                                      psKernelExprV2WhnfCacheFindWorker4 rest3 arena source hash
-                              else
-                                psKernelExprV2WhnfCacheFindWorker4 rest3 arena source hash
-      else
-        match rest0 with
-        | List.nil => Except.ok Option.none
-        | List.cons first1 rest1 =>
-            if Nat.beq first1.hash hash then
-              match psKernelExprV2PagedEqOnCanonical arena first1.source source with
-              | Except.error error => Except.error error
-              | Except.ok equal =>
-                  if equal then Except.ok (Option.some first1.result)
-                  else
-                    match rest1 with
-                    | List.nil => Except.ok Option.none
-                    | List.cons first2 rest2 =>
-                        if Nat.beq first2.hash hash then
-                          match psKernelExprV2PagedEqOnCanonical arena first2.source source with
-                          | Except.error error => Except.error error
-                          | Except.ok equal =>
-                              if equal then Except.ok (Option.some first2.result)
-                              else
-                                match rest2 with
-                                | List.nil => Except.ok Option.none
-                                | List.cons first3 rest3 =>
-                                    if Nat.beq first3.hash hash then
-                                      match psKernelExprV2PagedEqOnCanonical arena first3.source source with
-                                      | Except.error error => Except.error error
-                                      | Except.ok equal =>
-                                          if equal then Except.ok (Option.some first3.result)
-                                          else
-                                            psKernelExprV2WhnfCacheFindWorker4 rest3 arena source hash
-                                    else
-                                      psKernelExprV2WhnfCacheFindWorker4 rest3 arena source hash
-                        else
-                          match rest2 with
-                          | List.nil => Except.ok Option.none
-                          | List.cons first3 rest3 =>
-                              if Nat.beq first3.hash hash then
-                                match psKernelExprV2PagedEqOnCanonical arena first3.source source with
-                                | Except.error error => Except.error error
-                                | Except.ok equal =>
-                                    if equal then Except.ok (Option.some first3.result)
-                                    else
-                                      psKernelExprV2WhnfCacheFindWorker4 rest3 arena source hash
-                              else
-                                psKernelExprV2WhnfCacheFindWorker4 rest3 arena source hash
-            else
-              match rest1 with
-              | List.nil => Except.ok Option.none
-              | List.cons first2 rest2 =>
-                  if Nat.beq first2.hash hash then
-                    match psKernelExprV2PagedEqOnCanonical arena first2.source source with
-                    | Except.error error => Except.error error
-                    | Except.ok equal =>
-                        if equal then Except.ok (Option.some first2.result)
-                        else
-                          match rest2 with
-                          | List.nil => Except.ok Option.none
-                          | List.cons first3 rest3 =>
-                              if Nat.beq first3.hash hash then
-                                match psKernelExprV2PagedEqOnCanonical arena first3.source source with
-                                | Except.error error => Except.error error
-                                | Except.ok equal =>
-                                    if equal then Except.ok (Option.some first3.result)
-                                    else
-                                      psKernelExprV2WhnfCacheFindWorker4 rest3 arena source hash
-                              else
-                                psKernelExprV2WhnfCacheFindWorker4 rest3 arena source hash
-                  else
-                    match rest2 with
-                    | List.nil => Except.ok Option.none
-                    | List.cons first3 rest3 =>
-                        if Nat.beq first3.hash hash then
-                          match psKernelExprV2PagedEqOnCanonical arena first3.source source with
-                          | Except.error error => Except.error error
-                          | Except.ok equal =>
-                              if equal then Except.ok (Option.some first3.result)
-                              else
-                                psKernelExprV2WhnfCacheFindWorker4 rest3 arena source hash
-                        else
-                          psKernelExprV2WhnfCacheFindWorker4 rest3 arena source hash
+  psKernelExprV2WhnfCacheScanFour entries entries arena source hash
 
 /-
 Keep the existing generated curried entry point. The recursive scan receives

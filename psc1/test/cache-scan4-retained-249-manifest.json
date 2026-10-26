@@ -1501,8 +1501,8 @@
   "intentionalNativeQualifiedChanges": {
     "psc1/kernel-lakefile.lean": "673f9760eabbdef6527d9c2d3304bedc43bcf744",
     "psc1/packages/pskernel-core/src/Ps/KernelCore/API/Dag.lean": "8fefa3776ee99c9a205358bd97f9868376e083be",
-    "psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean": "44d89927404f629f167eb4bfeae3a27825b34fbb",
-    "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/WhnfState.lean": "a33f034392a48171b7dfa29719be2d1e9bf95b96",
+    "psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/Cache.lean": "a33d8c2519c301df06b134ca152ff271874e7c9c",
+    "psc1/packages/pskernel-core/src/Ps/KernelCore/Checker/ExprV2/WhnfState.lean": "0e972aef17e034b27ca77dbaf1b195f0fc2e375a",
     "psc1/packages/pskernel-core/src/Ps/KernelCore/Runtime/Acceleration/CacheAnalysis.lean": "c26a978da332860d3197f61f4023f7ddb4f25b9a",
     "psc1/test/PsKernelCacheScopeProofs.lean": "b33d90f36c888d02f5e99c496e8ed0db582ee623",
     "psc1/test/PsKernelEmptySemanticCacheProofs.lean": "5cdca0405ecff941bd0a5083cfd66c83720bbdb0"

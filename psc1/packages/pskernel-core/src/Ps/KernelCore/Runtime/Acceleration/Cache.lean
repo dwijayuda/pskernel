@@ -224,39 +224,52 @@ def psKernelExprMapGetIn
           expr
           rest
 
-/- Scan at most four ordered entries per recursive call. Representation,
-   first-match semantics, comparisons and error ordering are unchanged.
-   Exact all-input equality is an independent native proof obligation. -/
+/- Scan at most four ordered entries per recursive call. The structural
+   scheduler follows one direct tail, independently of the four consumed
+   entries, so the portable compiler needs no nested-subterm recursion rule.
+   The original worker is the exact fallback when any internal scheduler is
+   exhausted. The public wrapper seeds it with the entries themselves: there
+   is no upfront length pass, copied list, checker-fuel change or new cache.
+   All-input equality includes every arbitrary scheduler, error and order. -/
+def psKernelExprMapScanFour
+    (scheduler : List (Prod PsKernelExpr PsKernelExpr))
+    (expr : PsKernelExpr) (entries : List (Prod PsKernelExpr PsKernelExpr)) :
+    Option PsKernelExpr :=
+  match scheduler with
+  | List.nil => psKernelExprMapGetIn expr entries
+  | List.cons _ rest =>
+      match entries with
+      | List.nil => Option.none
+      | List.cons entry0 rest0 =>
+          if psKernelExprEq (Prod.fst entry0) expr then
+            Option.some (Prod.snd entry0)
+          else
+            match rest0 with
+            | List.nil => Option.none
+            | List.cons entry1 rest1 =>
+                if psKernelExprEq (Prod.fst entry1) expr then
+                  Option.some (Prod.snd entry1)
+                else
+                  match rest1 with
+                  | List.nil => Option.none
+                  | List.cons entry2 rest2 =>
+                      if psKernelExprEq (Prod.fst entry2) expr then
+                        Option.some (Prod.snd entry2)
+                      else
+                        match rest2 with
+                        | List.nil => Option.none
+                        | List.cons entry3 rest3 =>
+                            if psKernelExprEq (Prod.fst entry3) expr then
+                              Option.some (Prod.snd entry3)
+                            else
+                              psKernelExprMapScanFour rest expr rest3
+
 def psKernelExprMapGetIn4
     (expr : PsKernelExpr)
     (entries :
       List (Prod PsKernelExpr PsKernelExpr)) :
     Option PsKernelExpr :=
-  match entries with
-  | List.nil => Option.none
-  | List.cons entry0 rest0 =>
-      if psKernelExprEq (Prod.fst entry0) expr then
-        Option.some (Prod.snd entry0)
-      else
-        match rest0 with
-        | List.nil => Option.none
-        | List.cons entry1 rest1 =>
-            if psKernelExprEq (Prod.fst entry1) expr then
-              Option.some (Prod.snd entry1)
-            else
-              match rest1 with
-              | List.nil => Option.none
-              | List.cons entry2 rest2 =>
-                  if psKernelExprEq (Prod.fst entry2) expr then
-                    Option.some (Prod.snd entry2)
-                  else
-                    match rest2 with
-                    | List.nil => Option.none
-                    | List.cons entry3 rest3 =>
-                        if psKernelExprEq (Prod.fst entry3) expr then
-                          Option.some (Prod.snd entry3)
-                        else
-                          psKernelExprMapGetIn4 expr rest3
+  psKernelExprMapScanFour entries expr entries
 
 def psKernelExprMapGet
     (cache : PsKernelExprMap)

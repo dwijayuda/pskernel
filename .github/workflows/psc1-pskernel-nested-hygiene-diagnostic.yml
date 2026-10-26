@@ -1,0 +1,45 @@
+name: PSC1 original nested parameter hygiene diagnostic against pinned Lean
+'on':
+  workflow_dispatch: null
+  push:
+    branches:
+    - work/psc1-pskernel-t06-nested-hygiene-20261026
+    paths:
+    - .github/workflows/psc1-pskernel-nested-hygiene-diagnostic.yml
+    - psc1/test/PsKernelNestedHygieneDiagnostic.lean
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        fetch-depth: 0
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Install pinned Lean
+      run: bash psc1/scripts/install-lean435-ci.sh
+    - name: Build unchanged current kernel and compare real pinned Lean with ordinary and nested input closure
+      working-directory: psc1
+      shell: bash
+      run: 'set -euo pipefail
+
+        mkdir -p "$RUNNER_TEMP/nested-hygiene"
+
+        lake -f kernel-lakefile.lean build PsKernelCore 2>&1 | tee "$RUNNER_TEMP/nested-hygiene/build.log"
+
+        lake -f kernel-lakefile.lean env lean --run test/PsKernelNestedHygieneDiagnostic.lean 2>&1 | tee "$RUNNER_TEMP/nested-hygiene/native.log"
+
+        '
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: psc1-original-nested-hygiene-diagnostic
+        path: ${{ runner.temp }}/nested-hygiene/
+        if-no-files-found: warn
+        retention-days: 90

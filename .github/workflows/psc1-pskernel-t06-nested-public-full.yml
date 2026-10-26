@@ -23,7 +23,7 @@ jobs:
     - uses: actions/setup-node@v4
       with:
         node-version: '22'
-    - name: Authenticate all806 exact proof names364 native snapshots and249 actual audited bindings
+    - name: Authenticate all807 exact proof names364 native snapshots and249 actual audited bindings
       env:
         GH_TOKEN: ${{ github.token }}
       shell: bash
@@ -40,7 +40,7 @@ jobs:
         \ and not a['expired']\n    assert a['size_in_bytes']==size and a['digest']=='sha256:'+sha\n    raw=get('/actions/artifacts/'+str(artifact)+'/zip');assert\
         \ len(raw)==size and hashlib.sha256(raw).hexdigest()==sha\n    z=zipfile.ZipFile(io.BytesIO(raw));assert\
         \ len(z.namelist())==len(set(z.namelist()))==members and z.testzip() is None\n    (out/name).write_bytes(raw);return\
-        \ z\nnative_source='307faacf0de9132841f04850fedb35b69286fe7d'\nn=archive(native_source,40333185269,12655636595,1071172,'1760656c64cace86479bf90e3fea4769924b398d931359f4f196cc3c45d7cc26',453,'authenticated-native807.zip')\n\
+        \ z\nnative_source='ddde8df81cc32c61394eeca22c1e22a09fd47c04'\nn=archive(native_source,40336911250,12658345008,1071202,'775b35eec81d674fce3b667b72b64e91140541fa3f53b4261a24de1b0c9300c2',453,'authenticated-native807.zip')\n\
         manifest=json.loads(n.read('files.json'));assert manifest['source']==native_source\nsources=0\nfor path,pin\
         \ in manifest['files'].items():\n    data=n.read(path);assert len(data)==pin['bytes'] and hashlib.sha256(data).hexdigest()==pin['sha256']\n\
         \    if path.startswith('source/'):\n        p=path.removeprefix('source/');assert data==subprocess.check_output(['git','show','HEAD:'+p]),p\n\
@@ -532,7 +532,7 @@ jobs:
         \    paths.append(path)\nfor path in ['psc1/scripts/bootstrap-project.mjs','psc1/scripts/bootstrap-manifest.mjs','psc1/scripts/workspace-layout.mjs']:\n\
         \    assert pathlib.Path(path).read_bytes()==subprocess.check_output(['git','show','2f7ee0afc1cc2fbccdf47b4f140b5cf01eb05c89:'+path])\n\
         for p in paths:\n    data=pathlib.Path(p).read_bytes();assert data==subprocess.check_output(['git','show','HEAD:'+p]);dest=out/'sources'/p;dest.parent.mkdir(parents=True,exist_ok=True);dest.write_bytes(data);snapshots.append({'path':p,'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()})\n\
-        record={'schema':'psc1-corrected-mutual-parity-generated-preflight-v1','source':os.environ['GITHUB_SHA'],'run':os.environ['GITHUB_RUN_ID'],'nativeSource':native_source,'nativeRun':40333185269,'nativeReports':807,'nativeAssertions':1184,'generatedAssertions':853,'all364NativeSourceSnapshotsMatchActualGit':True,'all16NegativeErrorsCompareActualOriginalAdmission':True,'compilerSource':compiler_source,'compilerSha256':receipt['compilerSha256'],'allCompilerBuildSourcesUnchanged':True,'entry':'test/PsKernelNestedAdmissionSelfHost.lean','route':os.environ['PSC1_MUTUAL_ROUTE'],'snapshots':snapshots,'privateNestedControls':35,'privateNestedReports':11,'privateNestedPreprocessReports':8,'privateNestedPreprocessControls':26,'nestedCaptureReports':10,'nestedCaptureControls':17,'nestedOverlayReports':7,'nestedOverlayControls':68,'publicNestedRouteChanged':True,'completeNestedReports':33,'completeNestedGeneratedControls':189,'all807ProofNamesExactlyVerified':True,'scope':'Complete\
+        record={'schema':'psc1-corrected-mutual-parity-generated-preflight-v1','source':os.environ['GITHUB_SHA'],'run':os.environ['GITHUB_RUN_ID'],'nativeSource':native_source,'nativeRun':40336911250,'nativeReports':807,'nativeAssertions':1184,'generatedAssertions':853,'all364NativeSourceSnapshotsMatchActualGit':True,'all16NegativeErrorsCompareActualOriginalAdmission':True,'compilerSource':compiler_source,'compilerSha256':receipt['compilerSha256'],'allCompilerBuildSourcesUnchanged':True,'entry':'test/PsKernelNestedAdmissionSelfHost.lean','route':os.environ['PSC1_MUTUAL_ROUTE'],'snapshots':snapshots,'privateNestedControls':35,'privateNestedReports':11,'privateNestedPreprocessReports':8,'privateNestedPreprocessControls':26,'nestedCaptureReports':10,'nestedCaptureControls':17,'nestedOverlayReports':7,'nestedOverlayControls':68,'publicNestedRouteChanged':True,'completeNestedReports':33,'completeNestedGeneratedControls':189,'all807ProofNamesExactlyVerified':True,'scope':'Complete\
         \ nested owning public transaction;807native reports;fresh completeSelfHost plus all7nested phases;1188native-equal\
         \ controls(999retained+141completeprivate+48public) and21legacy. Isolated paired qualification,not production-adopted/global/performance\
         \ qualified.','privateRuntimeFuel':256,'publicRuntimeFuel':4096,'retainedRuntimeFuel':'unchanged per authenticated\

@@ -23,7 +23,7 @@ const candidate = JSON.parse(fs.readFileSync(output));
 assert.equal(sha(JSON.stringify(candidate)), item.candidateSha256);
 const sources = item.request[6].map(([module, text]) => ({ module, kind: 'lean', text }));
 const checker = path.resolve('.lake/build/bin/psc1_independent_checker');
-const runner = path.resolve('scripts/generated-compiler-runner.mjs'), root = path.join(directory, 'store');
+const runner = path.resolve('host-tools/execution/generated-service-runner.mjs'), root = path.join(directory, 'store');
 let serial = 0;
 function session(mutation = '', outputAbi = 'io-dispatcher') {
   const id = 'output-abi-host-' + serial++, file = path.join(directory, id + '.mjs');

@@ -161,6 +161,16 @@ for(const node of nodes){
   }
  }
 }
+// Isolated executable copies must use implementations, never path-relative delegates.
+for(const file of files.filter(f=>f.startsWith('scripts/')&&f.endsWith('.mjs'))){
+ assert.ok(!/(?:const runner(?:Source)?\\s*=|runnerFile:|runnerSha256:)[^\\n]*scripts\\/generated-compiler-runner\\.mjs/.test(read(file)),
+  'controller must pin/copy the canonical implementation: '+file);
+}
+for(const file of ['scripts/generated-compiler-diagnostic.mjs','scripts/generated-target-qualification.mjs'])
+ assert.ok(read(file).includes('host-tools/contracts/compiler-closure.mjs'),'canonical validator missing from protected tool inventory: '+file);
+for(const file of ['host-tools/process/resource-profiles.mjs','host-tools/process/bounded-process.py'])
+ assert.ok(read('scripts/generated-target-qualification.mjs').includes(file),'canonical process policy missing from protected tool inventory: '+file);
+
 const ownDocs=[
  'README.md','ARCHITECTURE.md','CONTRIBUTING.md','docs/README.md',
  'docs/PSC1_DEVELOPMENT_ROADMAP.md',...files.filter(f=>/^docs\/(guides|architecture|reference|development|evidence)\/.+\.md$/.test(f)),

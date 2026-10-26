@@ -19,7 +19,7 @@ fs.mkdirSync(directory,{recursive:true});
 const seed=path.resolve('.lake/build/bin/'+(unified?'psc1_unified_service_seed':'psc1_target_service_seed'));
 const checker=path.resolve('.lake/build/bin/psc1_independent_checker');
 const runner=path.resolve('scripts/generated-target-runner.mjs');
-const inventoryFiles=['scripts/generated-target-qualification.mjs','scripts/generated-target-runner.mjs',
+const inventoryFiles=['host-tools/process/resource-profiles.mjs','host-tools/process/bounded-process.py','host-tools/contracts/compiler-closure.mjs','scripts/generated-target-qualification.mjs','scripts/generated-target-runner.mjs',
  'scripts/selfhost-qualification-profiles.mjs','scripts/generated-target-corpus.mjs','host-tools/generated-target-tools.mjs',
  'host-tools/compiler-host-protocol.mjs','host-tools/compiler-source-inputs.mjs','host-tools/generated-target-profiles.mjs','host-tools/generated-wasm-transport.mjs','host-tools/generated-python-transport.py','host-tools/generated-php-transport.php','scripts/bounded-process.py','scripts/compiler-closure-contract.mjs'];
 const tools=[checker,process.execPath,...inventoryFiles.map(p=>path.resolve(p))].map(file=>({file,sha256:sha(fs.readFileSync(file))}));

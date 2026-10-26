@@ -28,7 +28,7 @@ const checker = path.join(directory, 'checker');
 fs.copyFileSync(path.join(root, '.lake/build/bin/psc1_independent_checker'), checker);
 fs.chmodSync(checker, 0o755);
 const checkerHash = sha(fs.readFileSync(checker));
-const runnerSource = path.join(root, 'scripts/generated-compiler-runner.mjs');
+const runnerSource = path.join(root, 'host-tools/execution/generated-service-runner.mjs');
 const runner = path.join(directory, 'runner.mjs');
 fs.copyFileSync(runnerSource, runner);
 const runnerHash = sha(fs.readFileSync(runner));

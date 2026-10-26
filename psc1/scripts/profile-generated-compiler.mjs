@@ -54,7 +54,7 @@ if(process.argv[4]==='--inspect-only') {
 }
 const input=path.join(directory,'request.json'),output=path.join(directory,'candidate.json');
 fs.writeFileSync(input,request);
-const runner=path.join(root,'scripts/generated-compiler-runner.mjs');
+const runner=path.join(root,'host-tools/execution/generated-service-runner.mjs');
 const args=['--prof','--logfile='+path.join(directory,'v8.log'),runner,service,serviceHash,input,output];
 const start=performance.now();
 const run=spawnSync(process.execPath,args,{cwd:root,encoding:'utf8',timeout:240000,

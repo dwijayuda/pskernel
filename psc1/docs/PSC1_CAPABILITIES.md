@@ -32,19 +32,19 @@ The checked API selects seven targets; compileCandidate selects only JS/TS/Rust/
 Wasm-core and has no admission or publication authority.
 Source metadata cannot select tools/checkers/output paths.
 
-Default checking: genuine official Lean4.35 C++/Emscripten **linear-memory Wasm**.
+Default checking: genuine official Lean 4.35 C++/Emscripten **linear-memory Wasm**.
 Native checking/comparison is explicit. Compiler-Wasm remains GC.
 Missing/corrupt/refusing checking never falls back silently.
 New optional native dispatch tools are qualified only on actual Ubuntu Linux x64.
-Current generated components accept Bool public interfaces, at most16 direct
+Current generated components accept Bool public interfaces, at most 16 direct
 parameters, supported WIT names and no imports/callback IO.
 Both publication protocols retain immutable generations and explicit committed
 uncertainty. Other-platform publication refuses.
 
 ## Qualified and incomplete are separate
 
-- Practical Core v1 is frozen at14 families/37 finite criteria. It is not unrestricted Lean.
-- Existing four-engine G1/G2/G3/fixed points remain attached to closure073e5156.
+- Practical Core v1 is frozen at 14 families / 37 finite criteria. It is not unrestricted Lean.
+- Existing four-engine G1/G2/G3/fixed points remain attached to closure `073e5156`.
   A source extraction creates a new development closure; frozen executables are not relabeled.
 - Lossless capture, ownership, finite conversion and bounded local rename are
   qualified candidate tools. General automatic semantic refactoring remains unqualified.
@@ -54,7 +54,7 @@ uncertainty. Other-platform publication refuses.
   kernel, FFI or publication authority.
 - Broader generated component String/IO, full provider application acceptance,
   additional native platforms and final clean universal release remain queued.
-- The original240s compiler self-compilation performance target remains unqualified.
+- The original 240-second compiler self-compilation performance target remains unqualified.
 - No whole-compiler preservation proof, merge or npm publication is claimed.
 
 See [the one roadmap](PSC1_DEVELOPMENT_ROADMAP.md),

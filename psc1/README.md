@@ -3,7 +3,7 @@
 PSC1 compiles frozen Practical Core v1 from supported `.lean` and `.ps` grammars.
 One semantic compiler supplies seven native backend mappings. The slim npm flavor
 uses genuine self-hosted JS/TS executors with optional Rust/compiler-Wasm executors
-and the official Lean4.35.0 independent C++ kernel compiled to linear-memory Wasm.
+and the official Lean 4.35.0 independent C++ kernel compiled to linear-memory Wasm.
 Compiler execution, output target and checking are separate choices.
 
 Start with the [installation guide](docs/PSC1_CHECKED_DISPATCH_INSTALL.md),

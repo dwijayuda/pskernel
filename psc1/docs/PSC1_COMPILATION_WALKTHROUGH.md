@@ -30,16 +30,47 @@ def invert(flag : Bool) : Bool := if (flag) { false } else { true }
 For each grammar the test launches the actual compiler command:
 
 ~~~sh
-.lake/build/bin/psc1 build Main.lean --target js --out module.js
+.lake/build/bin/psc1 build Main.lean --target js --out module.mjs
 ~~~
 
-The harness supplies 240s supervision and the existing bounded-process profile and8MiB native Lean thread-stack policy. It checks the
+The harness supplies 240s supervision and the existing bounded-process profile and 8 MiB native Lean thread-stack policy. It checks the
 public invert export by loading the **immutable** generated file in a separate
 Node process: invert(false)=true, invert(true)=false. Then it changes the tiny
 program to identity and requires the different results(false,true).
 This is a deliberate application change, not an automatic compiler rewrite.
 
-## Follow the actual owners
+## Follow the native call path
+
+The native file path has host wrappers around the shared semantic workers:
+
+~~~text
+Main.buildFor
+  psHostDirectPrepareFor
+    checkedInput
+      psHostCaptureProject
+        captureModule
+          psHostParseSource
+          psHostElabDeclarationsDetailed
+      psCompilerPrepareElaborated
+      psHostLeanCheckPrepared
+    psCompilerVerifiedIrFromPrepared
+    psStrictValidateModule
+  psHostDirectEmitJavaScript / emitEcma
+    ecmaPlan
+    jsSource
+    psHostWithArtifactStage
+      psHostDirectWriteProvenance
+      format
+      psHostPublishArtifactStage -> artifacts.publish
+~~~
+
+The actual native parsing wrapper is
+[psHostParseSource](../host/src/Ps/Host/ProjectCompiler.lean#L350);
+its declaration loop is
+[psHostElabDeclarationsDetailed](../host/src/Ps/Host/ProjectCompiler.lean#L403).
+The shared compiler Service uses the semantic API landmarks below. These rows
+identify responsibilities and shared entry points, not a claim that the native
+wrapper directly calls every listed API:
 
 <!-- generated-pass-links:start -->
 | Step | Source entry | Responsibility |
@@ -64,6 +95,10 @@ lowers/prints it. Ps.Host.ArtifactBundle delegates only staging/formatting/
 publication to the fixed host tool. See [pass contracts](PSC1_PASS_CONTRACTS.md)
 for exact obligations and refusal/resource behavior.
 
+The data definitions are [shared syntax](../packages/syntax/src/Ps/Syntax/Ast.lean),
+[logical Core](../packages/core/src/Ps/Core/Expr.lean),
+[executable IR](../packages/compiler-ir/src/Ps/CompilerIr/Model.lean), and
+[canonical admission encoding](../packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean).
 At each arrow, ask what the data means:
 - Text/syntax has not acquired logical admission.
 - Prepared declarations are the exact logical input; their names do not prove runtime behavior.
@@ -73,7 +108,7 @@ At each arrow, ask what the data means:
 
 ## Inspect the evidence
 
-The harness reads the real module.js.bundle.json pointer, resolves its immutable
+The harness reads the real module.mjs.bundle.json pointer, resolves its immutable
 generation and verifies every inventory hash. In that generation:
 - psc1-input.json records exact sources, public names, assurance and provenance.
 - admissions.json holds the canonical logical graph used for official checking.
@@ -81,7 +116,7 @@ generation and verifies every inventory hash. In that generation:
 - The generated module and declaration/source-map files are output artifacts.
 
 It sends those exact admissions bytes to the separate actual official checker
-and requires its Lean4.35 identity and accepted response. This additional replay
+and requires its Lean 4.35 identity and accepted response. This additional replay
 is logical acceptance evidence. It is not source-to-IR/backend preservation.
 
 An ill-typed replacement(declared Bool, returned Nat) must refuse and leave the
@@ -107,7 +142,7 @@ genuine official C++/Emscripten linear-memory Wasm kernel.
 Execution engine, requested output and independent checker are separate choices.
 Component output wraps exact GC core; Python/PHP receive only admitted portable
 IR and recheck it. Source/package metadata cannot choose those host capabilities.
-The package remains attached to its qualified122-module source; a new123-module
+The package remains attached to its qualified 122-module source; a new 123-module
 development extraction does not relabel its executable or fixed-point evidence.
 
 ## A first maintainer change

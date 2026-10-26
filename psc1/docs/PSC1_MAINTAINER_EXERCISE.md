@@ -8,8 +8,10 @@ may be recorded as a completed human trial.
 ## Participant protocol
 
 Use a clean Linux GitHub Actions checkout of the exact tested commit.
-Work without AI explanations, chat history or the reference solution until
-you finish. Normal source navigation, repository docs and tool errors are allowed.
+Work without AI chat assistance, this chat history or the reference solution
+until you finish. Published repository documentation and source are allowed,
+including material authored with AI; the trial measures independence from
+interactive AI explanations. Normal source navigation and tool errors are allowed.
 No local builds/tests or external messaging are needed.
 
 Read [the compilation walkthrough](PSC1_COMPILATION_WALKTHROUGH.md),
@@ -38,8 +40,8 @@ instruction. State prior Lean/compiler experience, AI/help used and whether you
 consulted the solution. A reviewer must verify the answers against source and CI.
 
 A human pass requires correct ownership/assurance answers, an actual passing
-focused regression and changed-program results, no weakened gate, and no AI
-explanations. Any unassisted failure or ambiguity is useful usability evidence.
+focused regression and changed-program results, no weakened gate, and no interactive AI
+assistance. Any unassisted failure or ambiguity is useful usability evidence.
 Do not convert time elapsed, an automated test or a self-declared checkbox into
 a human-qualified result. Record human outcomes in a separate dated receipt;
 never edit the immutable compiler qualification receipts to invent a participant.
@@ -57,3 +59,21 @@ The reference solution is available separately in
 [PSC1_MAINTAINER_REFERENCE.md](PSC1_MAINTAINER_REFERENCE.md). Read it after submitting
 the independent attempt. It describes a small test addition, not a new language
 feature or a proof of compiler preservation.
+
+## Running your own regression in Actions
+
+Use an isolated trial branch or fork through GitHub. Retain every existing gate
+and adjust only the workflow branch filter if your trial branch needs it.
+Add your test file and insert this step after the native build and **before**
+the G1 step removes native executables:
+
+~~~yaml
+- name: Participant runtime dependency regression
+  working-directory: psc1
+  run: timeout 240s lake env lean test/RuntimeNeedsMaintainer.lean
+~~~
+
+Use actual assertions about the existing runtime-dependency functions; do not
+use sorry, add axioms, change production behavior or bypass a checker to get a
+green result. Retain the workflow URL and test diff for review. This task tests
+a small compiler-maintenance regression, not a new language feature.

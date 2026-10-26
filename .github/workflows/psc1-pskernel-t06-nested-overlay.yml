@@ -143,10 +143,10 @@ jobs:
         \ env lean test/PsKernelNestedOverlayProofs.lean 2>&1 | tee \"$RUNNER_TEMP/t06-mutual-public/nested-overlay-proofs.log\"\
         \npython3 - <<'PYCODE'\nimport pathlib,os,re\nt=(pathlib.Path(os.environ['RUNNER_TEMP'])/'t06-mutual-public/nested-overlay-proofs.log').read_text()\n\
         rows=re.findall(r\"'(PsKernelNestedOverlayProofs\\.[^']+)' (?:depends on axioms: \\[([^\\]]*)\\]|does not\
-        \ depend on any axioms)\",t)\nassert len(rows)==len({n for n,_ in rows})==6,rows\nassert not any(x in t\
+        \ depend on any axioms)\",t)\nassert len(rows)==len({n for n,_ in rows})==7,rows\nassert not any(x in t\
         \ for x in ['error:','sorryAx','Lean.ofReduceBool','Lean.trustCompiler'])\nfor name,axioms in rows:assert\
         \ set(x.strip() for x in axioms.split(',') if x.strip())<={'propext','Classical.choice','Quot.sound'}\n\
-        print('PSC1_NESTED_OVERLAY_PROOFS: PASS new=6 retained=767 total=773')\nPYCODE\n"
+        print('PSC1_NESTED_OVERLAY_PROOFS: PASS new=7 retained=767 total=774')\nPYCODE\n"
     - name: Require all1184 controls including public atomicity resources and same-batch recursor ownership
       working-directory: psc1
       shell: bash
@@ -253,7 +253,7 @@ jobs:
         for p in sorted(out.rglob(''*'')) if p.is_file()}
 
         (out/''files.json'').write_text(json.dumps({''source'':os.environ[''GITHUB_SHA''],''run'':os.environ[''GITHUB_RUN_ID''],''attempt'':os.environ[''GITHUB_RUN_ATTEMPT''],''scope'':''Private
-        nested generated-syntax overlay only;773reports/55modules1330controls;unchanged nodes and child IDs retained;smart-construct
+        nested generated-syntax overlay only;774reports/55modules1330controls;unchanged nodes and child IDs retained;smart-construct
         only new nodes;publicroute and private preprocessing unchanged;no admission/restoration/adoption/global
         proof/performance qualification'',''files'':files},indent=2)+''\n'')
 

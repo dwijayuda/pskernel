@@ -1,0 +1,58 @@
+{
+  "source": "51b579cfd00883e72a257717ee660ecfa3d7bbca",
+  "run": 40314241978,
+  "job": 121542718922,
+  "artifact": 12651426975,
+  "archiveBytes": 16587898,
+  "archiveSha256": "93fae7a049235b86216514ab8190eca58d8d4b3b0b227c2561d0410a21da02d8",
+  "members": 17,
+  "all16ManifestDigestsActuallyReadAndVerified": true,
+  "bothActualQualifiedGeneratedArchivesByteIdenticalToRootOriginals": true,
+  "actualAuthenticFixtureArchiveAndRunnerVerified": true,
+  "observations": [
+    {
+      "index": 0,
+      "variant": "baseline",
+      "completed1400": true,
+      "observedWallSeconds": 1484.4005133249998,
+      "rightCensoredAtDeadline": false,
+      "validNodePeakRssKiB": 1249312,
+      "partialLogBytes": 14646
+    },
+    {
+      "index": 1,
+      "variant": "candidate",
+      "completed1400": true,
+      "observedWallSeconds": 1485.1490576180001,
+      "rightCensoredAtDeadline": false,
+      "validNodePeakRssKiB": 1128356,
+      "partialLogBytes": 14639
+    },
+    {
+      "index": 2,
+      "variant": "candidate",
+      "completed1400": false,
+      "observedWallSeconds": 1500.0029577160003,
+      "rightCensoredAtDeadline": true,
+      "validNodePeakRssKiB": null,
+      "partialLogBytes": 13676
+    },
+    {
+      "index": 3,
+      "variant": "baseline",
+      "completed1400": false,
+      "observedWallSeconds": 1500.0024036330005,
+      "rightCensoredAtDeadline": true,
+      "validNodePeakRssKiB": null,
+      "partialLogBytes": 13682
+    }
+  ],
+  "completedAssertions": 2800,
+  "allFourSelectedSampleProcessesPass": false,
+  "noMediansComputedFromCensoredRuns": true,
+  "bothVariantsHaveOne1500SecondTimeout": true,
+  "completedPairCandidateMinusBaselineSeconds": 0.7485442930003501,
+  "performanceQualified": false,
+  "scalarCandidateAdopted": false,
+  "decision": "Do not adopt scalar cache candidate: no demonstrated throughput win and both variants timed out on their second observations. Retain source/proof qualification as an experiment only. Timed-out wrapper RSS/exit fields are not Node measurements."
+}

@@ -90,6 +90,21 @@
       "status": "failed-component-smoke",
       "reason": "WIT token precedence split -> into - and >; fixed with longest operator before identifier matching and direct grammar positive/negative regressions",
       "formatting": "all seven host files already match pinned formatter; executable AST checks passed"
+    },
+    {
+      "head": "7e63615b0d0713db8b252f194d5740bbb5c5893f",
+      "run": 40248368107,
+      "job": 121334810951,
+      "status": "failed-test-fixture",
+      "passed": [
+        "all three new dispatch smoke requests",
+        "JS-engine five Python and five PHP checked corpus builds",
+        "four JS-engine callback IO checked builds",
+        "strict seven-module host formatting",
+        "actual full compiler native/Wasm kernel acceptance and rejection"
+      ],
+      "reason": "component fixture used Bool.not, absent from registered Practical Core prelude; replace only that expression with the existing checked conditional form",
+      "runtimeObservations": "full-loop consumer observations not yet executed; do not label partial builds as completed qualification"
     }
   ],
   "scope": {
@@ -131,5 +146,17 @@
     "expectedParentRequired": true,
     "cancelObsoleteRequests": true,
     "allPreviousGatesRetained": true
+  },
+  "exactCandidateReplay": {
+    "sourceCommit": "7e63615b0d0713db8b252f194d5740bbb5c5893f",
+    "producerRun": 40248368107,
+    "producerJob": 121334810951,
+    "artifactId": 12620121772,
+    "artifactSha256": "9e9c50843b68dd3257524e449c8ff0d42a4e3238897306d46435e390754addbb",
+    "rootSha256": "d4a0e963375366ac9b417dd1e9eb5372168c25c5230d3ce69f694274daa87043",
+    "rootBytes": 3811703,
+    "status": "pending all installed tests",
+    "productionSourceMustRemainIdentical": true,
+    "qualifiedArtifactReaderUnchanged": true
   }
 }

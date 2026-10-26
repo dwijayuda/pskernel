@@ -22,6 +22,18 @@ emit(base+"\nimport {verifyFile} from './node_modules/proofscript/host-tools/ins
 const sources=corpus.map(c=>({...c,sources:c.sources.map(s=>({...s,kind:c.grammar}))}));
 const program=base+`
 const rows=[],io=[],components=[],negatives=[];
+function checkedBuild(options){
+ try{return build(options);}catch(error){
+  try{
+   const directory=path.join(options.out,'generations');
+   const failed=fs.readdirSync(directory).filter(name=>name.startsWith('failed-')).sort((a,b)=>fs.statSync(path.join(directory,b)).mtimeMs-fs.statSync(path.join(directory,a)).mtimeMs)[0];
+   const candidate=JSON.parse(fs.readFileSync(path.join(directory,failed,'candidate.json')));
+   console.error('PSC1_DISPATCH_REFUSAL '+JSON.stringify({target:options.target,engine:options.engine,phase:candidate.phase,code:candidate.code,module:candidate.module,declaration:candidate.declaration,line:candidate.line,column:candidate.column}));
+  }catch(diagnosticError){console.error('PSC1_DISPATCH_DIAGNOSTIC '+diagnosticError.message);}
+  throw error;
+ }
+}
+
 for(const engine of ['js','ts','rust','wasm-core']) {
  for(const target of ['python','php']) {
   for(const entry of ${JSON.stringify(sources)}) {
@@ -43,8 +55,8 @@ for(const engine of ['js','ts','rust','wasm-core']) {
   }
  }
  for(const kind of ['lean','ps']){
-  const options={engine,target:'wasm-component',publicationProtocol:'portable-file',out:path.resolve('components',engine,kind),entryModule:'Entry',sources:[{module:'Entry',kind,text:kind==='lean'?'def truth : Bool := true\\ndef negate (value : Bool) : Bool := Bool.not value\\ndef big : Bool := Nat.beq (Nat.add 9007199254740993 1) 9007199254740994\\n':'def truth : Bool := true\\ndef negate(value : Bool) : Bool := Bool.not(value)\\ndef big : Bool := Nat.beq(Nat.add(9007199254740993, 1), 9007199254740994)\\n'}]};
-  const result=build(options);assert.equal(result.receipt.compilerTarget,'wasm-core');
+  const options={engine,target:'wasm-component',publicationProtocol:'portable-file',out:path.resolve('components',engine,kind),entryModule:'Entry',sources:[{module:'Entry',kind,text:kind==='lean'?'def truth : Bool := true\\ndef negate (value : Bool) : Bool := if value then false else true\\ndef big : Bool := Nat.beq (Nat.add 9007199254740993 1) 9007199254740994\\n':'def truth : Bool := true\\ndef negate(value : Bool) : Bool := if (value) { false } else { true }\\ndef big : Bool := Nat.beq(Nat.add(9007199254740993, 1), 9007199254740994)\\n'}]};
+  const result=checkedBuild(options);assert.equal(result.receipt.compilerTarget,'wasm-core');
   assert.equal(result.artifact,result.runtimeArtifact);assert.equal(result.receipt.targetArtifact.schema.length,3);
   const first=fs.readFileSync(result.artifact);assert.deepEqual([...first.subarray(0,8)],[0,97,115,109,13,0,1,0]);
   const next=build(options);assert.deepEqual(fs.readFileSync(next.artifact),first);assert.notEqual(result.generation,next.generation);

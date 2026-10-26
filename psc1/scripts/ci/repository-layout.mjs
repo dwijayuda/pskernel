@@ -162,9 +162,12 @@ for(const node of nodes){
  }
 }
 // Isolated executable copies must use implementations, never path-relative delegates.
+const copiedDelegate=/(?:const runner(?:Source)?\s*=|runnerFile:|runnerSha256:)[^\n]*scripts\/generated-compiler-runner\.mjs/;
+const badFixture="const runnerSource = path.join(root, "+JSON.stringify(['scripts','generated-compiler-runner.mjs'].join('/'))+");";
+assert.ok(copiedDelegate.test(badFixture),'detect the diagnosed isolated-copy defect');
+assert.ok(!copiedDelegate.test(badFixture.replace(['scripts','generated-compiler-runner.mjs'].join('/'),'host-tools/execution/generated-service-runner.mjs')));
 for(const file of files.filter(f=>f.startsWith('scripts/')&&f.endsWith('.mjs'))){
- assert.ok(!/(?:const runner(?:Source)?\\s*=|runnerFile:|runnerSha256:)[^\\n]*scripts\\/generated-compiler-runner\\.mjs/.test(read(file)),
-  'controller must pin/copy the canonical implementation: '+file);
+ assert.ok(!copiedDelegate.test(read(file)),'controller must pin/copy the canonical implementation: '+file);
 }
 for(const file of ['scripts/generated-compiler-diagnostic.mjs','scripts/generated-target-qualification.mjs'])
  assert.ok(read(file).includes('host-tools/contracts/compiler-closure.mjs'),'canonical validator missing from protected tool inventory: '+file);

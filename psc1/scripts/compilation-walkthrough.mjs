@@ -38,13 +38,13 @@ function verify(source,input,out,kind,stage,expected){
  const record={kind,stage,sourceSha256:sha(source),sourceClosureSha256:manifest.sourceClosureSha256,admissionsSha256:sha(graph),artifactSha256:sha(fs.readFileSync(artifact)),manifestSha256:sha(manifestBytes),generation,immutableArtifact:artifact,logicalAcceptance:true,strictIr:'required by actual production pipeline',behaviorallyVerified:false,observed};
  records.push(record);return record;
 }
-let status='running';
+let status='running',failure;
 try{
  for(const kind of ['lean','ps']){
   const dir=path.join(work,kind);fs.mkdirSync(dir,{recursive:true});
-  const input=path.join(dir,'Main.'+kind),out=path.join(dir,'module.mjs');
+  const input=path.join(dir,'Main.'+kind),out=path.join(dir,'module.js');
   fs.writeFileSync(input,originals[kind]);const before=verify(originals[kind],input,out,kind,'invert',[true,false]);
-  fs.writeFileSync(input,identities[kind]);verify(identities[kind],input,path.join(dir,'identity.mjs'),kind,'small-source-change',[false,true]);
+  fs.writeFileSync(input,identities[kind]);verify(identities[kind],input,path.join(dir,'identity.js'),kind,'small-source-change',[false,true]);
   fs.writeFileSync(input,kind==='lean'?'def invert (flag : Bool) : Bool := 42\n':'def invert(flag : Bool) : Bool := 42\n');
   const denied=run(compiler,['build',input,'--target','js','--out',out]);
   assert.equal(denied.error,null);assert.notEqual(denied.status,0);
@@ -64,8 +64,8 @@ try{
  for(const pin of pins)assert.equal(sha(fs.readFileSync(pin.file)),pin.sha256);
  status='passed';
  fs.writeFileSync(path.join(output,'exercise.json'),JSON.stringify({schema:'psc1-maintainer-exercise/1',testedCommit:process.env.GITHUB_SHA,status:'automated-rehearsal-passed',actualFreshCheckout:true,referenceRegression:'official Lean accepted',wrongAssertionRejected:true,smallSourceChanges:2,humanTrial:'pending-independent-human-participant',humanQualified:false,AIUsageForRehearsal:'authored by engineering agent; not an unassisted participant'},null,2)+'\n');
-}finally{
- const receipt={schema:'psc1-compilation-walkthrough/1',testedCommit:process.env.GITHUB_SHA,branchHead:process.env.PSC1_BRANCH_HEAD,status,pins,records,refusals,compilerRequestSeconds:240,checkerRequestSeconds:120,semanticFuel:'unchanged',freshHumanUsability:'not-tested',formalPreservation:false};
+}catch(error){status='failed';failure=error.message;throw error;}finally{
+ const receipt={schema:'psc1-compilation-walkthrough/1',testedCommit:process.env.GITHUB_SHA,branchHead:process.env.PSC1_BRANCH_HEAD,status,failure,pins,records,refusals,compilerRequestSeconds:240,checkerRequestSeconds:120,semanticFuel:'unchanged',freshHumanUsability:'not-tested',formalPreservation:false};
  fs.writeFileSync(path.join(output,'walkthrough.json'),JSON.stringify(receipt,null,2)+'\n');
  const archive=spawnSync('tar',['czf',path.join(output,'walkthrough-evidence.tar.gz'),'-C',output,'walkthrough'],{encoding:'utf8',timeout:240000,maxBuffer:32*1024*1024});
  assert.equal(archive.status,0,archive.stderr);

@@ -22,5 +22,22 @@
   },
   "soundness": "official Lean4.35 trust0, source/body pairing, strict IR, resources and negatives required",
   "merge": false,
-  "npmPublication": false
+  "npmPublication": false,
+  "attempts": [
+    {
+      "head": "1581b1f198a159a9414d01394a238cbc5e9940cf",
+      "run": 40272480824,
+      "job": 121408081788,
+      "status": "failed-walkthrough-example",
+      "passed": [
+        "docs/capability/source-link consistency",
+        "historical/current byte-identical extraction",
+        "all52 retained recursive-prefix checks",
+        "seven host AST/format checks",
+        "actual native compiler/unified seed build"
+      ],
+      "reason": "native CLI requires .js output; correct tutorial/harness extension, preserve refusal guard",
+      "compilerAlgorithmChange": false
+    }
+  ]
 }

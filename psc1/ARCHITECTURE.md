@@ -19,7 +19,9 @@ The previous architecture snapshot is [preserved](docs/history/ARCHITECTURE_BEFO
    admission graph, validates response/source/tool identities and runs target/API checks.
 7. For publication, seal a complete immutable generation and commit its current pointer
    through the existing transaction. Precommit failures preserve the previous generation;
-   committed durability/cleanup uncertainty is reported explicitly.
+   the installed generated publisher reports committed uncertainty explicitly.
+   The native legacy publisher can throw after its pointer commit while flushing;
+   its callers must inspect committed state rather than assume rollback.
 
 This is a dependency description. Generated execution can produce the candidate
 before the external checker runs; candidate production never grants publication authority.

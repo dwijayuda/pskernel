@@ -30,7 +30,7 @@ def invert(flag : Bool) : Bool := if (flag) { false } else { true }
 For each grammar the test launches the actual compiler command:
 
 ~~~sh
-.lake/build/bin/psc1 build Main.lean --target js --out module.mjs
+.lake/build/bin/psc1 build Main.lean --target js --out module.js
 ~~~
 
 The harness supplies 240s supervision and the existing bounded-process profile and8MiB native Lean thread-stack policy. It checks the
@@ -73,7 +73,7 @@ At each arrow, ask what the data means:
 
 ## Inspect the evidence
 
-The harness reads the real module.mjs.bundle.json pointer, resolves its immutable
+The harness reads the real module.js.bundle.json pointer, resolves its immutable
 generation and verifies every inventory hash. In that generation:
 - psc1-input.json records exact sources, public names, assurance and provenance.
 - admissions.json holds the canonical logical graph used for official checking.
@@ -88,8 +88,10 @@ An ill-typed replacement(declared Bool, returned Nat) must refuse and leave the
 previous manifest pointer, generation and artifact bytes unchanged. The test
 restores the fixture source afterward and retains reports plus a complete
 generation archive. No source in packages/ is edited by the harness.
-Postcommit durability uncertainty is a different outcome from this early refusal;
-do not treat every publication error as rollback.
+The native legacy publisher commits its pointer before its final directory flush;
+a late flush error can occur after commitment. The installed generated publisher
+reports committedPublication explicitly. Inspect committed state after late native
+errors; neither path permits assuming every publication error means rollback.
 
 ## Installed generated compiler path
 

@@ -49,7 +49,7 @@ describes the additional packages, checks and limitations.
 
 ## Qualification and evidence boundaries
 
-Current compiler source:122 modules/4742 Core members, closure
+Qualified packaged G3 source:122 modules/4742 Core members, closure
 `073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9`.
 All four genuine G1/G2/G3 chains and exact fixed points passed for this source:
 JS/TS/Wasm40223062370; Rust40223086966.
@@ -57,7 +57,9 @@ JS/TS/Wasm40223062370; Rust40223086966.
 retains the source, generation and preceding installed-application evidence.
 The [current dispatch receipt](docs/PSC1_CHECKED_DISPATCH_QUALIFICATION_2026-10-26.json)
 records the exact installed replay and source gate, including all 37 finite criteria.
-The current root is 3,811,703 bytes; optional native payloads remain separate.
+The current qualified root is 3,811,703 bytes; optional native payloads remain separate.
+Later development refactors have distinct source inventories and qualification;
+see AI_WORK_STATE.md and the maintainability receipt.
 
 [Checked-publication receipt](docs/PSC1_CHECKED_PUBLICATION_QUALIFICATION_2026-10-26.json)
 retains the preceding four-target host/package qualification. Older frozen120-module and refactored121-module

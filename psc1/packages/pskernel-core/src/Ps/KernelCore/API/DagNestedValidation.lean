@@ -203,7 +203,8 @@ def psKernelExprV2NestedCompareRulesWith
               match attemptedOld with
               | Except.error error => Option.some (Except.error error)
               | Except.ok oldType =>
-                  match psKernelExprV2OrdinaryExtendDecoded (Prod.fst oldType).whnf.arena oldOwner.built with
+                  let inferredState := Prod.fst oldType;
+                  match psKernelExprV2OrdinaryExtendDecoded inferredState.whnf.arena oldOwner.built with
                   | Except.error error => Option.some (Except.error error)
                   | Except.ok decoded =>
                       match psKernelExprV2DecodedRequire decoded (Prod.snd oldType) with

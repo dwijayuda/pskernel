@@ -1,0 +1,28 @@
+{
+  "source": "d746fb8cdcb47f2031ac6db483cf63b7debbcbef",
+  "run": 40310003421,
+  "job": 121528493889,
+  "artifact": 12644855628,
+  "archiveBytes": 1633,
+  "archiveSha256": "5144e838e752d4046626b9c440a2286126910ea320748fa01b45b4d5f6ce1cc4",
+  "all3ActualMembersReadAndCrcVerified": true,
+  "all10ReportsHaveOnlyStandardAxioms": true,
+  "all17ActualLabelsExactlyEqualQualifiedControls": true,
+  "actualDiagnostic": {
+    "source": "d746fb8cdcb47f2031ac6db483cf63b7debbcbef",
+    "schema": "psc1-original-nested-hygiene-diagnostic-v1",
+    "publishedConstructorMatchesDifferentClosedInput": false,
+    "pinnedLean": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "ordinaryValid": "accepted",
+    "ordinaryFreeVariable": "rejectedInvalid: declaration has free variables",
+    "officialValidAccepted": true,
+    "officialFreeVariableRejected": true,
+    "observedCapturedFreeVariableAccepted": false,
+    "nestedValid": "accepted",
+    "nestedCollidingFreeVariable": "rejectedInvalid: nested preprocessing: declaration has free variables",
+    "kernelQualified": false,
+    "diagnosticOnly": true
+  },
+  "permanentNativeGate": "PASS",
+  "compiledRoutesAndFullStringStillRequireSeparateResults": true
+}

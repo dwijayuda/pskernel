@@ -89,42 +89,31 @@ inductive PsKernelExprMapIndex where
       (left : PsKernelExprMapIndex)
       (right : PsKernelExprMapIndex)
 
-def psKernelExprMapIndexBucket
-    (fuel : Nat) :
-    PsKernelExprMapIndex ->
-    Nat ->
+/- Flat internal bucket scan: exact original fuel/path semantics; the public
+   curried interface below remains unchanged. No entry is admitted by a hash. -/
+def psKernelExprMapIndexBucketWorker
+    (fuel : Nat) (index : PsKernelExprMapIndex) (hash : Nat) :
     List (Prod PsKernelExpr PsKernelExpr) :=
   match fuel with
   | Nat.zero =>
-      fun
-        (index : PsKernelExprMapIndex)
-        (_hash : Nat) =>
-        match index with
-        | PsKernelExprMapIndex.bucket entries =>
-            entries
-        | _ =>
-            List.nil
+      match index with
+      | PsKernelExprMapIndex.bucket entries => entries
+      | _ => List.nil
   | Nat.succ remaining =>
-      let smaller :
-          PsKernelExprMapIndex ->
-          Nat ->
-          List (Prod PsKernelExpr PsKernelExpr) :=
-        psKernelExprMapIndexBucket remaining;
-      fun
-        (index : PsKernelExprMapIndex)
-        (hash : Nat) =>
-        match index with
-        | PsKernelExprMapIndex.branch left right =>
-            if Nat.beq (Nat.mod hash 2) 0 then
-              smaller
-                left
-                (Nat.div hash 2)
-            else
-              smaller
-                right
-                (Nat.div hash 2)
-        | _ =>
-            List.nil
+      match index with
+      | PsKernelExprMapIndex.branch left right =>
+          if Nat.beq (Nat.mod hash 2) 0 then
+            psKernelExprMapIndexBucketWorker remaining left (Nat.div hash 2)
+          else psKernelExprMapIndexBucketWorker remaining right (Nat.div hash 2)
+      | _ => List.nil
+
+def psKernelExprMapIndexBucket
+    (fuel : Nat) : PsKernelExprMapIndex -> Nat -> List (Prod PsKernelExpr PsKernelExpr) :=
+  match fuel with
+  | Nat.zero =>
+      fun (index : PsKernelExprMapIndex) (hash : Nat) => psKernelExprMapIndexBucketWorker Nat.zero index hash
+  | Nat.succ remaining =>
+      fun (index : PsKernelExprMapIndex) (hash : Nat) => psKernelExprMapIndexBucketWorker (Nat.succ remaining) index hash
 
 def psKernelExprMapIndexSet
     (fuel : Nat) :
@@ -379,42 +368,31 @@ inductive PsKernelExprPairSetIndex where
       (left : PsKernelExprPairSetIndex)
       (right : PsKernelExprPairSetIndex)
 
-def psKernelExprPairSetIndexBucket
-    (fuel : Nat) :
-    PsKernelExprPairSetIndex ->
-    Nat ->
+/- Flat internal bucket scan: exact original fuel/path semantics; the public
+   curried interface below remains unchanged. No entry is admitted by a hash. -/
+def psKernelExprPairSetIndexBucketWorker
+    (fuel : Nat) (index : PsKernelExprPairSetIndex) (hash : Nat) :
     List (Prod PsKernelExpr PsKernelExpr) :=
   match fuel with
   | Nat.zero =>
-      fun
-        (index : PsKernelExprPairSetIndex)
-        (_hash : Nat) =>
-        match index with
-        | PsKernelExprPairSetIndex.bucket entries =>
-            entries
-        | _ =>
-            List.nil
+      match index with
+      | PsKernelExprPairSetIndex.bucket entries => entries
+      | _ => List.nil
   | Nat.succ remaining =>
-      let smaller :
-          PsKernelExprPairSetIndex ->
-          Nat ->
-          List (Prod PsKernelExpr PsKernelExpr) :=
-        psKernelExprPairSetIndexBucket remaining;
-      fun
-        (index : PsKernelExprPairSetIndex)
-        (hash : Nat) =>
-        match index with
-        | PsKernelExprPairSetIndex.branch left right =>
-            if Nat.beq (Nat.mod hash 2) 0 then
-              smaller
-                left
-                (Nat.div hash 2)
-            else
-              smaller
-                right
-                (Nat.div hash 2)
-        | _ =>
-            List.nil
+      match index with
+      | PsKernelExprPairSetIndex.branch left right =>
+          if Nat.beq (Nat.mod hash 2) 0 then
+            psKernelExprPairSetIndexBucketWorker remaining left (Nat.div hash 2)
+          else psKernelExprPairSetIndexBucketWorker remaining right (Nat.div hash 2)
+      | _ => List.nil
+
+def psKernelExprPairSetIndexBucket
+    (fuel : Nat) : PsKernelExprPairSetIndex -> Nat -> List (Prod PsKernelExpr PsKernelExpr) :=
+  match fuel with
+  | Nat.zero =>
+      fun (index : PsKernelExprPairSetIndex) (hash : Nat) => psKernelExprPairSetIndexBucketWorker Nat.zero index hash
+  | Nat.succ remaining =>
+      fun (index : PsKernelExprPairSetIndex) (hash : Nat) => psKernelExprPairSetIndexBucketWorker (Nat.succ remaining) index hash
 
 def psKernelExprPairSetIndexSet
     (fuel : Nat) :

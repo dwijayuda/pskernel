@@ -166,8 +166,9 @@ private def compare (label : String) (session : PsKernelKernelSession)
     (fullEnvironmentEq original batch.session.environment)
   let failed := psKernelV1RunDag session [] .safe arena [.admit request,.admit request]
   require (label ++ "-late-batch-error-publishes-no-partial-session")
-    (match failed with | .error (.rejectedInvalid _) =>
-      !psKernelEnvironmentContains session.environment first.name
+    (match failed with
+     | .error (.rejectedInvalid _) =>
+         !psKernelEnvironmentContains session.environment first.name
      | _ => false)
   let limited := {session with resources := {session.resources with maxDeclarations := psKernelEnvironmentSize original - 1}}
   require (label ++ "-unchanged-public-declaration-limit-applies-after-complete-validation")

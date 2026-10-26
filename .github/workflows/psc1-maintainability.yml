@@ -1,0 +1,98 @@
+name: PSC1 maintainer walkthrough and body-preserving extraction
+on:
+  push:
+    branches: [refactor/psc1-maintainability-20261026]
+    paths:
+      - psc1/**/*.lean
+      - psc1/scripts/*.mjs
+      - psc1/*CONTRACT.json
+      - psc1/lakefile.lean
+      - .github/workflows/psc1-maintainability.yml
+permissions:
+  contents: read
+concurrency:
+  group: psc1-maintainability-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  walkthrough-and-g1:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      PSC1_BRANCH_HEAD: ${{ github.sha }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Check current guides, exact extraction and retained recursive guards
+        run: |
+          set -euo pipefail
+          node scripts/maintainer-docs.mjs
+          node scripts/readability-module-check.mjs
+          node scripts/check-wasm-applied-prefixes.mjs
+          node --check scripts/compilation-walkthrough.mjs
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        id: native-cache
+        with:
+          path: psc1/.lake
+          key: psc1-maintainer-native-v1-${{ runner.os }}-${{ hashFiles('psc1/**/*.lean','psc1/lakefile.lean','psc1/lean-toolchain') }}
+          restore-keys: |
+            psc1-maintainer-native-v1-${{ runner.os }}-
+            psc1-direct-service-native-v1-${{ runner.os }}-
+      - name: Install pinned Lean and locked host/target tooling
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          npm ci --prefix .. --ignore-scripts --include=optional
+          npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
+          rustup toolchain install 1.90.0 --profile minimal
+          rustup default 1.90.0
+      - name: Install SHA256-pinned Wasm validator
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/psc1-bin" "$RUNNER_TEMP/wasm-tools"
+          curl --fail --location --retry 3 'https://github.com/bytecodealliance/wasm-tools/releases/download/v1.254.0/wasm-tools-1.254.0-x86_64-linux.tar.gz' -o "$RUNNER_TEMP/wasm-tools.tar.gz"
+          echo "d0efb16c9c859137b7ab3e99151c299cd47caee106ed4594561002f7a04945bd  $RUNNER_TEMP/wasm-tools.tar.gz" | sha256sum -c -
+          tar xzf "$RUNNER_TEMP/wasm-tools.tar.gz" -C "$RUNNER_TEMP/wasm-tools"
+          install -m 755 "$(find "$RUNNER_TEMP/wasm-tools" -type f -name wasm-tools -print -quit)" "$RUNNER_TEMP/psc1-bin/wasm-tools"
+          echo "$RUNNER_TEMP/psc1-bin" >> "$GITHUB_PATH"
+      - name: Preserve scoped host formatting and executable AST evidence
+        run: node scripts/readability-host-check.mjs
+      - name: Build actual compiler, independent checker and unified seed
+        run: |
+          set -euo pipefail
+          lean --version
+          node packages/pskernel-lean/host/check-pin.mjs
+          lake build psc1 psc1_unified_service_seed psc1_source_census_probe psc1_independent_checker
+      - uses: actions/cache/save@v4
+        if: steps.native-cache.outputs.cache-hit != 'true'
+        with:
+          path: psc1/.lake
+          key: psc1-maintainer-native-v1-${{ runner.os }}-${{ hashFiles('psc1/**/*.lean','psc1/lakefile.lean','psc1/lean-toolchain') }}
+      - name: Execute checked example, small change, refusal preservation and reference maintainer test
+        run: node scripts/compilation-walkthrough.mjs
+      - name: Census complete refactored source under both grammars
+        run: node scripts/generated-target-source-audit.mjs wasm-core unified
+      - name: Execute genuine current-source Wasm G1 with native compiler executables removed
+        run: node scripts/generated-target-qualification.mjs wasm-core --g1-only performance-240s unified
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-maintainability-${{ github.sha }}
+          path: |
+            psc1/dist/maintainability/
+            psc1/dist/readability/
+            psc1/dist/generated-unified-wasm-core-compiler/
+          if-no-files-found: warn
+          retention-days: 90

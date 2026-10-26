@@ -27,7 +27,9 @@ assert.ok(bodyStart > 0, 'module header required');
 const imports = extracted.slice(0, bodyStart).split('\n').filter(line => line.startsWith('import '));
 assert.deepEqual(imports, ['import Ps.BackendWasm.Type', 'import Ps.Foundation.List']);
 assert.equal(extracted.slice(bodyStart), fold + inventory, 'all moved declaration bytes retained');
-assert.equal(fs.readFileSync(path.join(root, originalPath), 'utf8'),
+const historical = spawnSync('git', ['show', '446a0f21c6288a7c20b843bbeadcd18ba1460fa2:psc1/' + originalPath], {cwd: root, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024});
+assert.equal(historical.status, 0, historical.stderr);
+assert.equal(historical.stdout,
   'import Ps.BackendWasm.Lower.TypeInventory\n' +
   original.stdout.replace(fold, '').replace(inventory, ''),
   'all remaining Lower declarations and imports retained');
@@ -50,3 +52,20 @@ const receipt = {
 };
 fs.writeFileSync(path.join(out, 'module.json'), JSON.stringify(receipt, null, 2) + '\n');
 console.log('PSC1_READABILITY_MODULE: PASS ' + JSON.stringify(receipt));
+
+const currentBaseline='7fc146ef50ff5ba28bae033e334c49d1a9cd5637';
+const previous=spawnSync('git',['show',currentBaseline+':psc1/'+originalPath],{cwd:root,encoding:'utf8',timeout:10000,maxBuffer:1024*1024});
+assert.equal(previous.status,0,previous.stderr);
+const begin=previous.stdout.indexOf('def psWasmTypeUsesNatWithFuel');
+const end=previous.stdout.indexOf('def psWasmExportsOfDeclarations',begin);
+assert.ok(begin>=0&&end>begin);
+const moved=previous.stdout.slice(begin,end);
+const runtimePath='packages/backend-wasm/src/Ps/BackendWasm/Lower/RuntimeNeeds.lean';
+const runtime=fs.readFileSync(path.join(root,runtimePath),'utf8');
+assert.deepEqual(runtime.slice(0,runtime.indexOf('def psWasmTypeUsesNatWithFuel')).split('\n').filter(x=>x.startsWith('import ')),['import Ps.CompilerIr.Model','import Ps.Foundation.List']);
+assert.equal(runtime.slice(runtime.indexOf('def psWasmTypeUsesNatWithFuel')),moved,'all runtime dependency declarations byte-identical');
+assert.equal(fs.readFileSync(path.join(root,originalPath),'utf8'),'import Ps.BackendWasm.Lower.RuntimeNeeds\n'+previous.stdout.replace(moved,''),'all remaining Lower bytes retained');
+assert.ok(fs.readFileSync(path.join(root,'lakefile.lean'),'utf8').includes(String.fromCharCode(96)+'Ps.BackendWasm.Lower.RuntimeNeeds,'));
+const current={schema:'psc1-runtime-needs-extraction/1',testedCommit:process.env.GITHUB_SHA,baseline:currentBaseline,originalPath,extractedPath:runtimePath,movedDeclarations:[...moved.matchAll(/^def ([^\s{(]+)/gm)].map(m=>m[1]),movedLines:moved.split('\n').length-1,bodies:'byte-identical',remainingDeclarations:'byte-identical',historicalExtraction:'original proof retained against immutable446a0f21',newCompilerGenerationQualification:'separate; packaged G3 unchanged'};
+fs.writeFileSync(path.join(out,'runtime-needs.json'),JSON.stringify(current,null,2)+'\n');
+console.log('PSC1_RUNTIME_NEEDS_EXTRACTION: PASS '+JSON.stringify(current));

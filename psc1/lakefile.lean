@@ -162,6 +162,7 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.LowerFloat,
     `Ps.BackendWasm.TailCalls,
     `Ps.BackendWasm.Lower.TypeInventory,
+    `Ps.BackendWasm.Lower.RuntimeNeeds,
     `Ps.BackendWasm.Lower,
     `Ps.BackendWasm.Encode,
     `Ps.BackendWasm.BinaryBytes,

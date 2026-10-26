@@ -9,7 +9,7 @@ and [dated evidence](evidence/README.md).
 
 Repository organization follows PR#191 at b426f9763ed2a576135ed2089671d48e21f1ff32.
 Runtime path/entry-point changes and a body-preserving TypeScript runtime extraction
-require actual Linux qualification. [The checkpoint](../AI_WORK_STATE.md) distinguishes
+passed Linux qualification. [The checkpoint](../AI_WORK_STATE.md) distinguishes
 implementation from qualification.
 
 The preceding .8 host passed installed run40314294152 at9b251a97.
@@ -26,7 +26,7 @@ own exact prior scope, identities and limitations.
 
 | Order | Work | Status and finite acceptance |
 | --- | --- | --- |
-| 1 | Repository organization | In progress: canonical owners, compatibility paths, exact body/import-path correspondence, generated navigation, unchanged frozen payloads, source and offline installed gates. |
+| 1 | Repository organization | Qualified: [receipt](PSC1_LAYOUT_QUALIFICATION_2026-10-26.json). Source40344469855 passes37/37; installed40344458391 and current-source WasmG1/40344458240 pass. Canonical owners/compatibility paths, exact move/path checks, generated navigation and unchanged frozen payloads. Human understanding is separate. |
 | 2 | Independent maintainer trial | Pending human participation; the user can arrange a maintainer. Record commit, navigation mistakes, elapsed time, assistance and a real small change. No AI/CI comprehension claim. |
 | 3 | Compiler-origin structured diagnostics/editor integration | Pending: actual spans/provenance, both grammars, machine/human consumers and malformed-input refusals. |
 | 4 | Qualified watch/incremental behavior | Pending: dependency changes, cancellation, stale results, resource bounds and publication preservation. No second semantic compiler. |

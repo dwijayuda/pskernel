@@ -6,6 +6,11 @@ uses genuine self-hosted JS/TS executors with optional Rust/compiler-Wasm execut
 and the official Lean 4.35.0 independent C++ kernel compiled to linear-memory Wasm.
 Compiler execution, output target and checking are separate choices.
 
+The [qualified .9 layout milestone](./docs/PSC1_LAYOUT_QUALIFICATION_2026-10-26.json)
+adds explicit runtime/CLI ownership, categorized guides, package navigation and a
+body-preserving TypeScript runtime extraction. The selected root is3,823,980 bytes;
+its frozen G3/compiler/kernel/provider payloads retain their original identities.
+
 Start with the [project CLI/install guide](./docs/guides/cli.md),
 [architecture](./ARCHITECTURE.md) and [contributor guide](./CONTRIBUTING.md).
 Follow the [source-linked compilation walkthrough](./docs/guides/compilation-walkthrough.md)
@@ -16,7 +21,7 @@ The [documentation index](./docs/README.md) links current contracts and exact re
 The [roadmap](./docs/PSC1_DEVELOPMENT_ROADMAP.md) owns remaining work;
 [AI_WORK_STATE.md](./AI_WORK_STATE.md) records the engineering checkpoint.
 
-The .8 host CLI adds [project initialization, source files and diagnostics](./docs/guides/cli.md).
+The preceding .8 host CLI introduced [project initialization, source files and diagnostics](./docs/guides/cli.md).
 Its [exact Linux qualification](./docs/PSC1_CLI_QUALIFICATION_2026-10-26.json) preserves the frozen G3 executables.
 [TypeScript workflow research and decisions](./docs/development/typescript-workflows.md) explain the scope.
 
@@ -35,7 +40,7 @@ def invert(flag : Bool) : Bool := if (flag) { false } else { true }
 With Node22.23.3 and the qualified local unpublished tarball:
 
 ```sh
-npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1.8.tgz
+npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1.9.tgz
 npx --no-install psc check Main.lean
 npx --no-install psc compile Main.ps --engine ts
 npx --no-install psc build Main.ps --target wasm-core --publication-protocol portable-file --out dist/app
@@ -61,7 +66,8 @@ JS/TS/Wasm40223062370; Rust40223086966.
 retains the source, generation and preceding installed-application evidence.
 The [current dispatch receipt](./docs/PSC1_CHECKED_DISPATCH_QUALIFICATION_2026-10-26.json)
 records the exact installed replay and source gate, including all 37 finite criteria.
-The current qualified root is 3,811,703 bytes; optional native payloads remain separate.
+The preceding .7 root was3,811,703 bytes; the selected .9 root is3,823,980 bytes.
+Optional native payloads remain separate. Use the exact layout receipt.
 Later development refactors have distinct source inventories and qualification;
 see AI_WORK_STATE.md and the maintainability receipt.
 

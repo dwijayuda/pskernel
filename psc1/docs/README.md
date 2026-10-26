@@ -1,5 +1,10 @@
 # PSC1 documentation index
 
+The [qualified layout/ownership receipt](PSC1_LAYOUT_QUALIFICATION_2026-10-26.json)
+records the .9 host package, current source, exact moves, CI and preserved payloads.
+[Repository map](reference/repository-map.md) and [CLI roles](../npm-cli/README.md)
+are the navigation entry points. Human comprehension remains pending.
+
 Start with [the compiler README](../README.md), [architecture](../ARCHITECTURE.md)
 and [contributor guide](../CONTRIBUTING.md). This index separates current guidance
 from immutable evidence; dated records remain preserved.

@@ -1,5 +1,12 @@
 # Current capabilities and evidence scope
 
+The newer [.9 layout milestone](PSC1_LAYOUT_QUALIFICATION_2026-10-26.json) passes
+source40344469855 (37/37 finite criteria), current-source WasmG1/40344458240 and
+installed40344458391. It preserves the frozen122-module G3 source/executables;
+current124-module source and its new ownership/module paths are qualified separately.
+There is no new G2/G3, whole-compiler preservation or final cross-platform claim.
+The .7 capability table and .8 CLI receipt below retain their original identities.
+
 The newer [.8 project CLI](PSC1_CLI.md) is qualified separately in its
 [exact receipt](PSC1_CLI_QUALIFICATION_2026-10-26.json). It retains the same frozen
 G3 compiler/kernel executables and seven-target ABI scope. Three optional tools

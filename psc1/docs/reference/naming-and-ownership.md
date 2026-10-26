@@ -29,3 +29,14 @@ Automation may format authored host code, derive maps, check links/body movement
 apply qualified bounded renames. Separate moves, formatting, renames and behavior.
 Never hand-edit generated executors, vendored kernels or frozen evidence. Readable
 runtime views must be generated from the single source definitions.
+
+## Resource location and standalone copies
+
+Resolve a host-owned executable/helper from its owning module or trusted installed
+root. The source project's working directory is data and must not select that tool.
+Keep the child working directory independent. [The real-process regression](../../test/host/process-location.test.mjs)
+checks both directories and the original timeout ceiling.
+Compatibility delegates preserve commands in their normal tree; isolated fixtures
+must copy and pin [the implementation](../../host-tools/execution/generated-service-runner.mjs),
+including dependencies in protected tool inventories. No assertion is removed to
+accommodate an incomplete staged tree.

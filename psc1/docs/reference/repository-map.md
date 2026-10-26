@@ -24,3 +24,8 @@ pins and CI do not qualify PSC1. Existing paths remain; no history is deleted.
 The generated map labels legacy, kernel research, tests, production, receipts and
 automation separately. It reports imports rather than inventing a parallel semantic
 registry. Import edges describe static source dependencies, not dynamic authority.
+
+Import coverage is PSC1 Ps.* Lean modules and relative JavaScript imports.
+External Lean/Std/Lake imports, dynamic calls, Python/Cargo dependencies and semantic
+visibility are outside this graph. Generated Markdown links assume its normal
+psc1/dist/readability location; JSON records the exact tested commit and source paths.

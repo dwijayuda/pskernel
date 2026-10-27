@@ -53,9 +53,10 @@ noncomputable def fieldValue (data : List Type) (self : Type) (fields : List PsM
 noncomputable def projectionModel (specs : List PsMinRegSpec) :
     (slot field : Nat) → (type : PsMinRegTy) →
       psMinOpProjectionType specs slot field = some type → Denote (dataModel specs) type := by
-  induction specs with
+  cases specs with
   | nil => intro slot field type h; simp [psMinOpProjectionType] at h
-  | cons spec rest ih =>
+  | cons spec rest =>
+    let ih := projectionModel rest
     intro slot field type h
     cases slot with
     | succ slot =>
@@ -84,6 +85,8 @@ noncomputable def projectionModel (specs : List PsMinRegSpec) :
               exact fun value => fieldValue (dataModel rest) (Carrier (singleSpec fields) (dataModel rest))
                 fields field result hf (recordArgs fields (dataModel rest) value)
 
+termination_by structural specs
+
 theorem projection_iota (fields : List PsMinRegField) (data : List Type)
     (index : Nat) (type : PsMinRegTy) (h : psMinOpFieldType fields index = some type)
     (args : Args data (Carrier (singleSpec fields) data) fields) :
@@ -99,7 +102,14 @@ theorem actual_projection_iota (fields : List PsMinRegField) (rest : List PsMinR
       (by simp [psMinOpProjectionType, singleSpec, h])
       (construct (singleSpec fields) (dataModel rest) ⟨0, by simp [singleSpec]⟩ args) =
       fieldValue (dataModel rest) (Carrier (singleSpec fields) (dataModel rest)) fields index type h args := by
-  simpa [projectionModel, singleSpec, Nat.casesAuxOn, h] using projection_iota fields (dataModel rest) index type h args
+  cases hf : psMinOpFieldType fields index with
+  | none => simp [hf] at h
+  | some result =>
+    have ht : result = type := Option.some.inj (hf.symm.trans h)
+    cases ht
+    unfold projectionModel
+    dsimp only [singleSpec, Nat.casesAuxOn]
+    simpa only [hf] using projection_iota fields (dataModel rest) index result hf args
 
 #print axioms projectionModel
 #print axioms projection_iota

@@ -96,7 +96,8 @@ currently refuses before executing such input.
 
 ## Why full compiler self-hosting remains open
 
-The actual 124-module compiler graph has dependent Core, inductives/recursors,
+The census at `d6bebd230bcaadf35a254bfbc5a26a17228db55f` in Linux
+run40444275459 measures the actual124-module compiler graph. It has dependent Core, inductives/recursors,
 projections, polymorphism and a nonempty primitive foundation. The census measures
 the exact canonical graph and prelude instead of assuming the surface syntax is
 the kernel language. A model for 60 declared foundation axioms and an acceptance

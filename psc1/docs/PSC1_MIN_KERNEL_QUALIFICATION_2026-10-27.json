@@ -1,0 +1,706 @@
+{
+  "schema": "psc1-min-kernel-qualification/1",
+  "authority": "Data-only scoped Linux research evidence; grants no production admission, publication or changed-source authority.",
+  "branch": "research/psc1-minkernel-consistency-selfhost-20261027",
+  "baseBranch": "refactor/psc1-layout-20261026",
+  "baseCommit": "94e0c13f6a4b434f73c859cc0c716cb6fb8d1340",
+  "implementationCommit": "d6bebd230bcaadf35a254bfbc5a26a17228db55f",
+  "scope": "initial-stlc-source-proof-and-psc1-portability",
+  "implementationComplete": false,
+  "fullCompilerConsistencyProved": false,
+  "architecture": "Direct Type model: Empty, Unit, Nat, simple arrows; actual inference/sequential-admission bridge",
+  "runtime": {
+    "source": {
+      "path": "packages/pskernel-min/src/Ps/MinKernel/Check.lean",
+      "sha256": "2fb59b7477d42ee6c351e9c42db2afef94dc01f6db37764108141eeca016303c",
+      "bytes": 3322,
+      "lines": 93
+    },
+    "explicitSourceModules": 1,
+    "explicitRuntimeImports": 0,
+    "proofImports": 0,
+    "officialLeanCalls": 0
+  },
+  "proof": {
+    "status": "passed",
+    "runId": 40444275459,
+    "jobId": 121991681809,
+    "leanVersion": "4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "theorem": "Ps.MinKernel.Proofs.minKernel_consistent",
+    "modelTheorem": "Ps.MinKernel.Proofs.minKernel_hasModel",
+    "theoremAxioms": [
+      "propext"
+    ],
+    "sorryAx": false,
+    "arbitraryNewAxioms": false,
+    "boundary": "Safe Lean source definitions; generated-code/native-code semantic preservation is not proved"
+  },
+  "tests": {
+    "nativeSemanticVectors": 16,
+    "generatedSemanticVectors": 16,
+    "finiteOfficialNativeDifferential": [
+      {
+        "id": "empty-environment",
+        "accepted": true,
+        "canonicalSha256": "c3a46b7bcc5fd20612556cd1c6c42fdc1e68a2778966fe035311ffd6110ed73a",
+        "nativeProcessMs": 38.39717799999994,
+        "generatedInProcessMs": 0.11597400000005109
+      },
+      {
+        "id": "nat-identity",
+        "accepted": true,
+        "canonicalSha256": "bff91b9241003deeca22ef78988c83a190febed61bb386087428fd16ac339d09",
+        "nativeProcessMs": 39.14993400000003,
+        "generatedInProcessMs": 0.29542399999991176
+      },
+      {
+        "id": "sequential-prior-constant",
+        "accepted": true,
+        "canonicalSha256": "4e7deaaf88b7bdf8b5685f948bfc6dd1cd8a7c8d1d5a4b206b84c1f61efb8695",
+        "nativeProcessMs": 39.187384000000065,
+        "generatedInProcessMs": 0.28849300000001676
+      },
+      {
+        "id": "beta-application",
+        "accepted": true,
+        "canonicalSha256": "444cc97ae9a3bd378dfcd2741ab3112f85ced4877271e8d08b44881cbb0d5c73",
+        "nativeProcessMs": 38.19228999999996,
+        "generatedInProcessMs": 0.33231899999987036
+      },
+      {
+        "id": "forward-reference-refusal",
+        "accepted": false,
+        "canonicalSha256": "ff02bfa4a133328563eee95a03eb02962ce6d947f6b46f297ba6123bdee3f13a",
+        "nativeProcessMs": 43.74278400000003,
+        "generatedInProcessMs": 0.8202909999999974
+      }
+    ],
+    "canonicalMinDual": "explicit-refusal-no-delegation",
+    "officialAdmissionOfExactSource": {
+      "protocol": "pskernel-lean/1",
+      "provider": "lean4-cpp",
+      "leanVersion": "4.35.0",
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "profile": "lean4.35-core",
+      "accepted": true
+    }
+  },
+  "portability": {
+    "schema": "psc1-min-kernel-portability/1",
+    "commit": "d6bebd230bcaadf35a254bfbc5a26a17228db55f",
+    "sourceIdentities": [
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Check.lean",
+        "sha256": "2fb59b7477d42ee6c351e9c42db2afef94dc01f6db37764108141eeca016303c",
+        "bytes": 3322,
+        "lines": 93
+      },
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Tests/Vectors.lean",
+        "sha256": "7e4f1d3d196872977d625f6ed58fe24dda1441869055a1a417d62fedc699cde9",
+        "bytes": 2646,
+        "lines": 36
+      }
+    ],
+    "checkerSourceModules": 1,
+    "runtimeProofImports": 0,
+    "generatedVectorExport": "psMinRawVector",
+    "observations": [
+      {
+        "index": 0,
+        "accepted": true
+      },
+      {
+        "index": 1,
+        "accepted": true
+      },
+      {
+        "index": 2,
+        "accepted": true
+      },
+      {
+        "index": 3,
+        "accepted": true
+      },
+      {
+        "index": 4,
+        "accepted": true
+      },
+      {
+        "index": 5,
+        "accepted": false
+      },
+      {
+        "index": 6,
+        "accepted": false
+      },
+      {
+        "index": 7,
+        "accepted": false
+      },
+      {
+        "index": 8,
+        "accepted": false
+      },
+      {
+        "index": 9,
+        "accepted": false
+      },
+      {
+        "index": 10,
+        "accepted": false
+      },
+      {
+        "index": 11,
+        "accepted": false
+      },
+      {
+        "index": 12,
+        "accepted": false
+      },
+      {
+        "index": 13,
+        "accepted": false
+      },
+      {
+        "index": 14,
+        "accepted": false
+      },
+      {
+        "index": 15,
+        "accepted": false
+      }
+    ],
+    "generatedTsBytes": 30836,
+    "generatedJsBytes": 35869,
+    "generatedJsSha256": "9c0286037d1900cf5c54a35e6d6b69ac5dae6bee9cea99100ff99b4818cd2e42",
+    "admissionsSha256": "177db8f3b7c06b0ffb2b8b55af86f0f93a698abf4786f2084700f4912d58fc7c",
+    "officialCheckerSha256": "bfdbea2499837db2dd71de8425bc17f81e380990964568af98cd98ef31cce6b7",
+    "officialSourceAdmission": {
+      "protocol": "pskernel-lean/1",
+      "provider": "lean4-cpp",
+      "leanVersion": "4.35.0",
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "profile": "lean4.35-core",
+      "accepted": true
+    },
+    "differential": [
+      {
+        "id": "empty-environment",
+        "accepted": true,
+        "canonicalSha256": "c3a46b7bcc5fd20612556cd1c6c42fdc1e68a2778966fe035311ffd6110ed73a",
+        "nativeProcessMs": 38.39717799999994,
+        "generatedInProcessMs": 0.11597400000005109
+      },
+      {
+        "id": "nat-identity",
+        "accepted": true,
+        "canonicalSha256": "bff91b9241003deeca22ef78988c83a190febed61bb386087428fd16ac339d09",
+        "nativeProcessMs": 39.14993400000003,
+        "generatedInProcessMs": 0.29542399999991176
+      },
+      {
+        "id": "sequential-prior-constant",
+        "accepted": true,
+        "canonicalSha256": "4e7deaaf88b7bdf8b5685f948bfc6dd1cd8a7c8d1d5a4b206b84c1f61efb8695",
+        "nativeProcessMs": 39.187384000000065,
+        "generatedInProcessMs": 0.28849300000001676
+      },
+      {
+        "id": "beta-application",
+        "accepted": true,
+        "canonicalSha256": "444cc97ae9a3bd378dfcd2741ab3112f85ced4877271e8d08b44881cbb0d5c73",
+        "nativeProcessMs": 38.19228999999996,
+        "generatedInProcessMs": 0.33231899999987036
+      },
+      {
+        "id": "forward-reference-refusal",
+        "accepted": false,
+        "canonicalSha256": "ff02bfa4a133328563eee95a03eb02962ce6d947f6b46f297ba6123bdee3f13a",
+        "nativeProcessMs": 43.74278400000003,
+        "generatedInProcessMs": 0.8202909999999974
+      }
+    ],
+    "compileMs": 1073.535623,
+    "officialSourceAdmissionMs": 46.81437099999994,
+    "coldImportAndVectorsMs": 5.37250599999993,
+    "warm160000VectorsMs": 4955.509547,
+    "memoryUsage": {
+      "rss": 138334208,
+      "heapTotal": 66248704,
+      "heapUsed": 43690928,
+      "external": 121435877,
+      "arrayBuffers": 24811
+    },
+    "nativeCheckerSource": "actual current PSC1 source compiler; not a generated compiler generation",
+    "trust": "Lean-to-IR/backend preservation is empirically exercised, not formally proved",
+    "selfHost": "not-qualified: generated checker does not admit the compiler dependency graph",
+    "performanceScope": "test harness includes fixtures/assertions; not a PSC1 graph-check benchmark"
+  },
+  "compilerClosure": {
+    "commit": "d6bebd230bcaadf35a254bfbc5a26a17228db55f",
+    "sourceModules": 124,
+    "sourceCoreMembers": 4742,
+    "logicalCoreMembers": 4747,
+    "admissionRecords": 3465,
+    "preludeDeclarations": 115,
+    "foundationAxioms": 60,
+    "expressions": {
+      "app": 230478,
+      "b": 52868,
+      "const": 244702,
+      "forall": 12986,
+      "lam": 43860,
+      "let": 5955,
+      "nat": 2862,
+      "proj": 7168,
+      "sort": 531,
+      "str": 5875
+    },
+    "levels": {
+      "p": 128,
+      "s": 11786,
+      "z": 11786
+    },
+    "declarationKinds": {
+      "definition": 3152,
+      "inductive": 308,
+      "opaque": 5
+    },
+    "primitiveReferences": {
+      "Nat": 7953,
+      "Int": 337,
+      "Bool": 23286,
+      "String": 22425,
+      "Array": 0,
+      "List": 29254,
+      "Option": 10004,
+      "Except": 19154,
+      "Prod": 6810,
+      "Quot": 0,
+      "Quotient": 0
+    },
+    "minQualifiedModules": 0,
+    "minQualifiedPracticalCoreCriteria": 0,
+    "report": {
+      "path": "dist/pskernel-min/closure/report.json",
+      "bytes": 233500,
+      "sha256": "27dcd121b27e544550e8fd59a7d70d063f28b3265e1764a4c51d14124f50657c"
+    },
+    "qualifiedMinModules": 0,
+    "qualifiedPracticalCoreCriteria": 0,
+    "totalPracticalCoreCriteria": 37,
+    "completeMinAdmission": false,
+    "minG1": "not-qualified",
+    "minG2": "not-qualified",
+    "minG3": "not-qualified"
+  },
+  "officialIntegration": {
+    "default": "lean-wasm",
+    "leanVersion": "4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "productionPackagesChanged": false,
+    "native": "Existing official provider preserved; exact new source graph independently accepted natively.",
+    "wasm": "Existing default official linear-memory Wasm preserved; no new fragment-specific Wasm comparison in this workflow.",
+    "min": "Typed source library available; canonical bridge absent and explicitly refuses.",
+    "dual": "Canonical minimal-plus-official common-domain bridge absent and explicitly refuses.",
+    "compilerWasm": "GC preserved",
+    "officialKernelWasm": "C++/Emscripten linear memory preserved"
+  },
+  "artifacts": [
+    {
+      "id": 12707935407,
+      "name": "psc1-minkernel-portability-closure-d6bebd230bcaadf35a254bfbc5a26a17228db55f",
+      "size_in_bytes": 1515178,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12707935407",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12707935407/zip",
+      "expired": false,
+      "created_at": "2026-10-27T03:29:19Z",
+      "expires_at": "2027-01-25T03:27:35Z",
+      "updated_at": "2026-10-27T03:29:19Z",
+      "digest": "sha256:b3fe8b8ad20e0b8e7d2c61412394c5d9e3e6a828cc01b74496169b587708537c",
+      "workflow_run": {
+        "id": 40444275459,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "research/psc1-minkernel-consistency-selfhost-20261027",
+        "head_sha": "d6bebd230bcaadf35a254bfbc5a26a17228db55f"
+      }
+    },
+    {
+      "id": 12707632026,
+      "name": "psc1-minkernel-proof-d6bebd230bcaadf35a254bfbc5a26a17228db55f",
+      "size_in_bytes": 740,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12707632026",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12707632026/zip",
+      "expired": false,
+      "created_at": "2026-10-27T03:28:35Z",
+      "expires_at": "2027-01-25T03:27:35Z",
+      "updated_at": "2026-10-27T03:28:35Z",
+      "digest": "sha256:4bb77439bcbd196b080310bdba71422a8df231db449e8fca7c6d9bc2acfbc85a",
+      "workflow_run": {
+        "id": 40444275459,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "research/psc1-minkernel-consistency-selfhost-20261027",
+        "head_sha": "d6bebd230bcaadf35a254bfbc5a26a17228db55f"
+      }
+    }
+  ],
+  "existingRegressionGate": {
+    "runId": 40444282214,
+    "status": "completed",
+    "conclusion": "success",
+    "testedMerge": "1192135a60b7570ace969591f71f723521c32521",
+    "testedTree": "1e6eb1bf349cdde90b2ff35cc2b418b51a44a834",
+    "headTreeSameAsTestedMerge": true,
+    "gateJobId": 122004044236,
+    "fullJobId": 121996032136,
+    "finitePracticalCore": {
+      "qualified": 37,
+      "implemented": 0,
+      "tested": 0,
+      "blocked": 0,
+      "releaseReady": true,
+      "scope": "existing finite Practical Core only; not MinKernel coverage"
+    },
+    "jobs": [
+      {
+        "id": 121992075474,
+        "name": "static",
+        "conclusion": "success"
+      },
+      {
+        "id": 121992321240,
+        "name": "focused / focused (core)",
+        "conclusion": "success"
+      },
+      {
+        "id": 121992321265,
+        "name": "native / native",
+        "conclusion": "success"
+      },
+      {
+        "id": 121992321318,
+        "name": "source-bindings / trace",
+        "conclusion": "success"
+      },
+      {
+        "id": 121992321323,
+        "name": "focused / php-application",
+        "conclusion": "success"
+      },
+      {
+        "id": 121992321347,
+        "name": "focused / focused (applications)",
+        "conclusion": "success"
+      },
+      {
+        "id": 121992321411,
+        "name": "lossless / lossless",
+        "conclusion": "success"
+      },
+      {
+        "id": 121992322706,
+        "name": "benchmark",
+        "conclusion": "skipped"
+      },
+      {
+        "id": 121993350044,
+        "name": "source-bindings / integration",
+        "conclusion": "success"
+      },
+      {
+        "id": 121994825316,
+        "name": "g1 / host-session-boundary",
+        "conclusion": "success"
+      },
+      {
+        "id": 121994825337,
+        "name": "closures / selected-closure (directjs-compiler, ordinary-checked)",
+        "conclusion": "success"
+      },
+      {
+        "id": 121994825427,
+        "name": "closures / selected-closure (semantic-compiler, checked)",
+        "conclusion": "success"
+      },
+      {
+        "id": 121994825448,
+        "name": "closures / selected-closure (rust-compiler, ordinary-checked)",
+        "conclusion": "success"
+      },
+      {
+        "id": 121994826131,
+        "name": "g1 / generated-js",
+        "conclusion": "success"
+      },
+      {
+        "id": 121996032136,
+        "name": "full / linux-scoped",
+        "conclusion": "success"
+      },
+      {
+        "id": 122004044236,
+        "name": "gate",
+        "conclusion": "success"
+      }
+    ],
+    "fullArtifact": {
+      "id": 12708933625,
+      "bytes": 121480618,
+      "sha256": "1934cd5504bfe644de9648221af534f0e223d3131de9e3c193c7566faf195ce0"
+    }
+  },
+  "unresolved": [
+    "Dependent Core inference/conversion/inductives/recursors/projections and universe model",
+    "Interpretation of all allowed primitive/foundation declarations",
+    "Proved bounded canonical decoder/translation preserving exact declaration identities",
+    "Compiler/backend refinement to emitted executable code",
+    "Aggregate hostile-input resource limits",
+    "Complete compiler closure admission and genuine minimal-checked G1/G2/G3",
+    "Full graph and isolated-memory/Wasm performance qualification"
+  ],
+  "existingSourceIdentity": {
+    "leanClosureSha256": "9d6dd14bffa5e358d86d7b73776d9348fcaeda3e3fb8630803622f8728347099",
+    "psClosureSha256": "0fcbe8568a7a37bd4cc0322b65e040b67e4aef637d8069cc821bce83b53d3e66",
+    "sourceModules": 124,
+    "sourceCoreMembers": 4742,
+    "unchangedFromQualifiedBase": true,
+    "note": "The native historical SH1 package-section registration is outside this unified compiler source import closure."
+  },
+  "currentSourceG1": {
+    "runId": 40444282214,
+    "jobId": 121994826131,
+    "status": "passed-selected-corpus",
+    "sourceModules": 88,
+    "cases": 10,
+    "sourceClosureSha256": "58b99291f3390b346844c0e14412ddee4eb9aa055e58cadf4a2c707b0e07a97e",
+    "generatedServiceSha256": "f6a10e5aa45babf4a7125d6868d492818d9a47d459e576112b8667c10f72b7bc",
+    "selfCompilation": "deferred-manual",
+    "fixedPoint": "deferred",
+    "minimalCheckerUsed": false
+  },
+  "guidelineArtifactInspection": {
+    "schema": "psc1-min-guideline-artifact-inspection/1",
+    "artifactId": 12707935407,
+    "sourceCommit": "d6bebd230bcaadf35a254bfbc5a26a17228db55f",
+    "artifactZipSha256": "b3fe8b8ad20e0b8e7d2c61412394c5d9e3e6a828cc01b74496169b587708537c",
+    "scope": "Read-only structural inspection of retained CI JSON. No checker, build, proof check or project test executed.",
+    "canonicalCompilerAdmissionBytes": 29887093,
+    "foundationKinds": {
+      "axiom": 60,
+      "constructor": 14,
+      "definition": 25,
+      "inductive": 9,
+      "recursor": 7
+    },
+    "foundationAxioms": [
+      "Array",
+      "Array.emptyWithCapacity",
+      "Array.foldl",
+      "Array.getD",
+      "Array.map",
+      "Array.push",
+      "Array.setIfInBounds",
+      "Array.size",
+      "Bool",
+      "Bool.decEq",
+      "Bool.false",
+      "Bool.true",
+      "Char",
+      "Char.ofNat",
+      "Char.toNat",
+      "Eq",
+      "Float",
+      "Float32",
+      "ISize",
+      "Int.add",
+      "Int.mul",
+      "Int.neg",
+      "Int.repr",
+      "Int.sub",
+      "Int16",
+      "Int32",
+      "Int64",
+      "Int8",
+      "Nat.add",
+      "Nat.beq",
+      "Nat.ble",
+      "Nat.blt",
+      "Nat.div",
+      "Nat.mod",
+      "Nat.mul",
+      "Nat.sub",
+      "Prod.fst",
+      "Prod.snd",
+      "String",
+      "String.Internal.append",
+      "String.Internal.atEnd",
+      "String.Internal.extract",
+      "String.Internal.get",
+      "String.Internal.length",
+      "String.Internal.next",
+      "String.Pos.Raw.atEnd",
+      "String.Pos.Raw.byteIdx",
+      "String.Pos.Raw.mk",
+      "String.Pos.Raw.next",
+      "String.append",
+      "String.push",
+      "String.singleton",
+      "String.utf8ByteSize",
+      "UInt16",
+      "UInt32",
+      "UInt64",
+      "UInt8",
+      "USize",
+      "Unit",
+      "Unit.unit"
+    ],
+    "directReferencedAxiomCount": 34,
+    "syntacticallyReachedPreludeCount": 62,
+    "syntacticallyReachedAxiomCount": 34,
+    "syntacticallyReachedAxioms": [
+      "Bool",
+      "Bool.decEq",
+      "Bool.false",
+      "Bool.true",
+      "Char",
+      "Char.ofNat",
+      "Char.toNat",
+      "Eq",
+      "Int.repr",
+      "Int.sub",
+      "Nat.add",
+      "Nat.beq",
+      "Nat.ble",
+      "Nat.blt",
+      "Nat.div",
+      "Nat.mod",
+      "Nat.mul",
+      "Nat.sub",
+      "Prod.fst",
+      "Prod.snd",
+      "String",
+      "String.Internal.append",
+      "String.Internal.atEnd",
+      "String.Internal.extract",
+      "String.Internal.get",
+      "String.Internal.length",
+      "String.Internal.next",
+      "String.Pos.Raw.byteIdx",
+      "String.Pos.Raw.mk",
+      "String.push",
+      "String.singleton",
+      "String.utf8ByteSize",
+      "Unit",
+      "Unit.unit"
+    ],
+    "unreachedAxioms": [
+      "Array",
+      "Array.emptyWithCapacity",
+      "Array.foldl",
+      "Array.getD",
+      "Array.map",
+      "Array.push",
+      "Array.setIfInBounds",
+      "Array.size",
+      "Float",
+      "Float32",
+      "ISize",
+      "Int.add",
+      "Int.mul",
+      "Int.neg",
+      "Int16",
+      "Int32",
+      "Int64",
+      "Int8",
+      "String.Pos.Raw.atEnd",
+      "String.Pos.Raw.next",
+      "String.append",
+      "UInt16",
+      "UInt32",
+      "UInt64",
+      "UInt8",
+      "USize"
+    ],
+    "reachabilityCaveat": "Only constant references in serialized type/value/metadata were followed. Constructor/recursor registration, generated reduction rules, hidden name metadata and whole-environment validity require separate validation. This is not a proved foundation minimization.",
+    "runtimeOwnedCanonical": {
+      "records": 12,
+      "inductiveGroups": 3,
+      "definitions": 9,
+      "expressionOccurrences": {
+        "lam": 105,
+        "const": 396,
+        "app": 277,
+        "b": 75,
+        "forall": 54,
+        "let": 3,
+        "proj": 3,
+        "sort": 3
+      },
+      "constReferences": [
+        "Bool",
+        "Bool.decEq",
+        "Bool.false",
+        "Bool.true",
+        "Eq",
+        "List",
+        "List.cons",
+        "List.nil",
+        "List.rec",
+        "Nat",
+        "Nat.rec",
+        "Option",
+        "Option.none",
+        "Option.rec",
+        "Option.some",
+        "PsMinDeclaration",
+        "PsMinExpr",
+        "PsMinExpr.rec",
+        "PsMinTy",
+        "PsMinTy.arr",
+        "PsMinTy.nat",
+        "PsMinTy.rec",
+        "PsMinTy.unit",
+        "ite",
+        "psMinCheckDeclarations",
+        "psMinCheckDeclarations.$psc0SH.0",
+        "psMinInfer",
+        "psMinInfer.$psc0SH.0",
+        "psMinLookup",
+        "psMinLookup.$psc0SH.0",
+        "psMinTyEq",
+        "psMinTyEq.$psc0SH.0"
+      ]
+    },
+    "minBundleRecords": 16,
+    "minBundleAdmissionBytes": 88614
+  },
+  "installedQualification": {
+    "runId": 40444275465,
+    "status": "completed",
+    "conclusion": "success",
+    "preflightJobId": 121991853908,
+    "installedJobId": 121992045246,
+    "artifact": {
+      "id": 12708639355,
+      "bytes": 206728049,
+      "sha256": "1498b053387005ed19b7ee4037f5b1d8b3a779a74b9ec1cc011ac09485a41ce9"
+    },
+    "unpublishedRoot": {
+      "version": "proofscript@0.1.0-psc1.9",
+      "bytes": 3823980,
+      "sha256": "7bfeb61f96854fccfc78f9014474003a4501f3bd2ef6adfceba75239bb90e17b"
+    },
+    "installedApplications": 16,
+    "cases": 264,
+    "globalCases": 8,
+    "publicationCases": 32,
+    "publicationNegatives": 143,
+    "ioCandidatesExecuted": 24,
+    "ioCandidatesRefused": 8,
+    "qualificationBoundary": "Existing frozen source/executables, host and package paths; no minimal-kernel or new G2/G3 promotion."
+  }
+}

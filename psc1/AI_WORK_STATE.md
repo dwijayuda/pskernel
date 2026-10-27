@@ -11,7 +11,11 @@ based exactly on qualified layout HEAD94e0c13f6a4b434f73c859cc0c716cb6fb8d1340.
 
 The initial executable Empty/Unit/Nat/arrow fragment has a machine-checked
 acceptance-to-model bridge and consistency theorem (standard propext only).
-Current PSC1 source-subset portability/generated execution is being qualified.
+Exact source-subset portability/generated16-vector execution and5 finite native
+reference cases pass at d6bebd230bcaadf35a254bfbc5a26a17228db55f, Linux40444275459.
+The checker is1 module/93 lines/3322 bytes. Full existing-regression40444282214 and installed40444275465 also pass.
+See the [continuation guideline for GPT-6.1 Sol / High](docs/PSC1_MIN_KERNEL_CONTINUATION_GUIDE.md)
+and [exact receipt](docs/PSC1_MIN_KERNEL_QUALIFICATION_2026-10-27.json).
 The current124-module/4747-logical-member graph needs dependent checking,
 308 inductive groups and a115-declaration foundation containing60 axioms.
 The fragment qualifies0 complete compiler modules and0/37 Practical Core criteria.

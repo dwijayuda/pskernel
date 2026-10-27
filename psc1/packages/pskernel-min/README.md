@@ -17,6 +17,12 @@ psMinCheckEnvironment : Nat -> Nat -> List PsMinDeclaration -> Option (List PsMi
 psMinInfer : Nat -> List PsMinTy -> List PsMinTy -> PsMinExpr -> Option PsMinTy
 ```
 
+The qualifying entry is `psMinCheckEnvironment`, which starts from an empty
+environment. Low-level inference and declaration-fold functions can take supplied
+contexts; calling them with arbitrary global types grants no admission authority.
+The capstone theorem requires the actual successful environment-check equation;
+a list or copied result field is not a transferable certificate.
+
 Constants refer to the most recently admitted declaration at index zero. Bodies
 must be closed over locals. An identity on Empty is valid; a closed Empty value is
 not. Fuel exhaustion refuses. Fuel bounds recursion depth and declaration count,

@@ -97,13 +97,19 @@ jobs:
           import fs from 'node:fs';
           import assert from 'node:assert/strict';
           const text=fs.readFileSync('proofs/pskernel-min/proof.log','utf8');
-          const targets={"Ps.MinKernel.CoreEncoding":["number_wire","safe_text","name_wire","expression_wire","decode_success_has_wire_derivation","byte_admission_source_model","byte_admission_consistent"],"Ps.MinKernel.CoreSemantics":["infer_evaluates","primitive_semantics","translation_preserves_semantics","checked_source_semantics","checked_history_preserves_source","canonical_source_model","canonical_no_empty_constant","canonical_no_false_declaration"],"Ps.MinKernel.CoreTranslation":["type_translation","type_closed","primitive_translation","typed_primitive_translation","conditional_exact","term_translation","environment_translation"],"Ps.MinKernel.CoreIngress":["byteEq_sound","nameEq_sound","exprEq_sound","decode_success_is_well_formed","resolve_preserves_identity","fresh_no_shadowing","translate_environment_preserves_identity","canonical_admission_has_model"],"Ps.MinKernel.OperationalSource":["actual_ite_declaration","actual_decision_recursor","decisionBody_eq_ite","source_boolEqIte"],"Ps.MinKernel.OperationalProofs":["operational_hasModel","operational_hasBodyHistory","operational_consistent","latest_definition_value","previous_definition_value","checked_definition_unfold","conversion_model"],"Ps.MinKernel.OperationalProjection":["projectionModel","projection_iota","actual_projection_iota"],"Ps.MinKernel.OperationalFoundation":["primitiveType_guards","primitiveModel","nat_iota_succ","list_iota_cons","option_iota_some","boolEqIte_exact","boolEqIte_true","boolEqIte_false","derived_natPred","derived_boolNot","derived_boolBeq"]};
+          const targets={"Ps.MinKernel.RegularIngressModel":["decode_preserves_source","checked_entries_has_normalized_model","regular_byte_admission_has_normalized_model","regular_no_normalized_empty_constant","actual_constructor_signatures","group_slot_identity"],"Ps.MinKernel.CoreEncoding":["number_wire","safe_text","name_wire","expression_wire","decode_success_has_wire_derivation","byte_admission_source_model","byte_admission_consistent"],"Ps.MinKernel.CoreSemantics":["infer_evaluates","primitive_semantics","translation_preserves_semantics","checked_source_semantics","checked_history_preserves_source","canonical_source_model","canonical_no_empty_constant","canonical_no_false_declaration"],"Ps.MinKernel.CoreTranslation":["type_translation","type_closed","primitive_translation","typed_primitive_translation","conditional_exact","term_translation","environment_translation"],"Ps.MinKernel.CoreIngress":["byteEq_sound","nameEq_sound","exprEq_sound","decode_success_is_well_formed","resolve_preserves_identity","fresh_no_shadowing","translate_environment_preserves_identity","canonical_admission_has_model"],"Ps.MinKernel.OperationalSource":["actual_ite_declaration","actual_decision_recursor","decisionBody_eq_ite","source_boolEqIte"],"Ps.MinKernel.OperationalProofs":["operational_hasModel","operational_hasBodyHistory","operational_consistent","latest_definition_value","previous_definition_value","checked_definition_unfold","conversion_model"],"Ps.MinKernel.OperationalProjection":["projectionModel","projection_iota","actual_projection_iota"],"Ps.MinKernel.OperationalFoundation":["primitiveType_guards","primitiveModel","nat_iota_succ","list_iota_cons","option_iota_some","boolEqIte_exact","boolEqIte_true","boolEqIte_false","derived_natPred","derived_boolNot","derived_boolBeq"]};
           for(const [namespace,names]of Object.entries(targets))for(const name of names){
             const line=text.split('\n').find(line=>line.includes("'"+namespace+"."+name+"'"));
             assert.ok(line,'missing operational theorem '+namespace+'.'+name);
             assert.ok(line.includes('does not depend on any axioms')||line.includes('depends on axioms: [propext]'),line);
           }
           JS
+      - name: Build and run native regular-data exact-byte corpus
+        working-directory: psc1/packages/pskernel-min
+        run: |
+          set -euo pipefail
+          lake build minkernel_regular_ingress_tests
+          .lake/build/bin/minkernel_regular_ingress_tests --cases ../../scripts/minkernel-regular-ingress-cases.json | tee regular-ingress-tests.log
       - name: Build and run native exact-byte ingress corpus
         working-directory: psc1/packages/pskernel-min
         run: |
@@ -145,6 +151,7 @@ jobs:
             psc1/packages/pskernel-min/regular-tests.log
             psc1/packages/pskernel-min/operational-tests.log
             psc1/packages/pskernel-min/ingress-tests.log
+            psc1/packages/pskernel-min/regular-ingress-tests.log
           retention-days: 90
 
   portability-and-closure:
@@ -211,6 +218,9 @@ jobs:
       - name: Qualify exact-byte ingress and hostile-input refusal
         if: ${{ !cancelled() }}
         run: node --max-old-space-size=256 scripts/minkernel-ingress-portability.mjs
+      - name: Qualify regular-data ingress and attempt complete runtime admission
+        if: ${{ !cancelled() }}
+        run: node --max-old-space-size=256 scripts/minkernel-regular-ingress-portability.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

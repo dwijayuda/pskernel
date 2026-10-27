@@ -27,7 +27,7 @@ lean_lib PsMinRegularRuntime where
 
 lean_lib PsMinOperationalRuntime where
   srcDir := "../../packages/pskernel-min/src"
-  roots := #[`Ps.MinKernel.Profile.OperationalProfile, `Ps.MinKernel.Profile.OperationalCheck, `Ps.MinKernel.Tests.OperationalVectors, `Ps.MinKernel.Profile.CoreBytes, `Ps.MinKernel.Profile.CoreIngress]
+  roots := #[`Ps.MinKernel.Profile.OperationalProfile, `Ps.MinKernel.Profile.OperationalCheck, `Ps.MinKernel.Tests.OperationalVectors, `Ps.MinKernel.Profile.CoreBytes, `Ps.MinKernel.Profile.CoreIngress, `Ps.MinKernel.Profile.RegularIngressProfile, `Ps.MinKernel.Profile.RegularIngressCheck, `Ps.MinKernel.Profile.RegularIngressBytes]
 
 lean_lib PsMinOperationalSourceEnvironment where
   srcDir := "../../packages/environment/src"
@@ -37,7 +37,7 @@ lean_lib PsMinOperationalSourceEnvironment where
 @[default_target]
 lean_lib MinKernelProof where
   srcDir := "."
-  roots := #[`MainTheorem, `CoreScope, `BinderLowering, `RegularModel, `RegularSoundness, `RegularValidation, `RegularNames, `RegularSourceInstance, `OperationalProjection, `OperationalFoundation, `OperationalSoundness, `OperationalSource, `CoreIngress, `CoreTranslation, `CoreSemantics, `CoreEncoding]
+  roots := #[`MainTheorem, `CoreScope, `BinderLowering, `RegularModel, `RegularSoundness, `RegularValidation, `RegularNames, `RegularSourceInstance, `OperationalProjection, `OperationalFoundation, `OperationalSoundness, `OperationalSource, `CoreIngress, `CoreTranslation, `CoreSemantics, `CoreEncoding, `RegularIngressModel]
 
 lean_exe regular_core_witness where
   srcDir := "."

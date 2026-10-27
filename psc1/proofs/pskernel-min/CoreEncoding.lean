@@ -266,6 +266,11 @@ theorem binder_wire (binder : Nat) (h : Nat.blt binder 4 = true) :
           exact False.elim (Nat.not_lt_of_ge lower bound)
 
 inductive ExprWire : PsMinCoreExpr → List Nat → Prop where
+  | sort (level bytes) (h : LevelWire level bytes) :
+      ExprWire (.sort level) (objectBytes [([34, 107, 34, 58] ++ [34, 115, 111, 114, 116, 34]), ([34, 108, 34, 58] ++ bytes)])
+  | projection (name index value n i v) (hn : NameWire name n)
+      (hi : NumberWire index i) (hv : ExprWire value v) :
+      ExprWire (.projection name index value) (objectBytes [([34, 101, 34, 58] ++ v), ([34, 105, 34, 58] ++ i), ([34, 107, 34, 58] ++ [34, 112, 114, 111, 106, 34]), ([34, 110, 34, 58] ++ n)])
   | bvar (index numberBytes) (hn : NumberWire index numberBytes) :
       ExprWire (.bvar index) (objectBytes [([34, 105, 34, 58] ++ numberBytes), ([34, 107, 34, 58] ++ [34, 98, 34])])
   | natural (value numberBytes) (hn : NumberWire value numberBytes) :
@@ -291,6 +296,15 @@ theorem expression_wire (fuel : Nat) (expr : PsMinCoreExpr) (h : psMinCoreExprVa
   | zero => cases h
   | succ fuel ih =>
     cases expr with
+    | sort level =>
+      simpa only [psMinCoreEncodeExpr, object_eq, append_eq] using ExprWire.sort level _ (level_wire level)
+    | projection name index value =>
+      simp only [psMinCoreExprValid] at h
+      repeat' split at h
+      all_goals try contradiction
+      simpa only [psMinCoreEncodeExpr, object_eq, append_eq] using
+        ExprWire.projection name index value _ _ _ (name_wire 16 name (by assumption))
+          (number_wire index) (ih value h)
     | bvar index =>
       simpa only [psMinCoreEncodeExpr, object_eq, append_eq] using ExprWire.bvar index _ (number_wire index)
     | natural value =>

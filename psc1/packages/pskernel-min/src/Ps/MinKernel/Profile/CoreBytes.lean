@@ -15,6 +15,8 @@ inductive PsMinCoreExpr where
   | forallE (name : PsMinCoreName) (binder : Nat) (type body : PsMinCoreExpr)
   | letE (name : PsMinCoreName) (type value body : PsMinCoreExpr)
   | natural (value : Nat)
+  | sort (level : Nat)
+  | projection (name : PsMinCoreName) (index : Nat) (value : PsMinCoreExpr)
 
 structure PsMinCoreDeclaration where
   name : PsMinCoreName
@@ -94,6 +96,13 @@ def psMinCoreExprEq (fuel : Nat) : PsMinCoreExpr -> PsMinCoreExpr -> Bool :=
   | Nat.succ rest => fun left right =>
     let smaller : PsMinCoreExpr -> PsMinCoreExpr -> Bool := psMinCoreExprEq rest;
     match left with
+    | .sort level => match right with
+      | .sort other => Nat.beq level other
+      | _ => false
+    | .projection name index value => match right with
+      | .projection other position major => if psMinCoreNameEq name other then
+          if Nat.beq index position then smaller value major else false else false
+      | _ => false
     | .bvar index => match right with
       | .bvar other => Nat.beq index other
       | _ => false
@@ -130,6 +139,9 @@ def psMinCoreExprValid (fuel : Nat) : PsMinCoreExpr -> Bool :=
   | Nat.succ rest => fun expr =>
     let smaller : PsMinCoreExpr -> Bool := psMinCoreExprValid rest;
     match expr with
+    | .sort level => Nat.blt level 2
+    | .projection name index value => if psMinCoreNameValid 16 name then
+        if Nat.blt index 4096 then smaller value else false else false
     | .bvar index => Nat.blt index 4096
     | .natural value => Nat.blt value 4096
     | .constant name levels => if psMinCoreNameValid 16 name then
@@ -196,6 +208,8 @@ def psMinCoreBinderBytes (binder : Nat) : List Nat :=
 
 def psMinCoreEncodeExpr (expr : PsMinCoreExpr) : List Nat :=
   match expr with
+  | .sort level => psMinByteJoin [123] [44] [125] [psMinByteAppend [34, 107, 34, 58] ([34, 115, 111, 114, 116, 34]), psMinByteAppend [34, 108, 34, 58] (psMinCoreEncodeLevel level)]
+  | .projection name index value => psMinByteJoin [123] [44] [125] [psMinByteAppend [34, 101, 34, 58] (psMinCoreEncodeExpr value), psMinByteAppend [34, 105, 34, 58] (psMinCoreNumber index), psMinByteAppend [34, 107, 34, 58] ([34, 112, 114, 111, 106, 34]), psMinByteAppend [34, 110, 34, 58] (psMinCoreEncodeName name)]
   | .bvar index => psMinByteJoin [123] [44] [125] [psMinByteAppend [34, 105, 34, 58] (psMinCoreNumber index), psMinByteAppend [34, 107, 34, 58] ([34, 98, 34])]
   | .natural value => psMinByteJoin [123] [44] [125] [psMinByteAppend [34, 107, 34, 58] ([34, 110, 97, 116, 34]), psMinByteAppend [34, 118, 34, 58] (psMinCoreQuote (psMinCoreNumber value))]
   | .constant name levels => psMinByteJoin [123] [44] [125] [psMinByteAppend [34, 107, 34, 58] ([34, 99, 111, 110, 115, 116, 34]), psMinByteAppend [34, 108, 115, 34, 58] (psMinByteJoin [91] [44] [93] (psMinCoreEncodeLevels levels)), psMinByteAppend [34, 110, 34, 58] (psMinCoreEncodeName name)]

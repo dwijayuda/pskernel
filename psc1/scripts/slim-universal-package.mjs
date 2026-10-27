@@ -4,7 +4,7 @@ import fs from 'node:fs';import path from 'node:path';import assert from 'node:a
 import {readQualifiedArtifact,sha256} from './kernel435-qualified-artifact.mjs';
 import {readQualifiedCompilerAssets} from './qualified-compiler-assets.mjs';
 import {crosscheckCompilerAdmissions} from './crosscheck-compiler-admissions.mjs';
-const input=JSON.parse(fs.readFileSync('scripts/slim-universal-input.json','utf8')),out=path.resolve('dist/slim-universal'),stage=path.join(out,'package'),version=input.qualifiedCompilerGenerations?'0.1.0-psc1.9':'0.1.0-psc1.4';
+const input=JSON.parse(fs.readFileSync('scripts/slim-universal-input.json','utf8')),out=path.resolve('dist/slim-universal'),stage=path.join(out,'package'),version=input.qualifiedCompilerGenerations?'0.1.0-psc1.10':'0.1.0-psc1.4';
 assert.ok(out.startsWith(path.resolve('dist')+path.sep));fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(out,{recursive:true});
 const archive=await readQualifiedArtifact(input.qualifiedIntegration,path.join(out,'qualified-input'));
 const run=(exe,args)=>{const r=spawnSync(exe,args,{encoding:'utf8',timeout:240000,maxBuffer:64*1024*1024});assert.equal(r.error,undefined,String(r.error));assert.equal(r.status,0,r.stdout+r.stderr);return r.stdout;};
@@ -87,7 +87,7 @@ for(const [target,descriptor]of Object.entries(dispatchPackages)){
 const peers=Object.fromEntries(['nativeKernel','rust','wasm-core'].map(k=>[packages[k].package,packages[k].version]));
 for(const descriptor of Object.values(dispatchPackages))peers[descriptor.package]=descriptor.version;
 peers.typescript='7.0.2';peers[rustConsumer.package]=rustConsumer.version;
-const meta={name:'proofscript',version,type:'module',private:true,license:'UNLICENSED',engines:{node:'>=22.0.0'},
+const meta={name:'proofscript',version,type:'module',private:true,license:'UNLICENSED',engines:{node:'>=22.23.3'},
  main:'./npm-cli/universal.mjs',types:'./npm-cli/universal.d.ts',
  exports:{'./io':{types:'./host-tools/typed-io.d.ts',import:'./host-tools/typed-io.mjs'},'.':{types:'./npm-cli/universal.d.ts',import:'./npm-cli/universal.mjs'},'./kernel':{types:'./npm-cli/universal.d.ts',import:'./npm-cli/universal.mjs'},'./metadata':'./UNIVERSAL_DISTRIBUTION.json','./package.json':'./package.json'},
  bin:{proofscript:'./npm-cli/proofscript-cli.mjs',psc:'./npm-cli/proofscript-cli.mjs',psc1:'./npm-cli/proofscript-cli.mjs'},

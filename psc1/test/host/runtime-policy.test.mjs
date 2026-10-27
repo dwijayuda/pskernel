@@ -5,9 +5,9 @@ import os from 'node:os';
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {requireSupportedRuntime, runtimeArguments, syntaxArguments} from '../../host-tools/runtime-policy.mjs';
-for (const version of ['22.0.0', '22.23.3', '24.0.0', '26.1.2', '30.0.0'])
+for (const version of ['22.23.3', '24.0.0', '26.1.2', '30.0.0'])
   assert.equal(requireSupportedRuntime({node: version}).version, version);
-for (const version of ['20.19.0', '21.9.0', '22.0.0-rc.1', 'invalid'])
+for (const version of ['20.19.0', '21.9.0', '22.0.0', '22.23.2', '22.0.0-rc.1', 'invalid'])
   assert.throws(() => requireSupportedRuntime({node: version}), /PSC1_RUNTIME_VERSION/);
 for (const version of ['1.4.0', '1.4.4', '2.0.0'])
   assert.equal(requireSupportedRuntime({node: '0.0.0', bun: version}).name, 'bun');

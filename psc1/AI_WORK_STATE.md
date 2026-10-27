@@ -1,7 +1,7 @@
 # PSC1 AI work state
 
 Updated 2026-10-27 Asia/Jakarta. Runtime/watch development starts from PR #192
-HEAD 94e0c13f6a4b434f73c859cc0c716cb6fb8d1340, branch
+HEAD 94e0c13f6a4b434f73c859cc0c716cb6fb8d1340, active draft PR#193, branch
 feat/psc1-watch-runtime-20261027. Fetch live HEAD/CI before updates; preserve
 single-parent expected-HEAD non-force history. Connected GitHub/Linux Actions only.
 No merge or npm publication authorized.
@@ -10,7 +10,7 @@ No merge or npm publication authorized.
 
 The .9 package refuses any Node version except22.23.3 before checking.
 This host change replaces both installed/session exact-version refusals with
-Node>=22.0.0 or Bun>=1.4.0 policy. Exact CI executable versions/hashes remain
+Node>=22.23.3 or Bun>=1.4.0 policy. Exact CI executable versions/hashes remain
 reproduction evidence. Bun uses a separate parse-only JS consumer (its --check
 flag has different semantics), retains the independent official kernel and
 mandatory public-API consumer, and child launches disable automatic installation,

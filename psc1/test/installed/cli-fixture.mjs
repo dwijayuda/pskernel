@@ -28,13 +28,13 @@ export function fixture({consumers = false} = {}) {
   const tarballs = path.join(distribution, 'tarballs');
   const npm = path.resolve(path.dirname(process.execPath), '../lib/node_modules/npm/bin/npm-cli.js');
   const install = tars => ok(process.execPath, [npm, 'install', '--offline', '--registry', 'http://127.0.0.1:9',
-    '--ignore-scripts', '--no-audit', '--no-fund', '--cache', path.join(directory, 'empty-cache'),
+    '--ignore-scripts', ...(process.env.PSC1_EXPECT_RUNTIME_REFUSAL === '1' ? [] : ['--engine-strict']), '--no-audit', '--no-fund', '--cache', path.join(directory, 'empty-cache'),
     ...tars.map(t => path.join(tarballs, t))]);
   install([assembly.tarball]);
   const root = path.join(directory, 'node_modules/proofscript');
   const manifest = JSON.parse(fs.readFileSync(path.join(root, 'UNIVERSAL_DISTRIBUTION.json')));
   const meta = JSON.parse(fs.readFileSync(path.join(root, 'package.json')));
-  assert.equal(meta.engines.node, '>=22.0.0');
+  assert.equal(meta.engines.node, '>=22.23.3');
   const engines = assembly.input.packages;
   const extras = ['rust', 'wasm-core'].map(k => engines[k].tarball);
   if (consumers) {

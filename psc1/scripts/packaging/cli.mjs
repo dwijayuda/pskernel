@@ -114,7 +114,7 @@ for (const [target, descriptor] of Object.entries(d.dispatchPackages)) {
 }
 const metaFile = path.join(stage, 'package.json'), meta = JSON.parse(fs.readFileSync(metaFile));
 meta.version = version;
-meta.engines = {...meta.engines, node: '>=22.0.0'};
+meta.engines = {...meta.engines, node: '>=22.23.3'};
 for (const descriptor of Object.values(d.dispatchPackages))
   meta.peerDependencies[descriptor.package] = descriptor.version;
 meta.bin = {proofscript: './npm-cli/proofscript-cli.mjs',
@@ -159,7 +159,7 @@ const receipt = {...original, dispatchPackages: d.dispatchPackages, repackagedTo
   sizeRatio: packedBytes.length / original.previousRootBytes,
   removedBytes: original.previousRootBytes - packedBytes.length,
   originalRootSha256: old.rootSha256,
-  runtimePolicy: {node: '>=22.0.0', bun: '>=1.4.0', exactCiRuntimes: 'recorded separately'},
+  runtimePolicy: {node: '>=22.23.3', bun: '>=1.4.0', exactCiRuntimes: 'recorded separately'},
    scope: 'host runtime/watch only; unchanged qualified G3s/kernels/providers; installed and runtime qualification pending'};
 fs.writeFileSync(path.join(out, 'package-receipt.json'), JSON.stringify(receipt, null, 2) + '\n');
 console.log('PSC1_CLI_PACKAGE: ' + JSON.stringify({version, tarball: receipt.tarball,

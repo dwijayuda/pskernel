@@ -33,7 +33,7 @@ consumer. Actual malformed syntax and parse-only side-effect tests must pass.
 [Runtime flags](https://bun.com/docs/runtime),
 [Transpiler API](https://bun.com/docs/runtime/transpiler).
 
-Bun respects Node shebangs unless --bun is explicit. New child launch arguments
+Bun respects Node shebangs unless --bun is explicit. New host-controlled child launch arguments
 disable auto-install, macros and implicit env-file loading; source data cannot
 select a runtime or inject these flags. The minimum Bun1.4.0 permits these explicit
 policies. Exact tested versions remain separate evidence.
@@ -45,7 +45,7 @@ policies. Exact tested versions remain separate evidence.
 
 | Owner | Invariant and refusal behavior |
 | --- | --- |
-| runtime-policy.mjs | Node>=22.0.0 or Bun>=1.4.0; unsupported/malformed/prerelease versions refuse. Exact executable resources still verified before/after requests. Runtime launch/syntax differences are explicit. |
+| runtime-policy.mjs | Node>=22.23.3 or Bun>=1.4.0; unsupported/malformed/prerelease versions refuse. Exact executable resources still verified before/after requests. Runtime launch/syntax differences are explicit. |
 | cli-project.mjs | Source-only finite argv/project data; original fatal UTF8/BOM/exclusive/relative/non-symlink and byte/count limits remain. Missing watch paths may be observed but cannot be captured/admitted. |
 | cli-watch.mjs | Config plus declared paths only; 500ms bounded metadata polling/debounce; one checked attempt at a time; one dirty follow-up; progress on stderr; no checker cache, SDK/network install or output-triggered rebuild. |
 | cli-watch-worker.mjs | Private request hash plus full captured-input identity before execution; same identity immediately before publication or compile/check stdout. A stale/capture failure vetoes publication. |
@@ -66,7 +66,7 @@ stay distinct. No source-language/compiler algorithms are rewritten.
 
 ## Required actual acceptance
 
-- Node22.0.0 minimum, original22.23.3, Node24/26, Bun1.4.0 minimum and1.4.4;
+- Node22.23.3 minimum, original22.23.3, Node24/26, Bun1.4.0 minimum and1.4.4;
   actual installed processes, exact binary hashes, both grammars/four engines,
   output observations, genuine default independent checker and rejection.
 - Actual Node20 installed refusal; help/init remain usable without checking.
@@ -81,3 +81,8 @@ stay distinct. No source-language/compiler algorithms are rewritten.
 Linux qualification does not qualify Windows/macOS durability, arbitrary
 runtime versions, a semantic incremental compiler, final registry publication,
 or an independent human's understanding. Human trial remains pending.
+
+The bundled independent kernel declares engines.node>=22.23.3. The root minimum
+matches this existing dependency contract, so engine-strict offline installation
+can succeed. Lower Node22 releases and Node20 are actual negative matrix entries.
+Newer Node24/26 remain allowed and are tested separately; there is no exact user pin.

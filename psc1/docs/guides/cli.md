@@ -14,7 +14,7 @@ from different receipts. Nothing is published to the npm registry.
 
 ## Start a project
 
-With Node >=22.0.0, copy the root tarball into your project directory. Initialize
+With Node >=22.23.3, copy the root tarball into your project directory. Initialize
 package.json if needed, then install and run:
 
 ```sh
@@ -135,7 +135,8 @@ are deliberately incompatible.
 
 ## Runtime compatibility
 
-Node's user requirement is >=22.0.0, not one exact patch. CI records exact
+Node's user requirement is >=22.23.3, matching the bundled kernel's minimum,
+not one exact patch. Newer Node majors are allowed. CI records exact
 tested runtime versions and executable hashes separately. The new Node/Bun
 matrix must pass before claiming this candidate qualified; later untested
 versions are a compatibility policy, not automatically new CI evidence.
@@ -150,7 +151,7 @@ bun --no-install --no-env-file run --bun psc build --out dist/app --watch
 
 The --bun flag matters: Bun otherwise respects a CLI's Node shebang. Installed
 Bun runtime tests use actual Bun processes; npm remains the tested installer.
-The child pipeline disables automatic installs, macros and implicit env files.
+The host-controlled child launches disable automatic installs, macros and implicit env files.
 Bun's --check has different behavior from Node's parse-only check, so the host
 uses an explicit Bun JS parser and still runs the mandatory separate export/API
 consumer. Default independent checking stays the genuine official Lean Wasm

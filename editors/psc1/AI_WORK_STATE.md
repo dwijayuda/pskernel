@@ -14,6 +14,10 @@ Implementation `5188e44f95abaa9ca71a0e3583b075a97111d4ad`, run [40590223438](htt
 
 The Windows job failed before tests because GNU tar interpreted an absolute `D:` archive path as a remote host. The native-artifact unpack helper now uses relative paths. This follow-up changes only the test harness/workflow and documentation, not the installed editor payload. Native Windows qualification is still pending the corrected run.
 
+### Corrected unpack run
+
+Run [40590701343](https://github.com/dwijayuda/pskernel/actions/runs/40590701343) at `efe40c49cb8bc611c63376635e08227e3a19a78d` passed Linux and macOS qualification. Windows passed all 23 real/UI tests, the real latency harness, and fresh offline npm installation. Its VSIX harness failed before extension activation because the assumed internal VS Code `resources/app/out/cli.js` path was absent from the downloaded Windows archive. The harness now invokes the actual official `code.cmd` returned by the VS Code test library, with an explicit system command processor and safely bounded/quoted generated test paths, and records the launcher's actual entry references. No editor runtime or compiler source changed for this repair.
+
 ## Architecture and completed source
 
 Independent `editors/psc1` tooling contains a stdio LSP, bounded project-data adapter, isolated public-API compiler worker, original VS Code extension, and Lean-inspired Infoview. Both distributables bundle the unchanged qualified `.12` compiler and official Lean4.35.0 linear-memory Wasm checker. Compiler source, existing npm package layout, provider internals, self-hosting inputs and core CI are unchanged.

@@ -17,6 +17,24 @@ const harness = path.join(temporary, 'test-runner-extension');
 const manifest = JSON.parse(await fs.readFile(path.join(toolsRoot, 'vscode/package.json'), 'utf8'));
 const vsix = path.join(toolsRoot, 'dist', `${manifest.name}-${manifest.version}.vsix`);
 const version = process.env.PSC1_TEST_VSCODE_VERSION || '1.143.1';
+
+function quoteCmdArgument(value) {
+  // Only the downloaded launcher and controlled test paths enter this shell.
+  // Disable delayed expansion and reject characters cmd could expand or parse
+  // outside our quotes, rather than inventing a generic shell escape function.
+  assert.ok(typeof value === 'string' && value.length && !/[\x00-\x1f"%!^&|<>]/.test(value),
+    'A Windows test CLI argument contains unsupported shell characters');
+  return `"${value}"`;
+}
+
+async function directorySummary(directory) {
+  try {
+    const entries = await fs.readdir(directory, {withFileTypes: true});
+    return {directory, entries: entries.slice(0, 24).map(entry => entry.name + (entry.isDirectory() ? '/' : '')),
+      total: entries.length};
+  } catch (error) { return {directory, error: error.code}; }
+}
+
 try {
   await fs.mkdir(workspace); await fs.mkdir(extensions); await fs.mkdir(userData); await fs.mkdir(harness);
   await fs.writeFile(path.join(harness, 'package.json'), JSON.stringify({
@@ -29,16 +47,32 @@ try {
   }));
   const vscodeExecutablePath = await downloadAndUnzipVSCode(version);
   const [cli, ...args] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath, {reuseMachineInstall: true});
-  // Match VS Code's official Windows code.cmd entry without a command shell:
-  // Code.exe resources/app/out/cli.js under ELECTRON_RUN_AS_NODE.
-  const cliExecutable = process.platform === 'win32' ? vscodeExecutablePath : cli;
-  const cliArguments = process.platform === 'win32'
-    ? [path.join(path.dirname(vscodeExecutablePath), 'resources/app/out/cli.js')]
-    : args;
-  const installed = spawnSync(cliExecutable, [...cliArguments, '--install-extension', vsix, '--force',
-    '--extensions-dir', extensions, '--user-data-dir', userData, '--no-sandbox'],
-  {encoding: 'utf8', timeout: 120000,
-    env: process.platform === 'win32' ? {...process.env, ELECTRON_RUN_AS_NODE: '1', VSCODE_DEV: ''} : process.env});
+  const installArguments = [...args, '--install-extension', vsix, '--force',
+    '--extensions-dir', extensions, '--user-data-dir', userData, '--no-sandbox'];
+  let launcher = cli, launcherArguments = installArguments;
+  let windowsDirectories;
+  const launchOptions = {encoding: 'utf8', timeout: 120000, env: process.env};
+  if (process.platform === 'win32') {
+    // Use the archive's real launcher: its internal application layout is not
+    // an API and may differ from a source-tree launcher template.
+    const systemRoot = process.env.SystemRoot || process.env.SYSTEMROOT;
+    assert.ok(systemRoot, 'Windows did not provide its SystemRoot directory');
+    launcher = path.join(systemRoot, 'System32', 'cmd.exe');
+    const command = `"${[cli, ...installArguments].map(quoteCmdArgument).join(' ')}"`;
+    launcherArguments = ['/d', '/v:off', '/s', '/c', command];
+    launchOptions.windowsVerbatimArguments = true;
+    const launcherRoot = path.resolve(path.dirname(cli), '..');
+    windowsDirectories = [...new Set([path.dirname(vscodeExecutablePath), path.dirname(cli),
+      path.join(launcherRoot, 'resources'), path.join(launcherRoot, 'resources/app')])];
+    console.log('PSC1_VSCODE_WINDOWS_LAUNCHER', JSON.stringify({
+      vscodeExecutablePath, cli,
+      actualLauncher: (await fs.readFile(cli, 'utf8')).split(/\r?\n/)
+        .filter(line => /\.exe|\.c?m?js|app\.asar/i.test(line)).slice(0, 12),
+    }));
+  }
+  const installed = spawnSync(launcher, launcherArguments, launchOptions);
+  if (windowsDirectories && (installed.error || installed.status !== 0))
+    console.log('PSC1_VSCODE_WINDOWS_LAYOUT', JSON.stringify(await Promise.all(windowsDirectories.map(directorySummary))));
   assert.equal(installed.error, undefined, String(installed.error));
   assert.equal(installed.status, 0, installed.stdout + installed.stderr);
   console.log(installed.stdout);

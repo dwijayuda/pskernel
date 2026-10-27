@@ -268,10 +268,11 @@ theorem translation_preserves_semantics (names : List PsMinCoreName)
     · exact iha _ _ _ _ (by assumption)
   | lam name binder sourceType body t b ht hb ih =>
     cases evaluation
+    rename_i bodyEval
     apply CoreEval.lam
     · exact ht
     · intro argument
-      exact ih _ _ _ _ ((by assumption) argument)
+      exact ih _ _ _ _ (bodyEval argument)
   | letE name sourceType sourceValue body t v b ht hv hb ihv ihb =>
     cases evaluation
     apply CoreEval.letE
@@ -280,13 +281,13 @@ theorem translation_preserves_semantics (names : List PsMinCoreName)
     · exact ihb _ _ _ _ (by assumption)
   | conditional sourceType left right yes no t l r y n ht hl hr hy hn ihl ihr ihy ihn =>
     cases evaluation
-    rename_i fnValue argumentValue functionEval noEval
-    cases functionEval
-    rename_i fnValue argumentValue functionEval yesEval
-    cases functionEval
-    rename_i fnValue argumentValue functionEval rightEval
-    cases functionEval
-    rename_i fnValue argumentValue primitiveEval leftEval
+    rename_i domain0 fn0 arg0 head0 noEval
+    cases head0
+    rename_i domain1 fn1 arg1 head1 yesEval
+    cases head1
+    rename_i domain2 fn2 arg2 head2 rightEval
+    cases head2
+    rename_i domain3 fn3 arg3 primitiveEval leftEval
     cases primitiveEval
     apply CoreEval.conditional
     · exact ht
@@ -330,10 +331,10 @@ theorem checked_history_preserves_source (names : List PsMinCoreName) (globals :
     SourceHistory names globals source result initial output := by
   induction image generalizing globals result initial output with
   | nil names =>
-    cases history
+    cases history using @OperationalProofs.DefinitionHistory.casesOn 128 []
     exact .done names globals initial
   | step names decl rest type value tail fresh ht hv next ih =>
-    cases history with
+    cases history using @OperationalProofs.DefinitionHistory.casesOn 128 [] with
     | step declaration rest inferred valid checked same output history =>
       have heq : inferred = type := typeEq_sound 128 _ _ same
       have body := translation_preserves_semantics names decl.value value hv

@@ -4,8 +4,7 @@ namespace Ps.MinKernel.RegularIngressEncoding
 open Ps.MinKernel.RegularIngressWire
 open Ps.MinKernel.RegularIngressModel
 
--- Token descriptions specify the canonical JSON structure and numeric values.
--- Wire derivations below interpret them without consulting the verifier.
+-- A separate mathematical token grammar for canonical structure and numeral values.
 def quotedNumberTokens (expected : Nat) : List Token :=
   ((([] ++ [.literal [34]]) ++ [.number expected]) ++ [.literal [34]])
 
@@ -124,31 +123,28 @@ def packetTokens (entries : List PsMinRegCoreEntry) : List Token :=
 
 theorem quotedNumber_recognizes (expected : Nat) :
     Recognizes (quotedNumberTokens expected) (psMinRegByteQuotedNumber expected) := by
-  change Recognizes _ (fun bytes => psMinRegByteQuotedNumber _ bytes)
-  unfold quotedNumberTokens psMinRegByteQuotedNumber
+  change Recognizes (((([] ++ [.literal [34]]) ++ [.number expected]) ++ [.literal [34]])) (fun bytes => psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (Option.some bytes) (fun byteTail0 => psMinRegByteLiteral [34] byteTail0)) (fun byteTail1 => psMinRegByteNumber expected byteTail1)) (fun byteTail2 => psMinRegByteLiteral [34] byteTail2))
   repeat' first
-      | apply recognizes_then
-      | exact recognizes_empty
-      | exact recognizes_literal _
-      | exact recognizes_number _
+    | apply recognizes_then
+    | exact recognizes_empty
+    | exact recognizes_literal _
+    | exact recognizes_number _
 
 theorem text_recognizes (text : List Nat) :
     Recognizes (textTokens text) (psMinRegByteText text) := by
-  change Recognizes _ (fun bytes => psMinRegByteText _ bytes)
-  unfold textTokens psMinRegByteText
+  change Recognizes (((([] ++ [.literal [34]]) ++ [.literal text]) ++ [.literal [34]])) (fun bytes => psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (Option.some bytes) (fun byteTail0 => psMinRegByteLiteral [34] byteTail0)) (fun byteTail1 => psMinRegByteLiteral text byteTail1)) (fun byteTail2 => psMinRegByteLiteral [34] byteTail2))
   repeat' first
-      | apply recognizes_then
-      | exact recognizes_empty
-      | exact recognizes_literal _
-      | exact recognizes_number _
-      | exact quotedNumber_recognizes _
+    | apply recognizes_then
+    | exact recognizes_empty
+    | exact recognizes_literal _
+    | exact recognizes_number _
+    | exact quotedNumber_recognizes _
 
 theorem name_recognizes (name : PsMinCoreName) :
     Recognizes (nameTokens name) (psMinRegByteName name) := by
   induction name with
   | anonymous =>
-    change Recognizes _ (fun bytes => psMinRegByteName _ bytes)
-    unfold nameTokens psMinRegByteName
+    change Recognizes ([.literal [123, 34, 107, 34, 58, 34, 97, 34, 125]]) (fun bytes => psMinRegByteLiteral [123, 34, 107, 34, 58, 34, 97, 34, 125] bytes)
     repeat' first
       | apply recognizes_then
       | exact recognizes_empty
@@ -157,8 +153,7 @@ theorem name_recognizes (name : PsMinCoreName) :
       | exact quotedNumber_recognizes _
       | exact text_recognizes _
   | str parent text ih =>
-    change Recognizes _ (fun bytes => psMinRegByteName _ bytes)
-    unfold nameTokens psMinRegByteName
+    change Recognizes (((((([] ++ [.literal [123, 34, 107, 34, 58, 34, 115, 34, 44, 34, 112, 34, 58]]) ++ (nameTokens parent)) ++ [.literal [44, 34, 118, 34, 58]]) ++ (textTokens text)) ++ [.literal [125]])) (fun bytes => psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (Option.some bytes) (fun byteTail0 => psMinRegByteLiteral [123, 34, 107, 34, 58, 34, 115, 34, 44, 34, 112, 34, 58] byteTail0)) (fun byteTail1 => psMinRegByteName parent byteTail1)) (fun byteTail2 => psMinRegByteLiteral [44, 34, 118, 34, 58] byteTail2)) (fun byteTail3 => psMinRegByteText text byteTail3)) (fun byteTail4 => psMinRegByteLiteral [125] byteTail4))
     repeat' first
       | apply recognizes_then
       | exact recognizes_empty
@@ -168,8 +163,7 @@ theorem name_recognizes (name : PsMinCoreName) :
       | exact text_recognizes _
       | exact ih
   | num parent value ih =>
-    change Recognizes _ (fun bytes => psMinRegByteName _ bytes)
-    unfold nameTokens psMinRegByteName
+    change Recognizes (((((([] ++ [.literal [123, 34, 107, 34, 58, 34, 110, 34, 44, 34, 112, 34, 58]]) ++ (nameTokens parent)) ++ [.literal [44, 34, 118, 34, 58]]) ++ (quotedNumberTokens value)) ++ [.literal [125]])) (fun bytes => psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (Option.some bytes) (fun byteTail0 => psMinRegByteLiteral [123, 34, 107, 34, 58, 34, 110, 34, 44, 34, 112, 34, 58] byteTail0)) (fun byteTail1 => psMinRegByteName parent byteTail1)) (fun byteTail2 => psMinRegByteLiteral [44, 34, 118, 34, 58] byteTail2)) (fun byteTail3 => psMinRegByteQuotedNumber value byteTail3)) (fun byteTail4 => psMinRegByteLiteral [125] byteTail4))
     repeat' first
       | apply recognizes_then
       | exact recognizes_empty
@@ -183,8 +177,7 @@ theorem level_recognizes (level : Nat) :
     Recognizes (levelTokens level) (psMinRegByteLevel level) := by
   induction level with
   | zero =>
-    change Recognizes _ (fun bytes => psMinRegByteLevel _ bytes)
-    unfold levelTokens psMinRegByteLevel
+    change Recognizes ([.literal [123, 34, 107, 34, 58, 34, 122, 34, 125]]) (fun bytes => psMinRegByteLiteral [123, 34, 107, 34, 58, 34, 122, 34, 125] bytes)
     repeat' first
       | apply recognizes_then
       | exact recognizes_empty
@@ -194,8 +187,7 @@ theorem level_recognizes (level : Nat) :
       | exact text_recognizes _
       | exact name_recognizes _
   | succ rest ih =>
-    change Recognizes _ (fun bytes => psMinRegByteLevel _ bytes)
-    unfold levelTokens psMinRegByteLevel
+    change Recognizes (((([] ++ [.literal [123, 34, 107, 34, 58, 34, 115, 34, 44, 34, 111, 34, 58]]) ++ (levelTokens rest)) ++ [.literal [125]])) (fun bytes => psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (Option.some bytes) (fun byteTail0 => psMinRegByteLiteral [123, 34, 107, 34, 58, 34, 115, 34, 44, 34, 111, 34, 58] byteTail0)) (fun byteTail1 => psMinRegByteLevel rest byteTail1)) (fun byteTail2 => psMinRegByteLiteral [125] byteTail2))
     repeat' first
       | apply recognizes_then
       | exact recognizes_empty
@@ -210,8 +202,7 @@ theorem levelsTail_recognizes (levels : List Nat) :
     Recognizes (levelsTailTokens levels) (psMinRegByteLevelsTail levels) := by
   induction levels with
   | nil =>
-    change Recognizes _ (fun bytes => psMinRegByteLevelsTail _ bytes)
-    unfold levelsTailTokens psMinRegByteLevelsTail
+    change Recognizes ([]) (fun bytes => Option.some bytes)
     repeat' first
       | apply recognizes_then
       | exact recognizes_empty
@@ -221,9 +212,8 @@ theorem levelsTail_recognizes (levels : List Nat) :
       | exact text_recognizes _
       | exact name_recognizes _
       | exact level_recognizes _
-  | cons head rest ih =>
-    change Recognizes _ (fun bytes => psMinRegByteLevelsTail _ bytes)
-    unfold levelsTailTokens psMinRegByteLevelsTail
+  | cons level rest ih =>
+    change Recognizes (((([] ++ [.literal [44]]) ++ (levelTokens level)) ++ (levelsTailTokens rest))) (fun bytes => psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (Option.some bytes) (fun byteTail0 => psMinRegByteLiteral [44] byteTail0)) (fun byteTail1 => psMinRegByteLevel level byteTail1)) (fun byteTail2 => psMinRegByteLevelsTail rest byteTail2))
     repeat' first
       | apply recognizes_then
       | exact recognizes_empty
@@ -237,8 +227,21 @@ theorem levelsTail_recognizes (levels : List Nat) :
 
 theorem levels_recognizes (levels : List Nat) :
     Recognizes (levelsTokens levels) (psMinRegByteLevels levels) := by
-  cases levels <;> unfold levelsTokens psMinRegByteLevels
-  all_goals
+  cases levels with
+  | nil =>
+    change Recognizes ([.literal [91, 93]]) (fun bytes => psMinRegByteLiteral [91, 93] bytes)
+    repeat' first
+      | apply recognizes_then
+      | exact recognizes_empty
+      | exact recognizes_literal _
+      | exact recognizes_number _
+      | exact quotedNumber_recognizes _
+      | exact text_recognizes _
+      | exact name_recognizes _
+      | exact level_recognizes _
+      | exact levelsTail_recognizes _
+  | cons level rest =>
+    change Recognizes ((((([] ++ [.literal [91]]) ++ (levelTokens level)) ++ (levelsTailTokens rest)) ++ [.literal [93]])) (fun bytes => psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (Option.some bytes) (fun byteTail0 => psMinRegByteLiteral [91] byteTail0)) (fun byteTail1 => psMinRegByteLevel level byteTail1)) (fun byteTail2 => psMinRegByteLevelsTail rest byteTail2)) (fun byteTail3 => psMinRegByteLiteral [93] byteTail3))
     repeat' first
       | apply recognizes_then
       | exact recognizes_empty
@@ -262,74 +265,194 @@ theorem binder_recognizes (binder : Nat) :
         | zero => exact recognizes_literal _
         | succ rest =>
           intro bytes tail checked
-          simp [psMinRegByteBinder] at checked
+          change (none : Option (List Nat)) = some tail at checked
+          cases checked
 
 theorem expr_recognizes (fuel : Nat) (expr : PsMinCoreExpr) :
     Recognizes (exprTokens expr) (psMinRegByteExpr fuel expr) := by
   induction fuel generalizing expr with
   | zero =>
     intro bytes rest checked
-    simp [psMinRegByteExpr] at checked
+    change (none : Option (List Nat)) = some rest at checked
+    cases checked
   | succ fuel ih =>
-    cases expr
-    all_goals change Recognizes _ (fun bytes => psMinRegByteExpr _ _ bytes)
-    all_goals unfold exprTokens psMinRegByteExpr
-    all_goals
+    cases expr with
+    | bvar index =>
+      change Recognizes (((([] ++ [.literal [123, 34, 105, 34, 58]]) ++ [.number index]) ++ [.literal [44, 34, 107, 34, 58, 34, 98, 34, 125]])) (fun bytes => psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (Option.some bytes) (fun byteTail0 => psMinRegByteLiteral [123, 34, 105, 34, 58] byteTail0)) (fun byteTail1 => psMinRegByteNumber index byteTail1)) (fun byteTail2 => psMinRegByteLiteral [44, 34, 107, 34, 58, 34, 98, 34, 125] byteTail2))
       repeat' first
         | apply recognizes_then
         | exact recognizes_empty
         | exact recognizes_literal _
         | exact recognizes_number _
         | exact quotedNumber_recognizes _
+        | exact text_recognizes _
         | exact name_recognizes _
+        | exact level_recognizes _
+        | exact levelsTail_recognizes _
         | exact levels_recognizes _
         | exact binder_recognizes _
+        | exact ih _
+    | natural value =>
+      change Recognizes (((([] ++ [.literal [123, 34, 107, 34, 58, 34, 110, 97, 116, 34, 44, 34, 118, 34, 58]]) ++ (quotedNumberTokens value)) ++ [.literal [125]])) (fun bytes => psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (Option.some bytes) (fun byteTail0 => psMinRegByteLiteral [123, 34, 107, 34, 58, 34, 110, 97, 116, 34, 44, 34, 118, 34, 58] byteTail0)) (fun byteTail1 => psMinRegByteQuotedNumber value byteTail1)) (fun byteTail2 => psMinRegByteLiteral [125] byteTail2))
+      repeat' first
+        | apply recognizes_then
+        | exact recognizes_empty
+        | exact recognizes_literal _
+        | exact recognizes_number _
+        | exact quotedNumber_recognizes _
+        | exact text_recognizes _
+        | exact name_recognizes _
         | exact level_recognizes _
+        | exact levelsTail_recognizes _
+        | exact levels_recognizes _
+        | exact binder_recognizes _
+        | exact ih _
+    | sort level =>
+      change Recognizes (((([] ++ [.literal [123, 34, 107, 34, 58, 34, 115, 111, 114, 116, 34, 44, 34, 108, 34, 58]]) ++ (levelTokens level)) ++ [.literal [125]])) (fun bytes => psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (Option.some bytes) (fun byteTail0 => psMinRegByteLiteral [123, 34, 107, 34, 58, 34, 115, 111, 114, 116, 34, 44, 34, 108, 34, 58] byteTail0)) (fun byteTail1 => psMinRegByteLevel level byteTail1)) (fun byteTail2 => psMinRegByteLiteral [125] byteTail2))
+      repeat' first
+        | apply recognizes_then
+        | exact recognizes_empty
+        | exact recognizes_literal _
+        | exact recognizes_number _
+        | exact quotedNumber_recognizes _
+        | exact text_recognizes _
+        | exact name_recognizes _
+        | exact level_recognizes _
+        | exact levelsTail_recognizes _
+        | exact levels_recognizes _
+        | exact binder_recognizes _
+        | exact ih _
+    | constant name levels =>
+      change Recognizes (((((([] ++ [.literal [123, 34, 107, 34, 58, 34, 99, 111, 110, 115, 116, 34, 44, 34, 108, 115, 34, 58]]) ++ (levelsTokens levels)) ++ [.literal [44, 34, 110, 34, 58]]) ++ (nameTokens name)) ++ [.literal [125]])) (fun bytes => psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (Option.some bytes) (fun byteTail0 => psMinRegByteLiteral [123, 34, 107, 34, 58, 34, 99, 111, 110, 115, 116, 34, 44, 34, 108, 115, 34, 58] byteTail0)) (fun byteTail1 => psMinRegByteLevels levels byteTail1)) (fun byteTail2 => psMinRegByteLiteral [44, 34, 110, 34, 58] byteTail2)) (fun byteTail3 => psMinRegByteName name byteTail3)) (fun byteTail4 => psMinRegByteLiteral [125] byteTail4))
+      repeat' first
+        | apply recognizes_then
+        | exact recognizes_empty
+        | exact recognizes_literal _
+        | exact recognizes_number _
+        | exact quotedNumber_recognizes _
+        | exact text_recognizes _
+        | exact name_recognizes _
+        | exact level_recognizes _
+        | exact levelsTail_recognizes _
+        | exact levels_recognizes _
+        | exact binder_recognizes _
+        | exact ih _
+    | app fn arg =>
+      change Recognizes (((((([] ++ [.literal [123, 34, 97, 34, 58]]) ++ (exprTokens arg)) ++ [.literal [44, 34, 102, 34, 58]]) ++ (exprTokens fn)) ++ [.literal [44, 34, 107, 34, 58, 34, 97, 112, 112, 34, 125]])) (fun bytes => psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (Option.some bytes) (fun byteTail0 => psMinRegByteLiteral [123, 34, 97, 34, 58] byteTail0)) (fun byteTail1 => psMinRegByteExpr fuel arg byteTail1)) (fun byteTail2 => psMinRegByteLiteral [44, 34, 102, 34, 58] byteTail2)) (fun byteTail3 => psMinRegByteExpr fuel fn byteTail3)) (fun byteTail4 => psMinRegByteLiteral [44, 34, 107, 34, 58, 34, 97, 112, 112, 34, 125] byteTail4))
+      repeat' first
+        | apply recognizes_then
+        | exact recognizes_empty
+        | exact recognizes_literal _
+        | exact recognizes_number _
+        | exact quotedNumber_recognizes _
+        | exact text_recognizes _
+        | exact name_recognizes _
+        | exact level_recognizes _
+        | exact levelsTail_recognizes _
+        | exact levels_recognizes _
+        | exact binder_recognizes _
+        | exact ih _
+    | lam name binder type body =>
+      change Recognizes (((((((((([] ++ [.literal [123, 34, 98, 34, 58]]) ++ (exprTokens body)) ++ [.literal [44, 34, 98, 105, 34, 58]]) ++ (binderTokens binder)) ++ [.literal [44, 34, 107, 34, 58, 34, 108, 97, 109, 34, 44, 34, 110, 34, 58]]) ++ (nameTokens name)) ++ [.literal [44, 34, 116, 34, 58]]) ++ (exprTokens type)) ++ [.literal [125]])) (fun bytes => psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (Option.some bytes) (fun byteTail0 => psMinRegByteLiteral [123, 34, 98, 34, 58] byteTail0)) (fun byteTail1 => psMinRegByteExpr fuel body byteTail1)) (fun byteTail2 => psMinRegByteLiteral [44, 34, 98, 105, 34, 58] byteTail2)) (fun byteTail3 => psMinRegByteBinder binder byteTail3)) (fun byteTail4 => psMinRegByteLiteral [44, 34, 107, 34, 58, 34, 108, 97, 109, 34, 44, 34, 110, 34, 58] byteTail4)) (fun byteTail5 => psMinRegByteName name byteTail5)) (fun byteTail6 => psMinRegByteLiteral [44, 34, 116, 34, 58] byteTail6)) (fun byteTail7 => psMinRegByteExpr fuel type byteTail7)) (fun byteTail8 => psMinRegByteLiteral [125] byteTail8))
+      repeat' first
+        | apply recognizes_then
+        | exact recognizes_empty
+        | exact recognizes_literal _
+        | exact recognizes_number _
+        | exact quotedNumber_recognizes _
+        | exact text_recognizes _
+        | exact name_recognizes _
+        | exact level_recognizes _
+        | exact levelsTail_recognizes _
+        | exact levels_recognizes _
+        | exact binder_recognizes _
+        | exact ih _
+    | forallE name binder type body =>
+      change Recognizes (((((((((([] ++ [.literal [123, 34, 98, 34, 58]]) ++ (exprTokens body)) ++ [.literal [44, 34, 98, 105, 34, 58]]) ++ (binderTokens binder)) ++ [.literal [44, 34, 107, 34, 58, 34, 102, 111, 114, 97, 108, 108, 34, 44, 34, 110, 34, 58]]) ++ (nameTokens name)) ++ [.literal [44, 34, 116, 34, 58]]) ++ (exprTokens type)) ++ [.literal [125]])) (fun bytes => psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (Option.some bytes) (fun byteTail0 => psMinRegByteLiteral [123, 34, 98, 34, 58] byteTail0)) (fun byteTail1 => psMinRegByteExpr fuel body byteTail1)) (fun byteTail2 => psMinRegByteLiteral [44, 34, 98, 105, 34, 58] byteTail2)) (fun byteTail3 => psMinRegByteBinder binder byteTail3)) (fun byteTail4 => psMinRegByteLiteral [44, 34, 107, 34, 58, 34, 102, 111, 114, 97, 108, 108, 34, 44, 34, 110, 34, 58] byteTail4)) (fun byteTail5 => psMinRegByteName name byteTail5)) (fun byteTail6 => psMinRegByteLiteral [44, 34, 116, 34, 58] byteTail6)) (fun byteTail7 => psMinRegByteExpr fuel type byteTail7)) (fun byteTail8 => psMinRegByteLiteral [125] byteTail8))
+      repeat' first
+        | apply recognizes_then
+        | exact recognizes_empty
+        | exact recognizes_literal _
+        | exact recognizes_number _
+        | exact quotedNumber_recognizes _
+        | exact text_recognizes _
+        | exact name_recognizes _
+        | exact level_recognizes _
+        | exact levelsTail_recognizes _
+        | exact levels_recognizes _
+        | exact binder_recognizes _
+        | exact ih _
+    | letE name type value body =>
+      change Recognizes (((((((((([] ++ [.literal [123, 34, 98, 34, 58]]) ++ (exprTokens body)) ++ [.literal [44, 34, 107, 34, 58, 34, 108, 101, 116, 34, 44, 34, 110, 34, 58]]) ++ (nameTokens name)) ++ [.literal [44, 34, 116, 34, 58]]) ++ (exprTokens type)) ++ [.literal [44, 34, 118, 34, 58]]) ++ (exprTokens value)) ++ [.literal [125]])) (fun bytes => psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (Option.some bytes) (fun byteTail0 => psMinRegByteLiteral [123, 34, 98, 34, 58] byteTail0)) (fun byteTail1 => psMinRegByteExpr fuel body byteTail1)) (fun byteTail2 => psMinRegByteLiteral [44, 34, 107, 34, 58, 34, 108, 101, 116, 34, 44, 34, 110, 34, 58] byteTail2)) (fun byteTail3 => psMinRegByteName name byteTail3)) (fun byteTail4 => psMinRegByteLiteral [44, 34, 116, 34, 58] byteTail4)) (fun byteTail5 => psMinRegByteExpr fuel type byteTail5)) (fun byteTail6 => psMinRegByteLiteral [44, 34, 118, 34, 58] byteTail6)) (fun byteTail7 => psMinRegByteExpr fuel value byteTail7)) (fun byteTail8 => psMinRegByteLiteral [125] byteTail8))
+      repeat' first
+        | apply recognizes_then
+        | exact recognizes_empty
+        | exact recognizes_literal _
+        | exact recognizes_number _
+        | exact quotedNumber_recognizes _
+        | exact text_recognizes _
+        | exact name_recognizes _
+        | exact level_recognizes _
+        | exact levelsTail_recognizes _
+        | exact levels_recognizes _
+        | exact binder_recognizes _
+        | exact ih _
+    | projection name index value =>
+      change Recognizes (((((((([] ++ [.literal [123, 34, 101, 34, 58]]) ++ (exprTokens value)) ++ [.literal [44, 34, 105, 34, 58]]) ++ [.number index]) ++ [.literal [44, 34, 107, 34, 58, 34, 112, 114, 111, 106, 34, 44, 34, 110, 34, 58]]) ++ (nameTokens name)) ++ [.literal [125]])) (fun bytes => psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (Option.some bytes) (fun byteTail0 => psMinRegByteLiteral [123, 34, 101, 34, 58] byteTail0)) (fun byteTail1 => psMinRegByteExpr fuel value byteTail1)) (fun byteTail2 => psMinRegByteLiteral [44, 34, 105, 34, 58] byteTail2)) (fun byteTail3 => psMinRegByteNumber index byteTail3)) (fun byteTail4 => psMinRegByteLiteral [44, 34, 107, 34, 58, 34, 112, 114, 111, 106, 34, 44, 34, 110, 34, 58] byteTail4)) (fun byteTail5 => psMinRegByteName name byteTail5)) (fun byteTail6 => psMinRegByteLiteral [125] byteTail6))
+      repeat' first
+        | apply recognizes_then
+        | exact recognizes_empty
+        | exact recognizes_literal _
+        | exact recognizes_number _
+        | exact quotedNumber_recognizes _
+        | exact text_recognizes _
+        | exact name_recognizes _
+        | exact level_recognizes _
+        | exact levelsTail_recognizes _
+        | exact levels_recognizes _
+        | exact binder_recognizes _
         | exact ih _
 
 theorem definition_recognizes (decl : PsMinCoreDeclaration) :
     Recognizes (definitionTokens decl) (psMinRegByteDefinition decl) := by
-  change Recognizes _ (fun bytes => psMinRegByteDefinition _ bytes)
-  unfold definitionTokens psMinRegByteDefinition
+  change Recognizes (((((((((([] ++ [.literal [123, 34, 100, 101, 99, 108, 97, 114, 97, 116, 105, 111, 110, 34, 58, 123, 34, 104, 34, 58, 123, 34, 104, 34, 58]]) ++ (quotedNumberTokens decl.height)) ++ [.literal [44, 34, 107, 34, 58, 34, 114, 101, 103, 117, 108, 97, 114, 34, 125, 44, 34, 107, 34, 58, 34, 100, 101, 102, 105, 110, 105, 116, 105, 111, 110, 34, 44, 34, 108, 112, 34, 58, 91, 93, 44, 34, 110, 34, 58]]) ++ (nameTokens decl.name)) ++ [.literal [44, 34, 115, 34, 58, 34, 115, 97, 102, 101, 34, 44, 34, 116, 34, 58]]) ++ (exprTokens decl.type)) ++ [.literal [44, 34, 118, 34, 58]]) ++ (exprTokens decl.value)) ++ [.literal [125, 44, 34, 107, 105, 110, 100, 34, 58, 34, 99, 111, 110, 115, 116, 97, 110, 116, 34, 125]])) (fun bytes => psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (Option.some bytes) (fun byteTail0 => psMinRegByteLiteral [123, 34, 100, 101, 99, 108, 97, 114, 97, 116, 105, 111, 110, 34, 58, 123, 34, 104, 34, 58, 123, 34, 104, 34, 58] byteTail0)) (fun byteTail1 => psMinRegByteQuotedNumber decl.height byteTail1)) (fun byteTail2 => psMinRegByteLiteral [44, 34, 107, 34, 58, 34, 114, 101, 103, 117, 108, 97, 114, 34, 125, 44, 34, 107, 34, 58, 34, 100, 101, 102, 105, 110, 105, 116, 105, 111, 110, 34, 44, 34, 108, 112, 34, 58, 91, 93, 44, 34, 110, 34, 58] byteTail2)) (fun byteTail3 => psMinRegByteName decl.name byteTail3)) (fun byteTail4 => psMinRegByteLiteral [44, 34, 115, 34, 58, 34, 115, 97, 102, 101, 34, 44, 34, 116, 34, 58] byteTail4)) (fun byteTail5 => psMinRegByteExpr 256 decl.type byteTail5)) (fun byteTail6 => psMinRegByteLiteral [44, 34, 118, 34, 58] byteTail6)) (fun byteTail7 => psMinRegByteExpr 256 decl.value byteTail7)) (fun byteTail8 => psMinRegByteLiteral [125, 44, 34, 107, 105, 110, 100, 34, 58, 34, 99, 111, 110, 115, 116, 97, 110, 116, 34, 125] byteTail8))
   repeat' first
-      | apply recognizes_then
-      | exact recognizes_empty
-      | exact recognizes_literal _
-      | exact recognizes_number _
-      | exact quotedNumber_recognizes _
-      | exact text_recognizes _
-      | exact name_recognizes _
-      | exact level_recognizes _
-      | exact levelsTail_recognizes _
-      | exact levels_recognizes _
-      | exact binder_recognizes _
-      | exact expr_recognizes _ _
+    | apply recognizes_then
+    | exact recognizes_empty
+    | exact recognizes_literal _
+    | exact recognizes_number _
+    | exact quotedNumber_recognizes _
+    | exact text_recognizes _
+    | exact name_recognizes _
+    | exact level_recognizes _
+    | exact levelsTail_recognizes _
+    | exact levels_recognizes _
+    | exact binder_recognizes _
+    | exact expr_recognizes _ _
 
 theorem constructor_recognizes (ctor : PsMinRegCoreConstructor) :
     Recognizes (constructorTokens ctor) (psMinRegByteConstructor ctor) := by
-  change Recognizes _ (fun bytes => psMinRegByteConstructor _ bytes)
-  unfold constructorTokens psMinRegByteConstructor
+  change Recognizes (((((([] ++ [.literal [123, 34, 110, 34, 58]]) ++ (nameTokens ctor.name)) ++ [.literal [44, 34, 116, 34, 58]]) ++ (exprTokens ctor.type)) ++ [.literal [125]])) (fun bytes => psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (Option.some bytes) (fun byteTail0 => psMinRegByteLiteral [123, 34, 110, 34, 58] byteTail0)) (fun byteTail1 => psMinRegByteName ctor.name byteTail1)) (fun byteTail2 => psMinRegByteLiteral [44, 34, 116, 34, 58] byteTail2)) (fun byteTail3 => psMinRegByteExpr 256 ctor.type byteTail3)) (fun byteTail4 => psMinRegByteLiteral [125] byteTail4))
   repeat' first
-      | apply recognizes_then
-      | exact recognizes_empty
-      | exact recognizes_literal _
-      | exact recognizes_number _
-      | exact quotedNumber_recognizes _
-      | exact text_recognizes _
-      | exact name_recognizes _
-      | exact level_recognizes _
-      | exact levelsTail_recognizes _
-      | exact levels_recognizes _
-      | exact binder_recognizes _
-      | exact definition_recognizes _
-      | exact expr_recognizes _ _
+    | apply recognizes_then
+    | exact recognizes_empty
+    | exact recognizes_literal _
+    | exact recognizes_number _
+    | exact quotedNumber_recognizes _
+    | exact text_recognizes _
+    | exact name_recognizes _
+    | exact level_recognizes _
+    | exact levelsTail_recognizes _
+    | exact levels_recognizes _
+    | exact binder_recognizes _
+    | exact expr_recognizes _ _
+    | exact definition_recognizes _
 
 theorem constructorsTail_recognizes (constructors : List PsMinRegCoreConstructor) :
     Recognizes (constructorsTailTokens constructors) (psMinRegByteConstructorsTail constructors) := by
   induction constructors with
   | nil =>
-    change Recognizes _ (fun bytes => psMinRegByteConstructorsTail _ bytes)
-    unfold constructorsTailTokens psMinRegByteConstructorsTail
+    change Recognizes ([]) (fun bytes => Option.some bytes)
     repeat' first
       | apply recognizes_then
       | exact recognizes_empty
@@ -342,12 +465,11 @@ theorem constructorsTail_recognizes (constructors : List PsMinRegCoreConstructor
       | exact levelsTail_recognizes _
       | exact levels_recognizes _
       | exact binder_recognizes _
+      | exact expr_recognizes _ _
       | exact definition_recognizes _
       | exact constructor_recognizes _
-      | exact expr_recognizes _ _
-  | cons head rest ih =>
-    change Recognizes _ (fun bytes => psMinRegByteConstructorsTail _ bytes)
-    unfold constructorsTailTokens psMinRegByteConstructorsTail
+  | cons ctor rest ih =>
+    change Recognizes (((([] ++ [.literal [44]]) ++ (constructorTokens ctor)) ++ (constructorsTailTokens rest))) (fun bytes => psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (Option.some bytes) (fun byteTail0 => psMinRegByteLiteral [44] byteTail0)) (fun byteTail1 => psMinRegByteConstructor ctor byteTail1)) (fun byteTail2 => psMinRegByteConstructorsTail rest byteTail2))
     repeat' first
       | apply recognizes_then
       | exact recognizes_empty
@@ -360,15 +482,16 @@ theorem constructorsTail_recognizes (constructors : List PsMinRegCoreConstructor
       | exact levelsTail_recognizes _
       | exact levels_recognizes _
       | exact binder_recognizes _
+      | exact expr_recognizes _ _
       | exact definition_recognizes _
       | exact constructor_recognizes _
-      | exact expr_recognizes _ _
       | exact ih
 
 theorem constructors_recognizes (constructors : List PsMinRegCoreConstructor) :
     Recognizes (constructorsTokens constructors) (psMinRegByteConstructors constructors) := by
-  cases constructors <;> unfold constructorsTokens psMinRegByteConstructors
-  all_goals
+  cases constructors with
+  | nil =>
+    change Recognizes ([.literal [91, 93]]) (fun bytes => psMinRegByteLiteral [91, 93] bytes)
     repeat' first
       | apply recognizes_then
       | exact recognizes_empty
@@ -381,37 +504,55 @@ theorem constructors_recognizes (constructors : List PsMinRegCoreConstructor) :
       | exact levelsTail_recognizes _
       | exact levels_recognizes _
       | exact binder_recognizes _
+      | exact expr_recognizes _ _
       | exact definition_recognizes _
       | exact constructor_recognizes _
       | exact constructorsTail_recognizes _
+  | cons ctor rest =>
+    change Recognizes ((((([] ++ [.literal [91]]) ++ (constructorTokens ctor)) ++ (constructorsTailTokens rest)) ++ [.literal [93]])) (fun bytes => psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (Option.some bytes) (fun byteTail0 => psMinRegByteLiteral [91] byteTail0)) (fun byteTail1 => psMinRegByteConstructor ctor byteTail1)) (fun byteTail2 => psMinRegByteConstructorsTail rest byteTail2)) (fun byteTail3 => psMinRegByteLiteral [93] byteTail3))
+    repeat' first
+      | apply recognizes_then
+      | exact recognizes_empty
+      | exact recognizes_literal _
+      | exact recognizes_number _
+      | exact quotedNumber_recognizes _
+      | exact text_recognizes _
+      | exact name_recognizes _
+      | exact level_recognizes _
+      | exact levelsTail_recognizes _
+      | exact levels_recognizes _
+      | exact binder_recognizes _
       | exact expr_recognizes _ _
+      | exact definition_recognizes _
+      | exact constructor_recognizes _
+      | exact constructorsTail_recognizes _
 
 theorem group_recognizes (group : PsMinRegCoreGroup) :
     Recognizes (groupTokens group) (psMinRegByteGroup group) := by
-  change Recognizes _ (fun bytes => psMinRegByteGroup _ bytes)
-  unfold groupTokens psMinRegByteGroup
+  change Recognizes (((((((([] ++ [.literal [123, 34, 100, 101, 99, 108, 97, 114, 97, 116, 105, 111, 110, 34, 58, 123, 34, 108, 112, 34, 58, 91, 93, 44, 34, 110, 112, 34, 58, 48, 44, 34, 116, 115, 34, 58, 91, 123, 34, 99, 115, 34, 58]]) ++ (constructorsTokens group.constructors)) ++ [.literal [44, 34, 110, 34, 58]]) ++ (nameTokens group.name)) ++ [.literal [44, 34, 116, 34, 58]]) ++ (exprTokens group.type)) ++ [.literal [125, 93, 125, 44, 34, 107, 105, 110, 100, 34, 58, 34, 105, 110, 100, 117, 99, 116, 105, 118, 101, 34, 125]])) (fun bytes => psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (Option.some bytes) (fun byteTail0 => psMinRegByteLiteral [123, 34, 100, 101, 99, 108, 97, 114, 97, 116, 105, 111, 110, 34, 58, 123, 34, 108, 112, 34, 58, 91, 93, 44, 34, 110, 112, 34, 58, 48, 44, 34, 116, 115, 34, 58, 91, 123, 34, 99, 115, 34, 58] byteTail0)) (fun byteTail1 => psMinRegByteConstructors group.constructors byteTail1)) (fun byteTail2 => psMinRegByteLiteral [44, 34, 110, 34, 58] byteTail2)) (fun byteTail3 => psMinRegByteName group.name byteTail3)) (fun byteTail4 => psMinRegByteLiteral [44, 34, 116, 34, 58] byteTail4)) (fun byteTail5 => psMinRegByteExpr 256 group.type byteTail5)) (fun byteTail6 => psMinRegByteLiteral [125, 93, 125, 44, 34, 107, 105, 110, 100, 34, 58, 34, 105, 110, 100, 117, 99, 116, 105, 118, 101, 34, 125] byteTail6))
   repeat' first
-      | apply recognizes_then
-      | exact recognizes_empty
-      | exact recognizes_literal _
-      | exact recognizes_number _
-      | exact quotedNumber_recognizes _
-      | exact text_recognizes _
-      | exact name_recognizes _
-      | exact level_recognizes _
-      | exact levelsTail_recognizes _
-      | exact levels_recognizes _
-      | exact binder_recognizes _
-      | exact definition_recognizes _
-      | exact constructor_recognizes _
-      | exact constructorsTail_recognizes _
-      | exact constructors_recognizes _
-      | exact expr_recognizes _ _
+    | apply recognizes_then
+    | exact recognizes_empty
+    | exact recognizes_literal _
+    | exact recognizes_number _
+    | exact quotedNumber_recognizes _
+    | exact text_recognizes _
+    | exact name_recognizes _
+    | exact level_recognizes _
+    | exact levelsTail_recognizes _
+    | exact levels_recognizes _
+    | exact binder_recognizes _
+    | exact expr_recognizes _ _
+    | exact definition_recognizes _
+    | exact constructor_recognizes _
+    | exact constructorsTail_recognizes _
+    | exact constructors_recognizes _
 
 theorem entry_recognizes (entry : PsMinRegCoreEntry) :
     Recognizes (entryTokens entry) (psMinRegByteEntry entry) := by
-  cases entry <;> unfold entryTokens psMinRegByteEntry
-  all_goals
+  cases entry with
+  | definition decl =>
+    change Recognizes ((definitionTokens decl)) (fun bytes => psMinRegByteDefinition decl bytes)
     repeat' first
       | apply recognizes_then
       | exact recognizes_empty
@@ -424,19 +565,38 @@ theorem entry_recognizes (entry : PsMinRegCoreEntry) :
       | exact levelsTail_recognizes _
       | exact levels_recognizes _
       | exact binder_recognizes _
+      | exact expr_recognizes _ _
       | exact definition_recognizes _
       | exact constructor_recognizes _
       | exact constructorsTail_recognizes _
       | exact constructors_recognizes _
       | exact group_recognizes _
+  | inductiveE group =>
+    change Recognizes ((groupTokens group)) (fun bytes => psMinRegByteGroup group bytes)
+    repeat' first
+      | apply recognizes_then
+      | exact recognizes_empty
+      | exact recognizes_literal _
+      | exact recognizes_number _
+      | exact quotedNumber_recognizes _
+      | exact text_recognizes _
+      | exact name_recognizes _
+      | exact level_recognizes _
+      | exact levelsTail_recognizes _
+      | exact levels_recognizes _
+      | exact binder_recognizes _
       | exact expr_recognizes _ _
+      | exact definition_recognizes _
+      | exact constructor_recognizes _
+      | exact constructorsTail_recognizes _
+      | exact constructors_recognizes _
+      | exact group_recognizes _
 
 theorem entriesTail_recognizes (entries : List PsMinRegCoreEntry) :
     Recognizes (entriesTailTokens entries) (psMinRegByteEntriesTail entries) := by
   induction entries with
   | nil =>
-    change Recognizes _ (fun bytes => psMinRegByteEntriesTail _ bytes)
-    unfold entriesTailTokens psMinRegByteEntriesTail
+    change Recognizes ([]) (fun bytes => Option.some bytes)
     repeat' first
       | apply recognizes_then
       | exact recognizes_empty
@@ -449,16 +609,15 @@ theorem entriesTail_recognizes (entries : List PsMinRegCoreEntry) :
       | exact levelsTail_recognizes _
       | exact levels_recognizes _
       | exact binder_recognizes _
+      | exact expr_recognizes _ _
       | exact definition_recognizes _
       | exact constructor_recognizes _
       | exact constructorsTail_recognizes _
       | exact constructors_recognizes _
       | exact group_recognizes _
       | exact entry_recognizes _
-      | exact expr_recognizes _ _
-  | cons head rest ih =>
-    change Recognizes _ (fun bytes => psMinRegByteEntriesTail _ bytes)
-    unfold entriesTailTokens psMinRegByteEntriesTail
+  | cons entry rest ih =>
+    change Recognizes (((([] ++ [.literal [44]]) ++ (entryTokens entry)) ++ (entriesTailTokens rest))) (fun bytes => psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (Option.some bytes) (fun byteTail0 => psMinRegByteLiteral [44] byteTail0)) (fun byteTail1 => psMinRegByteEntry entry byteTail1)) (fun byteTail2 => psMinRegByteEntriesTail rest byteTail2))
     repeat' first
       | apply recognizes_then
       | exact recognizes_empty
@@ -471,19 +630,20 @@ theorem entriesTail_recognizes (entries : List PsMinRegCoreEntry) :
       | exact levelsTail_recognizes _
       | exact levels_recognizes _
       | exact binder_recognizes _
+      | exact expr_recognizes _ _
       | exact definition_recognizes _
       | exact constructor_recognizes _
       | exact constructorsTail_recognizes _
       | exact constructors_recognizes _
       | exact group_recognizes _
       | exact entry_recognizes _
-      | exact expr_recognizes _ _
       | exact ih
 
 theorem entries_recognizes (entries : List PsMinRegCoreEntry) :
     Recognizes (entriesTokens entries) (psMinRegByteEntries entries) := by
-  cases entries <;> unfold entriesTokens psMinRegByteEntries
-  all_goals
+  cases entries with
+  | nil =>
+    change Recognizes ([.literal [91, 93]]) (fun bytes => psMinRegByteLiteral [91, 93] bytes)
     repeat' first
       | apply recognizes_then
       | exact recognizes_empty
@@ -496,6 +656,7 @@ theorem entries_recognizes (entries : List PsMinRegCoreEntry) :
       | exact levelsTail_recognizes _
       | exact levels_recognizes _
       | exact binder_recognizes _
+      | exact expr_recognizes _ _
       | exact definition_recognizes _
       | exact constructor_recognizes _
       | exact constructorsTail_recognizes _
@@ -503,13 +664,9 @@ theorem entries_recognizes (entries : List PsMinRegCoreEntry) :
       | exact group_recognizes _
       | exact entry_recognizes _
       | exact entriesTail_recognizes _
-      | exact expr_recognizes _ _
-
-theorem packet_recognizes (entries : List PsMinRegCoreEntry) :
-    Recognizes (packetTokens entries) (psMinRegBytePacket entries) := by
-  change Recognizes _ (fun bytes => psMinRegBytePacket _ bytes)
-  unfold packetTokens psMinRegBytePacket
-  repeat' first
+  | cons entry rest =>
+    change Recognizes ((((([] ++ [.literal [91]]) ++ (entryTokens entry)) ++ (entriesTailTokens rest)) ++ [.literal [93]])) (fun bytes => psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (Option.some bytes) (fun byteTail0 => psMinRegByteLiteral [91] byteTail0)) (fun byteTail1 => psMinRegByteEntry entry byteTail1)) (fun byteTail2 => psMinRegByteEntriesTail rest byteTail2)) (fun byteTail3 => psMinRegByteLiteral [93] byteTail3))
+    repeat' first
       | apply recognizes_then
       | exact recognizes_empty
       | exact recognizes_literal _
@@ -521,6 +678,7 @@ theorem packet_recognizes (entries : List PsMinRegCoreEntry) :
       | exact levelsTail_recognizes _
       | exact levels_recognizes _
       | exact binder_recognizes _
+      | exact expr_recognizes _ _
       | exact definition_recognizes _
       | exact constructor_recognizes _
       | exact constructorsTail_recognizes _
@@ -528,9 +686,31 @@ theorem packet_recognizes (entries : List PsMinRegCoreEntry) :
       | exact group_recognizes _
       | exact entry_recognizes _
       | exact entriesTail_recognizes _
-      | exact entries_recognizes _
-      | exact expr_recognizes _ _
 
+theorem packet_recognizes (entries : List PsMinRegCoreEntry) :
+    Recognizes (packetTokens entries) (psMinRegBytePacket entries) := by
+  change Recognizes (((([] ++ [.literal [123, 34, 97, 100, 109, 105, 115, 115, 105, 111, 110, 115, 34, 58]]) ++ (entriesTokens entries)) ++ [.literal [44, 34, 102, 111, 114, 109, 97, 116, 34, 58, 34, 112, 114, 111, 111, 102, 115, 99, 114, 105, 112, 116, 45, 99, 104, 101, 99, 107, 101, 100, 45, 97, 100, 109, 105, 115, 115, 105, 111, 110, 115, 34, 44, 34, 118, 101, 114, 115, 105, 111, 110, 34, 58, 50, 125]])) (fun bytes => psMinRegByteThen (psMinRegByteThen (psMinRegByteThen (Option.some bytes) (fun byteTail0 => psMinRegByteLiteral [123, 34, 97, 100, 109, 105, 115, 115, 105, 111, 110, 115, 34, 58] byteTail0)) (fun byteTail1 => psMinRegByteEntries entries byteTail1)) (fun byteTail2 => psMinRegByteLiteral [44, 34, 102, 111, 114, 109, 97, 116, 34, 58, 34, 112, 114, 111, 111, 102, 115, 99, 114, 105, 112, 116, 45, 99, 104, 101, 99, 107, 101, 100, 45, 97, 100, 109, 105, 115, 115, 105, 111, 110, 115, 34, 44, 34, 118, 101, 114, 115, 105, 111, 110, 34, 58, 50, 125] byteTail2))
+  repeat' first
+    | apply recognizes_then
+    | exact recognizes_empty
+    | exact recognizes_literal _
+    | exact recognizes_number _
+    | exact quotedNumber_recognizes _
+    | exact text_recognizes _
+    | exact name_recognizes _
+    | exact level_recognizes _
+    | exact levelsTail_recognizes _
+    | exact levels_recognizes _
+    | exact binder_recognizes _
+    | exact expr_recognizes _ _
+    | exact definition_recognizes _
+    | exact constructor_recognizes _
+    | exact constructorsTail_recognizes _
+    | exact constructors_recognizes _
+    | exact group_recognizes _
+    | exact entry_recognizes _
+    | exact entriesTail_recognizes _
+    | exact entries_recognizes _
 
 theorem decode_has_wire_derivation (bytes : List Nat) (candidate source : List PsMinRegCoreEntry)
     (h : psMinRegCoreDecodeCertificate bytes candidate = some source) :
@@ -541,8 +721,22 @@ theorem decode_has_wire_derivation (bytes : List Nat) (candidate source : List P
   rw [same]
   exact ⟨identity, valid, grammar⟩
 
+#print axioms quotedNumber_recognizes
+#print axioms text_recognizes
 #print axioms name_recognizes
+#print axioms level_recognizes
+#print axioms levelsTail_recognizes
+#print axioms levels_recognizes
+#print axioms binder_recognizes
 #print axioms expr_recognizes
+#print axioms definition_recognizes
+#print axioms constructor_recognizes
+#print axioms constructorsTail_recognizes
+#print axioms constructors_recognizes
+#print axioms group_recognizes
+#print axioms entry_recognizes
+#print axioms entriesTail_recognizes
+#print axioms entries_recognizes
 #print axioms packet_recognizes
 #print axioms decode_has_wire_derivation
 end Ps.MinKernel.RegularIngressEncoding

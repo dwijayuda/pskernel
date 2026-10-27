@@ -182,6 +182,82 @@ theorem constructor_fields_translation (fuel older : Nat) (groups : List PsMinRe
     | _ => simp [psMinRegCoreConstructorFields] at h
 
 
+
+inductive AllConstructorFields (older : Nat) (groups : List PsMinRegCorePlan) (owner : PsMinCoreName) :
+    List PsMinRegCoreConstructor → List (List PsMinRegField) → Prop where
+  | nil : AllConstructorFields older groups owner [] []
+  | cons (ctor : PsMinRegCoreConstructor) (rest fields tail)
+      (head : ConstructorFields older groups owner ctor.type fields)
+      (next : AllConstructorFields older groups owner rest tail) :
+      AllConstructorFields older groups owner (ctor :: rest) (fields :: tail)
+
+theorem all_constructor_fields_translation (older : Nat) (groups : List PsMinRegCorePlan)
+    (owner : PsMinCoreName) (constructors : List PsMinRegCoreConstructor) (fields : List (List PsMinRegField))
+    (h : psMinRegCoreAllFields older groups owner constructors = some fields) :
+    AllConstructorFields older groups owner constructors fields := by
+  induction constructors generalizing fields with
+  | nil =>
+    cases h
+    exact .nil
+  | cons ctor rest ih =>
+    cases hh : psMinRegCoreConstructorFields 256 older groups owner ctor.type with
+    | none => simp [psMinRegCoreAllFields, hh] at h
+    | some head =>
+      cases ht : psMinRegCoreAllFields older groups owner rest with
+      | none => simp [psMinRegCoreAllFields, hh, ht] at h
+      | some tail =>
+        simp only [psMinRegCoreAllFields, hh, ht, Option.some.injEq] at h
+        subst fields
+        exact .cons ctor rest head tail (constructor_fields_translation _ _ _ _ _ _ hh) (ih _ ht)
+
+theorem constructor_count_exact (constructors : List PsMinRegCoreConstructor) :
+    psMinRegCoreConstructorCount constructors = constructors.length := by
+  induction constructors with
+  | nil => rfl
+  | cons head rest ih => exact congrArg Nat.succ ih
+
+inductive GroupImage (older : Nat) (groups : List PsMinRegCorePlan)
+    (source : PsMinRegCoreGroup) : PsMinRegSpec → Prop where
+  | regular (fields : List (List PsMinRegField))
+      (sourceType : source.type = .sort 1)
+      (constructorTypes : AllConstructorFields older groups source.name source.constructors fields) :
+      GroupImage older groups source ⟨0, 0, 0, 1, source.constructors.length, fields⟩
+
+theorem group_translation (initial final : PsMinRegCoreState) (source : PsMinRegCoreGroup)
+    (h : psMinRegCoreBuildGroup initial source = some final) :
+    ∃ spec, GroupImage initial.count initial.groups source spec ∧
+      final.groups = ⟨source, spec, initial.count⟩ :: initial.groups ∧
+      final.count = Nat.succ initial.count := by
+  unfold psMinRegCoreBuildGroup at h
+  split at h
+  next freshOwner =>
+    split at h
+    next exactType =>
+      cases hr : psMinRegCoreReserveConstructors source.constructors (source.name :: initial.used) with
+      | none => simp [hr] at h
+      | some used =>
+        simp only [hr] at h
+        split at h
+        next freshRecursor =>
+          cases hf : psMinRegCoreAllFields initial.count initial.groups source.name source.constructors with
+          | none => simp [hf] at h
+          | some fields =>
+            simp only [hf] at h
+            split at h
+            next valid =>
+              cases h
+              rw [constructor_count_exact]
+              exact ⟨_, .regular fields (exprEq_sound _ _ _ exactType)
+                (all_constructor_fields_translation _ _ _ _ _ hf), rfl, rfl⟩
+            next => contradiction
+        next => contradiction
+    next => contradiction
+  next => contradiction
+
+#print axioms all_constructor_fields_translation
+#print axioms constructor_count_exact
+#print axioms group_translation
+
 -- A mathematical ambient-code lift, independent of the partial lowering code.
 def liftCode (amount : Nat) : PsMinRegTy → PsMinRegTy
   | .empty => .empty
@@ -242,7 +318,10 @@ theorem lower_type_restores (fuel amount : Nat) (type lowered : PsMinRegTy)
         simp only [psMinRegCoreLowerType, ht, Option.some.injEq] at h
         subst lowered
         exact congrArg PsMinRegTy.option (ih _ _ ht)
-    | _ => simp_all [psMinRegCoreLowerType, liftCode]
+    | _ =>
+      simp only [psMinRegCoreLowerType, Option.some.injEq] at h
+      subst lowered
+      rfl
 
 #print axioms liftCode_zero
 #print axioms liftCode_one

@@ -26,5 +26,6 @@ for(const row of r.licensing.retainedThirdParty)
 const result={schema:'psc1-installed-license/1',testedCommit:process.env.GITHUB_SHA,status:'passed',
   rootSha256:r.sha256,cases,retainedThirdParty:r.licensing.retainedThirdParty,
   executablePolicy:r.licensing.executablePolicy};
+fs.mkdirSync('dist/cli',{recursive:true});
 fs.writeFileSync('dist/cli/license.json',JSON.stringify(result,null,2)+'\n');
 console.log('PSC1_INSTALLED_LICENSE '+JSON.stringify(result));

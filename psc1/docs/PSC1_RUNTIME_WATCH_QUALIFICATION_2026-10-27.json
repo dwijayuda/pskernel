@@ -86,6 +86,12 @@
       "run": 40436406870,
       "job": 121966422439,
       "reason": "Actual Bun reached the optional Rust transport's independent exact Node pin; audit found it as the remaining pin among23 production host modules. Repack both execution packages' host metadata, update only Rust transport/policy, retain every payload byte."
+    },
+    {
+      "commit": "c0a3d0bad1526ddbd1ef773ca0b4c300a57723af",
+      "run": 40441416370,
+      "job": 121982781750,
+      "reason": "Nine actual owned-tarball SPDX/license and two retained SDK assertions completed, then the receipt writer lacked dist/cli in a fresh installed job. Each new evidence producer now creates its own output directory."
     }
   ],
   "finalRelease": false,

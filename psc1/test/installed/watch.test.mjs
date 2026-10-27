@@ -178,6 +178,7 @@ try {
   }
   const result={schema:'psc1-installed-watch/1',status:'passed',testedCommit:process.env.GITHUB_SHA,
     runtime:f.runtime,cases,scope:'full checked rebuilds of explicit dependencies; no incremental semantic cache'};
+  fs.mkdirSync('dist/cli',{recursive:true});
   fs.writeFileSync('dist/cli/watch.json',JSON.stringify(result,null,2)+'\n');
   console.log('PSC1_INSTALLED_WATCH '+JSON.stringify(result));
 } finally {

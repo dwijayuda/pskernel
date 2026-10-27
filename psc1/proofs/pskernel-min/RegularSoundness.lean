@@ -76,14 +76,14 @@ theorem typeEq_sound (fuel : Nat) (left right : PsMinRegTy)
         rfl
 
 -- The model follows the actual executable inference, including every refusal.
-def inferModel (fuel : Nat) (specs : List PsMinRegSpec) (data : List Type)
+noncomputable def inferModel (fuel : Nat) (specs : List PsMinRegSpec) (data : List Type)
     (globals locals : List PsMinRegTy) (expression : PsMinRegTerm) (type : PsMinRegTy)
     (signatureModel : SignatureModel specs data) (globalModel : Model data globals)
     (localModel : Model data locals)
     (h : psMinRegInfer fuel specs globals locals expression = some type) : Denote data type := by
-  cases fuel with
+  induction fuel generalizing globals locals expression type with
   | zero => simp [psMinRegInfer] at h
-  | succ remaining =>
+  | succ remaining ih =>
     cases expression with
     | var index => exact localModel index type h
     | constant index => exact globalModel index type h
@@ -111,8 +111,7 @@ def inferModel (fuel : Nat) (specs : List PsMinRegSpec) (data : List Type)
         | some result =>
           have ht : PsMinRegTy.arr domain result = type := by simpa [psMinRegInfer, hv, hb] using h
           cases ht
-          exact fun value => inferModel remaining specs data globals (domain :: locals) body result
-            signatureModel globalModel (consModel data value localModel) hb
+          exact fun value => ih globals (domain :: locals) body result globalModel (consModel data value localModel) hb
     | app fn argument =>
       cases hf : psMinRegInfer remaining specs globals locals fn with
       | none => simp [psMinRegInfer, hf] at h
@@ -136,14 +135,11 @@ def inferModel (fuel : Nat) (specs : List PsMinRegSpec) (data : List Type)
               have harg : domain = argumentType := typeEq_sound remaining _ _ heq
               cases harg
               have output : Denote data result :=
-                (inferModel remaining specs data globals locals fn (PsMinRegTy.arr domain result)
-                  signatureModel globalModel localModel hf)
-                (inferModel remaining specs data globals locals argument domain
-                  signatureModel globalModel localModel ha)
+                (ih globals locals fn (PsMinRegTy.arr domain result) globalModel localModel hf)
+                (ih globals locals argument domain globalModel localModel ha)
               exact ht ▸ output
-termination_by structural fuel
 
-def declarationsModel (termFuel declarationFuel : Nat) (specs : List PsMinRegSpec) (data : List Type)
+noncomputable def declarationsModel (termFuel declarationFuel : Nat) (specs : List PsMinRegSpec) (data : List Type)
     (globals : List PsMinRegTy) (declarations : List PsMinRegDeclaration) (result : List PsMinRegTy)
     (signatureModel : SignatureModel specs data) (initialModel : Model data globals)
     (h : psMinRegCheckDeclarations termFuel declarationFuel specs globals declarations = some result) :
@@ -179,7 +175,7 @@ def declarationsModel (termFuel declarationFuel : Nat) (specs : List PsMinRegSpe
 termination_by declarationFuel
 decreasing_by all_goals simpa only [hFuel] using (Nat.lt_succ_self remaining)
 
-def environmentModel (termFuel declarationFuel : Nat) (specs : List PsMinRegSpec)
+noncomputable def environmentModel (termFuel declarationFuel : Nat) (specs : List PsMinRegSpec)
     (declarations : List PsMinRegDeclaration) (types : List PsMinRegTy)
     (h : psMinRegCheckEnvironment termFuel declarationFuel specs declarations = some types) :
     Model (dataModel specs) types := by

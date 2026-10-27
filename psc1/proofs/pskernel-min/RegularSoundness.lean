@@ -81,10 +81,9 @@ def inferModel (fuel : Nat) (specs : List PsMinRegSpec) (data : List Type)
     (signatureModel : SignatureModel specs data) (globalModel : Model data globals)
     (localModel : Model data locals)
     (h : psMinRegInfer fuel specs globals locals expression = some type) : Denote data type := by
-  cases hFuel : fuel with
-  | zero => simp [hFuel, psMinRegInfer] at h
+  cases fuel with
+  | zero => simp [psMinRegInfer] at h
   | succ remaining =>
-    simp only [hFuel] at h
     cases expression with
     | var index => exact localModel index type h
     | constant index => exact globalModel index type h

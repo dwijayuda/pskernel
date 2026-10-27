@@ -80,10 +80,10 @@ theorem increment_value (digits : List Nat) :
       have hd := Nat.eq_of_beq_eq_true heq
       subst digit
       simp only [psMinDecimalIncrement, heq, Bool.false_eq_true, ite_true, ite_false, digitValue, ih]
-      omega
+      simp [Nat.mul_add, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm]
     | false =>
       simp only [psMinDecimalIncrement, heq, Bool.false_eq_true, ite_true, ite_false, digitValue]
-      omega
+      simp [Nat.succ_eq_add_one, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm]
 
 theorem increment_nonzero (digits : List Nat) (h : NonzeroDigits digits) :
     NonzeroDigits (psMinDecimalIncrement digits) := by
@@ -98,7 +98,8 @@ theorem increment_nonzero (digits : List Nat) (h : NonzeroDigits digits) :
     | false =>
       have ne : digit ≠ 9 := by intro equal; subst digit; contradiction
       simpa only [psMinDecimalIncrement, heq, Bool.false_eq_true, ite_true, ite_false] using
-        NonzeroDigits.top (Nat.succ digit) (by omega) (by omega)
+        NonzeroDigits.top (Nat.succ digit) (Nat.zero_lt_succ digit)
+          (Nat.succ_lt_succ (Nat.lt_of_le_of_ne (Nat.le_of_lt_succ small) ne))
   | low digit rest small tail ih =>
     cases heq : Nat.beq digit 9 with
     | true =>
@@ -107,7 +108,8 @@ theorem increment_nonzero (digits : List Nat) (h : NonzeroDigits digits) :
     | false =>
       have ne : digit ≠ 9 := by intro equal; subst digit; contradiction
       simpa only [psMinDecimalIncrement, heq, Bool.false_eq_true, ite_true, ite_false] using
-        NonzeroDigits.low (Nat.succ digit) rest (by omega) tail
+        NonzeroDigits.low (Nat.succ digit) rest
+          (Nat.succ_lt_succ (Nat.lt_of_le_of_ne (Nat.le_of_lt_succ small) ne)) tail
 
 theorem digits_canonical (value : Nat) : CanonicalDigits (psMinDecimalDigits value) := by
   induction value with
@@ -226,12 +228,21 @@ inductive BinderWire : Nat → List Nat → Prop where
 theorem binder_wire (binder : Nat) (h : Nat.blt binder 4 = true) :
     BinderWire binder (psMinCoreBinderBytes binder) := by
   have bound : binder < 4 := by simpa only [Nat.blt_eq] using h
-  have cases : binder = 0 ∨ binder = 1 ∨ binder = 2 ∨ binder = 3 := by omega
-  rcases cases with h | h | h | h <;> subst binder
-  · exact .explicit
-  · exact .implicit
-  · exact .strictImplicit
-  · exact .instanceImplicit
+  cases binder with
+  | zero => exact .explicit
+  | succ a =>
+    cases a with
+    | zero => exact .implicit
+    | succ b =>
+      cases b with
+      | zero => exact .strictImplicit
+      | succ c =>
+        cases c with
+        | zero => exact .instanceImplicit
+        | succ d =>
+          have lower : 4 ≤ Nat.succ (Nat.succ (Nat.succ (Nat.succ d))) :=
+            Nat.succ_le_succ (Nat.succ_le_succ (Nat.succ_le_succ (Nat.succ_le_succ (Nat.zero_le d))))
+          exact False.elim (Nat.not_lt_of_ge lower bound)
 
 inductive ExprWire : PsMinCoreExpr → List Nat → Prop where
   | bvar (index numberBytes) (hn : NumberWire index numberBytes) :

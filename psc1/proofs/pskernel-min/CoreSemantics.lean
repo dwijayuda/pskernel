@@ -358,7 +358,9 @@ noncomputable def checked_source_history (declarationFuel : Nat) (names : List P
       exact ⟨initial, .done names globals initial⟩
     | cons head tail =>
       cases source with
-      | nil => have impossible : False := by cases image; exact False.elim impossible
+      | nil =>
+        have impossible : False := by cases image
+        exact False.elim impossible
       | cons decl rest =>
         obtain ⟨fresh, ht, hv, next⟩ := environment_head names decl rest head tail image
         cases valid : psMinRegTyValid 128 (psMinRegSpecCount []) head.type with

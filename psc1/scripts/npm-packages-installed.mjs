@@ -47,6 +47,18 @@ try{
  install(defaultProject,[tar(rootBuild)],['--global','--prefix',global]);
  assert.match(run(path.join(global,'bin/psc'),['--help'],defaultProject),/psc check/);
  record('fresh-global-cli');
+
+ fs.writeFileSync(path.join(defaultProject,'Main.lean'),'def answer : Nat := 42\n');
+ const localCli=path.join(defaultProject,'node_modules/.bin/psc');
+ const checked=JSON.parse(run(localCli,['check','Main.lean'],defaultProject));
+ assert.equal(checked.logicalAdmission,'accepted');record('fresh-local-cli-check');
+ const published=JSON.parse(run(path.join(global,'bin/psc'),['build','Main.lean','--target','js',
+  '--publication-protocol','portable-file','--out','compiled'],defaultProject));
+ assert.equal(published.logicalAdmission,'accepted');assert.equal(published.durability,'confirmed');
+ assert.ok(fs.statSync(published.runtimeArtifact).isFile());
+ script(defaultProject,'published.mjs',"import{pathToFileURL}from 'node:url';const m=await import(pathToFileURL(process.argv[2]));if(m.answer!==42n)throw Error('CLI output');",[published.runtimeArtifact]);
+ record('fresh-global-cli-checked-publication');
+
  const cwd=project('all-packages');install(cwd,builds.map(tar));record('all24-offline-install');
  const nodes=path.join(cwd,'node_modules'),rootInstalled=path.join(nodes,'proofscript');
  const exportCode=[
@@ -132,7 +144,8 @@ record('all-advertised-exports-import',{exports:exports.count});
  // New adapters return the existing checked API; no source language is reimplemented.
  for(const target of ['js','wasm-core','python','php']){
   const options={...samples[0],engine:'js',target};
-  const code="import{compile}from 'proofscript';const r=compile(JSON.parse(process.argv[2]));if(r.logicalAdmission!=='accepted')throw Error('unchecked');console.log(JSON.stringify({target:r.target,sourceEncoding:r.sourceEncoding,source:r.source}));";
+  const selectedPackage='@proofscript/backend-'+(target==='wasm-core'?'wasm':target);
+  const code="import{compile}from '"+selectedPackage+"';const r=compile(JSON.parse(process.argv[2]));if(r.logicalAdmission!=='accepted')throw Error('unchecked');console.log(JSON.stringify({target:r.target,sourceEncoding:r.sourceEncoding,source:r.source}));";
   const response=JSON.parse(script(cwd,'targets.mjs',code,[JSON.stringify(options)]));
   assert.equal(response.target,target);assert.ok(response.source.length>0);record('checked-installed-target-'+target);
  }
@@ -171,7 +184,8 @@ record('all-advertised-exports-import',{exports:exports.count});
  for(const target of ['ts','rust','wasm-component']){
   const options=target==='wasm-component'?{sources:[{module:'Entry',kind:'lean',text:'def answer : Bool := true'}],entryModule:'Entry',engine:'js',target}:
    {...samples[0],engine:'js',target};
-  const response=JSON.parse(script(cwd,'more-targets.mjs',"import{compile}from 'proofscript';const r=compile(JSON.parse(process.argv[2]));if(r.logicalAdmission!=='accepted')throw Error('unchecked');console.log(JSON.stringify({target:r.target,source:r.source}));",[JSON.stringify(options)]));
+  const selectedPackage=target==='wasm-component'?'@proofscript/backend-wasm/compiler':'@proofscript/backend-'+target;
+  const response=JSON.parse(script(cwd,'more-targets.mjs',"import{compile}from '"+selectedPackage+"';const r=compile(JSON.parse(process.argv[2]));if(r.logicalAdmission!=='accepted')throw Error('unchecked');console.log(JSON.stringify({target:r.target,source:r.source}));",[JSON.stringify(options)]));
   assert.equal(response.target,target);assert.ok(response.source.length>0);record('checked-installed-target-'+target);
  }
  // Compile actual source snapshots from a separately installed existing package.
@@ -185,6 +199,11 @@ record('all-advertised-exports-import',{exports:exports.count});
  fs.writeFileSync(path.join(cwd,'foundation-output.mjs'),foundationOutput);
  script(cwd,'foundation-observe.mjs',"import{answer}from './foundation-output.mjs';if(answer!=='café')throw Error('source package output');");
  record('existing-source-package-compiles-through-shared-compiler');
+
+
+ const mismatch=call(process.execPath,['--input-type=module','--eval',
+  "import{compile}from '@proofscript/backend-js';try{compile({target:'rust'});throw Error('accepted')}catch(e){if(String(e).includes('accepted'))throw e;if(!String(e).includes('PSC1_PACKAGE_TARGET'))throw e;}"],cwd);
+ assert.equal(mismatch.status,0,mismatch.stderr);record('backend-target-mismatch-refused');
 
  for(const fixture of refusals.slice(0,4)){
   const code="import{compile}from 'proofscript';try{compile(JSON.parse(process.argv[2]));throw Error('unexpected-acceptance')}catch(e){if(String(e).includes('unexpected-acceptance'))throw e;console.log('refused')}";

@@ -102,14 +102,10 @@ theorem actual_projection_iota (fields : List PsMinRegField) (rest : List PsMinR
       (by simp [psMinOpProjectionType, singleSpec, h])
       (construct (singleSpec fields) (dataModel rest) ⟨0, by simp [singleSpec]⟩ args) =
       fieldValue (dataModel rest) (Carrier (singleSpec fields) (dataModel rest)) fields index type h args := by
-  cases hf : psMinOpFieldType fields index with
-  | none => simp [hf] at h
-  | some result =>
-    have ht : result = type := Option.some.inj (hf.symm.trans h)
-    cases ht
-    unfold projectionModel
-    dsimp only [singleSpec, Nat.casesAuxOn]
-    simpa only [hf] using projection_iota fields (dataModel rest) index result hf args
+  unfold projectionModel
+  dsimp only [singleSpec, Nat.casesAuxOn]
+  simp only [h]
+  exact projection_iota fields (dataModel rest) index type h args
 
 #print axioms projectionModel
 #print axioms projection_iota

@@ -44,7 +44,8 @@ theorem extend_decoded_succeeds_with_shared_meaning
       built built.size meaning semantic layout decoded rfl within (by omega) with
     ⟨result, ran, resultLayout, resultDecoded, size⟩
   refine ⟨result, ?_, resultLayout, resultDecoded, size⟩
-  simpa only [psKernelExprV2OrdinaryExtendDecoded, Nat.ble_eq, within, ite_true] using ran
+  simpa only [psKernelExprV2OrdinaryExtendDecoded, Nat.ble_eq, within, ite_true,
+    HSub.hSub, instHSub, Sub.sub, Nat.instSub] using ran
 
 theorem extend_decoded_ok_preserves_shared_meaning
     (arena : PsKernelExprV2PagedArena) (built result : PsKernelExprV2Decoded)

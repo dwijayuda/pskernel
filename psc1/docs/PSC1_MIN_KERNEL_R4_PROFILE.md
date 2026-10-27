@@ -1,8 +1,9 @@
 # PSC1 MinKernel R4 canonical ingress
 
-Status: R4A qualified; R4B regular-data implementation and proof work in progress. This first R4 domain
-is `psc1-min-core-simple/1`. The complete R4 regular-data/recursor/projection
-bridge and runtime self-admission remain open. Production min/dual still refuse
+Status: R4A and R4B qualified. See the [current R4 guideline](PSC1_MIN_KERNEL_R4_GUIDELINE.md)
+and [R4B profile](PSC1_MIN_KERNEL_R4B_PROFILE.md). This first R4 domain
+is `psc1-min-core-simple/1`. The separate R4B regular-data/ambient-recursion/projection bridge and connected
+runtime self-admission are now qualified at e6bcb88e16ee42937d474e48ef5f98f5e12fc57a. Production min/dual still refuse
 with PSC1_MIN_CANONICAL_BRIDGE_UNPROVED; official Lean Wasm remains the default.
 Requested continuation: GPT-6.1 Sol / High. All builds, proofs, compiler execution,
 tests and measurements run exclusively on GitHub Actions Linux.
@@ -58,9 +59,9 @@ left right and Bool.decEq left right. Both operands are compared structurally,
 including nested syntax, binder names, levels and annotations. Wrong propositions,
 reversed operands, arbitrary decisions and altered universes refuse.
 
-Generic Nat/List/Option recursors, user regular groups and projections are not
-translated by this first domain. Their normalized R2/R3 models remain qualified;
-raw recognition and generated-member binding are the next R4 obligation.
+Generic recursors, user groups and projections remain outside this first API.
+The separate R4B byte API qualifies their supported raw recognition, nominal
+binding and source models; it does not widen R4A.
 
 ## Formal components
 
@@ -121,12 +122,14 @@ The standalone proof/native and portability workflows retain their existing
 10/20-minute limits. The source proof, generated execution, finite official
 comparison and runtime resource observations remain separate evidence classes.
 
-## Connected source view and remaining R4 work
+## Connected source view and later R4B qualification
 
 The actual connected explicit runtime comprises RegularProfile, RegularCheck,
 OperationalProfile, OperationalCheck, CoreBytes and CoreIngress: six modules,
-50672 UTF-8 bytes before any further R4 expansion. Same-compile source origins
-identify 173 runtime members and 103 admission records. The seven-module test
+50672 UTF-8 bytes at the initial a900 checkpoint. With explicit sort/projection
+syntax branches needed by R4B, the same six-module scope is 51787 B at e6bcb88. Same-compile source origins
+identify 175 runtime members and 103 admission records at e6bcb88 (173 members
+at the initial a900 checkpoint). The seven-module test
 graph includes the separate 53714-byte vector source.
 
 The runtime syntactic foundation reaches 26 declarations. The interpreted source
@@ -139,10 +142,10 @@ generated bundle still includes shared runtime/harness code. The census is
 diagnostic and does not establish self-admission. The old Check-only 12 records,
 R2's 37 records and R3's 56 records are preserved as different source scopes.
 
-Remaining R4: regular-group byte grammar and declaration-order/freshness validation;
-exact generated constructor/recursor identities and projection ownership; all
-required source recursor motives and instances; full connected runtime admission
-through this route; complete foundation adequacy at that scope. Keep the public
-production modes gated until their declared domain is complete and qualified.
-Full compiler min coverage remains 0/124 modules and 0/37 Practical Core, with no
-qualified min-checked G1/G2/G3. Do not relabel official-checker evidence.
+R4B now qualifies the separate regular-group wire grammar, ordered/fresh nominal
+bindings, actual source models and native/generated connected-runtime admission.
+The complete connected R4B route is ten modules / 206 records, distinct from this
+six-module / 103-record simple-profile census. See the current guideline and dated
+receipt. Production promotion and compiler preservation remain open beyond R4.
+Compiler minimal-checker coverage remains 0/124 modules and 0/37 Practical Core,
+with no min-qualified G1/G2/G3. Official-checker evidence retains its own label.

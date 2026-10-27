@@ -1,23 +1,44 @@
-# R4A qualified; R4B in progress
-
-The exact-byte closed-definition profile and its source-model/wire capstones pass
-Linux at `a90054c94b283c45e67afff91196ac474b92e49b`. All 47 printed reports meet the axiom guard
-(11 axiom-free, 36 propext only). Native/generated: 28 accepts, 36 refusals,
-14 hostile host cases, 11 resource boundaries and six source-sort probes. Every
-positive packet independently passes official native admission. Full repository
-and installed CLI CI also pass at that source commit.
-
-Read the [R4 profile](docs/PSC1_MIN_KERNEL_R4_PROFILE.md) and
-[dated receipt](docs/PSC1_MIN_KERNEL_R4_QUALIFICATION_2026-10-27.json).
-R4B remains active: regular-group bytes, constructor/recursor/projection binding,
-source semantics and actual whole-runtime self-admission. R4 is not complete.
-Production min/dual retain PSC1_MIN_CANONICAL_BRIDGE_UNPROVED; official Wasm remains
-the default. GPT-6.1 Sol / High is the confirmed setting; all project execution
-remains GitHub Actions Linux. Preserve the R2/R3 history below.
-
 # PSC1 AI work state
 
-## R3 operational profile qualified — continue with R4
+## R4 qualified — current checkpoint
+
+Source `e6bcb88e16ee42937d474e48ef5f98f5e12fc57a` passes
+[focused Linux qualification](https://github.com/dwijayuda/pskernel/actions/runs/40519651550).
+All 142 new reports meet the unchanged axiom guard (17 axiom-free, 125 propext only).
+R4B passes 20 accepts / 32 refusals, all positives independently official-checked,
+29 additional boundary probes, and native/actual generated self-admission of the
+complete connected ten-module byte-checker runtime: 307 origin members,
+206 records, 1804358 packet bytes. R4A's 28/36 corpus and 47 reports remain checked.
+
+Read the [current R4 guideline](docs/PSC1_MIN_KERNEL_R4_GUIDELINE.md),
+[R4A profile](docs/PSC1_MIN_KERNEL_R4_PROFILE.md), [R4B profile](docs/PSC1_MIN_KERNEL_R4B_PROFILE.md)
+and [dated receipt](docs/PSC1_MIN_KERNEL_R4_QUALIFICATION_2026-10-27.json).
+The exact-byte capstone now constructs meanings for original source bodies,
+including regular constructors/ambient recursors/projections, with fresh names and
+ordered registry identities. Compiler/generated-code preservation is unproved.
+Production min/dual retain PSC1_MIN_CANONICAL_BRIDGE_UNPROVED; official Wasm is
+the default. Compiler min coverage remains 0/124, Practical Core 0/37 and no
+min-qualified G1/G2/G3. All project execution remains GitHub Actions Linux,
+with the user-confirmed GPT-6.1 Sol / High setting.
+
+Terminal broader regressions pass in
+[main run 40519663163](https://github.com/dwijayuda/pskernel/actions/runs/40519663163):
+full Linux **122252188875**, gate **122269623462**, and every selected dependency
+succeed; the benchmark is deliberately unselected. The tested merge
+`0010ff8fe52d8423f45f693fd7ce6b6256934e6b` has the exact qualified source tree
+`48c15ca4509efd25822045727f6dae78a2e79947`.
+[Installed CLI run 40515328367](https://github.com/dwijayuda/pskernel/actions/runs/40515328367)
+also passes (installed job **122228057662**) at runtime commit
+`68887377c1c6bead518c5aa91832d6b967248859`. A verified comparison shows only
+proofs, qualification workflow and separate host tests changed afterward.
+These broader runs do not qualify compiler min G1/G2/G3.
+
+### Historical R0–R3 checkpoint material
+
+The sections below retain earlier scopes and obligations; use the R4 guideline
+above for the current state.
+
+## Historical R3 operational checkpoint
 
 The normalized R3 operational profile passes standalone Linux
 [40486405765](https://github.com/dwijayuda/pskernel/actions/runs/40486405765) at

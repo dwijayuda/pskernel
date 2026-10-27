@@ -1,0 +1,4367 @@
+{
+  "schema": "psc1-editor-qualification/2",
+  "version": "0.1.2",
+  "date": "2026-10-28",
+  "timezone": "Asia/Jakarta",
+  "repository": "dwijayuda/pskernel",
+  "branch": "perf/psc1-editor-checking-20261028",
+  "draftPullRequest": 200,
+  "baseCommit": "7a910a64743cceadc06b2a4a8a20b486d300b7f1",
+  "qualifiedCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+  "runtimeImplementationCommit": "69090f604127289c78982173c06da8f0e7a57bae",
+  "run": {
+    "id": 40602478756,
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/40602478756",
+    "attempt": 1,
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "development": {
+    "source": "GitHub/cloud-only",
+    "execution": "GitHub Actions only",
+    "localCompilerBuildOrTestExecution": false,
+    "merged": false,
+    "publishedToRegistry": false
+  },
+  "compiler": {
+    "schema": "psc1-editor-compiler-input/1",
+    "repository": "dwijayuda/pskernel",
+    "baselineCommit": "9d0e23c34484e4b1159f3e2428f5452139df530a",
+    "qualificationRun": 40501926898,
+    "artifactId": 12732813811,
+    "zipSha256": "ae67a85d75f46b6bfb512c232fc72b2a441cb195d0d2a9c8393752defb5be78a",
+    "tarball": "proofscript-0.1.0-psc1.12.tgz",
+    "tarballSha256": "9a66dcd0f92aaa60f600674fb91b31bc0d67b211d1e9e004146baa8e96502fcc",
+    "version": "0.1.0-psc1.12",
+    "leanVersion": "4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+  },
+  "authority": {
+    "compilerSourceUnchanged": true,
+    "kernelSourceUnchanged": true,
+    "compilerRebuilt": false,
+    "compilerMocks": false,
+    "publicCandidateApi": "proofscript.compileCandidate",
+    "publicKernelApi": "@proofscript/pskernel-lean-wasm.createKernel(...).checkCanonicalAdmissions",
+    "retainedState": "Editor worker, imported host API, immutable release pins, provider health handle",
+    "freshKernelProcessForEveryDistinctGraph": true,
+    "retainedLeanEnvironment": false,
+    "resourcePins": "Derived from the exact qualified ZIP/tarball; checked before and after provider use",
+    "checkingScope": "Exact logical admission; target execution, publication, and formal backend preservation are not claimed"
+  },
+  "changes": {
+    "defaultTypingDelayMs": 150,
+    "immediateOpenAndManualCheck": true,
+    "currentProjectPriority": true,
+    "targetedManualCacheBypass": true,
+    "maxCacheEntries": 128,
+    "maxCacheBytes": 16777216,
+    "maxWorkerRequests": 128,
+    "workerIdleRetirementMs": 30000,
+    "retireOn": [
+      "cancellation",
+      "timeout",
+      "protocol mismatch",
+      "infrastructure failure",
+      "trust removal",
+      "request limit",
+      "idle limit"
+    ]
+  },
+  "artifacts": [
+    {
+      "id": 12779835076,
+      "name": "psc1-editor-windows-latest-evidence-09bfcea90879e5a7f821bc2a988753d77a18f169",
+      "bytes": 8399,
+      "sha256": "e0503954e9b89b7f22d7159d755e52cebe4a44d2bc64df3e568db5bfc9f1a23e",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40602478756/artifacts/12779835076"
+    },
+    {
+      "id": 12779540837,
+      "name": "psc1-editor-evidence-09bfcea90879e5a7f821bc2a988753d77a18f169",
+      "bytes": 47137,
+      "sha256": "6720daf47c85bbbd4932fd480bd5541ad311950f0354b36d04da6efad1e8f2ba",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40602478756/artifacts/12779540837"
+    },
+    {
+      "id": 12779023197,
+      "name": "proofscript-psc1-editor-09bfcea90879e5a7f821bc2a988753d77a18f169",
+      "bytes": 7511749,
+      "sha256": "08101ffafbb42a598061059cb2ad50cfa32eb2ae4611700897473e2144a9a0bf",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40602478756/artifacts/12779023197"
+    },
+    {
+      "id": 12778819645,
+      "name": "psc1-editor-macos-15-evidence-09bfcea90879e5a7f821bc2a988753d77a18f169",
+      "bytes": 8409,
+      "sha256": "c30d43c99f1788ca7c1141f935d0c48922c09614616152a57177af2d70552ff5",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40602478756/artifacts/12778819645"
+    }
+  ],
+  "build": {
+    "schema": "psc1-editor-build/1",
+    "commit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+    "run": "40602478756",
+    "compiler": {
+      "schema": "psc1-editor-compiler-input/1",
+      "repository": "dwijayuda/pskernel",
+      "baselineCommit": "9d0e23c34484e4b1159f3e2428f5452139df530a",
+      "qualificationRun": 40501926898,
+      "artifactId": 12732813811,
+      "zipSha256": "ae67a85d75f46b6bfb512c232fc72b2a441cb195d0d2a9c8393752defb5be78a",
+      "tarball": "proofscript-0.1.0-psc1.12.tgz",
+      "tarballSha256": "9a66dcd0f92aaa60f600674fb91b31bc0d67b211d1e9e004146baa8e96502fcc",
+      "version": "0.1.0-psc1.12",
+      "leanVersion": "4.35.0",
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+    },
+    "node": "v22.23.3",
+    "platform": "linux",
+    "files": [
+      {
+        "file": "proofscript-lsp-0.1.2.tgz",
+        "bytes": 3931649,
+        "sha256": "84134f6511df32f99fbae492fdbdd2abff8b4e18c10aff33b256c14abd348e13"
+      },
+      {
+        "file": "proofscript-psc1-0.1.2.vsix",
+        "bytes": 3610978,
+        "sha256": "af8e69645c299cc038b6810d19177d2aecfc3e54639e6df5f8299a4119f60811"
+      }
+    ],
+    "published": false,
+    "compilerRebuilt": false
+  },
+  "controlledLinuxComparison": {
+    "baseline": {
+      "schema": "psc1-editor-end-to-end-latency/1",
+      "status": "passed",
+      "label": "baseline-0.1.1",
+      "baseline": true,
+      "testedCommit": "45818c359a9005ea98ac38117d3dab473ded8ce8",
+      "measurementHarnessCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+      "measuredServer": {
+        "name": "PSC1 Language Server",
+        "version": "0.1.1",
+        "protocol": "LSP over stdio",
+        "node": "v22.23.3",
+        "platform": "linux",
+        "compiler": "proofscript@0.1.0-psc1.12",
+        "kernel": "official Lean 4.35.0, linear-memory Wasm",
+        "compilerTarballSha256": "9a66dcd0f92aaa60f600674fb91b31bc0d67b211d1e9e004146baa8e96502fcc",
+        "compilerSourceUnchanged": true,
+        "selfHosting": "external tooling",
+        "settings": {
+          "trusted": true,
+          "enableLean": false,
+          "debounceMs": 50,
+          "timeoutMs": 60000
+        },
+        "metrics": {
+          "checksStarted": 0,
+          "checksCompleted": 0,
+          "superseded": 0,
+          "timeouts": 0,
+          "cacheHits": 0,
+          "unchangedSaves": 0,
+          "lastElapsedMs": null,
+          "cacheEntries": 0,
+          "cacheBytes": 0
+        },
+        "checkingScope": "Logical admission only; editor checks do not publish or validate generated runtime artifacts.",
+        "limitations": [
+          "No proof-state snapshots or term-level type inference.",
+          "No binding-aware references, rename, signature help or quick fixes.",
+          "Definitions navigate compiler-origin declarations and explicit imports; reference binding is not guessed.",
+          "Parse errors may have module-level locations."
+        ]
+      },
+      "node": "v22.23.3",
+      "platform": "linux",
+      "architecture": "x64",
+      "cpu": "AMD EPYC 7763 64-Core Processor",
+      "startupMs": 60.76,
+      "debounceMs": 50,
+      "debounceSelection": "explicit-controlled-override",
+      "compilerMocks": false,
+      "everyDistinctSnapshotIndependentlyChecked": true,
+      "reusedSamplesDisclosed": true,
+      "summary": {
+        "coldOpenMs": 1003.57,
+        "distinctEditMedianMs": 1013.36,
+        "distinctEditMaxMs": 1044.6,
+        "unchangedSaveMs": 0.5,
+        "repeatedSnapshotMs": 51.93
+      },
+      "finalMetrics": {
+        "checksStarted": 4,
+        "checksCompleted": 4,
+        "superseded": 0,
+        "timeouts": 0,
+        "cacheHits": 1,
+        "unchangedSaves": 1,
+        "lastElapsedMs": 938,
+        "cacheEntries": 4,
+        "cacheBytes": 4940
+      },
+      "samples": [
+        {
+          "kind": "cold-open",
+          "version": 1,
+          "sourceValue": 100,
+          "notificationToCheckedMs": 1003.57,
+          "notificationToCheckingMs": 59.73,
+          "compilerReportedMs": 893,
+          "phases": {
+            "candidateMs": 516,
+            "kernelMs": 362,
+            "metadataMs": 1
+          },
+          "cacheHit": false,
+          "reused": false,
+          "reusedKernelHealth": null,
+          "checksStarted": 1,
+          "admissionsSha256": "72400a7659e18a60de41e8d934d6d427b156ac1636051910b291a10cd50b1b4e",
+          "sourceClosureDigest": "d5e93a53082400abbba7dd79e560064511988e15dfcd40453930a69451776460"
+        },
+        {
+          "kind": "distinct-edit",
+          "version": 2,
+          "sourceValue": 101,
+          "notificationToCheckedMs": 1013.36,
+          "notificationToCheckingMs": 53.89,
+          "compilerReportedMs": 907,
+          "phases": {
+            "candidateMs": 514,
+            "kernelMs": 378,
+            "metadataMs": 1
+          },
+          "cacheHit": false,
+          "reused": false,
+          "reusedKernelHealth": null,
+          "checksStarted": 1,
+          "admissionsSha256": "07fab7c7da0b06efd6594c70958853eb8bca70079e8e885e542a455a82b672ef",
+          "sourceClosureDigest": "91a5b979403d6b6cb757ecc8b8afee2040f605ca1e8beac69eabed3899b1ab02"
+        },
+        {
+          "kind": "distinct-edit",
+          "version": 3,
+          "sourceValue": 102,
+          "notificationToCheckedMs": 987.79,
+          "notificationToCheckingMs": 55.1,
+          "compilerReportedMs": 882,
+          "phases": {
+            "candidateMs": 515,
+            "kernelMs": 351,
+            "metadataMs": 1
+          },
+          "cacheHit": false,
+          "reused": false,
+          "reusedKernelHealth": null,
+          "checksStarted": 1,
+          "admissionsSha256": "95f75e30ca746e516a47acedcc6886b02dc098157c00bebf5b7b62bec09ed2b1",
+          "sourceClosureDigest": "3812f68d19f71f505eda1f9d7402452fd3e1ead698a95ad0cacd0c47dcdfd58b"
+        },
+        {
+          "kind": "distinct-edit",
+          "version": 4,
+          "sourceValue": 103,
+          "notificationToCheckedMs": 1044.6,
+          "notificationToCheckingMs": 53.87,
+          "compilerReportedMs": 938,
+          "phases": {
+            "candidateMs": 559,
+            "kernelMs": 363,
+            "metadataMs": 1
+          },
+          "cacheHit": false,
+          "reused": false,
+          "reusedKernelHealth": null,
+          "checksStarted": 1,
+          "admissionsSha256": "df52c10715390706eb7db665b309c15547f8da6f23dc13b5b0a0db23ab590e91",
+          "sourceClosureDigest": "71ea08e4e8be8d6d65b21435d6709c043cdfcdfa822efb76dd4c616f50d4bf21"
+        },
+        {
+          "kind": "unchanged-save",
+          "version": 4,
+          "sourceValue": 103,
+          "notificationToCheckedMs": 0.5,
+          "notificationToCheckingMs": null,
+          "compilerReportedMs": 938,
+          "phases": {
+            "candidateMs": 559,
+            "kernelMs": 363,
+            "metadataMs": 1
+          },
+          "cacheHit": false,
+          "reused": true,
+          "reusedKernelHealth": null,
+          "checksStarted": 0,
+          "admissionsSha256": "df52c10715390706eb7db665b309c15547f8da6f23dc13b5b0a0db23ab590e91",
+          "sourceClosureDigest": "71ea08e4e8be8d6d65b21435d6709c043cdfcdfa822efb76dd4c616f50d4bf21"
+        },
+        {
+          "kind": "repeat-snapshot",
+          "version": 5,
+          "sourceValue": 102,
+          "notificationToCheckedMs": 51.93,
+          "notificationToCheckingMs": null,
+          "compilerReportedMs": 882,
+          "phases": {
+            "candidateMs": 515,
+            "kernelMs": 351,
+            "metadataMs": 1
+          },
+          "cacheHit": true,
+          "reused": false,
+          "reusedKernelHealth": null,
+          "checksStarted": 0,
+          "admissionsSha256": "95f75e30ca746e516a47acedcc6886b02dc098157c00bebf5b7b62bec09ed2b1",
+          "sourceClosureDigest": "3812f68d19f71f505eda1f9d7402452fd3e1ead698a95ad0cacd0c47dcdfd58b"
+        }
+      ],
+      "interpretation": "Wall latency includes scheduling, compiler and independent kernel checking. Three distinct edits are observations, not a statistically stable benchmark. Cached/save samples retain historical compiler phase fields; checksStarted=0 means those phases did not run again."
+    },
+    "updated": {
+      "schema": "psc1-editor-end-to-end-latency/1",
+      "status": "passed",
+      "label": "candidate-0.1.2",
+      "baseline": false,
+      "testedCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+      "measurementHarnessCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+      "measuredServer": {
+        "name": "PSC1 Language Server",
+        "version": "0.1.2",
+        "protocol": "LSP over stdio",
+        "node": "v22.23.3",
+        "platform": "linux",
+        "compiler": "proofscript@0.1.0-psc1.12",
+        "kernel": "official Lean 4.35.0, linear-memory Wasm",
+        "compilerTarballSha256": "9a66dcd0f92aaa60f600674fb91b31bc0d67b211d1e9e004146baa8e96502fcc",
+        "compilerSourceUnchanged": true,
+        "selfHosting": "external tooling",
+        "settings": {
+          "trusted": true,
+          "enableLean": false,
+          "debounceMs": 50,
+          "timeoutMs": 60000
+        },
+        "metrics": {
+          "checksStarted": 0,
+          "checksCompleted": 0,
+          "superseded": 0,
+          "timeouts": 0,
+          "cacheHits": 0,
+          "unchangedSaves": 0,
+          "workerStarts": 0,
+          "workerReuses": 0,
+          "workerRetirements": 0,
+          "workerProtocolFailures": 0,
+          "lastElapsedMs": null,
+          "cacheEntries": 0,
+          "cacheBytes": 0
+        },
+        "worker": {
+          "active": false,
+          "busy": false,
+          "requests": 0,
+          "maxRequests": 128,
+          "idleMs": 30000
+        },
+        "checkingScope": "Logical admission only; editor checks do not publish or validate generated runtime artifacts.",
+        "limitations": [
+          "No proof-state snapshots or term-level type inference.",
+          "No binding-aware references, rename, signature help or quick fixes.",
+          "Definitions navigate compiler-origin declarations and explicit imports; reference binding is not guessed.",
+          "Parse errors may have module-level locations."
+        ]
+      },
+      "node": "v22.23.3",
+      "platform": "linux",
+      "architecture": "x64",
+      "cpu": "AMD EPYC 7763 64-Core Processor",
+      "startupMs": 59.21,
+      "debounceMs": 50,
+      "debounceSelection": "explicit-controlled-override",
+      "compilerMocks": false,
+      "everyDistinctSnapshotIndependentlyChecked": true,
+      "reusedSamplesDisclosed": true,
+      "summary": {
+        "coldOpenMs": 974.23,
+        "distinctEditMedianMs": 749.65,
+        "distinctEditMaxMs": 762.02,
+        "unchangedSaveMs": 0.6,
+        "repeatedSnapshotMs": 52.56
+      },
+      "finalMetrics": {
+        "checksStarted": 4,
+        "checksCompleted": 4,
+        "superseded": 0,
+        "timeouts": 0,
+        "cacheHits": 1,
+        "unchangedSaves": 1,
+        "workerStarts": 1,
+        "workerReuses": 3,
+        "workerRetirements": 0,
+        "workerProtocolFailures": 0,
+        "lastElapsedMs": 697,
+        "cacheEntries": 4,
+        "cacheBytes": 5340
+      },
+      "samples": [
+        {
+          "kind": "cold-open",
+          "version": 1,
+          "sourceValue": 100,
+          "notificationToCheckedMs": 974.23,
+          "notificationToCheckingMs": 9.23,
+          "compilerReportedMs": 907,
+          "phases": {
+            "candidateMs": 511,
+            "kernelMs": 356,
+            "metadataMs": 1,
+            "apiImportMs": 12,
+            "kernelInitMs": 146,
+            "kernelCheckMs": 178,
+            "kernelVerifyMs": 58
+          },
+          "cacheHit": false,
+          "reused": false,
+          "reusedKernelHealth": false,
+          "checksStarted": 1,
+          "admissionsSha256": "72400a7659e18a60de41e8d934d6d427b156ac1636051910b291a10cd50b1b4e",
+          "sourceClosureDigest": "d5e93a53082400abbba7dd79e560064511988e15dfcd40453930a69451776460"
+        },
+        {
+          "kind": "distinct-edit",
+          "version": 2,
+          "sourceValue": 101,
+          "notificationToCheckedMs": 762.02,
+          "notificationToCheckingMs": 52.81,
+          "compilerReportedMs": 708,
+          "phases": {
+            "candidateMs": 505,
+            "kernelMs": 203,
+            "metadataMs": 0,
+            "apiImportMs": 0,
+            "kernelInitMs": 0,
+            "kernelCheckMs": 183,
+            "kernelVerifyMs": 20
+          },
+          "cacheHit": false,
+          "reused": false,
+          "reusedKernelHealth": true,
+          "checksStarted": 1,
+          "admissionsSha256": "07fab7c7da0b06efd6594c70958853eb8bca70079e8e885e542a455a82b672ef",
+          "sourceClosureDigest": "91a5b979403d6b6cb757ecc8b8afee2040f605ca1e8beac69eabed3899b1ab02"
+        },
+        {
+          "kind": "distinct-edit",
+          "version": 3,
+          "sourceValue": 102,
+          "notificationToCheckedMs": 744.46,
+          "notificationToCheckingMs": 52.97,
+          "compilerReportedMs": 691,
+          "phases": {
+            "candidateMs": 494,
+            "kernelMs": 196,
+            "metadataMs": 0,
+            "apiImportMs": 0,
+            "kernelInitMs": 0,
+            "kernelCheckMs": 175,
+            "kernelVerifyMs": 22
+          },
+          "cacheHit": false,
+          "reused": false,
+          "reusedKernelHealth": true,
+          "checksStarted": 1,
+          "admissionsSha256": "95f75e30ca746e516a47acedcc6886b02dc098157c00bebf5b7b62bec09ed2b1",
+          "sourceClosureDigest": "3812f68d19f71f505eda1f9d7402452fd3e1ead698a95ad0cacd0c47dcdfd58b"
+        },
+        {
+          "kind": "distinct-edit",
+          "version": 4,
+          "sourceValue": 103,
+          "notificationToCheckedMs": 749.65,
+          "notificationToCheckingMs": 52.24,
+          "compilerReportedMs": 697,
+          "phases": {
+            "candidateMs": 495,
+            "kernelMs": 201,
+            "metadataMs": 0,
+            "apiImportMs": 0,
+            "kernelInitMs": 0,
+            "kernelCheckMs": 181,
+            "kernelVerifyMs": 20
+          },
+          "cacheHit": false,
+          "reused": false,
+          "reusedKernelHealth": true,
+          "checksStarted": 1,
+          "admissionsSha256": "df52c10715390706eb7db665b309c15547f8da6f23dc13b5b0a0db23ab590e91",
+          "sourceClosureDigest": "71ea08e4e8be8d6d65b21435d6709c043cdfcdfa822efb76dd4c616f50d4bf21"
+        },
+        {
+          "kind": "unchanged-save",
+          "version": 4,
+          "sourceValue": 103,
+          "notificationToCheckedMs": 0.6,
+          "notificationToCheckingMs": null,
+          "compilerReportedMs": 697,
+          "phases": {
+            "candidateMs": 495,
+            "kernelMs": 201,
+            "metadataMs": 0,
+            "apiImportMs": 0,
+            "kernelInitMs": 0,
+            "kernelCheckMs": 181,
+            "kernelVerifyMs": 20
+          },
+          "cacheHit": false,
+          "reused": true,
+          "reusedKernelHealth": true,
+          "checksStarted": 0,
+          "admissionsSha256": "df52c10715390706eb7db665b309c15547f8da6f23dc13b5b0a0db23ab590e91",
+          "sourceClosureDigest": "71ea08e4e8be8d6d65b21435d6709c043cdfcdfa822efb76dd4c616f50d4bf21"
+        },
+        {
+          "kind": "repeat-snapshot",
+          "version": 5,
+          "sourceValue": 102,
+          "notificationToCheckedMs": 52.56,
+          "notificationToCheckingMs": null,
+          "compilerReportedMs": 691,
+          "phases": {
+            "candidateMs": 494,
+            "kernelMs": 196,
+            "metadataMs": 0,
+            "apiImportMs": 0,
+            "kernelInitMs": 0,
+            "kernelCheckMs": 175,
+            "kernelVerifyMs": 22
+          },
+          "cacheHit": true,
+          "reused": false,
+          "reusedKernelHealth": true,
+          "checksStarted": 0,
+          "admissionsSha256": "95f75e30ca746e516a47acedcc6886b02dc098157c00bebf5b7b62bec09ed2b1",
+          "sourceClosureDigest": "3812f68d19f71f505eda1f9d7402452fd3e1ead698a95ad0cacd0c47dcdfd58b"
+        }
+      ],
+      "interpretation": "Wall latency includes scheduling, compiler and independent kernel checking. Three distinct edits are observations, not a statistically stable benchmark. Cached/save samples retain historical compiler phase fields; checksStarted=0 means those phases did not run again."
+    },
+    "normalBaseline": {
+      "schema": "psc1-editor-end-to-end-latency/1",
+      "status": "passed",
+      "label": "default-baseline-0.1.1",
+      "baseline": true,
+      "testedCommit": "45818c359a9005ea98ac38117d3dab473ded8ce8",
+      "measurementHarnessCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+      "measuredServer": {
+        "name": "PSC1 Language Server",
+        "version": "0.1.1",
+        "protocol": "LSP over stdio",
+        "node": "v22.23.3",
+        "platform": "linux",
+        "compiler": "proofscript@0.1.0-psc1.12",
+        "kernel": "official Lean 4.35.0, linear-memory Wasm",
+        "compilerTarballSha256": "9a66dcd0f92aaa60f600674fb91b31bc0d67b211d1e9e004146baa8e96502fcc",
+        "compilerSourceUnchanged": true,
+        "selfHosting": "external tooling",
+        "settings": {
+          "trusted": true,
+          "enableLean": false,
+          "debounceMs": 350,
+          "timeoutMs": 60000
+        },
+        "metrics": {
+          "checksStarted": 0,
+          "checksCompleted": 0,
+          "superseded": 0,
+          "timeouts": 0,
+          "cacheHits": 0,
+          "unchangedSaves": 0,
+          "lastElapsedMs": null,
+          "cacheEntries": 0,
+          "cacheBytes": 0
+        },
+        "checkingScope": "Logical admission only; editor checks do not publish or validate generated runtime artifacts.",
+        "limitations": [
+          "No proof-state snapshots or term-level type inference.",
+          "No binding-aware references, rename, signature help or quick fixes.",
+          "Definitions navigate compiler-origin declarations and explicit imports; reference binding is not guessed.",
+          "Parse errors may have module-level locations."
+        ]
+      },
+      "node": "v22.23.3",
+      "platform": "linux",
+      "architecture": "x64",
+      "cpu": "AMD EPYC 7763 64-Core Processor",
+      "startupMs": 59.58,
+      "debounceMs": 350,
+      "debounceSelection": "server-default",
+      "compilerMocks": false,
+      "everyDistinctSnapshotIndependentlyChecked": true,
+      "reusedSamplesDisclosed": true,
+      "summary": {
+        "coldOpenMs": 1298.26,
+        "distinctEditMedianMs": 1307.22,
+        "distinctEditMaxMs": 1314.87,
+        "unchangedSaveMs": 0.53,
+        "repeatedSnapshotMs": 352.98
+      },
+      "finalMetrics": {
+        "checksStarted": 4,
+        "checksCompleted": 4,
+        "superseded": 0,
+        "timeouts": 0,
+        "cacheHits": 1,
+        "unchangedSaves": 1,
+        "lastElapsedMs": 897,
+        "cacheEntries": 4,
+        "cacheBytes": 4940
+      },
+      "samples": [
+        {
+          "kind": "cold-open",
+          "version": 1,
+          "sourceValue": 100,
+          "notificationToCheckedMs": 1298.26,
+          "notificationToCheckingMs": 360.4,
+          "compilerReportedMs": 885,
+          "phases": {
+            "candidateMs": 516,
+            "kernelMs": 355,
+            "metadataMs": 1
+          },
+          "cacheHit": false,
+          "reused": false,
+          "reusedKernelHealth": null,
+          "checksStarted": 1,
+          "admissionsSha256": "72400a7659e18a60de41e8d934d6d427b156ac1636051910b291a10cd50b1b4e",
+          "sourceClosureDigest": "d5e93a53082400abbba7dd79e560064511988e15dfcd40453930a69451776460"
+        },
+        {
+          "kind": "distinct-edit",
+          "version": 2,
+          "sourceValue": 101,
+          "notificationToCheckedMs": 1295.2,
+          "notificationToCheckingMs": 355.1,
+          "compilerReportedMs": 889,
+          "phases": {
+            "candidateMs": 514,
+            "kernelMs": 360,
+            "metadataMs": 1
+          },
+          "cacheHit": false,
+          "reused": false,
+          "reusedKernelHealth": null,
+          "checksStarted": 1,
+          "admissionsSha256": "07fab7c7da0b06efd6594c70958853eb8bca70079e8e885e542a455a82b672ef",
+          "sourceClosureDigest": "91a5b979403d6b6cb757ecc8b8afee2040f605ca1e8beac69eabed3899b1ab02"
+        },
+        {
+          "kind": "distinct-edit",
+          "version": 3,
+          "sourceValue": 102,
+          "notificationToCheckedMs": 1314.87,
+          "notificationToCheckingMs": 354.86,
+          "compilerReportedMs": 908,
+          "phases": {
+            "candidateMs": 521,
+            "kernelMs": 372,
+            "metadataMs": 1
+          },
+          "cacheHit": false,
+          "reused": false,
+          "reusedKernelHealth": null,
+          "checksStarted": 1,
+          "admissionsSha256": "95f75e30ca746e516a47acedcc6886b02dc098157c00bebf5b7b62bec09ed2b1",
+          "sourceClosureDigest": "3812f68d19f71f505eda1f9d7402452fd3e1ead698a95ad0cacd0c47dcdfd58b"
+        },
+        {
+          "kind": "distinct-edit",
+          "version": 4,
+          "sourceValue": 103,
+          "notificationToCheckedMs": 1307.22,
+          "notificationToCheckingMs": 354.94,
+          "compilerReportedMs": 897,
+          "phases": {
+            "candidateMs": 523,
+            "kernelMs": 358,
+            "metadataMs": 1
+          },
+          "cacheHit": false,
+          "reused": false,
+          "reusedKernelHealth": null,
+          "checksStarted": 1,
+          "admissionsSha256": "df52c10715390706eb7db665b309c15547f8da6f23dc13b5b0a0db23ab590e91",
+          "sourceClosureDigest": "71ea08e4e8be8d6d65b21435d6709c043cdfcdfa822efb76dd4c616f50d4bf21"
+        },
+        {
+          "kind": "unchanged-save",
+          "version": 4,
+          "sourceValue": 103,
+          "notificationToCheckedMs": 0.53,
+          "notificationToCheckingMs": null,
+          "compilerReportedMs": 897,
+          "phases": {
+            "candidateMs": 523,
+            "kernelMs": 358,
+            "metadataMs": 1
+          },
+          "cacheHit": false,
+          "reused": true,
+          "reusedKernelHealth": null,
+          "checksStarted": 0,
+          "admissionsSha256": "df52c10715390706eb7db665b309c15547f8da6f23dc13b5b0a0db23ab590e91",
+          "sourceClosureDigest": "71ea08e4e8be8d6d65b21435d6709c043cdfcdfa822efb76dd4c616f50d4bf21"
+        },
+        {
+          "kind": "repeat-snapshot",
+          "version": 5,
+          "sourceValue": 102,
+          "notificationToCheckedMs": 352.98,
+          "notificationToCheckingMs": null,
+          "compilerReportedMs": 908,
+          "phases": {
+            "candidateMs": 521,
+            "kernelMs": 372,
+            "metadataMs": 1
+          },
+          "cacheHit": true,
+          "reused": false,
+          "reusedKernelHealth": null,
+          "checksStarted": 0,
+          "admissionsSha256": "95f75e30ca746e516a47acedcc6886b02dc098157c00bebf5b7b62bec09ed2b1",
+          "sourceClosureDigest": "3812f68d19f71f505eda1f9d7402452fd3e1ead698a95ad0cacd0c47dcdfd58b"
+        }
+      ],
+      "interpretation": "Wall latency includes scheduling, compiler and independent kernel checking. Three distinct edits are observations, not a statistically stable benchmark. Cached/save samples retain historical compiler phase fields; checksStarted=0 means those phases did not run again."
+    },
+    "normalUpdated": {
+      "schema": "psc1-editor-end-to-end-latency/1",
+      "status": "passed",
+      "label": "default-candidate-0.1.2",
+      "baseline": false,
+      "testedCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+      "measurementHarnessCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+      "measuredServer": {
+        "name": "PSC1 Language Server",
+        "version": "0.1.2",
+        "protocol": "LSP over stdio",
+        "node": "v22.23.3",
+        "platform": "linux",
+        "compiler": "proofscript@0.1.0-psc1.12",
+        "kernel": "official Lean 4.35.0, linear-memory Wasm",
+        "compilerTarballSha256": "9a66dcd0f92aaa60f600674fb91b31bc0d67b211d1e9e004146baa8e96502fcc",
+        "compilerSourceUnchanged": true,
+        "selfHosting": "external tooling",
+        "settings": {
+          "trusted": true,
+          "enableLean": false,
+          "debounceMs": 150,
+          "timeoutMs": 60000
+        },
+        "metrics": {
+          "checksStarted": 0,
+          "checksCompleted": 0,
+          "superseded": 0,
+          "timeouts": 0,
+          "cacheHits": 0,
+          "unchangedSaves": 0,
+          "workerStarts": 0,
+          "workerReuses": 0,
+          "workerRetirements": 0,
+          "workerProtocolFailures": 0,
+          "lastElapsedMs": null,
+          "cacheEntries": 0,
+          "cacheBytes": 0
+        },
+        "worker": {
+          "active": false,
+          "busy": false,
+          "requests": 0,
+          "maxRequests": 128,
+          "idleMs": 30000
+        },
+        "checkingScope": "Logical admission only; editor checks do not publish or validate generated runtime artifacts.",
+        "limitations": [
+          "No proof-state snapshots or term-level type inference.",
+          "No binding-aware references, rename, signature help or quick fixes.",
+          "Definitions navigate compiler-origin declarations and explicit imports; reference binding is not guessed.",
+          "Parse errors may have module-level locations."
+        ]
+      },
+      "node": "v22.23.3",
+      "platform": "linux",
+      "architecture": "x64",
+      "cpu": "AMD EPYC 7763 64-Core Processor",
+      "startupMs": 61.68,
+      "debounceMs": 150,
+      "debounceSelection": "server-default",
+      "compilerMocks": false,
+      "everyDistinctSnapshotIndependentlyChecked": true,
+      "reusedSamplesDisclosed": true,
+      "summary": {
+        "coldOpenMs": 969.46,
+        "distinctEditMedianMs": 845.3,
+        "distinctEditMaxMs": 859.39,
+        "unchangedSaveMs": 0.56,
+        "repeatedSnapshotMs": 152.42
+      },
+      "finalMetrics": {
+        "checksStarted": 4,
+        "checksCompleted": 4,
+        "superseded": 0,
+        "timeouts": 0,
+        "cacheHits": 1,
+        "unchangedSaves": 1,
+        "workerStarts": 1,
+        "workerReuses": 3,
+        "workerRetirements": 0,
+        "workerProtocolFailures": 0,
+        "lastElapsedMs": 692,
+        "cacheEntries": 4,
+        "cacheBytes": 5340
+      },
+      "samples": [
+        {
+          "kind": "cold-open",
+          "version": 1,
+          "sourceValue": 100,
+          "notificationToCheckedMs": 969.46,
+          "notificationToCheckingMs": 9.38,
+          "compilerReportedMs": 901,
+          "phases": {
+            "candidateMs": 511,
+            "kernelMs": 349,
+            "metadataMs": 1,
+            "apiImportMs": 12,
+            "kernelInitMs": 136,
+            "kernelCheckMs": 181,
+            "kernelVerifyMs": 59
+          },
+          "cacheHit": false,
+          "reused": false,
+          "reusedKernelHealth": false,
+          "checksStarted": 1,
+          "admissionsSha256": "72400a7659e18a60de41e8d934d6d427b156ac1636051910b291a10cd50b1b4e",
+          "sourceClosureDigest": "d5e93a53082400abbba7dd79e560064511988e15dfcd40453930a69451776460"
+        },
+        {
+          "kind": "distinct-edit",
+          "version": 2,
+          "sourceValue": 101,
+          "notificationToCheckedMs": 859.39,
+          "notificationToCheckingMs": 153.01,
+          "compilerReportedMs": 706,
+          "phases": {
+            "candidateMs": 498,
+            "kernelMs": 208,
+            "metadataMs": 0,
+            "apiImportMs": 0,
+            "kernelInitMs": 0,
+            "kernelCheckMs": 189,
+            "kernelVerifyMs": 18
+          },
+          "cacheHit": false,
+          "reused": false,
+          "reusedKernelHealth": true,
+          "checksStarted": 1,
+          "admissionsSha256": "07fab7c7da0b06efd6594c70958853eb8bca70079e8e885e542a455a82b672ef",
+          "sourceClosureDigest": "91a5b979403d6b6cb757ecc8b8afee2040f605ca1e8beac69eabed3899b1ab02"
+        },
+        {
+          "kind": "distinct-edit",
+          "version": 3,
+          "sourceValue": 102,
+          "notificationToCheckedMs": 840.32,
+          "notificationToCheckingMs": 152.7,
+          "compilerReportedMs": 687,
+          "phases": {
+            "candidateMs": 488,
+            "kernelMs": 199,
+            "metadataMs": 0,
+            "apiImportMs": 0,
+            "kernelInitMs": 0,
+            "kernelCheckMs": 179,
+            "kernelVerifyMs": 19
+          },
+          "cacheHit": false,
+          "reused": false,
+          "reusedKernelHealth": true,
+          "checksStarted": 1,
+          "admissionsSha256": "95f75e30ca746e516a47acedcc6886b02dc098157c00bebf5b7b62bec09ed2b1",
+          "sourceClosureDigest": "3812f68d19f71f505eda1f9d7402452fd3e1ead698a95ad0cacd0c47dcdfd58b"
+        },
+        {
+          "kind": "distinct-edit",
+          "version": 4,
+          "sourceValue": 103,
+          "notificationToCheckedMs": 845.3,
+          "notificationToCheckingMs": 152.27,
+          "compilerReportedMs": 692,
+          "phases": {
+            "candidateMs": 495,
+            "kernelMs": 197,
+            "metadataMs": 0,
+            "apiImportMs": 0,
+            "kernelInitMs": 0,
+            "kernelCheckMs": 178,
+            "kernelVerifyMs": 20
+          },
+          "cacheHit": false,
+          "reused": false,
+          "reusedKernelHealth": true,
+          "checksStarted": 1,
+          "admissionsSha256": "df52c10715390706eb7db665b309c15547f8da6f23dc13b5b0a0db23ab590e91",
+          "sourceClosureDigest": "71ea08e4e8be8d6d65b21435d6709c043cdfcdfa822efb76dd4c616f50d4bf21"
+        },
+        {
+          "kind": "unchanged-save",
+          "version": 4,
+          "sourceValue": 103,
+          "notificationToCheckedMs": 0.56,
+          "notificationToCheckingMs": null,
+          "compilerReportedMs": 692,
+          "phases": {
+            "candidateMs": 495,
+            "kernelMs": 197,
+            "metadataMs": 0,
+            "apiImportMs": 0,
+            "kernelInitMs": 0,
+            "kernelCheckMs": 178,
+            "kernelVerifyMs": 20
+          },
+          "cacheHit": false,
+          "reused": true,
+          "reusedKernelHealth": true,
+          "checksStarted": 0,
+          "admissionsSha256": "df52c10715390706eb7db665b309c15547f8da6f23dc13b5b0a0db23ab590e91",
+          "sourceClosureDigest": "71ea08e4e8be8d6d65b21435d6709c043cdfcdfa822efb76dd4c616f50d4bf21"
+        },
+        {
+          "kind": "repeat-snapshot",
+          "version": 5,
+          "sourceValue": 102,
+          "notificationToCheckedMs": 152.42,
+          "notificationToCheckingMs": null,
+          "compilerReportedMs": 687,
+          "phases": {
+            "candidateMs": 488,
+            "kernelMs": 199,
+            "metadataMs": 0,
+            "apiImportMs": 0,
+            "kernelInitMs": 0,
+            "kernelCheckMs": 179,
+            "kernelVerifyMs": 19
+          },
+          "cacheHit": true,
+          "reused": false,
+          "reusedKernelHealth": true,
+          "checksStarted": 0,
+          "admissionsSha256": "95f75e30ca746e516a47acedcc6886b02dc098157c00bebf5b7b62bec09ed2b1",
+          "sourceClosureDigest": "3812f68d19f71f505eda1f9d7402452fd3e1ead698a95ad0cacd0c47dcdfd58b"
+        }
+      ],
+      "interpretation": "Wall latency includes scheduling, compiler and independent kernel checking. Three distinct edits are observations, not a statistically stable benchmark. Cached/save samples retain historical compiler phase fields; checksStarted=0 means those phases did not run again."
+    },
+    "speedupReceipt": {
+      "schema": "psc1-editor-checking-speedup/1",
+      "status": "passed",
+      "commit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+      "baseline": {
+        "coldOpenMs": 1003.57,
+        "distinctEditMedianMs": 1013.36,
+        "distinctEditMaxMs": 1044.6,
+        "unchangedSaveMs": 0.5,
+        "repeatedSnapshotMs": 51.93
+      },
+      "updated": {
+        "coldOpenMs": 974.23,
+        "distinctEditMedianMs": 749.65,
+        "distinctEditMaxMs": 762.02,
+        "unchangedSaveMs": 0.6,
+        "repeatedSnapshotMs": 52.56
+      },
+      "debounceMs": 50,
+      "distinctEditSpeedup": 1.351777496164877,
+      "identicalAdmissionAndSourceHashes": true,
+      "compilerMocks": false,
+      "normalDefaults": {
+        "baseline": {
+          "coldOpenMs": 1298.26,
+          "distinctEditMedianMs": 1307.22,
+          "distinctEditMaxMs": 1314.87,
+          "unchangedSaveMs": 0.53,
+          "repeatedSnapshotMs": 352.98
+        },
+        "updated": {
+          "coldOpenMs": 969.46,
+          "distinctEditMedianMs": 845.3,
+          "distinctEditMaxMs": 859.39,
+          "unchangedSaveMs": 0.56,
+          "repeatedSnapshotMs": 152.42
+        }
+      }
+    },
+    "statistics": {
+      "equalDelayReductionPercent": 26.023328333464914,
+      "defaultReductionPercent": 35.3360566698796,
+      "defaultColdReductionPercent": 25.326205844746042,
+      "rawMedianMs": {
+        "compilerProcessMs": 465.43,
+        "wasmHealthProcessMs": 126.74,
+        "wasmCheckProcessMs": 172.32,
+        "candidateHostResidualMs": 50.27,
+        "kernelHostResidualMs": 48.03
+      }
+    },
+    "interpretation": "Three distinct small-source edits per end-to-end run, measured on the same runner. Equal-delay comparisons separate implementation gains from default scheduling. These are observations, not broad performance guarantees."
+  },
+  "stageProfiles": {
+    "baseline": {
+      "schema": "psc1-checking-startup-profile/1",
+      "status": "passed",
+      "label": "baseline-0.1.1",
+      "baseline": true,
+      "measurementHarnessCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+      "serverVersion": "0.1.1",
+      "compiler": "proofscript@0.1.0-psc1.12",
+      "compilerAndKernelSourceUnchanged": true,
+      "node": "v22.23.3",
+      "platform": "linux",
+      "architecture": "x64",
+      "cpu": "AMD EPYC 7763 64-Core Processor",
+      "freshWorkers": [
+        {
+          "sourceValue": 201,
+          "wallMs": 958.47,
+          "workerElapsedMs": 908,
+          "phases": {
+            "candidateMs": 544,
+            "kernelMs": 347,
+            "metadataMs": 1
+          },
+          "reusedKernelHealth": null,
+          "sourceClosureDigest": "ca293a3f7564c87f0f11f22fb1597591b8f459987ab43772aff1a5d540f711ad",
+          "admissionsSha256": "62fa17ea11b37c1e80a07b2604c37036bd9874b668a934b64eab130171718544"
+        },
+        {
+          "sourceValue": 202,
+          "wallMs": 968.94,
+          "workerElapsedMs": 919,
+          "phases": {
+            "candidateMs": 539,
+            "kernelMs": 365,
+            "metadataMs": 1
+          },
+          "reusedKernelHealth": null,
+          "sourceClosureDigest": "f3f4bcd58387c3b8e5b5c656418658597aaed3d576de1c0b27ecd5299a4601d0",
+          "admissionsSha256": "d624e6e63b5e07719eeae694b156dbd4db68c62fc39b5c28d01f8b455fe6bded"
+        },
+        {
+          "sourceValue": 203,
+          "wallMs": 960.43,
+          "workerElapsedMs": 911,
+          "phases": {
+            "candidateMs": 535,
+            "kernelMs": 361,
+            "metadataMs": 1
+          },
+          "reusedKernelHealth": null,
+          "sourceClosureDigest": "c60ad857ce506f54562b6eda0b43acee2351181d5141883c58e5470a29c11b2a",
+          "admissionsSha256": "fd5341a0fdf00f02e760bc618c8dd7809381317818c88a9938b0cea3c8f1a9f5"
+        },
+        {
+          "sourceValue": 204,
+          "wallMs": 958.11,
+          "workerElapsedMs": 906,
+          "phases": {
+            "candidateMs": 535,
+            "kernelMs": 356,
+            "metadataMs": 1
+          },
+          "reusedKernelHealth": null,
+          "sourceClosureDigest": "45d9bb0d2dddeefdaa47dd09a79b93121df9bd86f40a0607dbd073189d95ef05",
+          "admissionsSha256": "e47c8a964988706b7fdcb7752ba49201184a0b9a4a707a15a7ca8eee4822bada"
+        },
+        {
+          "sourceValue": 205,
+          "wallMs": 973.2,
+          "workerElapsedMs": 922,
+          "phases": {
+            "candidateMs": 538,
+            "kernelMs": 368,
+            "metadataMs": 1
+          },
+          "reusedKernelHealth": null,
+          "sourceClosureDigest": "5dd15b5cefc1238f800c871d346a0b2086962ebff5da3240a1c206c0ade387c3",
+          "admissionsSha256": "535b765f43c7c51fef756cdb2e41fa81e92c361029b19e81beac6bb0be59d570"
+        }
+      ],
+      "retainedWorker": null,
+      "publicApis": {
+        "apiImportMs": 10.1,
+        "samples": [
+          {
+            "sourceValue": 201,
+            "wallMs": 889.26,
+            "candidateMs": 537.99,
+            "kernelMs": 351.06,
+            "compilerProcessMs": 469.59,
+            "wasmHealthProcessMs": 123.93,
+            "wasmCheckProcessMs": 172.23,
+            "candidateHostResidualMs": 68.4,
+            "kernelHostResidualMs": 54.9,
+            "outerProcessCpuMs": 153.95,
+            "sourceClosureDigest": "ca293a3f7564c87f0f11f22fb1597591b8f459987ab43772aff1a5d540f711ad",
+            "admissionsSha256": "62fa17ea11b37c1e80a07b2604c37036bd9874b668a934b64eab130171718544",
+            "subprocesses": [
+              {
+                "phase": "candidate",
+                "kind": "compiler-process",
+                "wallMs": 469.59,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              },
+              {
+                "phase": "kernel",
+                "kind": "wasm-health-process",
+                "wallMs": 123.93,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              },
+              {
+                "phase": "kernel",
+                "kind": "wasm-check-process",
+                "wallMs": 172.23,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              }
+            ]
+          },
+          {
+            "sourceValue": 202,
+            "wallMs": 873.12,
+            "candidateMs": 516.03,
+            "kernelMs": 356.99,
+            "compilerProcessMs": 465.43,
+            "wasmHealthProcessMs": 126.74,
+            "wasmCheckProcessMs": 175.02,
+            "candidateHostResidualMs": 50.6,
+            "kernelHostResidualMs": 55.23,
+            "outerProcessCpuMs": 139.3,
+            "sourceClosureDigest": "f3f4bcd58387c3b8e5b5c656418658597aaed3d576de1c0b27ecd5299a4601d0",
+            "admissionsSha256": "d624e6e63b5e07719eeae694b156dbd4db68c62fc39b5c28d01f8b455fe6bded",
+            "subprocesses": [
+              {
+                "phase": "candidate",
+                "kind": "compiler-process",
+                "wallMs": 465.43,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              },
+              {
+                "phase": "kernel",
+                "kind": "wasm-health-process",
+                "wallMs": 126.74,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              },
+              {
+                "phase": "kernel",
+                "kind": "wasm-check-process",
+                "wallMs": 175.02,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              }
+            ]
+          },
+          {
+            "sourceValue": 203,
+            "wallMs": 856.25,
+            "candidateMs": 505.68,
+            "kernelMs": 350.46,
+            "compilerProcessMs": 455.41,
+            "wasmHealthProcessMs": 133.1,
+            "wasmCheckProcessMs": 172.32,
+            "candidateHostResidualMs": 50.27,
+            "kernelHostResidualMs": 45.04,
+            "outerProcessCpuMs": 102.3,
+            "sourceClosureDigest": "c60ad857ce506f54562b6eda0b43acee2351181d5141883c58e5470a29c11b2a",
+            "admissionsSha256": "fd5341a0fdf00f02e760bc618c8dd7809381317818c88a9938b0cea3c8f1a9f5",
+            "subprocesses": [
+              {
+                "phase": "candidate",
+                "kind": "compiler-process",
+                "wallMs": 455.41,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              },
+              {
+                "phase": "kernel",
+                "kind": "wasm-health-process",
+                "wallMs": 133.1,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              },
+              {
+                "phase": "kernel",
+                "kind": "wasm-check-process",
+                "wallMs": 172.32,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              }
+            ]
+          },
+          {
+            "sourceValue": 204,
+            "wallMs": 878.73,
+            "candidateMs": 516.58,
+            "kernelMs": 362.02,
+            "compilerProcessMs": 466.63,
+            "wasmHealthProcessMs": 137.09,
+            "wasmCheckProcessMs": 176.9,
+            "candidateHostResidualMs": 49.95,
+            "kernelHostResidualMs": 48.03,
+            "outerProcessCpuMs": 139.3,
+            "sourceClosureDigest": "45d9bb0d2dddeefdaa47dd09a79b93121df9bd86f40a0607dbd073189d95ef05",
+            "admissionsSha256": "e47c8a964988706b7fdcb7752ba49201184a0b9a4a707a15a7ca8eee4822bada",
+            "subprocesses": [
+              {
+                "phase": "candidate",
+                "kind": "compiler-process",
+                "wallMs": 466.63,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              },
+              {
+                "phase": "kernel",
+                "kind": "wasm-health-process",
+                "wallMs": 137.09,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              },
+              {
+                "phase": "kernel",
+                "kind": "wasm-check-process",
+                "wallMs": 176.9,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              }
+            ]
+          },
+          {
+            "sourceValue": 205,
+            "wallMs": 847.64,
+            "candidateMs": 508.63,
+            "kernelMs": 338.91,
+            "compilerProcessMs": 459.61,
+            "wasmHealthProcessMs": 126.51,
+            "wasmCheckProcessMs": 169.45,
+            "candidateHostResidualMs": 49.02,
+            "kernelHostResidualMs": 42.95,
+            "outerProcessCpuMs": 103.41,
+            "sourceClosureDigest": "5dd15b5cefc1238f800c871d346a0b2086962ebff5da3240a1c206c0ade387c3",
+            "admissionsSha256": "535b765f43c7c51fef756cdb2e41fa81e92c361029b19e81beac6bb0be59d570",
+            "subprocesses": [
+              {
+                "phase": "candidate",
+                "kind": "compiler-process",
+                "wallMs": 459.61,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              },
+              {
+                "phase": "kernel",
+                "kind": "wasm-health-process",
+                "wallMs": 126.51,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              },
+              {
+                "phase": "kernel",
+                "kind": "wasm-check-process",
+                "wallMs": 169.45,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              }
+            ]
+          }
+        ],
+        "outerProcessMaxRssKiB": 132440,
+        "observationOnly": true,
+        "realSubprocessCallsPreserved": true,
+        "interpretation": "One outer process retains imported API modules. Each candidate and each Wasm health/check command still executes its real subprocess. Command times include process and Wasm startup. Host residual includes pin verification, hashing, serialization, and other host work; it is not a pure hashing measurement."
+      },
+      "endToEnd": {
+        "schema": "psc1-editor-end-to-end-latency/1",
+        "status": "passed",
+        "label": "baseline-0.1.1",
+        "baseline": true,
+        "testedCommit": "45818c359a9005ea98ac38117d3dab473ded8ce8",
+        "measurementHarnessCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+        "measuredServer": {
+          "name": "PSC1 Language Server",
+          "version": "0.1.1",
+          "protocol": "LSP over stdio",
+          "node": "v22.23.3",
+          "platform": "linux",
+          "compiler": "proofscript@0.1.0-psc1.12",
+          "kernel": "official Lean 4.35.0, linear-memory Wasm",
+          "compilerTarballSha256": "9a66dcd0f92aaa60f600674fb91b31bc0d67b211d1e9e004146baa8e96502fcc",
+          "compilerSourceUnchanged": true,
+          "selfHosting": "external tooling",
+          "settings": {
+            "trusted": true,
+            "enableLean": false,
+            "debounceMs": 50,
+            "timeoutMs": 60000
+          },
+          "metrics": {
+            "checksStarted": 0,
+            "checksCompleted": 0,
+            "superseded": 0,
+            "timeouts": 0,
+            "cacheHits": 0,
+            "unchangedSaves": 0,
+            "lastElapsedMs": null,
+            "cacheEntries": 0,
+            "cacheBytes": 0
+          },
+          "checkingScope": "Logical admission only; editor checks do not publish or validate generated runtime artifacts.",
+          "limitations": [
+            "No proof-state snapshots or term-level type inference.",
+            "No binding-aware references, rename, signature help or quick fixes.",
+            "Definitions navigate compiler-origin declarations and explicit imports; reference binding is not guessed.",
+            "Parse errors may have module-level locations."
+          ]
+        },
+        "node": "v22.23.3",
+        "platform": "linux",
+        "architecture": "x64",
+        "cpu": "AMD EPYC 7763 64-Core Processor",
+        "startupMs": 60.76,
+        "debounceMs": 50,
+        "debounceSelection": "explicit-controlled-override",
+        "compilerMocks": false,
+        "everyDistinctSnapshotIndependentlyChecked": true,
+        "reusedSamplesDisclosed": true,
+        "summary": {
+          "coldOpenMs": 1003.57,
+          "distinctEditMedianMs": 1013.36,
+          "distinctEditMaxMs": 1044.6,
+          "unchangedSaveMs": 0.5,
+          "repeatedSnapshotMs": 51.93
+        },
+        "finalMetrics": {
+          "checksStarted": 4,
+          "checksCompleted": 4,
+          "superseded": 0,
+          "timeouts": 0,
+          "cacheHits": 1,
+          "unchangedSaves": 1,
+          "lastElapsedMs": 938,
+          "cacheEntries": 4,
+          "cacheBytes": 4940
+        },
+        "samples": [
+          {
+            "kind": "cold-open",
+            "version": 1,
+            "sourceValue": 100,
+            "notificationToCheckedMs": 1003.57,
+            "notificationToCheckingMs": 59.73,
+            "compilerReportedMs": 893,
+            "phases": {
+              "candidateMs": 516,
+              "kernelMs": 362,
+              "metadataMs": 1
+            },
+            "cacheHit": false,
+            "reused": false,
+            "reusedKernelHealth": null,
+            "checksStarted": 1,
+            "admissionsSha256": "72400a7659e18a60de41e8d934d6d427b156ac1636051910b291a10cd50b1b4e",
+            "sourceClosureDigest": "d5e93a53082400abbba7dd79e560064511988e15dfcd40453930a69451776460"
+          },
+          {
+            "kind": "distinct-edit",
+            "version": 2,
+            "sourceValue": 101,
+            "notificationToCheckedMs": 1013.36,
+            "notificationToCheckingMs": 53.89,
+            "compilerReportedMs": 907,
+            "phases": {
+              "candidateMs": 514,
+              "kernelMs": 378,
+              "metadataMs": 1
+            },
+            "cacheHit": false,
+            "reused": false,
+            "reusedKernelHealth": null,
+            "checksStarted": 1,
+            "admissionsSha256": "07fab7c7da0b06efd6594c70958853eb8bca70079e8e885e542a455a82b672ef",
+            "sourceClosureDigest": "91a5b979403d6b6cb757ecc8b8afee2040f605ca1e8beac69eabed3899b1ab02"
+          },
+          {
+            "kind": "distinct-edit",
+            "version": 3,
+            "sourceValue": 102,
+            "notificationToCheckedMs": 987.79,
+            "notificationToCheckingMs": 55.1,
+            "compilerReportedMs": 882,
+            "phases": {
+              "candidateMs": 515,
+              "kernelMs": 351,
+              "metadataMs": 1
+            },
+            "cacheHit": false,
+            "reused": false,
+            "reusedKernelHealth": null,
+            "checksStarted": 1,
+            "admissionsSha256": "95f75e30ca746e516a47acedcc6886b02dc098157c00bebf5b7b62bec09ed2b1",
+            "sourceClosureDigest": "3812f68d19f71f505eda1f9d7402452fd3e1ead698a95ad0cacd0c47dcdfd58b"
+          },
+          {
+            "kind": "distinct-edit",
+            "version": 4,
+            "sourceValue": 103,
+            "notificationToCheckedMs": 1044.6,
+            "notificationToCheckingMs": 53.87,
+            "compilerReportedMs": 938,
+            "phases": {
+              "candidateMs": 559,
+              "kernelMs": 363,
+              "metadataMs": 1
+            },
+            "cacheHit": false,
+            "reused": false,
+            "reusedKernelHealth": null,
+            "checksStarted": 1,
+            "admissionsSha256": "df52c10715390706eb7db665b309c15547f8da6f23dc13b5b0a0db23ab590e91",
+            "sourceClosureDigest": "71ea08e4e8be8d6d65b21435d6709c043cdfcdfa822efb76dd4c616f50d4bf21"
+          },
+          {
+            "kind": "unchanged-save",
+            "version": 4,
+            "sourceValue": 103,
+            "notificationToCheckedMs": 0.5,
+            "notificationToCheckingMs": null,
+            "compilerReportedMs": 938,
+            "phases": {
+              "candidateMs": 559,
+              "kernelMs": 363,
+              "metadataMs": 1
+            },
+            "cacheHit": false,
+            "reused": true,
+            "reusedKernelHealth": null,
+            "checksStarted": 0,
+            "admissionsSha256": "df52c10715390706eb7db665b309c15547f8da6f23dc13b5b0a0db23ab590e91",
+            "sourceClosureDigest": "71ea08e4e8be8d6d65b21435d6709c043cdfcdfa822efb76dd4c616f50d4bf21"
+          },
+          {
+            "kind": "repeat-snapshot",
+            "version": 5,
+            "sourceValue": 102,
+            "notificationToCheckedMs": 51.93,
+            "notificationToCheckingMs": null,
+            "compilerReportedMs": 882,
+            "phases": {
+              "candidateMs": 515,
+              "kernelMs": 351,
+              "metadataMs": 1
+            },
+            "cacheHit": true,
+            "reused": false,
+            "reusedKernelHealth": null,
+            "checksStarted": 0,
+            "admissionsSha256": "95f75e30ca746e516a47acedcc6886b02dc098157c00bebf5b7b62bec09ed2b1",
+            "sourceClosureDigest": "3812f68d19f71f505eda1f9d7402452fd3e1ead698a95ad0cacd0c47dcdfd58b"
+          }
+        ],
+        "interpretation": "Wall latency includes scheduling, compiler and independent kernel checking. Three distinct edits are observations, not a statistically stable benchmark. Cached/save samples retain historical compiler phase fields; checksStarted=0 means those phases did not run again."
+      },
+      "identicalSourceAndAdmissionHashesAcrossModes": true,
+      "interpretation": "Five distinct checked graphs per mode. Fresh-worker timings include worker launch; retained-worker samples 2–5 reuse only the host process and qualified kernel health. Every graph still receives genuine compiler analysis and kernel admission. API tracing is exploratory and is not the uninstrumented end-to-end performance gate."
+    },
+    "updated": {
+      "schema": "psc1-checking-startup-profile/1",
+      "status": "passed",
+      "label": "candidate-0.1.2",
+      "baseline": false,
+      "measurementHarnessCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+      "serverVersion": "0.1.2",
+      "compiler": "proofscript@0.1.0-psc1.12",
+      "compilerAndKernelSourceUnchanged": true,
+      "node": "v22.23.3",
+      "platform": "linux",
+      "architecture": "x64",
+      "cpu": "AMD EPYC 7763 64-Core Processor",
+      "freshWorkers": [
+        {
+          "sourceValue": 201,
+          "wallMs": 960.14,
+          "workerElapsedMs": 904,
+          "phases": {
+            "candidateMs": 523,
+            "kernelMs": 341,
+            "metadataMs": 1,
+            "apiImportMs": 13,
+            "kernelInitMs": 130,
+            "kernelCheckMs": 180,
+            "kernelVerifyMs": 59
+          },
+          "reusedKernelHealth": false,
+          "sourceClosureDigest": "ca293a3f7564c87f0f11f22fb1597591b8f459987ab43772aff1a5d540f711ad",
+          "admissionsSha256": "62fa17ea11b37c1e80a07b2604c37036bd9874b668a934b64eab130171718544"
+        },
+        {
+          "sourceValue": 202,
+          "wallMs": 966.59,
+          "workerElapsedMs": 909,
+          "phases": {
+            "candidateMs": 532,
+            "kernelMs": 338,
+            "metadataMs": 1,
+            "apiImportMs": 12,
+            "kernelInitMs": 135,
+            "kernelCheckMs": 172,
+            "kernelVerifyMs": 57
+          },
+          "reusedKernelHealth": false,
+          "sourceClosureDigest": "f3f4bcd58387c3b8e5b5c656418658597aaed3d576de1c0b27ecd5299a4601d0",
+          "admissionsSha256": "d624e6e63b5e07719eeae694b156dbd4db68c62fc39b5c28d01f8b455fe6bded"
+        },
+        {
+          "sourceValue": 203,
+          "wallMs": 964.39,
+          "workerElapsedMs": 906,
+          "phases": {
+            "candidateMs": 527,
+            "kernelMs": 339,
+            "metadataMs": 1,
+            "apiImportMs": 12,
+            "kernelInitMs": 134,
+            "kernelCheckMs": 175,
+            "kernelVerifyMs": 57
+          },
+          "reusedKernelHealth": false,
+          "sourceClosureDigest": "c60ad857ce506f54562b6eda0b43acee2351181d5141883c58e5470a29c11b2a",
+          "admissionsSha256": "fd5341a0fdf00f02e760bc618c8dd7809381317818c88a9938b0cea3c8f1a9f5"
+        },
+        {
+          "sourceValue": 204,
+          "wallMs": 970.59,
+          "workerElapsedMs": 913,
+          "phases": {
+            "candidateMs": 521,
+            "kernelMs": 354,
+            "metadataMs": 1,
+            "apiImportMs": 12,
+            "kernelInitMs": 140,
+            "kernelCheckMs": 181,
+            "kernelVerifyMs": 58
+          },
+          "reusedKernelHealth": false,
+          "sourceClosureDigest": "45d9bb0d2dddeefdaa47dd09a79b93121df9bd86f40a0607dbd073189d95ef05",
+          "admissionsSha256": "e47c8a964988706b7fdcb7752ba49201184a0b9a4a707a15a7ca8eee4822bada"
+        },
+        {
+          "sourceValue": 205,
+          "wallMs": 960.63,
+          "workerElapsedMs": 903,
+          "phases": {
+            "candidateMs": 523,
+            "kernelMs": 341,
+            "metadataMs": 1,
+            "apiImportMs": 12,
+            "kernelInitMs": 132,
+            "kernelCheckMs": 176,
+            "kernelVerifyMs": 57
+          },
+          "reusedKernelHealth": false,
+          "sourceClosureDigest": "5dd15b5cefc1238f800c871d346a0b2086962ebff5da3240a1c206c0ade387c3",
+          "admissionsSha256": "535b765f43c7c51fef756cdb2e41fa81e92c361029b19e81beac6bb0be59d570"
+        }
+      ],
+      "retainedWorker": {
+        "samples": [
+          {
+            "sourceValue": 201,
+            "wallMs": 971.79,
+            "workerElapsedMs": 914,
+            "phases": {
+              "candidateMs": 526,
+              "kernelMs": 347,
+              "metadataMs": 1,
+              "apiImportMs": 12,
+              "kernelInitMs": 134,
+              "kernelCheckMs": 181,
+              "kernelVerifyMs": 59
+            },
+            "reusedKernelHealth": false,
+            "sourceClosureDigest": "ca293a3f7564c87f0f11f22fb1597591b8f459987ab43772aff1a5d540f711ad",
+            "admissionsSha256": "62fa17ea11b37c1e80a07b2604c37036bd9874b668a934b64eab130171718544"
+          },
+          {
+            "sourceValue": 202,
+            "wallMs": 725.07,
+            "workerElapsedMs": 725,
+            "phases": {
+              "candidateMs": 508,
+              "kernelMs": 216,
+              "metadataMs": 0,
+              "apiImportMs": 0,
+              "kernelInitMs": 0,
+              "kernelCheckMs": 198,
+              "kernelVerifyMs": 18
+            },
+            "reusedKernelHealth": true,
+            "sourceClosureDigest": "f3f4bcd58387c3b8e5b5c656418658597aaed3d576de1c0b27ecd5299a4601d0",
+            "admissionsSha256": "d624e6e63b5e07719eeae694b156dbd4db68c62fc39b5c28d01f8b455fe6bded"
+          },
+          {
+            "sourceValue": 203,
+            "wallMs": 713.3,
+            "workerElapsedMs": 713,
+            "phases": {
+              "candidateMs": 509,
+              "kernelMs": 204,
+              "metadataMs": 0,
+              "apiImportMs": 0,
+              "kernelInitMs": 0,
+              "kernelCheckMs": 184,
+              "kernelVerifyMs": 19
+            },
+            "reusedKernelHealth": true,
+            "sourceClosureDigest": "c60ad857ce506f54562b6eda0b43acee2351181d5141883c58e5470a29c11b2a",
+            "admissionsSha256": "fd5341a0fdf00f02e760bc618c8dd7809381317818c88a9938b0cea3c8f1a9f5"
+          },
+          {
+            "sourceValue": 204,
+            "wallMs": 720.59,
+            "workerElapsedMs": 720,
+            "phases": {
+              "candidateMs": 514,
+              "kernelMs": 205,
+              "metadataMs": 0,
+              "apiImportMs": 0,
+              "kernelInitMs": 0,
+              "kernelCheckMs": 187,
+              "kernelVerifyMs": 18
+            },
+            "reusedKernelHealth": true,
+            "sourceClosureDigest": "45d9bb0d2dddeefdaa47dd09a79b93121df9bd86f40a0607dbd073189d95ef05",
+            "admissionsSha256": "e47c8a964988706b7fdcb7752ba49201184a0b9a4a707a15a7ca8eee4822bada"
+          },
+          {
+            "sourceValue": 205,
+            "wallMs": 706.02,
+            "workerElapsedMs": 706,
+            "phases": {
+              "candidateMs": 514,
+              "kernelMs": 191,
+              "metadataMs": 0,
+              "apiImportMs": 0,
+              "kernelInitMs": 0,
+              "kernelCheckMs": 173,
+              "kernelVerifyMs": 18
+            },
+            "reusedKernelHealth": true,
+            "sourceClosureDigest": "5dd15b5cefc1238f800c871d346a0b2086962ebff5da3240a1c206c0ade387c3",
+            "admissionsSha256": "535b765f43c7c51fef756cdb2e41fa81e92c361029b19e81beac6bb0be59d570"
+          }
+        ]
+      },
+      "publicApis": {
+        "apiImportMs": 9.7,
+        "samples": [
+          {
+            "sourceValue": 201,
+            "wallMs": 913.82,
+            "candidateMs": 546.11,
+            "kernelMs": 367.51,
+            "compilerProcessMs": 477.07,
+            "wasmHealthProcessMs": 137.33,
+            "wasmCheckProcessMs": 173.92,
+            "candidateHostResidualMs": 69.04,
+            "kernelHostResidualMs": 56.26,
+            "outerProcessCpuMs": 157.82,
+            "sourceClosureDigest": "ca293a3f7564c87f0f11f22fb1597591b8f459987ab43772aff1a5d540f711ad",
+            "admissionsSha256": "62fa17ea11b37c1e80a07b2604c37036bd9874b668a934b64eab130171718544",
+            "subprocesses": [
+              {
+                "phase": "candidate",
+                "kind": "compiler-process",
+                "wallMs": 477.07,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              },
+              {
+                "phase": "kernel",
+                "kind": "wasm-health-process",
+                "wallMs": 137.33,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              },
+              {
+                "phase": "kernel",
+                "kind": "wasm-check-process",
+                "wallMs": 173.92,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              }
+            ]
+          },
+          {
+            "sourceValue": 202,
+            "wallMs": 874.63,
+            "candidateMs": 520.59,
+            "kernelMs": 353.94,
+            "compilerProcessMs": 469.66,
+            "wasmHealthProcessMs": 127.57,
+            "wasmCheckProcessMs": 168.69,
+            "candidateHostResidualMs": 50.93,
+            "kernelHostResidualMs": 57.68,
+            "outerProcessCpuMs": 139.98,
+            "sourceClosureDigest": "f3f4bcd58387c3b8e5b5c656418658597aaed3d576de1c0b27ecd5299a4601d0",
+            "admissionsSha256": "d624e6e63b5e07719eeae694b156dbd4db68c62fc39b5c28d01f8b455fe6bded",
+            "subprocesses": [
+              {
+                "phase": "candidate",
+                "kind": "compiler-process",
+                "wallMs": 469.66,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              },
+              {
+                "phase": "kernel",
+                "kind": "wasm-health-process",
+                "wallMs": 127.57,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              },
+              {
+                "phase": "kernel",
+                "kind": "wasm-check-process",
+                "wallMs": 168.69,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              }
+            ]
+          },
+          {
+            "sourceValue": 203,
+            "wallMs": 876.87,
+            "candidateMs": 515.4,
+            "kernelMs": 361.37,
+            "compilerProcessMs": 465.2,
+            "wasmHealthProcessMs": 131.03,
+            "wasmCheckProcessMs": 184.63,
+            "candidateHostResidualMs": 50.2,
+            "kernelHostResidualMs": 45.71,
+            "outerProcessCpuMs": 103.39,
+            "sourceClosureDigest": "c60ad857ce506f54562b6eda0b43acee2351181d5141883c58e5470a29c11b2a",
+            "admissionsSha256": "fd5341a0fdf00f02e760bc618c8dd7809381317818c88a9938b0cea3c8f1a9f5",
+            "subprocesses": [
+              {
+                "phase": "candidate",
+                "kind": "compiler-process",
+                "wallMs": 465.2,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              },
+              {
+                "phase": "kernel",
+                "kind": "wasm-health-process",
+                "wallMs": 131.03,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              },
+              {
+                "phase": "kernel",
+                "kind": "wasm-check-process",
+                "wallMs": 184.63,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              }
+            ]
+          },
+          {
+            "sourceValue": 204,
+            "wallMs": 863.92,
+            "candidateMs": 512.59,
+            "kernelMs": 351.21,
+            "compilerProcessMs": 463.33,
+            "wasmHealthProcessMs": 129.77,
+            "wasmCheckProcessMs": 175.78,
+            "candidateHostResidualMs": 49.26,
+            "kernelHostResidualMs": 45.66,
+            "outerProcessCpuMs": 134.35,
+            "sourceClosureDigest": "45d9bb0d2dddeefdaa47dd09a79b93121df9bd86f40a0607dbd073189d95ef05",
+            "admissionsSha256": "e47c8a964988706b7fdcb7752ba49201184a0b9a4a707a15a7ca8eee4822bada",
+            "subprocesses": [
+              {
+                "phase": "candidate",
+                "kind": "compiler-process",
+                "wallMs": 463.33,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              },
+              {
+                "phase": "kernel",
+                "kind": "wasm-health-process",
+                "wallMs": 129.77,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              },
+              {
+                "phase": "kernel",
+                "kind": "wasm-check-process",
+                "wallMs": 175.78,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              }
+            ]
+          },
+          {
+            "sourceValue": 205,
+            "wallMs": 853.52,
+            "candidateMs": 511.51,
+            "kernelMs": 341.91,
+            "compilerProcessMs": 462.22,
+            "wasmHealthProcessMs": 128.4,
+            "wasmCheckProcessMs": 170.32,
+            "candidateHostResidualMs": 49.29,
+            "kernelHostResidualMs": 43.19,
+            "outerProcessCpuMs": 104.11,
+            "sourceClosureDigest": "5dd15b5cefc1238f800c871d346a0b2086962ebff5da3240a1c206c0ade387c3",
+            "admissionsSha256": "535b765f43c7c51fef756cdb2e41fa81e92c361029b19e81beac6bb0be59d570",
+            "subprocesses": [
+              {
+                "phase": "candidate",
+                "kind": "compiler-process",
+                "wallMs": 462.22,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              },
+              {
+                "phase": "kernel",
+                "kind": "wasm-health-process",
+                "wallMs": 128.4,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              },
+              {
+                "phase": "kernel",
+                "kind": "wasm-check-process",
+                "wallMs": 170.32,
+                "status": 0,
+                "signal": null,
+                "errorCode": null
+              }
+            ]
+          }
+        ],
+        "outerProcessMaxRssKiB": 132396,
+        "observationOnly": true,
+        "realSubprocessCallsPreserved": true,
+        "interpretation": "One outer process retains imported API modules. Each candidate and each Wasm health/check command still executes its real subprocess. Command times include process and Wasm startup. Host residual includes pin verification, hashing, serialization, and other host work; it is not a pure hashing measurement."
+      },
+      "endToEnd": {
+        "schema": "psc1-editor-end-to-end-latency/1",
+        "status": "passed",
+        "label": "candidate-0.1.2",
+        "baseline": false,
+        "testedCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+        "measurementHarnessCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+        "measuredServer": {
+          "name": "PSC1 Language Server",
+          "version": "0.1.2",
+          "protocol": "LSP over stdio",
+          "node": "v22.23.3",
+          "platform": "linux",
+          "compiler": "proofscript@0.1.0-psc1.12",
+          "kernel": "official Lean 4.35.0, linear-memory Wasm",
+          "compilerTarballSha256": "9a66dcd0f92aaa60f600674fb91b31bc0d67b211d1e9e004146baa8e96502fcc",
+          "compilerSourceUnchanged": true,
+          "selfHosting": "external tooling",
+          "settings": {
+            "trusted": true,
+            "enableLean": false,
+            "debounceMs": 50,
+            "timeoutMs": 60000
+          },
+          "metrics": {
+            "checksStarted": 0,
+            "checksCompleted": 0,
+            "superseded": 0,
+            "timeouts": 0,
+            "cacheHits": 0,
+            "unchangedSaves": 0,
+            "workerStarts": 0,
+            "workerReuses": 0,
+            "workerRetirements": 0,
+            "workerProtocolFailures": 0,
+            "lastElapsedMs": null,
+            "cacheEntries": 0,
+            "cacheBytes": 0
+          },
+          "worker": {
+            "active": false,
+            "busy": false,
+            "requests": 0,
+            "maxRequests": 128,
+            "idleMs": 30000
+          },
+          "checkingScope": "Logical admission only; editor checks do not publish or validate generated runtime artifacts.",
+          "limitations": [
+            "No proof-state snapshots or term-level type inference.",
+            "No binding-aware references, rename, signature help or quick fixes.",
+            "Definitions navigate compiler-origin declarations and explicit imports; reference binding is not guessed.",
+            "Parse errors may have module-level locations."
+          ]
+        },
+        "node": "v22.23.3",
+        "platform": "linux",
+        "architecture": "x64",
+        "cpu": "AMD EPYC 7763 64-Core Processor",
+        "startupMs": 59.21,
+        "debounceMs": 50,
+        "debounceSelection": "explicit-controlled-override",
+        "compilerMocks": false,
+        "everyDistinctSnapshotIndependentlyChecked": true,
+        "reusedSamplesDisclosed": true,
+        "summary": {
+          "coldOpenMs": 974.23,
+          "distinctEditMedianMs": 749.65,
+          "distinctEditMaxMs": 762.02,
+          "unchangedSaveMs": 0.6,
+          "repeatedSnapshotMs": 52.56
+        },
+        "finalMetrics": {
+          "checksStarted": 4,
+          "checksCompleted": 4,
+          "superseded": 0,
+          "timeouts": 0,
+          "cacheHits": 1,
+          "unchangedSaves": 1,
+          "workerStarts": 1,
+          "workerReuses": 3,
+          "workerRetirements": 0,
+          "workerProtocolFailures": 0,
+          "lastElapsedMs": 697,
+          "cacheEntries": 4,
+          "cacheBytes": 5340
+        },
+        "samples": [
+          {
+            "kind": "cold-open",
+            "version": 1,
+            "sourceValue": 100,
+            "notificationToCheckedMs": 974.23,
+            "notificationToCheckingMs": 9.23,
+            "compilerReportedMs": 907,
+            "phases": {
+              "candidateMs": 511,
+              "kernelMs": 356,
+              "metadataMs": 1,
+              "apiImportMs": 12,
+              "kernelInitMs": 146,
+              "kernelCheckMs": 178,
+              "kernelVerifyMs": 58
+            },
+            "cacheHit": false,
+            "reused": false,
+            "reusedKernelHealth": false,
+            "checksStarted": 1,
+            "admissionsSha256": "72400a7659e18a60de41e8d934d6d427b156ac1636051910b291a10cd50b1b4e",
+            "sourceClosureDigest": "d5e93a53082400abbba7dd79e560064511988e15dfcd40453930a69451776460"
+          },
+          {
+            "kind": "distinct-edit",
+            "version": 2,
+            "sourceValue": 101,
+            "notificationToCheckedMs": 762.02,
+            "notificationToCheckingMs": 52.81,
+            "compilerReportedMs": 708,
+            "phases": {
+              "candidateMs": 505,
+              "kernelMs": 203,
+              "metadataMs": 0,
+              "apiImportMs": 0,
+              "kernelInitMs": 0,
+              "kernelCheckMs": 183,
+              "kernelVerifyMs": 20
+            },
+            "cacheHit": false,
+            "reused": false,
+            "reusedKernelHealth": true,
+            "checksStarted": 1,
+            "admissionsSha256": "07fab7c7da0b06efd6594c70958853eb8bca70079e8e885e542a455a82b672ef",
+            "sourceClosureDigest": "91a5b979403d6b6cb757ecc8b8afee2040f605ca1e8beac69eabed3899b1ab02"
+          },
+          {
+            "kind": "distinct-edit",
+            "version": 3,
+            "sourceValue": 102,
+            "notificationToCheckedMs": 744.46,
+            "notificationToCheckingMs": 52.97,
+            "compilerReportedMs": 691,
+            "phases": {
+              "candidateMs": 494,
+              "kernelMs": 196,
+              "metadataMs": 0,
+              "apiImportMs": 0,
+              "kernelInitMs": 0,
+              "kernelCheckMs": 175,
+              "kernelVerifyMs": 22
+            },
+            "cacheHit": false,
+            "reused": false,
+            "reusedKernelHealth": true,
+            "checksStarted": 1,
+            "admissionsSha256": "95f75e30ca746e516a47acedcc6886b02dc098157c00bebf5b7b62bec09ed2b1",
+            "sourceClosureDigest": "3812f68d19f71f505eda1f9d7402452fd3e1ead698a95ad0cacd0c47dcdfd58b"
+          },
+          {
+            "kind": "distinct-edit",
+            "version": 4,
+            "sourceValue": 103,
+            "notificationToCheckedMs": 749.65,
+            "notificationToCheckingMs": 52.24,
+            "compilerReportedMs": 697,
+            "phases": {
+              "candidateMs": 495,
+              "kernelMs": 201,
+              "metadataMs": 0,
+              "apiImportMs": 0,
+              "kernelInitMs": 0,
+              "kernelCheckMs": 181,
+              "kernelVerifyMs": 20
+            },
+            "cacheHit": false,
+            "reused": false,
+            "reusedKernelHealth": true,
+            "checksStarted": 1,
+            "admissionsSha256": "df52c10715390706eb7db665b309c15547f8da6f23dc13b5b0a0db23ab590e91",
+            "sourceClosureDigest": "71ea08e4e8be8d6d65b21435d6709c043cdfcdfa822efb76dd4c616f50d4bf21"
+          },
+          {
+            "kind": "unchanged-save",
+            "version": 4,
+            "sourceValue": 103,
+            "notificationToCheckedMs": 0.6,
+            "notificationToCheckingMs": null,
+            "compilerReportedMs": 697,
+            "phases": {
+              "candidateMs": 495,
+              "kernelMs": 201,
+              "metadataMs": 0,
+              "apiImportMs": 0,
+              "kernelInitMs": 0,
+              "kernelCheckMs": 181,
+              "kernelVerifyMs": 20
+            },
+            "cacheHit": false,
+            "reused": true,
+            "reusedKernelHealth": true,
+            "checksStarted": 0,
+            "admissionsSha256": "df52c10715390706eb7db665b309c15547f8da6f23dc13b5b0a0db23ab590e91",
+            "sourceClosureDigest": "71ea08e4e8be8d6d65b21435d6709c043cdfcdfa822efb76dd4c616f50d4bf21"
+          },
+          {
+            "kind": "repeat-snapshot",
+            "version": 5,
+            "sourceValue": 102,
+            "notificationToCheckedMs": 52.56,
+            "notificationToCheckingMs": null,
+            "compilerReportedMs": 691,
+            "phases": {
+              "candidateMs": 494,
+              "kernelMs": 196,
+              "metadataMs": 0,
+              "apiImportMs": 0,
+              "kernelInitMs": 0,
+              "kernelCheckMs": 175,
+              "kernelVerifyMs": 22
+            },
+            "cacheHit": true,
+            "reused": false,
+            "reusedKernelHealth": true,
+            "checksStarted": 0,
+            "admissionsSha256": "95f75e30ca746e516a47acedcc6886b02dc098157c00bebf5b7b62bec09ed2b1",
+            "sourceClosureDigest": "3812f68d19f71f505eda1f9d7402452fd3e1ead698a95ad0cacd0c47dcdfd58b"
+          }
+        ],
+        "interpretation": "Wall latency includes scheduling, compiler and independent kernel checking. Three distinct edits are observations, not a statistically stable benchmark. Cached/save samples retain historical compiler phase fields; checksStarted=0 means those phases did not run again."
+      },
+      "identicalSourceAndAdmissionHashesAcrossModes": true,
+      "interpretation": "Five distinct checked graphs per mode. Fresh-worker timings include worker launch; retained-worker samples 2–5 reuse only the host process and qualified kernel health. Every graph still receives genuine compiler analysis and kernel admission. API tracing is exploratory and is not the uninstrumented end-to-end performance gate."
+    }
+  },
+  "platforms": [
+    {
+      "runner": "ubuntu-24.04",
+      "platform": "linux",
+      "architecture": "x64",
+      "jobId": 122533854284,
+      "receipts": {
+        "performance-receipt.json": {
+          "schema": "psc1-editor-end-to-end-latency/1",
+          "status": "passed",
+          "label": "candidate-0.1.2",
+          "baseline": false,
+          "testedCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+          "measurementHarnessCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+          "measuredServer": {
+            "name": "PSC1 Language Server",
+            "version": "0.1.2",
+            "protocol": "LSP over stdio",
+            "node": "v22.23.3",
+            "platform": "linux",
+            "compiler": "proofscript@0.1.0-psc1.12",
+            "kernel": "official Lean 4.35.0, linear-memory Wasm",
+            "compilerTarballSha256": "9a66dcd0f92aaa60f600674fb91b31bc0d67b211d1e9e004146baa8e96502fcc",
+            "compilerSourceUnchanged": true,
+            "selfHosting": "external tooling",
+            "settings": {
+              "trusted": true,
+              "enableLean": false,
+              "debounceMs": 50,
+              "timeoutMs": 60000
+            },
+            "metrics": {
+              "checksStarted": 0,
+              "checksCompleted": 0,
+              "superseded": 0,
+              "timeouts": 0,
+              "cacheHits": 0,
+              "unchangedSaves": 0,
+              "workerStarts": 0,
+              "workerReuses": 0,
+              "workerRetirements": 0,
+              "workerProtocolFailures": 0,
+              "lastElapsedMs": null,
+              "cacheEntries": 0,
+              "cacheBytes": 0
+            },
+            "worker": {
+              "active": false,
+              "busy": false,
+              "requests": 0,
+              "maxRequests": 128,
+              "idleMs": 30000
+            },
+            "checkingScope": "Logical admission only; editor checks do not publish or validate generated runtime artifacts.",
+            "limitations": [
+              "No proof-state snapshots or term-level type inference.",
+              "No binding-aware references, rename, signature help or quick fixes.",
+              "Definitions navigate compiler-origin declarations and explicit imports; reference binding is not guessed.",
+              "Parse errors may have module-level locations."
+            ]
+          },
+          "node": "v22.23.3",
+          "platform": "linux",
+          "architecture": "x64",
+          "cpu": "AMD EPYC 7763 64-Core Processor",
+          "startupMs": 59.21,
+          "debounceMs": 50,
+          "debounceSelection": "explicit-controlled-override",
+          "compilerMocks": false,
+          "everyDistinctSnapshotIndependentlyChecked": true,
+          "reusedSamplesDisclosed": true,
+          "summary": {
+            "coldOpenMs": 974.23,
+            "distinctEditMedianMs": 749.65,
+            "distinctEditMaxMs": 762.02,
+            "unchangedSaveMs": 0.6,
+            "repeatedSnapshotMs": 52.56
+          },
+          "finalMetrics": {
+            "checksStarted": 4,
+            "checksCompleted": 4,
+            "superseded": 0,
+            "timeouts": 0,
+            "cacheHits": 1,
+            "unchangedSaves": 1,
+            "workerStarts": 1,
+            "workerReuses": 3,
+            "workerRetirements": 0,
+            "workerProtocolFailures": 0,
+            "lastElapsedMs": 697,
+            "cacheEntries": 4,
+            "cacheBytes": 5340
+          },
+          "samples": [
+            {
+              "kind": "cold-open",
+              "version": 1,
+              "sourceValue": 100,
+              "notificationToCheckedMs": 974.23,
+              "notificationToCheckingMs": 9.23,
+              "compilerReportedMs": 907,
+              "phases": {
+                "candidateMs": 511,
+                "kernelMs": 356,
+                "metadataMs": 1,
+                "apiImportMs": 12,
+                "kernelInitMs": 146,
+                "kernelCheckMs": 178,
+                "kernelVerifyMs": 58
+              },
+              "cacheHit": false,
+              "reused": false,
+              "reusedKernelHealth": false,
+              "checksStarted": 1,
+              "admissionsSha256": "72400a7659e18a60de41e8d934d6d427b156ac1636051910b291a10cd50b1b4e",
+              "sourceClosureDigest": "d5e93a53082400abbba7dd79e560064511988e15dfcd40453930a69451776460"
+            },
+            {
+              "kind": "distinct-edit",
+              "version": 2,
+              "sourceValue": 101,
+              "notificationToCheckedMs": 762.02,
+              "notificationToCheckingMs": 52.81,
+              "compilerReportedMs": 708,
+              "phases": {
+                "candidateMs": 505,
+                "kernelMs": 203,
+                "metadataMs": 0,
+                "apiImportMs": 0,
+                "kernelInitMs": 0,
+                "kernelCheckMs": 183,
+                "kernelVerifyMs": 20
+              },
+              "cacheHit": false,
+              "reused": false,
+              "reusedKernelHealth": true,
+              "checksStarted": 1,
+              "admissionsSha256": "07fab7c7da0b06efd6594c70958853eb8bca70079e8e885e542a455a82b672ef",
+              "sourceClosureDigest": "91a5b979403d6b6cb757ecc8b8afee2040f605ca1e8beac69eabed3899b1ab02"
+            },
+            {
+              "kind": "distinct-edit",
+              "version": 3,
+              "sourceValue": 102,
+              "notificationToCheckedMs": 744.46,
+              "notificationToCheckingMs": 52.97,
+              "compilerReportedMs": 691,
+              "phases": {
+                "candidateMs": 494,
+                "kernelMs": 196,
+                "metadataMs": 0,
+                "apiImportMs": 0,
+                "kernelInitMs": 0,
+                "kernelCheckMs": 175,
+                "kernelVerifyMs": 22
+              },
+              "cacheHit": false,
+              "reused": false,
+              "reusedKernelHealth": true,
+              "checksStarted": 1,
+              "admissionsSha256": "95f75e30ca746e516a47acedcc6886b02dc098157c00bebf5b7b62bec09ed2b1",
+              "sourceClosureDigest": "3812f68d19f71f505eda1f9d7402452fd3e1ead698a95ad0cacd0c47dcdfd58b"
+            },
+            {
+              "kind": "distinct-edit",
+              "version": 4,
+              "sourceValue": 103,
+              "notificationToCheckedMs": 749.65,
+              "notificationToCheckingMs": 52.24,
+              "compilerReportedMs": 697,
+              "phases": {
+                "candidateMs": 495,
+                "kernelMs": 201,
+                "metadataMs": 0,
+                "apiImportMs": 0,
+                "kernelInitMs": 0,
+                "kernelCheckMs": 181,
+                "kernelVerifyMs": 20
+              },
+              "cacheHit": false,
+              "reused": false,
+              "reusedKernelHealth": true,
+              "checksStarted": 1,
+              "admissionsSha256": "df52c10715390706eb7db665b309c15547f8da6f23dc13b5b0a0db23ab590e91",
+              "sourceClosureDigest": "71ea08e4e8be8d6d65b21435d6709c043cdfcdfa822efb76dd4c616f50d4bf21"
+            },
+            {
+              "kind": "unchanged-save",
+              "version": 4,
+              "sourceValue": 103,
+              "notificationToCheckedMs": 0.6,
+              "notificationToCheckingMs": null,
+              "compilerReportedMs": 697,
+              "phases": {
+                "candidateMs": 495,
+                "kernelMs": 201,
+                "metadataMs": 0,
+                "apiImportMs": 0,
+                "kernelInitMs": 0,
+                "kernelCheckMs": 181,
+                "kernelVerifyMs": 20
+              },
+              "cacheHit": false,
+              "reused": true,
+              "reusedKernelHealth": true,
+              "checksStarted": 0,
+              "admissionsSha256": "df52c10715390706eb7db665b309c15547f8da6f23dc13b5b0a0db23ab590e91",
+              "sourceClosureDigest": "71ea08e4e8be8d6d65b21435d6709c043cdfcdfa822efb76dd4c616f50d4bf21"
+            },
+            {
+              "kind": "repeat-snapshot",
+              "version": 5,
+              "sourceValue": 102,
+              "notificationToCheckedMs": 52.56,
+              "notificationToCheckingMs": null,
+              "compilerReportedMs": 691,
+              "phases": {
+                "candidateMs": 494,
+                "kernelMs": 196,
+                "metadataMs": 0,
+                "apiImportMs": 0,
+                "kernelInitMs": 0,
+                "kernelCheckMs": 175,
+                "kernelVerifyMs": 22
+              },
+              "cacheHit": true,
+              "reused": false,
+              "reusedKernelHealth": true,
+              "checksStarted": 0,
+              "admissionsSha256": "95f75e30ca746e516a47acedcc6886b02dc098157c00bebf5b7b62bec09ed2b1",
+              "sourceClosureDigest": "3812f68d19f71f505eda1f9d7402452fd3e1ead698a95ad0cacd0c47dcdfd58b"
+            }
+          ],
+          "interpretation": "Wall latency includes scheduling, compiler and independent kernel checking. Three distinct edits are observations, not a statistically stable benchmark. Cached/save samples retain historical compiler phase fields; checksStarted=0 means those phases did not run again."
+        },
+        "lsp-test-receipt.json": {
+          "schema": "psc1-lsp-tests/1",
+          "testedCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+          "compilerBackend": "real packaged PSC1 with official Lean WASM kernel",
+          "compilerMocks": false,
+          "node": "v22.23.3",
+          "server": {
+            "name": "PSC1 Language Server",
+            "version": "0.1.2",
+            "protocol": "LSP over stdio",
+            "node": "v22.23.3",
+            "platform": "linux",
+            "compiler": "proofscript@0.1.0-psc1.12",
+            "kernel": "official Lean 4.35.0, linear-memory Wasm",
+            "compilerTarballSha256": "9a66dcd0f92aaa60f600674fb91b31bc0d67b211d1e9e004146baa8e96502fcc",
+            "compilerSourceUnchanged": true,
+            "selfHosting": "external tooling",
+            "settings": {
+              "trusted": true,
+              "enableLean": true,
+              "debounceMs": 50,
+              "timeoutMs": 60000
+            },
+            "metrics": {
+              "checksStarted": 0,
+              "checksCompleted": 0,
+              "superseded": 0,
+              "timeouts": 0,
+              "cacheHits": 0,
+              "unchangedSaves": 0,
+              "workerStarts": 0,
+              "workerReuses": 0,
+              "workerRetirements": 0,
+              "workerProtocolFailures": 0,
+              "lastElapsedMs": null,
+              "cacheEntries": 0,
+              "cacheBytes": 0
+            },
+            "worker": {
+              "active": false,
+              "busy": false,
+              "requests": 0,
+              "maxRequests": 128,
+              "idleMs": 30000
+            },
+            "checkingScope": "Logical admission only; editor checks do not publish or validate generated runtime artifacts.",
+            "limitations": [
+              "No proof-state snapshots or term-level type inference.",
+              "No binding-aware references, rename, signature help or quick fixes.",
+              "Definitions navigate compiler-origin declarations and explicit imports; reference binding is not guessed.",
+              "Parse errors may have module-level locations."
+            ]
+          },
+          "observations": [
+            {
+              "case": "unsaved-valid",
+              "state": "checked",
+              "elapsedMs": 1220
+            },
+            {
+              "case": "editor-requests",
+              "capabilities": {
+                "positionEncoding": "utf-16",
+                "textDocumentSync": {
+                  "openClose": true,
+                  "change": 2,
+                  "save": {
+                    "includeText": false
+                  }
+                },
+                "hoverProvider": true,
+                "definitionProvider": true,
+                "documentSymbolProvider": true,
+                "workspaceSymbolProvider": true,
+                "documentHighlightProvider": true,
+                "completionProvider": {
+                  "resolveProvider": false,
+                  "triggerCharacters": [
+                    "."
+                  ]
+                },
+                "semanticTokensProvider": {
+                  "legend": {
+                    "tokenTypes": [
+                      "function",
+                      "type",
+                      "variable"
+                    ],
+                    "tokenModifiers": [
+                      "declaration"
+                    ]
+                  },
+                  "full": true
+                },
+                "workspace": {
+                  "workspaceFolders": {
+                    "supported": true,
+                    "changeNotifications": true
+                  }
+                }
+              }
+            },
+            {
+              "case": "real-type-rejection",
+              "state": "rejected",
+              "diagnostics": [
+                {
+                  "range": {
+                    "start": {
+                      "line": 1,
+                      "character": 0
+                    },
+                    "end": {
+                      "line": 1,
+                      "character": 0
+                    }
+                  },
+                  "severity": 1,
+                  "source": "PSC1",
+                  "code": "PSC1_ELABORATION_SOURCE_REFUSED",
+                  "message": "PSC1 rejected this declaration during elaboration. Compiler phase: elaboration; code: source-refused; declaration: answer.",
+                  "data": {
+                    "precision": "declaration",
+                    "module": "Main",
+                    "projectGeneration": 2
+                  }
+                }
+              ]
+            },
+            {
+              "case": "unicode-incremental-repair",
+              "state": "checked"
+            },
+            {
+              "case": "inflight-supersession-and-cancellation",
+              "state": "checked"
+            },
+            {
+              "case": "unchanged-save-reuse",
+              "checksStarted": 5,
+              "generation": 5
+            },
+            {
+              "case": "unsaved-import-and-close-restoration",
+              "state": "checked"
+            },
+            {
+              "case": "real-proof-refusal",
+              "stage": "compiler elaboration before kernel admission",
+              "state": "rejected",
+              "diagnostics": [
+                {
+                  "range": {
+                    "start": {
+                      "line": 0,
+                      "character": 0
+                    },
+                    "end": {
+                      "line": 0,
+                      "character": 0
+                    }
+                  },
+                  "severity": 1,
+                  "source": "PSC1",
+                  "code": "PSC1_ELABORATION_SOURCE_REFUSED",
+                  "message": "PSC1 rejected this declaration during elaboration. Compiler phase: elaboration; code: source-refused; declaration: identity.",
+                  "data": {
+                    "precision": "declaration",
+                    "module": "Main",
+                    "projectGeneration": 13
+                  }
+                }
+              ]
+            },
+            {
+              "case": "parse-error-recovery",
+              "state": "checked"
+            },
+            {
+              "case": "compiler-origin-utf16",
+              "range": {
+                "start": {
+                  "line": 0,
+                  "character": 13
+                },
+                "end": {
+                  "line": 0,
+                  "character": 19
+                }
+              }
+            },
+            {
+              "case": "untrusted-metadata-refusal-and-watch-recovery",
+              "state": "checked"
+            },
+            {
+              "case": "exact-snapshot-cache",
+              "version": 12,
+              "cacheHit": true,
+              "checksStarted": 14,
+              "cacheHits": 8
+            }
+          ]
+        },
+        "kernel-session-test-receipt.json": {
+          "schema": "psc1-kernel-session-tests/1",
+          "testedCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+          "compilerMocks": false,
+          "observations": [
+            {
+              "accepted": true,
+              "admissionsSha256": "33a5e3071e217aade49c6eaf05ecc3d2b9ff53e21fe0b7afa6c46d423ef9cc41",
+              "reusedKernelHealth": false
+            },
+            {
+              "accepted": false,
+              "admissionsSha256": "d97d35af987d062fa1655b7541cc792f8284ebf535d50cfa92a35540af958b48",
+              "reusedKernelHealth": true
+            },
+            {
+              "accepted": true,
+              "admissionsSha256": "1b24a752635906adf0d86d9df0f580c4496f75c10449683fb9b2080566e818d9",
+              "reusedKernelHealth": true
+            }
+          ]
+        },
+        "cache-lifecycle-test-receipt.json": {
+          "schema": "psc1-cache-lifecycle-tests/1",
+          "testedCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+          "compilerMocks": false,
+          "observations": [
+            {
+              "case": "nine-independent-snapshots",
+              "metrics": {
+                "checksStarted": 9,
+                "checksCompleted": 9,
+                "superseded": 0,
+                "timeouts": 0,
+                "cacheHits": 36,
+                "unchangedSaves": 0,
+                "workerStarts": 1,
+                "workerReuses": 8,
+                "workerRetirements": 0,
+                "workerProtocolFailures": 0,
+                "lastElapsedMs": 689,
+                "cacheEntries": 9,
+                "cacheBytes": 12010
+              }
+            },
+            {
+              "case": "single-project-edit",
+              "metrics": {
+                "checksStarted": 10,
+                "checksCompleted": 10,
+                "superseded": 0,
+                "timeouts": 0,
+                "cacheHits": 44,
+                "unchangedSaves": 0,
+                "workerStarts": 1,
+                "workerReuses": 9,
+                "workerRetirements": 0,
+                "workerProtocolFailures": 0,
+                "lastElapsedMs": 709,
+                "cacheEntries": 10,
+                "cacheBytes": 13344
+              }
+            },
+            {
+              "case": "targeted-manual-recheck",
+              "metrics": {
+                "checksStarted": 11,
+                "checksCompleted": 11,
+                "superseded": 0,
+                "timeouts": 0,
+                "cacheHits": 52,
+                "unchangedSaves": 0,
+                "workerStarts": 1,
+                "workerReuses": 10,
+                "workerRetirements": 0,
+                "workerProtocolFailures": 0,
+                "lastElapsedMs": 693,
+                "cacheEntries": 10,
+                "cacheBytes": 13344
+              }
+            }
+          ],
+          "idleWorkerShutdown": "passed"
+        },
+        "npm-test-receipt.json": {
+          "schema": "psc1-lsp-npm-installed/1",
+          "status": "passed",
+          "testedCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+          "name": "@proofscript/lsp",
+          "version": "0.1.2",
+          "platform": "linux",
+          "architecture": "x64",
+          "tarballSha256": "84134f6511df32f99fbae492fdbdd2abff8b4e18c10aff33b256c14abd348e13",
+          "offlineInstall": true,
+          "emptyNpmCache": true,
+          "lifecycleScriptsDisabled": true,
+          "sdkFreePath": true,
+          "checked": {
+            "state": "checked",
+            "receipt": {
+              "schema": "psc1-editor-logical-admission/1",
+              "scope": "Exact compiler-produced canonical graph independently checked; no target execution or publication.",
+              "sourceClosureDigest": "9ca655fecf1ca29d638798522ef2a20a3644de2ced1013ba1278c52ab3946bb5",
+              "admissionsSha256": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1",
+              "compilerSourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+              "kernelProviders": [
+                "wasm"
+              ],
+              "leanVersion": "4.35.0",
+              "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "wasmMemoryModel": "linear",
+              "assurance": "checked",
+              "logicalAdmission": "accepted",
+              "formalPreservation": "not-provided",
+              "targetValidation": "not-run",
+              "publication": "not-requested"
+            },
+            "elapsedMs": 895
+          }
+        },
+        "vscode-test-receipt.json": {
+          "schema": "psc1-vscode-installed-smoke/1",
+          "status": "passed",
+          "testedCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+          "vscode": "1.143.1",
+          "node": "v24.21.0",
+          "platform": "linux",
+          "architecture": "x64",
+          "electron": "43.7.7",
+          "extensionId": "proofscript.proofscript-psc1",
+          "installedVsix": true,
+          "sourceDevelopmentExtensionUsed": false,
+          "serverInfo": {
+            "name": "PSC1 Language Server",
+            "version": "0.1.2",
+            "protocol": "LSP over stdio",
+            "node": "v24.21.0",
+            "platform": "linux",
+            "compiler": "proofscript@0.1.0-psc1.12",
+            "kernel": "official Lean 4.35.0, linear-memory Wasm",
+            "compilerTarballSha256": "9a66dcd0f92aaa60f600674fb91b31bc0d67b211d1e9e004146baa8e96502fcc",
+            "compilerSourceUnchanged": true,
+            "selfHosting": "external tooling",
+            "settings": {
+              "trusted": true,
+              "enableLean": true,
+              "debounceMs": 150,
+              "timeoutMs": 30000
+            },
+            "metrics": {
+              "checksStarted": 1,
+              "checksCompleted": 1,
+              "superseded": 0,
+              "timeouts": 0,
+              "cacheHits": 0,
+              "unchangedSaves": 0,
+              "workerStarts": 1,
+              "workerReuses": 0,
+              "workerRetirements": 0,
+              "workerProtocolFailures": 0,
+              "lastElapsedMs": 1223,
+              "cacheEntries": 1,
+              "cacheBytes": 1339
+            },
+            "worker": {
+              "active": true,
+              "busy": false,
+              "requests": 1,
+              "maxRequests": 128,
+              "idleMs": 30000
+            },
+            "checkingScope": "Logical admission only; editor checks do not publish or validate generated runtime artifacts.",
+            "limitations": [
+              "No proof-state snapshots or term-level type inference.",
+              "No binding-aware references, rename, signature help or quick fixes.",
+              "Definitions navigate compiler-origin declarations and explicit imports; reference binding is not guessed.",
+              "Parse errors may have module-level locations."
+            ]
+          },
+          "hover": {
+            "count": 1,
+            "text": "answer\n\n\n\nElaborated&nbsp;declaration&nbsp;type:&nbsp;Nat\n\n\n\nIndependent&nbsp;Lean&nbsp;kernel&nbsp;admission&nbsp;accepted&nbsp;for&nbsp;this&nbsp;declaration&nbsp;in&nbsp;the&nbsp;current&nbsp;captured&nbsp;project."
+          },
+          "checked": {
+            "state": "checked",
+            "elapsedMs": 1223
+          },
+          "rejected": {
+            "state": "rejected",
+            "diagnostics": [
+              {
+                "range": {
+                  "start": {
+                    "line": 0,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 0
+                  }
+                },
+                "severity": 1,
+                "source": "PSC1",
+                "code": "PSC1_ELABORATION_SOURCE_REFUSED",
+                "message": "PSC1 rejected this declaration during elaboration. Compiler phase: elaboration; code: source-refused; declaration: answer.",
+                "data": {
+                  "precision": "declaration",
+                  "module": "Main",
+                  "projectGeneration": 2
+                }
+              }
+            ]
+          },
+          "recovered": {
+            "state": "checked",
+            "elapsedMs": 861
+          },
+          "saved": {
+            "reused": true,
+            "checksStarted": 1
+          },
+          "infrastructureFailure": {
+            "state": "error",
+            "diagnostics": [
+              {
+                "range": {
+                  "start": {
+                    "line": 0,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 0
+                  }
+                },
+                "severity": 1,
+                "source": "PSC1 project",
+                "code": "PSC1_LSP_PROJECT_FIELDS",
+                "message": "Expected proofscript-project/1 with entryModule, files and optional assurance only."
+              }
+            ],
+            "visibleInfoState": "error"
+          },
+          "latency": {
+            "sourceOpenToCheckedMs": 1432,
+            "editToRejectedMs": 717,
+            "restartAndRepairMs": 1226,
+            "unchangedSaveMs": 116
+          },
+          "checks": [
+            "activation",
+            ".ps registration",
+            "real compiler checking",
+            "document symbols",
+            "hover",
+            "Infoview protocol",
+            "Infoview command",
+            "unsaved invalid buffer",
+            "Problems diagnostics",
+            "restart and resynchronization",
+            "save without redundant checking",
+            "terminal project failure",
+            "cross-project error feedback"
+          ]
+        }
+      },
+      "tests": {
+        "count": 29,
+        "passed": 29,
+        "failed": 0
+      }
+    },
+    {
+      "runner": "windows-latest",
+      "platform": "win32",
+      "architecture": "x64",
+      "jobId": 122534706732,
+      "evidenceArtifactId": 12779835076,
+      "receipts": {
+        "cache-lifecycle-test-receipt.json": {
+          "schema": "psc1-cache-lifecycle-tests/1",
+          "testedCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+          "compilerMocks": false,
+          "observations": [
+            {
+              "case": "nine-independent-snapshots",
+              "metrics": {
+                "checksStarted": 9,
+                "checksCompleted": 9,
+                "superseded": 0,
+                "timeouts": 0,
+                "cacheHits": 36,
+                "unchangedSaves": 0,
+                "workerStarts": 1,
+                "workerReuses": 8,
+                "workerRetirements": 0,
+                "workerProtocolFailures": 0,
+                "lastElapsedMs": 696,
+                "cacheEntries": 9,
+                "cacheBytes": 12010
+              }
+            },
+            {
+              "case": "single-project-edit",
+              "metrics": {
+                "checksStarted": 10,
+                "checksCompleted": 10,
+                "superseded": 0,
+                "timeouts": 0,
+                "cacheHits": 44,
+                "unchangedSaves": 0,
+                "workerStarts": 1,
+                "workerReuses": 9,
+                "workerRetirements": 0,
+                "workerProtocolFailures": 0,
+                "lastElapsedMs": 692,
+                "cacheEntries": 10,
+                "cacheBytes": 13344
+              }
+            },
+            {
+              "case": "targeted-manual-recheck",
+              "metrics": {
+                "checksStarted": 11,
+                "checksCompleted": 11,
+                "superseded": 0,
+                "timeouts": 0,
+                "cacheHits": 52,
+                "unchangedSaves": 0,
+                "workerStarts": 1,
+                "workerReuses": 10,
+                "workerRetirements": 0,
+                "workerProtocolFailures": 0,
+                "lastElapsedMs": 703,
+                "cacheEntries": 10,
+                "cacheBytes": 13344
+              }
+            }
+          ],
+          "idleWorkerShutdown": "passed"
+        },
+        "delivered-build-receipt.json": {
+          "schema": "psc1-editor-build/1",
+          "commit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+          "run": "40602478756",
+          "compiler": {
+            "schema": "psc1-editor-compiler-input/1",
+            "repository": "dwijayuda/pskernel",
+            "baselineCommit": "9d0e23c34484e4b1159f3e2428f5452139df530a",
+            "qualificationRun": 40501926898,
+            "artifactId": 12732813811,
+            "zipSha256": "ae67a85d75f46b6bfb512c232fc72b2a441cb195d0d2a9c8393752defb5be78a",
+            "tarball": "proofscript-0.1.0-psc1.12.tgz",
+            "tarballSha256": "9a66dcd0f92aaa60f600674fb91b31bc0d67b211d1e9e004146baa8e96502fcc",
+            "version": "0.1.0-psc1.12",
+            "leanVersion": "4.35.0",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          "node": "v22.23.3",
+          "platform": "linux",
+          "files": [
+            {
+              "file": "proofscript-lsp-0.1.2.tgz",
+              "bytes": 3931649,
+              "sha256": "84134f6511df32f99fbae492fdbdd2abff8b4e18c10aff33b256c14abd348e13"
+            },
+            {
+              "file": "proofscript-psc1-0.1.2.vsix",
+              "bytes": 3610978,
+              "sha256": "af8e69645c299cc038b6810d19177d2aecfc3e54639e6df5f8299a4119f60811"
+            }
+          ],
+          "published": false,
+          "compilerRebuilt": false
+        },
+        "kernel-session-test-receipt.json": {
+          "schema": "psc1-kernel-session-tests/1",
+          "testedCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+          "compilerMocks": false,
+          "observations": [
+            {
+              "accepted": true,
+              "admissionsSha256": "33a5e3071e217aade49c6eaf05ecc3d2b9ff53e21fe0b7afa6c46d423ef9cc41",
+              "reusedKernelHealth": false
+            },
+            {
+              "accepted": false,
+              "admissionsSha256": "d97d35af987d062fa1655b7541cc792f8284ebf535d50cfa92a35540af958b48",
+              "reusedKernelHealth": true
+            },
+            {
+              "accepted": true,
+              "admissionsSha256": "1b24a752635906adf0d86d9df0f580c4496f75c10449683fb9b2080566e818d9",
+              "reusedKernelHealth": true
+            }
+          ]
+        },
+        "lsp-test-receipt.json": {
+          "schema": "psc1-lsp-tests/1",
+          "testedCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+          "compilerBackend": "real packaged PSC1 with official Lean WASM kernel",
+          "compilerMocks": false,
+          "node": "v22.23.3",
+          "server": {
+            "name": "PSC1 Language Server",
+            "version": "0.1.2",
+            "protocol": "LSP over stdio",
+            "node": "v22.23.3",
+            "platform": "win32",
+            "compiler": "proofscript@0.1.0-psc1.12",
+            "kernel": "official Lean 4.35.0, linear-memory Wasm",
+            "compilerTarballSha256": "9a66dcd0f92aaa60f600674fb91b31bc0d67b211d1e9e004146baa8e96502fcc",
+            "compilerSourceUnchanged": true,
+            "selfHosting": "external tooling",
+            "settings": {
+              "trusted": true,
+              "enableLean": true,
+              "debounceMs": 50,
+              "timeoutMs": 60000
+            },
+            "metrics": {
+              "checksStarted": 0,
+              "checksCompleted": 0,
+              "superseded": 0,
+              "timeouts": 0,
+              "cacheHits": 0,
+              "unchangedSaves": 0,
+              "workerStarts": 0,
+              "workerReuses": 0,
+              "workerRetirements": 0,
+              "workerProtocolFailures": 0,
+              "lastElapsedMs": null,
+              "cacheEntries": 0,
+              "cacheBytes": 0
+            },
+            "worker": {
+              "active": false,
+              "busy": false,
+              "requests": 0,
+              "maxRequests": 128,
+              "idleMs": 30000
+            },
+            "checkingScope": "Logical admission only; editor checks do not publish or validate generated runtime artifacts.",
+            "limitations": [
+              "No proof-state snapshots or term-level type inference.",
+              "No binding-aware references, rename, signature help or quick fixes.",
+              "Definitions navigate compiler-origin declarations and explicit imports; reference binding is not guessed.",
+              "Parse errors may have module-level locations."
+            ]
+          },
+          "observations": [
+            {
+              "case": "unsaved-valid",
+              "state": "checked",
+              "elapsedMs": 1126
+            },
+            {
+              "case": "editor-requests",
+              "capabilities": {
+                "positionEncoding": "utf-16",
+                "textDocumentSync": {
+                  "openClose": true,
+                  "change": 2,
+                  "save": {
+                    "includeText": false
+                  }
+                },
+                "hoverProvider": true,
+                "definitionProvider": true,
+                "documentSymbolProvider": true,
+                "workspaceSymbolProvider": true,
+                "documentHighlightProvider": true,
+                "completionProvider": {
+                  "resolveProvider": false,
+                  "triggerCharacters": [
+                    "."
+                  ]
+                },
+                "semanticTokensProvider": {
+                  "legend": {
+                    "tokenTypes": [
+                      "function",
+                      "type",
+                      "variable"
+                    ],
+                    "tokenModifiers": [
+                      "declaration"
+                    ]
+                  },
+                  "full": true
+                },
+                "workspace": {
+                  "workspaceFolders": {
+                    "supported": true,
+                    "changeNotifications": true
+                  }
+                }
+              }
+            },
+            {
+              "case": "real-type-rejection",
+              "state": "rejected",
+              "diagnostics": [
+                {
+                  "range": {
+                    "start": {
+                      "line": 1,
+                      "character": 0
+                    },
+                    "end": {
+                      "line": 1,
+                      "character": 0
+                    }
+                  },
+                  "severity": 1,
+                  "source": "PSC1",
+                  "code": "PSC1_ELABORATION_SOURCE_REFUSED",
+                  "message": "PSC1 rejected this declaration during elaboration. Compiler phase: elaboration; code: source-refused; declaration: answer.",
+                  "data": {
+                    "precision": "declaration",
+                    "module": "Main",
+                    "projectGeneration": 2
+                  }
+                }
+              ]
+            },
+            {
+              "case": "unicode-incremental-repair",
+              "state": "checked"
+            },
+            {
+              "case": "inflight-supersession-and-cancellation",
+              "state": "checked"
+            },
+            {
+              "case": "unchanged-save-reuse",
+              "checksStarted": 5,
+              "generation": 5
+            },
+            {
+              "case": "unsaved-import-and-close-restoration",
+              "state": "checked"
+            },
+            {
+              "case": "real-proof-refusal",
+              "stage": "compiler elaboration before kernel admission",
+              "state": "rejected",
+              "diagnostics": [
+                {
+                  "range": {
+                    "start": {
+                      "line": 0,
+                      "character": 0
+                    },
+                    "end": {
+                      "line": 0,
+                      "character": 0
+                    }
+                  },
+                  "severity": 1,
+                  "source": "PSC1",
+                  "code": "PSC1_ELABORATION_SOURCE_REFUSED",
+                  "message": "PSC1 rejected this declaration during elaboration. Compiler phase: elaboration; code: source-refused; declaration: identity.",
+                  "data": {
+                    "precision": "declaration",
+                    "module": "Main",
+                    "projectGeneration": 13
+                  }
+                }
+              ]
+            },
+            {
+              "case": "parse-error-recovery",
+              "state": "checked"
+            },
+            {
+              "case": "compiler-origin-utf16",
+              "range": {
+                "start": {
+                  "line": 0,
+                  "character": 13
+                },
+                "end": {
+                  "line": 0,
+                  "character": 19
+                }
+              }
+            },
+            {
+              "case": "untrusted-metadata-refusal-and-watch-recovery",
+              "state": "checked"
+            },
+            {
+              "case": "exact-snapshot-cache",
+              "version": 12,
+              "cacheHit": true,
+              "checksStarted": 14,
+              "cacheHits": 8
+            }
+          ]
+        },
+        "npm-test-receipt.json": {
+          "schema": "psc1-lsp-npm-installed/1",
+          "status": "passed",
+          "testedCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+          "name": "@proofscript/lsp",
+          "version": "0.1.2",
+          "platform": "win32",
+          "architecture": "x64",
+          "tarballSha256": "84134f6511df32f99fbae492fdbdd2abff8b4e18c10aff33b256c14abd348e13",
+          "offlineInstall": true,
+          "emptyNpmCache": true,
+          "lifecycleScriptsDisabled": true,
+          "sdkFreePath": true,
+          "checked": {
+            "state": "checked",
+            "receipt": {
+              "schema": "psc1-editor-logical-admission/1",
+              "scope": "Exact compiler-produced canonical graph independently checked; no target execution or publication.",
+              "sourceClosureDigest": "9ca655fecf1ca29d638798522ef2a20a3644de2ced1013ba1278c52ab3946bb5",
+              "admissionsSha256": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1",
+              "compilerSourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+              "kernelProviders": [
+                "wasm"
+              ],
+              "leanVersion": "4.35.0",
+              "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "wasmMemoryModel": "linear",
+              "assurance": "checked",
+              "logicalAdmission": "accepted",
+              "formalPreservation": "not-provided",
+              "targetValidation": "not-run",
+              "publication": "not-requested"
+            },
+            "elapsedMs": 979
+          }
+        },
+        "performance-receipt.json": {
+          "schema": "psc1-editor-end-to-end-latency/1",
+          "status": "passed",
+          "label": "native-windows-latest-0.1.2",
+          "baseline": false,
+          "testedCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+          "measurementHarnessCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+          "measuredServer": {
+            "name": "PSC1 Language Server",
+            "version": "0.1.2",
+            "protocol": "LSP over stdio",
+            "node": "v22.23.3",
+            "platform": "win32",
+            "compiler": "proofscript@0.1.0-psc1.12",
+            "kernel": "official Lean 4.35.0, linear-memory Wasm",
+            "compilerTarballSha256": "9a66dcd0f92aaa60f600674fb91b31bc0d67b211d1e9e004146baa8e96502fcc",
+            "compilerSourceUnchanged": true,
+            "selfHosting": "external tooling",
+            "settings": {
+              "trusted": true,
+              "enableLean": false,
+              "debounceMs": 50,
+              "timeoutMs": 60000
+            },
+            "metrics": {
+              "checksStarted": 0,
+              "checksCompleted": 0,
+              "superseded": 0,
+              "timeouts": 0,
+              "cacheHits": 0,
+              "unchangedSaves": 0,
+              "workerStarts": 0,
+              "workerReuses": 0,
+              "workerRetirements": 0,
+              "workerProtocolFailures": 0,
+              "lastElapsedMs": null,
+              "cacheEntries": 0,
+              "cacheBytes": 0
+            },
+            "worker": {
+              "active": false,
+              "busy": false,
+              "requests": 0,
+              "maxRequests": 128,
+              "idleMs": 30000
+            },
+            "checkingScope": "Logical admission only; editor checks do not publish or validate generated runtime artifacts.",
+            "limitations": [
+              "No proof-state snapshots or term-level type inference.",
+              "No binding-aware references, rename, signature help or quick fixes.",
+              "Definitions navigate compiler-origin declarations and explicit imports; reference binding is not guessed.",
+              "Parse errors may have module-level locations."
+            ]
+          },
+          "node": "v22.23.3",
+          "platform": "win32",
+          "architecture": "x64",
+          "cpu": "AMD EPYC 9V74 80-Core Processor                ",
+          "startupMs": 82.59,
+          "debounceMs": 50,
+          "debounceSelection": "explicit-controlled-override",
+          "compilerMocks": false,
+          "everyDistinctSnapshotIndependentlyChecked": true,
+          "reusedSamplesDisclosed": true,
+          "summary": {
+            "coldOpenMs": 1054.65,
+            "distinctEditMedianMs": 752.24,
+            "distinctEditMaxMs": 761,
+            "unchangedSaveMs": 0.61,
+            "repeatedSnapshotMs": 51.89
+          },
+          "finalMetrics": {
+            "checksStarted": 4,
+            "checksCompleted": 4,
+            "superseded": 0,
+            "timeouts": 0,
+            "cacheHits": 1,
+            "unchangedSaves": 1,
+            "workerStarts": 1,
+            "workerReuses": 3,
+            "workerRetirements": 0,
+            "workerProtocolFailures": 0,
+            "lastElapsedMs": 694,
+            "cacheEntries": 4,
+            "cacheBytes": 5341
+          },
+          "samples": [
+            {
+              "kind": "cold-open",
+              "version": 1,
+              "sourceValue": 100,
+              "notificationToCheckedMs": 1054.65,
+              "notificationToCheckingMs": 28.12,
+              "compilerReportedMs": 952,
+              "phases": {
+                "candidateMs": 505,
+                "kernelMs": 391,
+                "metadataMs": 1,
+                "apiImportMs": 13,
+                "kernelInitMs": 144,
+                "kernelCheckMs": 188,
+                "kernelVerifyMs": 100
+              },
+              "cacheHit": false,
+              "reused": false,
+              "reusedKernelHealth": false,
+              "checksStarted": 1,
+              "admissionsSha256": "72400a7659e18a60de41e8d934d6d427b156ac1636051910b291a10cd50b1b4e",
+              "sourceClosureDigest": "d5e93a53082400abbba7dd79e560064511988e15dfcd40453930a69451776460"
+            },
+            {
+              "kind": "distinct-edit",
+              "version": 2,
+              "sourceValue": 101,
+              "notificationToCheckedMs": 752.24,
+              "notificationToCheckingMs": 53.17,
+              "compilerReportedMs": 698,
+              "phases": {
+                "candidateMs": 485,
+                "kernelMs": 213,
+                "metadataMs": 0,
+                "apiImportMs": 0,
+                "kernelInitMs": 0,
+                "kernelCheckMs": 178,
+                "kernelVerifyMs": 36
+              },
+              "cacheHit": false,
+              "reused": false,
+              "reusedKernelHealth": true,
+              "checksStarted": 1,
+              "admissionsSha256": "07fab7c7da0b06efd6594c70958853eb8bca70079e8e885e542a455a82b672ef",
+              "sourceClosureDigest": "91a5b979403d6b6cb757ecc8b8afee2040f605ca1e8beac69eabed3899b1ab02"
+            },
+            {
+              "kind": "distinct-edit",
+              "version": 3,
+              "sourceValue": 102,
+              "notificationToCheckedMs": 761,
+              "notificationToCheckingMs": 59.77,
+              "compilerReportedMs": 700,
+              "phases": {
+                "candidateMs": 485,
+                "kernelMs": 215,
+                "metadataMs": 0,
+                "apiImportMs": 0,
+                "kernelInitMs": 0,
+                "kernelCheckMs": 180,
+                "kernelVerifyMs": 36
+              },
+              "cacheHit": false,
+              "reused": false,
+              "reusedKernelHealth": true,
+              "checksStarted": 1,
+              "admissionsSha256": "95f75e30ca746e516a47acedcc6886b02dc098157c00bebf5b7b62bec09ed2b1",
+              "sourceClosureDigest": "3812f68d19f71f505eda1f9d7402452fd3e1ead698a95ad0cacd0c47dcdfd58b"
+            },
+            {
+              "kind": "distinct-edit",
+              "version": 4,
+              "sourceValue": 103,
+              "notificationToCheckedMs": 746.49,
+              "notificationToCheckingMs": 51.99,
+              "compilerReportedMs": 694,
+              "phases": {
+                "candidateMs": 480,
+                "kernelMs": 213,
+                "metadataMs": 0,
+                "apiImportMs": 0,
+                "kernelInitMs": 0,
+                "kernelCheckMs": 178,
+                "kernelVerifyMs": 35
+              },
+              "cacheHit": false,
+              "reused": false,
+              "reusedKernelHealth": true,
+              "checksStarted": 1,
+              "admissionsSha256": "df52c10715390706eb7db665b309c15547f8da6f23dc13b5b0a0db23ab590e91",
+              "sourceClosureDigest": "71ea08e4e8be8d6d65b21435d6709c043cdfcdfa822efb76dd4c616f50d4bf21"
+            },
+            {
+              "kind": "unchanged-save",
+              "version": 4,
+              "sourceValue": 103,
+              "notificationToCheckedMs": 0.61,
+              "notificationToCheckingMs": null,
+              "compilerReportedMs": 694,
+              "phases": {
+                "candidateMs": 480,
+                "kernelMs": 213,
+                "metadataMs": 0,
+                "apiImportMs": 0,
+                "kernelInitMs": 0,
+                "kernelCheckMs": 178,
+                "kernelVerifyMs": 35
+              },
+              "cacheHit": false,
+              "reused": true,
+              "reusedKernelHealth": true,
+              "checksStarted": 0,
+              "admissionsSha256": "df52c10715390706eb7db665b309c15547f8da6f23dc13b5b0a0db23ab590e91",
+              "sourceClosureDigest": "71ea08e4e8be8d6d65b21435d6709c043cdfcdfa822efb76dd4c616f50d4bf21"
+            },
+            {
+              "kind": "repeat-snapshot",
+              "version": 5,
+              "sourceValue": 102,
+              "notificationToCheckedMs": 51.89,
+              "notificationToCheckingMs": null,
+              "compilerReportedMs": 700,
+              "phases": {
+                "candidateMs": 485,
+                "kernelMs": 215,
+                "metadataMs": 0,
+                "apiImportMs": 0,
+                "kernelInitMs": 0,
+                "kernelCheckMs": 180,
+                "kernelVerifyMs": 36
+              },
+              "cacheHit": true,
+              "reused": false,
+              "reusedKernelHealth": true,
+              "checksStarted": 0,
+              "admissionsSha256": "95f75e30ca746e516a47acedcc6886b02dc098157c00bebf5b7b62bec09ed2b1",
+              "sourceClosureDigest": "3812f68d19f71f505eda1f9d7402452fd3e1ead698a95ad0cacd0c47dcdfd58b"
+            }
+          ],
+          "interpretation": "Wall latency includes scheduling, compiler and independent kernel checking. Three distinct edits are observations, not a statistically stable benchmark. Cached/save samples retain historical compiler phase fields; checksStarted=0 means those phases did not run again."
+        },
+        "vscode-test-receipt.json": {
+          "schema": "psc1-vscode-installed-smoke/1",
+          "status": "passed",
+          "testedCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+          "vscode": "1.143.1",
+          "node": "v24.21.0",
+          "platform": "win32",
+          "architecture": "x64",
+          "electron": "43.7.7",
+          "extensionId": "proofscript.proofscript-psc1",
+          "installedVsix": true,
+          "sourceDevelopmentExtensionUsed": false,
+          "serverInfo": {
+            "name": "PSC1 Language Server",
+            "version": "0.1.2",
+            "protocol": "LSP over stdio",
+            "node": "v24.21.0",
+            "platform": "win32",
+            "compiler": "proofscript@0.1.0-psc1.12",
+            "kernel": "official Lean 4.35.0, linear-memory Wasm",
+            "compilerTarballSha256": "9a66dcd0f92aaa60f600674fb91b31bc0d67b211d1e9e004146baa8e96502fcc",
+            "compilerSourceUnchanged": true,
+            "selfHosting": "external tooling",
+            "settings": {
+              "trusted": true,
+              "enableLean": true,
+              "debounceMs": 150,
+              "timeoutMs": 30000
+            },
+            "metrics": {
+              "checksStarted": 1,
+              "checksCompleted": 1,
+              "superseded": 0,
+              "timeouts": 0,
+              "cacheHits": 0,
+              "unchangedSaves": 0,
+              "workerStarts": 1,
+              "workerReuses": 0,
+              "workerRetirements": 0,
+              "workerProtocolFailures": 0,
+              "lastElapsedMs": 1311,
+              "cacheEntries": 1,
+              "cacheBytes": 1340
+            },
+            "worker": {
+              "active": true,
+              "busy": false,
+              "requests": 1,
+              "maxRequests": 128,
+              "idleMs": 30000
+            },
+            "checkingScope": "Logical admission only; editor checks do not publish or validate generated runtime artifacts.",
+            "limitations": [
+              "No proof-state snapshots or term-level type inference.",
+              "No binding-aware references, rename, signature help or quick fixes.",
+              "Definitions navigate compiler-origin declarations and explicit imports; reference binding is not guessed.",
+              "Parse errors may have module-level locations."
+            ]
+          },
+          "hover": {
+            "count": 1,
+            "text": "answer\n\n\n\nElaborated&nbsp;declaration&nbsp;type:&nbsp;Nat\n\n\n\nIndependent&nbsp;Lean&nbsp;kernel&nbsp;admission&nbsp;accepted&nbsp;for&nbsp;this&nbsp;declaration&nbsp;in&nbsp;the&nbsp;current&nbsp;captured&nbsp;project."
+          },
+          "checked": {
+            "state": "checked",
+            "elapsedMs": 1311
+          },
+          "rejected": {
+            "state": "rejected",
+            "diagnostics": [
+              {
+                "range": {
+                  "start": {
+                    "line": 0,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 0
+                  }
+                },
+                "severity": 1,
+                "source": "PSC1",
+                "code": "PSC1_ELABORATION_SOURCE_REFUSED",
+                "message": "PSC1 rejected this declaration during elaboration. Compiler phase: elaboration; code: source-refused; declaration: answer.",
+                "data": {
+                  "precision": "declaration",
+                  "module": "Main",
+                  "projectGeneration": 2
+                }
+              }
+            ]
+          },
+          "recovered": {
+            "state": "checked",
+            "elapsedMs": 885
+          },
+          "saved": {
+            "reused": true,
+            "checksStarted": 1
+          },
+          "infrastructureFailure": {
+            "state": "error",
+            "diagnostics": [
+              {
+                "range": {
+                  "start": {
+                    "line": 0,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 0
+                  }
+                },
+                "severity": 1,
+                "source": "PSC1 project",
+                "code": "PSC1_LSP_PROJECT_FIELDS",
+                "message": "Expected proofscript-project/1 with entryModule, files and optional assurance only."
+              }
+            ],
+            "visibleInfoState": "error"
+          },
+          "latency": {
+            "sourceOpenToCheckedMs": 1490,
+            "editToRejectedMs": 681,
+            "restartAndRepairMs": 1439,
+            "unchangedSaveMs": 115
+          },
+          "checks": [
+            "activation",
+            ".ps registration",
+            "real compiler checking",
+            "document symbols",
+            "hover",
+            "Infoview protocol",
+            "Infoview command",
+            "unsaved invalid buffer",
+            "Problems diagnostics",
+            "restart and resynchronization",
+            "save without redundant checking",
+            "terminal project failure",
+            "cross-project error feedback"
+          ]
+        }
+      },
+      "tests": {
+        "count": 29,
+        "passed": 29,
+        "failed": 0
+      }
+    },
+    {
+      "runner": "macos-15",
+      "platform": "darwin",
+      "architecture": "arm64",
+      "jobId": 122534707096,
+      "evidenceArtifactId": 12778819645,
+      "receipts": {
+        "cache-lifecycle-test-receipt.json": {
+          "schema": "psc1-cache-lifecycle-tests/1",
+          "testedCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+          "compilerMocks": false,
+          "observations": [
+            {
+              "case": "nine-independent-snapshots",
+              "metrics": {
+                "checksStarted": 9,
+                "checksCompleted": 9,
+                "superseded": 0,
+                "timeouts": 0,
+                "cacheHits": 36,
+                "unchangedSaves": 0,
+                "workerStarts": 1,
+                "workerReuses": 8,
+                "workerRetirements": 0,
+                "workerProtocolFailures": 0,
+                "lastElapsedMs": 676,
+                "cacheEntries": 9,
+                "cacheBytes": 12011
+              }
+            },
+            {
+              "case": "single-project-edit",
+              "metrics": {
+                "checksStarted": 10,
+                "checksCompleted": 10,
+                "superseded": 0,
+                "timeouts": 0,
+                "cacheHits": 44,
+                "unchangedSaves": 0,
+                "workerStarts": 1,
+                "workerReuses": 9,
+                "workerRetirements": 0,
+                "workerProtocolFailures": 0,
+                "lastElapsedMs": 763,
+                "cacheEntries": 10,
+                "cacheBytes": 13345
+              }
+            },
+            {
+              "case": "targeted-manual-recheck",
+              "metrics": {
+                "checksStarted": 11,
+                "checksCompleted": 11,
+                "superseded": 0,
+                "timeouts": 0,
+                "cacheHits": 52,
+                "unchangedSaves": 0,
+                "workerStarts": 1,
+                "workerReuses": 10,
+                "workerRetirements": 0,
+                "workerProtocolFailures": 0,
+                "lastElapsedMs": 710,
+                "cacheEntries": 10,
+                "cacheBytes": 13345
+              }
+            }
+          ],
+          "idleWorkerShutdown": "passed"
+        },
+        "delivered-build-receipt.json": {
+          "schema": "psc1-editor-build/1",
+          "commit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+          "run": "40602478756",
+          "compiler": {
+            "schema": "psc1-editor-compiler-input/1",
+            "repository": "dwijayuda/pskernel",
+            "baselineCommit": "9d0e23c34484e4b1159f3e2428f5452139df530a",
+            "qualificationRun": 40501926898,
+            "artifactId": 12732813811,
+            "zipSha256": "ae67a85d75f46b6bfb512c232fc72b2a441cb195d0d2a9c8393752defb5be78a",
+            "tarball": "proofscript-0.1.0-psc1.12.tgz",
+            "tarballSha256": "9a66dcd0f92aaa60f600674fb91b31bc0d67b211d1e9e004146baa8e96502fcc",
+            "version": "0.1.0-psc1.12",
+            "leanVersion": "4.35.0",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+          },
+          "node": "v22.23.3",
+          "platform": "linux",
+          "files": [
+            {
+              "file": "proofscript-lsp-0.1.2.tgz",
+              "bytes": 3931649,
+              "sha256": "84134f6511df32f99fbae492fdbdd2abff8b4e18c10aff33b256c14abd348e13"
+            },
+            {
+              "file": "proofscript-psc1-0.1.2.vsix",
+              "bytes": 3610978,
+              "sha256": "af8e69645c299cc038b6810d19177d2aecfc3e54639e6df5f8299a4119f60811"
+            }
+          ],
+          "published": false,
+          "compilerRebuilt": false
+        },
+        "kernel-session-test-receipt.json": {
+          "schema": "psc1-kernel-session-tests/1",
+          "testedCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+          "compilerMocks": false,
+          "observations": [
+            {
+              "accepted": true,
+              "admissionsSha256": "33a5e3071e217aade49c6eaf05ecc3d2b9ff53e21fe0b7afa6c46d423ef9cc41",
+              "reusedKernelHealth": false
+            },
+            {
+              "accepted": false,
+              "admissionsSha256": "d97d35af987d062fa1655b7541cc792f8284ebf535d50cfa92a35540af958b48",
+              "reusedKernelHealth": true
+            },
+            {
+              "accepted": true,
+              "admissionsSha256": "1b24a752635906adf0d86d9df0f580c4496f75c10449683fb9b2080566e818d9",
+              "reusedKernelHealth": true
+            }
+          ]
+        },
+        "lsp-test-receipt.json": {
+          "schema": "psc1-lsp-tests/1",
+          "testedCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+          "compilerBackend": "real packaged PSC1 with official Lean WASM kernel",
+          "compilerMocks": false,
+          "node": "v22.23.3",
+          "server": {
+            "name": "PSC1 Language Server",
+            "version": "0.1.2",
+            "protocol": "LSP over stdio",
+            "node": "v22.23.3",
+            "platform": "darwin",
+            "compiler": "proofscript@0.1.0-psc1.12",
+            "kernel": "official Lean 4.35.0, linear-memory Wasm",
+            "compilerTarballSha256": "9a66dcd0f92aaa60f600674fb91b31bc0d67b211d1e9e004146baa8e96502fcc",
+            "compilerSourceUnchanged": true,
+            "selfHosting": "external tooling",
+            "settings": {
+              "trusted": true,
+              "enableLean": true,
+              "debounceMs": 50,
+              "timeoutMs": 60000
+            },
+            "metrics": {
+              "checksStarted": 0,
+              "checksCompleted": 0,
+              "superseded": 0,
+              "timeouts": 0,
+              "cacheHits": 0,
+              "unchangedSaves": 0,
+              "workerStarts": 0,
+              "workerReuses": 0,
+              "workerRetirements": 0,
+              "workerProtocolFailures": 0,
+              "lastElapsedMs": null,
+              "cacheEntries": 0,
+              "cacheBytes": 0
+            },
+            "worker": {
+              "active": false,
+              "busy": false,
+              "requests": 0,
+              "maxRequests": 128,
+              "idleMs": 30000
+            },
+            "checkingScope": "Logical admission only; editor checks do not publish or validate generated runtime artifacts.",
+            "limitations": [
+              "No proof-state snapshots or term-level type inference.",
+              "No binding-aware references, rename, signature help or quick fixes.",
+              "Definitions navigate compiler-origin declarations and explicit imports; reference binding is not guessed.",
+              "Parse errors may have module-level locations."
+            ]
+          },
+          "observations": [
+            {
+              "case": "unsaved-valid",
+              "state": "checked",
+              "elapsedMs": 1480
+            },
+            {
+              "case": "editor-requests",
+              "capabilities": {
+                "positionEncoding": "utf-16",
+                "textDocumentSync": {
+                  "openClose": true,
+                  "change": 2,
+                  "save": {
+                    "includeText": false
+                  }
+                },
+                "hoverProvider": true,
+                "definitionProvider": true,
+                "documentSymbolProvider": true,
+                "workspaceSymbolProvider": true,
+                "documentHighlightProvider": true,
+                "completionProvider": {
+                  "resolveProvider": false,
+                  "triggerCharacters": [
+                    "."
+                  ]
+                },
+                "semanticTokensProvider": {
+                  "legend": {
+                    "tokenTypes": [
+                      "function",
+                      "type",
+                      "variable"
+                    ],
+                    "tokenModifiers": [
+                      "declaration"
+                    ]
+                  },
+                  "full": true
+                },
+                "workspace": {
+                  "workspaceFolders": {
+                    "supported": true,
+                    "changeNotifications": true
+                  }
+                }
+              }
+            },
+            {
+              "case": "real-type-rejection",
+              "state": "rejected",
+              "diagnostics": [
+                {
+                  "range": {
+                    "start": {
+                      "line": 1,
+                      "character": 0
+                    },
+                    "end": {
+                      "line": 1,
+                      "character": 0
+                    }
+                  },
+                  "severity": 1,
+                  "source": "PSC1",
+                  "code": "PSC1_ELABORATION_SOURCE_REFUSED",
+                  "message": "PSC1 rejected this declaration during elaboration. Compiler phase: elaboration; code: source-refused; declaration: answer.",
+                  "data": {
+                    "precision": "declaration",
+                    "module": "Main",
+                    "projectGeneration": 2
+                  }
+                }
+              ]
+            },
+            {
+              "case": "unicode-incremental-repair",
+              "state": "checked"
+            },
+            {
+              "case": "inflight-supersession-and-cancellation",
+              "state": "checked"
+            },
+            {
+              "case": "unchanged-save-reuse",
+              "checksStarted": 5,
+              "generation": 5
+            },
+            {
+              "case": "unsaved-import-and-close-restoration",
+              "state": "checked"
+            },
+            {
+              "case": "real-proof-refusal",
+              "stage": "compiler elaboration before kernel admission",
+              "state": "rejected",
+              "diagnostics": [
+                {
+                  "range": {
+                    "start": {
+                      "line": 0,
+                      "character": 0
+                    },
+                    "end": {
+                      "line": 0,
+                      "character": 0
+                    }
+                  },
+                  "severity": 1,
+                  "source": "PSC1",
+                  "code": "PSC1_ELABORATION_SOURCE_REFUSED",
+                  "message": "PSC1 rejected this declaration during elaboration. Compiler phase: elaboration; code: source-refused; declaration: identity.",
+                  "data": {
+                    "precision": "declaration",
+                    "module": "Main",
+                    "projectGeneration": 13
+                  }
+                }
+              ]
+            },
+            {
+              "case": "parse-error-recovery",
+              "state": "checked"
+            },
+            {
+              "case": "compiler-origin-utf16",
+              "range": {
+                "start": {
+                  "line": 0,
+                  "character": 13
+                },
+                "end": {
+                  "line": 0,
+                  "character": 19
+                }
+              }
+            },
+            {
+              "case": "untrusted-metadata-refusal-and-watch-recovery",
+              "state": "checked"
+            },
+            {
+              "case": "exact-snapshot-cache",
+              "version": 12,
+              "cacheHit": true,
+              "checksStarted": 14,
+              "cacheHits": 8
+            }
+          ]
+        },
+        "npm-test-receipt.json": {
+          "schema": "psc1-lsp-npm-installed/1",
+          "status": "passed",
+          "testedCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+          "name": "@proofscript/lsp",
+          "version": "0.1.2",
+          "platform": "darwin",
+          "architecture": "arm64",
+          "tarballSha256": "84134f6511df32f99fbae492fdbdd2abff8b4e18c10aff33b256c14abd348e13",
+          "offlineInstall": true,
+          "emptyNpmCache": true,
+          "lifecycleScriptsDisabled": true,
+          "sdkFreePath": true,
+          "checked": {
+            "state": "checked",
+            "receipt": {
+              "schema": "psc1-editor-logical-admission/1",
+              "scope": "Exact compiler-produced canonical graph independently checked; no target execution or publication.",
+              "sourceClosureDigest": "9ca655fecf1ca29d638798522ef2a20a3644de2ced1013ba1278c52ab3946bb5",
+              "admissionsSha256": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1",
+              "compilerSourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+              "kernelProviders": [
+                "wasm"
+              ],
+              "leanVersion": "4.35.0",
+              "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "wasmMemoryModel": "linear",
+              "assurance": "checked",
+              "logicalAdmission": "accepted",
+              "formalPreservation": "not-provided",
+              "targetValidation": "not-run",
+              "publication": "not-requested"
+            },
+            "elapsedMs": 984
+          }
+        },
+        "vscode-test-receipt.json": {
+          "schema": "psc1-vscode-installed-smoke/1",
+          "status": "passed",
+          "testedCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+          "vscode": "1.143.1",
+          "node": "v24.21.0",
+          "platform": "darwin",
+          "architecture": "arm64",
+          "electron": "43.7.7",
+          "extensionId": "proofscript.proofscript-psc1",
+          "installedVsix": true,
+          "sourceDevelopmentExtensionUsed": false,
+          "serverInfo": {
+            "name": "PSC1 Language Server",
+            "version": "0.1.2",
+            "protocol": "LSP over stdio",
+            "node": "v24.21.0",
+            "platform": "darwin",
+            "compiler": "proofscript@0.1.0-psc1.12",
+            "kernel": "official Lean 4.35.0, linear-memory Wasm",
+            "compilerTarballSha256": "9a66dcd0f92aaa60f600674fb91b31bc0d67b211d1e9e004146baa8e96502fcc",
+            "compilerSourceUnchanged": true,
+            "selfHosting": "external tooling",
+            "settings": {
+              "trusted": true,
+              "enableLean": true,
+              "debounceMs": 150,
+              "timeoutMs": 30000
+            },
+            "metrics": {
+              "checksStarted": 1,
+              "checksCompleted": 1,
+              "superseded": 0,
+              "timeouts": 0,
+              "cacheHits": 0,
+              "unchangedSaves": 0,
+              "workerStarts": 1,
+              "workerReuses": 0,
+              "workerRetirements": 0,
+              "workerProtocolFailures": 0,
+              "lastElapsedMs": 2064,
+              "cacheEntries": 1,
+              "cacheBytes": 1340
+            },
+            "worker": {
+              "active": true,
+              "busy": false,
+              "requests": 1,
+              "maxRequests": 128,
+              "idleMs": 30000
+            },
+            "checkingScope": "Logical admission only; editor checks do not publish or validate generated runtime artifacts.",
+            "limitations": [
+              "No proof-state snapshots or term-level type inference.",
+              "No binding-aware references, rename, signature help or quick fixes.",
+              "Definitions navigate compiler-origin declarations and explicit imports; reference binding is not guessed.",
+              "Parse errors may have module-level locations."
+            ]
+          },
+          "hover": {
+            "count": 1,
+            "text": "answer\n\n\n\nElaborated&nbsp;declaration&nbsp;type:&nbsp;Nat\n\n\n\nIndependent&nbsp;Lean&nbsp;kernel&nbsp;admission&nbsp;accepted&nbsp;for&nbsp;this&nbsp;declaration&nbsp;in&nbsp;the&nbsp;current&nbsp;captured&nbsp;project."
+          },
+          "checked": {
+            "state": "checked",
+            "elapsedMs": 2064
+          },
+          "rejected": {
+            "state": "rejected",
+            "diagnostics": [
+              {
+                "range": {
+                  "start": {
+                    "line": 0,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 0
+                  }
+                },
+                "severity": 1,
+                "source": "PSC1",
+                "code": "PSC1_ELABORATION_SOURCE_REFUSED",
+                "message": "PSC1 rejected this declaration during elaboration. Compiler phase: elaboration; code: source-refused; declaration: answer.",
+                "data": {
+                  "precision": "declaration",
+                  "module": "Main",
+                  "projectGeneration": 2
+                }
+              }
+            ]
+          },
+          "recovered": {
+            "state": "checked",
+            "elapsedMs": 1510
+          },
+          "saved": {
+            "reused": true,
+            "checksStarted": 1
+          },
+          "infrastructureFailure": {
+            "state": "error",
+            "diagnostics": [
+              {
+                "range": {
+                  "start": {
+                    "line": 0,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 0,
+                    "character": 0
+                  }
+                },
+                "severity": 1,
+                "source": "PSC1 project",
+                "code": "PSC1_LSP_PROJECT_FIELDS",
+                "message": "Expected proofscript-project/1 with entryModule, files and optional assurance only."
+              }
+            ],
+            "visibleInfoState": "error"
+          },
+          "latency": {
+            "sourceOpenToCheckedMs": 2409,
+            "editToRejectedMs": 1378,
+            "restartAndRepairMs": 2270,
+            "unchangedSaveMs": 131
+          },
+          "checks": [
+            "activation",
+            ".ps registration",
+            "real compiler checking",
+            "document symbols",
+            "hover",
+            "Infoview protocol",
+            "Infoview command",
+            "unsaved invalid buffer",
+            "Problems diagnostics",
+            "restart and resynchronization",
+            "save without redundant checking",
+            "terminal project failure",
+            "cross-project error feedback"
+          ]
+        },
+        "performance-receipt.json": {
+          "schema": "psc1-editor-end-to-end-latency/1",
+          "status": "passed",
+          "label": "native-macos-15-0.1.2",
+          "baseline": false,
+          "testedCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+          "measurementHarnessCommit": "09bfcea90879e5a7f821bc2a988753d77a18f169",
+          "measuredServer": {
+            "name": "PSC1 Language Server",
+            "version": "0.1.2",
+            "protocol": "LSP over stdio",
+            "node": "v22.23.3",
+            "platform": "darwin",
+            "compiler": "proofscript@0.1.0-psc1.12",
+            "kernel": "official Lean 4.35.0, linear-memory Wasm",
+            "compilerTarballSha256": "9a66dcd0f92aaa60f600674fb91b31bc0d67b211d1e9e004146baa8e96502fcc",
+            "compilerSourceUnchanged": true,
+            "selfHosting": "external tooling",
+            "settings": {
+              "trusted": true,
+              "enableLean": false,
+              "debounceMs": 50,
+              "timeoutMs": 60000
+            },
+            "metrics": {
+              "checksStarted": 0,
+              "checksCompleted": 0,
+              "superseded": 0,
+              "timeouts": 0,
+              "cacheHits": 0,
+              "unchangedSaves": 0,
+              "workerStarts": 0,
+              "workerReuses": 0,
+              "workerRetirements": 0,
+              "workerProtocolFailures": 0,
+              "lastElapsedMs": null,
+              "cacheEntries": 0,
+              "cacheBytes": 0
+            },
+            "worker": {
+              "active": false,
+              "busy": false,
+              "requests": 0,
+              "maxRequests": 128,
+              "idleMs": 30000
+            },
+            "checkingScope": "Logical admission only; editor checks do not publish or validate generated runtime artifacts.",
+            "limitations": [
+              "No proof-state snapshots or term-level type inference.",
+              "No binding-aware references, rename, signature help or quick fixes.",
+              "Definitions navigate compiler-origin declarations and explicit imports; reference binding is not guessed.",
+              "Parse errors may have module-level locations."
+            ]
+          },
+          "node": "v22.23.3",
+          "platform": "darwin",
+          "architecture": "arm64",
+          "cpu": "Apple M1 (Virtual)",
+          "startupMs": 79.74,
+          "debounceMs": 50,
+          "debounceSelection": "explicit-controlled-override",
+          "compilerMocks": false,
+          "everyDistinctSnapshotIndependentlyChecked": true,
+          "reusedSamplesDisclosed": true,
+          "summary": {
+            "coldOpenMs": 1130.6,
+            "distinctEditMedianMs": 694.25,
+            "distinctEditMaxMs": 723.19,
+            "unchangedSaveMs": 0.5,
+            "repeatedSnapshotMs": 59.11
+          },
+          "finalMetrics": {
+            "checksStarted": 4,
+            "checksCompleted": 4,
+            "superseded": 0,
+            "timeouts": 0,
+            "cacheHits": 1,
+            "unchangedSaves": 1,
+            "workerStarts": 1,
+            "workerReuses": 3,
+            "workerRetirements": 0,
+            "workerProtocolFailures": 0,
+            "lastElapsedMs": 594,
+            "cacheEntries": 4,
+            "cacheBytes": 5341
+          },
+          "samples": [
+            {
+              "kind": "cold-open",
+              "version": 1,
+              "sourceValue": 100,
+              "notificationToCheckedMs": 1130.6,
+              "notificationToCheckingMs": 8.52,
+              "compilerReportedMs": 1053,
+              "phases": {
+                "candidateMs": 530,
+                "kernelMs": 475,
+                "metadataMs": 1,
+                "apiImportMs": 19,
+                "kernelInitMs": 234,
+                "kernelCheckMs": 176,
+                "kernelVerifyMs": 90
+              },
+              "cacheHit": false,
+              "reused": false,
+              "reusedKernelHealth": false,
+              "checksStarted": 1,
+              "admissionsSha256": "72400a7659e18a60de41e8d934d6d427b156ac1636051910b291a10cd50b1b4e",
+              "sourceClosureDigest": "d5e93a53082400abbba7dd79e560064511988e15dfcd40453930a69451776460"
+            },
+            {
+              "kind": "distinct-edit",
+              "version": 2,
+              "sourceValue": 101,
+              "notificationToCheckedMs": 694.25,
+              "notificationToCheckingMs": 53.65,
+              "compilerReportedMs": 639,
+              "phases": {
+                "candidateMs": 423,
+                "kernelMs": 216,
+                "metadataMs": 0,
+                "apiImportMs": 0,
+                "kernelInitMs": 0,
+                "kernelCheckMs": 199,
+                "kernelVerifyMs": 17
+              },
+              "cacheHit": false,
+              "reused": false,
+              "reusedKernelHealth": true,
+              "checksStarted": 1,
+              "admissionsSha256": "07fab7c7da0b06efd6594c70958853eb8bca70079e8e885e542a455a82b672ef",
+              "sourceClosureDigest": "91a5b979403d6b6cb757ecc8b8afee2040f605ca1e8beac69eabed3899b1ab02"
+            },
+            {
+              "kind": "distinct-edit",
+              "version": 3,
+              "sourceValue": 102,
+              "notificationToCheckedMs": 723.19,
+              "notificationToCheckingMs": 51.98,
+              "compilerReportedMs": 670,
+              "phases": {
+                "candidateMs": 477,
+                "kernelMs": 193,
+                "metadataMs": 0,
+                "apiImportMs": 0,
+                "kernelInitMs": 0,
+                "kernelCheckMs": 175,
+                "kernelVerifyMs": 18
+              },
+              "cacheHit": false,
+              "reused": false,
+              "reusedKernelHealth": true,
+              "checksStarted": 1,
+              "admissionsSha256": "95f75e30ca746e516a47acedcc6886b02dc098157c00bebf5b7b62bec09ed2b1",
+              "sourceClosureDigest": "3812f68d19f71f505eda1f9d7402452fd3e1ead698a95ad0cacd0c47dcdfd58b"
+            },
+            {
+              "kind": "distinct-edit",
+              "version": 4,
+              "sourceValue": 103,
+              "notificationToCheckedMs": 650.59,
+              "notificationToCheckingMs": 55.68,
+              "compilerReportedMs": 594,
+              "phases": {
+                "candidateMs": 401,
+                "kernelMs": 193,
+                "metadataMs": 0,
+                "apiImportMs": 0,
+                "kernelInitMs": 0,
+                "kernelCheckMs": 174,
+                "kernelVerifyMs": 18
+              },
+              "cacheHit": false,
+              "reused": false,
+              "reusedKernelHealth": true,
+              "checksStarted": 1,
+              "admissionsSha256": "df52c10715390706eb7db665b309c15547f8da6f23dc13b5b0a0db23ab590e91",
+              "sourceClosureDigest": "71ea08e4e8be8d6d65b21435d6709c043cdfcdfa822efb76dd4c616f50d4bf21"
+            },
+            {
+              "kind": "unchanged-save",
+              "version": 4,
+              "sourceValue": 103,
+              "notificationToCheckedMs": 0.5,
+              "notificationToCheckingMs": null,
+              "compilerReportedMs": 594,
+              "phases": {
+                "candidateMs": 401,
+                "kernelMs": 193,
+                "metadataMs": 0,
+                "apiImportMs": 0,
+                "kernelInitMs": 0,
+                "kernelCheckMs": 174,
+                "kernelVerifyMs": 18
+              },
+              "cacheHit": false,
+              "reused": true,
+              "reusedKernelHealth": true,
+              "checksStarted": 0,
+              "admissionsSha256": "df52c10715390706eb7db665b309c15547f8da6f23dc13b5b0a0db23ab590e91",
+              "sourceClosureDigest": "71ea08e4e8be8d6d65b21435d6709c043cdfcdfa822efb76dd4c616f50d4bf21"
+            },
+            {
+              "kind": "repeat-snapshot",
+              "version": 5,
+              "sourceValue": 102,
+              "notificationToCheckedMs": 59.11,
+              "notificationToCheckingMs": null,
+              "compilerReportedMs": 670,
+              "phases": {
+                "candidateMs": 477,
+                "kernelMs": 193,
+                "metadataMs": 0,
+                "apiImportMs": 0,
+                "kernelInitMs": 0,
+                "kernelCheckMs": 175,
+                "kernelVerifyMs": 18
+              },
+              "cacheHit": true,
+              "reused": false,
+              "reusedKernelHealth": true,
+              "checksStarted": 0,
+              "admissionsSha256": "95f75e30ca746e516a47acedcc6886b02dc098157c00bebf5b7b62bec09ed2b1",
+              "sourceClosureDigest": "3812f68d19f71f505eda1f9d7402452fd3e1ead698a95ad0cacd0c47dcdfd58b"
+            }
+          ],
+          "interpretation": "Wall latency includes scheduling, compiler and independent kernel checking. Three distinct edits are observations, not a statistically stable benchmark. Cached/save samples retain historical compiler phase fields; checksStarted=0 means those phases did not run again."
+        }
+      },
+      "tests": {
+        "count": 29,
+        "passed": 29,
+        "failed": 0
+      }
+    }
+  ],
+  "qualificationHistory": [
+    {
+      "runId": 40601678465,
+      "attempt": 1,
+      "commit": "69090f604127289c78982173c06da8f0e7a57bae",
+      "tests": 29,
+      "testFailures": 0,
+      "performance": "passed",
+      "installedNpm": "passed",
+      "installedVsixLinux": "passed",
+      "artifactId": 12779316587,
+      "completion": "Separate evidence upload failed during FinalizeArtifact with ECONNRESET; native jobs were skipped. No compiler or test failure."
+    },
+    {
+      "runId": 40601678465,
+      "attempt": 2,
+      "commit": "69090f604127289c78982173c06da8f0e7a57bae",
+      "completion": "Superseded by documentation corrections in the packaged README files; runtime implementation unchanged.",
+      "status": "completed",
+      "conclusion": "cancelled"
+    }
+  ],
+  "limitations": [
+    "Complete declared source closure is still analyzed on a distinct edit.",
+    "Compiler candidate and genuine Wasm admission still launch fresh subprocesses.",
+    "The worker is retired after idle/cancellation; the next check pays initialization again.",
+    "The global generation can still cancel another open project's in-flight check.",
+    "No declaration-level incremental compiler, warm Wasm instance, proof-state snapshots, or binding API is introduced."
+  ]
+}

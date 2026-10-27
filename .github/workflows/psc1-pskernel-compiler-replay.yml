@@ -1,0 +1,32 @@
+name: PSC1 exact portable compiler closure export and independent replay diagnostic
+on:
+  push:
+    branches: [work/psc1-pskernel-compiler-replay-20261027]
+    paths: [psc1/scripts/pskernel-compiler-replay-diagnostic.py, .github/workflows/psc1-pskernel-compiler-replay.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Export the actual compiler declarations and attempt empty-PATH PSKernel replay
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 psc1/scripts/pskernel-compiler-replay-diagnostic.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-actual-compiler-closure-replay-diagnostic
+          path: ${{ runner.temp }}/compiler-replay/
+          if-no-files-found: error

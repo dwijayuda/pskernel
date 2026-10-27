@@ -86,6 +86,14 @@ jobs:
           retention-days: 90
       - name: Real offline local/global project workflow and npm script execution
         run: node scripts/cli-installed.mjs
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.4'
+      - name: Qualify actual Bun compiler and live watch before expensive regression gates
+        run: |
+          bun --no-install --no-macros --no-env-file test/host/runtime-policy.test.mjs
+          export PSC1_TEST_RUNTIME="$(command -v bun)"
+          node test/installed/runtime-compatibility.test.mjs
       - name: Prepare unchanged external consumers for existing full regression gates
         run: |
           npm ci --prefix .. --ignore-scripts --include=optional
@@ -162,7 +170,6 @@ jobs:
           - {label: node24, node: '24', bun: '', negative: ''}
           - {label: node26, node: '26', bun: '', negative: ''}
           - {label: bun-minimum, node: '22.23.3', bun: '1.4.0', negative: ''}
-          - {label: bun-current, node: '22.23.3', bun: '1.4.4', negative: ''}
           - {label: node20-refusal, node: '20', bun: '', negative: '1'}
     defaults:
       run:

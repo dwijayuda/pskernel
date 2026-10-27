@@ -230,7 +230,7 @@ function build(dir){
    const target=dir==='backend-wasm'?'wasm-core':dir.slice('backend-'.length);
    entry+="import {compile as checked} from '@proofscript/compiler';\nexport function compile(options){if(options.target!==undefined&&options.target!=="+
     JSON.stringify(target)+")throw Error('PSC1_PACKAGE_TARGET');return checked({...options,target:"+JSON.stringify(target)+"});}\n";
-   declarations+="import type {CompileOptions,CheckedCompilation} from 'proofscript';\nexport function compile(options:Omit<CompileOptions,'target'>):CheckedCompilation;\n";
+   declarations+="import type {CompileOptions,CheckedCompilation} from '@proofscript/compiler';\nexport function compile(options:Omit<CompileOptions,'target'>):CheckedCompilation;\n";
   }
   put(path.join(packageRoot,'dist/index.js'),entry);
   put(path.join(packageRoot,'dist/index.d.ts'),declarations);

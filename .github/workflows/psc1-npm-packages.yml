@@ -62,11 +62,11 @@ jobs:
           retention-days: 90
       - uses: actions/upload-artifact@v4
         with:
-          name: proofscript-installable-packages-0.1.0-psc1.12-${{ github.sha }}
+          name: proofscript-installable-packages-0.1.0-psc1.13-${{ github.sha }}
           path: psc1/dist/npm-packages/installable/
           retention-days: 90
       - uses: actions/upload-artifact@v4
         with:
-          name: proofscript-optional-packages-0.1.0-psc1.12-${{ github.sha }}
+          name: proofscript-optional-packages-0.1.0-psc1.13-${{ github.sha }}
           path: psc1/dist/npm-packages/optional/
           retention-days: 90

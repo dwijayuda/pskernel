@@ -33,9 +33,10 @@ jobs:
           const file='test/installed/watch.test.mjs';let source=fs.readFileSync(file,'utf8');
           const start=source.indexOf('async function receipt('),end=source.indexOf('async function failed(',start);
           if(start<0||end<0)throw Error('watch diagnostic fixture drift');
-          source=source.slice(0,start)+"async function receipt(state, after) {\n  await until(() => {\n    if (state.events.some(e=>e.event.startsWith('failed')) &&\n        !state.diagnostics.every(d=>/WATCH_SUPERSEDED|INPUT_CHANGED/.test(d.message)))\n      throw Error('WATCH_ACTUAL_FAILURE: '+state.stderr);\n    return state.receipts.length > after || state.exit;\n  }, 'current state follows in receipt failure handler').catch(error=>{\n    console.error('WATCH_LIVE_DIAGNOSTICS '+state.stderr);throw error;\n  });\n  assert.equal(state.exit, undefined, state.stderr);\n  return state.receipts[after];\n}\n"+source.slice(end);
+          source=source.slice(0,start)+"async function receipt(state, after) {\n  await until(() => {\n    if (state.caseArgs?.includes('--target') && state.events.some(e=>e.event.startsWith('failed')) &&\n        !state.diagnostics.every(d=>/WATCH_SUPERSEDED|INPUT_CHANGED/.test(d.message)))\n      throw Error('WATCH_ACTUAL_FAILURE: '+state.stderr);\n    return state.receipts.length > after || state.exit;\n  }, 'current state follows in receipt failure handler').catch(error=>{\n    console.error('WATCH_LIVE_DIAGNOSTICS '+state.stderr);throw error;\n  });\n  assert.equal(state.exit, undefined, state.stderr);\n  return state.receipts[after];\n}\n"+source.slice(end);
           source=source.replace('function watch(args, cwd, runtime = f.runtime) {',
             "function watch(args, cwd, runtime = f.runtime) { console.log('WATCH_CASE '+JSON.stringify({args,cwd,runtime}));");
+          source=source.replace('const state = {child,', 'const state = {caseArgs:args,child,');
           fs.writeFileSync(file,source);
           JS
           node test/installed/watch.test.mjs

@@ -60,9 +60,18 @@ def main (args : List String) : IO Unit := do
   let binderMode := args == ["binder"]
   let regularMode := args == ["regular"]
   let operationalMode := args == ["operational"]
-  if !args.isEmpty && !binderMode && !regularMode && !operationalMode then
-    throw (IO.userError "expected no arguments, binder, regular or operational")
-  let paths : List (List String × String) := if operationalMode then [
+  let ingressMode := args == ["ingress"]
+  if !args.isEmpty && !binderMode && !regularMode && !operationalMode && !ingressMode then
+    throw (IO.userError "expected no arguments, binder, regular, operational or ingress")
+  let paths : List (List String × String) := if ingressMode then [
+      (["Ps", "MinKernel", "Profile", "RegularProfile"], "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularProfile.lean"),
+      (["Ps", "MinKernel", "Profile", "RegularCheck"], "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularCheck.lean"),
+      (["Ps", "MinKernel", "Profile", "OperationalProfile"], "packages/pskernel-min/src/Ps/MinKernel/Profile/OperationalProfile.lean"),
+      (["Ps", "MinKernel", "Profile", "OperationalCheck"], "packages/pskernel-min/src/Ps/MinKernel/Profile/OperationalCheck.lean"),
+      (["Ps", "MinKernel", "Profile", "CoreBytes"], "packages/pskernel-min/src/Ps/MinKernel/Profile/CoreBytes.lean"),
+      (["Ps", "MinKernel", "Profile", "CoreIngress"], "packages/pskernel-min/src/Ps/MinKernel/Profile/CoreIngress.lean"),
+      (["Ps", "MinKernel", "Tests", "IngressVectors"], "packages/pskernel-min/src/Ps/MinKernel/Tests/IngressVectors.lean")]
+    else if operationalMode then [
       (["Ps", "MinKernel", "Profile", "RegularProfile"], "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularProfile.lean"),
       (["Ps", "MinKernel", "Profile", "RegularCheck"], "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularCheck.lean"),
       (["Ps", "MinKernel", "Profile", "OperationalProfile"], "packages/pskernel-min/src/Ps/MinKernel/Profile/OperationalProfile.lean"),
@@ -87,7 +96,7 @@ def main (args : List String) : IO Unit := do
   let inputs ← paths.mapM fun (moduleName, path) => do
     let source ← IO.FS.readFile path
     pure (psSh1SourceInput moduleName source)
-  let stem := if operationalMode then "dist/pskernel-min/operational/vectors" else if regularMode then "dist/pskernel-min/regular/vectors" else if binderMode then "dist/pskernel-min/binder/vectors" else "dist/pskernel-min/portable/vectors"
+  let stem := if ingressMode then "dist/pskernel-min/ingress/vectors" else if operationalMode then "dist/pskernel-min/operational/vectors" else if regularMode then "dist/pskernel-min/regular/vectors" else if binderMode then "dist/pskernel-min/binder/vectors" else "dist/pskernel-min/portable/vectors"
   match psCompilerSh1TypeScriptSources psSh1DefaultSourceOptions
       psIrCheckDefaultOptions PsCompilerSourceKind.lean inputs with
   | .error error => throw (IO.userError (minKernelSourceFailure error))

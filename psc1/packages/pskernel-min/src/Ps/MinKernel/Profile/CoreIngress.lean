@@ -210,3 +210,7 @@ def psMinCoreAdmit (bytes : List Nat) (candidate : List PsMinCoreDeclaration) : 
     | Option.some normalized => match psMinOpCheckEnvironment 128 128 List.nil normalized with
       | Option.none => Option.none
       | Option.some types => Option.some (PsMinCoreAdmission.mk source normalized types)
+
+-- Host construction uses a source-owned function, never an assumed record ABI.
+def psMinCoreMakeDeclaration (name : PsMinCoreName) (height : Nat) (type value : PsMinCoreExpr) :
+    PsMinCoreDeclaration := PsMinCoreDeclaration.mk name height type value

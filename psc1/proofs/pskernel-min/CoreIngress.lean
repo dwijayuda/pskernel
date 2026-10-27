@@ -3,6 +3,12 @@ import OperationalSoundness
 
 namespace Ps.MinKernel.CoreIngress
 
+theorem congr_binary {α β γ : Sort _} (f : α → β → γ)
+    {a c : α} {b d : β} (h₁ : a = c) (h₂ : b = d) : f a b = f c d := by
+  cases h₁
+  cases h₂
+  rfl
+
 theorem byteEq_sound (left right : List Nat) (h : psMinByteEq left right = true) : left = right := by
   induction left generalizing right with
   | nil => cases right <;> simp_all [psMinByteEq]
@@ -12,7 +18,7 @@ theorem byteEq_sound (left right : List Nat) (h : psMinByteEq left right = true)
     | cons other rest =>
       simp only [psMinByteEq] at h
       split at h
-      next same => exact congrArg2 List.cons (Nat.eq_of_beq_eq_true same) (ih rest h)
+      next same => exact congr_binary List.cons (Nat.eq_of_beq_eq_true same) (ih rest h)
       next => contradiction
 
 theorem byteEq_refl (bytes : List Nat) : psMinByteEq bytes bytes = true := by
@@ -27,7 +33,7 @@ theorem nameEq_sound (left right : PsMinCoreName) (h : psMinCoreNameEq left righ
     | str other rest =>
       simp only [psMinCoreNameEq] at h
       split at h
-      next same => exact congrArg2 PsMinCoreName.str (ih other same) (byteEq_sound _ _ h)
+      next same => exact congr_binary PsMinCoreName.str (ih other same) (byteEq_sound _ _ h)
       next => contradiction
     | _ => simp [psMinCoreNameEq] at h
   | num parent value ih =>
@@ -35,7 +41,7 @@ theorem nameEq_sound (left right : PsMinCoreName) (h : psMinCoreNameEq left righ
     | num other number =>
       simp only [psMinCoreNameEq] at h
       split at h
-      next same => exact congrArg2 PsMinCoreName.num (ih other same) (Nat.eq_of_beq_eq_true h)
+      next same => exact congr_binary PsMinCoreName.num (ih other same) (Nat.eq_of_beq_eq_true h)
       next => contradiction
     | _ => simp [psMinCoreNameEq] at h
 
@@ -54,7 +60,7 @@ theorem exprEq_sound (fuel : Nat) (left right : PsMinCoreExpr)
     all_goals first
       | exact congrArg PsMinCoreExpr.bvar (Nat.eq_of_beq_eq_true h)
       | exact congrArg PsMinCoreExpr.natural (Nat.eq_of_beq_eq_true h)
-      | exact congrArg2 PsMinCoreExpr.constant (nameEq_sound _ _ (by assumption)) (byteEq_sound _ _ h)
+      | exact congr_binary PsMinCoreExpr.constant (nameEq_sound _ _ (by assumption)) (byteEq_sound _ _ h)
       | congr 1 <;> first
           | exact nameEq_sound _ _ (by assumption)
           | exact Nat.eq_of_beq_eq_true (by assumption)
@@ -126,14 +132,20 @@ theorem member_iff (names : List PsMinCoreName) (name : PsMinCoreName) :
   induction names with
   | nil => simp [psMinCoreNameMember]
   | cons head rest ih =>
-    by_cases heq : name = head
-    · subst head
-      simp [psMinCoreNameMember, nameEq_refl]
-    · have hb : psMinCoreNameEq name head = false := by
-        cases h : psMinCoreNameEq name head with
-        | false => rfl
-        | true => exact False.elim (heq (nameEq_sound _ _ h))
-      simp [psMinCoreNameMember, hb, ih, heq]
+    cases hb : psMinCoreNameEq name head with
+    | true =>
+      have heq := nameEq_sound _ _ hb
+      simp [psMinCoreNameMember, hb, heq]
+    | false =>
+      constructor
+      · intro h
+        exact List.mem_cons_of_mem head (ih.mp (by simpa [psMinCoreNameMember, hb] using h))
+      · intro h
+        rcases List.mem_cons.mp h with heq | hm
+        · subst head
+          rw [nameEq_refl] at hb
+          contradiction
+        · simpa [psMinCoreNameMember, hb] using ih.mpr hm
 
 theorem fresh_no_shadowing (names : List PsMinCoreName) (name : PsMinCoreName)
     (h : psMinCoreFresh names name = true) :
@@ -211,6 +223,9 @@ theorem canonical_admission_has_model (bytes : List Nat) (candidate : List PsMin
           OperationalProofs.operational_hasModel _ _ _ _ _ hc,
           OperationalProofs.operational_hasBodyHistory _ _ _ _ _ hc⟩
 
+#print axioms lengthAtMost_sound
+#print axioms psMinCoreEncode
+#print axioms member_iff
 #print axioms byteEq_sound
 #print axioms nameEq_sound
 #print axioms exprEq_sound

@@ -339,6 +339,26 @@ const cases = [
     "index": 56,
     "id": "bad-second-declaration",
     "expectedOutcome": false
+  },
+  {
+    "index": 57,
+    "id": "stable-slot-name-before-extension",
+    "expectedOutcome": true
+  },
+  {
+    "index": 58,
+    "id": "stable-slot-name-after-extension",
+    "expectedOutcome": true
+  },
+  {
+    "index": 59,
+    "id": "newest-slot-fresh-ordinal",
+    "expectedOutcome": true
+  },
+  {
+    "index": 60,
+    "id": "out-of-range-slot-has-no-name",
+    "expectedOutcome": false
   }
 ];
 assert.equal(nativeRows.length, cases.length + 2);
@@ -415,7 +435,7 @@ const receipt = { schema: 'psc1-min-regular-portability/1', commit: process.env.
   generatedTsBytes: fs.statSync(stem + '.ts').size,
   generatedJsBytes: fs.statSync(stem + '.js').size,
   generatedJsSha256: sha(fs.readFileSync(stem + '.js')),
-  positiveCases: 20, refusalCases: 37, outOfRangeProbes: 2,
+  positiveCases: 23, refusalCases: 38, outOfRangeProbes: 2,
   observations, sourceWitness, comparison: 'normalized-profile expected acceptance/refusal plus native/generated equality',
   theoremBoundary: 'Safe Lean normalized-profile inference/admission has a model and consistency proof; generated-code/canonical translation preservation is not formally proved',
   resourceBoundary: 'Structural recursion on finite Lean values; aggregate size, host stack and hostile JS objects are not qualified',

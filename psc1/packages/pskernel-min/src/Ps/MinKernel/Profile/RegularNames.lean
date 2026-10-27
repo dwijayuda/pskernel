@@ -9,3 +9,9 @@ def psMinRegConstructorName (index ctorIndex : Nat) : PsName :=
 
 def psMinRegRecursorName (index : Nat) : PsName :=
   PsName.str (psMinRegDataName index) "rec"
+
+-- Names use stable chronological ordinals; types use newest-first relative slots.
+def psMinRegOrdinal (count index : Nat) : Nat := Nat.sub count (Nat.succ index)
+
+def psMinRegSlotName (count index : Nat) : Option PsName :=
+  if Nat.blt index count then Option.some (psMinRegDataName (psMinRegOrdinal count index)) else Option.none

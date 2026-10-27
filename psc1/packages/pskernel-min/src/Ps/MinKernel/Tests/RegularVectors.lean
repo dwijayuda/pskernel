@@ -32,6 +32,11 @@ def psMinRegClosedCase (specs : List PsMinRegSpec) (type : PsMinRegTy) (expressi
   psMinRegAccepted 128 64 specs
     (List.cons (PsMinRegDeclaration.mk type expression) List.nil)
 
+def psMinRegSlotNameIs (count index : Nat) (expected : PsName) : Bool :=
+  match psMinRegSlotName count index with
+  | Option.none => false
+  | Option.some actual => psNameEq actual expected
+
 def psMinRegVector (index : Nat) : Bool :=
   if Nat.beq index 0 then psMinRegAccepted 0 0 List.nil List.nil
   else if Nat.beq index 1 then psMinRegClosedCase List.nil (PsMinRegTy.arr PsMinRegTy.nat PsMinRegTy.nat) (PsMinRegTerm.lam PsMinRegTy.nat (PsMinRegTerm.var 0))
@@ -90,4 +95,8 @@ def psMinRegVector (index : Nat) : Bool :=
   else if Nat.beq index 54 then psMinRegAccepted 128 0 (List.cons psMinRegTySpec List.nil) (List.cons (PsMinRegDeclaration.mk (PsMinRegTy.data 0) (PsMinRegTerm.ctor 0 0)) List.nil)
   else if Nat.beq index 55 then psMinRegAccepted 0 64 List.nil (List.cons (PsMinRegDeclaration.mk PsMinRegTy.nat (PsMinRegTerm.nat 7)) List.nil)
   else if Nat.beq index 56 then psMinRegAccepted 128 64 List.nil (List.cons (PsMinRegDeclaration.mk PsMinRegTy.nat (PsMinRegTerm.nat 7)) (List.cons (PsMinRegDeclaration.mk PsMinRegTy.empty (PsMinRegTerm.constant 0)) List.nil))
+  else if Nat.beq index 57 then psMinRegSlotNameIs 5 1 (psMinRegDataName 3)
+  else if Nat.beq index 58 then psMinRegSlotNameIs 6 2 (psMinRegDataName 3)
+  else if Nat.beq index 59 then psMinRegSlotNameIs 6 0 (psMinRegDataName 5)
+  else if Nat.beq index 60 then psMinRegSlotNameIs 5 5 (psMinRegDataName 0)
   else false

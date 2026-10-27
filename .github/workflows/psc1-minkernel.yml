@@ -83,7 +83,7 @@ jobs:
           import fs from 'node:fs';
           import assert from 'node:assert/strict';
           const text=fs.readFileSync('proofs/pskernel-min/proof.log','utf8');
-          const theorems={"Ps.MinKernel.RegularModel":["fold_construct","signatures"],"Ps.MinKernel.RegularProofs":["typeEq_sound","regular_hasModel","regular_consistent"],"Ps.MinKernel.RegularValidation":["registryValid_sound","registry_hasModel"],"Ps.MinKernel.RegularNames":["constructor_injective","recursor_injective","generated_root_disjoint"],"Ps.MinKernel.RegularSource":["source_instance_checked","checked_source_semantics","source_iota","source_motive_instantiation","actual_core_instance_model","checked_instance_core_model"]};
+          const theorems={"Ps.MinKernel.RegularModel":["fold_construct","signatures"],"Ps.MinKernel.RegularProofs":["typeEq_sound","regular_hasModel","regular_consistent"],"Ps.MinKernel.RegularValidation":["registryValid_sound","registry_hasModel"],"Ps.MinKernel.RegularNames":["constructor_injective","recursor_injective","generated_root_disjoint","slot_name_stable","slot_name_injective","generated_child_disjoint"],"Ps.MinKernel.RegularSource":["source_instance_checked","checked_source_semantics","source_iota","source_motive_instantiation","actual_core_instance_model","checked_instance_core_model"]};
           for(const [namespace,names] of Object.entries(theorems)) for(const name of names) {
             const line=text.split('\n').find(line=>line.includes("'"+namespace+"."+name+"'"));
             assert.ok(line,'missing regular-profile theorem '+namespace+'.'+name);

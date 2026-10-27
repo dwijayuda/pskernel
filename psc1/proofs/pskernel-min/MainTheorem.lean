@@ -57,9 +57,10 @@ theorem tyEq_sound (fuel : Nat) (left right : Ty)
 def inferModel (fuel : Nat) (globals locals : List Ty) (expression : Expr)
     (type : Ty) (globalModel : Model globals) (localModel : Model locals)
     (h : infer fuel globals locals expression = some type) : Denote type := by
-  cases fuel with
-  | zero => simp [infer] at h
+  cases hFuel : fuel with
+  | zero => simp [hFuel, infer] at h
   | succ remaining =>
+    simp only [hFuel] at h
     cases expression with
     | var index => exact localModel index type h
     | constant index => exact globalModel index type h
@@ -103,7 +104,8 @@ def inferModel (fuel : Nat) (globals locals : List Ty) (expression : Expr)
                 (inferModel remaining globals locals argument domain
                   globalModel localModel ha)
               exact ht ▸ output
-termination_by structural fuel
+termination_by fuel
+decreasing_by all_goals simp_all
 
 /- Successful sequential admission extends a model with the interpreted body.
    There is no assumption that an arbitrary supplied environment has a model. -/
@@ -118,9 +120,10 @@ def checkDeclarationsModel (termFuel declarationFuel : Nat)
     cases ht
     exact initialModel
   | cons declaration rest =>
-    cases declarationFuel with
-    | zero => simp [checkDeclarations] at h
+    cases hFuel : declarationFuel with
+    | zero => simp [hFuel, checkDeclarations] at h
     | succ remaining =>
+      simp only [hFuel] at h
       cases hb : infer termFuel globals [] declaration.value with
       | none => simp [checkDeclarations, hb] at h
       | some inferred =>
@@ -136,7 +139,8 @@ def checkDeclarationsModel (termFuel declarationFuel : Nat)
               initialModel emptyModel hb
           exact checkDeclarationsModel termFuel remaining
             (declaration.type :: globals) rest result (consModel value initialModel) hs
-termination_by structural declarationFuel
+termination_by declarationFuel
+decreasing_by all_goals simp_all
 
 def environmentModel (termFuel declarationFuel : Nat)
     (declarations : List Declaration) (types : List Ty)

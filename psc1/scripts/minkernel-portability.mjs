@@ -27,9 +27,7 @@ function run(command, args, input) {
 }
 const stem = path.join(dir, 'vectors');
 const started = performance.now();
-run('.lake/build/bin/psc1_sh1_compile', ['--kind', 'lean', '--out', stem + '.ts',
-  '--admissions', stem + '.admissions.json', '--report', stem + '.source.json',
-  '--sources', ...sources]);
+run('lake', ['env', 'lean', '--run', 'scripts/MinKernelSourceCompile.lean']);
 const compileMs = performance.now() - started;
 const admissions = fs.readFileSync(stem + '.admissions.json', 'utf8');
 const checker = '.lake/build/bin/psc1_independent_checker';
@@ -54,6 +52,39 @@ for (let index = 0; index < 16; index++) {
   observations.push({ index, accepted: value });
 }
 const coldImportAndVectorsMs = performance.now() - cold;
+// Finite, explicitly paired STLC/Core fixtures. This encoding is tested here;
+// no theorem about a general PSC1 canonical-to-fragment translation is implied.
+const name = value => ({ k: 's', p: { k: 'a' }, v: value });
+const nat = { k: 'const', n: name('Nat'), ls: [] };
+const literal = value => ({ k: 'nat', v: String(value) });
+const bound = { k: 'b', i: 0 };
+const lambda = { k: 'lam', n: name('x'), bi: 'default', t: nat, b: bound };
+const arrow = { k: 'forall', n: name('x'), bi: 'default', t: nat, b: nat };
+const constant = value => ({ k: 'const', n: name(value), ls: [] });
+const declaration = (n, v, t = nat) => ({ kind: 'constant', declaration: {
+  k: 'definition', h: { k: 'regular', h: '1' }, lp: [], n: name(n), s: 'safe', t, v } });
+const fixtures = [
+  { index: 0, id: 'empty-environment', declarations: [] },
+  { index: 1, id: 'nat-identity', declarations: [declaration('Min.Id', lambda, arrow)] },
+  { index: 2, id: 'sequential-prior-constant', declarations: [declaration('Min.A', literal(7)),
+    declaration('Min.B', constant('Min.A'))] },
+  { index: 4, id: 'beta-application', declarations: [declaration('Min.Apply',
+    { k: 'app', f: lambda, a: literal(7) })] },
+  { index: 8, id: 'forward-reference-refusal', declarations: [declaration('Min.Future', constant('Min.Future'))] },
+];
+const differential = fixtures.map(fixture => {
+  const input = JSON.stringify({ protocol: 'pskernel-lean/1', format: 'proofscript-checked-admissions',
+    version: 2, admissions: fixture.declarations });
+  const before = performance.now();
+  const result = JSON.parse(run(checker, ['--check'], input));
+  assert.equal(result.leanCommit, official.leanCommit);
+  const nativeProcessMs = performance.now() - before;
+  const beforeMin = performance.now();
+  const accepted = vector(BigInt(fixture.index));
+  const generatedInProcessMs = performance.now() - beforeMin;
+  assert.equal(result.accepted, accepted, fixture.id);
+  return { id: fixture.id, accepted, canonicalSha256: sha(input), nativeProcessMs, generatedInProcessMs };
+});
 const warm = performance.now();
 for (let iteration = 0; iteration < 10000; iteration++)
   for (let index = 0; index < 16; index++) assert.equal(vector(BigInt(index)), index < 5);
@@ -64,7 +95,7 @@ const receipt = { schema: 'psc1-min-kernel-portability/1', commit: process.env.G
   generatedVectorExport: exportName[0], observations, generatedTsBytes: fs.statSync(stem + '.ts').size,
   generatedJsBytes: fs.statSync(stem + '.js').size, generatedJsSha256: sha(fs.readFileSync(stem + '.js')),
   admissionsSha256: sha(admissions), officialCheckerSha256: sha(fs.readFileSync(checker)),
-  officialSourceAdmission: official, compileMs, officialSourceAdmissionMs,
+  officialSourceAdmission: official, differential, compileMs, officialSourceAdmissionMs,
   coldImportAndVectorsMs, warm160000VectorsMs, memoryUsage: process.memoryUsage(),
   nativeCheckerSource: 'actual current PSC1 source compiler; not a generated compiler generation',
   trust: 'Lean-to-IR/backend preservation is empirically exercised, not formally proved',

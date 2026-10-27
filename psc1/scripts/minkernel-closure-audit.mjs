@@ -180,7 +180,7 @@ function finish(counter) {
   return counter;
 }
 const foundationalAxioms = prelude.filter(row => row.kind === 'axiom').map(row => row.name).sort();
-const usedFoundationalAxioms = foundationalAxioms.filter(name => compiler.constants[name]);
+const directlyReferencedFoundationalAxioms = foundationalAxioms.filter(name => compiler.constants[name]);
 const primitiveFamilies = ['Nat', 'Int', 'Bool', 'String', 'Array', 'List', 'Option', 'Except', 'Prod', 'Quot', 'Quotient'];
 const primitiveReferences = Object.fromEntries(primitiveFamilies.map(family => [family,
   Object.entries(compiler.constants).filter(([name]) => name === family || name.startsWith(family + '.'))
@@ -199,7 +199,7 @@ const report = {
   sourceBytes: sources.reduce((count, row) => count + row.bytes, 0),
   compiler: finish(compiler), foundation: finish(foundation),
   canonicalAdmissionRecords: canonical.admissions.length,
-  preludeDeclarationCount: prelude.length, foundationalAxioms, usedFoundationalAxioms, primitiveReferences,
+  preludeDeclarationCount: prelude.length, foundationalAxioms, directlyReferencedFoundationalAxioms, primitiveReferences,
   officialNativeAdmission: 'accepted-exact-retained-bytes-by-production-probe',
   originalStrictIr: 'accepted', grammarParity: 'not-measured-by-this-audit',
   reductionUse: 'Syntax counts do not measure which beta/delta/zeta/iota/DefEq rules execute; profiling remains pending.',

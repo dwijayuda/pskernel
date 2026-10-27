@@ -6,6 +6,7 @@ on:
       - psc1/packages/pskernel-min/**
       - psc1/proofs/pskernel-min/**
       - psc1/scripts/minkernel-*
+      - psc1/scripts/MinKernelSourceCompile.lean
       - .github/workflows/psc1-minkernel.yml
   workflow_dispatch:
 permissions:
@@ -100,7 +101,7 @@ jobs:
         run: |
           set -euo pipefail
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1_sh1_compile psc1_independent_checker psc1_source_census_probe psc2_joint_closure_inventory
+          lake build PsBackendTs psc1_independent_checker psc1_source_census_probe psc2_joint_closure_inventory
       - name: Compile and execute checker source through PSC1 and check exact source admissions
         run: node scripts/minkernel-portability.mjs
       - name: Measure complete current compiler admission graph and foundation

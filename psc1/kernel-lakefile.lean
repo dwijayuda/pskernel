@@ -443,4 +443,6 @@ lean_exe psc1_kernel_ordinary_admission_public_regression where
 -- Real public-decoder to generated-owner semantic continuation bridge.
 lean_lib PsKernelGeneratedContinuationNativeProofs where
   srcDir := "test"
-  roots := #[`PsKernelExprV2GeneratedContinuationProofs]
+  roots := #[`PsKernelExprV2ReplayMetadataProofs, `PsKernelExprV2SemanticPrefixProofs,
+    `PsKernelExprV2DecodedNodeProofs, `PsKernelExprV2DecodedBridgeProofs,
+    `PsKernelExprV2ArenaModelBridgeProofs, `PsKernelExprV2GeneratedContinuationProofs]

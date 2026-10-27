@@ -72,6 +72,7 @@ def main (args : List String) : IO Unit := do
       (["Ps", "MinKernel", "Profile", "CoreBytes"], "packages/pskernel-min/src/Ps/MinKernel/Profile/CoreBytes.lean"),
       (["Ps", "MinKernel", "Profile", "CoreIngress"], "packages/pskernel-min/src/Ps/MinKernel/Profile/CoreIngress.lean"),
       (["Ps", "MinKernel", "Profile", "RegularIngressProfile"], "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularIngressProfile.lean"),
+      (["Ps", "MinKernel", "Profile", "RegularIngressOperational"], "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularIngressOperational.lean"),
       (["Ps", "MinKernel", "Profile", "RegularIngressCheck"], "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularIngressCheck.lean"),
       (["Ps", "MinKernel", "Profile", "RegularIngressBytes"], "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularIngressBytes.lean"),
       (["Ps", "MinKernel", "Tests", "RegularIngressVectors"], "packages/pskernel-min/src/Ps/MinKernel/Tests/RegularIngressVectors.lean")]

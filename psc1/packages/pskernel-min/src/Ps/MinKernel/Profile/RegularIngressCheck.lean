@@ -1,4 +1,4 @@
-import Ps.MinKernel.Profile.RegularIngressProfile
+import Ps.MinKernel.Profile.RegularIngressOperational
 
 -- Every declared constructor type is checked again against the derived ambient
 -- signature. This closes source/context rebasing through the actual type checker.
@@ -57,34 +57,8 @@ def psMinRegCoreTypedPrimitive (total visible : Nat) (groups : List PsMinRegCore
     | _ => Option.none
   | _ => Option.none
 
--- A user recursor's result code belongs to its own family/older prefix.
--- Lowering is partial: references to newer families cannot be represented by R2.
-def psMinRegCoreLowerType (fuel amount : Nat) (type : PsMinRegTy) : Option PsMinRegTy :=
-  match fuel with
-  | Nat.zero => Option.none
-  | Nat.succ remaining =>
-    match type with
-    | .empty => Option.some PsMinRegTy.empty
-    | .unit => Option.some PsMinRegTy.unit
-    | .nat => Option.some PsMinRegTy.nat
-    | .boolean => Option.some PsMinRegTy.boolean
-    | .data index => if Nat.blt index amount then Option.none else
-        Option.some (PsMinRegTy.data (Nat.sub index amount))
-    | .arr domain result =>
-      match psMinRegCoreLowerType remaining amount domain with
-      | Option.none => Option.none
-      | Option.some a => match psMinRegCoreLowerType remaining amount result with
-        | Option.none => Option.none
-        | Option.some b => Option.some (PsMinRegTy.arr a b)
-    | .list element => match psMinRegCoreLowerType remaining amount element with
-      | Option.none => Option.none
-      | Option.some a => Option.some (PsMinRegTy.list a)
-    | .option element => match psMinRegCoreLowerType remaining amount element with
-      | Option.none => Option.none
-      | Option.some a => Option.some (PsMinRegTy.option a)
-
 def psMinRegCoreRecursor (total visible : Nat) (groups : List PsMinRegCorePlan)
-    (expr : PsMinCoreExpr) : Option PsMinOpTerm :=
+    (expr : PsMinCoreExpr) : Option PsMinRegCoreTerm :=
   match expr with
   | .app head motive =>
     match head with
@@ -94,17 +68,13 @@ def psMinRegCoreRecursor (total visible : Nat) (groups : List PsMinRegCorePlan)
           match psMinRegCoreMotiveType total visible groups (PsMinCoreExpr.constant (PsMinCoreName.str PsMinCoreName.anonymous [78, 97, 116]) List.nil) motive with
           | Option.none => Option.none
           | Option.some result => Option.some
-              (PsMinOpTerm.primitive (PsMinOpPrimitive.natRec result) 1 0 0 1 2)
+              (PsMinRegCoreTerm.ordinary (PsMinOpTerm.primitive (PsMinOpPrimitive.natRec result) 1 0 0 1 2))
         else match psMinRegCoreFindRecursor total visible groups name with
           | Option.none => Option.none
           | Option.some binding =>
             match psMinRegCoreMotiveType total visible groups (PsMinCoreExpr.constant binding.owner List.nil) motive with
             | Option.none => Option.none
-            | Option.some result =>
-              match psMinRegCoreLowerType 256 binding.slot result with
-              | Option.none => Option.none
-              | Option.some localResult => Option.some (PsMinOpTerm.base
-                  (PsMinRegTerm.recursor binding.slot 1 0 0 1 binding.minors localResult))
+            | Option.some result => Option.some (PsMinRegCoreTerm.recursor binding.slot result)
       else Option.none
     | .app base element =>
       match base with
@@ -119,13 +89,13 @@ def psMinRegCoreRecursor (total visible : Nat) (groups : List PsMinRegCorePlan)
                     (PsMinCoreExpr.app (PsMinCoreExpr.constant (PsMinCoreName.str PsMinCoreName.anonymous [76, 105, 115, 116]) List.nil) element) motive with
                 | Option.none => Option.none
                 | Option.some result => Option.some
-                    (PsMinOpTerm.primitive (PsMinOpPrimitive.listRec a result) 1 1 0 1 2)
+                    (PsMinRegCoreTerm.ordinary (PsMinOpTerm.primitive (PsMinOpPrimitive.listRec a result) 1 1 0 1 2))
               else if psMinCoreNameEq name (PsMinCoreName.str (PsMinCoreName.str PsMinCoreName.anonymous [79, 112, 116, 105, 111, 110]) [114, 101, 99]) then
                 match psMinRegCoreMotiveType total visible groups
                     (PsMinCoreExpr.app (PsMinCoreExpr.constant (PsMinCoreName.str PsMinCoreName.anonymous [79, 112, 116, 105, 111, 110]) List.nil) element) motive with
                 | Option.none => Option.none
                 | Option.some result => Option.some
-                    (PsMinOpTerm.primitive (PsMinOpPrimitive.optionRec a result) 1 1 0 1 2)
+                    (PsMinRegCoreTerm.ordinary (PsMinOpTerm.primitive (PsMinOpPrimitive.optionRec a result) 1 1 0 1 2))
               else Option.none
             else Option.none
         else Option.none
@@ -135,7 +105,7 @@ def psMinRegCoreRecursor (total visible : Nat) (groups : List PsMinRegCorePlan)
 
 -- Unlike the first domain, source terms may use validated regular data heads.
 def psMinRegCoreTranslate (fuel total visible : Nat) (groups : List PsMinRegCorePlan)
-    (names : List PsMinCoreName) (expr : PsMinCoreExpr) : Option PsMinOpTerm :=
+    (names : List PsMinCoreName) (expr : PsMinCoreExpr) : Option PsMinRegCoreTerm :=
   match fuel with
   | Nat.zero => Option.none
   | Nat.succ rest =>
@@ -154,39 +124,39 @@ def psMinRegCoreTranslate (fuel total visible : Nat) (groups : List PsMinRegCore
               | Option.some yes => match psMinRegCoreTranslate rest total visible groups names view.no with
                 | Option.none => Option.none
                 | Option.some no => Option.some
-                  (PsMinOpTerm.app (PsMinOpTerm.app (PsMinOpTerm.app (PsMinOpTerm.app
-                    (PsMinOpTerm.primitive (PsMinOpPrimitive.boolEqIte type) 1 1 0 0 0) left) right) yes) no)
+                  (PsMinRegCoreTerm.app (PsMinRegCoreTerm.app (PsMinRegCoreTerm.app (PsMinRegCoreTerm.app
+                    (PsMinRegCoreTerm.ordinary (PsMinOpTerm.primitive (PsMinOpPrimitive.boolEqIte type) 1 1 0 0 0)) left) right) yes) no)
         else Option.none
     | Option.none =>
       match psMinRegCoreTypedPrimitive total visible groups expr with
-      | Option.some primitive => Option.some primitive
+      | Option.some primitive => Option.some (PsMinRegCoreTerm.ordinary primitive)
       | Option.none =>
         match psMinRegCoreRecursor total visible groups expr with
         | Option.some primitive => Option.some primitive
         | Option.none => match expr with
-          | .bvar index => Option.some (PsMinOpTerm.base (PsMinRegTerm.var index))
-          | .natural value => Option.some (PsMinOpTerm.base (PsMinRegTerm.nat value))
+          | .bvar index => Option.some (PsMinRegCoreTerm.ordinary (PsMinOpTerm.base (PsMinRegTerm.var index)))
+          | .natural value => Option.some (PsMinRegCoreTerm.ordinary (PsMinOpTerm.base (PsMinRegTerm.nat value)))
           | .constant name levels => if psMinByteEq levels List.nil then
               match psMinCorePrimitive name with
-              | Option.some primitive => Option.some primitive
+              | Option.some primitive => Option.some (PsMinRegCoreTerm.ordinary primitive)
               | Option.none => match psMinRegCoreFindConstructor total visible groups name with
-                | Option.some binding => Option.some (PsMinOpTerm.base (PsMinRegTerm.ctor binding.slot binding.index))
+                | Option.some binding => Option.some (PsMinRegCoreTerm.ordinary (PsMinOpTerm.base (PsMinRegTerm.ctor binding.slot binding.index)))
                 | Option.none => match psMinCoreResolve names name with
                   | Option.none => Option.none
-                  | Option.some index => Option.some (PsMinOpTerm.base (PsMinRegTerm.constant index))
+                  | Option.some index => Option.some (PsMinRegCoreTerm.ordinary (PsMinOpTerm.base (PsMinRegTerm.constant index)))
             else Option.none
           | .app fn arg =>
             match psMinRegCoreTranslate rest total visible groups names fn with
             | Option.none => Option.none
             | Option.some f => match psMinRegCoreTranslate rest total visible groups names arg with
               | Option.none => Option.none
-              | Option.some a => Option.some (PsMinOpTerm.app f a)
+              | Option.some a => Option.some (PsMinRegCoreTerm.app f a)
           | .lam _ _ type body =>
             match psMinRegCoreType 256 total visible groups type with
             | Option.none => Option.none
             | Option.some t => match psMinRegCoreTranslate rest total visible groups names body with
               | Option.none => Option.none
-              | Option.some b => Option.some (PsMinOpTerm.lam t b)
+              | Option.some b => Option.some (PsMinRegCoreTerm.lam t b)
           | .letE _ type value body =>
             match psMinRegCoreType 256 total visible groups type with
             | Option.none => Option.none
@@ -194,19 +164,19 @@ def psMinRegCoreTranslate (fuel total visible : Nat) (groups : List PsMinRegCore
               | Option.none => Option.none
               | Option.some v => match psMinRegCoreTranslate rest total visible groups names body with
                 | Option.none => Option.none
-                | Option.some b => Option.some (PsMinOpTerm.letE t v b)
+                | Option.some b => Option.some (PsMinRegCoreTerm.letE t v b)
           | .projection owner field major =>
             match psMinRegCoreGroupSlot total visible groups owner with
             | Option.none => Option.none
             | Option.some slot => match psMinRegCoreTranslate rest total visible groups names major with
               | Option.none => Option.none
-              | Option.some value => Option.some (PsMinOpTerm.app (PsMinOpTerm.projection slot field) value)
+              | Option.some value => Option.some (PsMinRegCoreTerm.app (PsMinRegCoreTerm.ordinary (PsMinOpTerm.projection slot field)) value)
           | _ => Option.none
 
 -- Original entries remain ordered. A group changes visibility, never the global
 -- definition context; all type codes are rebased into the final validated registry.
 def psMinRegCoreTranslateEntries (fuel total visible : Nat) (groups : List PsMinRegCorePlan)
-    (names : List PsMinCoreName) (entries : List PsMinRegCoreEntry) : Option (List PsMinOpDeclaration) :=
+    (names : List PsMinCoreName) (entries : List PsMinRegCoreEntry) : Option (List PsMinRegCoreDefinition) :=
   match entries with
   | List.nil => Option.some List.nil
   | List.cons entry rest =>
@@ -223,11 +193,11 @@ def psMinRegCoreTranslateEntries (fuel total visible : Nat) (groups : List PsMin
           | Option.some value =>
             match psMinRegCoreTranslateEntries remaining total visible groups (List.cons decl.name names) rest with
             | Option.none => Option.none
-            | Option.some tail => Option.some (List.cons (PsMinOpDeclaration.mk type value) tail)
+            | Option.some tail => Option.some (List.cons (PsMinRegCoreDefinition.mk type value) tail)
 
 structure PsMinRegCoreChecked where
   plans : PsMinRegCoreState
-  normalized : List PsMinOpDeclaration
+  normalized : List PsMinRegCoreDefinition
   types : List PsMinRegTy
 
 -- Typed AST admission is internal. The bounded byte certificate guard is composed
@@ -240,7 +210,7 @@ def psMinRegCoreCheckEntries (entries : List PsMinRegCoreEntry) : Option PsMinRe
       match psMinRegCoreTranslateEntries 512 state.count 0 state.groups List.nil entries with
       | Option.none => Option.none
       | Option.some normalized =>
-        match psMinOpCheckEnvironment 512 512 (psMinRegCoreSpecs state.groups) normalized with
+        match psMinRegCoreCheckEnvironment 512 512 (psMinRegCoreSpecs state.groups) normalized with
         | Option.none => Option.none
         | Option.some types => Option.some (PsMinRegCoreChecked.mk state normalized types)
     else Option.none

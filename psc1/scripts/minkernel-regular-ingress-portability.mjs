@@ -35,7 +35,7 @@ assert.equal(official.accepted,true);
 assert.equal(official.leanVersion,'4.35.0');
 assert.equal(official.leanCommit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
 const report=JSON.parse(fs.readFileSync(stem+'.source.json'));
-assert.equal(report.moduleCount,10);assert.equal(report.origins.length,10);
+assert.equal(report.moduleCount,11);assert.equal(report.origins.length,11);
 run(process.execPath,[resolveTypeScriptCli(),...typeScriptProfileArgs([stem+'.ts','--target','ES2022',
  '--module','ES2022','--moduleResolution','bundler','--strict','--skipLibCheck','--noEmitOnError','--pretty','false'])]);
 const G=await import(pathToFileURL(path.resolve(stem+'.js')).href);
@@ -77,7 +77,7 @@ assert.equal(check(own).accepted,true);assert.equal(touched,0);
 const stable=v=>Array.isArray(v)?v.map(stable):v&&typeof v==='object'
  ?Object.fromEntries(Object.keys(v).sort().map(k=>[k,stable(v[k])])):v;
 const key=n=>JSON.stringify(stable(n));
-const wire=JSON.parse(admissionBytes),runtimeOrigins=report.origins.slice(0,9);
+const wire=JSON.parse(admissionBytes),runtimeOrigins=report.origins.slice(0,10);
 const names=new Set(runtimeOrigins.flatMap(m=>m.batches.flatMap(b=>b.members.map(x=>key(x.nameWire)))));
 const owned=r=>r.kind==='constant'?[r.declaration.n]:r.kind==='inductive'
  ?r.declaration.ts.flatMap(t=>[t.n,...t.cs.map(c=>c.n)]):[];
@@ -88,12 +88,12 @@ assert.ok(Buffer.byteLength(runtimeBytes)<=regularIngressLimits.bytes,'complete 
 const runtimeOfficial=JSON.parse(run('.lake/build/bin/psc1_independent_checker',['--check'],runtimeBytes));
 assert.equal(runtimeOfficial.accepted,true);
 const sources=['RegularProfile','RegularCheck','OperationalProfile','OperationalCheck','CoreBytes','CoreIngress',
- 'RegularIngressProfile','RegularIngressCheck','RegularIngressBytes'].map(n=>'packages/pskernel-min/src/Ps/MinKernel/Profile/'+n+'.lean');
+ 'RegularIngressProfile','RegularIngressOperational','RegularIngressCheck','RegularIngressBytes'].map(n=>'packages/pskernel-min/src/Ps/MinKernel/Profile/'+n+'.lean');
 const receipt={schema:'psc1-min-regular-ingress-portability/1',commit:process.env.GITHUB_SHA,authoritative:false,
  productionCanonicalMinDual:false,sourceIdentities:sources.map(p=>({path:p,bytes:fs.statSync(p).size,sha256:sha(fs.readFileSync(p))})),
  sourceReport:report,officialSourceAdmission:official,officialCommon,runtimeOfficial,
  generatedTsBytes:fs.statSync(stem+'.ts').size,generatedJsBytes:fs.statSync(stem+'.js').size,
- runtime:{modules:9,originMembers:names.size,admissionRecords:runtimeRecords.length,bytes:Buffer.byteLength(runtimeBytes),sha256:sha(runtimeBytes)},
+ runtime:{modules:10,originMembers:names.size,admissionRecords:runtimeRecords.length,bytes:Buffer.byteLength(runtimeBytes),sha256:sha(runtimeBytes)},
  positives:cases.filter(c=>c.expected).length,refusals:cases.filter(c=>!c.expected).length,hostile:hostile.length,observations,
  nativeSelf:false,generatedSelf:false,boundary:'Runtime execution evidence; full raw source and streaming wire proof obligations remain separate.'};
 const save=()=>fs.writeFileSync(path.join(dir,'receipt.json'),JSON.stringify(receipt,null,2)+'\n');save();

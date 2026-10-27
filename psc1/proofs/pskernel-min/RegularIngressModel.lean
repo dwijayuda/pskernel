@@ -1,4 +1,5 @@
 import OperationalSoundness
+import RegularIngressOperationalModel
 import CoreIngress
 import Ps.MinKernel.Profile.RegularIngressBytes
 
@@ -6,6 +7,7 @@ namespace Ps.MinKernel.RegularIngressModel
 open Ps.MinKernel.CoreIngress
 open Ps.MinKernel.RegularModel
 open Ps.MinKernel.RegularProofs
+open Ps.MinKernel.RegularIngressOperationalModel
 
 -- This module records the backend boundary. Raw source interpretation and the
 -- streaming wire grammar are separate obligations and are not claimed by it.
@@ -33,7 +35,10 @@ theorem decode_preserves_source (bytes : List Nat) (candidate source : List PsMi
 theorem checked_entries_has_normalized_model (entries : List PsMinRegCoreEntry)
     (result : PsMinRegCoreChecked) (h : psMinRegCoreCheckEntries entries = some result) :
     Nonempty (Model (dataModel (psMinRegCoreSpecs result.plans.groups)) result.types) ∧
-    ∃ output, OperationalProofs.DefinitionHistory 512 (psMinRegCoreSpecs result.plans.groups)
+    ∃ output, RegularIngressOperationalModel.DefinitionHistory
+      (dataModel (psMinRegCoreSpecs result.plans.groups)) (psMinRegCoreSpecs result.plans.groups)
+      (actualOrdinary (psMinRegCoreSpecs result.plans.groups))
+      (actualRecursors (psMinRegCoreSpecs result.plans.groups))
       [] result.normalized result.types (emptyModel (dataModel (psMinRegCoreSpecs result.plans.groups))) output := by
   unfold psMinRegCoreCheckEntries at h
   cases hp : psMinRegCorePlans entries with
@@ -45,13 +50,14 @@ theorem checked_entries_has_normalized_model (entries : List PsMinRegCoreEntry)
       cases ht : psMinRegCoreTranslateEntries 512 state.count 0 state.groups [] entries with
       | none => simp [ht] at h
       | some normalized =>
-        cases hc : psMinOpCheckEnvironment 512 512 (psMinRegCoreSpecs state.groups) normalized with
+        cases hc : psMinRegCoreCheckEnvironment 512 512 (psMinRegCoreSpecs state.groups) normalized with
         | none => simp [ht, hc] at h
         | some types =>
           simp only [ht, hc, Option.some.injEq] at h
           subst result
-          exact ⟨OperationalProofs.operational_hasModel _ _ _ _ _ hc,
-            OperationalProofs.operational_hasBodyHistory _ _ _ _ _ hc⟩
+          refine ⟨environment_has_model _ _ _ _ _ hc, ?_⟩
+          let witness := environment_history 512 512 (psMinRegCoreSpecs state.groups) normalized types hc
+          exact ⟨witness.val, witness.property⟩
     next => contradiction
 
 theorem regular_byte_admission_has_normalized_model (bytes : List Nat) (candidate : List PsMinRegCoreEntry)

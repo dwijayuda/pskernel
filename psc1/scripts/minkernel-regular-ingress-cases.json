@@ -7942,7 +7942,7 @@
   },
   {
     "index": 51,
-    "id": "newer-family-recursor-result-outside-domain",
+    "id": "earlier-family-recursor-newer-result",
     "source": "{\"admissions\":[{\"declaration\":{\"lp\":[],\"np\":0,\"ts\":[{\"cs\":[{\"n\":{\"k\":\"s\",\"p\":{\"k\":\"s\",\"p\":{\"k\":\"a\"},\"v\":\"Older\"},\"v\":\"mk\"},\"t\":{\"k\":\"const\",\"ls\":[],\"n\":{\"k\":\"s\",\"p\":{\"k\":\"a\"},\"v\":\"Older\"}}}],\"n\":{\"k\":\"s\",\"p\":{\"k\":\"a\"},\"v\":\"Older\"},\"t\":{\"k\":\"sort\",\"l\":{\"k\":\"s\",\"o\":{\"k\":\"z\"}}}}]},\"kind\":\"inductive\"},{\"declaration\":{\"lp\":[],\"np\":0,\"ts\":[{\"cs\":[{\"n\":{\"k\":\"s\",\"p\":{\"k\":\"s\",\"p\":{\"k\":\"a\"},\"v\":\"Newer\"},\"v\":\"mk\"},\"t\":{\"k\":\"const\",\"ls\":[],\"n\":{\"k\":\"s\",\"p\":{\"k\":\"a\"},\"v\":\"Newer\"}}}],\"n\":{\"k\":\"s\",\"p\":{\"k\":\"a\"},\"v\":\"Newer\"},\"t\":{\"k\":\"sort\",\"l\":{\"k\":\"s\",\"o\":{\"k\":\"z\"}}}}]},\"kind\":\"inductive\"},{\"declaration\":{\"h\":{\"h\":\"0\",\"k\":\"regular\"},\"k\":\"definition\",\"lp\":[],\"n\":{\"k\":\"s\",\"p\":{\"k\":\"a\"},\"v\":\"answer\"},\"s\":\"safe\",\"t\":{\"k\":\"const\",\"ls\":[],\"n\":{\"k\":\"s\",\"p\":{\"k\":\"a\"},\"v\":\"Newer\"}},\"v\":{\"a\":{\"k\":\"const\",\"ls\":[],\"n\":{\"k\":\"s\",\"p\":{\"k\":\"s\",\"p\":{\"k\":\"a\"},\"v\":\"Older\"},\"v\":\"mk\"}},\"f\":{\"a\":{\"k\":\"const\",\"ls\":[],\"n\":{\"k\":\"s\",\"p\":{\"k\":\"s\",\"p\":{\"k\":\"a\"},\"v\":\"Newer\"},\"v\":\"mk\"}},\"f\":{\"a\":{\"b\":{\"k\":\"const\",\"ls\":[],\"n\":{\"k\":\"s\",\"p\":{\"k\":\"a\"},\"v\":\"Newer\"}},\"bi\":\"default\",\"k\":\"lam\",\"n\":{\"k\":\"s\",\"p\":{\"k\":\"a\"},\"v\":\"x\"},\"t\":{\"k\":\"const\",\"ls\":[],\"n\":{\"k\":\"s\",\"p\":{\"k\":\"a\"},\"v\":\"Older\"}}},\"f\":{\"k\":\"const\",\"ls\":[{\"k\":\"s\",\"o\":{\"k\":\"z\"}}],\"n\":{\"k\":\"s\",\"p\":{\"k\":\"s\",\"p\":{\"k\":\"a\"},\"v\":\"Older\"},\"v\":\"rec\"}},\"k\":\"app\"},\"k\":\"app\"},\"k\":\"app\"}},\"kind\":\"constant\"}],\"format\":\"proofscript-checked-admissions\",\"version\":2}",
     "candidate": {
       "admissions": [
@@ -8180,6 +8180,6 @@
       "format": "proofscript-checked-admissions",
       "version": 2
     },
-    "expected": false
+    "expected": true
   }
 ]

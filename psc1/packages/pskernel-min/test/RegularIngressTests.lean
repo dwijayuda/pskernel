@@ -134,38 +134,29 @@ def debugType : PsMinRegTy → String
   | .option a => "Option(" ++ debugType a ++ ")"
 
 def debugInfer (fuel : Nat) (specs : List PsMinRegSpec) (globals locals : List PsMinRegTy)
-    (term : PsMinOpTerm) : String :=
+    (term : PsMinRegCoreTerm) : String :=
   match fuel with
   | 0 => "diagnostic-depth"
   | fuel + 1 =>
-    if (psMinOpInfer 512 specs globals locals term).isSome then "accepted" else
+    if (psMinRegCoreInfer 512 specs globals locals term).isSome then "accepted" else
     match term with
-    | .base base =>
-      match base with
-      | .ctor slot index => "constructor " ++ toString slot ++ ":" ++ toString index
-      | .recursor slot l p i m n result =>
-        "recursor " ++ toString slot ++ " result=" ++ debugType result ++ " metadata=" ++ toString [l,p,i,m,n]
-      | .var index => "variable " ++ toString index ++ " locals=" ++ toString locals.length
-      | .constant index => "constant " ++ toString index ++ " globals=" ++ toString globals.length
-      | _ => "base"
-    | .primitive _ l p i m n => "primitive metadata=" ++ toString [l,p,i,m,n]
-    | .projection slot field => "projection " ++ toString slot ++ ":" ++ toString field
+    | .ordinary _ => "ordinary-atom"
+    | .recursor slot result => "ambient-recursor " ++ toString slot ++ " result=" ++ debugType result
     | .lam domain body =>
       if !psMinRegTyValid 511 (psMinRegSpecCount specs) domain then "lambda-domain:" ++ debugType domain else
         "lambda-body:" ++ debugInfer fuel specs globals (domain :: locals) body
     | .letE type value body =>
       if !psMinRegTyValid 511 (psMinRegSpecCount specs) type then "let-type:" ++ debugType type else
-      match psMinOpInfer 511 specs globals locals value with
+      match psMinRegCoreInfer 511 specs globals locals value with
       | none => "let-value:" ++ debugInfer fuel specs globals locals value
       | some inferred => if !psMinRegTyEq 511 inferred type then
           "let-mismatch inferred=" ++ debugType inferred ++ " declared=" ++ debugType type else
           "let-body:" ++ debugInfer fuel specs globals (type :: locals) body
     | .app fn argument =>
-      match psMinOpInfer 511 specs globals locals fn with
+      match psMinRegCoreInfer 511 specs globals locals fn with
       | none => "app-fn:" ++ debugInfer fuel specs globals locals fn
       | some fnType => match fnType with
-        | .arr domain _ =>
-          match psMinOpInfer 511 specs globals locals argument with
+        | .arr domain _ => match psMinRegCoreInfer 511 specs globals locals argument with
           | none => "app-arg:" ++ debugInfer fuel specs globals locals argument
           | some inferred => "app-mismatch domain=" ++ debugType domain ++ " argument=" ++ debugType inferred
         | _ => "app-nonfunction:" ++ debugType fnType
@@ -201,7 +192,7 @@ def diagnose (bytes : ByteArray) (entries : List PsMinRegCoreEntry) : IO Unit :=
   let mut globals := []
   let mut definitionIndex := 0
   for declaration in normalized do
-    let inferred := psMinOpInfer 512 specs globals [] declaration.value
+    let inferred := psMinRegCoreInfer 512 specs globals [] declaration.value
     let agrees := match inferred with
       | none => false
       | some type => psMinRegTyEq 512 type declaration.type

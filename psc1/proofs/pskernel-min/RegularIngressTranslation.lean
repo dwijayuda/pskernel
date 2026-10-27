@@ -2,6 +2,33 @@ import RegularIngressModel
 import Ps.MinKernel.Profile.RegularIngressOperational
 import CoreTranslation
 
+-- A user recursor's result code belongs to its own family/older prefix.
+-- Lowering is partial: references to newer families cannot be represented by R2.
+def psMinRegCoreLowerType (fuel amount : Nat) (type : PsMinRegTy) : Option PsMinRegTy :=
+  match fuel with
+  | Nat.zero => Option.none
+  | Nat.succ remaining =>
+    match type with
+    | .empty => Option.some PsMinRegTy.empty
+    | .unit => Option.some PsMinRegTy.unit
+    | .nat => Option.some PsMinRegTy.nat
+    | .boolean => Option.some PsMinRegTy.boolean
+    | .data index => if Nat.blt index amount then Option.none else
+        Option.some (PsMinRegTy.data (Nat.sub index amount))
+    | .arr domain result =>
+      match psMinRegCoreLowerType remaining amount domain with
+      | Option.none => Option.none
+      | Option.some a => match psMinRegCoreLowerType remaining amount result with
+        | Option.none => Option.none
+        | Option.some b => Option.some (PsMinRegTy.arr a b)
+    | .list element => match psMinRegCoreLowerType remaining amount element with
+      | Option.none => Option.none
+      | Option.some a => Option.some (PsMinRegTy.list a)
+    | .option element => match psMinRegCoreLowerType remaining amount element with
+      | Option.none => Option.none
+      | Option.some a => Option.some (PsMinRegTy.option a)
+
+
 namespace Ps.MinKernel.RegularIngressTranslation
 open Ps.MinKernel.CoreIngress
 open Ps.MinKernel.CoreTranslation
@@ -310,7 +337,8 @@ theorem build_plans_order (fuel : Nat) (entries : List PsMinRegCoreEntry)
       | definition declaration =>
         simp only [psMinRegCoreBuildPlans] at h
         split at h
-        next fresh => exact ih rest _ final order h
+        next fresh => exact ih rest
+          (PsMinRegCoreState.mk initial.groups (declaration.name :: initial.used) initial.count) final order h
         next => contradiction
       | inductiveE group =>
         cases hg : psMinRegCoreBuildGroup initial group with

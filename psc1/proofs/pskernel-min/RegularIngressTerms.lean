@@ -209,6 +209,117 @@ theorem typed_primitive_translation (total visible : Nat) (groups : List PsMinRe
   | _ => simp [psMinRegCoreTypedPrimitive] at h
 
 
+inductive RecursorImage (total visible : Nat) (groups : List PsMinRegCorePlan) :
+    PsMinCoreExpr → PsMinRegCoreTerm → Prop where
+  | nat (motive result)
+      (meaning : MotiveImage total visible groups
+        (.constant (.str PsMinCoreName.anonymous [78,97,116]) []) motive result) :
+      RecursorImage total visible groups
+        (.app (.constant (.str (.str PsMinCoreName.anonymous [78,97,116]) [114,101,99]) [1]) motive)
+        (.ordinary (.primitive (.natRec result) 1 0 0 1 2))
+  | list (element motive a result)
+      (elementType : RegularIngressTranslation.TypeImage total visible groups element a)
+      (elementSort : sourceSort a = 1)
+      (meaning : MotiveImage total visible groups
+        (.app (.constant (.str PsMinCoreName.anonymous [76,105,115,116]) []) element) motive result) :
+      RecursorImage total visible groups
+        (.app (.app (.constant (.str (.str PsMinCoreName.anonymous [76,105,115,116]) [114,101,99]) [1]) element) motive)
+        (.ordinary (.primitive (.listRec a result) 1 1 0 1 2))
+  | option (element motive a result)
+      (elementType : RegularIngressTranslation.TypeImage total visible groups element a)
+      (elementSort : sourceSort a = 1)
+      (meaning : MotiveImage total visible groups
+        (.app (.constant (.str PsMinCoreName.anonymous [79,112,116,105,111,110]) []) element) motive result) :
+      RecursorImage total visible groups
+        (.app (.app (.constant (.str (.str PsMinCoreName.anonymous [79,112,116,105,111,110]) [114,101,99]) [1]) element) motive)
+        (.ordinary (.primitive (.optionRec a result) 1 1 0 1 2))
+  | regular (name owner slot minors motive result)
+      (binding : RecursorBinding total visible groups name owner slot minors)
+      (meaning : MotiveImage total visible groups (.constant owner []) motive result) :
+      RecursorImage total visible groups (.app (.constant name [1]) motive) (.recursor slot result)
+
+theorem recursor_translation (total visible : Nat) (groups : List PsMinRegCorePlan)
+    (source : PsMinCoreExpr) (term : PsMinRegCoreTerm)
+    (h : psMinRegCoreRecursor total visible groups source = some term) :
+    RecursorImage total visible groups source term := by
+  cases source with
+  | app head motive =>
+    cases head with
+    | constant name levels =>
+      simp only [psMinRegCoreRecursor] at h
+      split at h
+      next correctLevels =>
+        have hl := byteEq_sound _ _ correctLevels
+        subst levels
+        split at h
+        next natural =>
+          cases hm : psMinRegCoreMotiveType total visible groups
+              (.constant (.str PsMinCoreName.anonymous [78,97,116]) []) motive with
+          | none => simp [hm] at h
+          | some result =>
+            simp only [hm, Option.some.injEq] at h
+            subst term
+            rw [nameEq_sound _ _ natural]
+            exact .nat motive result (motive_translation _ _ _ _ _ _ hm)
+        next =>
+          cases hb : psMinRegCoreFindRecursor total visible groups name with
+          | none => simp [hb] at h
+          | some binding =>
+            cases hm : psMinRegCoreMotiveType total visible groups (.constant binding.owner []) motive with
+            | none => simp [hb, hm] at h
+            | some result =>
+              simp only [hb, hm, Option.some.injEq] at h
+              subst term
+              exact .regular name binding.owner binding.slot binding.minors motive result
+                (recursor_binding _ _ _ _ _ hb) (motive_translation _ _ _ _ _ _ hm)
+      next => contradiction
+    | app base element =>
+      cases base with
+      | constant name levels =>
+        simp only [psMinRegCoreRecursor] at h
+        split at h
+        next correctLevels =>
+          have hl := byteEq_sound _ _ correctLevels
+          subst levels
+          cases ht : psMinRegCoreType 256 total visible groups element with
+          | none => simp [ht] at h
+          | some a =>
+            simp only [ht] at h
+            split at h
+            next elementSort =>
+              split at h
+              next listHead =>
+                cases hm : psMinRegCoreMotiveType total visible groups
+                    (.app (.constant (.str PsMinCoreName.anonymous [76,105,115,116]) []) element) motive with
+                | none => simp [hm] at h
+                | some result =>
+                  simp only [hm, Option.some.injEq] at h
+                  subst term
+                  rw [nameEq_sound _ _ listHead]
+                  exact .list element motive a result
+                    (RegularIngressTranslation.type_translation _ _ _ _ _ _ ht)
+                    ((isType_iff a).mp elementSort) (motive_translation _ _ _ _ _ _ hm)
+              next =>
+                split at h
+                next optionHead =>
+                  cases hm : psMinRegCoreMotiveType total visible groups
+                      (.app (.constant (.str PsMinCoreName.anonymous [79,112,116,105,111,110]) []) element) motive with
+                  | none => simp [hm] at h
+                  | some result =>
+                    simp only [hm, Option.some.injEq] at h
+                    subst term
+                    rw [nameEq_sound _ _ optionHead]
+                    exact .option element motive a result
+                      (RegularIngressTranslation.type_translation _ _ _ _ _ _ ht)
+                      ((isType_iff a).mp elementSort) (motive_translation _ _ _ _ _ _ hm)
+                next => contradiction
+            next => contradiction
+        next => contradiction
+      | _ => simp [psMinRegCoreRecursor] at h
+    | _ => simp [psMinRegCoreRecursor] at h
+  | _ => simp [psMinRegCoreRecursor] at h
+
+#print axioms recursor_translation
 #print axioms constructor_index_identity
 #print axioms constructor_binding
 #print axioms recursor_binding

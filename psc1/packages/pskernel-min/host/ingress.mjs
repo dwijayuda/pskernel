@@ -19,7 +19,7 @@ export const ingressLimits = frozen({
   declarations: 128, numberExclusive: 4096, numberDigits: 4,
 });
 export const regularIngressLimits = frozen({
-  bytes: 2 * 1024 * 1024, jsonDepth: 768, jsonContainers: 131072, nodes: 65536,
+  bytes: 2 * 1024 * 1024, jsonDepth: 768, jsonContainers: 131072, nodes: 131072,
   expressionDepth: 256, nameDepth: 16, nameBytes: 128,
   declarations: 512, numberExclusive: 65537, numberDigits: 5,
 });
@@ -64,7 +64,13 @@ function createByteIngress(generated, regular) {
     for (let i = values.length - 1; i >= 0; --i) result = G.List.cons(values[i], result);
     return result;
   };
-  const byteList = bytes => list(Array.from(bytes, BigInt));
+  const byteNaturals = Array.from({ length: 256 }, (_, value) => BigInt(value));
+  const byteList = bytes => {
+    let result = G.List.nil();
+    for (let index = bytes.length - 1; index >= 0; --index)
+      result = G.List.cons(byteNaturals[bytes[index]], result);
+    return result;
+  };
   const reject = code => { throw Error(code); };
   const natural = value => {
     if (!Number.isSafeInteger(value) || value < 0 || value >= limits.numberExclusive) reject('NUMBER');

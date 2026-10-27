@@ -1,6 +1,6 @@
 # PSC1 MinKernel R4 canonical ingress
 
-Status: implementation and proof qualification in progress. This first R4 domain
+Status: R4A qualified; R4B regular-data implementation and proof work in progress. This first R4 domain
 is `psc1-min-core-simple/1`. The complete R4 regular-data/recursor/projection
 bridge and runtime self-admission remain open. Production min/dual still refuse
 with PSC1_MIN_CANONICAL_BRIDGE_UNPROVED; official Lean Wasm remains the default.
@@ -38,7 +38,10 @@ conversion authority. Arbitrary user axioms, theorems, opaque/partial declaratio
 inductive admissions and generated members are currently refused.
 
 Types are the exact foundation names _psc1OrderFalse, Unit, Nat and Bool,
-closed simple arrows, and monomorphic List/Option of another closed type.
+closed simple arrows, and monomorphic List/Option of another closed Type-sorted type.
+`psMinCoreIsType` tracks the source sort through arrow codomains: False and
+arrows ending in False are propositions, and cannot inhabit List/Option or the
+level-1 conditional result. Source universes are checked before type-code erasure.
 The source type grammar excludes bound variables everywhere, so a Pi never
 silently erases dependency. List, Option and their constructors have zero universe
 arguments in the pinned PSC1 prelude. Eq Bool and ite use level 1.
@@ -80,18 +83,28 @@ a complete grammar derivation for the original bytes. The final capstones compos
 that derivation, source translation and a source-body model, with a no-declaration
 corollary for the exact canonical _psc1OrderFalse type.
 
-These new semantic/rendering capstones are still undergoing Linux qualification.
-No incomplete development run qualifies them. Printed axiom guards remain
+All 47 new printed theorem reports passed standalone Linux at
+`a90054c94b283c45e67afff91196ac474b92e49b`: 11 are axiom-free and 36 use only
+propext. This qualifies the closed-definition source and wire capstones for R4A. Printed axiom guards remain
 restricted to no axioms or exactly propext; sorryAx, Classical.choice and Quot.sound
 are not admitted by the qualification workflow.
 
 ## Execution and limits
 
-The corrected runtime passed standalone Linux at
-`e0c4cadde836645492a4f0b1c273a3c5468c2b71`:
+The corrected runtime and complete R4A proofs passed standalone Linux
+[40502224984](https://github.com/dwijayuda/pskernel/actions/runs/40502224984) at
+`a90054c94b283c45e67afff91196ac474b92e49b`:
 28 accepted cases, 36 refusals, 14 hostile-host cases. All 28 accepted packets also
 passed the official native checker. Native canonical bytes and actual PSC1-generated
-JS outcomes agree. Later proof changes retain that tested runtime identity.
+JS outcomes agree. Six separate source-universe probes include List/Option of
+propositions and conditional result sorts. A valid level-0 proposition conditional
+is deliberately refused as outside this domain. Earlier green finite runs did not
+cover this boundary; the a900 source-sort guard closes that discovered defect.
+
+The full repository run [40502238308](https://github.com/dwijayuda/pskernel/actions/runs/40502238308)
+and installed CLI run [40502224679](https://github.com/dwijayuda/pskernel/actions/runs/40502224679)
+both completed successfully at the same source commit. The dated
+[R4 receipt](PSC1_MIN_KERNEL_R4_QUALIFICATION_2026-10-27.json) records exact evidence.
 
 The first boundary run additionally exercises maximum/over-limit numbers,
 height, name text, structured-name depth, declaration count and byte input, and
@@ -112,9 +125,9 @@ comparison and runtime resource observations remain separate evidence classes.
 
 The actual connected explicit runtime comprises RegularProfile, RegularCheck,
 OperationalProfile, OperationalCheck, CoreBytes and CoreIngress: six modules,
-50191 UTF-8 bytes before any further R4 expansion. Same-compile source origins
-identify 172 runtime members and 102 admission records. The seven-module test
-graph includes the separate 53724-byte vector source.
+50672 UTF-8 bytes before any further R4 expansion. Same-compile source origins
+identify 173 runtime members and 103 admission records. The seven-module test
+graph includes the separate 53714-byte vector source.
 
 The runtime syntactic foundation reaches 26 declarations. The interpreted source
 language additionally requires Unit, Unit.unit and Nat.sub; its selected contracts

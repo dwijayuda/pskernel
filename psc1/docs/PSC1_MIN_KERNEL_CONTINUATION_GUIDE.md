@@ -1,11 +1,19 @@
-# R4 in progress — bounded canonical ingress
+# R4A qualified; R4B in progress
 
-See [R4 profile](PSC1_MIN_KERNEL_R4_PROFILE.md) for the current source domain,
-exact byte route and remaining regular-data bridge work. The corrected first-domain
-runtime passes native/actual PSC1-generated Linux tests, including all 28 positive
-packets against the official native checker. Source-body and wire-grammar proof
-capstones are still qualifying. R4 is not yet complete; production min/dual refuse.
-All execution remains GitHub Actions Linux with GPT-6.1 Sol / High as requested.
+The exact-byte closed-definition profile and its source-model/wire capstones pass
+Linux at `a90054c94b283c45e67afff91196ac474b92e49b`. All 47 printed reports meet the axiom guard
+(11 axiom-free, 36 propext only). Native/generated: 28 accepts, 36 refusals,
+14 hostile host cases, 11 resource boundaries and six source-sort probes. Every
+positive packet independently passes official native admission. Full repository
+and installed CLI CI also pass at that source commit.
+
+Read the [R4 profile](PSC1_MIN_KERNEL_R4_PROFILE.md) and
+[dated receipt](PSC1_MIN_KERNEL_R4_QUALIFICATION_2026-10-27.json).
+R4B remains active: regular-group bytes, constructor/recursor/projection binding,
+source semantics and actual whole-runtime self-admission. R4 is not complete.
+Production min/dual retain PSC1_MIN_CANONICAL_BRIDGE_UNPROVED; official Wasm remains
+the default. GPT-6.1 Sol / High is the confirmed setting; all project execution
+remains GitHub Actions Linux. Preserve the R2/R3 history below.
 
 # PSC1 MinKernel — continuation guideline for GPT-6.1 Sol / High
 

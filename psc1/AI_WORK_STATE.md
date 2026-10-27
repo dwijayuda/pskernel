@@ -1,12 +1,19 @@
-# R4 in progress — PSC1 minimal kernel canonical ingress
+# R4A qualified; R4B in progress
 
-Current research work follows the R3 continuation on the existing branch. See
-[the R4 profile](docs/PSC1_MIN_KERNEL_R4_PROFILE.md). Initial exact-byte closed-definition
-ingress runtime passes Linux native/generated and finite official comparisons;
-new source semantic/rendering capstones are still qualifying. Raw regular groups,
-generated members, recursors/projections and runtime self-admission remain open.
-Production min/dual refuse, official Wasm remains the default, and all project
-execution is GitHub Actions Linux. No merge/publication is authorized.
+The exact-byte closed-definition profile and its source-model/wire capstones pass
+Linux at `a90054c94b283c45e67afff91196ac474b92e49b`. All 47 printed reports meet the axiom guard
+(11 axiom-free, 36 propext only). Native/generated: 28 accepts, 36 refusals,
+14 hostile host cases, 11 resource boundaries and six source-sort probes. Every
+positive packet independently passes official native admission. Full repository
+and installed CLI CI also pass at that source commit.
+
+Read the [R4 profile](docs/PSC1_MIN_KERNEL_R4_PROFILE.md) and
+[dated receipt](docs/PSC1_MIN_KERNEL_R4_QUALIFICATION_2026-10-27.json).
+R4B remains active: regular-group bytes, constructor/recursor/projection binding,
+source semantics and actual whole-runtime self-admission. R4 is not complete.
+Production min/dual retain PSC1_MIN_CANONICAL_BRIDGE_UNPROVED; official Wasm remains
+the default. GPT-6.1 Sol / High is the confirmed setting; all project execution
+remains GitHub Actions Linux. Preserve the R2/R3 history below.
 
 # PSC1 AI work state
 

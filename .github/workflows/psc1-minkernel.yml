@@ -63,6 +63,25 @@ jobs:
             assert.ok(line.includes('does not depend on any axioms') || line.includes('depends on axioms: [propext]'),line);
           }
           JS
+      - name: Check executable binder-lowering theorem assumptions
+        working-directory: psc1
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const text=fs.readFileSync('proofs/pskernel-min/proof.log','utf8');
+          for(const name of ['lower_sound','lower_instantiate','lower_motive_body']) {
+            const line=text.split('\n').find(line=>line.includes("'Ps.MinKernel.BinderLowering."+name+"'"));
+            assert.ok(line,'missing binder-lowering theorem '+name);
+            assert.ok(line.includes('does not depend on any axioms') || line.includes('depends on axioms: [propext]'),line);
+          }
+          JS
+      - name: Build and run native binder transformation corpus
+        working-directory: psc1/packages/pskernel-min
+        run: |
+          set -euo pipefail
+          lake build minkernel_binder_tests
+          .lake/build/bin/minkernel_binder_tests | tee binder-tests.log
       - name: Build and run native semantic refusal corpus
         working-directory: psc1/packages/pskernel-min
         run: |
@@ -76,6 +95,7 @@ jobs:
           path: |
             psc1/proofs/pskernel-min/proof.log
             psc1/packages/pskernel-min/native-tests.log
+            psc1/packages/pskernel-min/binder-tests.log
           retention-days: 90
 
   portability-and-closure:
@@ -130,6 +150,9 @@ jobs:
       - name: Attribute the runtime Core graph and classify recursor motives
         if: ${{ !cancelled() && steps.portable.outcome == 'success' && steps.closure_audit.outcome == 'success' }}
         run: node scripts/minkernel-runtime-frontier.mjs
+      - name: Qualify actual binder helper source and generated transformation corpus
+        if: ${{ !cancelled() }}
+        run: node scripts/minkernel-binder-portability.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

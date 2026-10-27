@@ -56,11 +56,24 @@ def minKernelOriginModule (origin : PsSh1ModuleOrigin) : String :=
     ("coreStart", toString origin.coreStart),
     ("batches", psJsonArray (origin.batches.map minKernelOriginBatch))]
 
-def main : IO Unit := do
-  let checker ← IO.FS.readFile "packages/pskernel-min/src/Ps/MinKernel/Check.lean"
-  let vectors ← IO.FS.readFile "packages/pskernel-min/src/Ps/MinKernel/Tests/Vectors.lean"
-  let inputs := [psSh1SourceInput ["Ps", "MinKernel", "Check"] checker,
-    psSh1SourceInput ["Ps", "MinKernel", "Tests", "Vectors"] vectors]
+def main (args : List String) : IO Unit := do
+  let binderMode := args == ["binder"]
+  if !args.isEmpty && !binderMode then
+    throw (IO.userError "expected no arguments or binder")
+  let paths : List (List String × String) := if binderMode then [
+      (["Ps", "Foundation", "Name"], "packages/foundation/src/Ps/Foundation/Name.lean"),
+      (["Ps", "Core", "Level"], "packages/core/src/Ps/Core/Level.lean"),
+      (["Ps", "Core", "Expr"], "packages/core/src/Ps/Core/Expr.lean"),
+      (["Ps", "Core", "Equality"], "packages/core/src/Ps/Core/Equality.lean"),
+      (["Ps", "MinKernel", "Profile", "LowerUnusedBinder"], "packages/pskernel-min/src/Ps/MinKernel/Profile/LowerUnusedBinder.lean"),
+      (["Ps", "MinKernel", "Tests", "BinderVectors"], "packages/pskernel-min/src/Ps/MinKernel/Tests/BinderVectors.lean")]
+    else [
+      (["Ps", "MinKernel", "Check"], "packages/pskernel-min/src/Ps/MinKernel/Check.lean"),
+      (["Ps", "MinKernel", "Tests", "Vectors"], "packages/pskernel-min/src/Ps/MinKernel/Tests/Vectors.lean")]
+  let inputs ← paths.mapM fun (moduleName, path) => do
+    let source ← IO.FS.readFile path
+    pure (psSh1SourceInput moduleName source)
+  let stem := if binderMode then "dist/pskernel-min/binder/vectors" else "dist/pskernel-min/portable/vectors"
   match psCompilerSh1TypeScriptSources psSh1DefaultSourceOptions
       psIrCheckDefaultOptions PsCompilerSourceKind.lean inputs with
   | .error error => throw (IO.userError (minKernelSourceFailure error))
@@ -68,9 +81,9 @@ def main : IO Unit := do
     if !result.sourcePolicy.accepted || !result.targetPolicy.accepted ||
         !result.checkReport.accepted then
       throw (IO.userError "PSC1_MIN_SOURCE_OR_IR_REFUSED")
-    IO.FS.writeFile "dist/pskernel-min/portable/vectors.ts" result.typeScript
-    IO.FS.writeFile "dist/pskernel-min/portable/vectors.admissions.json" result.admissions
-    IO.FS.writeFile "dist/pskernel-min/portable/vectors.source.json"
+    IO.FS.writeFile (stem ++ ".ts") result.typeScript
+    IO.FS.writeFile (stem ++ ".admissions.json") result.admissions
+    IO.FS.writeFile (stem ++ ".source.json")
       (psJsonObject [("schema", psJsonQuote "psc1-min-source-compile/2"),
         ("sourceAccepted", "true"), ("targetAccepted", "true"),
         ("originalIrAccepted", "true"), ("providerChecked", "false"),

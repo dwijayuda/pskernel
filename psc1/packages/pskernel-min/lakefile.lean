@@ -14,3 +14,20 @@ lean_lib PsMinKernelTestVectors where
 lean_exe minkernel_tests where
   srcDir := "test"
   root := `NativeTests
+
+-- Experimental Core syntax helper; the existing default checker root is unchanged.
+lean_lib PsMinProfileFoundation where
+  srcDir := "../foundation/src"
+  roots := #[`Ps.Foundation.Name]
+
+lean_lib PsMinProfileSyntax where
+  srcDir := "../core/src"
+  roots := #[`Ps.Core.Level, `Ps.Core.Expr, `Ps.Core.Equality]
+
+lean_lib PsMinBinderProfile where
+  srcDir := "src"
+  roots := #[`Ps.MinKernel.Profile.LowerUnusedBinder, `Ps.MinKernel.Tests.BinderVectors]
+
+lean_exe minkernel_binder_tests where
+  srcDir := "test"
+  root := `BinderTests

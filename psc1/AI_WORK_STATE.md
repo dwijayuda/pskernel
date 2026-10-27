@@ -38,6 +38,15 @@ Installed40454629955 passes at783718f9, with only the CoreScope proof repair
 intervening before57964262. Exact separate identities are in the dated receipt.
 Next batch R1 uses the user-confirmed GPT-6.1 Sol/High setting.
 
+## R1 syntax-helper batch, qualification pending
+
+The guideline checkpoint is295a7ec828c3db80acae8995ef47c71971f034bc. R1 adds
+experimental Profile/LowerUnusedBinder.lean and proof BinderLowering.lean over
+actual Core operations, plus34 meaningful native/generated transformation cases
+and2 out-of-range probes. Linux proof/source-portability qualification is pending.
+There is no new checker acceptance, foundation admission or production mode.
+The helper has4 explicit import-closure modules; the source test input has6.
+
 ## Preserved layout baseline state
 
 

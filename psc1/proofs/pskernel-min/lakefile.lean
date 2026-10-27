@@ -16,7 +16,11 @@ lean_lib PsMinCoreSyntax where
   srcDir := "../../packages/core/src"
   roots := #[`Ps.Core.Level, `Ps.Core.Expr, `Ps.Core.Subst]
 
+lean_lib PsMinBinderRuntime where
+  srcDir := "../../packages/pskernel-min/src"
+  roots := #[`Ps.MinKernel.Profile.LowerUnusedBinder]
+
 @[default_target]
 lean_lib MinKernelProof where
   srcDir := "."
-  roots := #[`MainTheorem, `CoreScope]
+  roots := #[`MainTheorem, `CoreScope, `BinderLowering]

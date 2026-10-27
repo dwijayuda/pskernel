@@ -228,3 +228,26 @@ The guideline/appendices now distinguish the completed ledger/scope theorem from
 R1 executable binder lowering and the later regular-data/foundation/profile/
 canonical obligations. GPT-6.1 Sol/High was confirmed selected by the user.
 No runtime acceptance, official provider, compiler payload or default change.
+
+## R1 executable unused-binder lowering (qualification pending)
+
+Guideline checkpoint295a7ec828c3db80acae8995ef47c71971f034bc follows terminal
+standalone40455022116, main40455025111 and installed40454629955 qualification.
+The user confirmed GPT-6.1 Sol/High selected before this next proof batch.
+
+R1 adds a separate experimental Core syntax helper, not an acceptance rule.
+Its actual executable worker rejects the removed binder and lowers outer
+references with binder-aware traversal of every PsExpr constructor. The exact
+success-to-lifting inverse and derived actual-instantiation/motive-body laws are
+in BinderLowering.lean; their qualification is pending Linux CI and axiom reports.
+The runtime imports Core.Expr, not proofs. Explicit helper imports span4 source
+modules; the test-only Equality module and BinderVectors make6 compilation inputs.
+Do not apply the unchanged Check.lean one-module/93-line count to this helper.
+
+Meaningful corpus:21 positive syntax transformations,13 removed-binder refusals,
+plus2 out-of-range harness probes. Native/PSC1-generated comparisons and exact
+source admissions are required in Linux CI. Expected shapes use existing
+psExprAlphaEq for tests; the source theorem targets exact equality. Free/meta
+variables may be preserved as syntax, never admitted by this helper. Aggregate
+hostile-input/JS-object/stack resource bounds remain unqualified. Min/dual refuse,
+official Wasm stays default, full min coverage stays0/124 modules and0/37 criteria.

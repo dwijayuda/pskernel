@@ -882,8 +882,8 @@ def psErasePrimitiveApplication
           | Except.ok result => Except.ok (Option.some result)
         else
           Except.error PsErasureError.unsupportedApplication
-      else if psStringEq text "String.Internal.append" ||
-              psStringEq text "String.append" then
+      else if psErasureBoolOr (psStringEq text "String.Internal.append")
+              (psStringEq text "String.append") then
         binary PsVerifiedIrIntrinsic.stringAppend
       else if psStringEq text "String.utf8ByteSize" then
         if Nat.beq (psListLength view.args) 1 then
@@ -896,13 +896,13 @@ def psErasePrimitiveApplication
           | Except.ok result => Except.ok (Option.some result)
         else
           Except.error PsErasureError.unsupportedApplication
-      else if psStringEq text "String.Internal.next" ||
-              psStringEq text "String.Pos.Raw.next" then
+      else if psErasureBoolOr (psStringEq text "String.Internal.next")
+              (psStringEq text "String.Pos.Raw.next") then
         binary PsVerifiedIrIntrinsic.stringNext
       else if psStringEq text "String.Internal.get" then
         binary PsVerifiedIrIntrinsic.stringGet
-      else if psStringEq text "String.Internal.atEnd" ||
-              psStringEq text "String.Pos.Raw.atEnd" then
+      else if psErasureBoolOr (psStringEq text "String.Internal.atEnd")
+              (psStringEq text "String.Pos.Raw.atEnd") then
         binary PsVerifiedIrIntrinsic.stringAtEnd
       else if psStringEq text "String.Internal.extract" then
         if Nat.beq (psListLength view.args) 3 then

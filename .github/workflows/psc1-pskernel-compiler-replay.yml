@@ -20,6 +20,26 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Install pinned Lean for the source portability equivalence proof
+        run: bash psc1/scripts/install-lean435-ci.sh
+      - name: Kernel-check exact original primitive dispatch equivalence
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          lake build PsKernelCompilerStringAliasNativeProofs
+          mkdir -p "$RUNNER_TEMP/compiler-replay-proof"
+          lake env lean test/PsKernelCompilerStringAliasProofs.lean | tee "$RUNNER_TEMP/compiler-replay-proof/proofs.log"
+          python3 - <<'PY'
+          import re,pathlib,os
+          text=(pathlib.Path(os.environ['RUNNER_TEMP'])/'compiler-replay-proof/proofs.log').read_text()
+          rows=re.findall(r"'([^']+)' (?:depends on axioms: \[([^\]]*)\]|does not depend on any axioms)",text)
+          expected={'PsKernelCompilerStringAliasProofs.portable_disjunction_exact_original','PsKernelCompilerStringAliasProofs.primitive_dispatch_exact_original_all_inputs'}
+          assert len(rows)==2 and {n for n,_ in rows}==expected
+          for n,a in rows:assert {x.strip() for x in a.split(',') if x.strip()}<={'propext','Classical.choice','Quot.sound'}
+          print('PSC1_COMPILER_STRING_ALIAS_PROOFS: PASS reports=2')
+          PY
       - name: Export the actual compiler declarations and attempt empty-PATH PSKernel replay
         env:
           GH_TOKEN: ${{ github.token }}
@@ -30,3 +50,8 @@ jobs:
           name: psc1-actual-compiler-closure-replay-diagnostic
           path: ${{ runner.temp }}/compiler-replay/
           if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-compiler-string-alias-proof2
+          path: ${{ runner.temp }}/compiler-replay-proof/

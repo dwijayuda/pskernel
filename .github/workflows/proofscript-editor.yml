@@ -26,6 +26,18 @@ jobs:
       - name: Install editor build tools
         run: |
           if test -f package-lock.json; then npm ci --ignore-scripts; else npm install --ignore-scripts; fi
+      - name: Record dependency audit for release review
+        run: |
+          mkdir -p dist
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import {spawnSync} from 'node:child_process';
+          const result = spawnSync('npm', ['audit', '--json'], {encoding:'utf8'});
+          const audit = JSON.parse(result.stdout);
+          fs.writeFileSync('dist/dependency-audit.json', JSON.stringify(audit,null,2)+'\n');
+          console.log(JSON.stringify(audit.vulnerabilities || audit.error || {}));
+          if (result.error || result.status > 1) throw Error('Unable to complete dependency audit');
+          JS
       - name: Capture qualified compiler without rebuilding
         env:
           GH_TOKEN: ${{ github.token }}

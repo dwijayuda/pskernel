@@ -12,6 +12,7 @@ const distribution = path.resolve(__dirname, '..');
 const connection = createConnection(process.stdin, process.stdout);
 const documents = new TextDocuments(TextDocument);
 const states = new Map(), projects = new Map(), published = new Set();
+const temporaryDirectories = new Set();
 const settings = { trusted: false, enableLean: false, debounceMs: 350, timeoutMs: 30000 };
 let workspaceFolders = [], generation = 0, timer, running, shutdown = false, semanticRefresh = false, workspaceFolderEvents = false;
 const metrics = { checksStarted: 0, checksCompleted: 0, superseded: 0, timeouts: 0, lastElapsedMs: null };
@@ -63,6 +64,7 @@ function invalidate() {
 }
 function compilerJob(project) {
   const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'psc1-lsp-'));
+  temporaryDirectories.add(temporary);
   let child, settled = false, timeout, stderr = '';
   let finish;
   const promise = new Promise(resolve => { finish = value => {
@@ -73,7 +75,7 @@ function compilerJob(project) {
       try { if (process.platform !== 'win32') process.kill(-child.pid, 'SIGKILL'); else child.kill('SIGKILL'); } catch { /* Already exited. */ }
     }
     // Child temp directories stay within this private per-job directory.
-    setTimeout(() => fs.rm(temporary, { recursive: true, force: true }, () => {}), 100).unref();
+    setTimeout(() => fs.rm(temporary, { recursive: true, force: true }, () => temporaryDirectories.delete(temporary)), 100).unref();
     resolve(value);
   }; });
   try {
@@ -319,10 +321,15 @@ connection.languages.semanticTokens.on((params, token) => {
   }
   return { data };
 });
-function stop() { shutdown = true; clearTimeout(timer); killRunning(); }
+function stop() {
+  shutdown = true; clearTimeout(timer); killRunning();
+  for (const directory of temporaryDirectories) {
+    try { fs.rmSync(directory, { recursive: true, force: true }); } catch { /* Process exit must still terminate children. */ }
+  }
+  temporaryDirectories.clear();
+}
 connection.onShutdown(() => { stop(); return null; });
 connection.onExit(() => { stop(); });
-connection.onClose(stop);
 process.on('SIGTERM', () => { stop(); process.exit(0); });
 process.on('SIGINT', () => { stop(); process.exit(0); });
 process.on('exit', stop);

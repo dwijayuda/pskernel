@@ -36,27 +36,26 @@ inductive OpEval (globals : List PsMinRegTy)
       (hb : OpEval globals G (type :: locals) (consModel ([]) v L) body result b) :
       OpEval globals G locals L (.letE type value body) result b
 
-theorem infer_evaluates (fuel : Nat)
+noncomputable def evaluate_checked (fuel : Nat)
     (globals locals : List PsMinRegTy) (expression : PsMinOpTerm) (type : PsMinRegTy)
-    (G : Model ([]) globals) (L : Model ([]) locals)
+    (G : Model [] globals) (L : Model [] locals)
     (h : psMinOpInfer fuel [] globals locals expression = some type) :
-    OpEval globals G locals L expression type
-      (OperationalProofs.inferModel fuel [] globals locals expression type G L h) := by
+    { value : Denote [] type // OpEval globals G locals L expression type value } := by
   induction fuel generalizing locals expression type with
   | zero => simp [psMinOpInfer] at h
   | succ remaining ih =>
     cases expression with
-    | base expression => exact .base locals L expression type remaining h
+    | base expression =>
+      exact ⟨RegularProofs.inferModel remaining [] [] globals locals expression type
+        (signatures []) G L h, .base locals L expression type remaining h⟩
     | projection slot field => simp [psMinOpInfer, psMinOpProjectionType] at h
     | primitive schema level parameters indices motives minors =>
-      have ht := OperationalFoundation.primitiveType_signature remaining (0)
+      have ht := OperationalFoundation.primitiveType_signature remaining (psMinRegSpecCount [])
         schema level parameters indices motives minors type h
       subst type
-      simpa -implicitDefEqProofs only [OperationalProofs.inferModel, Nat.recAux, OperationalFoundation.primitiveModel] using!
-        (OpEval.primitive (globals := globals) (G := G) locals L schema level parameters indices motives minors)
+      exact ⟨OperationalFoundation.primitiveValue [] schema,
+        .primitive locals L schema level parameters indices motives minors⟩
     | lam domain body =>
-      unfold OperationalProofs.inferModel
-      dsimp only [Nat.recAux]
       cases hv : psMinRegTyValid remaining (psMinRegSpecCount []) domain with
       | false => simp [psMinOpInfer, hv] at h
       | true =>
@@ -64,14 +63,12 @@ theorem infer_evaluates (fuel : Nat)
         | none => simp [psMinOpInfer, hv, hb] at h
         | some result =>
           have ht : .arr domain result = type := by simpa [psMinOpInfer, hv, hb] using h
-          cases ht
-          apply OpEval.lam
-          intro value
-          simpa -implicitDefEqProofs only [] using!
-            ih (domain :: locals) body result (consModel ([]) value L) hb
+          subst type
+          let values := fun value => ih (domain :: locals) body result (consModel [] value L) hb
+          exact ⟨fun value => (values value).val,
+            .lam locals L domain body result (fun value => (values value).val)
+              (fun value => (values value).property)⟩
     | app fn argument =>
-      unfold OperationalProofs.inferModel
-      dsimp only [Nat.recAux]
       cases hf : psMinOpInfer remaining [] globals locals fn with
       | none => simp [psMinOpInfer, hf] at h
       | some functionType =>
@@ -87,15 +84,11 @@ theorem infer_evaluates (fuel : Nat)
               have same := typeEq_sound remaining _ _ heq
               cases same
               subst type
-              simpa -implicitDefEqProofs only [] using!
-                OpEval.app locals L fn argument domain result
-                  (OperationalProofs.inferModel remaining [] globals locals fn (.arr domain result) G L hf)
-                  (OperationalProofs.inferModel remaining [] globals locals argument domain G L ha)
-                  (ih locals fn (.arr domain result) L hf) (ih locals argument domain L ha)
+              let f := ih locals fn (.arr domain result) L hf
+              let a := ih locals argument domain L ha
+              exact ⟨f.val a.val, .app locals L fn argument domain result f.val a.val f.property a.property⟩
         | _ => simp [psMinOpInfer, hf] at h
     | letE annotation value body =>
-      unfold OperationalProofs.inferModel
-      dsimp only [Nat.recAux]
       cases hv : psMinRegTyValid remaining (psMinRegSpecCount []) annotation with
       | false => simp [psMinOpInfer, hv] at h
       | true =>
@@ -109,13 +102,15 @@ theorem infer_evaluates (fuel : Nat)
             cases same
             have hs : psMinOpInfer remaining [] globals (annotation :: locals) body = some type := by
               simpa [psMinOpInfer, hv, hb, heq] using h
-            let v := OperationalProofs.inferModel remaining [] globals locals value annotation G L hb
-            simpa -implicitDefEqProofs only [] using!
-              OpEval.letE locals L annotation value body type v
-                (OperationalProofs.inferModel remaining [] globals (annotation :: locals) body type
-                  G (consModel ([]) v L) hs)
-                (ih locals value annotation L hb)
-                (ih (annotation :: locals) body type (consModel ([]) v L) hs)
+            let v := ih locals value annotation L hb
+            let b := ih (annotation :: locals) body type (consModel [] v.val L) hs
+            exact ⟨b.val, .letE locals L annotation value body type v.val b.val v.property b.property⟩
+
+theorem infer_evaluates (fuel : Nat) (globals locals : List PsMinRegTy)
+    (expression : PsMinOpTerm) (type : PsMinRegTy) (G : Model [] globals) (L : Model [] locals)
+    (h : psMinOpInfer fuel [] globals locals expression = some type) :
+    OpEval globals G locals L expression type (evaluate_checked fuel globals locals expression type G L h).val :=
+  (evaluate_checked fuel globals locals expression type G L h).property
 
 -- Direct meanings of the selected *source* constants and typed instances.
 inductive PrimitiveDenotation : PsMinCoreExpr → (type : PsMinRegTy) → Denote [] type → Prop where
@@ -308,7 +303,7 @@ theorem checked_source_semantics (translationFuel checkingFuel : Nat) (names : L
     (translated : psMinCoreTranslate translationFuel names source = some term)
     (checked : psMinOpInfer checkingFuel [] globals locals term = some type) :
     CoreEval names globals G locals L source type
-      (OperationalProofs.inferModel checkingFuel [] globals locals term type G L checked) :=
+      (evaluate_checked checkingFuel globals locals term type G L checked).val :=
   translation_preserves_semantics _ _ _ (term_translation _ _ _ _ translated)
     _ _ _ _ _ _ (infer_evaluates _ _ _ _ _ _ _ checked)
 
@@ -329,40 +324,98 @@ inductive SourceHistory :
         (consModel [] value initial) output) :
       SourceHistory names globals (decl :: rest) result initial output
 
-theorem checked_history_preserves_source (names : List PsMinCoreName) (globals : List PsMinRegTy)
-    (source : List PsMinCoreDeclaration) (normalized : List PsMinOpDeclaration)
-    (result : List PsMinRegTy) (initial : Model [] globals) (output : Model [] result)
+theorem environment_head (names : List PsMinCoreName) (decl : PsMinCoreDeclaration)
+    (rest : List PsMinCoreDeclaration) (head : PsMinOpDeclaration) (tail : List PsMinOpDeclaration)
+    (image : EnvironmentImage names (decl :: rest) (head :: tail)) :
+    psMinCoreFresh names decl.name = true ∧ TypeImage decl.type head.type ∧
+    TermImage names decl.value head.value ∧ EnvironmentImage (decl.name :: names) rest tail := by
+  cases image
+  exact ⟨by assumption, by assumption, by assumption, by assumption⟩
+
+noncomputable def checked_source_history (declarationFuel : Nat) (names : List PsMinCoreName)
+    (globals : List PsMinRegTy) (source : List PsMinCoreDeclaration) (normalized : List PsMinOpDeclaration)
+    (result : List PsMinRegTy) (initial : Model [] globals)
     (image : EnvironmentImage names source normalized)
-    (history : OperationalProofs.DefinitionHistory 128 [] globals normalized result initial output) :
-    SourceHistory names globals source result initial output := by
-  induction image generalizing globals result initial output with
-  | nil names =>
-    cases history using @OperationalProofs.DefinitionHistory.casesOn 128 []
-    exact .done names globals initial
-  | step names decl rest type value tail fresh ht hv next ih =>
-    cases history using @OperationalProofs.DefinitionHistory.casesOn 128 [] with
-    | step declaration rest inferred valid checked same output history =>
-      have heq : inferred = type := typeEq_sound 128 _ _ same
-      have body := translation_preserves_semantics names decl.value value hv
-        globals [] initial (emptyModel []) inferred
-        (OperationalProofs.inferModel 128 [] globals [] value inferred initial (emptyModel []) checked)
-        (infer_evaluates 128 globals [] value inferred initial (emptyModel []) checked)
-      cases heq
-      exact .step names globals decl rest result type initial output
-        (OperationalProofs.inferModel 128 [] globals [] value type initial (emptyModel []) checked)
-        fresh ht body (ih _ _ _ _ history)
+    (checked : psMinOpCheckDeclarations 128 declarationFuel [] globals normalized = some result) :
+    { output : Model [] result // SourceHistory names globals source result initial output } := by
+  induction declarationFuel generalizing names globals source normalized result with
+  | zero =>
+    cases normalized with
+    | nil =>
+      have hs : source = [] := by cases image; rfl
+      subst source
+      have ht : globals = result := by simpa [psMinOpCheckDeclarations] using checked
+      subst result
+      exact ⟨initial, .done names globals initial⟩
+    | cons head tail => simp [psMinOpCheckDeclarations] at checked
+  | succ fuel ih =>
+    cases normalized with
+    | nil =>
+      have hs : source = [] := by cases image; rfl
+      subst source
+      have ht : globals = result := by simpa [psMinOpCheckDeclarations] using checked
+      subst result
+      exact ⟨initial, .done names globals initial⟩
+    | cons head tail =>
+      cases source with
+      | nil => have impossible : False := by cases image; exact False.elim impossible
+      | cons decl rest =>
+        obtain ⟨fresh, ht, hv, next⟩ := environment_head names decl rest head tail image
+        cases valid : psMinRegTyValid 128 (psMinRegSpecCount []) head.type with
+        | false => simp [psMinOpCheckDeclarations, valid] at checked
+        | true =>
+          cases body : psMinOpInfer 128 [] globals [] head.value with
+          | none => simp [psMinOpCheckDeclarations, valid, body] at checked
+          | some inferred =>
+            cases same : psMinRegTyEq 128 inferred head.type with
+            | false => simp [psMinOpCheckDeclarations, valid, body, same] at checked
+            | true =>
+              have heq := typeEq_sound 128 _ _ same
+              have onward : psMinOpCheckDeclarations 128 fuel [] (head.type :: globals) tail = some result := by
+                simpa [psMinOpCheckDeclarations, valid, body, same] using checked
+              let value := evaluate_checked 128 globals [] head.value inferred initial (emptyModel []) body
+              have meaning := translation_preserves_semantics names decl.value head.value hv
+                globals [] initial (emptyModel []) inferred value.val value.property
+              let admitted : Denote [] head.type := heq ▸ value.val
+              have sourceBody : CoreEval names globals initial [] (emptyModel []) decl.value head.type admitted := by
+                cases heq
+                exact meaning
+              let remaining := ih (decl.name :: names) (head.type :: globals) rest tail result
+                (consModel [] admitted initial) next onward
+              exact ⟨remaining.val, .step names globals decl rest result head.type initial remaining.val
+                admitted fresh ht sourceBody remaining.property⟩
+
+theorem checked_history_preserves_source (declarationFuel : Nat) (names : List PsMinCoreName)
+    (globals : List PsMinRegTy) (source : List PsMinCoreDeclaration) (normalized : List PsMinOpDeclaration)
+    (result : List PsMinRegTy) (initial : Model [] globals)
+    (image : EnvironmentImage names source normalized)
+    (checked : psMinOpCheckDeclarations 128 declarationFuel [] globals normalized = some result) :
+    ∃ output, SourceHistory names globals source result initial output :=
+  ⟨_, (checked_source_history declarationFuel names globals source normalized result initial image checked).property⟩
 
 theorem canonical_source_model (bytes : List Nat) (candidate : List PsMinCoreDeclaration)
     (accepted : PsMinCoreAdmission) (h : psMinCoreAdmit bytes candidate = some accepted) :
     WellFormedBytes bytes accepted.source ∧
     EnvironmentImage [] accepted.source accepted.normalized ∧
     ∃ model, SourceHistory [] [] accepted.source accepted.types (emptyModel []) model := by
-  obtain ⟨bytesExact, correspondence, modelExists, model, history⟩ :=
-    canonical_admission_has_model bytes candidate accepted h
-  have image := environment_translation 64 [] accepted.source accepted.normalized correspondence
-  exact ⟨bytesExact, image, model,
-    checked_history_preserves_source [] [] accepted.source accepted.normalized accepted.types
-      (emptyModel []) model image history⟩
+  unfold psMinCoreAdmit at h
+  cases hd : psMinCoreDecodeCertificate bytes candidate with
+  | none => simp [hd] at h
+  | some source =>
+    cases ht : psMinCoreTranslateDeclarations 64 128 [] source with
+    | none => simp [hd, ht] at h
+    | some normalized =>
+      cases hc : psMinOpCheckEnvironment 128 128 [] normalized with
+      | none => simp [hd, ht, hc] at h
+      | some types =>
+        simp only [hd, ht, hc, Option.some.injEq] at h
+        subst accepted
+        have image := environment_translation 64 [] source normalized
+          (translate_environment_preserves_identity 64 128 [] source normalized ht)
+        have checked : psMinOpCheckDeclarations 128 128 [] [] normalized = some types := by
+          simpa [psMinOpCheckEnvironment, psMinRegRegistryValid] using hc
+        exact ⟨(decode_success_is_well_formed _ _ _ hd).2, image,
+          checked_history_preserves_source 128 [] [] source normalized types (emptyModel []) image checked⟩
 
 theorem canonical_no_empty_constant (bytes : List Nat) (candidate : List PsMinCoreDeclaration)
     (accepted : PsMinCoreAdmission) (h : psMinCoreAdmit bytes candidate = some accepted) (index : Nat) :

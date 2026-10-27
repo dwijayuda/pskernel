@@ -86,7 +86,7 @@ try{
    builds.push(built);
    assert.equal(built.receipt.accepted,true);
    const installed=install(built,grammar+'-consumer');
-   for(const name of packageNames){
+   for(const [index,name]of packageNames.entries()){
      const pkg=path.join(installed,'node_modules',name),meta=JSON.parse(fs.readFileSync(path.join(pkg,'package.json')));
      assert.equal(meta.license,'Apache-2.0');assert.equal(meta.version,packageVersion);
      for(const subpath of ['.','./ts'])for(const field of ['types','import'])assert.ok(fs.statSync(path.join(pkg,meta.exports[subpath][field])).isFile());
@@ -94,6 +94,11 @@ try{
      const map=JSON.parse(fs.readFileSync(path.join(pkg,'dist/ts/index.mjs.map'),'utf8'));
      assert.equal(map.sources.length,1);assert.deepEqual(map.sourcesContent,[source]);
      assert.equal(fs.readFileSync(path.resolve(pkg,'dist/ts',map.sources[0]),'utf8'),source);
+     if(index>0){
+       const source=sources[index-1],alternate=variants[source.module],base=index===1?'Name':'Consumer';
+       assert.equal(fs.readFileSync(path.join(pkg,'sources',base+'.'+source.kind),'utf8'),source.text);
+       assert.equal(fs.readFileSync(path.join(pkg,'sources',base+'.'+alternate.kind),'utf8'),alternate.text);
+     }
      inventories++;
    }
    const installable=path.resolve('dist/modular','installable-'+grammar);fs.mkdirSync(installable,{recursive:true});
@@ -105,8 +110,11 @@ try{
    const referenceJs=path.join(installed,'reference-js.mjs');fs.writeFileSync(referenceJs,built.candidate.referenceJs);
    const referenceTs=path.join(installed,'reference-ts.mts');fs.writeFileSync(referenceTs,built.candidate.referenceTs);
    const referenceOut=path.join(installed,'reference-out');
-   run(process.execPath,[tsc,referenceTs,'--strict','--target','ES2022','--module','NodeNext',
-     '--moduleResolution','NodeNext','--rootDir',installed,'--outDir',referenceOut,'--types','node'],{cwd:root});
+   const referenceConfig=path.join(installed,'reference-config.json');
+   fs.writeFileSync(referenceConfig,JSON.stringify({compilerOptions:{strict:true,noEmitOnError:true,
+     target:'ES2022',module:'NodeNext',moduleResolution:'NodeNext',rootDir:installed,outDir:referenceOut,
+     types:[],lib:['ES2022','DOM']},files:[referenceTs]}));
+   run(process.execPath,[tsc,'--project',referenceConfig],{cwd:root});
    for(const variant of ['js','ts']){
      const reference=variant==='js'?referenceJs:path.join(referenceOut,'reference-ts.mjs');
      const expected=observe(installed,variant,'reference',reference);
@@ -144,6 +152,11 @@ try{
        fs.mkdirSync(path.join(nested,'@proofscript'),{recursive:true});
        fs.cpSync(path.join(scope,'modular-pilot-runtime'),path.join(nested,'@proofscript','modular-pilot-runtime'),{recursive:true});
      },()=>fs.rmSync(nested,{recursive:true,force:true}));
+     const reproduced=buildPilot({sources,out:path.resolve('dist/modular/reproduced-cohort'),
+       sourceVariants:variants,requestId:'modular-pack-lean'});
+     assert.deepEqual([...reproduced.packages,reproduced.rootTar].map(p=>p.sha256),
+       [...built.packages,built.rootTar].map(p=>p.sha256));
+     record('same-input-tarball-reproduction',{status:'passed',tarballs:4});
      const pointer=fs.readFileSync(path.join(out,'current.json'));
      assert.throws(()=>buildPilot({sources,out,sourceVariants:variants,requestId:'modular-before-commit',
        publicationFault:point=>{if(point==='before-commit')throw Error('injected-before-commit');}}),/injected-before-commit/);

@@ -45,6 +45,7 @@
     "ps-js-node",
     "ps-ts-bun",
     "ps-ts-node",
+    "same-input-tarball-reproduction",
     "same-version-wrong-source-cohort",
     "source-and-map-inventories",
     "symlink-module",

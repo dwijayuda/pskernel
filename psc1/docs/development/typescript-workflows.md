@@ -143,3 +143,11 @@ identities and failed attempts. [Ordinary source 40314305497](https://github.com
 passes all 37 finite Practical Core criteria. This is a Linux engineering
 qualification; independent human comprehension, watch/editor features and final
 universal release remain separate.
+
+## Runtime/watch follow-through (2026-10-27)
+
+The dated results above describe .8. [The runtime/watch decision](runtime-and-watch.md)
+records the later .10 implementation and its separately required actual-runtime,
+stale-input, dependency and publication tests. The current development source
+has124 modules; the frozen122-module G3 identity remains unchanged. Do not infer
+new runtime or watch qualification from the original CLI run.

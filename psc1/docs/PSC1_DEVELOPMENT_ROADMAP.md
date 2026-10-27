@@ -1,26 +1,24 @@
 # PSC1 development roadmap
 
-Updated 2026-10-26 Asia/Jakarta. This is the authoritative remaining-work queue.
+Updated 2026-10-27 Asia/Jakarta. This is the authoritative remaining-work queue.
 Practical Core v1 remains frozen at14 feature families and 37 finite criteria.
 Completed detail is preserved in [the previous roadmap](history/ROADMAP_BEFORE_LAYOUT_2026-10-26.md)
 and [dated evidence](evidence/README.md).
 
 ## Current change and preserved qualifications
 
-Repository organization follows PR#191 at b426f9763ed2a576135ed2089671d48e21f1ff32.
-Runtime path/entry-point changes and a body-preserving TypeScript runtime extraction
-passed Linux qualification. [The checkpoint](../AI_WORK_STATE.md) distinguishes
-implementation from qualification.
+PR#193 qualifies runtime/watch and Apache-2.0 package cohort .11 at
+`fdc52207fdf3d809ad99b05a5b738aca21b95139`. Full source run40453128053 passes37/37 finite
+criteria and scoped seven-backend execution. Installed/runtime run40453124171
+passes all previous/new gates,32 supported-runtime compiler cases and three
+older-runtime refusals. [Dated receipt](PSC1_RUNTIME_WATCH_QUALIFICATION_2026-10-27.json)
+and [work state](../AI_WORK_STATE.md) contain exact artifacts and limitations.
 
-The preceding .8 host passed installed run 40314294152 at9b251a97.
-Source run 40314305497 passed37/37 finite Practical Core criteria.
-Frozen G3 executors retain122 modules/4742 Core members and closure
+Development source has124 modules/4742 Core members; frozen qualified G3 executors
+retain122 modules/4742 members and closure
 073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9.
-Before this extraction, development source has123 modules. Later source builds
-do not qualify different frozen executors.
-[CLI receipt](PSC1_CLI_QUALIFICATION_2026-10-26.json) and
-[maintainability receipt](PSC1_MAINTAINABILITY_QUALIFICATION_2026-10-26.json)
-own exact prior scope, identities and limitations.
+Current source qualification and frozen executor qualification remain distinct.
+Repository organization remains qualified at PR#192 /94e0c13f6a4b434f73c859cc0c716cb6fb8d1340.
 
 ## Dependency-ordered remaining queue
 
@@ -29,15 +27,16 @@ own exact prior scope, identities and limitations.
 | 1 | Repository organization | Qualified: [receipt](PSC1_LAYOUT_QUALIFICATION_2026-10-26.json). Source 40344469855 passes 37/37; installed40344458391 and current-source WasmG1/40344458240 pass. Canonical owners/compatibility paths, exact move/path checks, generated navigation and unchanged frozen payloads. Human understanding is separate. |
 | 2 | Independent maintainer trial | Pending human participation; the user can arrange a maintainer. Record commit, navigation mistakes, elapsed time, assistance and a real small change. No AI/CI comprehension claim. |
 | 3 | Compiler-origin structured diagnostics/editor integration | Pending: actual spans/provenance, both grammars, machine/human consumers and malformed-input refusals. |
-| 4 | Qualified watch/incremental behavior | Pending: dependency changes, cancellation, stale results, resource bounds and publication preservation. No second semantic compiler. |
-| 5 | Component String/IO and export selection | Pending: reuse shared/native ABI; both grammars/four engines, actual validation/execution, exact exports and refusals. Public component ABI currently Bool only. |
-| 6 | Full Python/PHP practical applications | Pending: real CLI/JSON/file/multi-module observations against checked reference; retain corpus/Unicode/integer/loop/IO tests. Providers remain optional. |
-| 7 | Automatic source-package capture | Pending: bounded deterministic order, exact identities, cycle/missing/stale refusals, real multi-package applications. Metadata never executes code or grants authority. |
-| 8 | Native publication committed-outcome parity | Pending: retain transaction and explicitly report post-commit uncertainty. No false rollback guarantee. |
-| 9 | Additional platform consumers/publication | Blocked on actual permitted platform execution. Linux does not qualify macOS/Windows durability or SDK/provider consumers. |
-| 10 | Clean reproduction/final universal release | Pending: exact final source/package/platform identities and required generations; authorization before merge/publication. |
-| 11 | Original240-second self-compilation target | Unqualified: optimize measured compiler workloads; retain separate correctness profiles and safety policies. |
-| 12 | Broader features/extensions and R4 transformations | Deferred beyond frozen v1 or explicit semantic obligations. Preserve working features; packages cannot acquire checker/host/FFI/publication authority. |
+| 4 | Runtime compatibility, checked watch and licensing | Qualified Linux milestone, PR#193 /fdc52207fdf3d809ad99b05a5b738aca21b95139: Node>=22.23.3, Bun>=1.4.4; actual Node22.23.3/24.21.0/26.12.1 and Bun1.4.4; older Node/Bun refusals;55 CLI requests,11 full watch cases,16 applications/264 observations,32 publications/143 refusals; all61 SDK pins unchanged. Apache-2.0 source/cohort, vendor notices retained. [Receipt](PSC1_RUNTIME_WATCH_QUALIFICATION_2026-10-27.json). Semantic incremental caching remains deferred. |
+| 5 | Genuine modular JS/TS compiler packages | Decided for final distribution; implementation pending. [Source-owned module graph design](architecture/modular-compiler-distribution.md): real pass-family modules/cohort, typed producer-consumer pilot, shared runtime/initialization, strict whole-graph admission, atomic publication and real modular G1/G2/G3 before promotion. Existing bundled executors remain reference. Apache-2.0 for owned packages. |
+| 6 | Component String/IO and export selection | Pending: reuse shared/native ABI; both grammars/four engines, actual validation/execution, exact exports and refusals. Public component ABI currently Bool only. |
+| 7 | Full Python/PHP practical applications | Pending: real CLI/JSON/file/multi-module observations against checked reference; retain corpus/Unicode/integer/loop/IO tests. Providers remain optional. |
+| 8 | Automatic source-package capture | Pending: bounded deterministic order, exact identities, cycle/missing/stale refusals, real multi-package applications. Metadata never executes code or grants authority. |
+| 9 | Native publication committed-outcome parity | Pending: retain transaction and explicitly report post-commit uncertainty. No false rollback guarantee. |
+| 10 | Additional platform consumers/publication | Blocked on actual permitted platform execution. Linux does not qualify macOS/Windows durability or SDK/provider consumers. |
+| 11 | Clean reproduction/final universal release | Pending: exact final source/package/platform identities and required generations; authorization before merge/publication. |
+| 12 | Original240-second self-compilation target | Unqualified: optimize measured compiler workloads; retain separate correctness profiles and safety policies. |
+| 13 | Broader features/extensions and R4 transformations | Deferred beyond frozen v1 or explicit semantic obligations. Preserve working features; packages cannot acquire checker/host/FFI/publication authority. |
 
 ## Fixed policies
 

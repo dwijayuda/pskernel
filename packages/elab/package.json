@@ -29,5 +29,6 @@
     "@proofscript/syntax": "file:../syntax",
     "@proofscript/checked-core": "file:../checked-core",
     "@proofscript/tactic": "file:../tactic"
-  }
+  },
+  "license": "Apache-2.0"
 }

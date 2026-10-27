@@ -1,10 +1,11 @@
+import {finalizeProjectLicenses} from './packaging/finalize-licenses.mjs';
 import {renderSourceGuide} from './packaging/render-guide.mjs';
 // Repackage pinned qualified G3 payloads; never rebuild a compiler or kernel.
 import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';import {spawnSync} from 'node:child_process';
 import {readQualifiedArtifact,sha256} from './kernel435-qualified-artifact.mjs';
 import {readQualifiedCompilerAssets} from './qualified-compiler-assets.mjs';
 import {crosscheckCompilerAdmissions} from './crosscheck-compiler-admissions.mjs';
-const input=JSON.parse(fs.readFileSync('scripts/slim-universal-input.json','utf8')),out=path.resolve('dist/slim-universal'),stage=path.join(out,'package'),version=input.qualifiedCompilerGenerations?'0.1.0-psc1.9':'0.1.0-psc1.4';
+const input=JSON.parse(fs.readFileSync('scripts/slim-universal-input.json','utf8')),out=path.resolve('dist/slim-universal'),stage=path.join(out,'package'),version=input.qualifiedCompilerGenerations?'0.1.0-psc1.11':'0.1.0-psc1.4';
 assert.ok(out.startsWith(path.resolve('dist')+path.sep));fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(out,{recursive:true});
 const archive=await readQualifiedArtifact(input.qualifiedIntegration,path.join(out,'qualified-input'));
 const run=(exe,args)=>{const r=spawnSync(exe,args,{encoding:'utf8',timeout:240000,maxBuffer:64*1024*1024});assert.equal(r.error,undefined,String(r.error));assert.equal(r.status,0,r.stdout+r.stderr);return r.stdout;};
@@ -54,7 +55,7 @@ const hostFiles=[
  'host-tools/transactional-publication.mjs','host-tools/checked-targets.mjs','host-tools/generated-wasm-transport.mjs','host-tools/generated-compiler-session.mjs','host-tools/compiler-host-protocol.mjs','host-tools/installed-engine-resolver.mjs',
  'host-tools/typed-io.mjs','host-tools/typed-io.d.ts',
  'scripts/compiler-closure-contract.mjs','scripts/generated-compiler-runner.mjs','scripts/universal-candidate-runner.mjs',
- 'npm-cli/proofscript-cli.mjs','npm-cli/cli-project.mjs',
+ 'npm-cli/proofscript-cli.mjs','npm-cli/cli-project.mjs','npm-cli/cli-watch.mjs','npm-cli/cli-watch-worker.mjs','host-tools/runtime-policy.mjs',
  'npm-cli/universal.mjs','npm-cli/universal-cli.mjs','npm-cli/universal-kernel-checker.mjs','npm-cli/universal-wasm-checker.mjs','npm-cli/universal-native-checker.mjs','npm-cli/universal.d.ts'
 ];
 for(const file of hostFiles)copy(file,path.join(stage,file));fs.chmodSync(path.join(stage,'npm-cli/universal-cli.mjs'),0o755);fs.chmodSync(path.join(stage,'npm-cli/proofscript-cli.mjs'),0o755);
@@ -87,7 +88,7 @@ for(const [target,descriptor]of Object.entries(dispatchPackages)){
 const peers=Object.fromEntries(['nativeKernel','rust','wasm-core'].map(k=>[packages[k].package,packages[k].version]));
 for(const descriptor of Object.values(dispatchPackages))peers[descriptor.package]=descriptor.version;
 peers.typescript='7.0.2';peers[rustConsumer.package]=rustConsumer.version;
-const meta={name:'proofscript',version,type:'module',private:true,license:'UNLICENSED',engines:{node:'22.23.3'},
+const meta={name:'proofscript',version,type:'module',private:true,license:'Apache-2.0',engines:{node:'>=22.23.3'},
  main:'./npm-cli/universal.mjs',types:'./npm-cli/universal.d.ts',
  exports:{'./io':{types:'./host-tools/typed-io.d.ts',import:'./host-tools/typed-io.mjs'},'.':{types:'./npm-cli/universal.d.ts',import:'./npm-cli/universal.mjs'},'./kernel':{types:'./npm-cli/universal.d.ts',import:'./npm-cli/universal.mjs'},'./metadata':'./UNIVERSAL_DISTRIBUTION.json','./package.json':'./package.json'},
  bin:{proofscript:'./npm-cli/proofscript-cli.mjs',psc:'./npm-cli/proofscript-cli.mjs',psc1:'./npm-cli/proofscript-cli.mjs'},
@@ -115,3 +116,5 @@ const inventoryRows=inventory(stage);assert.ok(!inventoryRows.some(r=>r.path.sta
 const ratio=bytes.length/fs.statSync(tar).size;assert.ok(ratio<0.5,'root must be less than half the previous root');
 const receipt={schema:'psc1-slim-universal-package/1',sourceCommit:process.env.GITHUB_SHA,status:'assembled-not-yet-qualified',targetConsumers,dispatchPackages,package:meta.name,version,tarball:packed[0].filename,bytes:bytes.length,sha256:sha256(bytes),previousRootBytes:fs.statSync(tar).size,sizeRatio:ratio,removedBytes:fs.statSync(tar).size-bytes.length,compilerSourceClosureDigest:compiler.sharedSourceClosureDigest,embeddedEngines:['js','ts'],optionalExecutionPackages:['rust','wasm-core'].map(k=>packages[k]),defaultKernel:'wasm',nativePayloadsIncluded:false,compilerSdkRequired:false,osCpuLibcRestrictions:false,publicationPlatforms:['linux'],fullCrossPlatformRelease:false,input:{...input,packages}};
 fs.writeFileSync(path.join(out,'package-receipt.json'),JSON.stringify(receipt,null,2)+'\n');console.log('PSC1_SLIM_UNIVERSAL_PACKAGE: '+JSON.stringify(receipt));
+
+finalizeProjectLicenses(out);

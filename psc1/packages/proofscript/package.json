@@ -4,7 +4,7 @@
   "description": "ProofScript PSC0 CLI, qualified self-host compiler closure and JS checker",
   "private": false,
   "type": "module",
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "bin": {
     "psc": "./bin/psc.js"
   },
@@ -22,7 +22,9 @@
   "files": [
     "bin/",
     "README.md",
-    "MANIFEST.json"
+    "MANIFEST.json",
+    "LICENSE",
+    "NOTICE"
   ],
   "dependencies": {
     "@proofscript/foundation": "0.1.0-psc0.1",

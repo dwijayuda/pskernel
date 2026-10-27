@@ -11,6 +11,14 @@ const require = createRequire(path.join(root, 'host-tools/package.json'));
 const prettier = require('prettier');
 const {parse} = require('@babel/parser');
 const baseline = '3089cbc369bc8a11f540c13140c7003c9dadf4a8';
+const layoutCheckpoint = '94e0c13f6a4b434f73c859cc0c716cb6fb8d1340';
+const runtimeFeatureBaseline = '91bcbd107f375eea5cf5f87f15a9be9fe561b7c4';
+function readAt(commit, file) {
+  const r = spawnSync('git', ['show', commit + ':psc1/' + file], {
+    cwd: root, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024,
+  });
+  assert.equal(r.status, 0, r.stderr); return r.stdout;
+}
 const cleanupCommit = '446a0f21c6288a7c20b843bbeadcd18ba1460fa2';
 // Intentional checked-target/publication features have separate behavior qualification.
 // Preserve the original cleanup proof; do not call these features formatting.
@@ -73,8 +81,12 @@ for (const file of files) {
   });
   assert.equal(feature.status, 0, file + '\n' + feature.stderr);
   const source = fs.readFileSync(path.join(root, canonicalFiles[file] ?? file), 'utf8');
-  assert.deepEqual(executableAst(source), executableAst(relocated(feature.stdout)),
+  // Reproduce the historical layout correspondence without freezing future behavior.
+  const layoutSource = readAt(layoutCheckpoint, canonicalFiles[file] ?? file);
+  assert.deepEqual(executableAst(layoutSource), executableAst(relocated(feature.stdout)),
     file + ': executable AST changed from the explicit feature baseline');
+  assert.deepEqual(executableAst(source), executableAst(readAt(runtimeFeatureBaseline, canonicalFiles[file] ?? file)),
+    file + ': current runtime/watch host differs from its separately tested feature baseline');
   const formatted = await prettier.format(source, formatOptions);
   assert.deepEqual(executableAst(formatted), executableAst(source),
     file + ': formatter changed executable AST');
@@ -100,8 +112,11 @@ for (const file of newModules) {
   });
   assert.equal(feature.status, 0, file + '\n' + feature.stderr);
   const source = fs.readFileSync(path.join(root, canonicalFiles[file] ?? file), 'utf8');
-  assert.deepEqual(executableAst(source), executableAst(relocated(feature.stdout)),
+  const layoutSource = readAt(layoutCheckpoint, canonicalFiles[file] ?? file);
+  assert.deepEqual(executableAst(layoutSource), executableAst(relocated(feature.stdout)),
     file + ': new dispatch module changed from its explicit feature baseline');
+  assert.deepEqual(executableAst(source), executableAst(readAt(runtimeFeatureBaseline, canonicalFiles[file] ?? file)),
+    file + ': runtime/watch host differs from separately tested feature baseline');
   const formatted = await prettier.format(source, formatOptions);
   assert.deepEqual(executableAst(formatted), executableAst(source),
     file + ': formatter changed executable AST');
@@ -116,7 +131,7 @@ const out = path.join(root, 'dist/readability');
 fs.mkdirSync(out, {recursive: true});
 fs.writeFileSync(path.join(out, 'host.json'), JSON.stringify({
   schema: 'psc1-readability-host/1', commit: process.env.GITHUB_SHA,
-  baseline, cleanupCommit, featureBaselines, featureQualification,
+  baseline, cleanupCommit, featureBaselines, featureQualification, layoutCheckpoint, runtimeFeatureBaseline,
   mode: propose ? 'proposal-not-qualification' : 'check',
   formatter: 'prettier@3.6.2', parser: '@babel/parser@7.28.0', results,
 }, null, 2) + '\n');

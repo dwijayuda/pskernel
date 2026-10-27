@@ -1,5 +1,6 @@
 // Trusted installed-package selection only. Compiler wire data never selects tools.
 import fs from 'node:fs';
+import { requireSupportedRuntime } from './runtime-policy.mjs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import os from 'node:os';
@@ -57,7 +58,7 @@ function manifestPin() {
   return { bytes, pin: { path: file, sha256: expectedDistributionSha256 } };
 }
 export function loadDistribution() {
-  if (process.version !== 'v22.23.3') fail('NODE_PIN');
+  requireSupportedRuntime();
   if (!/^[a-f0-9]{64}$/.test(compilerRoot)) fail('COMPILER_SOURCE_PIN');
   const { bytes } = manifestPin(),
     d = JSON.parse(bytes);

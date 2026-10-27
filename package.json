@@ -72,5 +72,6 @@
   },
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "license": "Apache-2.0"
 }

@@ -1,3 +1,4 @@
+import {applyProjectLicense} from './packaging/license.mjs';
 // Augment the qualified compiler package. Compiler/G3 bytes are never regenerated here.
 import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';import {spawnSync} from 'node:child_process';import {readQualifiedArtifact,sha256} from './kernel435-qualified-artifact.mjs';
 const root=process.cwd(),out=path.resolve('dist/kernel435-core'),work=path.join(out,'work'),stage=path.join(work,'package'),inputs=JSON.parse(fs.readFileSync('scripts/kernel435-integrated-inputs.json','utf8'));
@@ -15,6 +16,7 @@ const providers={};
 for(const key of ['native','wasm']){
  const input=inputs[key],tar=path.join(archives[key],input.tarball);assert.equal(sha256(fs.readFileSync(tar)),input.tarballSha256);
  const extracted=path.join(out,key);unpack(tar,extracted);const pkg=path.join(extracted,'package'),pmeta=JSON.parse(fs.readFileSync(path.join(pkg,'package.json'),'utf8')),name=key==='native'?'@proofscript/pskernel-lean':'@proofscript/pskernel-lean-wasm';assert.equal(pmeta.name,name);assert.equal(pmeta.version,'4.35.0');
+ applyProjectLicense(pkg);
  const dst='node_modules/'+name;assert.equal(fs.existsSync(path.join(stage,dst)),false);fs.mkdirSync(path.dirname(path.join(stage,dst)),{recursive:true});fs.cpSync(pkg,path.join(stage,dst),{recursive:true});
  const files=[];for(const rel of ['index.mjs','package.json',key==='native'?'PREBUILT_MANIFEST.json':'PREBUILT_WASM_MANIFEST.json'])files.push(filePin(dst+'/'+rel));
  function walk(dir){for(const e of fs.readdirSync(path.join(stage,dst,dir),{withFileTypes:true})){const rel=dir+'/'+e.name;if(e.isDirectory())walk(rel);else{assert.ok(e.isFile()&&!e.isSymbolicLink());files.push(filePin(dst+'/'+rel));}}}
@@ -42,7 +44,9 @@ fs.writeFileSync(path.join(stage,'SELFHOST_DISTRIBUTION.json'),JSON.stringify(ol
 const obsolete=path.join(stage,'native/bin/psc1_independent_checker');assert.ok(obsolete.startsWith(stage+path.sep));fs.unlinkSync(obsolete);
 meta.files=[...new Set([...meta.files,'KERNEL_DISTRIBUTION.json'])];meta.exports={...meta.exports,'./kernel':{types:'./host-tools/kernel-toolchain.d.ts',import:'./host-tools/kernel-toolchain.mjs'},'./kernel-metadata':'./KERNEL_DISTRIBUTION.json'};meta.proofscript.kernelPackages=old.kernelPackages;meta.proofscript.defaultKernel='wasm';meta.proofscript.nativeKernelRole='explicit-optional-comparison';meta.engines={...meta.engines,node:'22.23.3'};
 if(inputs.compiledExecutionBundles)meta.proofscript.executionBundlePackages=inputs.compiledExecutionBundles.packages.map(p=>({name:p.package,version:meta.version,tarballSha256:p.sha256,scope:'separate execution payload; core embedding retained until final release split'}));
+meta.license='Apache-2.0';
 fs.writeFileSync(path.join(stage,'package.json'),JSON.stringify(meta,null,2)+'\n');
+applyProjectLicense(stage);
 const lockPath=path.join(stage,'npm-shrinkwrap.json');
 let lock;
 if(fs.existsSync(lockPath))lock=JSON.parse(fs.readFileSync(lockPath,'utf8'));
@@ -51,7 +55,7 @@ else{
  lock=JSON.parse(sourceLock);for(const [key,p]of Object.entries(lock.packages)){if(p.dev===true){delete lock.packages[key];continue;}if(key){assert.ok(key.startsWith('node_modules/'));const actual=JSON.parse(fs.readFileSync(path.join(stage,key,'package.json'),'utf8'));assert.equal(actual.version,p.version,'bundled dependency version '+key);p.inBundle=true;}}
 }
 lock.name=meta.name;lock.version=meta.version;lock.packages['']={name:meta.name,version:meta.version,dependencies:meta.dependencies,bundleDependencies:meta.bundledDependencies,engines:meta.engines,bin:meta.bin,os:meta.os,cpu:meta.cpu,libc:meta.libc};
-for(const p of Object.values(providers))lock.packages['node_modules/'+p.package]={version:'4.35.0',inBundle:true,license:'UNLICENSED',engines:{node:'>=22.23.3'}};
+for(const p of Object.values(providers))lock.packages['node_modules/'+p.package]={version:'4.35.0',inBundle:true,license:'Apache-2.0',engines:{node:'>=22.23.3'}};
 fs.writeFileSync(lockPath,JSON.stringify(lock,null,2)+'\n');
 fs.appendFileSync(path.join(stage,'README.md'),'\nCompatible independent Lean4.35.0 native and Emscripten linear-memory Wasm kernel packages are bundled. No kernel install-time SDK/download/build is needed. psc kernel --identity; psc kernel check admissions.json --provider both; psc kernel check-source Main.ps --provider both. psc generated build Main.ps --engine ts --out dist/generated checks the captured admission graph with default Wasm before publication; --kernel both explicitly checks identical bytes with both kernels. Independent official Lean admission remains mandatory. Wasm is the default checker; --kernel native or --kernel both is explicit and there is no automatic native fallback. Preserved native compiler commands retain their internal native checking and add default Wasm checking of the exact staged admission graph before publication. This integrated core candidate retains its Linux x64/glibc platform scope; the kernel packages have separate five-platform qualification. No final cross-platform compiler release is claimed.\n');
 const tarballs=path.join(out,'tarballs');fs.mkdirSync(tarballs);const packed=JSON.parse(run('npm',['pack',stage,'--ignore-scripts','--json','--pack-destination',tarballs]));assert.equal(packed.length,1);const tar=path.join(tarballs,packed[0].filename),b=fs.readFileSync(tar);

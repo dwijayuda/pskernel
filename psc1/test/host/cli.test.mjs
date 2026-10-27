@@ -21,6 +21,11 @@ const write = (name, value) => fs.writeFileSync(path.join(root, name), value);
 const select = args => captureProject(parseCompilation(args), root);
 const config = files => ({schema: 'proofscript-project/1', entryModule: 'Main', files});
 try {
+  test('watch aliases and invalid combinations are finite host options', () => {
+    for (const flag of ['--watch', '-w', '-watch']) assert.equal(parseCompilation([flag]).watch, true);
+    for (const args of [['--watch', '-w'], ['--watch', '--showConfig'], ['--watch=1']])
+      assert.throws(() => parseCompilation(args), /watch|option/i);
+  });
   test('help and empty invocation succeed without distribution, compiler or kernel', () => {
     for (const args of [[], ['--help'], ['-h'], ['help'], ['build', '--help']]) {
       const r = call(args); assert.equal(r.status, 0); assert.match(r.stdout, /--engine/);

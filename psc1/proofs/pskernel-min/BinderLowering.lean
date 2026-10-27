@@ -34,7 +34,6 @@ theorem lower_worker_sound (expression : PsExpr) (depth : Nat) (result : PsExpr)
             PsExpr.bvar (Nat.add previous 1) else PsExpr.bvar previous) =
               PsExpr.bvar (Nat.succ previous)
           rw [if_pos lift]
-          rfl
   | fvar id =>
       simp [psMinLowerUnusedBinderWorker] at success
       subst result

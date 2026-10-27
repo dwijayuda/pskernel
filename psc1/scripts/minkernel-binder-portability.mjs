@@ -35,6 +35,10 @@ const stem = path.join(dir, 'vectors');
 const admissionBytes = fs.readFileSync(stem + '.admissions.json');
 const official = JSON.parse(run('.lake/build/bin/psc1_independent_checker', ['--check'], admissionBytes));
 assert.equal(official.accepted, true);
+assert.equal(official.protocol, 'pskernel-lean/1');
+assert.equal(official.provider, 'lean4-cpp');
+assert.equal(official.leanVersion, '4.35.0');
+assert.equal(official.profile, 'lean4.35-core');
 assert.equal(official.leanCommit, 'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
 const sourceReport = JSON.parse(fs.readFileSync(stem + '.source.json', 'utf8'));
 assert.equal(sourceReport.schema, 'psc1-min-source-compile/2');
@@ -273,6 +277,9 @@ const receipt = { schema: 'psc1-min-binder-portability/1', commit: process.env.G
   helperExplicitImportClosureModules: 4, completeTestClosureModules: 6,
   testOnlyAdditionalModule: 'Ps.Core.Equality', sourceReport,
   canonicalAdmissionSha256: sha(admissionBytes), officialSourceAdmission: official,
+  officialCheckerSha256: sha(fs.readFileSync('.lake/build/bin/psc1_independent_checker')),
+  sourceCompileDriverSha256: sha(fs.readFileSync('scripts/MinKernelSourceCompile.lean')),
+  payloadScope: 'Entire six-module test bundle; not isolated checker payload',
   generatedTsBytes: fs.statSync(stem + '.ts').size,
   generatedJsBytes: fs.statSync(stem + '.js').size,
   generatedJsSha256: sha(fs.readFileSync(stem + '.js')),

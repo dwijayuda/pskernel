@@ -24,46 +24,66 @@ def psMinLowerUnusedBinderWorker (expression : PsExpr) : Nat -> Option PsExpr :=
       fun (_depth : Nat) => Option.some (PsExpr.lit value)
   | .app fn arg =>
       fun (depth : Nat) =>
-        match psMinLowerUnusedBinderWorker fn depth with
+        let lowerFn : Nat -> Option PsExpr :=
+          psMinLowerUnusedBinderWorker fn;
+        let lowerArg : Nat -> Option PsExpr :=
+          psMinLowerUnusedBinderWorker arg;
+        match lowerFn depth with
         | Option.none => Option.none
         | Option.some loweredFn =>
-            match psMinLowerUnusedBinderWorker arg depth with
+            match lowerArg depth with
             | Option.none => Option.none
             | Option.some loweredArg =>
                 Option.some (PsExpr.app loweredFn loweredArg)
   | .lam name type body binder =>
       fun (depth : Nat) =>
-        match psMinLowerUnusedBinderWorker type depth with
+        let lowerType : Nat -> Option PsExpr :=
+          psMinLowerUnusedBinderWorker type;
+        let lowerBody : Nat -> Option PsExpr :=
+          psMinLowerUnusedBinderWorker body;
+        match lowerType depth with
         | Option.none => Option.none
         | Option.some loweredType =>
-            match psMinLowerUnusedBinderWorker body (Nat.succ depth) with
+            match lowerBody (Nat.succ depth) with
             | Option.none => Option.none
             | Option.some loweredBody =>
                 Option.some (PsExpr.lam name loweredType loweredBody binder)
   | .forallE name type body binder =>
       fun (depth : Nat) =>
-        match psMinLowerUnusedBinderWorker type depth with
+        let lowerType : Nat -> Option PsExpr :=
+          psMinLowerUnusedBinderWorker type;
+        let lowerBody : Nat -> Option PsExpr :=
+          psMinLowerUnusedBinderWorker body;
+        match lowerType depth with
         | Option.none => Option.none
         | Option.some loweredType =>
-            match psMinLowerUnusedBinderWorker body (Nat.succ depth) with
+            match lowerBody (Nat.succ depth) with
             | Option.none => Option.none
             | Option.some loweredBody =>
                 Option.some (PsExpr.forallE name loweredType loweredBody binder)
   | .letE name type value body =>
       fun (depth : Nat) =>
-        match psMinLowerUnusedBinderWorker type depth with
+        let lowerType : Nat -> Option PsExpr :=
+          psMinLowerUnusedBinderWorker type;
+        let lowerValue : Nat -> Option PsExpr :=
+          psMinLowerUnusedBinderWorker value;
+        let lowerBody : Nat -> Option PsExpr :=
+          psMinLowerUnusedBinderWorker body;
+        match lowerType depth with
         | Option.none => Option.none
         | Option.some loweredType =>
-            match psMinLowerUnusedBinderWorker value depth with
+            match lowerValue depth with
             | Option.none => Option.none
             | Option.some loweredValue =>
-                match psMinLowerUnusedBinderWorker body (Nat.succ depth) with
+                match lowerBody (Nat.succ depth) with
                 | Option.none => Option.none
                 | Option.some loweredBody =>
                     Option.some (PsExpr.letE name loweredType loweredValue loweredBody)
   | .proj name index value =>
       fun (depth : Nat) =>
-        match psMinLowerUnusedBinderWorker value depth with
+        let lowerValue : Nat -> Option PsExpr :=
+          psMinLowerUnusedBinderWorker value;
+        match lowerValue depth with
         | Option.none => Option.none
         | Option.some loweredValue =>
             Option.some (PsExpr.proj name index loweredValue)

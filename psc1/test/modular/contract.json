@@ -1,0 +1,62 @@
+{
+  "schema": "psc1-modular-pilot-contract/1",
+  "scope": "Foundation.Name compiler component and a dependent consumer; not whole-compiler modularization",
+  "version": "0.1.0-psc1-modular-pilot.0",
+  "sourceCount": 2,
+  "units": 3,
+  "packages": 4,
+  "limits": {
+    "requestBytes": 1048576,
+    "responseBytes": 33554432,
+    "cohortBytes": 33554432,
+    "survivingValues": 256,
+    "nominalTypes": 64,
+    "referenceFuel": 4096,
+    "producerSeconds": 240,
+    "checkerSeconds": 120,
+    "addressSpaceBytes": 4294967296,
+    "stackBytes": 8388608
+  },
+  "independentChecker": {
+    "version": "4.35.0",
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+  },
+  "requiredCases": [
+    "cohort-after-commit-reports-uncertainty",
+    "cohort-before-commit-preserves-prior",
+    "extra-empty-directory",
+    "extra-module",
+    "facade-dynamic-authority-and-thenable-graphs",
+    "forged-admission-metadata",
+    "ill-typed-source",
+    "lean-Bundler",
+    "lean-NodeNext",
+    "lean-js-bun",
+    "lean-js-node",
+    "lean-ts-bun",
+    "lean-ts-node",
+    "missing-module",
+    "missing-source-import",
+    "modified-generated-body",
+    "nested-runtime-copy",
+    "ps-Bundler",
+    "ps-NodeNext",
+    "ps-js-bun",
+    "ps-js-node",
+    "ps-ts-bun",
+    "ps-ts-node",
+    "same-version-wrong-source-cohort",
+    "source-and-map-inventories",
+    "symlink-module",
+    "wrong-version"
+  ],
+  "requiredPlannerRefusals": 14,
+  "promotion": false,
+  "remaining": [
+    "whole compiler graph and transformation provenance",
+    "complete shared type ownership beyond bounded monomorphic DAG",
+    "seven-backend application/reference parity for complete modular compiler",
+    "modular G1/G2/G3 and exact fixed points",
+    "final platform qualification and authorized registry publication"
+  ]
+}

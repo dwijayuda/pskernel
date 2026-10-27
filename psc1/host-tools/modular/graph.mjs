@@ -8,7 +8,7 @@ export function inspectModule(source){
   const imports=[],exports=[],state={weakMaps:0,symbols:0};
   for(const node of tree.program.body){
     if(node.type==='ImportDeclaration'){
-      assert.equal(node.importKind,'value');
+      assert.equal(node.importKind??'value','value');
       assert.ok(node.specifiers.every(s=>s.type==='ImportSpecifier'),'PSC1_MODULAR_NAMESPACE_IMPORT');
       imports.push({source:node.source.value,names:node.specifiers.map(s=>s.imported.name).sort()});
     }

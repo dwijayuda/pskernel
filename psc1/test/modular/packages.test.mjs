@@ -12,7 +12,8 @@ const root=process.cwd(),temporary=fs.mkdtempSync(path.join(os.tmpdir(),'psc1-mo
 const observer=fs.readFileSync(new URL('./observe.mjs',import.meta.url),'utf8');
 const producer=path.resolve('.lake/build/bin/psc1_modular_pilot');
 const tsc=path.resolve('../node_modules/typescript/bin/tsc');
-const result={schema:'psc1-modular-pilot-qualification/1',testedCommit:process.env.GITHUB_SHA,
+const contract=JSON.parse(fs.readFileSync('test/modular/contract.json','utf8'));
+const result={contractSha256:sha256(JSON.stringify(contract)),runtimes:{node:process.version,bun:run('bun',['--version']).trim()},schema:'psc1-modular-pilot-qualification/1',testedCommit:process.env.GITHUB_SHA,
  scope:'real compiler Foundation.Name plus dependent consumer; not a complete modular compiler or self-hosting qualification',
  cases:[],profiles:[],performanceTargetClaim:false,portableReleaseQualified:false};
 const leanSources=[
@@ -76,7 +77,7 @@ try{
    const file=path.join(temporary,'translate-'+index+'.lean');fs.writeFileSync(file,s.text);
    return{...s,kind:'ps',text:run(producer,['--translate',file])};
  });
- const builds=[];
+ const builds=[];let inventories=0;
  for(const sources of [leanSources,psSources]){
    const grammar=sources[0].kind;
    const out=path.resolve('dist/modular',grammar+'-cohort');
@@ -85,6 +86,21 @@ try{
    builds.push(built);
    assert.equal(built.receipt.accepted,true);
    const installed=install(built,grammar+'-consumer');
+   for(const name of packageNames){
+     const pkg=path.join(installed,'node_modules',name),meta=JSON.parse(fs.readFileSync(path.join(pkg,'package.json')));
+     assert.equal(meta.license,'Apache-2.0');assert.equal(meta.version,packageVersion);
+     for(const subpath of ['.','./ts'])for(const field of ['types','import'])assert.ok(fs.statSync(path.join(pkg,meta.exports[subpath][field])).isFile());
+     const source=fs.readFileSync(path.join(pkg,'src/ts/index.mts'),'utf8');
+     const map=JSON.parse(fs.readFileSync(path.join(pkg,'dist/ts/index.mjs.map'),'utf8'));
+     assert.equal(map.sources.length,1);assert.deepEqual(map.sourcesContent,[source]);
+     assert.equal(fs.readFileSync(path.resolve(pkg,'dist/ts',map.sources[0]),'utf8'),source);
+     inventories++;
+   }
+   const installable=path.resolve('dist/modular','installable-'+grammar);fs.mkdirSync(installable,{recursive:true});
+   for(const item of [...built.packages,built.rootTar])fs.copyFileSync(path.join(built.directory,item.tarball),path.join(installable,item.tarball));
+   fs.writeFileSync(path.join(installable,'SHA256SUMS'),[...built.packages,built.rootTar].map(item=>item.sha256+'  '+item.tarball).join('\n')+'\n');
+   fs.writeFileSync(path.join(installable,'INSTALL.txt'),'Experimental compiler-component pilot, not the complete compiler.\nInstall all four .tgz files together: npm install --offline --ignore-scripts <four .tgz paths>\n'+
+     'Use the umbrella loadPilot() or loadPilot({variant: "ts"}). Do not mix cohorts or variant values.\n');
    for(const resolution of ['NodeNext','Bundler']){types(installed,resolution);record(grammar+'-'+resolution,{status:'passed'});}
    const referenceJs=path.join(installed,'reference-js.mjs');fs.writeFileSync(referenceJs,built.candidate.referenceJs);
    const referenceTs=path.join(installed,'reference-ts.mts');fs.writeFileSync(referenceTs,built.candidate.referenceTs);
@@ -97,7 +113,7 @@ try{
      for(const runtime of [process.execPath,'bun']){
        const actual=observe(installed,variant,'installed',undefined,runtime);
        assert.deepEqual(actual.observations,expected.observations);
-       record(grammar+'-'+variant+'-'+actual.runtime,{status:'passed',elapsedMs:actual.elapsedMs,observations:actual.observations.length});
+       record(grammar+'-'+variant+'-'+actual.runtime,{status:'passed',elapsedMs:actual.elapsedMs,importedMs:actual.importedMs,warmMs:actual.warmMs,processMaxRssKiB:actual.processMaxRssKiB,observations:actual.observations.length});
      }
    }
    result.profiles.push({grammar,generation:built.generation,cohortSha256:built.cohortSha256,
@@ -134,6 +150,18 @@ try{
      assert.deepEqual(fs.readFileSync(path.join(out,'current.json')),pointer);
      assert.equal(readPublication(out,'portable-file').generation,built.generation);
      observe(installed,'js');record('cohort-before-commit-preserves-prior',{status:'passed'});
+     let uncertain;
+     try{buildPilot({sources,out,sourceVariants:variants,requestId:'modular-after-commit',
+       publicationFault:point=>{if(point==='after-commit')throw Error('injected-after-commit');}});}
+     catch(error){uncertain=error;}
+     assert.equal(uncertain?.message,'PSC1_SERVICE_PUBLICATION_COMMITTED_DURABILITY_UNCERTAIN');
+     assert.equal(uncertain.committedPublication.durability,'unconfirmed');
+     const committed=readPublication(out,'portable-file');
+     assert.equal(committed.generation,uncertain.committedPublication.generation);
+     assert.notEqual(committed.generation,built.generation);
+     const input=JSON.parse(fs.readFileSync(path.join(committed.directory,'qualification-input.json')));
+     observe(install({...input,directory:committed.directory},'committed-consumer'),'ts');
+     record('cohort-after-commit-reports-uncertainty',{status:'passed'});
    }
  }
  assert.notEqual(builds[0].receipt.sourceClosureDigest,builds[1].receipt.sourceClosureDigest);
@@ -154,6 +182,8 @@ try{
    assert.throws(()=>inspectModule(source),/PSC1_MODULAR_/);
  }
  record('facade-dynamic-authority-and-thenable-graphs',{status:'refused',count:6});
+ assert.equal(inventories,6);record('source-and-map-inventories',{status:'passed',packages:inventories});
+ assert.deepEqual(result.cases.map(c=>c.name).sort(),contract.requiredCases);
  result.status='passed';fs.mkdirSync('dist/modular',{recursive:true});
  fs.writeFileSync('dist/modular/qualification.json',JSON.stringify(result,null,2)+'\n');
  console.log('PSC1_MODULAR_QUALIFIED '+JSON.stringify(result));

@@ -11,6 +11,7 @@ if(mode==='installed'){
   const graph=await umbrella.loadPilot({variant});({names:n,consumer:c,runtime:r}=graph);
   assert.equal(graph.variant,variant);
 }else{n=c=await import(pathToFileURL(reference).href);}
+const importedMs=performance.now()-started;
 const root=c.pilotSeed;
 let name=n.psNameAppendStr(root,'café'),name2=n.psNameAppendNum(name,42n);
 name2=n.psNameAppendStr(name2,'🌱');
@@ -42,5 +43,8 @@ if(r){
     assert.equal(r.PsName.anonymous[r.__ps$tag$0],root[r.__ps$tag$0]);
   }else assert.equal(root.$ps$tag,'PsName.anonymous');
 }
-console.log(JSON.stringify({observations:['café.42.🌱','root/café/42/🌱',3,'🌱',true,false,false,6000],
+const warmStart=performance.now();
+for(let i=0;i<5;i++){assert.equal(c.pilotDepth(deep),6000n);assert.equal(c.pilotSame(name2,name2),true);}
+const warmMs=performance.now()-warmStart;
+console.log(JSON.stringify({importedMs,warmMs,processMaxRssKiB:process.resourceUsage().maxRSS,observations:['café.42.🌱','root/café/42/🌱',3,'🌱',true,false,false,6000],
  elapsedMs:performance.now()-started,runtime:process.versions.bun?'bun':'node',variant,mode}));

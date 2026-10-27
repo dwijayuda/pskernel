@@ -1,7 +1,7 @@
 {
   "name": "proofscript",
-  "version": "0.1.0-psc1.12",
-  "description": "ProofScript PSC1 checked CLI and qualified shared compiler",
+  "version": "0.1.0-psc1.13",
+  "description": "ProofScript PSC1 checked CLI with automatically installed core packages",
   "private": false,
   "type": "module",
   "license": "Apache-2.0",
@@ -29,16 +29,54 @@
     "NOTICE"
   ],
   "dependencies": {
-    "@proofscript/pskernel-lean-wasm": "4.35.0-psc1.12"
+    "@proofscript/backend-common": "0.1.0-psc1.13",
+    "@proofscript/backend-js": "0.1.0-psc1.13",
+    "@proofscript/backend-rust": "0.1.0-psc1.13",
+    "@proofscript/backend-ts": "0.1.0-psc1.13",
+    "@proofscript/backend-wasm": "0.1.0-psc1.13",
+    "@proofscript/bootstrap": "0.1.0-psc1.13",
+    "@proofscript/bridge": "0.1.0-psc1.13",
+    "@proofscript/cli": "0.1.0-psc1.13",
+    "@proofscript/compiler": "0.1.0-psc1.13",
+    "@proofscript/compiler-ir": "0.1.0-psc1.13",
+    "@proofscript/core": "0.1.0-psc1.13",
+    "@proofscript/elab": "0.1.0-psc1.13",
+    "@proofscript/environment": "0.1.0-psc1.13",
+    "@proofscript/erasure": "0.1.0-psc1.13",
+    "@proofscript/foundation": "0.1.0-psc1.13",
+    "@proofscript/meta": "0.1.0-psc1.13",
+    "@proofscript/pskernel-core": "0.1.0-psc1.13",
+    "@proofscript/pskernel-lean-wasm": "4.35.0-psc1.13",
+    "@proofscript/stdlib": "0.1.0-psc1.13",
+    "@proofscript/syntax": "0.1.0-psc1.13"
   },
   "bundledDependencies": [
-    "@proofscript/pskernel-lean-wasm"
+    "@proofscript/backend-common",
+    "@proofscript/backend-js",
+    "@proofscript/backend-rust",
+    "@proofscript/backend-ts",
+    "@proofscript/backend-wasm",
+    "@proofscript/bootstrap",
+    "@proofscript/bridge",
+    "@proofscript/cli",
+    "@proofscript/compiler",
+    "@proofscript/compiler-ir",
+    "@proofscript/core",
+    "@proofscript/elab",
+    "@proofscript/environment",
+    "@proofscript/erasure",
+    "@proofscript/foundation",
+    "@proofscript/meta",
+    "@proofscript/pskernel-core",
+    "@proofscript/pskernel-lean-wasm",
+    "@proofscript/stdlib",
+    "@proofscript/syntax"
   ],
   "proofscript": {
-    "npmArchitecture": "psc1-existing-packages-shared-root/1",
-    "implementationOwner": "proofscript",
+    "npmArchitecture": "psc1-existing-packages-umbrella/1",
+    "implementationOwner": "@proofscript/compiler",
     "internalCompilerModules": false,
-    "packageKind": "qualified-shared-compiler",
+    "packageKind": "core-package-umbrella",
     "canonicalSources": "src",
     "sourceVariants": [
       "lean",
@@ -68,21 +106,101 @@
     "./package.json": "./package.json",
     "./sources": "./dist/source-manifest.json",
     "./io": {
-      "types": "./dist/implementation/host-tools/typed-io.d.ts",
-      "import": "./dist/implementation/host-tools/typed-io.mjs"
+      "types": "./dist/io.d.ts",
+      "import": "./dist/io.js"
     },
     "./kernel": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./metadata": "./dist/implementation/UNIVERSAL_DISTRIBUTION.json"
+    "./metadata": "./dist/distribution.json",
+    "./backend-common": {
+      "types": "./dist/packages/backend-common.d.ts",
+      "import": "./dist/packages/backend-common.js"
+    },
+    "./backend-js": {
+      "types": "./dist/packages/backend-js.d.ts",
+      "import": "./dist/packages/backend-js.js"
+    },
+    "./backend-rust": {
+      "types": "./dist/packages/backend-rust.d.ts",
+      "import": "./dist/packages/backend-rust.js"
+    },
+    "./backend-ts": {
+      "types": "./dist/packages/backend-ts.d.ts",
+      "import": "./dist/packages/backend-ts.js"
+    },
+    "./backend-wasm": {
+      "types": "./dist/packages/backend-wasm.d.ts",
+      "import": "./dist/packages/backend-wasm.js"
+    },
+    "./bootstrap": {
+      "types": "./dist/packages/bootstrap.d.ts",
+      "import": "./dist/packages/bootstrap.js"
+    },
+    "./bridge": {
+      "types": "./dist/packages/bridge.d.ts",
+      "import": "./dist/packages/bridge.js"
+    },
+    "./cli": {
+      "types": "./dist/packages/cli.d.ts",
+      "import": "./dist/packages/cli.js"
+    },
+    "./compiler-ir": {
+      "types": "./dist/packages/compiler-ir.d.ts",
+      "import": "./dist/packages/compiler-ir.js"
+    },
+    "./compiler": {
+      "types": "./dist/packages/compiler.d.ts",
+      "import": "./dist/packages/compiler.js"
+    },
+    "./core": {
+      "types": "./dist/packages/core.d.ts",
+      "import": "./dist/packages/core.js"
+    },
+    "./elab": {
+      "types": "./dist/packages/elab.d.ts",
+      "import": "./dist/packages/elab.js"
+    },
+    "./environment": {
+      "types": "./dist/packages/environment.d.ts",
+      "import": "./dist/packages/environment.js"
+    },
+    "./erasure": {
+      "types": "./dist/packages/erasure.d.ts",
+      "import": "./dist/packages/erasure.js"
+    },
+    "./foundation": {
+      "types": "./dist/packages/foundation.d.ts",
+      "import": "./dist/packages/foundation.js"
+    },
+    "./meta": {
+      "types": "./dist/packages/meta.d.ts",
+      "import": "./dist/packages/meta.js"
+    },
+    "./pskernel-core": {
+      "types": "./dist/packages/pskernel-core.d.ts",
+      "import": "./dist/packages/pskernel-core.js"
+    },
+    "./pskernel-lean-wasm": {
+      "types": "./dist/packages/pskernel-lean-wasm.d.ts",
+      "import": "./dist/packages/pskernel-lean-wasm.js"
+    },
+    "./stdlib": {
+      "types": "./dist/packages/stdlib.d.ts",
+      "import": "./dist/packages/stdlib.js"
+    },
+    "./syntax": {
+      "types": "./dist/packages/syntax.d.ts",
+      "import": "./dist/packages/syntax.js"
+    }
   },
   "peerDependencies": {
-    "@proofscript/pskernel-lean": "4.35.0-psc1.12",
+    "@proofscript/pskernel-lean": "4.35.0-psc1.13",
     "@proofscript/compiler-rust-linux-x64": "0.1.0-psc1.11",
     "@proofscript/compiler-wasm": "0.1.0-psc1.11",
-    "@proofscript/backend-python": "0.1.0-psc1.12",
-    "@proofscript/backend-php": "0.1.0-psc1.12",
+    "@proofscript/backend-python": "0.1.0-psc1.13",
+    "@proofscript/backend-php": "0.1.0-psc1.13",
     "@proofscript/wasm-component-tools-linux-x64": "0.1.0-psc1.11",
     "typescript": "7.0.2",
     "@proofscript/rust-target-consumer-linux-x64": "0.1.0-psc1.6"

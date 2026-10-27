@@ -1,6 +1,6 @@
 {
   "name": "@proofscript/pskernel-lean-wasm",
-  "version": "4.35.0-psc1.12",
+  "version": "4.35.0-psc1.13",
   "description": "PSC1 independent official Lean4.35.0 C++ kernel compiled with Emscripten into linear-memory WebAssembly",
   "type": "module",
   "private": false,

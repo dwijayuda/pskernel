@@ -1,11 +1,11 @@
 {
   "name": "@proofscript/backend-python",
-  "version": "0.1.0-psc1.12",
+  "version": "0.1.0-psc1.13",
   "private": false,
   "description": "ProofScript PSC1 backend-python: source package and shared compiler API adapter",
   "proofscript": {
     "npmArchitecture": "psc1-existing-packages-shared-root/1",
-    "implementationOwner": "proofscript",
+    "implementationOwner": "@proofscript/compiler",
     "internalCompilerModules": false,
     "packageKind": "shared-backend-adapter",
     "canonicalSources": "src",
@@ -57,7 +57,7 @@
     }
   },
   "dependencies": {
-    "proofscript": "0.1.0-psc1.12"
+    "@proofscript/compiler": "0.1.0-psc1.13"
   },
   "os": [
     "linux"

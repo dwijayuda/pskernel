@@ -1,37 +1,38 @@
-# ProofScript PSC1
+# proofscript
 
-This package owns one qualified shared compiler implementation and the normal
-ProofScript CLI. The default install includes JS/TS executors, the four core
-output emitters, and a genuine independent official Lean 4.35.0 checker compiled
-with Emscripten to linear-memory Wasm.
+PSC1 .13 installs the core package set automatically. This existing root package
+declares and bundles all 20 required existing @proofscript packages, including
+compiler, core, elab, syntax, erasure, foundation, JS/TS/Rust/Wasm adapters, and
+the genuine official Lean 4.35.0 Emscripten linear-memory Wasm checker.
 
-Install the unpublished .12 tarball from its matching CI cohort:
+The existing @proofscript/compiler package owns the one qualified JS/TS compiler
+implementation. Other adapters depend on compiler. No package depends back on
+proofscript, and optional provider peer edges are also checked for cycles.
+Source-only packages remain verified source interfaces, not new private runtime APIs.
 
-    npm install -g ./proofscript-0.1.0-psc1.12.tgz
-    psc --help
-    psc init --kind lean
-    psc check Main.lean
-    psc build Main.lean --target js --out dist/app
+Install the unpacked ZIP's root tarball, with Node >=22.23.3:
 
-No installation script downloads binaries, installs a native SDK, or builds the
-compiler from source. Rust/Wasm compiler execution engines, native checking,
-Python/PHP providers, and target SDKs remain explicit optional installations.
-Their existing runtime/platform and ABI constraints still apply.
+    npm install ./proofscript-0.1.0-psc1.13.tgz
+    npx --no-install psc --help
 
-The public programmatic API exports compile, build, compileCandidate,
-getCompilerMetadata, checkCanonicalAdmissions and the existing publication/kernel
-helpers. Independent checking and strict original/transformed IR validation
-remain part of checked compilation. Candidate APIs have no publication authority.
+No install hook, source build or network toolchain download is used. Every core
+package is present under the installed root's node_modules. npm may retain bundled
+dependencies there rather than hoist them into the project's top-level node_modules.
+Use the guaranteed root exports without relying on hoisting:
 
-Other existing @proofscript packages provide source interfaces or transparent
-adapters to this owner. There is no duplicate compiler bundle in each package.
-Private elaborator/Core functions are not exposed through fabricated exports.
+    import {compile} from 'proofscript';
+    import {readSources} from 'proofscript/foundation';
+    import {compile as compileJs} from 'proofscript/backend-js';
 
-From the repository checkout, npm run build creates dist from pinned qualified
-inputs, npm run clean removes dist, and npm pack creates the release tarball.
-The generated provider/compiler bodies retain their original qualification
-identities. The .12 distribution does not claim new modular G2/G3 fixed points.
-Canonical source and old successful CI evidence remain preserved.
+All core packages also retain their original npm names for explicit direct installs.
+Python/PHP providers, native checking, optional Rust/Wasm compiler engines and target
+SDKs are separate explicit packages. No missing provider silently falls back.
 
-[Build, package inventory and limitations](../../docs/guides/npm-packages.md).
-Apache-2.0; upstream notices are retained. No registry publication is authorized.
+Official independent Lean checking, strict original/transformed IR, exact qualified
+compiler source identities and all existing execution/resource policies remain.
+Public compilation accepts both .lean/.ps; source packages expose only variants
+actually present. Full compiler-internal modular code generation remains deferred.
+Linux CI qualifies this distribution; final non-Linux consumers remain separate.
+
+Owned code is Apache-2.0. Qualified input and third-party notices are retained.
+No registry publication or merge is included.

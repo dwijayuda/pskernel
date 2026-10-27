@@ -9,7 +9,7 @@
     "tarball": "proofscript-0.1.0-psc1.11.tgz",
     "tarballSha256": "4b7b88a395c00e1e757e7239026349d0bfbecc3e09b24ed8f6563d18f663a7c1"
   },
-  "version": "0.1.0-psc1.12",
+  "version": "0.1.0-psc1.13",
   "full": {
     "run": 40466372623,
     "job": 122062828886,

@@ -1,5 +1,5 @@
 // Packaging only: no parser/elaborator/IR transform/kernel implementation.
-// One qualified root implementation; existing source packages expose honest APIs.
+// Existing compiler package owns the qualified implementation; root installs the core DAG.
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
@@ -106,24 +106,31 @@ const sourceTypes=[
  "export const sourcePackage:Readonly<{schema:'psc1-source-package/1';name:string;version:string;kind:string;files:readonly SourceFile[];internalRuntimeApi:false;admissionAuthority:false;}>;",
  "export function readSources(options?:{kind?:'lean'|'ps'}):readonly SourceRecord[];"
 ].join('\n')+'\n';
-const records=[],built=new Map(),packedRoots=new Map();
+const records=[],built=new Map(),packedRoots=new Map(),active=new Set();
+const directoryByName=new Map(dirs.map(d=>[read(path.join('packages',d,'package.json')).name,d]));
 function build(dir){
  if(built.has(dir))return built.get(dir);
  const packageRoot=path.join(root,'packages',dir),meta=read(path.join(packageRoot,'package.json'));
+ assert.ok(!active.has(dir),'package dependency cycle:'+dir);active.add(dir);
+ for(const name of Object.keys(meta.dependencies??{})){
+  assert.ok(directoryByName.has(name),'missing workspace dependency:'+name);
+  build(directoryByName.get(name));
+ }
+ // Native checking remains optional; seal its exact descriptor without installing it.
+ if(dir==='compiler')build('pskernel-lean');
  if(dir==='stdlib')fs.cpSync(path.join(root,'stdlib/ProofScript'),path.join(packageRoot,'src/ProofScript'),{recursive:true});
  const stamp=sha256(json({input,meta,source:sourceFiles(packageRoot),builder:sha256(fs.readFileSync(fileURLToPath(import.meta.url))),
-  rootMetadata:dir==='proofscript'?dirs.map(name=>['package.json','README.md','LICENSE','NOTICE'].map(file=>{const p=path.join(root,'packages',name,file);return fs.existsSync(p)?sha256(fs.readFileSync(p)):null;})):null}));
+  dependencyTarballs:Object.keys(meta.dependencies??{}).map(name=>built.get(directoryByName.get(name)).sha256),
+  rootMetadata:dir==='compiler'?dirs.map(name=>['package.json','README.md','LICENSE','NOTICE'].map(file=>{const p=path.join(root,'packages',name,file);return fs.existsSync(p)?sha256(fs.readFileSync(p)):null;})):null}));
  const marker=path.join(out,'build-cache',dir+'.json');
  if(fs.existsSync(marker)){
   const old=read(marker);
   if(old.input===stamp&&old.files.every(p=>fs.existsSync(path.join(packageRoot,p.path))&&sha256(fs.readFileSync(path.join(packageRoot,p.path)))===p.sha256)&&
     fs.existsSync(path.join(packed,old.tarball))&&sha256(fs.readFileSync(path.join(packed,old.tarball)))===old.sha256){
    const unpacked=path.join(out,'packed',dir);if(!fs.existsSync(path.join(unpacked,'package')))unpack(path.join(packed,old.tarball),unpacked);
-   packedRoots.set(dir,path.join(unpacked,'package'));built.set(dir,old);records.push({...old,cache:'verified-unchanged'});return old;
+   packedRoots.set(dir,path.join(unpacked,'package'));built.set(dir,old);records.push({...old,cache:'verified-unchanged'});active.delete(dir);return old;
   }
  }
- if(dir!=='proofscript'&&!dir.startsWith('pskernel-lean'))build('proofscript');
- if(dir==='proofscript'){build('pskernel-lean-wasm');build('pskernel-lean');}
  clean(dir);fs.mkdirSync(path.join(packageRoot,'dist'));
  if(dir==='backend-python'||dir==='backend-php'){
   const old=originalPackage(meta.name);hydrate(packageRoot,old);
@@ -140,7 +147,7 @@ function build(dir){
   files:sources,internalRuntimeApi:false,admissionAuthority:false}));
  put(path.join(packageRoot,'dist/sources.js'),readSourcesCode);
  put(path.join(packageRoot,'dist/sources.d.ts'),sourceTypes);
- if(dir==='proofscript'){
+ if(dir==='compiler'){
   const impl=path.join(packageRoot,'dist/implementation');
   fs.cpSync(frozen,impl,{recursive:true,filter:p=>p!==path.join(frozen,'node_modules')});
   // Update distribution metadata before sealing it; execution code stays exact.
@@ -178,27 +185,52 @@ function build(dir){
   put(path.join(impl,'DISTRIBUTION_PIN.mjs'),originalPin.replace(/expectedDistributionSha256\s*=\s*['"][a-f0-9]{64}['"]/,
     "expectedDistributionSha256 = "+JSON.stringify(sha256(json(d)))));
 
-  const bundled=path.join(packageRoot,'node_modules/@proofscript/pskernel-lean-wasm');
+  put(path.join(packageRoot,'dist/index.js'),"export * from './implementation/npm-cli/compiler-api.mjs';\nexport {sourcePackage,readSources} from './sources.js';\n");
+  put(path.join(packageRoot,'dist/index.d.ts'),fs.readFileSync(path.join(impl,'npm-cli/universal.d.ts'),'utf8')+"\nexport * from './sources.js';\n");
+  put(path.join(packageRoot,'dist/compiler.js'),"export * from './index.js';\n");
+  put(path.join(packageRoot,'dist/compiler.d.ts'),"export * from './index.js';\n");
+ }else if(dir==='proofscript'){
+  const bundled=path.join(packageRoot,'node_modules');
   if(fs.existsSync(bundled)){inventory(bundled);fs.rmSync(bundled,{recursive:true});}
-  fs.cpSync(kernel,bundled,{recursive:true});
-  put(path.join(packageRoot,'dist/index.js'),"export * from './implementation/npm-cli/compiler-api.mjs';\n");
-  put(path.join(packageRoot,'dist/index.d.ts'),fs.readFileSync(path.join(impl,'npm-cli/universal.d.ts')));
-  put(path.join(packageRoot,'dist/psc.mjs'),"#!/usr/bin/env node\nimport './implementation/npm-cli/proofscript-cli.mjs';\n");
+  for(const name of meta.bundledDependencies){
+   const dependency=packedRoots.get(directoryByName.get(name));assert.ok(dependency,'unbuilt core package:'+name);
+   fs.cpSync(dependency,path.join(bundled,name),{recursive:true});
+  }
+  const forwarding="export * from '@proofscript/compiler';\n";
+  put(path.join(packageRoot,'dist/index.js'),forwarding);
+  put(path.join(packageRoot,'dist/index.d.ts'),forwarding);
+  put(path.join(packageRoot,'dist/io.js'),"export * from '@proofscript/compiler/io';\n");
+  put(path.join(packageRoot,'dist/io.d.ts'),"export * from '@proofscript/compiler/io';\n");
+  put(path.join(packageRoot,'dist/distribution.json'),fs.readFileSync(path.join(packedRoots.get('compiler'),'dist/implementation/UNIVERSAL_DISTRIBUTION.json')));
+  for(const name of meta.bundledDependencies){
+   const directory=directoryByName.get(name),forward="export * from "+JSON.stringify(name)+";\n";
+   put(path.join(packageRoot,'dist/packages',directory+'.js'),forward);
+   put(path.join(packageRoot,'dist/packages',directory+'.d.ts'),forward);
+  }
+  put(path.join(packageRoot,'dist/psc.mjs'),[
+   '#!/usr/bin/env node',
+   "import {createRequire} from 'node:module';",
+   "import {pathToFileURL} from 'node:url';",
+   "import path from 'node:path';",
+   "const require=createRequire(import.meta.url);",
+   "const owner=path.dirname(require.resolve('@proofscript/compiler/package.json'));",
+   "await import(pathToFileURL(path.join(owner,'dist/implementation/npm-cli/proofscript-cli.mjs')));"
+  ].join('\n')+'\n');
   fs.chmodSync(path.join(packageRoot,'dist/psc.mjs'),0o755);
  }else if(dir.startsWith('pskernel-lean')){
   put(path.join(packageRoot,'dist/index.js'),"export * from './implementation/index.mjs';\n");
   put(path.join(packageRoot,'dist/index.d.ts'),fs.readFileSync(path.join(packageRoot,'dist/implementation/index.d.ts')));
  }else{
-  const adapter="export * from 'proofscript';\n",types="export * from 'proofscript';\n";
+  const adapter="export * from '@proofscript/compiler';\n",types="export * from '@proofscript/compiler';\n";
   put(path.join(packageRoot,'dist/compiler.js'),adapter);
   put(path.join(packageRoot,'dist/compiler.d.ts'),types);
   let entry="export {sourcePackage,readSources} from './sources.js';\n",declarations="export * from './sources.js';\n";
   if(['compiler','cli','bootstrap'].includes(dir)){entry+=adapter;declarations+=types;}
   if(dir.startsWith('backend-')&&dir!=='backend-common'){
    const target=dir==='backend-wasm'?'wasm-core':dir.slice('backend-'.length);
-   entry+="import {compile as checked} from 'proofscript';\nexport function compile(options){if(options.target!==undefined&&options.target!=="+
+   entry+="import {compile as checked} from '@proofscript/compiler';\nexport function compile(options){if(options.target!==undefined&&options.target!=="+
     JSON.stringify(target)+")throw Error('PSC1_PACKAGE_TARGET');return checked({...options,target:"+JSON.stringify(target)+"});}\n";
-   declarations+="import type {CompileOptions,CheckedCompilation} from 'proofscript';\nexport function compile(options:Omit<CompileOptions,'target'>):CheckedCompilation;\n";
+   declarations+="import type {CompileOptions,CheckedCompilation} from '@proofscript/compiler';\nexport function compile(options:Omit<CompileOptions,'target'>):CheckedCompilation;\n";
   }
   put(path.join(packageRoot,'dist/index.js'),entry);
   put(path.join(packageRoot,'dist/index.d.ts'),declarations);
@@ -210,7 +242,7 @@ function build(dir){
  unpack(path.join(packed,r.tarball),unpacked);packedRoots.set(dir,path.join(unpacked,'package'));
  // Track emitted content; build stamps are not part of the published API or compiler pins.
  r.files=inventory(path.join(packageRoot,'dist')).map(p=>({...p,path:'dist/'+p.path}));
- put(marker,json(r));built.set(dir,r);records.push(r);return r;
+ put(marker,json(r));built.set(dir,r);records.push(r);active.delete(dir);return r;
 }
 for(const dir of selected?[selected]:dirs)build(dir);
 
@@ -221,11 +253,11 @@ put(path.join(out,'source-dependencies.json'),json(sourceRows.map(row=>({
  sourceDependencies:[...new Set(row.files.flatMap(f=>f.imports).map(name=>sourceOwner.get(name)).filter(name=>name&&name!==row.name))].sort(),
  externalOrInternalWorkspaceImports:[...new Set(row.files.flatMap(f=>f.imports).filter(name=>!sourceOwner.has(name)))].sort(),
  runtimeDependencies:read(path.join('packages',row.directory,'package.json')).dependencies??{},
- scope:'source import inventory only; runtime adapters reuse proofscript and do not execute internal source imports'
+ scope:'source import inventory only; runtime adapters reuse @proofscript/compiler and do not execute internal source imports'
 }))));
 
 put(path.join(out,'package-builds.json'),json({schema:'psc1-existing-package-builds/1',
- testedCommit:process.env.GITHUB_SHA,version:input.version,implementationOwner:'proofscript',
+ testedCommit:process.env.GITHUB_SHA,version:input.version,implementationOwner:'@proofscript/compiler',
  independentCompilerModularity:'deferred',packages:records,
  unnamedSourceOnlyDirectories:fs.readdirSync('packages').filter(d=>fs.statSync(path.join('packages',d)).isDirectory()&&!dirs.includes(d))}));
 console.log('PSC1_PACKAGE_BUILDS '+json(records.map(({files,...r})=>r)));

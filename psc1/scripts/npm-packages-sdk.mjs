@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {sha256} from './kernel435-qualified-artifact.mjs';
-const root=path.resolve('packages/proofscript/dist/implementation');
+const root=path.resolve('packages/compiler/dist/implementation');
 const d=JSON.parse(fs.readFileSync(path.join(root,'UNIVERSAL_DISTRIBUTION.json')));
 const {verifyFile}=await import(pathToFileURL(path.join(root,'host-tools/installed-engine-resolver.mjs')).href);
 const result=spawnSync('rustup',['run','1.90.0','rustc','--print','sysroot'],{encoding:'utf8',timeout:10000});

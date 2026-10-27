@@ -1,24 +1,23 @@
-# compiler
+# @proofscript/compiler
 
-Semantic compiler API and service preparation. Start at [src/Ps/Compiler/Api.lean](src/Ps/Compiler/Api.lean).
+PSC1 .13 shared implementation owner for the existing checked compiler API.
+This package reuses the exact qualified JS/TS compiler executors and host bodies;
+it does not introduce a parser, compiler pipeline or new self-hosting claim.
 
-- Representation: Captured source input → prepared Core/admissions/IR candidates.
-- Boundary: One frontend/elaborator; external admission/publication stays host-owned.
-- Focused guard: [scripts/compiler-m-conformance-tests.mjs](../../scripts/compiler-m-conformance-tests.mjs). This guard alone is not release qualification.
-- Refusal/resources: preserve explicit fuel, error order, source/body identities,
-  and negative cases. See [pass contracts](../../docs/reference/pass-contracts.md).
+proofscript depends on this package and bundles the core set. Core adapters depend
+here, never on proofscript. This package requires the matching genuine Wasm Lean
+provider; native checking, engines, provider executables and target SDKs remain
+explicit optional tools discovered by the existing pinned resolver.
 
-For a change, locate the responsible operation here, preserve both grammars/shared
-semantics, and run the focused guard plus selected source/package gates from
-[the contributor guide](../../CONTRIBUTING.md). Source imports/Lake roots and the
-[generated map](../../docs/reference/repository-map.md) determine exact dependencies.
-Do not infer installed capability or independent admission from this package's presence.
+The existing public checked API is exported from "." and "./compiler". Source
+snapshots remain available through readSources/sourcePackage. Accurate declarations,
+typed IO and metadata exports are preserved. The sealed internal service retains
+its original proofscript logical identity while its physical npm owner is compiler.
 
-## npm package build
+    npm run build
+    npm run clean
+    npm pack
 
-This package provides transparent adapters to the existing checked proofscript API and verified source snapshots. Backend compile adapters select their declared output target; the ./compiler entry retains the full existing API. No separately compiled internal compiler implementation or new self-hosting qualification is claimed.
-
-Build from this directory with npm run build, clean generated dist with npm run clean,
-and create a tarball with npm pack. Builds use the pinned qualified inputs and the
-workspace scripts; installation has no build or download hooks. Registry publication
-is not authorized. See [the package guide](../../docs/guides/npm-packages.md).
+No source/compiler/kernel implementation is changed for packaging. Source-only
+interfaces and independent compiler-internal modularity retain their prior bounds.
+Owned code is Apache-2.0; all qualified input/upstream notices are retained.

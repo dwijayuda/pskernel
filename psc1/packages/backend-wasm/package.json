@@ -1,6 +1,6 @@
 {
   "name": "@proofscript/backend-wasm",
-  "version": "0.1.0-psc1.12",
+  "version": "0.1.0-psc1.13",
   "description": "ProofScript PSC1 backend-wasm: source package and shared compiler API adapter",
   "type": "module",
   "private": false,
@@ -38,11 +38,11 @@
     "NOTICE"
   ],
   "dependencies": {
-    "proofscript": "0.1.0-psc1.12"
+    "@proofscript/compiler": "0.1.0-psc1.13"
   },
   "proofscript": {
     "npmArchitecture": "psc1-existing-packages-shared-root/1",
-    "implementationOwner": "proofscript",
+    "implementationOwner": "@proofscript/compiler",
     "internalCompilerModules": false,
     "packageKind": "shared-backend-adapter",
     "canonicalSources": "src",

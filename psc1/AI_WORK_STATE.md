@@ -1,5 +1,61 @@
 # PSC1 AI work state
 
+## R3 operational profile qualified — continue with R4
+
+The normalized R3 operational profile passes standalone Linux
+[40486405765](https://github.com/dwijayuda/pskernel/actions/runs/40486405765) at
+**`695c68701437899b17a39205300cf26988322b15`**:
+proof/native **122129166896**, source/portability/census **122129166670**.
+The user-confirmed continuation setting is GPT-6.1 Sol / High. All project builds,
+proof checks, source compilation and tests ran on GitHub Actions Linux.
+
+Read the [R3 profile and exact boundary](docs/PSC1_MIN_KERNEL_R3_PROFILE.md) and
+[dated R3 receipt](docs/PSC1_MIN_KERNEL_R3_QUALIFICATION_2026-10-27.json).
+The separate operational layer adds annotated lets, descriptor-derived
+single-constructor projections, and closed Nat/List/Option/Bool-decision schemas.
+Every actual inference/admission success has a concrete model and Empty
+consistency proof. R2 source/proofs remain intact.
+
+The actual typed projection-model iota equation is proved for arbitrary supported
+fields. The sequential fold carries DefinitionHistory for actual checked bodies;
+checked_definition_unfold relates real constant interpretation to that body.
+Conversion is structural code equality with a model-soundness theorem. There is
+no general beta/delta type-conversion engine or dependent-alias acceptance.
+
+All **26** new printed reports are no axioms or exactly `[propext]`.
+The actual native/generated corpus passes **36 positives, 40 refusals and two
+out-of-range probes**. Fifteen initial contracts were expanded to **29** exact
+selected foundation declarations, including required types and constructors.
+The actual source-owned ite/Decidable.rec AST equations and constructive
+conditional model are checked. Canonical primitive contract comparisons are CI
+evidence, never fixture/hash admission rules.
+
+The checker closure is four source modules, 518 lines/22339 B; the two added
+modules are 211 lines/10071 B. The five-module source/test graph is independently
+admitted by official Lean 4.35. Its bundle is 134690 B TS/318436 B JS, including the
+test/shared runtime, not an isolated checker payload or performance measurement.
+
+Historical broader-regression snapshot at 2026-10-27 10:14 UTC: main 40486414934
+and installed 40483267987 were still in progress. A reporting push may supersede
+main; requery live PR checks. The source/standalone theorem qualification above
+is complete; terminal broader outcomes are recorded separately.
+
+**Next is R4:** bounded exact byte decoding, exact source-name/slot binding and
+profile translation, then the actual generated checker acceptance-to-model path.
+Check matching Eq Bool operands and Bool.decEq operands before constructing
+boolEqIte; no arbitrary proof/decision term may be erased. Recompute the complete
+connected R1/R2/R3/naming/ingress closure and required String/Char semantics.
+The old Check-only 12 records and R2's 37-record view are not this enlarged checker.
+
+R3 does not prove a general raw-Core translator/byte decoder or full foundation
+closure. Generated-code preservation and hostile-input aggregate/heap/stack
+bounds remain open. Canonical min/dual still refuse; full min coverage remains
+0/124 modules, 0/37 Practical Core and no qualified min G1/G2/G3. Preserve official
+Lean Wasm as default. Do not repeat R1/R2/R3 or promote official generations.
+
+
+## Historical checkpoints retained below
+
 ## Minimal-kernel research branch, 2026-10-27 Asia/Jakarta
 
 Research work is isolated on `research/psc1-minkernel-consistency-selfhost-20261027`,

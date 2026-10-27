@@ -4416,5 +4416,13 @@
       "foundationBoundary": "Counts exclude foundation reconstruction/implicit generated-type obligations. R3/R4 must measure the full connected checker plus R1/naming/ingress dependencies before self-check.",
       "archiveDownloadVerified": true
     }
+  },
+  "operationalBatch": {
+    "receipt": "PSC1_MIN_KERNEL_R3_QUALIFICATION_2026-10-27.json",
+    "implementationCommit": "695c68701437899b17a39205300cf26988322b15",
+    "standaloneRun": 40486405765,
+    "status": "standalone-qualified-normalized-profile",
+    "canonicalAdmission": false,
+    "next": "R4 canonical ingress/translation and expanded source closure"
   }
 }

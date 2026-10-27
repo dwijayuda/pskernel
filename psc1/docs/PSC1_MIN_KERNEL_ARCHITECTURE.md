@@ -1,67 +1,57 @@
 # PSC1 minimal-kernel architecture
 
-## R2 qualified normalized-profile checkpoint — continue with R3
+## R3 operational profile qualified — continue with R4
 
-R2 passes both standalone Linux jobs at
-**`028dcd98fabcb0bf196c0d6f27a80bad3b666745`**, run
-[40469648092](https://github.com/dwijayuda/pskernel/actions/runs/40469648092):
-proof/native **122073398746**, portability/census/source witness **122073398515**.
-The user-confirmed setting is GPT-6.1 Sol / High. All project builds, proof checks,
-source compilation and tests in this batch ran on GitHub Actions Linux.
+The normalized R3 operational profile passes standalone Linux
+[40486405765](https://github.com/dwijayuda/pskernel/actions/runs/40486405765) at
+**`695c68701437899b17a39205300cf26988322b15`**:
+proof/native **122129166896**, source/portability/census **122129166670**.
+The user-confirmed continuation setting is GPT-6.1 Sol / High. All project builds,
+proof checks, source compilation and tests ran on GitHub Actions Linux.
 
-Read the [R2 profile and precise boundary](PSC1_MIN_KERNEL_R2_PROFILE.md) before
-editing. The isolated executable checks closed Type-0 codes and ordered regular
-datatype descriptors, derives constructor/fixed-result recursor signatures, and
-checks sequential declarations from an empty environment. The generic concrete
-tree model discharges the signature model; actual inference/admission success
-gives a model and Empty consistency. The iota law covers the entire declared
-descriptor family. Stable chronological quotation names are proved injective
-and preserved when relative slots rebase.
+Read the [R3 profile and exact boundary](PSC1_MIN_KERNEL_R3_PROFILE.md) and
+[dated R3 receipt](PSC1_MIN_KERNEL_R3_QUALIFICATION_2026-10-27.json).
+The separate operational layer adds annotated lets, descriptor-derived
+single-constructor projections, and closed Nat/List/Option/Bool-decision schemas.
+Every actual inference/admission success has a concrete model and Empty
+consistency proof. R2 source/proofs remain intact.
 
-All **24** new printed model/validation/name/source bridge reports contain
-no axioms or exactly `[propext]`. The native and actual PSC1-generated corpus
-passes **23 positives, 38 refusals and two out-of-range probes**. The complete
-five-module source/test graph is admitted by official Lean 4.35. Its bundle is
-105087 B TS / 221393 B JS; these include test/shared runtime code. The two-module
-checker source has 307 lines/12268 B; naming adds Foundation.Name and
-RegularNames (four-module checker-plus-naming closure 17081 B). The original
-Check.lean remains 93 lines/3322 B with its original source SHA.
+The actual typed projection-model iota equation is proved for arbitrary supported
+fields. The sequential fold carries DefinitionHistory for actual checked bodies;
+checked_definition_unfold relates real constant interpretation to that body.
+Conversion is structural code equality with a model-soundness theorem. There is
+no general beta/delta type-conversion engine or dependent-alias acceptance.
 
-The concrete source-image theorem connects the checked normalized recursor to
-the exact retained PsMinTy.rec spine, with its actual host PsMinTy/Bool model and
-R1 motive-instantiation law. CI locates the native proof witness structurally
-once in the current source-origin-bound psMinTyEq worker. This is a representative
-typed source-image result, not a general decoder, external name resolver or proof
-for all 115 canonical foundation declarations. Internal quotation names do not
-authorize arbitrary canonical source-name binding.
+All **26** new printed reports are no axioms or exactly `[propext]`.
+The actual native/generated corpus passes **36 positives, 40 refusals and two
+out-of-range probes**. Fifteen initial contracts were expanded to **29** exact
+selected foundation declarations, including required types and constructors.
+The actual source-owned ite/Decidable.rec AST equations and constructive
+conditional model are checked. Canonical primitive contract comparisons are CI
+evidence, never fixture/hash admission rules.
 
-Previous R1 main 40460549124 and installed 40459838431 are terminal success.
-**R2 terminal regressions:** [main 40470311636](https://github.com/dwijayuda/pskernel/actions/runs/40470311636)
-passes at reporting commit `48810244a9d6d449f71bc0d10dcbdbb45f4e2e63`,
-full-job 122080382138 and gate-job 122087862294. Every selected dependency passes;
-the benchmark is deliberately unselected. The tested merge and reporting head
-have the same tree `44291047885b84101167ffa404d3bad059b2fb8a`.
-[Installed 40468550390](https://github.com/dwijayuda/pskernel/actions/runs/40468550390)
-passes preflight 122070225396 and installed 122070428136 at d0810a57. Only three
-proof files and documentation changed afterward; runtime/test/driver bytes match
-the qualified R2 runtime. The dated receipt preserves these separate exact scopes.
-Verified 2026-10-27 08:32:58 UTC. Later documentation-only reports retain these source
-identities; requery live HEAD and checks before starting the next proof batch.
+The checker closure is four source modules, 518 lines/22339 B; the two added
+modules are 211 lines/10071 B. The five-module source/test graph is independently
+admitted by official Lean 4.35. Its bundle is 134690 B TS/318436 B JS, including the
+test/shared runtime, not an isolated checker payload or performance measurement.
 
-**Next batch is R3:** measured lets, declaration projections and exact pinned
-foundation instance semantics, keeping the real acceptance-to-model bridge.
-Any delta conversion needs a definition-body/evaluation invariant. R4 still
-owns general canonical ingress/name binding/translation and generated execution/
-resource obligations. Canonical min/dual still refuse; full min coverage remains
-0/124 compiler modules, 0/37 Practical Core and no qualified min G1/G2/G3.
-Do not repeat R1/R2 or promote the representative witness to full self-check.
+Historical broader-regression snapshot at 2026-10-27 10:14 UTC: main 40486414934
+and installed 40483267987 were still in progress. A reporting push may supersede
+main; requery live PR checks. The source/standalone theorem qualification above
+is complete; terminal broader outcomes are recorded separately.
 
+**Next is R4:** bounded exact byte decoding, exact source-name/slot binding and
+profile translation, then the actual generated checker acceptance-to-model path.
+Check matching Eq Bool operands and Bool.decEq operands before constructing
+boolEqIte; no arbitrary proof/decision term may be erased. Recompute the complete
+connected R1/R2/R3/naming/ingress closure and required String/Char semantics.
+The old Check-only 12 records and R2's 37-record view are not this enlarged checker.
 
-This research branch implements a small, directly modeled checker before extending
-it to dependent PSC1 Core. It does not replace the independently checked production
-compiler. The [research comparison](PSC1_MIN_KERNEL_RESEARCH.md) selects approach A
-for the first complete fragment; the [coverage matrix](PSC1_MIN_KERNEL_COVERAGE.md)
-records what is still required by the actual compiler.
+R3 does not prove a general raw-Core translator/byte decoder or full foundation
+closure. Generated-code preservation and hostile-input aggregate/heap/stack
+bounds remain open. Canonical min/dual still refuse; full min coverage remains
+0/124 modules, 0/37 Practical Core and no qualified min G1/G2/G3. Preserve official
+Lean Wasm as default. Do not repeat R1/R2/R3 or promote official generations.
 
 ## Selected base
 

@@ -87,6 +87,64 @@ def accepted (bytes : ByteArray) (source : List PsMinRegCoreEntry) : Bool :=
   | none => false
   | some _ => true
 
+
+def debugName : PsMinCoreName → String
+  | .anonymous => "_"
+  | .str parent bytes => debugName parent ++ "." ++ String.ofList (bytes.map Char.ofNat)
+  | .num parent value => debugName parent ++ "." ++ toString value
+
+def debugExpr (fuel total visible : Nat) (groups : List PsMinRegCorePlan)
+    (names : List PsMinCoreName) (source : PsMinCoreExpr) : String :=
+  match fuel with
+  | 0 => "diagnostic-depth"
+  | fuel + 1 =>
+    if (psMinRegCoreTranslate 256 total visible groups names source).isSome then "accepted" else
+    match source with
+    | .constant name levels => "constant " ++ debugName name ++ " levels=" ++ toString levels
+    | .bvar index => "bvar " ++ toString index
+    | .natural value => "natural " ++ toString value
+    | .sort level => "sort " ++ toString level
+    | .forallE _ _ _ _ => "forall-as-term"
+    | .lam _ _ type body =>
+      if (psMinRegCoreType 256 total visible groups type).isNone then "lambda-type" else
+        "lambda-body:" ++ debugExpr fuel total visible groups names body
+    | .letE _ type value body =>
+      if (psMinRegCoreType 256 total visible groups type).isNone then "let-type" else
+      if (psMinRegCoreTranslate 256 total visible groups names value).isNone then
+        "let-value:" ++ debugExpr fuel total visible groups names value else
+        "let-body:" ++ debugExpr fuel total visible groups names body
+    | .app fn arg =>
+      if (psMinRegCoreTranslate 256 total visible groups names fn).isNone then
+        "app-fn:" ++ debugExpr fuel total visible groups names fn else
+        "app-arg:" ++ debugExpr fuel total visible groups names arg
+    | .projection owner field major =>
+      if (psMinRegCoreGroupSlot total visible groups owner).isNone then
+        "projection-owner " ++ debugName owner ++ " field=" ++ toString field else
+        "projection-major:" ++ debugExpr fuel total visible groups names major
+
+def diagnose (bytes : ByteArray) (entries : List PsMinRegCoreEntry) : IO Unit := do
+  IO.println s!"PSC1_MIN_REGULAR_DIAGNOSTIC certificate={(psMinRegCoreDecodeCertificate (bytes.toList.map UInt8.toNat) entries).isSome}"
+  let some plans := psMinRegCorePlans entries | do
+    IO.println "PSC1_MIN_REGULAR_DIAGNOSTIC plans=false"
+    return
+  IO.println s!"PSC1_MIN_REGULAR_DIAGNOSTIC plans=true groups={plans.count} signatures={psMinRegCoreCheckSignatures plans.count plans.groups plans.groups}"
+  let mut visible := 0
+  let mut names := []
+  let mut index := 0
+  for entry in entries do
+    match entry with
+    | .inductiveE _ => visible := visible + 1
+    | .definition declaration =>
+      let typeOk := (psMinRegCoreType 256 plans.count visible plans.groups declaration.type).isSome
+      let valueOk := (psMinRegCoreTranslate 256 plans.count visible plans.groups names declaration.value).isSome
+      if !typeOk || !valueOk then
+        IO.println s!"PSC1_MIN_REGULAR_DIAGNOSTIC entry={index} name={debugName declaration.name} type={typeOk} value={valueOk}"
+        IO.println ("PSC1_MIN_REGULAR_DIAGNOSTIC expression=" ++ debugExpr 256 plans.count visible plans.groups names declaration.value)
+        return
+      names := declaration.name :: names
+    index := index + 1
+  IO.println s!"PSC1_MIN_REGULAR_DIAGNOSTIC translation={(psMinRegCoreTranslateEntries 512 plans.count 0 plans.groups [] entries).isSome}"
+
 def main (args : List String) : IO Unit := do
   match args with
   | ["--cases", file] =>
@@ -107,7 +165,9 @@ def main (args : List String) : IO Unit := do
     let source ← IO.ofExcept (propose text)
     let outcome := accepted bytes source
     IO.println s!"PSC1_MIN_REGULAR_INGRESS_NATIVE_SELF {outcome}"
-    if !outcome then throw (IO.userError "regular runtime self-admission refused")
+    if !outcome then
+      diagnose bytes source
+      throw (IO.userError "regular runtime self-admission refused")
   | _ => throw (IO.userError "expected --cases PATH or --self PATH")
 
 end Ps.MinKernel.RegularIngressNative

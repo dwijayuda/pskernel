@@ -337,8 +337,9 @@ theorem build_plans_order (fuel : Nat) (entries : List PsMinRegCoreEntry)
       | definition declaration =>
         simp only [psMinRegCoreBuildPlans] at h
         split at h
-        next fresh => exact ih rest
-          (PsMinRegCoreState.mk initial.groups (declaration.name :: initial.used) initial.count) final order h
+        next fresh =>
+          exact ih rest (PsMinRegCoreState.mk initial.groups
+            (declaration.name :: initial.used) initial.count) final order h
         next => contradiction
       | inductiveE group =>
         cases hg : psMinRegCoreBuildGroup initial group with

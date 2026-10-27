@@ -10,6 +10,7 @@ import {createRegularCoreIngress} from '../packages/pskernel-min/host/ingress.mj
 assert.equal(process.platform,'linux');
 assert.equal(process.env.GITHUB_ACTIONS,'true');
 assert.match(process.env.GITHUB_SHA||'',/^[0-9a-f]{40}$/);
+const abiOnly=process.argv.includes('--abi-only');
 const dir='dist/pskernel-min/compiler-preservation';
 fs.mkdirSync(dir,{recursive:true});
 fs.writeFileSync(path.join(dir,'package.json'),'{"type":"module"}\n');
@@ -24,20 +25,18 @@ const nativeLog=run('lake',['env','lean','--run','scripts/MinKernelCompilerPrese
 fs.writeFileSync(path.join(dir,'native.log'),nativeLog);
 const oracle=JSON.parse(fs.readFileSync(path.join(dir,'native.json')));
 assert.equal(oracle.probes.length,400);
+assert.equal(oracle.stageIrAccepted,true);
 assert.equal(oracle.arityRefusals,30);
 assert.equal(oracle.strictIrRefusals,4);
 assert.equal(oracle.binaryStageRefusals,30);
 assert.equal(oracle.recognizerRefusals,30);
 assert.equal(oracle.recognizerCases,10);
 const admissions=fs.readFileSync(path.join(dir,'whole.admissions.json'));
-const official=JSON.parse(run('.lake/build/bin/psc1_independent_checker',['--check'],admissions));
-assert.equal(official.accepted,true);
-assert.equal(official.leanVersion,'4.35.0');
-assert.equal(official.leanCommit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
 run(process.execPath,[resolveTypeScriptCli(),...typeScriptProfileArgs([
- path.join(dir,'direct.ts'),path.join(dir,'whole.ts'),'--target','ES2022','--module','ES2022',
+ path.join(dir,'direct.ts'),path.join(dir,'stages.ts'),path.join(dir,'whole.ts'),'--target','ES2022','--module','ES2022',
  '--moduleResolution','bundler','--strict','--skipLibCheck','--noEmitOnError','--pretty','false'])]);
 const direct=await import(pathToFileURL(path.resolve(dir,'direct.js')).href);
+const stages=await import(pathToFileURL(path.resolve(dir,'stages.js')).href);
 const whole=await import(pathToFileURL(path.resolve(dir,'whole.js')).href);
 assert.equal(direct.probes.length,400);
 for(let i=0;i<oracle.probes.length;i++){
@@ -45,14 +44,14 @@ for(let i=0;i<oracle.probes.length;i++){
  assert.equal(typeof got,want.type,'representation '+i);
  assert.equal(String(got),want.value,'native/generated '+i);
 }
-assert.equal(direct.captureProbe(),2n);
+assert.equal(stages.captureProbe,2n);
 assert.equal(direct.literalProbes.length,3);
 assert.deepEqual(direct.literalProbes.map(f=>f()),[undefined,false,true]);
-assert.equal(direct.combinedProbe(11n),18n);
+assert.equal(stages.combinedProbe(11n),18n);
 const large=(1n<<256n)+12345n;
-assert.equal(direct.curryProbe(large)(5n)(true),large+5n);
-assert.equal(direct.curryProbe(2n)(5n)(false),0n);
-assert.equal(direct.shadowProbe(71n)(23n),23n);
+assert.equal(stages.curryProbe(large)(5n)(true),large+5n);
+assert.equal(stages.curryProbe(2n)(5n)(false),0n);
+assert.equal(stages.shadowProbe(71n)(23n),23n);
 const traces=direct.traced.map(f=>f());
 assert.deepEqual(traces.map(x=>x.trace),[...Array(8).fill('LR'),'L','LR','LR','L']);
 assert.equal(oracle.wholeProbes.length,294);
@@ -65,6 +64,18 @@ for(const row of oracle.wholeProbes){
  wholeCalls++;
 }
 assert.equal(wholeCalls,294);
+if(abiOnly){
+ const fast={schema:'psc1-r5-fast-abi/1',head:process.env.GITHUB_SHA,platform:process.platform,
+  node:process.version,scalarProbes:400,wholeSourceCalls:wholeCalls,literalAbiProbes:3,
+  checkedStructuralIrDeclarations:4,operandTraceProbes:traces.length,
+  boundary:'Finite engine and native-source ABI checks only; official and R4B byte admissions run in the portability job.'};
+ fs.writeFileSync(path.join(dir,'fast-abi.json'),JSON.stringify(fast,null,2)+'\n');
+ console.log('PSC1_R5_FAST_ABI_PASS '+JSON.stringify(fast));process.exit(0);
+}
+const official=JSON.parse(run('.lake/build/bin/psc1_independent_checker',['--check'],admissions));
+assert.equal(official.accepted,true);
+assert.equal(official.leanVersion,'4.35.0');
+assert.equal(official.leanCommit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
 const generated=await import(pathToFileURL(path.resolve('dist/pskernel-min/regular-ingress/vectors.js')).href);
 const owned=createRegularCoreIngress(generated)(new Uint8Array(admissions));
 assert.equal(owned.accepted,true,'R4B exact new source packet');
@@ -83,7 +94,9 @@ const originalIrAbi=ir[4].map(d=>({name:d[0],typeParameters:d[1],parameters:d[2]
 const origins=JSON.parse(fs.readFileSync(path.join(dir,'origins.json')));
 assert.equal(origins.length,1);
 assert.equal(origins[0].batches.length,6);
-const paths=['direct.ts','direct.js','whole.ts','whole.js','whole.admissions.json','whole.ir.json','origins.json','source.lean','native.json'];
+const stageIr=JSON.parse(fs.readFileSync(path.join(dir,'stages.ir.json')));
+assert.equal(stageIr[0],'psc1-ir/1');assert.equal(stageIr[4].length,4);
+const paths=['direct.ts','direct.js','stages.ts','stages.js','stages.ir.json','whole.ts','whole.js','whole.admissions.json','whole.ir.json','origins.json','source.lean','native.json'];
 const files=paths.map(file=>{const bytes=fs.readFileSync(path.join(dir,file));return {file,bytes:bytes.length,sha256:sha(bytes)}});
 assert.equal(sha(fs.readFileSync('packages/pskernel-min/src/Ps/MinKernel/Tests/CompilerScalar.lean')),
  sha(fs.readFileSync(path.join(dir,'source.lean'))),'exact same physical source');
@@ -95,7 +108,7 @@ const sources=['packages/pskernel-min/src/Ps/MinKernel/Tests/CompilerScalar.lean
 const sourceFiles=sources.map(file=>{const bytes=fs.readFileSync(file);return {file,bytes:bytes.length,sha256:sha(bytes)}});
 const receipt={schema:'psc1-r5-compiler-preservation-execution/1',head:process.env.GITHUB_SHA,
  platform:process.platform,node:process.version,scalarProbes:400,wholeSourceCalls:wholeCalls,
- literalAbiProbes:3,captureProbe:true,combinedCaptureCurryProbe:true,curryProbes:3,operandTraceProbes:traces.length,arityRefusals:oracle.arityRefusals,
+ literalAbiProbes:3,checkedStructuralIrDeclarations:4,captureProbe:true,combinedCaptureCurryProbe:true,curryProbes:3,operandTraceProbes:traces.length,arityRefusals:oracle.arityRefusals,
  strictIrRefusals:oracle.strictIrRefusals,binaryStageRefusals:oracle.binaryStageRefusals,
  recognizerRefusals:oracle.recognizerRefusals,recognizerCases:oracle.recognizerCases,official:{accepted:official.accepted,version:official.leanVersion,commit:official.leanCommit},
  ownedNewSourcePacket:{accepted:owned.accepted,delegated:owned.delegated,bytes:admissions.length,sha256:sha(admissions)},

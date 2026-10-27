@@ -116,20 +116,32 @@ def main : IO Unit := do
   let first := (PsVerifiedIrParameter.mk "capturedA" r5NatType, r5Nat 5)
   let second := (PsVerifiedIrParameter.mk "capturedB" r5NatType,
     r5Binary .natAdd (.var "capturedA") (r5Nat 2))
-  let capture ← r5Emit (psErasureWrapApplicationCaptures [second, first]
-    (r5Binary .natSub (.var "capturedB") (.var "capturedA")))
+  let capture := psErasureWrapApplicationCaptures [second, first]
+    (r5Binary .natSub (.var "capturedB") (.var "capturedA"))
   let params := [PsVerifiedIrParameter.mk "x" r5NatType,
     PsVerifiedIrParameter.mk "y" r5NatType, PsVerifiedIrParameter.mk "flag" r5BoolType]
   let body : PsVerifiedIrExpr := .ifE (.var "flag")
     (r5Binary .natAdd (.var "x") (.var "y"))
     (r5Binary .natSub (.var "x") (.var "y"))
-  let curry ← r5Emit (psErasureCurryParameters params r5NatType body).2
-  let shadow ← r5Emit (psErasureCurryParameters
+  let curry := psErasureCurryParameters params r5NatType body
+  let shadow := psErasureCurryParameters
     [PsVerifiedIrParameter.mk "same" r5NatType, PsVerifiedIrParameter.mk "same" r5NatType]
-    r5NatType (.var "same")).2
-  let combined ← r5Emit (psErasureWrapApplicationCaptures [second, first]
-    (psErasureCurryParameters [PsVerifiedIrParameter.mk "input" r5NatType] r5NatType
-      (r5Binary .natAdd (.var "capturedB") (.var "input"))).2)
+    r5NatType (.var "same")
+  let combinedCurry := psErasureCurryParameters
+    [PsVerifiedIrParameter.mk "input" r5NatType] r5NatType
+    (r5Binary .natAdd (.var "capturedB") (.var "input"))
+  let combined := psErasureWrapApplicationCaptures [second, first] combinedCurry.2
+  let stageModule := PsVerifiedIrModule.mk [] [] [] [
+    PsVerifiedIrDeclaration.mk "captureProbe" [] [] r5NatType capture,
+    PsVerifiedIrDeclaration.mk "curryProbe" [] [] curry.1 curry.2,
+    PsVerifiedIrDeclaration.mk "shadowProbe" [] [] shadow.1 shadow.2,
+    PsVerifiedIrDeclaration.mk "combinedProbe" [] [] combinedCurry.1 combined]
+  match psTsEmitCheckedModule psIrCheckDefaultOptions stageModule with
+  | .error _ => throw (IO.userError "R5_STRUCTURAL_STAGE_CHECKED_EMISSION_REFUSED")
+  | .ok text => IO.FS.writeFile (dir ++ "/stages.ts") text
+  match psIrEncodeModule stageModule with
+  | .error _ => throw (IO.userError "R5_STRUCTURAL_STAGE_IR_ENCODING_REFUSED")
+  | .ok text => IO.FS.writeFile (dir ++ "/stages.ir.json") text
   let mut traced : List String := []
   for (_, op, _, _) in operations do
     match psTsEmitIntrinsicFromPrinted op ["left()", "right()"] with
@@ -218,13 +230,9 @@ def main : IO Unit := do
   IO.FS.writeFile (dir ++ "/direct.ts")
     ("export const probes = [" ++ String.intercalate ",\n" functions ++ "];\n" ++
       "export const traced = [" ++ String.intercalate ",\n" traced ++ "];\n" ++
-      "export const literalProbes = [() => (" ++ unitText ++ "), () => (" ++ falseText ++ "), () => (" ++ trueText ++ ")];\n" ++
-      "export const captureProbe = () => (" ++ capture ++ ");\n" ++
-      "export const combinedProbe = (" ++ combined ++ ");\n" ++
-      "export const curryProbe = (" ++ curry ++ ");\n" ++
-      "export const shadowProbe = (" ++ shadow ++ ");\n")
+      "export const literalProbes = [() => (" ++ unitText ++ "), () => (" ++ falseText ++ "), () => (" ++ trueText ++ ")];\n")
   IO.FS.writeFile (dir ++ "/native.json")
-    (psJsonObject [("schema", psJsonQuote "psc1-r5-native-oracle/1"),
+    (psJsonObject [("schema", psJsonQuote "psc1-r5-native-oracle/1"), ("stageIrAccepted", "true"),
       ("probes", psJsonArray expected), ("wholeProbes", psJsonArray wholeExpected),
       ("arityRefusals", toString arityRefusals),
       ("strictIrRefusals", toString strictRefusals),

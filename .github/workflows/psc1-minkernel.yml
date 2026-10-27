@@ -15,7 +15,7 @@ permissions:
   contents: read
 concurrency:
   group: psc1-minkernel-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   proof:
     runs-on: ubuntu-24.04
@@ -182,6 +182,8 @@ jobs:
         run: |
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          npm install --prefix "$RUNNER_TEMP/min-ts" --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          echo "PSC0_TSC=$RUNNER_TEMP/min-ts/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
       - name: Prove actual compiler capture, currying and scalar-stage preservation
         run: |
           set -euo pipefail
@@ -189,10 +191,8 @@ jobs:
           lake build PsMinCompilerPreservation PsHost PsMinCompilerScalarFixture 2>&1 | tee dist/pskernel-min/compiler-preservation/build.log
           lake env lean proofs/pskernel-min/CompilerPreservationTrust.lean 2>&1 | tee dist/pskernel-min/compiler-preservation/proof.log
           node scripts/minkernel-compiler-preservation-guard.mjs
-      - name: Prepare actual source and native scalar ABI oracle
-        run: |
-          set -euo pipefail
-          lake env lean --run scripts/MinKernelCompilerPreservation.lean 2>&1 | tee dist/pskernel-min/compiler-preservation/native.log
+      - name: Check strict emitted modules against native scalar and source ABI oracles
+        run: node --max-old-space-size=256 scripts/minkernel-compiler-preservation.mjs --abi-only
       - uses: actions/upload-artifact@v4
         if: always()
         with:

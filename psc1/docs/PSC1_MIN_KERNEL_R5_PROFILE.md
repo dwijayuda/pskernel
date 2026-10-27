@@ -50,7 +50,7 @@ operand instrumentation records single evaluation and left/right order for the
 eight Nat operators, and the expected Boolean short-circuit behavior separately.
 This finite observation does not establish effectful-IR preservation.
 
-Actual capture ordering, the composed capture/currying expression, currying and shadowing execute in Node. Three standalone generated Unit/Bool literal probes complete the declared literal ABI observations.
+Four constructed structural IR declarations pass the actual checked module emitter, including its generator runtime/context; capture ordering, composed capture/currying, currying and shadowing execute in Node. Selected pure scalar/template expressions remain separate. Three standalone generated Unit/Bool literal probes complete the declared literal ABI observations.
 A separate registered test-only source fixture passes the actual atomic SH/1 source API,
 original IR check and target check, then independent official admission and the
 existing generated R4B exact-byte API. The exact original IR, structured origins and emitted artifacts are retained from that same computation. Its generated functions exercise computed
@@ -134,3 +134,21 @@ to names/strings. Exact emitter equations retain the original opaque token join;
 literal Nat equations retain opaque append and psNatToString. Actual native and
 generated text behavior remains independently tested, with string/numeral
 semantics and source-name dispatch listed as open composition obligations.
+
+## Emitter context discovered during qualification
+
+The strict TSC check refused the first structural harness because psTsEmitExpr
+may return yield* and generator-wrapper syntax. That low-level expression API
+expects the surrounding module/generator context. The harness now passes four
+constructed structural IR declarations through psTsEmitCheckedModule, retaining
+their exact IR and complete emitted module/runtime. Its zero-parameter scalar
+declaration exports a value; its function-valued declarations export curried
+values. This corrects the test context without relaxing TSC or adding runtime
+text substitutions. The source-compiled fixture remains a separate exact-source
+admission/compilation route. Scheduler semantics are still an open proof obligation.
+
+The separate ten-minute compiler-preservation job now performs strict TSC and
+finite native/generated ABI comparisons before the longer portability job. Its
+fast receipt explicitly excludes official and R4B byte admission, which remain
+required in portability. Superseded focused runs cancel; only terminal success
+for every selected job at the final stable source can qualify the batch.

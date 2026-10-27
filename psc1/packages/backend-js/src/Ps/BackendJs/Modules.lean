@@ -49,14 +49,14 @@ def declarationType (declaration : PsVerifiedIrDeclaration) : Except String Stri
   return "export declare function " ++ declaration.name ++ "(" ++
     String.intercalate ", " parameters ++ "): " ++ result ++ ";\n"
 
-def unitImports (_plan : PsModulePlan) (unit : PsModuleUnit) : List PsModuleImport :=
+def unitImports (plan : PsModulePlan) (unit : PsModuleUnit) : List PsModuleImport :=
   if unit.index == 0 then []
   else
     let runtimeValues := helpers ++ (unit.imports.filter (fun item => item.unit == 0)).map (fun item => item.name)
-    let values : List PsModuleImport := [{ source := psModuleSpecifier 0 false, names := runtimeValues }]
-    values ++ ([1, 2].filterMap fun index =>
+    let values : List PsModuleImport := [{ source := psModuleSpecifierFor plan 0 false, names := runtimeValues }]
+    values ++ ((psModuleSourceIndices plan).filterMap fun index =>
       let names := (unit.imports.filter (fun item => item.unit == index)).map (fun item => item.name)
-      if names.isEmpty then none else some { source := psModuleSpecifier index false, names })
+      if names.isEmpty then none else some { source := psModuleSpecifierFor plan index false, names })
 
 def renderUnit (plan : PsModulePlan) (lowered : PsJsIrModule)
     (digest : String) (unit : PsModuleUnit) : Except String PsModuleArtifact := do
@@ -68,17 +68,17 @@ def renderUnit (plan : PsModulePlan) (lowered : PsJsIrModule)
   let imports := unitImports plan unit
   let header := if unit.index == 0 then
       psJsStringRuntimeSupport ++ psJsStackRuntimeSupport ++
-      "export const __ps$cohort = " ++ psJsonQuote (psModuleCohort digest false) ++ ";\n" ++
+      "export const __ps$cohort = " ++ psJsonQuote (psModuleCohortFor plan digest false) ++ ";\n" ++
       "export { " ++ String.intercalate ", " (helpers.filter (fun name => name != "__ps$cohort")) ++ " };\n"
     else
       String.join (imports.map importText) ++
-      "if (__ps$cohort !== " ++ psJsonQuote (psModuleCohort digest false) ++
+      "if (__ps$cohort !== " ++ psJsonQuote (psModuleCohortFor plan digest false) ++
       ") throw new Error(\"PSC1_MODULE_RUNTIME_COHORT\");\n"
   let types := psModuleTypeNames plan.raw
   let typeHeader := if unit.index == 0 || types.isEmpty then "" else
     "import type { " ++ String.intercalate ", " types ++ " } from " ++
-      psJsonQuote (psModuleSpecifier 0 false) ++ ";\nexport type { " ++
-      String.intercalate ", " types ++ " } from " ++ psJsonQuote (psModuleSpecifier 0 false) ++ ";\n"
+      psJsonQuote (psModuleSpecifierFor plan 0 false) ++ ";\nexport type { " ++
+      String.intercalate ", " types ++ " } from " ++ psJsonQuote (psModuleSpecifierFor plan 0 false) ++ ";\n"
   let declarations ← unit.declarations.mapM declarationType
   let nominal ← if unit.index == 0 then nominalTypes plan.raw else pure ""
   return {
@@ -93,7 +93,7 @@ end Ps.Internal.ModularJs
 
 def psEmitJsModules (plan : PsModulePlan) (digest : String) :
     Except String (List PsModuleArtifact) := do
-  let rechecked ← psPlanModules plan.raw plan.owners
+  let rechecked ← psPlanModulesWithPackages plan.raw plan.owners plan.packages plan.protocol
   let lowered ← (psJsLowerSpecializedModule rechecked.raw).mapError (fun _ => "PSC1_MODULE_JS_LOWER")
   let _ ← (psJsValidateModule lowered).mapError (fun _ => "PSC1_MODULE_JS_VALIDATE")
   rechecked.units.mapM (Ps.Internal.ModularJs.renderUnit rechecked lowered digest)

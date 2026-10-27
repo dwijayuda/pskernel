@@ -12,6 +12,20 @@ export const sha256=bytes=>crypto.createHash('sha256').update(bytes).digest('hex
 export const packageVersion='0.1.0-psc1-modular-pilot.0';
 export const packageNames=['@proofscript/modular-pilot-runtime','@proofscript/modular-pilot-names','@proofscript/modular-pilot-consumer'];
 export const umbrellaName='@proofscript/modular-compiler-pilot';
+export function moduleProfile(profile,sources){
+  if(profile==='legacy')return{profile,version:packageVersion,packageNames:[...packageNames],
+    protocol:'psc1-modular-pilot/1',candidateProtocol:'psc1-modular-pilot-candidate/1',schema:'psc1-modular-installed-cohort/1',maxSources:2};
+  if(profile!=='extended')fail('PROFILE');
+  const names=['@proofscript/modular-pilot-runtime',...sources.map(source=>{
+    if(source.module==='Ps.Foundation.Name')return '@proofscript/modular-pilot-names';
+    if(source.module==='Pilot.Consumer')return '@proofscript/modular-pilot-consumer';
+    return '@proofscript/modular-pilot-'+source.module.replaceAll('.','-').replaceAll('_','-').toLowerCase();
+  })];
+  if(names.some(name=>!/^@proofscript\/modular-pilot-[a-z0-9-]{1,114}$/.test(name))||
+     new Set(names).size!==names.length)fail('PACKAGE_IDENTITY');
+  return{profile,version:'0.1.0-psc1-modular-pilot.1',packageNames:names,
+    protocol:'psc1-modular-pilot/2',candidateProtocol:'psc1-modular-pilot-candidate/2',schema:'psc1-modular-installed-cohort/2',maxSources:8};
+}
 const workspace=fileURLToPath(new URL('../../',import.meta.url));
 const fail=code=>{throw Error('PSC1_MODULAR_'+code);};
 export function run(executable,args,options={}){
@@ -19,16 +33,17 @@ export function run(executable,args,options={}){
   if(result.error||result.status!==0)fail('PROCESS:'+executable+':'+(result.error?.message||result.stderr||result.stdout));
   return result.stdout;
 }
-export function compileSources({sources,producer=path.join(workspace,'.lake/build/bin/psc1_modular_pilot'),
+export function compileSources({sources,profile='legacy',producer=path.join(workspace,'.lake/build/bin/psc1_modular_pilot'),
   checker=path.join(workspace,'.lake/build/bin/psc1_independent_checker'),requestId='modular-pilot'}){
-  if(!Array.isArray(sources)||sources.length!==2||sources.some(s=>!s||
+  if(!Array.isArray(sources)||sources.length<2||sources.length>(profile==='extended'?8:2)||sources.some(s=>!s||
     Object.keys(s).sort().join(',')!=='kind,module,text'||!['lean','ps'].includes(s.kind)||
     !/^[A-Za-z][A-Za-z0-9_.]{0,127}$/.test(s.module)||typeof s.text!=='string'||
     Buffer.from(s.text,'utf8').toString('utf8')!==s.text||s.text.startsWith('\uFEFF'))||
     sources[0].kind!==sources[1].kind)fail('SOURCE_SCOPE');
   sources=JSON.parse(JSON.stringify(sources));
+  const settings=moduleProfile(profile,sources);
   const digest=compilerSourceClosureDigest(sources),grammar=sources[0].kind;
-  const request=['psc1-modular-pilot/1',requestId,digest,grammar,'checked',sources[1].module,sources.map(s=>[s.module,s.text])];
+  const request=[settings.protocol,requestId,digest,grammar,'checked',sources.at(-1).module,sources.map(s=>[s.module,s.text])];
   const bytes=Buffer.from(JSON.stringify(request));if(bytes.length>1024*1024)fail('INPUT_BOUND');
   const supervisor=fileURLToPath(new URL('../process/bounded-process.py',import.meta.url));
   const resources=[producer,checker,supervisor,'/usr/bin/prlimit'].map(file=>{
@@ -49,16 +64,21 @@ export function compileSources({sources,producer=path.join(workspace,'.lake/buil
     const raw=fs.readFileSync(path.join(logs,'tool.stdout.txt'));
     if(raw.length>32*1024*1024)fail('RESPONSE_BOUND');
     const candidate=JSON.parse(raw);
-    for(const[key,value]of Object.entries({protocol:'psc1-modular-pilot-candidate/1',requestId,
+    for(const[key,value]of Object.entries({protocol:settings.candidateProtocol,requestId,
       sourceClosureDigest:digest,grammar,admission:'not-run',candidateOnly:true,
       leanVersion:'4.35.0',leanCommit:'eb6cafb7290e8bd5f2937522d8d804f58f02bafc',behaviorallyVerified:false}))
       assert.equal(candidate[key],value,'PSC1_MODULAR_CANDIDATE_'+key);
     for(const target of ['js','ts']){
-      if(!Array.isArray(candidate[target])||candidate[target].length!==3)fail('UNIT_COVERAGE');
+      if(!Array.isArray(candidate[target])||candidate[target].length!==settings.packageNames.length)fail('UNIT_COVERAGE');
       candidate[target].forEach((unit,index)=>{
         if(unit.unit!==index||typeof unit.source!=='string'||!unit.source||
           !Array.isArray(unit.imports)||!Array.isArray(unit.exports))fail('UNIT_SHAPE');
       });
+    }
+    if(profile==='extended'){
+      assert.deepEqual(candidate.packages,settings.packageNames,'PSC1_MODULAR_PACKAGE_LAYOUT');
+      assert.deepEqual(candidate.sourceModules,sources.map(s=>s.module),'PSC1_MODULAR_SOURCE_LAYOUT');
+      if(!candidate.transformOrigins||!Array.isArray(candidate.specializedIr))fail('PROVENANCE');
     }
     for(const graph of [candidate.originalIr,candidate.transformedIr])
       if(!Array.isArray(graph)||graph.length!==5||graph[0]!=='psc1-ir/1')fail('IR_SHAPE');
@@ -69,7 +89,7 @@ export function compileSources({sources,producer=path.join(workspace,'.lake/buil
       canonicalAdmissions:candidate.admissions,checkerExecutable:checker});
     const receipt=session.admit(JSON.stringify(candidate.admissionRequest));
     verify();assert.equal(sha256(fs.readFileSync(requestFile)),sha256(bytes));
-    return Object.freeze({candidate,sources,receipt,execution,resources,candidateSha256:sha256(raw),
+    return Object.freeze({candidate,sources,settings,receipt,execution,resources,candidateSha256:sha256(raw),
       originalIrSha256:sha256(JSON.stringify(candidate.originalIr)),
       transformedIrSha256:sha256(JSON.stringify(candidate.transformedIr))});
   }finally{fs.rmSync(temporary,{recursive:true,force:true});}

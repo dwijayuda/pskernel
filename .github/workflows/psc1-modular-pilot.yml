@@ -59,6 +59,9 @@ jobs:
       - name: Compile real compiler Name module and dependent consumer
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: node test/modular/native-probe.mjs
+      - name: Capture extended compiler graph with specialization and worker owners
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: node test/modular/extended-native.mjs
       - name: Independently checked offline modular packages and negative tests
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: node test/modular/packages.test.mjs

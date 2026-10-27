@@ -5,6 +5,11 @@ the existing [Foundation.Name](../../packages/foundation/src/Ps/Foundation/Name.
 module and a [dependent consumer](../../test/modular/Consumer.lean). It does not
 replace the qualified proofscript compiler or claim a complete modular compiler.
 
+[Qualification receipt](../PSC1_MODULAR_PILOT_QUALIFICATION_2026-10-27.json):
+code42eef6ca, source/integrated CI40466377732 and installed/runtime CI40466372623
+pass. The pilot has28 package cases/14 planner refusals; existing Core37/37 and
+seven-backend scoped execution remain qualified.
+
 ## What is generated
 
 | Package | Responsibility |

@@ -7,10 +7,15 @@ Single-parent expected-HEAD non-force history; no merge or registry publication.
 
 ## Genuine modular compiler-component pilot
 
-Implemented and dedicated Linux CI passed at
-`8473b22e2840f32543543f89ad238b3907b4e93c` /
-[40465513856](https://github.com/dwijayuda/pskernel/actions/runs/40465513856).
-Broader source and integrated-gate qualification are pending.
+Qualified code checkpoint `42eef6ca6409e9637b189bf3f064f37649ae62ed`.
+[Full source40466377732](https://github.com/dwijayuda/pskernel/actions/runs/40466377732)
+passes16 selected jobs, benchmark skipped,37/37 Practical Core criteria/zero blocked.
+Tested PR merge `8c20d1484ab7f3eca7d47f505418824ab1b7c7e6`.
+Required modular job122063338916 passes28 package cases and14 planner refusals.
+[Installed/runtime40466372623](https://github.com/dwijayuda/pskernel/actions/runs/40466372623)
+also completes successfully. Subsequent checkpoint edits are documentation/evidence only.
+[Dated qualification receipt](docs/PSC1_MODULAR_PILOT_QUALIFICATION_2026-10-27.json)
+records exact source/package/tool identities and all attempts.
 
 Actual existing Foundation.Name compiler source plus a dependent consumer emit
 as three real packages (shared runtime/types, names bodies, consumer bodies) and
@@ -31,14 +36,18 @@ two sources/three units/256 values/64 types. Worker fusion and open generic valu
 are outside this first profile. Shared type/tag plan and one WeakMap/cache per
 variant; JS structural tags and TS unique-symbol ABI stay distinct.
 
-Dedicated artifact12716482631,436266 bytes, ZIP SHA256
-`0b2b520c731dfd63f04f0521f483faba748bf29d92e5f532c2efac4c61e0e1bd`.
+Primary [pilot artifact12716353757](https://github.com/dwijayuda/pskernel/actions/runs/40466377732/artifacts/12716353757),
+436285 bytes, ZIP SHA256
+`ec03b644d125418591ecf5ab8b7a21ded707bc141c20ec54471e1720330d0af6`.
+Earlier standalone pilot40465513856 at8473b22e also passes the same contract;
+all six child tarballs reproduce exactly across the two independent runner builds.
+Umbrella identities differ because their compiler-commit metadata differs.
 It contains installable-lean/installable-ps four-tarball directories, SHA256SUMS,
 canonical admissions/IR/source snapshots, cohort pins and qualification JSON.
 These are experimental unpublished component packages, version
 `0.1.0-psc1-modular-pilot.0`; owned code/packages Apache-2.0.
 
-Measured native candidate requests: Lean77ms/79840KiB maxRSS; PS83ms/79592KiB.
+Measured integrated native candidate requests: Lean82ms/79992KiB maxRSS; PS76ms/79912KiB.
 Runtime receipts retain module-load/workload/warm timings and process-reported
 maxRSS. These are bounded component observations, not whole-compiler benchmarks,
 isolated workload memory or a performance-improvement claim.
@@ -48,20 +57,39 @@ Installed verification assumes a trusted bootstrap/pin and stable package files;
 metadata grants no checker/host/publication authority. Flat npm-cohort transaction
 qualification does not qualify arbitrary nested service publication or another OS.
 
-CI integration: the pilot becomes a reusable selected focused gate and a required
+CI integration: the pilot is a reusable selected focused gate and a required
 final dependency. Its independent stages retain evidence even if another stage
 fails; any failure still fails the job/gate. Production CLI does not import these
 new host modules; isolated pilot-only edits use this gate, while shared host/CLI
 changes retain the entire existing installed workflow.
 
-Next: finish integrated/full source validation; preserve exact evidence. Then
-carry explicit synthetic ownership through transforms and measure the complete
+Existing installed gates pass:55 CLI requests,11 watch cases,16 applications/
+264 observations/eight global cases,32 checked publications/143 refusals,
+all61 unchanged SDK pins,32 supported-runtime compiler cases/eight runtime-watch
+cases and three older-runtime refusals.117 frozen compiler/kernel/provider payloads
+are byte-preserved. The prior components-pin failure remains recorded. CI now
+permits only a unique metadata-line permutation matching the original pinned
+hash/length, after all60 other files match; all61 then must match. On the passing
+retry, the fresh minimal SDK already matched; that conditional repair branch
+was not exercised. No production verifier or resource pin was relaxed.
+
+Latest preserved root `proofscript@0.1.0-psc1.11`:3831381 bytes, SHA256
+`4b7b88a395c00e1e757e7239026349d0bfbecc3e09b24ed8f6563d18f663a7c1`.
+[SDK-free ZIP12718935961](https://github.com/dwijayuda/pskernel/actions/runs/40466372623/artifacts/12718935961)
+is3909502 bytes, ZIP SHA256
+`2cb9cb5aab74898148670b019bdc71c9b63db8c90c6d009a6b8bbea30b56c101`.
+It remains the bundled compiler distribution; the new pilot tarballs are separate.
+
+Next: carry explicit synthetic ownership through transforms and measure the complete
 compiler dependency graph before extending the profile. Complete modular compiler,
 portable planner self-hosting, modular G1/G2/G3/fixed points, seven-backend modular
 application parity, macOS/Windows release and arranged human trial remain pending.
 Existing qualified bundled executors/kernels/optional providers are unchanged.
 
-## Preserved qualified reference
+## Preserved PR #193 reference
+
+The following previous evidence/artifacts remain historical references; current
+checkpoint and artifact identities are recorded above.
 
 ## Qualified milestone
 

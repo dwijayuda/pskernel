@@ -7,8 +7,9 @@ its own genuine installed and self-host qualification. The bounded compiler-comp
 Linux gate at8473b22e2840f32543543f89ad238b3907b4e93c /40465513856.
 [Current pilot guide](../guides/modular-pilot.md) gives exact scope, APIs, invariants,
 resource limits and remaining work. Full compiler-family packaging and modular
-self-host promotion remain future work. Broader source/integrated-gate validation
-for this change is pending.
+self-host promotion remain future work. Full source/integrated gate40466377732 and installed/runtime40466372623 now pass
+at42eef6ca6409e9637b189bf3f064f37649ae62ed. The [dated receipt](../PSC1_MODULAR_PILOT_QUALIFICATION_2026-10-27.json)
+separates this component qualification from pending complete modular self-hosting.
 
 ## Evidence behind the decision
 
@@ -139,9 +140,9 @@ require runtime and declaration entry points to agree.
 [Rust crates/modules](https://doc.rust-lang.org/reference/crates-and-source-files.html)
 support modular source within a compiled crate.
 
-Implementation priority: integrate and qualify the bounded pilot alongside all
-existing source regressions, then carry synthetic ownership and a measured complete
-compiler graph into the next explicit profile. This document changes neither
+Implementation priority: carry explicit synthetic ownership and a measured complete
+compiler graph into the next finite profile. The bounded pilot and all existing
+selected source/installed regressions now pass. This document changes neither
 current compiler semantics nor the frozen Practical Core language scope. There
 is no claim of independently compiled complete PSC1 pass packages or modular
 self-hosted compiler generations yet.

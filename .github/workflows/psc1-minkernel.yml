@@ -1,0 +1,42 @@
+name: PSC1 MinKernel proved fragment
+on:
+  push:
+    branches: [research/psc1-minkernel-consistency-selfhost-20261027]
+    paths:
+      - psc1/packages/pskernel-min/**
+      - psc1/proofs/pskernel-min/**
+      - psc1/scripts/minkernel-*
+      - .github/workflows/psc1-minkernel.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: psc1-minkernel-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - name: Install pinned Lean
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Check exact executable and its complete fragment consistency proof
+        working-directory: psc1/proofs/pskernel-min
+        run: |
+          set -euo pipefail
+          lean --version
+          lake build 2>&1 | tee proof.log
+          ! grep -E 'sorryAx|declaration uses.*sorry' proof.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-minkernel-proof-${{ github.sha }}
+          path: psc1/proofs/pskernel-min/proof.log
+          retention-days: 90

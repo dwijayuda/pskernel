@@ -37,13 +37,13 @@ theorem generated_root_disjoint (index constructor : Nat) (text : String) :
 
 theorem ordinal_stable (count index : Nat) :
     psMinRegOrdinal (Nat.succ count) (Nat.succ index) = psMinRegOrdinal count index := by
-  simp only [psMinRegOrdinal, Nat.succ_sub_succ]
+  simp only [psMinRegOrdinal, Nat.sub_eq, Nat.succ_sub_succ]
 
 theorem ordinal_injective (count left right : Nat) (hl : left < count) (hr : right < count)
     (h : psMinRegOrdinal count left = psMinRegOrdinal count right) : left = right := by
   have recover := congrArg (fun value : Nat => Nat.sub count value) h
   have eq : Nat.succ left = Nat.succ right := by
-    simpa only [psMinRegOrdinal, Nat.sub_sub_self (Nat.succ_le_of_lt hl),
+    simpa only [psMinRegOrdinal, Nat.sub_eq, Nat.sub_sub_self (Nat.succ_le_of_lt hl),
       Nat.sub_sub_self (Nat.succ_le_of_lt hr)] using recover
   exact Nat.succ.inj eq
 

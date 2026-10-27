@@ -1,0 +1,151 @@
+name: PSC1 independently audited nested and flat full workload qualification
+on:
+  push:
+    branches: [work/psc1-pskernel-qualified-cohorts-20261027]
+    paths:
+      - .github/workflows/psc1-pskernel-qualified-cohorts.yml
+      - psc1/scripts/pskernel-paired-cohort-audit.py
+      - psc1/scripts/pskernel-cohort-qualification.py
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Independently audit all four raw archives and actual Git bindings and package detached examples
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 psc1/scripts/pskernel-cohort-qualification.py prepare
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-cohort-independent-audit
+          path: ${{ runner.temp }}/qualified-cohorts/audit.json
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-qualified-nested-generated
+          path: ${{ runner.temp }}/qualified-cohorts/nested-generated/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-qualified-nested-canonical
+          path: ${{ runner.temp }}/qualified-cohorts/nested-canonical/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-qualified-flat-generated
+          path: ${{ runner.temp }}/qualified-cohorts/flat-generated/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-qualified-flat-canonical
+          path: ${{ runner.temp }}/qualified-cohorts/flat-canonical/
+  string:
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        candidate: [nested, flat]
+        route: [generated, canonical]
+        sample: [0, 1, 2, 3, 4, 5]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-qualified-${{ matrix.candidate }}-${{ matrix.route }}
+          path: ${{ runner.temp }}/qualified-cohorts/${{ matrix.candidate }}-${{ matrix.route }}
+      - name: Execute original complete sample with all 1400 assertions and unchanged resources
+        run: python3 psc1/scripts/pskernel-cohort-qualification.py string ${{ matrix.candidate }} ${{ matrix.route }} ${{ matrix.sample }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-cohort-string-${{ matrix.candidate }}-${{ matrix.route }}-${{ matrix.sample }}
+          path: |
+            ${{ runner.temp }}/qualified-cohorts/${{ matrix.candidate }}-${{ matrix.route }}/generated.log
+            ${{ runner.temp }}/qualified-cohorts/${{ matrix.candidate }}-${{ matrix.route }}/generated.memory
+            ${{ runner.temp }}/qualified-cohorts/${{ matrix.candidate }}-${{ matrix.route }}/qualification.json
+  official:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Install exact Lean 4.35.0 reference
+        run: bash psc1/scripts/install-lean435-ci.sh
+      - name: Recheck all 193 unchanged original Arena bodies
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          curl -fL --retry 3 -o "$RUNNER_TEMP/arena.tar.gz" https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
+          echo "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d  $RUNNER_TEMP/arena.tar.gz" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/cohort-official"
+          python3 scripts/pskernel-arena435-oracle.py --archive "$RUNNER_TEMP/arena.tar.gz" --official-project . --out "$RUNNER_TEMP/cohort-official/report.json" --timeout 300 --workers 2 | tee "$RUNNER_TEMP/cohort-official/run.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-cohort-official193
+          path: ${{ runner.temp }}/cohort-official/
+  arena:
+    needs: [prepare, official]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        candidate: [nested, flat]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-qualified-${{ matrix.candidate }}-generated
+          path: ${{ runner.temp }}/qualified-cohorts/${{ matrix.candidate }}-generated
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-cohort-official193
+          path: ${{ runner.temp }}/cohort-official
+      - name: Retain replay controls and exact original 193-case gate
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/pskernel-arena435-progress-controls.py
+          OUT="$RUNNER_TEMP/cohort-arena"
+          mkdir -p "$OUT"
+          KERNEL="$RUNNER_TEMP/qualified-cohorts/${{ matrix.candidate }}-generated/kernel.mjs"
+          env PATH="" "$(command -v node)" --max-old-space-size=2048 scripts/pskernel-arena-replay-controls.mjs "$KERNEL" | tee "$OUT/controls.log"
+          curl -fL --retry 3 -o "$RUNNER_TEMP/arena.tar.gz" https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
+          echo "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d  $RUNNER_TEMP/arena.tar.gz" | sha256sum -c -
+          cp "$RUNNER_TEMP/qualified-cohorts/${{ matrix.candidate }}-generated/package/provenance.json" "$OUT/kernel-provenance.json"
+          python3 scripts/pskernel-arena435-compare.py --archive "$RUNNER_TEMP/arena.tar.gz" --oracle-report "$RUNNER_TEMP/cohort-official/report.json" --kernel "$KERNEL" --out "$OUT/report.json" --timeout 60 --workers 2 | tee "$OUT/run.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-cohort-arena193-${{ matrix.candidate }}
+          path: ${{ runner.temp }}/cohort-arena/

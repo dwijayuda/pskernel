@@ -37,7 +37,7 @@ lean_lib PsMinOperationalSourceEnvironment where
 @[default_target]
 lean_lib MinKernelProof where
   srcDir := "."
-  roots := #[`MainTheorem, `CoreScope, `BinderLowering, `RegularModel, `RegularSoundness, `RegularValidation, `RegularNames, `RegularSourceInstance, `OperationalProjection, `OperationalFoundation, `OperationalSoundness, `OperationalSource, `CoreIngress, `CoreTranslation, `CoreSemantics, `CoreEncoding, `RegularIngressModel]
+  roots := #[`MainTheorem, `CoreScope, `BinderLowering, `RegularModel, `RegularSoundness, `RegularValidation, `RegularNames, `RegularSourceInstance, `OperationalProjection, `OperationalFoundation, `OperationalSoundness, `OperationalSource, `CoreIngress, `CoreTranslation, `CoreSemantics, `CoreEncoding, `RegularIngressModel, `RegularIngressTranslation, `RegularIngressWire]
 
 lean_exe regular_core_witness where
   srcDir := "."

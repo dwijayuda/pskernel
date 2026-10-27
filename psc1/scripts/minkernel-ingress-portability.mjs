@@ -116,6 +116,37 @@ Object.defineProperty(withOwnGetters,Symbol.iterator,{get(){touched++;throw Erro
 assert.equal(check(withOwnGetters).accepted,true,'intrinsic snapshot ignores own accessors');
 assert.equal(touched,0);
 
+// Source sort boundary: accepted packets must also be well typed under the
+// pinned source-owned foundation. Valid constructs outside this domain may refuse.
+const universeProbes=[];
+const nameWire=text=>text.split('.').reduce((p,v)=>({k:'s',p,v}),{k:'a'});
+const cn=(text,ls=[])=>({k:'const',ls:ls.map(x=>x?{k:'s',o:{k:'z'}}:{k:'z'}),n:nameWire(text)});
+const ap=(f,a)=>({a,f,k:'app'});
+const aps=(f,...args)=>args.reduce(ap,f);
+const falseType=cn('_psc1OrderFalse'),natType=cn('Nat'),boolType=cn('Bool');
+const arrow=(a,b)=>({b,bi:'default',k:'forall',n:nameWire('x'),t:a});
+const lambda=(a,b)=>({b,bi:'default',k:'lam',n:nameWire('x'),t:a});
+const identity=lambda(falseType,{i:0,k:'b'});
+const falseArrow=arrow(falseType,falseType);
+const mkProbe=(id,type,value)=>{
+  const packet=clone();packet.admissions[0].declaration.t=type;packet.admissions[0].declaration.v=value;
+  const raw=JSON.stringify(packet);
+  const official=JSON.parse(run('.lake/build/bin/psc1_independent_checker',['--check'],raw));
+  const minimal=check(new Uint8Array(Buffer.from(raw)));
+  universeProbes.push({id,minimal:minimal.accepted,official:official.accepted,code:minimal.code});
+};
+mkProbe('list-proposition',ap(cn('List'),falseType),ap(cn('List.nil'),falseType));
+mkProbe('option-proposition',ap(cn('Option'),falseType),ap(cn('Option.none'),falseType));
+mkProbe('list-proposition-arrow',ap(cn('List'),falseArrow),ap(cn('List.nil'),falseArrow));
+mkProbe('option-type-arrow',ap(cn('Option'),arrow(falseType,natType)),ap(cn('Option.none'),arrow(falseType,natType)));
+const left=cn('Bool.true'),right=cn('Bool.true');
+const proposition=aps(cn('Eq',[1]),boolType,left,right),decision=aps(cn('Bool.decEq'),left,right);
+mkProbe('ite-proposition-level-one',falseArrow,aps(cn('ite',[1]),falseArrow,proposition,decision,identity,identity));
+mkProbe('ite-proposition-level-zero',falseArrow,aps(cn('ite',[0]),falseArrow,proposition,decision,identity,identity));
+fs.writeFileSync(path.join(dir,'source-universe-probes.json'),JSON.stringify(universeProbes,null,2)+'\\n');
+console.log('PSC1_MIN_SOURCE_UNIVERSE_PROBES '+JSON.stringify(universeProbes));
+for(const result of universeProbes)assert.ok(!result.minimal||result.official,'accepted ill-typed source '+result.id);
+
 const numbered=cases.filter(c=>c.expected);
 const common=[];
 for(const c of numbered) {
@@ -175,7 +206,7 @@ const receipt={schema:'psc1-min-core-ingress-portability/1',commit:process.env.G
   sourceOriginsSha256:sha(fs.readFileSync(stem+'.source.json')),
   generatedTsBytes:fs.statSync(stem+'.ts').size,generatedJsBytes:fs.statSync(stem+'.js').size,
   generatedJsSha256:sha(fs.readFileSync(stem+'.js')),hostSha256:sha(fs.readFileSync('packages/pskernel-min/host/ingress.mjs')),
-  positiveCases:cases.filter(c=>c.expected).length,refusalCases:cases.filter(c=>!c.expected).length,
+  sourceUniverseProbes:universeProbes,positiveCases:cases.filter(c=>c.expected).length,refusalCases:cases.filter(c=>!c.expected).length,
   hostileHostCases:hostile.length,resourceObservations,hostResourceUsage:process.resourceUsage(),
   heapUsedBytes:process.memoryUsage().heapUsed,observations,commonOfficialCases:common,census,
   boundary:'Safe Lean exact-byte certificate and normalized checker source proofs; generated-code/runtime preservation remains explicit trust'};

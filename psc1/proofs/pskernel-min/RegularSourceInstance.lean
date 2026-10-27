@@ -98,9 +98,83 @@ theorem source_motive_lowered : psMinLowerUnusedBinder 0 sourceBool = some sourc
 theorem source_motive_instantiation (major : PsExpr) : psExprInstantiate1 sourceBool major = sourceBool :=
   Ps.MinKernel.BinderLowering.lower_motive_body sourceBool sourceBool major source_motive_lowered
 
+
+-- A small typed model for the exact source-image fragment used by this witness.
+-- This is not a decoder for arbitrary canonical input or source environments.
+inductive SourceAnnotation : PsMinRegTy → PsExpr → Prop where
+  | data : SourceAnnotation (PsMinRegTy.data 0) sourceType
+  | boolean : SourceAnnotation PsMinRegTy.boolean sourceBool
+
+def sourcePartialRecursor : PsExpr :=
+  PsExpr.app (PsExpr.constE (PsName.str (root "PsMinTy") "rec") [PsLevel.succ PsLevel.zero]) sourceMotive
+
+def sourceRecursorFunction : Denote [PsMinTy] (psMinRegRecursorTy PsMinRegTy.boolean psMinRegTySpec.constructors) :=
+  fun empty unit nat arr major => PsMinTy.rec (motive := fun _ => Bool) empty unit nat arr major
+
+inductive CoreEval : (locals : List PsMinRegTy) → Model [PsMinTy] locals →
+    PsExpr → (type : PsMinRegTy) → Denote [PsMinTy] type → Prop where
+  | var {locals : List PsMinRegTy} (model : Model [PsMinTy] locals) (index : Nat) (type : PsMinRegTy)
+      (h : psMinRegLookup locals index = some type) :
+      CoreEval locals model (PsExpr.bvar index) type (model index type h)
+  | boolean {locals : List PsMinRegTy} (model : Model [PsMinTy] locals) (value : Bool) :
+      CoreEval locals model (boolValue value) PsMinRegTy.boolean value
+  | recursor {locals : List PsMinRegTy} (model : Model [PsMinTy] locals)
+      (motiveLaw : (major : PsExpr) → psExprInstantiate1 sourceBool major = sourceBool) :
+      CoreEval locals model sourcePartialRecursor
+        (psMinRegRecursorTy PsMinRegTy.boolean psMinRegTySpec.constructors) sourceRecursorFunction
+  | lam {locals : List PsMinRegTy} {model : Model [PsMinTy] locals}
+      {domain result : PsMinRegTy} {annotation body : PsExpr} {name : PsName}
+      {fn : Denote [PsMinTy] domain → Denote [PsMinTy] result}
+      (annotationLaw : SourceAnnotation domain annotation)
+      (bodyLaw : (value : Denote [PsMinTy] domain) →
+        CoreEval (domain :: locals) (consModel [PsMinTy] value model) body result (fn value)) :
+      CoreEval locals model (PsExpr.lam name annotation body PsBinderInfo.explicit)
+        (PsMinRegTy.arr domain result) fn
+  | app {locals : List PsMinRegTy} {model : Model [PsMinTy] locals}
+      {domain result : PsMinRegTy} {fn argument : PsExpr}
+      {fnValue : Denote [PsMinTy] domain → Denote [PsMinTy] result}
+      {argumentValue : Denote [PsMinTy] domain}
+      (fnLaw : CoreEval locals model fn (PsMinRegTy.arr domain result) fnValue)
+      (argumentLaw : CoreEval locals model argument domain argumentValue) :
+      CoreEval locals model (PsExpr.app fn argument) result (fnValue argumentValue)
+
+theorem actual_core_instance_model (major : PsMinTy) :
+    CoreEval [PsMinRegTy.data 0] (consModel [PsMinTy] major (emptyModel [PsMinTy]))
+      sourceCoreInstance PsMinRegTy.boolean (actualRecursorValue major) := by
+  let model := consModel [PsMinTy] major (emptyModel [PsMinTy])
+  have arr : CoreEval [PsMinRegTy.data 0] model sourceArrMinor
+      (psMinRegMinorTy PsMinRegTy.boolean [PsMinRegField.recursive, PsMinRegField.recursive])
+      (fun (_ _ : PsMinTy) (_ _ : Bool) => false) := by
+    apply CoreEval.lam SourceAnnotation.data
+    intro left
+    apply CoreEval.lam SourceAnnotation.data
+    intro right
+    apply CoreEval.lam SourceAnnotation.boolean
+    intro leftIH
+    apply CoreEval.lam SourceAnnotation.boolean
+    intro rightIH
+    exact CoreEval.boolean _ false
+  have majorLaw : CoreEval [PsMinRegTy.data 0] model (PsExpr.bvar 0) (PsMinRegTy.data 0) major :=
+    CoreEval.var model 0 (PsMinRegTy.data 0) rfl
+  exact CoreEval.app
+    (CoreEval.app
+      (CoreEval.app
+        (CoreEval.app
+          (CoreEval.app (CoreEval.recursor model source_motive_instantiation) (CoreEval.boolean model false))
+          (CoreEval.boolean model false))
+        (CoreEval.boolean model true)) arr) majorLaw
+
+theorem checked_instance_core_model (major : PsMinTy) :
+    CoreEval [PsMinRegTy.data 0] (consModel [PsMinTy] major (emptyModel [PsMinTy]))
+      sourceCoreInstance PsMinRegTy.boolean (checkedValue major) := by
+  rw [checked_source_semantics]
+  exact actual_core_instance_model major
+
 #print axioms source_instance_checked
 #print axioms checked_source_semantics
 #print axioms source_iota
 #print axioms source_motive_instantiation
+#print axioms actual_core_instance_model
+#print axioms checked_instance_core_model
 
 end Ps.MinKernel.RegularSource

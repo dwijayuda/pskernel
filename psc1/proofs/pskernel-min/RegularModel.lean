@@ -59,7 +59,8 @@ def joinArgs (data : List Type) (self : Type) (fields : List PsMinRegField)
   match fields with
   | [] => ()
   | .ground _ :: rest => (ground.1, joinArgs data self rest ground.2 children)
-  | .recursive :: rest => (children 0, joinArgs data self rest ground (fun i => children i.succ))
+  | .recursive :: rest => (children ⟨0, by change 0 < Nat.succ (psMinRegSelfCount rest); exact Nat.zero_lt_succ _⟩,
+      joinArgs data self rest ground (fun i => children i.succ))
 
 theorem join_split (data : List Type) (self : Type) (fields : List PsMinRegField)
     (args : Args data self fields) :
@@ -99,11 +100,13 @@ def construct (spec : PsMinRegSpec) (data : List Type) (index : Fin spec.constru
 def fold (spec : PsMinRegSpec) (data : List Type) (result : Type)
     (branches : (index : Fin spec.constructors.length) →
       Args data (Carrier spec data) (spec.constructors.get index) →
-      (Fin (psMinRegSelfCount (spec.constructors.get index)) → result) → result) :
-    Carrier spec data → result :=
-  RegularTree.rec (motive := fun _ => result)
-    (fun tag children ih => branches tag.1
-      (joinArgs data (Carrier spec data) (spec.constructors.get tag.1) tag.2 children) ih)
+      (Fin (psMinRegSelfCount (spec.constructors.get index)) → result) → result)
+    (tree : Carrier spec data) : result :=
+  match tree with
+  | .node tag children => branches tag.1
+      (joinArgs data (Carrier spec data) (spec.constructors.get tag.1) tag.2 children)
+      (fun i => fold spec data result branches (children i))
+termination_by structural tree
 
 theorem fold_construct (spec : PsMinRegSpec) (data : List Type) (result : Type)
     (branches : (index : Fin spec.constructors.length) →
@@ -117,7 +120,7 @@ theorem fold_construct (spec : PsMinRegSpec) (data : List Type) (result : Type)
   change branches index (joinArgs data (Carrier spec data) (spec.constructors.get index)
     (splitArgs data (Carrier spec data) (spec.constructors.get index) args).1
     (splitArgs data (Carrier spec data) (spec.constructors.get index) args).2) _ = _
-  rw [join_split]
+  rw [join_split] <;> rfl
 
 def FieldArrow (data : List Type) (self : Type) (fields : List PsMinRegField) (result : Type) : Type :=
   match fields with
@@ -214,7 +217,7 @@ theorem denote_repeat (data : List Type) (count : Nat) (domain result : PsMinReg
 
 theorem denote_minor (self : Type) (data : List Type) (result : PsMinRegTy) (fields : List PsMinRegField) :
     Denote (self :: data) (psMinRegMinorTy result fields) = Minor data self (Denote (self :: data) result) fields := by
-  rw [psMinRegMinorTy, denote_fields, denote_repeat]
+  rw [psMinRegMinorTy, denote_fields, denote_repeat] <;> rfl
 
 theorem denote_recursor (self : Type) (data : List Type) (result : PsMinRegTy)
     (constructors : List (List PsMinRegField)) :

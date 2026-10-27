@@ -49,93 +49,93 @@ theorem lift_input (type : PsMinRegTy) (amount : Nat) :
   | list a ih => exact congrArg PsMinRegTy.list ih
   | option a ih => exact congrArg PsMinRegTy.option ih
 
-theorem denote_prefix_lift (prefix data : List Type) (type : PsMinRegTy) :
-    Denote (prefix ++ data) (psMinRegCoreLiftCode type prefix.length) = Denote data type := by
-  induction prefix with
+theorem denote_prefix_lift (heads data : List Type) (type : PsMinRegTy) :
+    Denote (heads ++ data) (psMinRegCoreLiftCode type heads.length) = Denote data type := by
+  induction heads with
   | nil => rw [lift_zero]; rfl
   | cons head tail ih =>
     change Denote (head :: (tail ++ data)) (psMinRegCoreLiftCode type (Nat.succ tail.length)) = Denote data type
     rw [lift_succ, denote_lift]
     exact ih
 
-theorem denote_self (prefix data : List Type) (self : Type) :
-    Denote (prefix ++ (self :: data)) (.data prefix.length) = self := by
-  induction prefix with
+theorem denote_self (heads data : List Type) (self : Type) :
+    Denote (heads ++ (self :: data)) (.data heads.length) = self := by
+  induction heads with
   | nil => rfl
   | cons head tail ih => exact ih
 
-theorem denote_ground (prefix data : List Type) (self : Type) (type : PsMinRegTy) :
-    Denote (prefix ++ (self :: data)) (psMinRegCoreLiftCode type (Nat.succ prefix.length)) =
+theorem denote_ground (heads data : List Type) (self : Type) (type : PsMinRegTy) :
+    Denote (heads ++ (self :: data)) (psMinRegCoreLiftCode type (Nat.succ heads.length)) =
       Denote data type := by
   rw [lift_input, denote_prefix_lift, denote_lift]
 
-theorem denote_fields (prefix data : List Type) (self : Type) (fields : List PsMinRegField)
+theorem denote_fields (heads data : List Type) (self : Type) (fields : List PsMinRegField)
     (result : PsMinRegTy) :
-    Denote (prefix ++ (self :: data)) (psMinRegCoreAmbientFields prefix.length fields result) =
-      FieldArrow data self fields (Denote (prefix ++ (self :: data)) result) := by
+    Denote (heads ++ (self :: data)) (psMinRegCoreAmbientFields heads.length fields result) =
+      FieldArrow data self fields (Denote (heads ++ (self :: data)) result) := by
   induction fields with
   | nil => rfl
   | cons field rest ih =>
     cases field with
     | ground type =>
-      change (Denote (prefix ++ (self :: data)) (psMinRegCoreLiftCode type (Nat.succ prefix.length)) →
-        Denote (prefix ++ (self :: data)) (psMinRegCoreAmbientFields prefix.length rest result)) =
-        (Denote data type → FieldArrow data self rest (Denote (prefix ++ (self :: data)) result))
+      change (Denote (heads ++ (self :: data)) (psMinRegCoreLiftCode type (Nat.succ heads.length)) →
+        Denote (heads ++ (self :: data)) (psMinRegCoreAmbientFields heads.length rest result)) =
+        (Denote data type → FieldArrow data self rest (Denote (heads ++ (self :: data)) result))
       rw [denote_ground, ih]
     | recursive =>
-      change (Denote (prefix ++ (self :: data)) (.data prefix.length) →
-        Denote (prefix ++ (self :: data)) (psMinRegCoreAmbientFields prefix.length rest result)) =
-        (self → FieldArrow data self rest (Denote (prefix ++ (self :: data)) result))
+      change (Denote (heads ++ (self :: data)) (.data heads.length) →
+        Denote (heads ++ (self :: data)) (psMinRegCoreAmbientFields heads.length rest result)) =
+        (self → FieldArrow data self rest (Denote (heads ++ (self :: data)) result))
       rw [denote_self, ih]
 
-theorem denote_branch (prefix data : List Type) (self : Type) (fields : List PsMinRegField)
+theorem denote_branch (heads data : List Type) (self : Type) (fields : List PsMinRegField)
     (result : PsMinRegTy) :
-    Denote (prefix ++ (self :: data)) (psMinRegCoreAmbientBranch prefix.length result fields) =
-      Minor data self (Denote (prefix ++ (self :: data)) result) fields := by
-  change Denote (prefix ++ (self :: data)) (psMinRegCoreAmbientFields prefix.length fields
+    Denote (heads ++ (self :: data)) (psMinRegCoreAmbientBranch heads.length result fields) =
+      Minor data self (Denote (heads ++ (self :: data)) result) fields := by
+  change Denote (heads ++ (self :: data)) (psMinRegCoreAmbientFields heads.length fields
     (psMinRegRepeatArrow (psMinRegSelfCount fields) result result)) = _
   rw [denote_fields, denote_repeat]
   rfl
 
-theorem denote_branches (prefix data : List Type) (self : Type) (constructors : List (List PsMinRegField))
+theorem denote_branches (heads data : List Type) (self : Type) (constructors : List (List PsMinRegField))
     (result : PsMinRegTy) :
-    Denote (prefix ++ (self :: data)) (psMinRegCoreAmbientBranches prefix.length result constructors) =
-      BranchArrow data self (Denote (prefix ++ (self :: data)) result) constructors := by
+    Denote (heads ++ (self :: data)) (psMinRegCoreAmbientBranches heads.length result constructors) =
+      BranchArrow data self (Denote (heads ++ (self :: data)) result) constructors := by
   induction constructors with
   | nil =>
-    change (Denote (prefix ++ (self :: data)) (.data prefix.length) →
-      Denote (prefix ++ (self :: data)) result) = _
+    change (Denote (heads ++ (self :: data)) (.data heads.length) →
+      Denote (heads ++ (self :: data)) result) = _
     rw [denote_self]
     rfl
   | cons fields rest ih =>
-    change (Denote (prefix ++ (self :: data)) (psMinRegCoreAmbientBranch prefix.length result fields) →
-      Denote (prefix ++ (self :: data)) (psMinRegCoreAmbientBranches prefix.length result rest)) = _
+    change (Denote (heads ++ (self :: data)) (psMinRegCoreAmbientBranch heads.length result fields) →
+      Denote (heads ++ (self :: data)) (psMinRegCoreAmbientBranches heads.length result rest)) = _
     rw [denote_branch, ih]
     rfl
 
 -- The existing positive carrier folds into the actual ambient result type.
--- It does not require that result to belong to the selected family's prefix.
-noncomputable def ambientValue (prefix : List Type) (specs : List PsMinRegSpec)
+-- It does not require that result to belong to the selected family's heads.
+noncomputable def ambientValue (heads : List Type) (specs : List PsMinRegSpec)
     (slot : Nat) (result : PsMinRegTy) (selected : PsMinRegSpec)
     (h : psMinRegCoreSpecAt specs slot = some selected) :
-    Denote (prefix ++ dataModel specs)
-      (psMinRegCoreAmbientBranches (prefix.length + slot) result selected.constructors) := by
-  induction specs generalizing prefix slot with
+    Denote (heads ++ dataModel specs)
+      (psMinRegCoreAmbientBranches (heads.length + slot) result selected.constructors) := by
+  induction specs generalizing heads slot with
   | nil => simp [psMinRegCoreSpecAt] at h
   | cons spec rest ih =>
     cases slot with
     | zero =>
       have equal : spec = selected := Option.some.inj h
       subst selected
-      change Denote (prefix ++ (Carrier spec (dataModel rest) :: dataModel rest))
-        (psMinRegCoreAmbientBranches prefix.length result spec.constructors)
-      exact cast (denote_branches prefix (dataModel rest) (Carrier spec (dataModel rest))
+      change Denote (heads ++ (Carrier spec (dataModel rest) :: dataModel rest))
+        (psMinRegCoreAmbientBranches heads.length result spec.constructors)
+      exact cast (denote_branches heads (dataModel rest) (Carrier spec (dataModel rest))
         spec.constructors result).symm
         (recursor spec (dataModel rest)
-          (Denote (prefix ++ (Carrier spec (dataModel rest) :: dataModel rest)) result))
+          (Denote (heads ++ (Carrier spec (dataModel rest) :: dataModel rest)) result))
     | succ slot =>
       have next : psMinRegCoreSpecAt rest slot = some selected := h
-      have value := ih (prefix ++ [Carrier spec (dataModel rest)]) slot next
+      have value := ih (heads ++ [Carrier spec (dataModel rest)]) slot next
       simpa only [List.length_append, List.length_cons, List.length_nil, Nat.add_zero,
         Nat.add_succ, Nat.succ_add, List.append_assoc, List.cons_append, List.nil_append, dataModel] using value
 

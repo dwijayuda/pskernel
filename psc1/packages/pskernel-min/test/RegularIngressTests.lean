@@ -122,6 +122,54 @@ def debugExpr (fuel total visible : Nat) (groups : List PsMinRegCorePlan)
         "projection-owner " ++ debugName owner ++ " field=" ++ toString field else
         "projection-major:" ++ debugExpr fuel total visible groups names major
 
+
+def debugType : PsMinRegTy → String
+  | .empty => "False"
+  | .unit => "Unit"
+  | .nat => "Nat"
+  | .boolean => "Bool"
+  | .data slot => "D" ++ toString slot
+  | .arr a b => "(" ++ debugType a ++ "->" ++ debugType b ++ ")"
+  | .list a => "List(" ++ debugType a ++ ")"
+  | .option a => "Option(" ++ debugType a ++ ")"
+
+def debugInfer (fuel : Nat) (specs : List PsMinRegSpec) (globals locals : List PsMinRegTy)
+    (term : PsMinOpTerm) : String :=
+  match fuel with
+  | 0 => "diagnostic-depth"
+  | fuel + 1 =>
+    if (psMinOpInfer 512 specs globals locals term).isSome then "accepted" else
+    match term with
+    | .base base =>
+      match base with
+      | .ctor slot index => "constructor " ++ toString slot ++ ":" ++ toString index
+      | .recursor slot l p i m n result =>
+        "recursor " ++ toString slot ++ " result=" ++ debugType result ++ " metadata=" ++ toString [l,p,i,m,n]
+      | .var index => "variable " ++ toString index ++ " locals=" ++ toString locals.length
+      | .constant index => "constant " ++ toString index ++ " globals=" ++ toString globals.length
+      | _ => "base"
+    | .primitive _ l p i m n => "primitive metadata=" ++ toString [l,p,i,m,n]
+    | .projection slot field => "projection " ++ toString slot ++ ":" ++ toString field
+    | .lam domain body =>
+      if !psMinRegTyValid 511 (psMinRegSpecCount specs) domain then "lambda-domain:" ++ debugType domain else
+        "lambda-body:" ++ debugInfer fuel specs globals (domain :: locals) body
+    | .letE type value body =>
+      if !psMinRegTyValid 511 (psMinRegSpecCount specs) type then "let-type:" ++ debugType type else
+      match psMinOpInfer 511 specs globals locals value with
+      | none => "let-value:" ++ debugInfer fuel specs globals locals value
+      | some inferred => if !psMinRegTyEq 511 inferred type then
+          "let-mismatch inferred=" ++ debugType inferred ++ " declared=" ++ debugType type else
+          "let-body:" ++ debugInfer fuel specs globals (type :: locals) body
+    | .app fn argument =>
+      match psMinOpInfer 511 specs globals locals fn with
+      | none => "app-fn:" ++ debugInfer fuel specs globals locals fn
+      | some fnType => match fnType with
+        | .arr domain _ =>
+          match psMinOpInfer 511 specs globals locals argument with
+          | none => "app-arg:" ++ debugInfer fuel specs globals locals argument
+          | some inferred => "app-mismatch domain=" ++ debugType domain ++ " argument=" ++ debugType inferred
+        | _ => "app-nonfunction:" ++ debugType fnType
+
 def diagnose (bytes : ByteArray) (entries : List PsMinRegCoreEntry) : IO Unit := do
   IO.println s!"PSC1_MIN_REGULAR_DIAGNOSTIC certificate={(psMinRegCoreDecodeCertificate (bytes.toList.map UInt8.toNat) entries).isSome}"
   let some plans := psMinRegCorePlans entries | do
@@ -143,7 +191,27 @@ def diagnose (bytes : ByteArray) (entries : List PsMinRegCoreEntry) : IO Unit :=
         return
       names := declaration.name :: names
     index := index + 1
-  IO.println s!"PSC1_MIN_REGULAR_DIAGNOSTIC translation={(psMinRegCoreTranslateEntries 512 plans.count 0 plans.groups [] entries).isSome}"
+  let some normalized := psMinRegCoreTranslateEntries 512 plans.count 0 plans.groups [] entries |
+    throw (IO.userError "diagnostic translation changed")
+  let specs := psMinRegCoreSpecs plans.groups
+  IO.println s!"PSC1_MIN_REGULAR_DIAGNOSTIC registry={psMinRegRegistryValid 512 specs} translation=true"
+  let sourceNames := entries.filterMap fun e => match e with
+    | .definition d => some d.name
+    | .inductiveE _ => none
+  let mut globals := []
+  let mut definitionIndex := 0
+  for declaration in normalized do
+    let inferred := psMinOpInfer 512 specs globals [] declaration.value
+    let agrees := match inferred with
+      | none => false
+      | some type => psMinRegTyEq 512 type declaration.type
+    if !agrees then
+      let name := (sourceNames[definitionIndex]?).map debugName
+      IO.println s!"PSC1_MIN_REGULAR_DIAGNOSTIC definition={definitionIndex} name={name} declared={debugType declaration.type} inferred={inferred.map debugType}"
+      IO.println ("PSC1_MIN_REGULAR_DIAGNOSTIC infer=" ++ debugInfer 512 specs globals [] declaration.value)
+      return
+    globals := declaration.type :: globals
+    definitionIndex := definitionIndex + 1
 
 def main (args : List String) : IO Unit := do
   match args with

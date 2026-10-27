@@ -159,7 +159,7 @@ theorem recognizes_number (value : Nat) :
     simp only [hn] at checked
     split at checked
     next same =>
-      have equal : result.value = value := by simpa only [Nat.beq_eq_true] using same
+      have equal : result.value = value := Nat.eq_of_beq_eq_true same
       have tail : result.rest = rest := by simpa only [Option.some.injEq] using checked
       obtain ⟨digits, equation, meaning⟩ := readNumber_value bytes result hn
       rw [equal] at meaning

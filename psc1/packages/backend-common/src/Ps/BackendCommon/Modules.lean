@@ -25,7 +25,8 @@ def seen (name : String) (names : List String) : Bool :=
   names.any (fun item => item == name)
 
 def safeName (name : String) : Except String Unit :=
-  if name.startsWith "__ps$" then .error "PSC1_MODULE_RESERVED_NAME" else .ok ()
+  if name.startsWith "__ps$" || ["eval", "Function", "require", "process", "globalThis", "then"].contains name then
+    .error "PSC1_MODULE_RESERVED_NAME" else .ok ()
 
 def owner (owners : List PsModuleOwner) (name : String) : Except String PsModuleOwner :=
   match owners.filter (fun item => item.name == name) with

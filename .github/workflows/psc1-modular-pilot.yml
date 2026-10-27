@@ -61,6 +61,8 @@ jobs:
           lake build psc1_modular_pilot psc1_independent_checker
       - name: Compile real compiler Name module and dependent consumer
         run: node test/modular/native-probe.mjs
+      - name: Independently checked offline modular packages and negative tests
+        run: node test/modular/packages.test.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

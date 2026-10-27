@@ -42,7 +42,7 @@ def check : IO Unit := do
   | .ok plan =>
     if plan.units.length != 3 then throw (IO.userError "positive unit coverage")
   refuse "missing-owner" "PSC1_MODULE_OWNER_COVERAGE" (psPlanModules raw owners.tail)
-  refuse "duplicate-owner" "PSC1_MODULE_OWNER_COVERAGE"
+  refuse "duplicate-owner" "PSC1_MODULE_OWNER_COVERAGE:moduleLeaf"
     (psPlanModules raw [{ name := "moduleLeaf", unit := 1 }, { name := "moduleLeaf", unit := 2 }])
   refuse "owner-range" "PSC1_MODULE_OWNER_COVERAGE"
     (psPlanModules raw [{ name := "moduleLeaf", unit := 3 }, { name := "moduleUse", unit := 2 }])

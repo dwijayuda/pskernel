@@ -55,6 +55,7 @@ jobs:
           npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
           npm ci --prefix .. --ignore-scripts --include=optional --no-audit --no-fund
       - name: Build additive pilot and genuine independent checker
+        id: build
         run: |
           set -euo pipefail
           node packages/pskernel-lean/host/check-pin.mjs
@@ -62,8 +63,10 @@ jobs:
       - name: Strict graph planning positives and negative tests
         run: lake env lean --run test/modular/Plan.lean
       - name: Compile real compiler Name module and dependent consumer
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: node test/modular/native-probe.mjs
       - name: Independently checked offline modular packages and negative tests
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: node test/modular/packages.test.mjs
       - uses: actions/upload-artifact@v4
         if: always()

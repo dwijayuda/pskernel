@@ -125,7 +125,10 @@ function build(dir){
  if(dir!=='proofscript'&&!dir.startsWith('pskernel-lean'))build('proofscript');
  if(dir==='proofscript'){build('pskernel-lean-wasm');build('pskernel-lean');}
  clean(dir);fs.mkdirSync(path.join(packageRoot,'dist'));
- if(dir==='backend-python'||dir==='backend-php')hydrate(packageRoot,originalPackage(meta.name));
+ if(dir==='backend-python'||dir==='backend-php'){
+  const old=originalPackage(meta.name);hydrate(packageRoot,old);
+  for(const name of ['LICENSE','NOTICE'])put(path.join(packageRoot,'dist/QUALIFIED_INPUT_'+name),fs.readFileSync(path.join(old,name)));
+ }
  if(dir.startsWith('pskernel-lean'))fs.cpSync(originalPackage(meta.name),path.join(packageRoot,'dist/implementation'),{recursive:true});
  if(dir==='stdlib'){
   // Preserve the existing canonical standard library; copy, never translate.

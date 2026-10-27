@@ -59,7 +59,26 @@ try{
   "console.log(JSON.stringify({count}));"
  ].join('\n');
  const manifest=path.join(cwd,'packages.json');fs.writeFileSync(manifest,json(builds));
- const exports=JSON.parse(script(cwd,'imports.mjs',exportCode,[manifest]));record('all-advertised-exports-import',{exports:exports.count});
+ const exports=JSON.parse(script(cwd,'imports.mjs',exportCode,[manifest]));
+
+ for(const p of contract.packages){
+  const packageRoot=path.join(nodes,p.name);
+  assert.equal(sha256(fs.readFileSync(path.join(packageRoot,'LICENSE'))),sha256(fs.readFileSync('LICENSE')));
+  assert.ok(fs.readFileSync(path.join(packageRoot,'NOTICE'),'utf8').trim().length>0);
+ }
+ for(const dir of ['backend-python','backend-php'])for(const name of ['LICENSE','NOTICE'])
+  assert.ok(fs.statSync(path.join(nodes,'@proofscript',dir,'dist/QUALIFIED_INPUT_'+name)).size>0);
+ record('owned-licenses-and-qualified-input-notices-retained');
+ const frozenAudit=JSON.parse(fs.readFileSync(path.join(out,'inventory.json')));
+ const metadataChanges=new Set(['package.json','UNIVERSAL_DISTRIBUTION.json','DISTRIBUTION_PIN.mjs','DEPENDENCY_LOCK.json','npm-shrinkwrap.json']);
+ let preserved=0;
+ for(const pin of frozenAudit.frozenFiles){
+  if(pin.path.startsWith('node_modules/')||metadataChanges.has(pin.path))continue;
+  const bytes=fs.readFileSync(path.join(rootInstalled,'dist/implementation',pin.path));
+  assert.equal(bytes.length,pin.bytes);assert.equal(sha256(bytes),pin.sha256);preserved++;
+ }
+ assert.ok(preserved>50);record('qualified-root-execution-files-byte-preserved',{files:preserved,metadataChanges:[...metadataChanges]});
+record('all-advertised-exports-import',{exports:exports.count});
  for(const runtime of [process.execPath,'bun']){
   const observed=script(cwd,'shared.mjs',[
    "import assert from 'node:assert/strict';",

@@ -320,6 +320,8 @@
     "modified-executable-refused-before-execution",
     "modified-source-snapshot-refused",
     "no-per-package-compiler-bundle-duplication",
+    "owned-licenses-and-qualified-input-notices-retained",
+    "qualified-root-execution-files-byte-preserved",
     "semantic-refusal-checked-partial",
     "semantic-refusal-malformed-list",
     "semantic-refusal-missing-import",

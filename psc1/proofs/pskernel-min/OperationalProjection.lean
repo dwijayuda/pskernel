@@ -107,7 +107,9 @@ theorem actual_projection_iota (fields : List PsMinRegField) (rest : List PsMinR
       (projection_head_type fields rest index type h)
       (construct (singleSpec fields) (dataModel rest) ⟨0, by simp [singleSpec]⟩ args) =
       fieldValue (dataModel rest) (Carrier (singleSpec fields) (dataModel rest)) fields index type h args := by
-  simpa -implicitDefEqProofs [projectionModel, singleSpec, Nat.casesAuxOn, h] using!
+  unfold projectionModel
+  dsimp only [singleSpec, Nat.casesAuxOn, psMinOpProjectionType]
+  simpa -implicitDefEqProofs only [h] using!
     projection_iota fields (dataModel rest) index type h args
 
 #print axioms projectionModel

@@ -1,47 +1,53 @@
 # PSC1 MinKernel — continuation guideline for GPT-6.1 Sol / High
 
-## R1 qualified checkpoint — continue with R2
+## R2 qualified normalized-profile checkpoint — continue with R3
 
-The user-confirmed GPT-6.1 Sol/High R1 batch passes standalone Linux
-[40459838298](https://github.com/dwijayuda/pskernel/actions/runs/40459838298) at
-**`8b33b3a17b241d3b264600dd9616cc195933df65`**. Proof/native job122041556260
-and portability/census job122041556046 are success. The actual helper is
-`Ps.MinKernel.Profile.LowerUnusedBinder`; the proof is `BinderLowering.lean`.
+R2 passes both standalone Linux jobs at
+**`028dcd98fabcb0bf196c0d6f27a80bad3b666745`**, run
+[40469648092](https://github.com/dwijayuda/pskernel/actions/runs/40469648092):
+proof/native **122073398746**, portability/census/source witness **122073398515**.
+The user-confirmed setting is GPT-6.1 Sol / High. All project builds, proof checks,
+source compilation and tests in this batch ran on GitHub Actions Linux.
 
-`Ps.MinKernel.BinderLowering.lower_sound`, `lower_instantiate` and
-`lower_motive_body` each print exactly`[propext]`. Every successful lowering
-has an exact inverse under actual Core lifting, then the existing Core theorem
-derives actual instantiation independence. This covers arbitrary syntax/open
-references; it does not prove typing or grant canonical admission.
+Read the [R2 profile and precise boundary](PSC1_MIN_KERNEL_R2_PROFILE.md) before
+editing. The isolated executable checks closed Type-0 codes and ordered regular
+datatype descriptors, derives constructor/fixed-result recursor signatures, and
+checks sequential declarations from an empty environment. The generic concrete
+tree model discharges the signature model; actual inference/admission success
+gives a model and Empty consistency. The iota law covers the entire declared
+descriptor family. Stable chronological quotation names are proved injective
+and preserved when relative slots rebase.
 
-All21 positive transformations,13 removed-binder refusals and2 out-of-range
-probes pass natively and through actual PSC1-generated JS. The exact six-module
-source/test graph is independently admitted by official Lean4.35. The helper is
-93lines/3853B, SHA256`da2b0d1911358e88b49c7e9bbed4c64f6c5a16ed1a9e73296892f6983f14f6f6`.
-Its explicit import closure has4 modules/8879B. The6-module test source has21514B;
-its full bundle is79089B TS/135332B JS, not an isolated checker payload.
+All **24** new printed model/validation/name/source bridge reports contain
+no axioms or exactly `[propext]`. The native and actual PSC1-generated corpus
+passes **23 positives, 38 refusals and two out-of-range probes**. The complete
+five-module source/test graph is admitted by official Lean 4.35. Its bundle is
+105087 B TS / 221393 B JS; these include test/shared runtime code. The two-module
+checker source has 307 lines/12268 B; naming adds Foundation.Name and
+RegularNames (four-module checker-plus-naming closure 17081 B). The original
+Check.lean remains 93 lines/3322 B with its original source SHA.
 
-The original Check.lean remains93lines/3322B with its original SHA and acceptance
-boundary. The runtime ledger still selects Check only. A future connected
-canonical checker must include and remeasure this helper's dependencies; the
-12-record target cannot silently stand for the larger checker/decoder closure.
+The concrete source-image theorem connects the checked normalized recursor to
+the exact retained PsMinTy.rec spine, with its actual host PsMinTy/Bool model and
+R1 motive-instantiation law. CI locates the native proof witness structurally
+once in the current source-origin-bound psMinTyEq worker. This is a representative
+typed source-image result, not a general decoder, external name resolver or proof
+for all 115 canonical foundation declarations. Internal quotation names do not
+authorize arbitrary canonical source-name binding.
 
-**Next mathematical batch:** R2 in the runtime-profile guide. Define the closed
-regular-data/type-code profile and prove one actual recursor instance with all
-parameters, levels, minors and major checked. Use the successful lowering equation
-and R1 theorem; do not infer recursor typing, iota soundness or primitive semantics
-from motive independence alone. Then R3 foundation/projection/conversion rules and
-R4 canonical ingress. Do not repeat completed R1.
+Previous R1 main 40460549124 and installed 40459838431 are terminal success.
+**Historical broader-regression snapshot at 07:55 UTC / 14:55 Asia/Jakarta:** R2
+main 40469652253 and installed 40468550390 were in progress. Reporting commits may
+supersede main; query the live PR checks rather than infer current status from
+this snapshot. The dated receipt preserves each exact commit/run/artifact scope.
 
-**Broader regression boundary:** the preceding57964262 main and783718f9 installed
-runs are fully green. New R1 main40459842620 and installed40459838431 were still
-in progress when this result was recorded. Requery live HEAD and latest runs;
-a documentation reporting push may supersede the main run. Do not call current
-whole-branch qualification complete until its selected gates are terminal.
-The dated receipt retains exact run/job/artifact identities and failed development
-attempts. Canonical min/dual still refuse, with0/124 modules,0/37 criteria and no
-min-checked G1/G2/G3. No generated-code preservation theorem or hostile-input
-resource qualification is added by R1.
+**Next batch is R3:** measured lets, declaration projections and exact pinned
+foundation instance semantics, keeping the real acceptance-to-model bridge.
+Any delta conversion needs a definition-body/evaluation invariant. R4 still
+owns general canonical ingress/name binding/translation and generated execution/
+resource obligations. Canonical min/dual still refuse; full min coverage remains
+0/124 compiler modules, 0/37 Practical Core and no qualified min G1/G2/G3.
+Do not repeat R1/R2 or promote the representative witness to full self-check.
 
 Updated **27 October 2026, Asia/Jakarta**. Requested continuation configuration:
 **GPT-6.1 Sol (`gpt-6.1-sol`), reasoning effort High**.
@@ -52,7 +58,7 @@ minimal kernel. The first proved and PSC1-portable fragment is complete; the
 dependent kernel, canonical bridge and minimal-checker self-hosting remain open.
 
 
-## Current continuation checkpoint — scope proof and ledger complete
+## Historical scope/ledger checkpoint
 
 The next research batch has now passed standalone Linux CI at
 **`579642626daa67bd167dd1af626f5b0e0401cb00`**, run
@@ -105,7 +111,7 @@ The remaining runs are terminal **success**, verified27 October2026 at06:05UTC:
 
 This documentation checkpoint records those outcomes without replacing the
 initial d6bebd23 evidence or the57964262 proof/ledger identity with a later
-reporting SHA. The earlier cancelled main40454634094 and failed proof40454629943
+reporting SHA. The earlier cancelled main 40454634094 and failed proof40454629943
 remain development history. Neither supplies qualification for the repair.
 
 **First operational action:** fetch live branch HEAD, PR#194 and current CI;

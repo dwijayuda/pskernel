@@ -1385,22 +1385,2657 @@
       }
     ],
     "broaderRegressionSnapshot": {
-      "checkedAtUtc": "2026-10-27T06:16:16Z",
+      "checkedAtUtc": "2026-10-27 07:55:44 UTC",
       "main": {
-        "runId": 40459842620,
-        "commit": "8b33b3a17b241d3b264600dd9616cc195933df65",
-        "status": "in_progress",
-        "conclusion": null
+        "runId": 40460549124,
+        "commit": "fea85153fe48cc9a3fb8ae809ca6cbf55a40740b",
+        "status": "completed",
+        "conclusion": "success",
+        "fullJob": 122048999348,
+        "gateJob": 122058392831
       },
       "installed": {
         "runId": 40459838431,
         "commit": "8b33b3a17b241d3b264600dd9616cc195933df65",
+        "status": "completed",
+        "conclusion": "success",
+        "preflightJob": 122041905553,
+        "installedJob": 122042121659
+      },
+      "qualification": "terminal previous R1 regression scopes; not R2 full-compiler minimal qualification"
+    },
+    "next": "Historical R1 next was R2; R2 standalone qualification is now recorded below.",
+    "fullPortableReceiptInArtifact": "binder/receipt.json; complete same-compile origins in binder/vectors.source.json"
+  },
+  "regularDataBatch": {
+    "status": "standalone-qualified-normalized-profile",
+    "implementationComplete": true,
+    "scope": "Defined normalized regular-data calculus and one exact current source-image witness; general raw canonical bridge remains open",
+    "implementationCommit": "028dcd98fabcb0bf196c0d6f27a80bad3b666745",
+    "parentCommit": "eb568e9247e68ad3ebed8065eb10a5e27edf25ec",
+    "modelConfiguration": "User confirmed GPT-6.1 Sol / High",
+    "executionPolicy": "All project builds, proof checks, source compilation and tests ran on GitHub Actions Linux only; local work was text drafting and CI evidence parsing",
+    "profileDocument": "PSC1_MIN_KERNEL_R2_PROFILE.md",
+    "acceptanceFunctions": [
+      "psMinRegInfer",
+      "psMinRegCheckEnvironment"
+    ],
+    "capstones": [
+      "Ps.MinKernel.RegularProofs.regular_hasModel",
+      "Ps.MinKernel.RegularProofs.regular_consistent"
+    ],
+    "iota": "Ps.MinKernel.RegularModel.fold_construct",
+    "sourceBridge": "Ps.MinKernel.RegularSource.checked_instance_core_model",
+    "logicalBoundary": {
+      "ambient": "Lean 4.35.0 and its kernel; all printed new acceptance/model/source bridge reports are no axioms or propext",
+      "axiomReports": [
+        "RegularNames.lean:75:0: 'Ps.MinKernel.RegularNames.constructor_injective' does not depend on any axioms",
+        "RegularNames.lean:76:0: 'Ps.MinKernel.RegularNames.recursor_injective' does not depend on any axioms",
+        "RegularNames.lean:77:0: 'Ps.MinKernel.RegularNames.generated_root_disjoint' depends on axioms: [propext]",
+        "RegularNames.lean:78:0: 'Ps.MinKernel.RegularNames.slot_name_stable' depends on axioms: [propext]",
+        "RegularNames.lean:79:0: 'Ps.MinKernel.RegularNames.slot_name_injective' depends on axioms: [propext]",
+        "RegularNames.lean:80:0: 'Ps.MinKernel.RegularNames.generated_child_disjoint' depends on axioms: [propext]",
+        "RegularModel.lean:326:0: 'Ps.MinKernel.RegularModel.join_split' depends on axioms: [propext]",
+        "RegularModel.lean:327:0: 'Ps.MinKernel.RegularModel.fold_construct' depends on axioms: [propext]",
+        "RegularModel.lean:328:0: 'Ps.MinKernel.RegularModel.constructorValue' depends on axioms: [propext]",
+        "RegularModel.lean:329:0: 'Ps.MinKernel.RegularModel.recursorValue' depends on axioms: [propext]",
+        "RegularModel.lean:330:0: 'Ps.MinKernel.RegularModel.signatures' depends on axioms: [propext]",
+        "RegularSoundness.lean:206:0: 'Ps.MinKernel.RegularProofs.typeEq_sound' depends on axioms: [propext]",
+        "RegularSoundness.lean:207:0: 'Ps.MinKernel.RegularProofs.inferModel' depends on axioms: [propext]",
+        "RegularSoundness.lean:208:0: 'Ps.MinKernel.RegularProofs.regular_hasModel' depends on axioms: [propext]",
+        "RegularSoundness.lean:209:0: 'Ps.MinKernel.RegularProofs.regular_consistent' depends on axioms: [propext]",
+        "RegularValidation.lean:121:0: 'Ps.MinKernel.RegularValidation.typeValid_sound' depends on axioms: [propext]",
+        "RegularValidation.lean:122:0: 'Ps.MinKernel.RegularValidation.registryValid_sound' depends on axioms: [propext]",
+        "RegularValidation.lean:123:0: 'Ps.MinKernel.RegularValidation.registry_hasModel' depends on axioms: [propext]",
+        "RegularSourceInstance.lean:174:0: 'Ps.MinKernel.RegularSource.source_instance_checked' depends on axioms: [propext]",
+        "RegularSourceInstance.lean:175:0: 'Ps.MinKernel.RegularSource.checked_source_semantics' depends on axioms: [propext]",
+        "RegularSourceInstance.lean:176:0: 'Ps.MinKernel.RegularSource.source_iota' depends on axioms: [propext]",
+        "RegularSourceInstance.lean:177:0: 'Ps.MinKernel.RegularSource.source_motive_instantiation' depends on axioms: [propext]",
+        "RegularSourceInstance.lean:178:0: 'Ps.MinKernel.RegularSource.actual_core_instance_model' depends on axioms: [propext]",
+        "RegularSourceInstance.lean:179:0: 'Ps.MinKernel.RegularSource.checked_instance_core_model' depends on axioms: [propext]"
+      ],
+      "sourceImageEnvironment": "Fixed actual imported PsMinTy and Bool; exact structured source names and one retained Core recursor spine",
+      "foundation": "Normalized concrete Empty/Unit/Nat/Bool/arrows/List/Option and recursively constructed regular carriers. Not a model of the entire 115-declaration canonical prelude.",
+      "generation": "Native/generated finite agreement and independently checked source admissions; no Lean-to-PSC1/backend/generated-machine-code preservation theorem",
+      "resources": "No aggregate hostile-input size, cyclic JS object, heap or stack qualification",
+      "canonicalMinDual": "PSC1_MIN_CANONICAL_BRIDGE_UNPROVED; no acceptance"
+    },
+    "sourceIdentities": [
+      {
+        "path": "psc1/packages/pskernel-min/src/Ps/MinKernel/Profile/RegularProfile.lean",
+        "bytes": 8569,
+        "lines": 226,
+        "sha256": "ebecd7fc1fc49171d0a3fde4faae04f22130c6f112298739cd44a8ffb338df14"
+      },
+      {
+        "path": "psc1/packages/pskernel-min/src/Ps/MinKernel/Profile/RegularCheck.lean",
+        "bytes": 3699,
+        "lines": 81,
+        "sha256": "126b83aa4a22115d6bef29dae079a727e72ebed790ad725aeaeac3235acd23f7"
+      },
+      {
+        "path": "psc1/packages/pskernel-min/src/Ps/MinKernel/Profile/RegularNames.lean",
+        "bytes": 826,
+        "lines": 17,
+        "sha256": "2b47d746aa9fd0b48ac579cd62609a616fd09e19204dddd1821101ddbbe6182f"
+      },
+      {
+        "path": "psc1/packages/pskernel-min/src/Ps/MinKernel/Tests/RegularVectors.lean",
+        "bytes": 15776,
+        "lines": 102,
+        "sha256": "ae5d2e5b24690874ce46a5bf2599d30da3421e9d946083b7b85ec7b8cb0f5c9b"
+      },
+      {
+        "path": "psc1/packages/pskernel-min/test/RegularTests.lean",
+        "bytes": 804,
+        "lines": 11,
+        "sha256": "9d559c51633069023a880b91784e05def3007c691596ca4695f8d15169d98cfb"
+      },
+      {
+        "path": "psc1/proofs/pskernel-min/RegularModel.lean",
+        "bytes": 16321,
+        "lines": 332,
+        "sha256": "a6cc1f5027b209767a2b3c1b6b0b7c63d372b9bf14ea11b34eb0c0d1c0c259a7"
+      },
+      {
+        "path": "psc1/proofs/pskernel-min/RegularSoundness.lean",
+        "bytes": 10249,
+        "lines": 211,
+        "sha256": "6bb610c890f66f6ad08795d6b41e5d5b11cb082da9bc553778deb09419c8b3ca"
+      },
+      {
+        "path": "psc1/proofs/pskernel-min/RegularValidation.lean",
+        "bytes": 5839,
+        "lines": 125,
+        "sha256": "c35973148ab3ac122d57f391bf5a8b1032de9553cb704a109ff6a2d2b375868e"
+      },
+      {
+        "path": "psc1/proofs/pskernel-min/RegularNames.lean",
+        "bytes": 4116,
+        "lines": 82,
+        "sha256": "76f643c29c67ff82033e3ba909ce99aecd8e3b5cccbbd0b344abf293e59ee984"
+      },
+      {
+        "path": "psc1/proofs/pskernel-min/RegularSourceInstance.lean",
+        "bytes": 9530,
+        "lines": 181,
+        "sha256": "580aff97751ff7717c0f9e1874f9477e93627be6a0ac176b995821b94739f1bd"
+      },
+      {
+        "path": "psc1/proofs/pskernel-min/RegularCoreWitness.lean",
+        "bytes": 1277,
+        "lines": 23,
+        "sha256": "b7ade5b252c6861e3cf8b16a106a9f4211bc0bdc25031ab2a70b8abfdd70846c"
+      }
+    ],
+    "runtimeSize": {
+      "checkerModules": 2,
+      "checkerLines": 307,
+      "checkerBytes": 12268,
+      "additionalNamingModules": 2,
+      "checkerPlusNamingClosureBytes": 17081,
+      "testModules": 5,
+      "testSourceBytes": 32857,
+      "payloadScope": "Entire five-module profile test bundle; not isolated checker payload"
+    },
+    "ci": {
+      "runId": 40469648092,
+      "commit": "028dcd98fabcb0bf196c0d6f27a80bad3b666745",
+      "status": "completed",
+      "conclusion": "success",
+      "proofNativeJob": 122073398746,
+      "portabilityClosureJob": 122073398515,
+      "artifacts": [
+        {
+          "id": 12717967510,
+          "name": "psc1-minkernel-proof-028dcd98fabcb0bf196c0d6f27a80bad3b666745",
+          "bytes": 2531,
+          "digest": "sha256:8c091fd01587c4049f9b0a7acaf9d9f94a8731495736168209e5269bc1bbc9ce"
+        },
+        {
+          "id": 12717887625,
+          "name": "psc1-minkernel-portability-closure-028dcd98fabcb0bf196c0d6f27a80bad3b666745",
+          "bytes": 1590913,
+          "digest": "sha256:a8d4ef18d424aa0a595f80b1a901ebcc6f8e3b5e1dcac911b0e7f2de8b50fb85"
+        }
+      ]
+    },
+    "portableReceipt": {
+      "schema": "psc1-min-regular-portability/1",
+      "commit": "028dcd98fabcb0bf196c0d6f27a80bad3b666745",
+      "authoritative": false,
+      "canonicalAdmission": false,
+      "sourceIdentities": [
+        {
+          "path": "packages/foundation/src/Ps/Foundation/Name.lean",
+          "sha256": "2e663eb4d3af85ef70cd3b0dec148b9303d0e994c7c3157d4f81494c9f999f15",
+          "bytes": 3987
+        },
+        {
+          "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularProfile.lean",
+          "sha256": "ebecd7fc1fc49171d0a3fde4faae04f22130c6f112298739cd44a8ffb338df14",
+          "bytes": 8569
+        },
+        {
+          "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularCheck.lean",
+          "sha256": "126b83aa4a22115d6bef29dae079a727e72ebed790ad725aeaeac3235acd23f7",
+          "bytes": 3699
+        },
+        {
+          "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularNames.lean",
+          "sha256": "2b47d746aa9fd0b48ac579cd62609a616fd09e19204dddd1821101ddbbe6182f",
+          "bytes": 826
+        },
+        {
+          "path": "packages/pskernel-min/src/Ps/MinKernel/Tests/RegularVectors.lean",
+          "sha256": "ae5d2e5b24690874ce46a5bf2599d30da3421e9d946083b7b85ec7b8cb0f5c9b",
+          "bytes": 15776
+        }
+      ],
+      "checkerExplicitImportClosureModules": 2,
+      "completeTestClosureModules": 5,
+      "testOnlySourceModules": [
+        "Ps.Foundation.Name",
+        "Ps.MinKernel.Profile.RegularNames",
+        "Ps.MinKernel.Tests.RegularVectors"
+      ],
+      "sourceReport": {
+        "schema": "psc1-min-source-compile/2",
+        "sourceAccepted": true,
+        "targetAccepted": true,
+        "originalIrAccepted": true,
+        "providerChecked": false,
+        "moduleCount": 5,
+        "origins": [
+          {
+            "moduleName": [
+              "Ps",
+              "Foundation",
+              "Name"
+            ],
+            "coreStart": 0,
+            "batches": [
+              {
+                "sourceIndex": 0,
+                "sourceName": [
+                  "PsName"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsName"
+                    },
+                    "role": "inductiveType"
+                  },
+                  {
+                    "index": 1,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsName"
+                      },
+                      "v": "anonymous"
+                    },
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 2,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsName"
+                      },
+                      "v": "str"
+                    },
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 3,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsName"
+                      },
+                      "v": "num"
+                    },
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 4,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsName"
+                      },
+                      "v": "rec"
+                    },
+                    "role": "recursor"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 1,
+                "sourceName": [
+                  "psNameDepth"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psNameDepth"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 2,
+                "sourceName": [
+                  "psStringEqFromWithFuel"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psStringEqFromWithFuel"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 3,
+                "sourceName": [
+                  "psStringEqFrom"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psStringEqFrom"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 4,
+                "sourceName": [
+                  "psStringEq"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psStringEq"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 5,
+                "sourceName": [
+                  "psNatToString"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psNatToString"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 6,
+                "sourceName": [
+                  "psNameEq"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psNameEq"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 7,
+                "sourceName": [
+                  "psNameAppendStr"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psNameAppendStr"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 8,
+                "sourceName": [
+                  "psNameAppendNum"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psNameAppendNum"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 9,
+                "sourceName": [
+                  "psNameToString"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psNameToString"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 10,
+                "sourceName": [
+                  "psNameLastComponent"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psNameLastComponent"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "moduleName": [
+              "Ps",
+              "MinKernel",
+              "Profile",
+              "RegularProfile"
+            ],
+            "coreStart": 15,
+            "batches": [
+              {
+                "sourceIndex": 0,
+                "sourceName": [
+                  "PsMinRegTy"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegTy"
+                    },
+                    "role": "inductiveType"
+                  },
+                  {
+                    "index": 1,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsMinRegTy"
+                      },
+                      "v": "empty"
+                    },
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 2,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsMinRegTy"
+                      },
+                      "v": "unit"
+                    },
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 3,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsMinRegTy"
+                      },
+                      "v": "nat"
+                    },
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 4,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsMinRegTy"
+                      },
+                      "v": "boolean"
+                    },
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 5,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsMinRegTy"
+                      },
+                      "v": "data"
+                    },
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 6,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsMinRegTy"
+                      },
+                      "v": "arr"
+                    },
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 7,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsMinRegTy"
+                      },
+                      "v": "list"
+                    },
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 8,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsMinRegTy"
+                      },
+                      "v": "option"
+                    },
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 9,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsMinRegTy"
+                      },
+                      "v": "rec"
+                    },
+                    "role": "recursor"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 1,
+                "sourceName": [
+                  "PsMinRegField"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegField"
+                    },
+                    "role": "inductiveType"
+                  },
+                  {
+                    "index": 1,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsMinRegField"
+                      },
+                      "v": "ground"
+                    },
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 2,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsMinRegField"
+                      },
+                      "v": "recursive"
+                    },
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 3,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsMinRegField"
+                      },
+                      "v": "rec"
+                    },
+                    "role": "recursor"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 2,
+                "sourceName": [
+                  "PsMinRegSpec"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegSpec"
+                    },
+                    "role": "structureType"
+                  },
+                  {
+                    "index": 1,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsMinRegSpec"
+                      },
+                      "v": "mk"
+                    },
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 2,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsMinRegSpec"
+                      },
+                      "v": "rec"
+                    },
+                    "role": "recursor"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 3,
+                "sourceName": [
+                  "psMinRegTyEq"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "n",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "s",
+                          "p": {
+                            "k": "a"
+                          },
+                          "v": "psMinRegTyEq"
+                        },
+                        "v": "$psc0SH"
+                      },
+                      "v": "0"
+                    },
+                    "role": "normalizedWorker"
+                  },
+                  {
+                    "index": 1,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegTyEq"
+                    },
+                    "role": "publicWrapper"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 4,
+                "sourceName": [
+                  "psMinRegTyValid"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "n",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "s",
+                          "p": {
+                            "k": "a"
+                          },
+                          "v": "psMinRegTyValid"
+                        },
+                        "v": "$psc0SH"
+                      },
+                      "v": "0"
+                    },
+                    "role": "normalizedWorker"
+                  },
+                  {
+                    "index": 1,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegTyValid"
+                    },
+                    "role": "publicWrapper"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 5,
+                "sourceName": [
+                  "psMinRegLiftTy"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegLiftTy"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 6,
+                "sourceName": [
+                  "psMinRegFieldCount"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegFieldCount"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 7,
+                "sourceName": [
+                  "psMinRegSelfCount"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegSelfCount"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 8,
+                "sourceName": [
+                  "psMinRegCtorCount"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegCtorCount"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 9,
+                "sourceName": [
+                  "psMinRegSpecCount"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegSpecCount"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 10,
+                "sourceName": [
+                  "psMinRegFieldsValid"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegFieldsValid"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 11,
+                "sourceName": [
+                  "psMinRegConstructorsValid"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegConstructorsValid"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 12,
+                "sourceName": [
+                  "psMinRegSpecValid"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegSpecValid"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 13,
+                "sourceName": [
+                  "psMinRegRegistryValid"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "n",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "s",
+                          "p": {
+                            "k": "a"
+                          },
+                          "v": "psMinRegRegistryValid"
+                        },
+                        "v": "$psc0SH"
+                      },
+                      "v": "0"
+                    },
+                    "role": "normalizedWorker"
+                  },
+                  {
+                    "index": 1,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegRegistryValid"
+                    },
+                    "role": "publicWrapper"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 14,
+                "sourceName": [
+                  "psMinRegCtorAt"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "n",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "s",
+                          "p": {
+                            "k": "a"
+                          },
+                          "v": "psMinRegCtorAt"
+                        },
+                        "v": "$psc0SH"
+                      },
+                      "v": "0"
+                    },
+                    "role": "normalizedWorker"
+                  },
+                  {
+                    "index": 1,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegCtorAt"
+                    },
+                    "role": "publicWrapper"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 15,
+                "sourceName": [
+                  "psMinRegFieldArrow"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegFieldArrow"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 16,
+                "sourceName": [
+                  "psMinRegRepeatArrow"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegRepeatArrow"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 17,
+                "sourceName": [
+                  "psMinRegMinorTy"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegMinorTy"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 18,
+                "sourceName": [
+                  "psMinRegRecursorTy"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegRecursorTy"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 19,
+                "sourceName": [
+                  "psMinRegCtorTypeAt"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "n",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "s",
+                          "p": {
+                            "k": "a"
+                          },
+                          "v": "psMinRegCtorTypeAt"
+                        },
+                        "v": "$psc0SH"
+                      },
+                      "v": "0"
+                    },
+                    "role": "normalizedWorker"
+                  },
+                  {
+                    "index": 1,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegCtorTypeAt"
+                    },
+                    "role": "publicWrapper"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 20,
+                "sourceName": [
+                  "psMinRegRecursorAllowed"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegRecursorAllowed"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 21,
+                "sourceName": [
+                  "psMinRegRecursorTypeAt"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "n",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "s",
+                          "p": {
+                            "k": "a"
+                          },
+                          "v": "psMinRegRecursorTypeAt"
+                        },
+                        "v": "$psc0SH"
+                      },
+                      "v": "0"
+                    },
+                    "role": "normalizedWorker"
+                  },
+                  {
+                    "index": 1,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegRecursorTypeAt"
+                    },
+                    "role": "publicWrapper"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "moduleName": [
+              "Ps",
+              "MinKernel",
+              "Profile",
+              "RegularCheck"
+            ],
+            "coreStart": 57,
+            "batches": [
+              {
+                "sourceIndex": 0,
+                "sourceName": [
+                  "PsMinRegTerm"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegTerm"
+                    },
+                    "role": "inductiveType"
+                  },
+                  {
+                    "index": 1,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsMinRegTerm"
+                      },
+                      "v": "var"
+                    },
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 2,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsMinRegTerm"
+                      },
+                      "v": "constant"
+                    },
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 3,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsMinRegTerm"
+                      },
+                      "v": "unit"
+                    },
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 4,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsMinRegTerm"
+                      },
+                      "v": "nat"
+                    },
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 5,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsMinRegTerm"
+                      },
+                      "v": "boolean"
+                    },
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 6,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsMinRegTerm"
+                      },
+                      "v": "lam"
+                    },
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 7,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsMinRegTerm"
+                      },
+                      "v": "app"
+                    },
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 8,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsMinRegTerm"
+                      },
+                      "v": "ctor"
+                    },
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 9,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsMinRegTerm"
+                      },
+                      "v": "recursor"
+                    },
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 10,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsMinRegTerm"
+                      },
+                      "v": "rec"
+                    },
+                    "role": "recursor"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 1,
+                "sourceName": [
+                  "PsMinRegDeclaration"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegDeclaration"
+                    },
+                    "role": "structureType"
+                  },
+                  {
+                    "index": 1,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsMinRegDeclaration"
+                      },
+                      "v": "mk"
+                    },
+                    "role": "constructor"
+                  },
+                  {
+                    "index": 2,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "PsMinRegDeclaration"
+                      },
+                      "v": "rec"
+                    },
+                    "role": "recursor"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 2,
+                "sourceName": [
+                  "psMinRegLookup"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "n",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "s",
+                          "p": {
+                            "k": "a"
+                          },
+                          "v": "psMinRegLookup"
+                        },
+                        "v": "$psc0SH"
+                      },
+                      "v": "0"
+                    },
+                    "role": "normalizedWorker"
+                  },
+                  {
+                    "index": 1,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegLookup"
+                    },
+                    "role": "publicWrapper"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 3,
+                "sourceName": [
+                  "psMinRegInfer"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "n",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "s",
+                          "p": {
+                            "k": "a"
+                          },
+                          "v": "psMinRegInfer"
+                        },
+                        "v": "$psc0SH"
+                      },
+                      "v": "0"
+                    },
+                    "role": "normalizedWorker"
+                  },
+                  {
+                    "index": 1,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegInfer"
+                    },
+                    "role": "publicWrapper"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 4,
+                "sourceName": [
+                  "psMinRegCheckDeclarations"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "n",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "s",
+                          "p": {
+                            "k": "a"
+                          },
+                          "v": "psMinRegCheckDeclarations"
+                        },
+                        "v": "$psc0SH"
+                      },
+                      "v": "0"
+                    },
+                    "role": "normalizedWorker"
+                  },
+                  {
+                    "index": 1,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegCheckDeclarations"
+                    },
+                    "role": "publicWrapper"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 5,
+                "sourceName": [
+                  "psMinRegCheckEnvironment"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegCheckEnvironment"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "moduleName": [
+              "Ps",
+              "MinKernel",
+              "Profile",
+              "RegularNames"
+            ],
+            "coreStart": 78,
+            "batches": [
+              {
+                "sourceIndex": 0,
+                "sourceName": [
+                  "psMinRegDataName"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegDataName"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 1,
+                "sourceName": [
+                  "psMinRegConstructorName"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegConstructorName"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 2,
+                "sourceName": [
+                  "psMinRegRecursorName"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegRecursorName"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 3,
+                "sourceName": [
+                  "psMinRegOrdinal"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegOrdinal"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 4,
+                "sourceName": [
+                  "psMinRegSlotName"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegSlotName"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "moduleName": [
+              "Ps",
+              "MinKernel",
+              "Tests",
+              "RegularVectors"
+            ],
+            "coreStart": 83,
+            "batches": [
+              {
+                "sourceIndex": 0,
+                "sourceName": [
+                  "psMinRegMakeSpec"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegMakeSpec"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 1,
+                "sourceName": [
+                  "psMinRegTySpec"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegTySpec"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 2,
+                "sourceName": [
+                  "psMinRegNatListSpec"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegNatListSpec"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 3,
+                "sourceName": [
+                  "psMinRegEmptySpec"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegEmptySpec"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 4,
+                "sourceName": [
+                  "psMinRegLoopSpec"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegLoopSpec"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 5,
+                "sourceName": [
+                  "psMinRegOneSpec"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegOneSpec"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 6,
+                "sourceName": [
+                  "psMinRegTyArrMinor"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegTyArrMinor"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 7,
+                "sourceName": [
+                  "psMinRegTyInstance"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegTyInstance"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 8,
+                "sourceName": [
+                  "psMinRegTyFunction"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegTyFunction"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 9,
+                "sourceName": [
+                  "psMinRegAccepted"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegAccepted"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 10,
+                "sourceName": [
+                  "psMinRegClosedCase"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegClosedCase"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 11,
+                "sourceName": [
+                  "psMinRegSlotNameIs"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegSlotNameIs"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              },
+              {
+                "sourceIndex": 12,
+                "sourceName": [
+                  "psMinRegVector"
+                ],
+                "members": [
+                  {
+                    "index": 0,
+                    "nameWire": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "psMinRegVector"
+                    },
+                    "role": "sourceDeclaration"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "canonicalAdmissionSha256": "522025f72d80205e3c1004145b65a40535df46e7840869719b0c646bb73ded8d",
+      "officialSourceAdmission": {
+        "protocol": "pskernel-lean/1",
+        "provider": "lean4-cpp",
+        "leanVersion": "4.35.0",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "profile": "lean4.35-core",
+        "accepted": true
+      },
+      "officialCheckerSha256": "bfdbea2499837db2dd71de8425bc17f81e380990964568af98cd98ef31cce6b7",
+      "sourceCompileDriverSha256": "c7bb794580f55ab004ee71f6808e33eb4afc94598ead98349bfb3a80b51641df",
+      "payloadScope": "Entire five-module profile test bundle; not isolated checker payload",
+      "generatedTsBytes": 105087,
+      "generatedJsBytes": 221393,
+      "generatedJsSha256": "59b9da87d0f27cfeba707ee9e07718bc74128a4259f901f2346783af215fe0ab",
+      "positiveCases": 23,
+      "refusalCases": 38,
+      "outOfRangeProbes": 2,
+      "observations": [
+        {
+          "index": 0,
+          "outcome": "true",
+          "id": "empty-environment",
+          "expected": "true",
+          "generated": "true"
+        },
+        {
+          "index": 1,
+          "outcome": "true",
+          "id": "identity-nat",
+          "expected": "true",
+          "generated": "true"
+        },
+        {
+          "index": 2,
+          "outcome": "true",
+          "id": "boolean-literal",
+          "expected": "true",
+          "generated": "true"
+        },
+        {
+          "index": 3,
+          "outcome": "true",
+          "id": "unit-literal",
+          "expected": "true",
+          "generated": "true"
+        },
+        {
+          "index": 4,
+          "outcome": "true",
+          "id": "datatype-nullary",
+          "expected": "true",
+          "generated": "true"
+        },
+        {
+          "index": 5,
+          "outcome": "true",
+          "id": "datatype-binary",
+          "expected": "true",
+          "generated": "true"
+        },
+        {
+          "index": 6,
+          "outcome": "true",
+          "id": "owned-recursor-instance",
+          "expected": "true",
+          "generated": "true"
+        },
+        {
+          "index": 7,
+          "outcome": "true",
+          "id": "owned-recursor-applied-nat",
+          "expected": "true",
+          "generated": "true"
+        },
+        {
+          "index": 8,
+          "outcome": "true",
+          "id": "owned-recursor-applied-arr",
+          "expected": "true",
+          "generated": "true"
+        },
+        {
+          "index": 9,
+          "outcome": "true",
+          "id": "regular-nat-list-constructor",
+          "expected": "true",
+          "generated": "true"
+        },
+        {
+          "index": 10,
+          "outcome": "true",
+          "id": "regular-nat-list-eliminator",
+          "expected": "true",
+          "generated": "true"
+        },
+        {
+          "index": 11,
+          "outcome": "true",
+          "id": "empty-datatype-elimination",
+          "expected": "true",
+          "generated": "true"
+        },
+        {
+          "index": 12,
+          "outcome": "true",
+          "id": "recursive-only-constructor-function",
+          "expected": "true",
+          "generated": "true"
+        },
+        {
+          "index": 13,
+          "outcome": "true",
+          "id": "recursive-only-empty-model",
+          "expected": "true",
+          "generated": "true"
+        },
+        {
+          "index": 14,
+          "outcome": "true",
+          "id": "prior-function-field",
+          "expected": "true",
+          "generated": "true"
+        },
+        {
+          "index": 15,
+          "outcome": "true",
+          "id": "older-datatype-slot",
+          "expected": "true",
+          "generated": "true"
+        },
+        {
+          "index": 16,
+          "outcome": "true",
+          "id": "older-result-scope",
+          "expected": "true",
+          "generated": "true"
+        },
+        {
+          "index": 17,
+          "outcome": "true",
+          "id": "sequential-constants",
+          "expected": "true",
+          "generated": "true"
+        },
+        {
+          "index": 18,
+          "outcome": "true",
+          "id": "list-option-code-scope",
+          "expected": "true",
+          "generated": "true"
+        },
+        {
+          "index": 19,
+          "outcome": "true",
+          "id": "type-equality",
+          "expected": "true",
+          "generated": "true"
+        },
+        {
+          "index": 20,
+          "outcome": "false",
+          "id": "forward-constant",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 21,
+          "outcome": "false",
+          "id": "closed-unbound-variable",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 22,
+          "outcome": "false",
+          "id": "logical-empty-from-datatype",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 23,
+          "outcome": "false",
+          "id": "logical-empty-from-bool",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 24,
+          "outcome": "false",
+          "id": "missing-constructor",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 25,
+          "outcome": "false",
+          "id": "missing-family",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 26,
+          "outcome": "false",
+          "id": "missing-recursive-field",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 27,
+          "outcome": "false",
+          "id": "wrong-constructor-argument",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 28,
+          "outcome": "false",
+          "id": "wrong-minor-result",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 29,
+          "outcome": "false",
+          "id": "field-hypothesis-order",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 30,
+          "outcome": "false",
+          "id": "missing-minor-application",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 31,
+          "outcome": "false",
+          "id": "extra-minor-application",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 32,
+          "outcome": "false",
+          "id": "wrong-major-type",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 33,
+          "outcome": "false",
+          "id": "wrong-universe",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 34,
+          "outcome": "false",
+          "id": "higher-universe",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 35,
+          "outcome": "false",
+          "id": "forged-parameters",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 36,
+          "outcome": "false",
+          "id": "forged-indices",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 37,
+          "outcome": "false",
+          "id": "forged-motives",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 38,
+          "outcome": "false",
+          "id": "forged-minor-count",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 39,
+          "outcome": "false",
+          "id": "group-universes",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 40,
+          "outcome": "false",
+          "id": "group-parameters",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 41,
+          "outcome": "false",
+          "id": "group-indices",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 42,
+          "outcome": "false",
+          "id": "group-motives",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 43,
+          "outcome": "false",
+          "id": "group-minor-count",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 44,
+          "outcome": "false",
+          "id": "forward-data-field",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 45,
+          "outcome": "false",
+          "id": "negative-current-self-as-ground",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 46,
+          "outcome": "false",
+          "id": "out-of-scope-result-code",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 47,
+          "outcome": "false",
+          "id": "bad-annotation-data-slot",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 48,
+          "outcome": "false",
+          "id": "bad-lambda-domain-slot",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 49,
+          "outcome": "false",
+          "id": "no-base-datatype-cannot-fabricate-value",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 50,
+          "outcome": "false",
+          "id": "wrong-list-recursive-argument",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 51,
+          "outcome": "false",
+          "id": "type-equality-exhaustion",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 52,
+          "outcome": "false",
+          "id": "type-validation-exhaustion",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 53,
+          "outcome": "false",
+          "id": "registry-exhaustion",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 54,
+          "outcome": "false",
+          "id": "declaration-exhaustion",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 55,
+          "outcome": "false",
+          "id": "term-exhaustion",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 56,
+          "outcome": "false",
+          "id": "bad-second-declaration",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 57,
+          "outcome": "true",
+          "id": "stable-slot-name-before-extension",
+          "expected": "true",
+          "generated": "true"
+        },
+        {
+          "index": 58,
+          "outcome": "true",
+          "id": "stable-slot-name-after-extension",
+          "expected": "true",
+          "generated": "true"
+        },
+        {
+          "index": 59,
+          "outcome": "true",
+          "id": "newest-slot-fresh-ordinal",
+          "expected": "true",
+          "generated": "true"
+        },
+        {
+          "index": 60,
+          "outcome": "false",
+          "id": "out-of-range-slot-has-no-name",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 61,
+          "outcome": "false",
+          "id": "out-of-range-0",
+          "expected": "false",
+          "generated": "false"
+        },
+        {
+          "index": 62,
+          "outcome": "false",
+          "id": "out-of-range-1",
+          "expected": "false",
+          "generated": "false"
+        }
+      ],
+      "sourceWitness": {
+        "authoritative": false,
+        "scope": "exact current source occurrence and proved representative; not general canonical admission",
+        "currentAdmissionsSha256": "177db8f3b7c06b0ffb2b8b55af86f0f93a698abf4786f2084700f4912d58fc7c",
+        "worker": {
+          "k": "n",
+          "p": {
+            "k": "s",
+            "p": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "psMinTyEq"
+            },
+            "v": "$psc0SH"
+          },
+          "v": "0"
+        },
+        "occurrences": [
+          {
+            "record": 3,
+            "path": "v.b.f.a.b.b.b.b.f.f.a"
+          }
+        ],
+        "witnessSha256": "3225309cfea2f9efb4416ddd1cb1de2e5972f6e22f402047ab65c1999385f949"
+      },
+      "comparison": "normalized-profile expected acceptance/refusal plus native/generated equality",
+      "theoremBoundary": "Safe Lean normalized-profile inference/admission has a model and consistency proof; generated-code/canonical translation preservation is not formally proved",
+      "resourceBoundary": "Structural recursion on finite Lean values; aggregate size, host stack and hostile JS objects are not qualified",
+      "canonicalMinDual": "still unsupported; this helper grants no checking authority"
+    },
+    "originalCheckerSource": {
+      "path": "packages/pskernel-min/src/Ps/MinKernel/Check.lean",
+      "sha256": "2fb59b7477d42ee6c351e9c42db2afef94dc01f6db37764108141eeca016303c",
+      "bytes": 3322,
+      "lines": 93
+    },
+    "originalCheckerRegeneratedPayload": {
+      "tsBytes": 30836,
+      "jsBytes": 35869,
+      "sha256": "9c0286037d1900cf5c54a35e6d6b69ac5dae6bee9cea99100ff99b4818cd2e42"
+    },
+    "compilerClosure": {
+      "commit": "028dcd98fabcb0bf196c0d6f27a80bad3b666745",
+      "sourceModules": 124,
+      "sourceCoreMembers": 4742,
+      "logicalCoreMembers": 4747,
+      "admissionRecords": 3465,
+      "preludeDeclarations": 115,
+      "foundationAxioms": 60,
+      "expressions": {
+        "app": 230478,
+        "b": 52868,
+        "const": 244702,
+        "forall": 12986,
+        "lam": 43860,
+        "let": 5955,
+        "nat": 2862,
+        "proj": 7168,
+        "sort": 531,
+        "str": 5875
+      },
+      "levels": {
+        "p": 128,
+        "s": 11786,
+        "z": 11786
+      },
+      "declarationKinds": {
+        "definition": 3152,
+        "inductive": 308,
+        "opaque": 5
+      },
+      "primitiveReferences": {
+        "Nat": 7953,
+        "Int": 337,
+        "Bool": 23286,
+        "String": 22425,
+        "Array": 0,
+        "List": 29254,
+        "Option": 10004,
+        "Except": 19154,
+        "Prod": 6810,
+        "Quot": 0,
+        "Quotient": 0
+      },
+      "minQualifiedModules": 0,
+      "minQualifiedPracticalCoreCriteria": 0,
+      "report": {
+        "path": "dist/pskernel-min/closure/report.json",
+        "bytes": 233500,
+        "sha256": "291d2d1f7911fcefcaf10bc017f493b95baaa4e1b64b9a0cec9bd9b4b1a50e68"
+      }
+    },
+    "runtimeFrontier": {
+      "commit": "028dcd98fabcb0bf196c0d6f27a80bad3b666745",
+      "canonicalRecords": 12,
+      "inductiveGroups": 3,
+      "definitions": 9,
+      "expressions": {
+        "sort": 3,
+        "const": 396,
+        "forall": 54,
+        "lam": 105,
+        "app": 277,
+        "b": 75,
+        "let": 3,
+        "proj": 3
+      },
+      "piNodes": 54,
+      "dependentPiNodes": 0,
+      "maximalRecursorSpines": 17,
+      "recursorsWithMajor": 17,
+      "noMajorReferenceMotives": 17,
+      "dependentMotives": 0,
+      "otherMotives": 0,
+      "reachedPreludeEntries": 23,
+      "reachedAxioms": 5,
+      "reportSha256": "892a24f53016f21783a0d4371f4e6a7cf827d1ebdd67e52179587fa76f38b90c"
+    },
+    "broaderRegressionSnapshot": {
+      "checkedAtUtc": "2026-10-27 07:55:44 UTC",
+      "main": {
+        "runId": 40469652253,
+        "commit": "028dcd98fabcb0bf196c0d6f27a80bad3b666745",
         "status": "in_progress",
         "conclusion": null
       },
-      "qualification": "not-yet-terminal; reporting commits may supersede main; no whole-branch or min self-host promotion"
+      "installed": {
+        "runId": 40468550390,
+        "commit": "d0810a57aa1eb424fc5b82968684b972b332a758",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      "policy": "Historical snapshot; reporting pushes can supersede main. Query live PR checks. No claim of terminal R2 broad gates in this snapshot."
     },
-    "next": "R2 closed regular-data/type-code profile, checked recursor instance and exact foundation obligations",
-    "fullPortableReceiptInArtifact": "binder/receipt.json; complete same-compile origins in binder/vectors.source.json"
+    "developmentAttempts": [
+      {
+        "commit": "9dc5fdc3949628e293d2e33e60a19d62e7b33ed8",
+        "runId": 40466197936,
+        "reason": "Reserved Lean universe binder",
+        "status": "failure",
+        "qualification": false
+      },
+      {
+        "commit": "076b2ad651a3c0fdacdd616b2f3004e7020716ad",
+        "runId": 40466733435,
+        "reason": "Explicit Fin bound and tree fold code generation",
+        "status": "failure",
+        "qualification": false
+      },
+      {
+        "commit": "ce4d6cc95a3e4142dd2ef3ab11133cfdc8d6717b",
+        "runId": 40467531473,
+        "reason": "List-induction signature builder code generation",
+        "status": "failure",
+        "qualification": false
+      },
+      {
+        "commit": "d3e55317334159474ed9805ec6ff865b663f8821",
+        "runId": 40467764547,
+        "reason": "Concrete source recursor code generation and model annotation",
+        "status": "failure",
+        "qualification": false
+      },
+      {
+        "commit": "14b1bc96f7cb185bfc084f4a7c93d3da76126747",
+        "runId": 40468377540,
+        "reason": "Semantic interpreter unfolding reached proof recursion depth",
+        "status": "failure",
+        "qualification": false
+      },
+      {
+        "commit": "d0810a57aa1eb424fc5b82968684b972b332a758",
+        "runId": 40468550367,
+        "reason": "Explicit Nat.sub arithmetic normalization",
+        "status": "failure",
+        "qualification": false
+      },
+      {
+        "commit": "17d52db6b872ab02b108bbcdbaf3859862d23da8",
+        "runId": 40468659684,
+        "reason": "Structural semantic recursion rejected; ordinal normalization",
+        "status": "failure",
+        "qualification": false
+      },
+      {
+        "commit": "03625a08ae12722d721a22d00fe8015a719fca5e",
+        "runId": 40468910718,
+        "reason": "Structural semantic recursion rejected; naming repair already passed",
+        "status": "failure",
+        "qualification": false
+      },
+      {
+        "commit": "eb568e9247e68ad3ebed8065eb10a5e27edf25ec",
+        "runId": 40469224672,
+        "reason": "Dependent structural semantic recursion rejected; replaced with proof-only fuel induction",
+        "status": "failure",
+        "qualification": false
+      }
+    ],
+    "remaining": [
+      "R3 lets, declaration projections and selected pinned foundation instance semantics",
+      "R3 definition-body/evaluation invariant for any delta conversion",
+      "R4 general exact source-name-to-slot binding, canonical decoding and typing/semantic preservation",
+      "R4 generated execution/hostile-input resource boundary and complete runtime self-check",
+      "Full compiler min checking and genuine min G1/G2/G3; coverage remains 0/124 and 0/37"
+    ],
+    "next": "R3: preserve the qualified R2 grammar/model and add the measured let/projection/foundation rules with actual acceptance-to-model proofs; do not implement unproved canonical acceptance"
   }
 }

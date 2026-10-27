@@ -13,7 +13,7 @@ The initial executable Empty/Unit/Nat/arrow fragment has a machine-checked
 acceptance-to-model bridge and consistency theorem (standard propext only).
 Exact source-subset portability/generated16-vector execution and5 finite native
 reference cases pass at d6bebd230bcaadf35a254bfbc5a26a17228db55f, Linux40444275459.
-The checker is1 module/93 lines/3322 bytes. Full existing-regression40444282214 and installed40444275465 also pass.
+The checker is1 module/93 lines/3322 bytes. Full existing-regression40444282214 and installed 40444275465 also pass.
 See the [continuation guideline for GPT-6.1 Sol / High](docs/PSC1_MIN_KERNEL_CONTINUATION_GUIDE.md)
 and [exact receipt](docs/PSC1_MIN_KERNEL_QUALIFICATION_2026-10-27.json).
 The current124-module/4747-logical-member graph needs dependent checking,
@@ -32,7 +32,7 @@ See [measured runtime profile and next proof batch](docs/PSC1_MIN_KERNEL_RUNTIME
 Next: proved executable binder lowering, then a defined regular-data/closed-type
 profile with exact primitive semantics. No runtime acceptance or production mode
 changes; no foundation pruning, recursor soundness or min self-check is claimed.
-Broader main40455025111 is terminal success at57964262 (full122030229165,
+Broader main 40455025111 is terminal success at57964262 (full122030229165,
 gate122038991205;37/37 existing finite Practical Core criteria, zero blocked).
 Installed40454629955 passes at783718f9, with only the CoreScope proof repair
 intervening before57964262. Exact separate identities are in the dated receipt.
@@ -46,22 +46,61 @@ actual Core operations, plus34 meaningful native/generated transformation cases
 and2 out-of-range probes. Linux40459838298 at8b33b3a17b241d3b264600dd9616cc195933df65 passes both
 proof/native122041556260 and portability/census122041556046. All3 new theorem
 reports are[propext];21positive/13refusal transformations and2out-of-range probes
-pass native/generated execution. New broader main40459842620 and installed
+pass native/generated execution. New broader main 40459842620 and installed
 40459838431 remain in progress; requery before promotion. Next mathematical
 batch is R2 closed regular-data/type-code recognition and a proved recursor instance.
 There is no new checker acceptance, foundation admission or production mode.
 The helper has4 explicit import-closure modules; the source test input has6.
 
-## R2 normalized regular-data profile, qualification pending
+## R2 normalized regular-data profile — standalone qualified
 
-Pre-R2 remaining main40460549124 and installed40459838431 are terminal success.
-R2 adds isolated closed type codes, first-order regular descriptors, inferred
-constructor/fixed-result recursor signatures, and a source inference/admission
-path. Its proposed model is a finite-branching tree interpretation, with actual
-success-to-model/Empty-consistency proofs and a current PsMinTy.rec source witness.
-The57-case native/generated corpus and theorem axiom guards require Linux CI.
-No raw canonical-name bridge or production acceptance is claimed. Existing
-Check.lean, min/dual refusal, official Wasm default and min coverage remain intact.
+R2 passes both standalone Linux jobs at
+**`028dcd98fabcb0bf196c0d6f27a80bad3b666745`**, run
+[40469648092](https://github.com/dwijayuda/pskernel/actions/runs/40469648092):
+proof/native **122073398746**, portability/census/source witness **122073398515**.
+The user-confirmed setting is GPT-6.1 Sol / High. All project builds, proof checks,
+source compilation and tests in this batch ran on GitHub Actions Linux.
+
+Read the [R2 profile and precise boundary](docs/PSC1_MIN_KERNEL_R2_PROFILE.md) before
+editing. The isolated executable checks closed Type-0 codes and ordered regular
+datatype descriptors, derives constructor/fixed-result recursor signatures, and
+checks sequential declarations from an empty environment. The generic concrete
+tree model discharges the signature model; actual inference/admission success
+gives a model and Empty consistency. The iota law covers the entire declared
+descriptor family. Stable chronological quotation names are proved injective
+and preserved when relative slots rebase.
+
+All **24** new printed model/validation/name/source bridge reports contain
+no axioms or exactly `[propext]`. The native and actual PSC1-generated corpus
+passes **23 positives, 38 refusals and two out-of-range probes**. The complete
+five-module source/test graph is admitted by official Lean 4.35. Its bundle is
+105087 B TS / 221393 B JS; these include test/shared runtime code. The two-module
+checker source has 307 lines/12268 B; naming adds Foundation.Name and
+RegularNames (four-module checker-plus-naming closure 17081 B). The original
+Check.lean remains 93 lines/3322 B with its original source SHA.
+
+The concrete source-image theorem connects the checked normalized recursor to
+the exact retained PsMinTy.rec spine, with its actual host PsMinTy/Bool model and
+R1 motive-instantiation law. CI locates the native proof witness structurally
+once in the current source-origin-bound psMinTyEq worker. This is a representative
+typed source-image result, not a general decoder, external name resolver or proof
+for all 115 canonical foundation declarations. Internal quotation names do not
+authorize arbitrary canonical source-name binding.
+
+Previous R1 main 40460549124 and installed 40459838431 are terminal success.
+**Historical broader-regression snapshot at 07:55 UTC / 14:55 Asia/Jakarta:** R2
+main 40469652253 and installed 40468550390 were in progress. Reporting commits may
+supersede main; query the live PR checks rather than infer current status from
+this snapshot. The dated receipt preserves each exact commit/run/artifact scope.
+
+**Next batch is R3:** measured lets, declaration projections and exact pinned
+foundation instance semantics, keeping the real acceptance-to-model bridge.
+Any delta conversion needs a definition-body/evaluation invariant. R4 still
+owns general canonical ingress/name binding/translation and generated execution/
+resource obligations. Canonical min/dual still refuse; full min coverage remains
+0/124 compiler modules, 0/37 Practical Core and no qualified min G1/G2/G3.
+Do not repeat R1/R2 or promote the representative witness to full self-check.
+
 
 ## Preserved layout baseline state
 

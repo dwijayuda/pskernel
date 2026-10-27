@@ -135,9 +135,9 @@ calls were in-process; these are deliberately different timing scopes, not a
 claimed speedup. No minimal-checker Wasm payload or full-compiler graph benchmark
 is qualified. WHNF/DefEq are absent from this simple-type calculus.
 
-Portable/census artifact12707935407 has ZIP SHA256
+Portable/census artifact 12707935407 has ZIP SHA256
 b3fe8b8ad20e0b8e7d2c61412394c5d9e3e6a828cc01b74496169b587708537c.
-Proof/native artifact12707632026 has ZIP SHA256
+Proof/native artifact 12707632026 has ZIP SHA256
 4bb77439bcbd196b080310bdba71422a8df231db449e8fca7c6d9bc2acfbc85a.
 Artifacts require GitHub sign-in and expire under the recorded retention policy.
 The receipt binds actual requests, source/admission/JS hashes and exact artifact IDs.
@@ -214,7 +214,7 @@ for the repaired theorem. Broader regressions retain separate run/commit scopes.
 
 ## Completed regression checkpoint before R1
 
-Verified2026-10-27 06:05UTC: main40455025111 is terminal success at57964262;
+Verified2026-10-27 06:05UTC: main 40455025111 is terminal success at57964262;
 full122030229165 and gate122038991205 pass, as does every selected dependency.
 Existing finite Practical Core readiness is37/37 qualified, zero blocked.
 Tested merge49b399f725875822043df2a2afbebb1e30f659eb has the exact implementation
@@ -232,7 +232,7 @@ No runtime acceptance, official provider, compiler payload or default change.
 ## R1 executable unused-binder lowering (initial source-commit state)
 
 Guideline checkpoint295a7ec828c3db80acae8995ef47c71971f034bc follows terminal
-standalone40455022116, main40455025111 and installed40454629955 qualification.
+standalone40455022116, main 40455025111 and installed 40454629955 qualification.
 The user confirmed GPT-6.1 Sol/High selected before this next proof batch.
 
 R1 adds a separate experimental Core syntax helper, not an acceptance rule.
@@ -273,7 +273,7 @@ source/test graph is independently admitted by official Lean4.35. The helper is
 Its explicit import closure has4 modules/8879B. The6-module test source has21514B;
 its full bundle is79089B TS/135332B JS, not an isolated checker payload.
 
-The original Check.lean remains93lines/3322B with its original SHA and acceptance
+The original Check.lean remains 93lines/3322B with its original SHA and acceptance
 boundary. The runtime ledger still selects Check only. A future connected
 canonical checker must include and remeasure this helper's dependencies; the
 12-record target cannot silently stand for the larger checker/decoder closure.
@@ -286,41 +286,61 @@ from motive independence alone. Then R3 foundation/projection/conversion rules a
 R4 canonical ingress. Do not repeat completed R1.
 
 **Broader regression boundary:** the preceding57964262 main and783718f9 installed
-runs are fully green. New R1 main40459842620 and installed40459838431 were still
+runs are fully green. New R1 main 40459842620 and installed 40459838431 were still
 in progress when this result was recorded. Requery live HEAD and latest runs;
 a documentation reporting push may supersede the main run. Do not call current
 whole-branch qualification complete until its selected gates are terminal.
 The dated receipt retains exact run/job/artifact identities and failed development
-attempts. Canonical min/dual still refuse, with0/124 modules,0/37 criteria and no
+attempts. Canonical min/dual still refuse, with0/124 modules, 0/37 criteria and no
 min-checked G1/G2/G3. No generated-code preservation theorem or hostile-input
 resource qualification is added by R1.
 
-## R2 normalized regular-data profile (qualification pending)
+## R2 normalized regular-data profile — standalone qualified
 
-The preceding R1 reporting main40460549124 atfea85153 and installed40459838431
-at8b33b3a1 are terminal success; each retains its exact separate source/release scope.
-R2 now introduces an isolated slot-based, monomorphic first-order regular-data
-calculus: closed ground/data/arrow/List/Option type codes, ordered descriptors,
-checked constructor and fixed-result eliminator signatures, and a sequential
-source acceptance path. Self fields are direct positive occurrences; ground
-fields reference only older registry entries. Universes/parameters/indices,
-motive/minor counts, type scope and exhaustion are explicitly checked.
-Recursor result codes are relative to the selected family and older registry;
-queries for older families lift the resulting complete signature into the full
-registry. Generated quotation-name helpers use absolute ordinals, not relative
-slot identities; canonical source-name binding/rebasing remains a separate proof.
+R2 passes both standalone Linux jobs at
+**`028dcd98fabcb0bf196c0d6f27a80bad3b666745`**, run
+[40469648092](https://github.com/dwijayuda/pskernel/actions/runs/40469648092):
+proof/native **122073398746**, portability/census/source witness **122073398515**.
+The user-confirmed setting is GPT-6.1 Sol / High. All project builds, proof checks,
+source compilation and tests in this batch ran on GitHub Actions Linux.
 
-The proposed proof constructs finite-branching tree carriers, constructor and
-recursor values with iota equations, and follows actual inference/admission
-success to a model and Empty-consistency theorem. A representative actual
-PsMinTy.rec source spine is compared with a compiled native proof witness, and
-its constant motive is connected to R1's actual Core substitution theorem.
-The native/generated corpus has57 meaningful cases (20positive/37refusal) plus
-2out-of-range probes. Qualification is pending Linux CI and actual axiom reports.
+Read the [R2 profile and precise boundary](PSC1_MIN_KERNEL_R2_PROFILE.md) before
+editing. The isolated executable checks closed Type-0 codes and ordered regular
+datatype descriptors, derives constructor/fixed-result recursor signatures, and
+checks sequential declarations from an empty environment. The generic concrete
+tree model discharges the signature model; actual inference/admission success
+gives a model and Empty consistency. The iota law covers the entire declared
+descriptor family. Stable chronological quotation names are proved injective
+and preserved when relative slots rebase.
 
-This normalized profile is not a raw canonical decoder or completed PSC1-Core
-bridge. It does not authorize arbitrary source-name/metadata binding, model all
-115 foundational declarations, or grant min/dual production admission. Source
-occurrence witnesses are diagnostic, never fixture/hash acceptance rules.
-Check.lean and canonical min/dual refusal remain unchanged. Full min coverage
-is still0/124 compiler modules,0/37 Practical Core criteria; no min G1/G2/G3.
+All **24** new printed model/validation/name/source bridge reports contain
+no axioms or exactly `[propext]`. The native and actual PSC1-generated corpus
+passes **23 positives, 38 refusals and two out-of-range probes**. The complete
+five-module source/test graph is admitted by official Lean 4.35. Its bundle is
+105087 B TS / 221393 B JS; these include test/shared runtime code. The two-module
+checker source has 307 lines/12268 B; naming adds Foundation.Name and
+RegularNames (four-module checker-plus-naming closure 17081 B). The original
+Check.lean remains 93 lines/3322 B with its original source SHA.
+
+The concrete source-image theorem connects the checked normalized recursor to
+the exact retained PsMinTy.rec spine, with its actual host PsMinTy/Bool model and
+R1 motive-instantiation law. CI locates the native proof witness structurally
+once in the current source-origin-bound psMinTyEq worker. This is a representative
+typed source-image result, not a general decoder, external name resolver or proof
+for all 115 canonical foundation declarations. Internal quotation names do not
+authorize arbitrary canonical source-name binding.
+
+Previous R1 main 40460549124 and installed 40459838431 are terminal success.
+**Historical broader-regression snapshot at 07:55 UTC / 14:55 Asia/Jakarta:** R2
+main 40469652253 and installed 40468550390 were in progress. Reporting commits may
+supersede main; query the live PR checks rather than infer current status from
+this snapshot. The dated receipt preserves each exact commit/run/artifact scope.
+
+**Next batch is R3:** measured lets, declaration projections and exact pinned
+foundation instance semantics, keeping the real acceptance-to-model bridge.
+Any delta conversion needs a definition-body/evaluation invariant. R4 still
+owns general canonical ingress/name binding/translation and generated execution/
+resource obligations. Canonical min/dual still refuse; full min coverage remains
+0/124 compiler modules, 0/37 Practical Core and no qualified min G1/G2/G3.
+Do not repeat R1/R2 or promote the representative witness to full self-check.
+

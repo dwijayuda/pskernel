@@ -44,6 +44,8 @@ def controls : List (String × Bool) :=
     ("capture-declines",none (psTsEmitSaturatedTailLoop [] [] [{helper with body := .letE "x" nat (n 0) helper.body}] forward)),
     ("partial-self-declines",none (psTsSaturatedSelfWithFuel "genericCurried" "genericFlat" 3 4096 (.call (v "genericCurried") [] [n 1]))),
     ("escaping-self-declines",none (psTsSaturatedSelfWithFuel "genericCurried" "genericFlat" 3 4096 (v "genericCurried"))),
+    ("shadowed-match-self-declines",none (psTsSaturatedSelfWithFuel "genericCurried" "genericFlat" 3 4096
+      (.matchE "Shape" [] (v "value") [("node",[⟨"field","genericCurried",nat⟩],call3 "genericCurried" (n 1) (n 2) (n 3))]))),
     ("nested-self-argument-declines",none (psTsSaturatedSelfWithFuel "genericCurried" "genericFlat" 3 4096 (call3 "genericCurried" (n 1) (v "genericCurried") (n 0)))),
     ("bounded-spine-declines",none (psTsSaturatedSpineWithFuel 0 forward.body [])),
     ("bounded-application-declines",none (psTsSaturatedApplyWithFuel 0 helper.body [n 1])),
@@ -64,4 +66,4 @@ def main : IO Unit := do
       match out with
       | .none => throw (IO.userError "missing fixture destination")
       | .some path => IO.FS.writeFile path source
-  IO.println "PSC1_SATURATED_TAIL_NATIVE: PASS controls=20"
+  IO.println "PSC1_SATURATED_TAIL_NATIVE: PASS controls=21"

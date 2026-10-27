@@ -182,7 +182,7 @@ jobs:
           printf 'PSC0_TSC=%s\n' "$TSC_PATH" >> "$GITHUB_ENV"
 
           OUT="$RUNNER_TEMP/mutual-generated"
-          node "$TSC_PATH" "$OUT/saturated-fixture.ts" --target ES2022 --module ES2022 --strict --skipLibCheck --outDir "$OUT/fixture-built"
+          node "$TSC_PATH" --ignoreConfig "$OUT/saturated-fixture.ts" --target ES2022 --module ES2022 --strict --skipLibCheck --outDir "$OUT/fixture-built"
           cp "$OUT/fixture-built/saturated-fixture.js" "$OUT/saturated-fixture.mjs"
           cp psc1/scripts/pskernel-saturated-fixture-smoke.mjs "$OUT/"
           (cd "$OUT" && env -i PATH= "$(command -v node)" --max-old-space-size=2048 pskernel-saturated-fixture-smoke.mjs) | tee "$OUT/saturated-runtime.log"

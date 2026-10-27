@@ -820,9 +820,16 @@ def psTsSaturatedSelfWithFuel (self target : String) (arity fuel : Nat) :
         | PsVerifiedIrExpr.matchE name types scrutinee alternatives =>
             if psTsExprUsesNameWithFuel 4096 scrutinee self then Option.none
             else
-              match psTsEtaAlternatives smaller alternatives with
-              | Option.none => Option.none
-              | Option.some branches => Option.some (PsVerifiedIrExpr.matchE name types scrutinee branches)
+              let shadows : PsVerifiedIrMatchBinding -> Bool :=
+                fun (binding : PsVerifiedIrMatchBinding) => psStringEq binding.name self;
+              let unsafe : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr) -> Bool :=
+                fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>
+                  psListAny shadows (Prod.fst (Prod.snd alternative));
+              if psListAny unsafe alternatives then Option.none
+              else
+                match psTsEtaAlternatives smaller alternatives with
+                | Option.none => Option.none
+                | Option.some branches => Option.some (PsVerifiedIrExpr.matchE name types scrutinee branches)
         | _ => if psTsExprUsesNameWithFuel 4096 expr self then Option.none else Option.some expr
 
 def psTsFindSaturatedCallee (name : String) (declarations : List PsVerifiedIrDeclaration) :

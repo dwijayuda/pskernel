@@ -1,0 +1,38 @@
+name: PSC1 usable source-qualified nested runtime delivery
+on:
+  push:
+    branches: [work/psc1-pskernel-runtime-delivery-20261027]
+    paths: [psc1/scripts/pskernel-package-qualified-runtime.py, psc1/scripts/pskernel-public-api-example.mjs, psc1/packages/pskernel-core/docs/QUALIFIED_RUNTIME_2026-10-27.md, psc1/test/runtime-delivery-targets-20261027.json, .github/workflows/psc1-pskernel-runtime-delivery.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  deliver:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Authenticate all final gates and execute detached public API and nested examples
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 psc1/scripts/pskernel-package-qualified-runtime.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-nested-delivery-evidence
+          path: ${{ runner.temp }}/runtime-delivery/evidence/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-nested-runtime-generated
+          path: ${{ runner.temp }}/runtime-delivery/generated/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-nested-runtime-canonical
+          path: ${{ runner.temp }}/runtime-delivery/canonical/

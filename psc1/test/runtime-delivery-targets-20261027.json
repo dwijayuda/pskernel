@@ -1,0 +1,158 @@
+[
+  {
+    "id": 12704339204,
+    "name": "psc1-cohort-string-nested-generated-2",
+    "size_in_bytes": 4095,
+    "digest": "sha256:2557d6dbbe06bdf0b43ebd7cf8fb5d8e73f4c93c3e5e2e5472942560d6859c99"
+  },
+  {
+    "id": 12705105508,
+    "name": "psc1-cohort-string-nested-canonical-0",
+    "size_in_bytes": 4080,
+    "digest": "sha256:50e2fa658de8f1c1f9332a12c91f57b1bdc25da3aaf0890eb44704ed8b4e4f3b"
+  },
+  {
+    "id": 12705126280,
+    "name": "psc1-cohort-string-flat-generated-3",
+    "size_in_bytes": 4114,
+    "digest": "sha256:77303b488bab0d593fc38b85abd592a75975ce5d9eec5e1fb459fea669af602e"
+  },
+  {
+    "id": 12703649899,
+    "name": "psc1-cohort-string-flat-canonical-4",
+    "size_in_bytes": 4117,
+    "digest": "sha256:b219b9ff3e7748304414afec71aaf146fbe20adab7d5e91942842a883f60a870"
+  },
+  {
+    "id": 12705710812,
+    "name": "psc1-cohort-string-flat-generated-4",
+    "size_in_bytes": 4105,
+    "digest": "sha256:651179f927f346eda50a34cd684e253438c9d302e497a9bce5b1a94ee3b0dab0"
+  },
+  {
+    "id": 12703854847,
+    "name": "psc1-cohort-string-nested-canonical-3",
+    "size_in_bytes": 4119,
+    "digest": "sha256:2e36748f66986ac0911a4ebaa2e091eabffe1b4ea908b4a0e42eee9c807cec13"
+  },
+  {
+    "id": 12705090137,
+    "name": "psc1-cohort-string-flat-generated-2",
+    "size_in_bytes": 4099,
+    "digest": "sha256:6207c14576eca06c013f536885196a172d588fa3b1da2061fb3f9856fb328908"
+  },
+  {
+    "id": 12703844882,
+    "name": "psc1-cohort-string-nested-canonical-4",
+    "size_in_bytes": 4116,
+    "digest": "sha256:57c280800f338e36e8a2e69c19f6bdb43af323f935d7206ce074266f4ffb71b4"
+  },
+  {
+    "id": 12704419005,
+    "name": "psc1-cohort-string-flat-generated-0",
+    "size_in_bytes": 4089,
+    "digest": "sha256:fd6a3f40b9dd6255f0aad73e4fba618a00467c2595e11f24d7cdb9543ac17c66"
+  },
+  {
+    "id": 12705295292,
+    "name": "psc1-cohort-string-nested-generated-4",
+    "size_in_bytes": 4114,
+    "digest": "sha256:08c349e8da9528eaada795a46907da3122fe966fb011b8cd798b9e214a6e7c13"
+  },
+  {
+    "id": 12704728180,
+    "name": "psc1-cohort-string-flat-canonical-3",
+    "size_in_bytes": 4104,
+    "digest": "sha256:4c6211ea5e4a47554977d288d0335f63728e1d9e8958d9f9ebc200c1b9eb270f"
+  },
+  {
+    "id": 12705315474,
+    "name": "psc1-cohort-string-flat-canonical-2",
+    "size_in_bytes": 4103,
+    "digest": "sha256:94389cc77d3712ec07353a59ba20ebf07231b5beb261706b895c665513c87084"
+  },
+  {
+    "id": 12704782711,
+    "name": "psc1-cohort-string-nested-generated-1",
+    "size_in_bytes": 4093,
+    "digest": "sha256:1c37cfbd07e674a1c229198198d964b28a02627cbbb2a12d8d57f281826eb438"
+  },
+  {
+    "id": 12705206749,
+    "name": "psc1-cohort-string-flat-generated-5",
+    "size_in_bytes": 4144,
+    "digest": "sha256:19087bfd3b46eb12284a3293b6ab6b706988bfce21a8d8c64e9d39d16576b0ab"
+  },
+  {
+    "id": 12704364122,
+    "name": "psc1-cohort-string-flat-canonical-0",
+    "size_in_bytes": 4089,
+    "digest": "sha256:754acbbe5513aac90393495576bed42c166d44f6894b04a5b32cdb16fac9ae0c"
+  },
+  {
+    "id": 12704119852,
+    "name": "psc1-cohort-string-nested-generated-0",
+    "size_in_bytes": 4092,
+    "digest": "sha256:051b4afe1bae0cd21f4cca3209c89635ab89f09d2fd95f18abb3a7f9f0c12a6d"
+  },
+  {
+    "id": 12703699995,
+    "name": "psc1-cohort-string-nested-generated-3",
+    "size_in_bytes": 4100,
+    "digest": "sha256:2b442bb0c81894a707f5c870c054b658296221971c53863913e35f2544c62110"
+  },
+  {
+    "id": 12703869623,
+    "name": "psc1-cohort-string-nested-canonical-1",
+    "size_in_bytes": 4097,
+    "digest": "sha256:2f839544458aea5116e211e555b72af03a72983484b9ddf6721db335779429a6"
+  },
+  {
+    "id": 12704108615,
+    "name": "psc1-cohort-string-flat-canonical-1",
+    "size_in_bytes": 4091,
+    "digest": "sha256:7ad5844a0d3a709cc83829dd6670d6e124d91a8fa071f33e989ae397fdab4514"
+  },
+  {
+    "id": 12704369559,
+    "name": "psc1-cohort-string-flat-generated-1",
+    "size_in_bytes": 4093,
+    "digest": "sha256:0df140badf82849b790816ee85b6bea9b540a0e25169cb1cf45c0a1daaef5e8d"
+  },
+  {
+    "id": 12703999322,
+    "name": "psc1-cohort-string-nested-canonical-2",
+    "size_in_bytes": 4099,
+    "digest": "sha256:aba362314f1fdd643e3900d062e32107fbc2275ad5384370a915ba180f57dc9f"
+  },
+  {
+    "id": 12705990238,
+    "name": "psc1-cohort-arena193-nested",
+    "size_in_bytes": 388845,
+    "digest": "sha256:c662e8c5be5b6ecc3b718002be62545cbed85d55d7f50b7ad7275c65ed24f049"
+  },
+  {
+    "id": 12705351530,
+    "name": "psc1-cohort-arena193-flat",
+    "size_in_bytes": 389305,
+    "digest": "sha256:7bbfee2382a447ab629c29c1019ae58c1382c003c49935926a4a477ed0ee184e"
+  },
+  {
+    "id": 12706141269,
+    "name": "psc1-cohort-string-flat-canonical-5",
+    "size_in_bytes": 3197,
+    "digest": "sha256:fc775c98f4998f7e42ff00743f4fc57b06877b49a05fb9fda2b6caaede9a44b6"
+  },
+  {
+    "id": 12705776438,
+    "name": "psc1-cohort-string-nested-generated-5",
+    "size_in_bytes": 4153,
+    "digest": "sha256:9739c7b881e5e82d5bff3f58beec6b15d17a47050381bc5c678a166debd9ae32"
+  },
+  {
+    "id": 12705136909,
+    "name": "psc1-cohort-string-nested-canonical-5",
+    "size_in_bytes": 4158,
+    "digest": "sha256:5951ede70e116ef5af0f6a919782cb516ea49d2d5a5c983c7071e7ff5db88a07"
+  }
+]

@@ -1,0 +1,737 @@
+{
+  "schema": "psc1-npm-umbrella-qualification/1",
+  "recordedDate": "2026-10-27",
+  "repository": "dwijayuda/pskernel",
+  "pullRequest": 198,
+  "basePullRequest": 197,
+  "baseCommit": "9d0e23c34484e4b1159f3e2428f5452139df530a",
+  "implementationCommit": "acbf4e70707ee86b7b3b973d71b0aefe646f9883",
+  "testedMergeCommit": "1bec01c2af82bb562bae094c43340a288aa3de01",
+  "packageRun": {
+    "id": 40507930195,
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/40507930195",
+    "status": "success",
+    "headCommit": "acbf4e70707ee86b7b3b973d71b0aefe646f9883",
+    "jobId": 122201943395
+  },
+  "status": "qualified-linux-npm-umbrella-scope",
+  "version": "0.1.0-psc1.13",
+  "architecture": {
+    "umbrella": "proofscript",
+    "implementationOwner": "@proofscript/compiler",
+    "requiredCorePackages": [
+      "@proofscript/backend-common",
+      "@proofscript/backend-js",
+      "@proofscript/backend-rust",
+      "@proofscript/backend-ts",
+      "@proofscript/backend-wasm",
+      "@proofscript/bootstrap",
+      "@proofscript/bridge",
+      "@proofscript/cli",
+      "@proofscript/compiler",
+      "@proofscript/compiler-ir",
+      "@proofscript/core",
+      "@proofscript/elab",
+      "@proofscript/environment",
+      "@proofscript/erasure",
+      "@proofscript/foundation",
+      "@proofscript/meta",
+      "@proofscript/pskernel-core",
+      "@proofscript/pskernel-lean-wasm",
+      "@proofscript/stdlib",
+      "@proofscript/syntax"
+    ],
+    "requiredCoreCount": 20,
+    "optionalOwnedPackages": [
+      "@proofscript/backend-python",
+      "@proofscript/backend-php",
+      "@proofscript/pskernel-lean"
+    ],
+    "cycleCheck": "all declared workspace runtime and peer edges; no package depends back on proofscript",
+    "defaultCompilerExecutors": 2,
+    "internalCompilerModularity": "deferred",
+    "sourceOnlyInterfaces": 12
+  },
+  "qualification": {
+    "schema": "psc1-simple-npm-package-qualification/1",
+    "testedCommit": "1bec01c2af82bb562bae094c43340a288aa3de01",
+    "status": "passed",
+    "modularNpmDistribution": "qualified-linux-packaging-scope",
+    "independentCompilerInternalModularity": "deferred",
+    "cases": [
+      {
+        "name": "default-root-is-small-and-optional-payloads-absent",
+        "status": "passed",
+        "rootTarballBytes": 4455215
+      },
+      {
+        "name": "acyclic-workspace-runtime-and-peer-graph",
+        "status": "passed"
+      },
+      {
+        "name": "root-only-core-packages-installed",
+        "status": "passed",
+        "packages": 20,
+        "owner": "@proofscript/compiler"
+      },
+      {
+        "name": "root-only-core-public-exports",
+        "status": "passed",
+        "exports": 86
+      },
+      {
+        "name": "root-only-single-owner-node",
+        "status": "passed"
+      },
+      {
+        "name": "root-only-single-owner-bun",
+        "status": "passed"
+      },
+      {
+        "name": "root-only-optional-providers-refused",
+        "status": "passed"
+      },
+      {
+        "name": "fresh-global-cli",
+        "status": "passed"
+      },
+      {
+        "name": "global-core-packages-installed",
+        "status": "passed"
+      },
+      {
+        "name": "fresh-local-cli-check",
+        "status": "passed"
+      },
+      {
+        "name": "fresh-global-cli-checked-publication",
+        "status": "passed"
+      },
+      {
+        "name": "all24-offline-install",
+        "status": "passed"
+      },
+      {
+        "name": "owned-licenses-and-qualified-input-notices-retained",
+        "status": "passed"
+      },
+      {
+        "name": "qualified-root-execution-files-byte-preserved",
+        "status": "passed",
+        "files": 49,
+        "metadataChanges": [
+          "package.json",
+          "UNIVERSAL_DISTRIBUTION.json",
+          "DISTRIBUTION_PIN.mjs",
+          "DEPENDENCY_LOCK.json",
+          "npm-shrinkwrap.json"
+        ]
+      },
+      {
+        "name": "all-advertised-exports-import",
+        "status": "passed",
+        "exports": 125
+      },
+      {
+        "name": "single-shared-runtime-node",
+        "status": "passed",
+        "sourceModules": 6,
+        "version": "0.1.0-psc1.13"
+      },
+      {
+        "name": "single-shared-runtime-bun",
+        "status": "passed",
+        "sourceModules": 6,
+        "version": "0.1.0-psc1.13"
+      },
+      {
+        "name": "standalone-owner-shared-api-identity",
+        "status": "passed"
+      },
+      {
+        "name": "no-per-package-compiler-bundle-duplication",
+        "status": "passed",
+        "payloads": [
+          "node_modules/proofscript/node_modules/@proofscript/compiler/dist/implementation/selfhost/js/module.js",
+          "node_modules/proofscript/node_modules/@proofscript/compiler/dist/implementation/selfhost/ts/module.js"
+        ]
+      },
+      {
+        "name": "explicit-standalone-copies-retain-qualified-bytes",
+        "status": "passed",
+        "executors": 4,
+        "scope": "separate npm installations, no synthetic runtime singleton"
+      },
+      {
+        "name": "checked-source-and-output-parity-0-js",
+        "status": "passed"
+      },
+      {
+        "name": "checked-source-and-output-parity-0-ts",
+        "status": "passed"
+      },
+      {
+        "name": "checked-source-and-output-parity-1-js",
+        "status": "passed"
+      },
+      {
+        "name": "checked-source-and-output-parity-1-ts",
+        "status": "passed"
+      },
+      {
+        "name": "independent-pskernel-lean-wasm-accept-and-reject",
+        "status": "passed",
+        "cases": 14
+      },
+      {
+        "name": "independent-pskernel-lean-accept-and-reject",
+        "status": "passed",
+        "cases": 14
+      },
+      {
+        "name": "checked-installed-target-js",
+        "status": "passed"
+      },
+      {
+        "name": "checked-installed-target-wasm-core",
+        "status": "passed"
+      },
+      {
+        "name": "checked-installed-target-python",
+        "status": "passed"
+      },
+      {
+        "name": "checked-installed-target-php",
+        "status": "passed"
+      },
+      {
+        "name": "unchanged-optional-engines-and-sdks-install",
+        "status": "passed"
+      },
+      {
+        "name": "accurate-strict-public-declarations",
+        "status": "passed"
+      },
+      {
+        "name": "existing-optional-compiler-engine-rust",
+        "status": "passed"
+      },
+      {
+        "name": "existing-optional-compiler-engine-wasm-core",
+        "status": "passed"
+      },
+      {
+        "name": "checked-installed-target-ts",
+        "status": "passed"
+      },
+      {
+        "name": "checked-installed-target-rust",
+        "status": "passed"
+      },
+      {
+        "name": "checked-installed-target-wasm-component",
+        "status": "passed"
+      },
+      {
+        "name": "existing-source-package-compiles-through-shared-compiler",
+        "status": "passed"
+      },
+      {
+        "name": "backend-target-mismatch-refused",
+        "status": "passed"
+      },
+      {
+        "name": "semantic-refusal-malformed-list",
+        "status": "passed"
+      },
+      {
+        "name": "semantic-refusal-wrong-body",
+        "status": "passed"
+      },
+      {
+        "name": "semantic-refusal-missing-import",
+        "status": "passed"
+      },
+      {
+        "name": "semantic-refusal-checked-partial",
+        "status": "passed"
+      },
+      {
+        "name": "modified-source-snapshot-refused",
+        "status": "passed"
+      },
+      {
+        "name": "modified-executable-refused-before-execution",
+        "status": "passed"
+      },
+      {
+        "name": "standalone-owner-tamper-refused",
+        "status": "passed"
+      },
+      {
+        "name": "broken-export-refused",
+        "status": "passed"
+      },
+      {
+        "name": "missing-exact-shared-dependency-refused",
+        "status": "passed"
+      },
+      {
+        "name": "incompatible-shared-version-refused",
+        "status": "passed"
+      },
+      {
+        "name": "clean-build-pack-reproduces-foundation",
+        "status": "passed"
+      },
+      {
+        "name": "clean-build-pack-reproduces-compiler",
+        "status": "passed"
+      },
+      {
+        "name": "clean-build-pack-reproduces-proofscript",
+        "status": "passed"
+      },
+      {
+        "name": "individual-build-command-all24",
+        "status": "passed"
+      }
+    ],
+    "packages": [
+      {
+        "directory": "pskernel-lean-wasm",
+        "name": "@proofscript/pskernel-lean-wasm",
+        "version": "4.35.0-psc1.13",
+        "input": "4a43faae9b9422789fd163d993ba09981dbfef9162206e2807e01c0e3ea2276f",
+        "tarball": "proofscript-pskernel-lean-wasm-4.35.0-psc1.13.tgz",
+        "bytes": 587630,
+        "sha256": "b3389bec682b0422ddf7772f7b68183f22148ca4fa34c4056a923c0b9ee9089d",
+        "kind": "independent-kernel"
+      },
+      {
+        "directory": "pskernel-lean",
+        "name": "@proofscript/pskernel-lean",
+        "version": "4.35.0-psc1.13",
+        "input": "eddc05335001df49b0efb7fc264bdb2455d3bf0e79da97733d5e922358f837a6",
+        "tarball": "proofscript-pskernel-lean-4.35.0-psc1.13.tgz",
+        "bytes": 6453041,
+        "sha256": "472eff8cf60b17bbb551d1ef1a331c417fd4833dccd86478a6ae5242fe20bbc7",
+        "kind": "independent-kernel"
+      },
+      {
+        "directory": "compiler",
+        "name": "@proofscript/compiler",
+        "version": "0.1.0-psc1.13",
+        "input": "09dde20725dba12f926da2182eec29ea488a71c1d8d5a2c3ca062ed792597301",
+        "tarball": "proofscript-compiler-0.1.0-psc1.13.tgz",
+        "bytes": 3270363,
+        "sha256": "80027f4042c4b88b14ac6bf929f19522bc0d03a52e56cca05e01c2647104fedb",
+        "kind": "qualified-shared-compiler"
+      },
+      {
+        "directory": "backend-common",
+        "name": "@proofscript/backend-common",
+        "version": "0.1.0-psc1.13",
+        "input": "d4f1674c2786ef302b471539de46f3898fab563bdb0f3c91f21e1671406ef0a2",
+        "tarball": "proofscript-backend-common-0.1.0-psc1.13.tgz",
+        "bytes": 14906,
+        "sha256": "d793594a28c1006420a17640dff70c4b17031295c2174a62b5a85dea249ad7d4",
+        "kind": "source-only"
+      },
+      {
+        "directory": "backend-js",
+        "name": "@proofscript/backend-js",
+        "version": "0.1.0-psc1.13",
+        "input": "14fa32267bc8083b70a2331ac6a4a0eb7e0b87ab261a0a79499f61ca890f0d83",
+        "tarball": "proofscript-backend-js-0.1.0-psc1.13.tgz",
+        "bytes": 36542,
+        "sha256": "fd2918436f394cdd238aa15556a90049fdce15765ca2a8be2eca1a18bc5dd7bf",
+        "kind": "shared-backend-adapter"
+      },
+      {
+        "directory": "backend-php",
+        "name": "@proofscript/backend-php",
+        "version": "0.1.0-psc1.13",
+        "input": "7de066af16a8aa7305fa2c4c70ee54657d8b0d6ab397fdb3e89009a9b8014ab4",
+        "tarball": "proofscript-backend-php-0.1.0-psc1.13.tgz",
+        "bytes": 55430326,
+        "sha256": "1553d179fd9b6b07755866e8338ca86ecf274156e0b60c12b2f67d88ea9e6e02",
+        "kind": "shared-backend-adapter"
+      },
+      {
+        "directory": "backend-python",
+        "name": "@proofscript/backend-python",
+        "version": "0.1.0-psc1.13",
+        "input": "cf3cd73d1afe62abbf8051b1b2d95488febcf642795a275650cd0c50395f40c1",
+        "tarball": "proofscript-backend-python-0.1.0-psc1.13.tgz",
+        "bytes": 102712801,
+        "sha256": "70507de721130ba93751536beff55d222eb4203bb754dd1b166e253991909415",
+        "kind": "shared-backend-adapter"
+      },
+      {
+        "directory": "backend-rust",
+        "name": "@proofscript/backend-rust",
+        "version": "0.1.0-psc1.13",
+        "input": "612f038151b8ce5922aeca87f688aae8e5fd7ae0c06f1ef94885ff406355a369",
+        "tarball": "proofscript-backend-rust-0.1.0-psc1.13.tgz",
+        "bytes": 34057,
+        "sha256": "97f48b0b376354837ea3a174b13052fb4daff086f08af9b381e8385074dcba57",
+        "kind": "shared-backend-adapter"
+      },
+      {
+        "directory": "backend-ts",
+        "name": "@proofscript/backend-ts",
+        "version": "0.1.0-psc1.13",
+        "input": "0d9449971a24efca138f1a90c0214b5739ce9162594b8f306dc6bc7fabc9bd1e",
+        "tarball": "proofscript-backend-ts-0.1.0-psc1.13.tgz",
+        "bytes": 33363,
+        "sha256": "6f846f595affbcf1a5ccbd1f9a86a654c28cca0e4acfb02111518392c42a98df",
+        "kind": "shared-backend-adapter"
+      },
+      {
+        "directory": "backend-wasm",
+        "name": "@proofscript/backend-wasm",
+        "version": "0.1.0-psc1.13",
+        "input": "ad971421b4aa9c8e68d51c0b0be5c0d6ed307fa1e18544485803c163f6799623",
+        "tarball": "proofscript-backend-wasm-0.1.0-psc1.13.tgz",
+        "bytes": 76347,
+        "sha256": "e01551672a110cd77703e3d657041e38b197afbb7f6dde5929d012291ed02a83",
+        "kind": "shared-backend-adapter"
+      },
+      {
+        "directory": "bootstrap",
+        "name": "@proofscript/bootstrap",
+        "version": "0.1.0-psc1.13",
+        "input": "4c1298f6f980c152031a6de66ad05d93c0eddaed67968341a6492042fa829714",
+        "tarball": "proofscript-bootstrap-0.1.0-psc1.13.tgz",
+        "bytes": 6851,
+        "sha256": "e564d7c19473cdddcef9d9ba1c11da5747bd44a47695caa7c2dc15ac647cabbb",
+        "kind": "shared-compiler-adapter"
+      },
+      {
+        "directory": "bridge",
+        "name": "@proofscript/bridge",
+        "version": "0.1.0-psc1.13",
+        "input": "8f41d2beb1b9f36138ef86728bd696ba7237535b49ac4886a5c8b2d1efa60e8d",
+        "tarball": "proofscript-bridge-0.1.0-psc1.13.tgz",
+        "bytes": 24338,
+        "sha256": "c3a56aa9d67ba9062c5541ce2bd7bc61224cd8ff1c0d1f56ead9ba016377b66f",
+        "kind": "source-only"
+      },
+      {
+        "directory": "cli",
+        "name": "@proofscript/cli",
+        "version": "0.1.0-psc1.13",
+        "input": "9655e6a207afd2efbf93bfe3ed48075669295c2c714717ca1e7dfe1b66495a26",
+        "tarball": "proofscript-cli-0.1.0-psc1.13.tgz",
+        "bytes": 9533,
+        "sha256": "ac8b893def1934eca06fdcc7d227b4559bec82f7435154fdeef79e56538137fd",
+        "kind": "shared-compiler-adapter"
+      },
+      {
+        "directory": "compiler-ir",
+        "name": "@proofscript/compiler-ir",
+        "version": "0.1.0-psc1.13",
+        "input": "10f8ffe8c2e29ff506d0111f9032d7a2c4ca2ffd46d0650101eca64ee659e9cd",
+        "tarball": "proofscript-compiler-ir-0.1.0-psc1.13.tgz",
+        "bytes": 38021,
+        "sha256": "29118ab9d27b11ac39c00009635cf141394011fe72a96050879eaaaafd040bc2",
+        "kind": "source-only"
+      },
+      {
+        "directory": "core",
+        "name": "@proofscript/core",
+        "version": "0.1.0-psc1.13",
+        "input": "35f598aa3d0e51f2fd2c5b783fdd9f6d611532ee1a01fb0fe3387c818792a332",
+        "tarball": "proofscript-core-0.1.0-psc1.13.tgz",
+        "bytes": 11273,
+        "sha256": "7f4b1518adf103465e5d6e9932474d69c068901cd126a5508fd1ea0fa3316344",
+        "kind": "source-only"
+      },
+      {
+        "directory": "elab",
+        "name": "@proofscript/elab",
+        "version": "0.1.0-psc1.13",
+        "input": "67595769fb7f00daa7ca867efe53bbecd9b62482e80d0a4001b88ac9fd800f81",
+        "tarball": "proofscript-elab-0.1.0-psc1.13.tgz",
+        "bytes": 69486,
+        "sha256": "797157ab4740487713a1f362243af97bceef523a0818a01886dea0ef8c4562f6",
+        "kind": "source-only"
+      },
+      {
+        "directory": "environment",
+        "name": "@proofscript/environment",
+        "version": "0.1.0-psc1.13",
+        "input": "bc4dac926c83f6715e31a9649f42362af7f113ec41e1f2b7a246500c7843aba7",
+        "tarball": "proofscript-environment-0.1.0-psc1.13.tgz",
+        "bytes": 20065,
+        "sha256": "7298fbe1d8927f95d324e2fd759a5c36158756ffd339edb5979866bf729eab41",
+        "kind": "source-only"
+      },
+      {
+        "directory": "erasure",
+        "name": "@proofscript/erasure",
+        "version": "0.1.0-psc1.13",
+        "input": "535a31fc48883bfac610d01774b9efdad100921eb24e025f21565644783f7231",
+        "tarball": "proofscript-erasure-0.1.0-psc1.13.tgz",
+        "bytes": 39194,
+        "sha256": "6355f6c41e664398d48ae1adbd4b4388127188e88fe8f9eb6d2e333e2ef8b1af",
+        "kind": "source-only"
+      },
+      {
+        "directory": "foundation",
+        "name": "@proofscript/foundation",
+        "version": "0.1.0-psc1.13",
+        "input": "f1687233217549c7fd245bf94958221487dce94bb4fe645a436ac34bed7b7ad6",
+        "tarball": "proofscript-foundation-0.1.0-psc1.13.tgz",
+        "bytes": 10206,
+        "sha256": "4fa3221ffd662fd50df554b641e855d0f6e9e18da76d7207e48345bffe1a9365",
+        "kind": "source-only"
+      },
+      {
+        "directory": "meta",
+        "name": "@proofscript/meta",
+        "version": "0.1.0-psc1.13",
+        "input": "a0c1420966fce517d9295a8b2752d78358cd6043869c7eb3e482509f08c2fbea",
+        "tarball": "proofscript-meta-0.1.0-psc1.13.tgz",
+        "bytes": 16736,
+        "sha256": "8caf6deef30e7c1004ac3ce6f4e38030775a3bfb51cf8f3e8f9ea65933291753",
+        "kind": "source-only"
+      },
+      {
+        "directory": "pskernel-core",
+        "name": "@proofscript/pskernel-core",
+        "version": "0.1.0-psc1.13",
+        "input": "665cec0c6da10dc7986340c18aeee665aea5d5470b1fe8c66ae86e8e57027a76",
+        "tarball": "proofscript-pskernel-core-0.1.0-psc1.13.tgz",
+        "bytes": 112669,
+        "sha256": "fa4b063f10130871a1ff0347d92acf8aee867919ae74f5576b953c0f447952a3",
+        "kind": "source-only"
+      },
+      {
+        "directory": "stdlib",
+        "name": "@proofscript/stdlib",
+        "version": "0.1.0-psc1.13",
+        "input": "1b53379b37bb1a37de8a0ba7a0cec576b93c9cea1b669860a06a0e74c4fc8b8b",
+        "tarball": "proofscript-stdlib-0.1.0-psc1.13.tgz",
+        "bytes": 18644,
+        "sha256": "954fb3acaba916d423e21bcfd0283a3de10ebeb85b7784daa9755b7e682393ea",
+        "kind": "source-only"
+      },
+      {
+        "directory": "syntax",
+        "name": "@proofscript/syntax",
+        "version": "0.1.0-psc1.13",
+        "input": "9981225cb99759cc251ae1c6f1e160809225b039251a63a5f88b9e3c85015309",
+        "tarball": "proofscript-syntax-0.1.0-psc1.13.tgz",
+        "bytes": 60711,
+        "sha256": "870d76575a4163c658df4a8775f23c2956d7f8f878e2c38f3b046548186bbcfa",
+        "kind": "source-only"
+      },
+      {
+        "directory": "proofscript",
+        "name": "proofscript",
+        "version": "0.1.0-psc1.13",
+        "input": "b3baead02d685e9b5bcd680fbcbb32475c4b30b704aec581b138126f47696f04",
+        "tarball": "proofscript-0.1.0-psc1.13.tgz",
+        "bytes": 4455215,
+        "sha256": "62d8b6843328e197a3fcb4acf47bd497c2642a4bfab9b4920808e1dcbf2ee9d3",
+        "kind": "core-package-umbrella"
+      }
+    ],
+    "sharedImplementationOwner": "@proofscript/compiler",
+    "qualification": "npm/API/CLI/source-adapter wiring with preserved qualified implementation; not new internal-module or fixed-point qualification",
+    "platforms": [
+      "linux-x64"
+    ],
+    "noRegistryPublication": true
+  },
+  "artifacts": [
+    {
+      "id": 12736306462,
+      "name": "psc1-npm-packages-1bec01c2af82bb562bae094c43340a288aa3de01",
+      "bytes": 172959068,
+      "sha256": "97c8e58eb2c2983391a62d132b416dedfd69a3db3c46d03fae4c2b096d1df2c7",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40507930195/artifacts/12736306462",
+      "expiresAt": "2027-01-25T12:57:38Z"
+    },
+    {
+      "id": 12736032172,
+      "name": "proofscript-optional-packages-0.1.0-psc1.13-1bec01c2af82bb562bae094c43340a288aa3de01",
+      "bytes": 198623191,
+      "sha256": "38bce99f8dcf0291fab0fcb941500f70f103b5a701f2970c6f5f1be0b069a54d",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40507930195/artifacts/12736032172",
+      "expiresAt": "2027-01-25T12:57:38Z"
+    },
+    {
+      "id": 12735868794,
+      "name": "proofscript-installable-packages-0.1.0-psc1.13-1bec01c2af82bb562bae094c43340a288aa3de01",
+      "bytes": 8917501,
+      "sha256": "e90081f5723e28cb7f9f742684eb06a2112976706a095ce464273d085adc8dd5",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40507930195/artifacts/12735868794",
+      "expiresAt": "2027-01-25T12:57:38Z"
+    }
+  ],
+  "rootTarball": {
+    "directory": "proofscript",
+    "name": "proofscript",
+    "version": "0.1.0-psc1.13",
+    "input": "b3baead02d685e9b5bcd680fbcbb32475c4b30b704aec581b138126f47696f04",
+    "tarball": "proofscript-0.1.0-psc1.13.tgz",
+    "bytes": 4455215,
+    "sha256": "62d8b6843328e197a3fcb4acf47bd497c2642a4bfab9b4920808e1dcbf2ee9d3",
+    "kind": "core-package-umbrella"
+  },
+  "compilerOwnerTarball": {
+    "directory": "compiler",
+    "name": "@proofscript/compiler",
+    "version": "0.1.0-psc1.13",
+    "input": "09dde20725dba12f926da2182eec29ea488a71c1d8d5a2c3ca062ed792597301",
+    "tarball": "proofscript-compiler-0.1.0-psc1.13.tgz",
+    "bytes": 3270363,
+    "sha256": "80027f4042c4b88b14ac6bf929f19522bc0d03a52e56cca05e01c2647104fedb",
+    "kind": "qualified-shared-compiler"
+  },
+  "defaultTarballs": 21,
+  "optionalTarballs": 9,
+  "defaultTarballBytes": 8946150,
+  "optionalTarballBytes": 199575067,
+  "preservation": {
+    "canonicalCompilerKernelAndProductionHostBodyChanges": [],
+    "qualifiedExecutionFilesPreserved": 49,
+    "explicitMetadataChanges": [
+      "package.json",
+      "UNIVERSAL_DISTRIBUTION.json",
+      "DISTRIBUTION_PIN.mjs",
+      "DEPENDENCY_LOCK.json",
+      "npm-shrinkwrap.json"
+    ],
+    "leanVersion": "4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "compilerSourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+    "frozenCompilerSourceModules": 122,
+    "currentDevelopmentSourceImportModules": 125,
+    "kernelWasmMemoryModel": "official C++ / Emscripten linear memory",
+    "strictOriginalAndTransformedIR": true,
+    "independentAdmission": true,
+    "compilerRequestSeconds": 240,
+    "checkerSeconds": 120,
+    "semanticFuelAndMemoryStackPolicies": "unchanged",
+    "newFixedPointClaim": false
+  },
+  "history": {
+    "singleParentNonForce": true,
+    "baseStillPreserved": true,
+    "commitsAtQualification": 5
+  },
+  "npmScopes": {
+    "default": "root-only install contains all20 core packages and one qualified JS/TS pair",
+    "standalone": "explicitly installing a standalone owner as well may retain a separate npm scope; four exact executors observed in mixed fixture",
+    "identity": "reference-equal API within each dependency scope; no process-global singleton",
+    "rootSubpaths": "stable public access independent of npm hoisting",
+    "preferredDefaultInstall": "npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1.13.tgz"
+  },
+  "attempts": [
+    {
+      "run": 40506390847,
+      "head": "9b7de8b5b2154146bdc55be42cc3eaa69990d166",
+      "status": "failed",
+      "cause": "SDK helper still read the old root-owned implementation path; builds and cycle checks passed",
+      "resolution": "Use existing compiler-owned distribution metadata; preserve all original SDK pins"
+    },
+    {
+      "run": 40506787126,
+      "head": "0ba0610c49c1e53a206f7dd00a915b829da542aa",
+      "status": "failed",
+      "cause": "Explicitly installing the standalone compiler alongside the bundled root creates separate npm scopes; an old identity assertion compared separate installed copies.",
+      "resolution": "Retain identity assertions within both real dependency scopes, enforce one executor pair in root-only installation, hash-check every explicit standalone copy and test tamper refusal in both owners."
+    }
+  ],
+  "broaderSourceCI": {
+    "runId": 40507930222,
+    "status": "in_progress",
+    "conclusion": null,
+    "jobs": [
+      {
+        "id": 122202678974,
+        "name": "static",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 122203034089,
+        "name": "lossless / lossless",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "id": 122203034282,
+        "name": "modular / pilot",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 122203034359,
+        "name": "native / native",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 122203034364,
+        "name": "focused / focused (core)",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "id": 122203034412,
+        "name": "source-bindings / trace",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 122203034429,
+        "name": "focused / focused (applications)",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      {
+        "id": 122203035053,
+        "name": "focused / php-application",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 122203035468,
+        "name": "benchmark",
+        "status": "completed",
+        "conclusion": "skipped"
+      },
+      {
+        "id": 122204618970,
+        "name": "source-bindings / integration",
+        "status": "in_progress",
+        "conclusion": null
+      }
+    ],
+    "scope": "pending at receipt creation; not claimed passed, and not the distribution qualification above"
+  },
+  "preservedSourceQualification": {
+    "run": 40497179005,
+    "head": "9aefeeb469b4e350348d365ff3e1c149df82ac71",
+    "selectedJobsPassed": 16,
+    "practicalCoreCriteriaQualified": 37,
+    "scope": "previous canonical source, unchanged by packaging"
+  },
+  "platformScope": [
+    "Linux x64 Node22.23.3 complete contract",
+    "Bun1.4.4 scoped API/source identity"
+  ],
+  "remaining": [
+    "actual non-Linux release consumers and publication durability",
+    "permanent retention of pinned qualified build inputs",
+    "user-arranged independent human maintainer trial",
+    "registry publication and merge require authorization"
+  ],
+  "noRegistryPublication": true,
+  "noMerge": true
+}

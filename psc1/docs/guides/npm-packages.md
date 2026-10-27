@@ -1,177 +1,153 @@
 # Existing PSC1 npm packages
 
-This work delivers package interfaces around the existing compiler. Full compiler
-IR modularization and modular self-hosting are deferred. Existing directories and
-npm names are retained; no compiler or kernel is reimplemented.
+The .13 cohort makes one proofscript installation include all 20 existing core
+@proofscript packages. It preserves the 25 existing directories and 24 npm names.
+The unnamed compiler-unified source directory remains internal and has no invented
+npm name. Full compiler-internal modularization and modular G2/G3 remain deferred.
 
-## Inventory at PR196
+## Installation and use
 
-The live baseline is173ecdc9f7131366d376c80886a7843a402d363b.
-There are25 directories under packages/,24 with existing npm names. The internal
-compiler-unified directory has no npm name and is not renamed or published.
-The existing qualified root and both kernel distributions already have executable
-artifacts. Most workspace source manifests advertise nonexistent dist files.
-[Machine contract](../../NPM_PACKAGE_CONTRACT.json) retains the exact old exports;
-Linux inventory/build receipts retain complete source files and dependency data.
+Extract the qualified ZIP, then install only its root tarball:
 
-| Existing package | Current source | Tracked dist at baseline | Original npm entry | Problem | Minimal repair |
-| --- | --- | --- | --- | --- | --- |
-| @proofscript/backend-common | src/ (5 files) | absent | none | Absent dist/stale metadata | Verified source API; explicit shared compiler entry |
-| @proofscript/backend-js | src/ (8 files) | absent | ./dist/index.js | Absent dist/stale metadata | Transparent adapter over existing checked root API |
-| @proofscript/backend-php | src/ (5 files) | absent | none | Absent dist/stale metadata | Transparent adapter over existing checked root API |
-| @proofscript/backend-python | src/ (5 files) | absent | none | Absent dist/stale metadata | Transparent adapter over existing checked root API |
-| @proofscript/backend-rust | src/ (11 files) | absent | ./dist/index.js | Absent dist/stale metadata | Transparent adapter over existing checked root API |
-| @proofscript/backend-ts | src/ (10 files) | absent | ./dist/index.js | Absent dist/stale metadata | Transparent adapter over existing checked root API |
-| @proofscript/backend-wasm | src/ (31 files) | absent | ./dist/index.js | Absent dist/stale metadata | Transparent adapter over existing checked root API |
-| @proofscript/bootstrap | src/ (1 files) | absent | ./dist/index.js | Absent dist/stale metadata | Transparent adapter over existing checked root API |
-| @proofscript/bridge | src/ (5 files) | absent | ./dist/index.js | Absent dist/stale metadata | Verified source API; explicit shared compiler entry |
-| @proofscript/cli | src/ (1 files) | absent | ./dist/index.js | Absent dist/stale metadata | Transparent adapter over existing checked root API |
-| @proofscript/compiler-ir | src/ (10 files) | absent | ./dist/index.js | Absent dist/stale metadata | Verified source API; explicit shared compiler entry |
-| @proofscript/compiler | src/ (5 files) | absent | ./dist/index.js | Absent dist/stale metadata | Transparent adapter over existing checked root API |
-| @proofscript/core | src/ (8 files) | absent | ./dist/index.js | Absent dist/stale metadata | Verified source API; explicit shared compiler entry |
-| @proofscript/elab | src/ (17 files) | absent | ./dist/index.js | Absent dist/stale metadata | Verified source API; explicit shared compiler entry |
-| @proofscript/environment | src/ (9 files) | absent | ./dist/index.js | Absent dist/stale metadata | Verified source API; explicit shared compiler entry |
-| @proofscript/erasure | src/ (6 files) | absent | ./dist/index.js | Absent dist/stale metadata | Verified source API; explicit shared compiler entry |
-| @proofscript/foundation | src/ (6 files) | absent | ./dist/index.js | Absent dist/stale metadata | Verified source API; explicit shared compiler entry |
-| @proofscript/meta | src/ (6 files) | absent | ./dist/index.js | Absent dist/stale metadata | Verified source API; explicit shared compiler entry |
-| proofscript | existing provider/CLI source or distribution | absent | legacy bin/psc.js (absent) | Absent dist/stale metadata | One qualified shared implementation and existing CLI |
-| @proofscript/pskernel-core | src/ (79 files) | absent | ./dist/index.js | Absent dist/stale metadata | Verified source API; explicit shared compiler entry |
-| @proofscript/pskernel-lean-wasm | existing provider/CLI source or distribution | absent | index.mjs; qualified provider available | No conventional workspace build for published prebuilt | Reuse exact provider under dist; preserve canonical sources |
-| @proofscript/pskernel-lean | existing provider/CLI source or distribution | absent | index.mjs; qualified provider available | No conventional workspace build for published prebuilt | Reuse exact provider under dist; preserve canonical sources |
-| @proofscript/stdlib | canonical stdlib/ProofScript | absent | ./dist/index.mjs | Absent dist/stale metadata | Verified source API; explicit shared compiler entry |
-| @proofscript/syntax | src/ (17 files) | absent | ./dist/index.js | Absent dist/stale metadata | Verified source API; explicit shared compiler entry |
+    npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1.13.tgz
+    npx --no-install psc --help
 
-## What the public interfaces provide
+For a global CLI, use npm install -g with the same tarball. Node >=22.23.3 is the
+supported minimum. Exact Node/Bun/SDK versions in receipts identify tested tools.
+There are no install hooks, source builds or network toolchain downloads.
 
-proofscript remains the single implementation owner. It packages the previously
-qualified self-hosted JS/TS compiler, the existing checked host and default genuine
-official Lean4.35.0 linear-memory Wasm checker. It contains all four core output
-emitters. Optional Rust/Wasm execution engines and Python/PHP providers retain
-their separate installation policy.
+All 20 core packages are declared required dependencies and bundled into the
+root tarball. npm can retain them under:
 
-@proofscript/compiler and CLI/bootstrap interfaces transparently re-export the
-existing root checked API. Backend compile adapters select their existing output
-target and refuse a conflicting target option. The ./compiler subpath exposes the
-full checked API explicitly.
+    node_modules/proofscript/node_modules/@proofscript/
 
-Other source packages expose sourcePackage and readSources. These capture their
-own canonical sources, verify recorded bytes/hashes and order local imports.
-They do not expose private low-level compiler functions or implement a second
-language resolver. Source import records describe data dependencies; executable
-npm adapters depend on the existing root, which does not import them back.
-Package metadata and source snapshots grant no checking or publication authority.
+Do not depend on npm hoisting a transitive dependency. The root exposes every
+core package through a stable subpath:
 
-The frozen compiler's sole export is psCompilerServiceCandidate. A foundation
-package therefore cannot honestly re-export psNameAppendStr from that executor.
-The source interface is explicit about this limitation. readSources returns only
-variants that exist; requesting a missing .ps variant refuses. No automatic
-Lean-to-PS rewrite is performed. The stdlib build copies its existing canonical
-stdlib/ProofScript files into the npm source snapshot without translation.
+    import {compile} from 'proofscript';
+    import {readSources} from 'proofscript/foundation';
+    import {compile as compileJs} from 'proofscript/backend-js';
+    import {sourcePackage} from 'proofscript/elab';
 
-Both Lean providers retain genuine official C++ implementations. Their compiled
-payloads live under dist/implementation while current canonical provider source
-and build metadata remain unchanged. New npm wrapper versions4.35.0-psc1.12
-distinguish the repack from old4.35.0 archives; Lean semantic identity stays4.35.0.
+    const result = compile({
+      sources: [{module:'Main',kind:'lean',text:'def answer : Nat := 42'}],
+      entryModule:'Main'
+    });
+    // result.logicalAdmission === 'accepted'; result.source is checked JS.
 
-## Build and install
+Bare-name imports such as @proofscript/foundation remain available after explicitly
+installing that existing package. Installing standalone core tarballs alongside the
+bundled root may produce another npm scope. API identity is shared within each
+scope; there is no invented process-global compiler singleton. The ordinary root-only
+installation contains exactly one pair of qualified JS/TS executors.
+Do not install every standalone tarball merely to obtain core packages; the root
+already contains them.
 
-Use Linux CI or a development environment with the pinned artifact inputs:
+## Dependency direction
+
+    proofscript -> all 20 required core packages
+      adapters/source interfaces -> @proofscript/compiler
+        -> @proofscript/pskernel-lean-wasm
+
+The existing compiler package physically owns the unchanged qualified compiler and
+host payload. No package has a dependency back on proofscript. The workspace
+validator traverses runtime and peer edges, rejects cycles, checks exact versions,
+and verifies the complete root dependency/bundle set.
+
+Python/PHP, native checking, Rust/Wasm compiler execution engines, TypeScript,
+Rust target consumers and component SDKs remain explicit optional packages.
+Missing tools refuse; no command downloads or substitutes a tool.
+Offline optional installation must supply its exact dependencies as matching tarballs.
+Existing optional engine/SDK archives retain their original versions and hashes.
+
+Both .lean/.ps compiler inputs remain supported. Source packages expose only
+variants actually present in their canonical sources. They do not translate Lean
+to PS, register external libraries, or expose private low-level compiler functions.
+The existing reserved namespace and admission/publication authority policies remain.
+
+## Existing packages
+
+| npm name | Interface/implementation | Installation |
+| --- | --- | --- |
+| @proofscript/backend-common | source-only | Automatic core |
+| @proofscript/backend-js | shared-backend-adapter | Automatic core |
+| @proofscript/backend-php | shared-backend-adapter | Optional |
+| @proofscript/backend-python | shared-backend-adapter | Optional |
+| @proofscript/backend-rust | shared-backend-adapter | Automatic core |
+| @proofscript/backend-ts | shared-backend-adapter | Automatic core |
+| @proofscript/backend-wasm | shared-backend-adapter | Automatic core |
+| @proofscript/bootstrap | shared-compiler-adapter | Automatic core |
+| @proofscript/bridge | source-only | Automatic core |
+| @proofscript/cli | shared-compiler-adapter | Automatic core |
+| @proofscript/compiler | qualified-shared-compiler | Automatic core |
+| @proofscript/compiler-ir | source-only | Automatic core |
+| @proofscript/core | source-only | Automatic core |
+| @proofscript/elab | source-only | Automatic core |
+| @proofscript/environment | source-only | Automatic core |
+| @proofscript/erasure | source-only | Automatic core |
+| @proofscript/foundation | source-only | Automatic core |
+| @proofscript/meta | source-only | Automatic core |
+| proofscript | core-package-umbrella | Automatic core root |
+| @proofscript/pskernel-core | source-only | Automatic core |
+| @proofscript/pskernel-lean | independent-kernel | Optional |
+| @proofscript/pskernel-lean-wasm | independent-kernel | Automatic core |
+| @proofscript/stdlib | source-only | Automatic core |
+| @proofscript/syntax | source-only | Automatic core |
+
+The twelve source-only interfaces expose sourcePackage/readSources and an explicit
+./compiler entry. CLI/bootstrap/backend adapters use the existing checked compiler.
+Backend compile adapters select their declared target and reject conflicting options.
+Source snapshots verify exact byte hashes and bounded local import order; callers
+still provide a complete explicit source closure to the production compiler.
+The old baseline inventory and source counts remain in the [.12 guide at its exact
+commit](https://github.com/dwijayuda/pskernel/blob/9d0e23c34484e4b1159f3e2428f5452139df530a/psc1/docs/guides/npm-packages.md).
+
+## Build contracts
 
     cd psc1
     npm run check:workspace
+    npm run build
     npm run build:packages
     cd packages/foundation
     npm run clean
     npm run build
     npm pack
 
-The root npm run build runs the package build. The previous compiler build is
-still available as npm run build:compiler. Source builds use pinned qualified
-GitHub artifacts and require a read-only Actions token to retrieve missing
-inputs. They never run during npm installation. Previously verified inputs and
-unchanged package outputs are cached by exact identities; missing dependencies,
-changed inputs, invalid exports and incompatible versions fail.
+build and build:packages build the existing package DAG. The old compiler build
+is retained as build:compiler. Package builds use pinned qualified GitHub artifacts;
+a read-only Actions token is needed to retrieve missing build inputs. Installation
+does not invoke this process. Exact dependency tarball hashes and input fingerprints
+support safe reuse. Missing/incompatible dependencies, bad exports and cycles fail.
 
-CI retains unpublished tarballs with SHA256SUMS. For a fresh default installation:
+The original .12 manifests advertised absent dist files and stale PSC0 metadata.
+All 24 names now retain conventional build/clean/pack, honest exports/types/files,
+exact dependencies, original source directories and Apache-2.0 owned code.
+Upstream and qualified-input notices remain included.
 
-    npm install -g ./proofscript-0.1.0-psc1.12.tgz
-    psc --help
-    psc init --kind lean
-    psc check Main.lean
-    psc build Main.lean --target js --out dist/app
+## Verification boundaries
 
-The root bundles its compatible default Wasm kernel, so this install needs no
-source build, native compiler, target SDK or network binary download. Additional
-source/compiler adapters must be installed from the same exact .12 cohort. For
-example, install the root tarball and foundation/compiler tarballs together with
-npm install --offline --ignore-scripts <matching tarball paths>.
+The compiler and genuine official Lean 4.35.0 providers are reused at their exact
+qualified source/execution identities. The default checker remains the C++ kernel
+compiled with Emscripten to linear-memory Wasm; compiler Wasm retains GC.
+The sealed service retains its proofscript logical identity while the physical
+npm implementation owner is @proofscript/compiler.
 
-    import {compile} from '@proofscript/compiler';
-    import {readSources} from '@proofscript/foundation';
-    const ownedFoundationSources = readSources();
-    // Supply an explicit, complete source closure to compile; snapshots never
-    // bypass the production frontend, strict IR or independent checking.
+Only package/seal metadata is regenerated. No canonical .lean/.ps/compiler/kernel/
+production host body changes. Original/transformed IR validation, independent
+admission, source/logical-body pairing, semantic fuel, process limits, memory/stack
+policies, negative tests, unsupported-ABI refusals and safe publication remain.
+Installation is not a proof of semantic preservation or a new fixed point.
 
-Runtime syntax and target-tool requirements remain those of the existing CLI.
-Native/Python/PHP release consumers remain Linux-qualified only. SDKs and optional
-engines are explicit; no install hook downloads them. Kernel Wasm uses linear
-memory and compiler Wasm retains GC.
+The finite [package contract](../../NPM_PACKAGE_CONTRACT.json) covers root-only
+offline local/global installation, all core exports, Node/Bun API identity in both
+scopes, one default executor pair, exact standalone bytes, both source grammars,
+seven checked targets, genuine native/Wasm acceptance/refusal, accurate types,
+optional engines, semantic/tamper/dependency refusals and reproducible builds.
 
-## Acceptance and evidence
-
-The focused Linux workflow builds/packs every existing named package, imports all
-advertised exports after fresh offline installation, checks one shared runtime
-identity, exercises local/global CLI, genuine kernel acceptance and rejection,
-both source grammars, representative checked outputs and old-bundle parity.
-It checks source/executable tampering, broken exports, missing dependencies,
-incompatible versions and exact clean/build/pack reproduction.
-
-Compiler code and old G1/G2/G3 identities stay unchanged. npm installation and
-adapter tests do not establish a new fixed point or a formal source/backend
-preservation proof. Full internal physical module independence is deferred.
-Registry publication and merging require separate authorization.
-
-## Qualified package results
-
-The dated qualification receipt records all42 finite distribution cases,103
-advertised imports, both genuine providers'14 acceptance/refusal cases each,
-strict public typings, both grammars, all seven checked targets, optional engines,
-source-snapshot compilation and exact clean/build/pack reproduction.
-
-The default ZIP has21 matching tarballs; the optional ZIP has nine. There are
-24 rebuilt named packages, including twelve source-only interfaces, nine checked
-API adapters, one shared root and two independent provider wrappers. No new
-individual compiler-internal module is compiled. Their genuine qualified
-executors and providers are reused at their original identities.
-
-Root proofscript-0.1.0-psc1.12.tgz: 3836354 bytes, SHA256 9a66dcd0f92aaa60f600674fb91b31bc0d67b211d1e9e004146baa8e96502fcc.
-Native provider proofscript-pskernel-lean-4.35.0-psc1.12.tgz: 6453041 bytes.
-All package sizes/hashes and complete source import inventories accompany the
-delivery. The exact existing compiler execution files are checked against the
-qualified input, separately from explicit package/seal metadata changes.
-
-A complete source-package example, executed in CI:
-
-    import {readSources} from '@proofscript/foundation';
-    import {compile} from '@proofscript/compiler';
-
-    const sources = [...readSources()];
-    const imports = sources.map(source => 'import ' + source.module).join('\n');
-    sources.push({
-      module: 'Entry',
-      kind: 'lean',
-      text: imports +
-        '\ndef answer : String := psNameToString (psNameAppendStr PsName.anonymous "café")\n'
-    });
-    const result = compile({sources, entryModule: 'Entry'});
-    // result.logicalAdmission is 'accepted'; result.source is checked JS.
-    // CI executes that output and observes answer === 'café'.
-
-This explicit capture is different from registering a portable external library.
-The existing reserved namespace policy still applies. Source-only npm packages
-do not automatically acquire library, kernel, FFI or publication authority.
-
-[Exact qualification and all tarball sizes/hashes](../PSC1_SIMPLE_NPM_PACKAGE_QUALIFICATION_2026-10-27.json).
-[Default ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40501926898/artifacts/12732813811) and [optional ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40501926898/artifacts/12732714143).
-Full source run40497179005 retains all 16 selected jobs and 37/37 Core criteria.
-The final documentation tarball refresh passes [40501926898](https://github.com/dwijayuda/pskernel/actions/runs/40501926898).
+[Exact .13 qualification](../PSC1_NPM_UMBRELLA_QUALIFICATION_2026-10-27.json)
+records all 53 cases/125 exports at acbf4e70, [run40507930195](https://github.com/dwijayuda/pskernel/actions/runs/40507930195).
+[Default ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40507930195/artifacts/12735868794) is 8917501 bytes; its root tarball is 4455215 bytes.
+[Optional ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40507930195/artifacts/12736032172) is 198623191 bytes.
+All package sizes/hashes accompany the delivery. Broader source CI is recorded separately. Universal non-Linux consumers, permanent bootstrap retention and the arranged
+independent human maintainer trial remain separate release tasks.
+No merge or npm registry publication is authorized.

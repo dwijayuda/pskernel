@@ -30,17 +30,17 @@ for(const [directory,label]of [[defaults,'installable'],[optional,'optional']]){
  fs.copyFileSync('LICENSE',path.join(directory,'LICENSE'));fs.copyFileSync('NOTICE',path.join(directory,'NOTICE'));
 }
 fs.writeFileSync(path.join(defaults,'INSTALL.txt'),[
- 'Unpublished ProofScript PSC1 .12 package cohort. Verify SHA256SUMS.',
- 'Default CLI only: npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1.12.tgz',
+ 'Unpublished ProofScript PSC1 .13 package cohort. Verify SHA256SUMS.',
+ 'Default CLI only: npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1.13.tgz',
  'All included source/adapters: npm install --offline --ignore-scripts ./*.tgz',
  'Then: npx --no-install psc --help',
- 'The default root bundles the compatible genuine Lean4.35.0 linear-memory Wasm kernel.',
+ 'The default root automatically includes all20 core packages, the shared compiler and the genuine Lean4.35.0 linear-memory Wasm kernel.',
  'Optional native/Python/PHP/SDK/engine artifacts are separate. Install exact matching files explicitly.',
  'Source-only packages expose verified snapshots; private compiler internals are not fabricated APIs.',
  'No installation hook, package registry publication or new modular G2/G3 claim.',
  'Release qualification currently covers Linux x64. Other platforms retain separate qualification boundaries.'
 ].join('\n')+'\n');
-fs.writeFileSync(path.join(optional,'INSTALL.txt'),'Optional qualified payloads and SDKs. Install selected exact tarballs into the same project as the .12 root. Python/PHP/native/SDK consumers retain Linux/platform limits; do not mix incompatible cohort versions. Vendor SDKs retain upstream licenses.\n');
+fs.writeFileSync(path.join(optional,'INSTALL.txt'),'Optional qualified payloads and SDKs. Install selected exact tarballs into the same project as the .13 root. Python/PHP/native/SDK consumers retain Linux/platform limits; do not mix incompatible cohort versions. Vendor SDKs retain upstream licenses.\n');
 const manifest={schema:'psc1-simple-npm-delivery/1',status:'qualified-linux',testedCommit:process.env.GITHUB_SHA,
  modularNpmDistribution:'completed-in-documented-scope',independentCompilerInternalModularity:'deferred',
  packages:records,qualification:q};

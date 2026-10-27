@@ -34,7 +34,8 @@ try{
  const defaultProject=project('default'),rootBuild=builds.find(r=>r.name==='proofscript');
  install(defaultProject,[tar(rootBuild)]);
  const defaultRoot=path.join(defaultProject,'node_modules/proofscript');
- const installedImpl=path.join(defaultRoot,'dist/implementation'),d=JSON.parse(fs.readFileSync(path.join(installedImpl,'UNIVERSAL_DISTRIBUTION.json')));
+ const installedOwner=path.join(defaultRoot,'node_modules/@proofscript/compiler');
+ const installedImpl=path.join(installedOwner,'dist/implementation'),d=JSON.parse(fs.readFileSync(path.join(installedImpl,'UNIVERSAL_DISTRIBUTION.json')));
  for(const pin of d.hostFiles){const b=fs.readFileSync(path.join(installedImpl,pin.path));assert.equal(sha256(b),pin.sha256,'packed host pin:'+pin.path);}
  const identity=JSON.parse(run(path.join(defaultProject,'node_modules/.bin/psc'),['--identity'],defaultProject));
  assert.equal(identity.version,contract.version);assert.equal(identity.defaultKernel,'wasm');
@@ -43,10 +44,46 @@ try{
  for(const n of ['@proofscript/backend-python','@proofscript/backend-php','@proofscript/compiler-rust-linux-x64',
    '@proofscript/compiler-wasm','@proofscript/pskernel-lean'])assert.equal(fs.existsSync(path.join(defaultProject,'node_modules',n)),false);
  record('default-root-is-small-and-optional-payloads-absent',{rootTarballBytes:rootBuild.bytes});
+
+ run('npm',['run','check:workspace'],root);record('acyclic-workspace-runtime-and-peer-graph');
+ for(const name of contract.corePackages){
+  const m=JSON.parse(fs.readFileSync(path.join(defaultRoot,'node_modules',name,'package.json')));
+  assert.equal(m.name,name);assert.equal(m.version,name==='@proofscript/pskernel-lean-wasm'?contract.kernelPackageVersion:contract.version);
+ }
+ assert.ok(!fs.existsSync(path.join(defaultRoot,'dist/implementation')),'root is only an umbrella');
+ record('root-only-core-packages-installed',{packages:contract.corePackages.length,owner:contract.implementationOwner});
+ let coreExports=0;
+ for(const p of contract.packages.filter(p=>contract.corePackages.includes(p.name))){
+  const meta=JSON.parse(fs.readFileSync(path.join(defaultRoot,'node_modules',p.name,'package.json')));
+  for(const value of Object.values(meta.exports)){
+   const target=typeof value==='string'?value:value.import;
+   script(defaultProject,'root-import.mjs',"import{pathToFileURL}from'node:url';await import(pathToFileURL(process.argv[2]),"+(target.endsWith('.json')?"{with:{type:'json'}}":"{}")+");",[path.join(defaultRoot,'node_modules',p.name,target)]);
+   coreExports++;
+  }
+ }
+ record('root-only-core-public-exports',{exports:coreExports});
+ for(const runtime of [process.execPath,'bun']){
+  script(defaultProject,'root-shared.mjs',[
+   "import assert from 'node:assert/strict';",
+   "import{compile}from 'proofscript';import{compile as direct}from 'proofscript/compiler';",
+   "import{compile as syntax}from 'proofscript/cli';",
+   "import{readSources}from 'proofscript/foundation';",
+   "assert.equal(compile,direct);assert.equal(compile,syntax);assert.ok(readSources().length>=5);"
+  ].join('\n'),[],runtime);
+  record('root-only-single-owner-'+(runtime==='bun'?'bun':'node'));
+ }
+ for(const target of ['python','php']){
+  const r=call(process.execPath,['--input-type=module','--eval',
+   "import{compile}from'proofscript';compile({sources:[{module:'Main',kind:'lean',text:'def answer : Nat := 42'}],entryModule:'Main',target:"+JSON.stringify(target)+"});"],defaultProject);
+  assert.notEqual(r.status,0);assert.match(r.stderr,/OPTIONAL_PACKAGE_MISSING/);
+ }
+ record('root-only-optional-providers-refused');
  const global=path.join(temp,'global');
  install(defaultProject,[tar(rootBuild)],['--global','--prefix',global]);
  assert.match(run(path.join(global,'bin/psc'),['--help'],defaultProject),/psc check/);
  record('fresh-global-cli');
+ for(const name of contract.corePackages)assert.equal(JSON.parse(fs.readFileSync(path.join(global,'lib/node_modules/proofscript/node_modules',name,'package.json'))).name,name);
+ record('global-core-packages-installed');
 
  fs.writeFileSync(path.join(defaultProject,'Main.lean'),'def answer : Nat := 42\n');
  const localCli=path.join(defaultProject,'node_modules/.bin/psc');
@@ -61,6 +98,7 @@ try{
 
  const cwd=project('all-packages');install(cwd,builds.map(tar));record('all24-offline-install');
  const nodes=path.join(cwd,'node_modules'),rootInstalled=path.join(nodes,'proofscript');
+ const compilerInstalled=path.join(nodes,'@proofscript/compiler');
  const exportCode=[
   "import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';",
   "const records=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));let count=0;",
@@ -86,7 +124,7 @@ try{
  let preserved=0;
  for(const pin of frozenAudit.frozenFiles){
   if(pin.path.startsWith('node_modules/')||metadataChanges.has(pin.path))continue;
-  const bytes=fs.readFileSync(path.join(rootInstalled,'dist/implementation',pin.path));
+  const bytes=fs.readFileSync(path.join(compilerInstalled,'dist/implementation',pin.path));
   assert.equal(bytes.length,pin.bytes);assert.equal(sha256(bytes),pin.sha256);preserved++;
  }
  for(const required of ['selfhost/js/module.js','selfhost/ts/module.js','host-tools/compiler-host-protocol.mjs',
@@ -220,7 +258,7 @@ record('all-advertised-exports-import',{exports:exports.count});
   const r=call(process.execPath,['--input-type=module','--eval',"import{readSources}from '@proofscript/foundation';readSources();"],cwd);
   assert.notEqual(r.status,0);assert.match(r.stderr,/PSC1_PACKAGE_SOURCE_IDENTITY/);
  }finally{fs.writeFileSync(source,before);}record('modified-source-snapshot-refused');
- const implementation=path.join(rootInstalled,'dist/implementation'),body=path.join(implementation,'selfhost/js/module.js'),bodyBytes=fs.readFileSync(body);
+ const implementation=path.join(compilerInstalled,'dist/implementation'),body=path.join(implementation,'selfhost/js/module.js'),bodyBytes=fs.readFileSync(body);
  try{fs.appendFileSync(body,"\nthrow Error('tampered-executed');");
   const r=call(process.execPath,[path.join(cwd,'compile.mjs'),JSON.stringify({...samples[0],engine:'js',target:'js'})],cwd);
   assert.notEqual(r.status,0);assert.match(r.stderr,/PSC1_INSTALLED_RESOURCE_IDENTITY/);assert.doesNotMatch(r.stderr,/tampered-executed/);
@@ -238,7 +276,7 @@ record('all-advertised-exports-import',{exports:exports.count});
  const wrong=call('npm',['install','--offline','--ignore-scripts','--registry','http://127.0.0.1:9','--cache',path.join(incompatible,'empty'),
   baselineTar,tar(builds.find(b=>b.name==='@proofscript/compiler'))],incompatible);
  assert.notEqual(wrong.status,0);record('incompatible-shared-version-refused');
- for(const dir of ['foundation','proofscript']){
+ for(const dir of ['foundation','compiler','proofscript']){
   const original=builds.find(b=>b.directory===dir);
   run('npm',['run','clean'],path.join(root,'packages',dir));
   assert.equal(fs.existsSync(path.join(root,'packages',dir,'dist')),false);
@@ -254,7 +292,7 @@ record('all-advertised-exports-import',{exports:exports.count});
  assert.deepEqual(cases.map(c=>c.name).sort(),contract.requiredCases,'finite distribution case coverage');
  const report={schema:'psc1-simple-npm-package-qualification/1',testedCommit:process.env.GITHUB_SHA,
   status:'passed',modularNpmDistribution:'qualified-linux-packaging-scope',independentCompilerInternalModularity:'deferred',
-  cases,packages:builds.map(({files,...r})=>r),sharedImplementationOwner:'proofscript',
+  cases,packages:builds.map(({files,...r})=>r),sharedImplementationOwner:'@proofscript/compiler',
   qualification:'npm/API/CLI/source-adapter wiring with preserved qualified implementation; not new internal-module or fixed-point qualification',
   platforms:['linux-x64'],noRegistryPublication:true};
  fs.writeFileSync(path.join(out,'qualification.json'),json(report));console.log('PSC1_SIMPLE_PACKAGES_QUALIFIED '+JSON.stringify(report));

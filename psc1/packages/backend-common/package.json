@@ -1,11 +1,11 @@
 {
   "name": "@proofscript/backend-common",
-  "version": "0.1.0-psc1.12",
+  "version": "0.1.0-psc1.13",
   "private": false,
   "description": "ProofScript PSC1 backend-common: source package and shared compiler API adapter",
   "proofscript": {
     "npmArchitecture": "psc1-existing-packages-shared-root/1",
-    "implementationOwner": "proofscript",
+    "implementationOwner": "@proofscript/compiler",
     "internalCompilerModules": false,
     "packageKind": "source-only",
     "canonicalSources": "src",
@@ -19,7 +19,7 @@
     ]
   },
   "dependencies": {
-    "proofscript": "0.1.0-psc1.12"
+    "@proofscript/compiler": "0.1.0-psc1.13"
   },
   "type": "module",
   "license": "Apache-2.0",

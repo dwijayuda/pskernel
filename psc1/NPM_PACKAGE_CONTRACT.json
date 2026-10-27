@@ -1,8 +1,8 @@
 {
   "schema": "psc1-existing-npm-packages/1",
   "baselineCommit": "173ecdc9f7131366d376c80886a7843a402d363b",
-  "version": "0.1.0-psc1.12",
-  "implementationOwner": "proofscript",
+  "version": "0.1.0-psc1.13",
+  "implementationOwner": "@proofscript/compiler",
   "packages": [
     {
       "directory": "backend-common",
@@ -119,7 +119,7 @@
     {
       "directory": "compiler",
       "name": "@proofscript/compiler",
-      "kind": "shared-compiler-adapter",
+      "kind": "qualified-shared-compiler",
       "beforeVersion": "0.1.0-psc0.1",
       "beforeExports": {
         ".": "./dist/index.js",
@@ -196,7 +196,7 @@
     {
       "directory": "proofscript",
       "name": "proofscript",
-      "kind": "qualified-shared-compiler",
+      "kind": "core-package-umbrella",
       "beforeVersion": "0.1.0-psc0.1",
       "beforeExports": null,
       "beforeDistFiles": 0
@@ -288,9 +288,10 @@
     "repeat-build-tarball-identity",
     "missing-incompatible-and-tampered-refusals"
   ],
-  "kernelPackageVersion": "4.35.0-psc1.12",
+  "kernelPackageVersion": "4.35.0-psc1.13",
   "requiredCases": [
     "accurate-strict-public-declarations",
+    "acyclic-workspace-runtime-and-peer-graph",
     "all-advertised-exports-import",
     "all24-offline-install",
     "backend-target-mismatch-refused",
@@ -306,6 +307,7 @@
     "checked-source-and-output-parity-0-ts",
     "checked-source-and-output-parity-1-js",
     "checked-source-and-output-parity-1-ts",
+    "clean-build-pack-reproduces-compiler",
     "clean-build-pack-reproduces-foundation",
     "clean-build-pack-reproduces-proofscript",
     "default-root-is-small-and-optional-payloads-absent",
@@ -315,6 +317,7 @@
     "fresh-global-cli",
     "fresh-global-cli-checked-publication",
     "fresh-local-cli-check",
+    "global-core-packages-installed",
     "incompatible-shared-version-refused",
     "independent-pskernel-lean-accept-and-reject",
     "independent-pskernel-lean-wasm-accept-and-reject",
@@ -325,6 +328,11 @@
     "no-per-package-compiler-bundle-duplication",
     "owned-licenses-and-qualified-input-notices-retained",
     "qualified-root-execution-files-byte-preserved",
+    "root-only-core-packages-installed",
+    "root-only-core-public-exports",
+    "root-only-optional-providers-refused",
+    "root-only-single-owner-bun",
+    "root-only-single-owner-node",
     "semantic-refusal-checked-partial",
     "semantic-refusal-malformed-list",
     "semantic-refusal-missing-import",
@@ -332,5 +340,34 @@
     "single-shared-runtime-bun",
     "single-shared-runtime-node",
     "unchanged-optional-engines-and-sdks-install"
-  ]
+  ],
+  "umbrella": "proofscript",
+  "corePackages": [
+    "@proofscript/backend-common",
+    "@proofscript/backend-js",
+    "@proofscript/backend-rust",
+    "@proofscript/backend-ts",
+    "@proofscript/backend-wasm",
+    "@proofscript/bootstrap",
+    "@proofscript/bridge",
+    "@proofscript/cli",
+    "@proofscript/compiler",
+    "@proofscript/compiler-ir",
+    "@proofscript/core",
+    "@proofscript/elab",
+    "@proofscript/environment",
+    "@proofscript/erasure",
+    "@proofscript/foundation",
+    "@proofscript/meta",
+    "@proofscript/pskernel-core",
+    "@proofscript/pskernel-lean-wasm",
+    "@proofscript/stdlib",
+    "@proofscript/syntax"
+  ],
+  "optionalPackages": [
+    "@proofscript/backend-python",
+    "@proofscript/backend-php",
+    "@proofscript/pskernel-lean"
+  ],
+  "umbrellaBaselineCommit": "9d0e23c34484e4b1159f3e2428f5452139df530a"
 }

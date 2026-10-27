@@ -12,7 +12,7 @@ for(const p of contract.packages){
  assert.equal(meta.type,'module');assert.ok(meta.scripts.build&&meta.scripts.clean);
  assert.equal(meta.repository.directory,'psc1/packages/'+p.directory);
  for(const forbidden of ['preinstall','install','postinstall','prepare'])assert.ok(!meta.scripts[forbidden]);
- assert.equal(meta.version,p.kind==='independent-kernel'?'4.35.0-psc1.12':contract.version);
+ assert.equal(meta.version,p.kind==='independent-kernel'?contract.kernelPackageVersion:contract.version);
  names.set(meta.name,meta);
  const targets=value=>typeof value==='string'?[value]:Object.values(value).flatMap(targets);
  for(const file of targets(meta.exports)){
@@ -25,6 +25,23 @@ for(const meta of names.values())for(const [dep,version]of Object.entries(meta.d
  assert.ok(names.has(dep),'declared existing workspace dependency:'+dep);
  assert.equal(names.get(dep).version,version,'exact compatible version');
 }
+// Check declared runtime/peer edges, including the optional providers, for cycles.
+const visited=new Set(),active=new Set();
+function visit(name){
+ assert.ok(!active.has(name),'workspace dependency cycle:'+name);if(visited.has(name))return;
+ active.add(name);const meta=names.get(name);
+ for(const dep of new Set([...Object.keys(meta.dependencies??{}),...Object.keys(meta.peerDependencies??{})]))
+  if(names.has(dep))visit(dep);
+ active.delete(name);visited.add(name);
+}
+for(const name of names.keys())visit(name);
+const umbrella=names.get('proofscript'),owner=names.get(contract.implementationOwner);
+assert.ok(owner&&!owner.dependencies.proofscript);
+assert.deepEqual(Object.keys(umbrella.dependencies).sort(),contract.corePackages.slice().sort());
+assert.deepEqual(umbrella.bundledDependencies.slice().sort(),contract.corePackages.slice().sort());
+for(const name of names.keys())if(name!=='proofscript')
+ assert.ok(!Object.hasOwn(names.get(name).dependencies??{},'proofscript'),'no dependency back to umbrella');
+for(const name of contract.optionalPackages)assert.ok(!Object.hasOwn(umbrella.dependencies,name));
 for(const dir of contract.sourceOnlyWithoutNpmName){
  assert.ok(fs.statSync(path.join(root,'packages',dir,'src')).isDirectory());
  assert.equal(fs.existsSync(path.join(root,'packages',dir,'package.json')),false,'do not invent npm name');

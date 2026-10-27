@@ -1,7 +1,7 @@
 {
   "name": "@proofscript/compiler",
-  "version": "0.1.0-psc1.12",
-  "description": "ProofScript PSC1 compiler: source package and shared compiler API adapter",
+  "version": "0.1.0-psc1.13",
+  "description": "ProofScript PSC1 qualified shared compiler and checked API",
   "type": "module",
   "private": false,
   "main": "./dist/index.js",
@@ -28,7 +28,12 @@
     "./compiler": {
       "types": "./dist/compiler.d.ts",
       "import": "./dist/compiler.js"
-    }
+    },
+    "./io": {
+      "types": "./dist/implementation/host-tools/typed-io.d.ts",
+      "import": "./dist/implementation/host-tools/typed-io.mjs"
+    },
+    "./metadata": "./dist/implementation/UNIVERSAL_DISTRIBUTION.json"
   },
   "files": [
     "dist/",
@@ -38,10 +43,10 @@
     "NOTICE"
   ],
   "proofscript": {
-    "npmArchitecture": "psc1-existing-packages-shared-root/1",
-    "implementationOwner": "proofscript",
+    "npmArchitecture": "psc1-existing-packages-compiler-owner/1",
+    "implementationOwner": "@proofscript/compiler",
     "internalCompilerModules": false,
-    "packageKind": "shared-compiler-adapter",
+    "packageKind": "qualified-shared-compiler",
     "canonicalSources": "src",
     "sourceVariants": [
       "lean"
@@ -57,6 +62,34 @@
     "clean": "node ../../scripts/build-packages.mjs clean --package compiler"
   },
   "dependencies": {
-    "proofscript": "0.1.0-psc1.12"
+    "@proofscript/pskernel-lean-wasm": "4.35.0-psc1.13"
+  },
+  "peerDependencies": {
+    "@proofscript/pskernel-lean": "4.35.0-psc1.13",
+    "@proofscript/compiler-rust-linux-x64": "0.1.0-psc1.11",
+    "@proofscript/compiler-wasm": "0.1.0-psc1.11",
+    "@proofscript/wasm-component-tools-linux-x64": "0.1.0-psc1.11",
+    "typescript": "7.0.2",
+    "@proofscript/rust-target-consumer-linux-x64": "0.1.0-psc1.6"
+  },
+  "peerDependenciesMeta": {
+    "@proofscript/pskernel-lean": {
+      "optional": true
+    },
+    "@proofscript/compiler-rust-linux-x64": {
+      "optional": true
+    },
+    "@proofscript/compiler-wasm": {
+      "optional": true
+    },
+    "@proofscript/wasm-component-tools-linux-x64": {
+      "optional": true
+    },
+    "typescript": {
+      "optional": true
+    },
+    "@proofscript/rust-target-consumer-linux-x64": {
+      "optional": true
+    }
   }
 }

@@ -59,9 +59,16 @@ def minKernelOriginModule (origin : PsSh1ModuleOrigin) : String :=
 def main (args : List String) : IO Unit := do
   let binderMode := args == ["binder"]
   let regularMode := args == ["regular"]
-  if !args.isEmpty && !binderMode && !regularMode then
-    throw (IO.userError "expected no arguments, binder or regular")
-  let paths : List (List String × String) := if regularMode then [
+  let operationalMode := args == ["operational"]
+  if !args.isEmpty && !binderMode && !regularMode && !operationalMode then
+    throw (IO.userError "expected no arguments, binder, regular or operational")
+  let paths : List (List String × String) := if operationalMode then [
+      (["Ps", "MinKernel", "Profile", "RegularProfile"], "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularProfile.lean"),
+      (["Ps", "MinKernel", "Profile", "RegularCheck"], "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularCheck.lean"),
+      (["Ps", "MinKernel", "Profile", "OperationalProfile"], "packages/pskernel-min/src/Ps/MinKernel/Profile/OperationalProfile.lean"),
+      (["Ps", "MinKernel", "Profile", "OperationalCheck"], "packages/pskernel-min/src/Ps/MinKernel/Profile/OperationalCheck.lean"),
+      (["Ps", "MinKernel", "Tests", "OperationalVectors"], "packages/pskernel-min/src/Ps/MinKernel/Tests/OperationalVectors.lean")]
+    else if regularMode then [
       (["Ps", "Foundation", "Name"], "packages/foundation/src/Ps/Foundation/Name.lean"),
       (["Ps", "MinKernel", "Profile", "RegularProfile"], "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularProfile.lean"),
       (["Ps", "MinKernel", "Profile", "RegularCheck"], "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularCheck.lean"),
@@ -80,7 +87,7 @@ def main (args : List String) : IO Unit := do
   let inputs ← paths.mapM fun (moduleName, path) => do
     let source ← IO.FS.readFile path
     pure (psSh1SourceInput moduleName source)
-  let stem := if regularMode then "dist/pskernel-min/regular/vectors" else if binderMode then "dist/pskernel-min/binder/vectors" else "dist/pskernel-min/portable/vectors"
+  let stem := if operationalMode then "dist/pskernel-min/operational/vectors" else if regularMode then "dist/pskernel-min/regular/vectors" else if binderMode then "dist/pskernel-min/binder/vectors" else "dist/pskernel-min/portable/vectors"
   match psCompilerSh1TypeScriptSources psSh1DefaultSourceOptions
       psIrCheckDefaultOptions PsCompilerSourceKind.lean inputs with
   | .error error => throw (IO.userError (minKernelSourceFailure error))

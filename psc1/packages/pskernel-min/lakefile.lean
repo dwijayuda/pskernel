@@ -40,3 +40,12 @@ lean_lib PsMinRegularProfile where
 lean_exe minkernel_regular_tests where
   srcDir := "test"
   root := `RegularTests
+
+lean_lib PsMinOperationalProfile where
+  srcDir := "src"
+  roots := #[`Ps.MinKernel.Profile.OperationalProfile, `Ps.MinKernel.Profile.OperationalCheck,
+    `Ps.MinKernel.Tests.OperationalVectors]
+
+lean_exe minkernel_operational_tests where
+  srcDir := "test"
+  root := `OperationalTests

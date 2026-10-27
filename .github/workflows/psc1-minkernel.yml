@@ -104,6 +104,12 @@ jobs:
             assert.ok(line.includes('does not depend on any axioms')||line.includes('depends on axioms: [propext]'),line);
           }
           JS
+      - name: Build and run native operational-profile corpus
+        working-directory: psc1/packages/pskernel-min
+        run: |
+          set -euo pipefail
+          lake build minkernel_operational_tests
+          .lake/build/bin/minkernel_operational_tests | tee operational-tests.log
       - name: Build and run native regular-profile corpus
         working-directory: psc1/packages/pskernel-min
         run: |
@@ -131,6 +137,7 @@ jobs:
             psc1/packages/pskernel-min/native-tests.log
             psc1/packages/pskernel-min/binder-tests.log
             psc1/packages/pskernel-min/regular-tests.log
+            psc1/packages/pskernel-min/operational-tests.log
           retention-days: 90
 
   portability-and-closure:
@@ -191,6 +198,9 @@ jobs:
       - name: Qualify regular-profile executable and compare the current source Core witness
         if: ${{ !cancelled() }}
         run: node scripts/minkernel-regular-portability.mjs
+      - name: Qualify actual operational source and native/generated refusal corpus
+        if: ${{ !cancelled() }}
+        run: node scripts/minkernel-operational-portability.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -27,7 +27,7 @@ lean_lib PsMinRegularRuntime where
 
 lean_lib PsMinOperationalRuntime where
   srcDir := "../../packages/pskernel-min/src"
-  roots := #[`Ps.MinKernel.Profile.OperationalProfile, `Ps.MinKernel.Profile.OperationalCheck]
+  roots := #[`Ps.MinKernel.Profile.OperationalProfile, `Ps.MinKernel.Profile.OperationalCheck, `Ps.MinKernel.Tests.OperationalVectors]
 
 @[default_target]
 lean_lib MinKernelProof where

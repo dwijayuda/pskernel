@@ -171,10 +171,27 @@ theorem previous_definition_value (specs : List PsMinRegSpec) (globals : List Ps
     (value : Denote (dataModel specs) head) (index : Nat) (h : psMinRegLookup globals index = some type) :
     consModel (dataModel specs) value initial (Nat.succ index) type h = initial index type h := rfl
 
+-- The real constant interpreter unfolds to the value of its actual checked body.
+theorem checked_definition_unfold (termFuel : Nat) (specs : List PsMinRegSpec)
+    (globals : List PsMinRegTy) (initial : Model (dataModel specs) globals)
+    (body : PsMinOpTerm) (type : PsMinRegTy)
+    (h : psMinOpInfer termFuel specs globals [] body = some type) :
+    inferModel 2 specs (type :: globals) [] (.base (.constant 0)) type
+      (consModel (dataModel specs)
+        (inferModel termFuel specs globals [] body type initial (emptyModel (dataModel specs)) h) initial)
+      (emptyModel (dataModel specs)) rfl =
+      inferModel termFuel specs globals [] body type initial (emptyModel (dataModel specs)) h := rfl
+
+theorem conversion_model (data : List Type) (fuel : Nat) (left right : PsMinRegTy)
+    (h : psMinRegTyEq fuel left right = true) : Denote data left = Denote data right :=
+  congrArg (Denote data) (typeEq_sound fuel left right h)
+
 #print axioms inferModel
 #print axioms operational_hasModel
 #print axioms operational_hasBodyHistory
 #print axioms operational_consistent
 #print axioms latest_definition_value
 #print axioms previous_definition_value
+#print axioms checked_definition_unfold
+#print axioms conversion_model
 end Ps.MinKernel.OperationalProofs

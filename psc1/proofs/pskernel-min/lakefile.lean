@@ -27,7 +27,7 @@ lean_lib PsMinRegularRuntime where
 
 lean_lib PsMinOperationalRuntime where
   srcDir := "../../packages/pskernel-min/src"
-  roots := #[`Ps.MinKernel.Profile.OperationalProfile, `Ps.MinKernel.Profile.OperationalCheck, `Ps.MinKernel.Tests.OperationalVectors]
+  roots := #[`Ps.MinKernel.Profile.OperationalProfile, `Ps.MinKernel.Profile.OperationalCheck, `Ps.MinKernel.Tests.OperationalVectors, `Ps.MinKernel.Profile.CoreBytes, `Ps.MinKernel.Profile.CoreIngress]
 
 lean_lib PsMinOperationalSourceEnvironment where
   srcDir := "../../packages/environment/src"
@@ -37,7 +37,7 @@ lean_lib PsMinOperationalSourceEnvironment where
 @[default_target]
 lean_lib MinKernelProof where
   srcDir := "."
-  roots := #[`MainTheorem, `CoreScope, `BinderLowering, `RegularModel, `RegularSoundness, `RegularValidation, `RegularNames, `RegularSourceInstance, `OperationalProjection, `OperationalFoundation, `OperationalSoundness, `OperationalSource]
+  roots := #[`MainTheorem, `CoreScope, `BinderLowering, `RegularModel, `RegularSoundness, `RegularValidation, `RegularNames, `RegularSourceInstance, `OperationalProjection, `OperationalFoundation, `OperationalSoundness, `OperationalSource, `CoreIngress]
 
 lean_exe regular_core_witness where
   srcDir := "."

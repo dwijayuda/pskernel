@@ -49,3 +49,7 @@ lean_lib PsMinOperationalProfile where
 lean_exe minkernel_operational_tests where
   srcDir := "test"
   root := `OperationalTests
+
+lean_lib PsMinCoreIngress where
+  srcDir := "src"
+  roots := #[`Ps.MinKernel.Profile.CoreBytes, `Ps.MinKernel.Profile.CoreIngress]

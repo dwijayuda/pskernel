@@ -1,3 +1,5 @@
+import Ps.CompilerIr.Specialize
+import Ps.CompilerIr.Provenance
 import Ps.CompilerIr.Validate
 
 /-! Opt-in bounded module planning. Ownership is supplied by the same captured
@@ -153,3 +155,67 @@ def psModuleTypeNames (raw : PsVerifiedIrModule) : List String :=
 def psModuleCohort (sourceDigest : String) (typed : Bool) : String :=
   "psc1-modular-pilot/1:" ++ (if typed then "ts:" else "js:") ++ sourceDigest
 
+
+/-! Carry value ownership only through complete producer-generated provenance.
+Nominal types remain owned by the shared runtime unit. This metadata neither
+authorizes IR nor proves transform preservation: both raw modules are rechecked. -/
+
+def psModuleOriginKindEqual (left right : PsIrOriginKind) : Bool :=
+  match left, right with
+  | .structure, .structure => true
+  | .inductive, .inductive => true
+  | .declaration, .declaration => true
+  | _, _ => false
+
+def psModuleEntityArity (raw : PsVerifiedIrModule) (kind : PsIrOriginKind)
+    (name : String) : Except String Nat := do
+  let entries := match kind with
+    | .structure => raw.structures.filterMap (fun item =>
+        if item.name == name then some item.typeParameters.length else none)
+    | .inductive => raw.inductives.filterMap (fun item =>
+        if item.name == name then some item.typeParameters.length else none)
+    | .declaration => raw.declarations.filterMap (fun item =>
+        if item.name == name then some item.typeParameters.length else none)
+  match entries with
+  | [arity] => return arity
+  | _ => throw ("PSC1_MODULE_ORIGIN_ENTITY:" ++ name)
+
+def psModuleOriginFor (rows : List PsIrTransformOrigin) (kind : PsIrOriginKind)
+    (name : String) : Except String PsIrTransformOrigin := do
+  match rows.filter (fun row => psModuleOriginKindEqual row.kind kind && row.outputName == name) with
+  | [row] => return row
+  | _ => throw ("PSC1_MODULE_ORIGIN_COVERAGE:" ++ name)
+
+def psModuleCarryOwners (input : PsVerifiedIrModule) (owners : List PsModuleOwner)
+    (output : PsIrTracedModule) : Except String (List PsModuleOwner) := do
+  let _ ← (psStrictValidateModule input).mapError (fun _ => "PSC1_MODULE_ORIGIN_INPUT_IR")
+  let _ ← (psStrictValidateModule output.raw).mapError (fun _ => "PSC1_MODULE_ORIGIN_OUTPUT_IR")
+  if owners.length != input.declarations.length then throw "PSC1_MODULE_ORIGIN_INPUT_OWNERS"
+  for declaration in input.declarations do
+    let _ ← Ps.Internal.ModuleGraph.owner owners declaration.name
+  let count := output.raw.structures.length + output.raw.inductives.length + output.raw.declarations.length
+  if output.origins.length != count then throw "PSC1_MODULE_ORIGIN_COVERAGE"
+  for row in output.origins do
+    let _ ← psModuleEntityArity output.raw row.kind row.outputName
+    let arity ← psModuleEntityArity input row.kind row.inputName
+    match row.rule with
+    | .retained =>
+      if row.outputName != row.inputName || !row.arguments.isEmpty then
+        throw "PSC1_MODULE_ORIGIN_RETAINED"
+    | .specialization =>
+      if arity != row.arguments.length || !psIrSpecializeAllGround row.arguments then
+        throw "PSC1_MODULE_ORIGIN_ARGUMENTS"
+      if psIrSpecializedName row.inputName row.arguments != some row.outputName then
+        throw "PSC1_MODULE_ORIGIN_SPECIALIZATION"
+    | .worker =>
+      if !psModuleOriginKindEqual row.kind .declaration || !row.arguments.isEmpty ||
+          row.outputName == row.inputName || input.declarations.any (fun d => d.name == row.outputName) then
+        throw "PSC1_MODULE_ORIGIN_WORKER"
+  for item in output.raw.structures do
+    let _ ← psModuleOriginFor output.origins .structure item.name
+  for item in output.raw.inductives do
+    let _ ← psModuleOriginFor output.origins .inductive item.name
+  output.raw.declarations.mapM fun declaration => do
+    let row ← psModuleOriginFor output.origins .declaration declaration.name
+    let previous ← Ps.Internal.ModuleGraph.owner owners row.inputName
+    return { name := declaration.name, unit := previous.unit }

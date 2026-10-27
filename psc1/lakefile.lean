@@ -82,6 +82,7 @@ lean_lib PsCompilerIr where
     `Ps.CompilerIr.CheckTypes,
     `Ps.CompilerIr.CheckSize,
     `Ps.CompilerIr.Check,
+    `Ps.CompilerIr.Provenance,
     `Ps.CompilerIr.Specialize,
     `Ps.CompilerIr.Validate,
     `Ps.CompilerIr.WorkerFusion

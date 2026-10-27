@@ -2,6 +2,9 @@ name: PSC1 genuine modular JS TS compiler package pilot
 on:
   workflow_dispatch:
   workflow_call:
+  push:
+    branches: ['feat/psc1-modular-origins-20261027']
+    paths: ['psc1/**', '.github/workflows/psc1-modular-pilot.yml']
 permissions:
   contents: read
 concurrency:
@@ -49,6 +52,8 @@ jobs:
           set -euo pipefail
           node packages/pskernel-lean/host/check-pin.mjs
           lake build psc1_modular_pilot psc1_independent_checker
+      - name: Transform provenance invariants and ownership refusal tests
+        run: lake env lean --run test/modular/Provenance.lean
       - name: Strict graph planning positives and negative tests
         run: lake env lean --run test/modular/Plan.lean
       - name: Compile real compiler Name module and dependent consumer

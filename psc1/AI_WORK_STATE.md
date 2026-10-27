@@ -1,5 +1,28 @@
 # PSC1 AI work state
 
+Updated 2026-10-27 Asia/Jakarta. Active branch `feat/psc1-modular-origins-20261027`,
+from PR#195 HEAD `cc13ebfabf6763703ee1ec75a663002a9134bc74`.
+
+## Transform provenance and extended modular graph — implementation pending CI
+
+The specialization and worker-fusion creation sites now return explicit immediate
+parent provenance. Existing raw-IR APIs project the same transform results;
+no synthetic-name-prefix ownership inference is used. Ownership composition
+rechecks both raw modules and complete, unique value/type origin coverage.
+Tests cover generic instantiation, actual worker creation, authored-name collisions,
+missing/duplicate/unknown origins, open arguments and invalid IR. These changes
+are unqualified until actual Linux CI completes. Next: extend the bounded module
+graph to real compiler collections/text/JSON components, qualify both grammars,
+Node/Bun JS/TS packages and compare transforms against the PR#195 implementation.
+
+Use GitHub/Linux CI only; exact independent Lean4.35 admission, strict IR, limits,
+negative tests and frozen compiler/kernel/provider payloads remain required.
+Preserve expected-HEAD non-force history. No merge or registry publication.
+
+## Preserved PR #195 qualification
+
+# PSC1 AI work state
+
 Updated 2026-10-27 Asia/Jakarta. Active PR[#195](https://github.com/dwijayuda/pskernel/pull/195),
 branch `feat/psc1-modular-pilot-20261027`, from PR#193 HEAD
 `24d1a9764e8251ab4f4bac65c38fb30f9e8295f4` (re-read unchanged).

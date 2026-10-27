@@ -2,11 +2,35 @@
 
 Updated 2026-10-28 Asia/Jakarta. Branch `feat/psc1-lsp-vscode-20261028`; base `9d0e23c34484e4b1159f3e2428f5452139df530a` from qualified PR197. GitHub/cloud-only development, Linux CI, single-parent non-force expected-HEAD updates. No merge or registry publication.
 
-## Active 0.1.1 performance and platform follow-up
+## Qualified 0.1.1 performance and platform follow-up
 
 User reported slow checking and a screenshot of `PSC1_SERVICE_PUBLICATION_PLATFORM_UNQUALIFIED` with Infoview stuck pending. The repair uses existing public candidate-analysis and exact-graph checking APIs, removing duplicate analysis/target publication work. Compiler and kernel sources remain unchanged. The receipt explicitly records logical-admission scope, no target validation, and no publication. The loader preserves client URI identity and unsaved buffers, including Windows aliases. Terminal UI state and dependency-version tracking were repaired. The server now skips unchanged saves, caches up to eight exact source results within 16 MiB, and terminates Windows compiler descendants on cancellation. Cursor selection no longer requires a server round-trip.
 
-Version 0.1.1 is under qualification. The updated workflow compares the previous immutable 0.1.0 npm package with this candidate on the same Linux runner, then installs the exact new artifacts on Windows and macOS. No local compiler execution, tests or dependency installation have been run. The historical sections below describe 0.1.0 and are not new-version qualification claims.
+Version 0.1.1 is fully qualified in the successful run recorded below. The workflow compares the immutable 0.1.0 npm package with this candidate on the same Linux runner and installs the exact new artifacts on native Windows and macOS. No local compiler execution, tests or dependency installation were run. Earlier failures are preserved below; historical 0.1.0 sections are explicitly archived.
+
+### Complete 0.1.1 qualification and delivery
+
+**All three jobs passed** in [40591485183](https://github.com/dwijayuda/pskernel/actions/runs/40591485183) at exact commit `45818c359a9005ea98ac38117d3dab473ded8ce8`. The editor runtime source has been unchanged since `5188e44f95abaa9ca71a0e3583b075a97111d4ad`; later qualification repairs affected only test tooling and work-state documentation.
+
+- Linux x64: 23 tests, controlled old/new comparison, offline npm installation, actual installed VSIX, all passed.
+- Windows x64: the same 23 tests, encoded-drive/case-alias unsaved buffers, genuine checking, performance observation, offline npm and actual installed VSIX all passed.
+- macOS arm64: the same 23 tests, genuine checking, performance observation, offline npm and actual installed VSIX all passed.
+- Standalone Node 22.23.3; VS Code 1.143.1 / Electron 43.7.7 / embedded Node 24.21.0. No source-tree extension substitutes for the installed VSIX.
+
+[Installable bundle 12773214308](https://github.com/dwijayuda/pskernel/actions/runs/40591485183/artifacts/12773214308): ZIP 7473440 bytes, SHA256 `a65cc86e0d2f3b26271a9a572006826f5690df5e0845c7fc9d3012664b006ce9`.
+
+| Deliverable | Bytes | SHA256 |
+| --- | ---: | --- |
+| proofscript-psc1-0.1.1.vsix | 3599126 | 142a438270679b99af59d9254a1b925b0d762f0743c085a95b463966064dc689 |
+| proofscript-lsp-0.1.1.tgz | 3919391 | 5b0e05b2e7f2627c44b7cb22fe7db636d66d1f26bf4921a56617d28e0f2ff1cb |
+
+Raw evidence: [Linux](https://github.com/dwijayuda/pskernel/actions/runs/40591485183/artifacts/12773454213), [Windows](https://github.com/dwijayuda/pskernel/actions/runs/40591485183/artifacts/12774636782), [macOS](https://github.com/dwijayuda/pskernel/actions/runs/40591485183/artifacts/12774641338). [Complete machine-readable receipt](QUALIFICATION_0.1.1_2026-10-28.json) retains runtime/package identities, per-platform installed-package receipts, all measured samples, and prior CI failures.
+
+The final controlled comparison measured 2327 ms old median versus 773.96 ms new median for three distinct valid edits: 66.74% less time, 3.01× speedup. Both use 50 ms debounce on one Linux runner, and all source/admissions hashes match across versions. Unchanged save: 2344.75 ms to 0.39 ms with zero new compiler jobs. Repeated snapshot: 2349.45 ms to 51.43 ms with exact-result reuse. New distinct-edit medians were 817.96 ms on Windows and 756.19 ms on macOS. These are small-fixture observations, not statistically stable or large-project guarantees.
+
+Actual installed VS Code uses the normal 350 ms debounce. Initial open-to-checked observations: Linux 1411 ms, Windows 1480 ms, macOS 2307 ms. The genuine kernel remains mandatory for every distinct logical snapshot. No warm Wasm instance, incremental compiler, target-artifact validation, or publication qualification is claimed. Proof-state/binding API limits remain unchanged.
+
+The final post-qualification update is documentation only (this work state, top-level guide and new receipt). PR199 remains draft and unmerged; nothing was published to npm or Marketplace.
 
 ### First follow-up run
 
@@ -18,7 +42,11 @@ The Windows job failed before tests because GNU tar interpreted an absolute `D:`
 
 Run [40590701343](https://github.com/dwijayuda/pskernel/actions/runs/40590701343) at `efe40c49cb8bc611c63376635e08227e3a19a78d` passed Linux and macOS qualification. Windows passed all 23 real/UI tests, the real latency harness, and fresh offline npm installation. Its VSIX harness failed before extension activation because the assumed internal VS Code `resources/app/out/cli.js` path was absent from the downloaded Windows archive. The harness now invokes the actual official `code.cmd` returned by the VS Code test library, with an explicit system command processor and safely bounded/quoted generated test paths, and records the launcher's actual entry references. No editor runtime or compiler source changed for this repair.
 
-## Architecture and completed source
+## 0.1.0 baseline history
+
+The following sections archive the earlier Linux-only preview; current delivery and platform evidence are above.
+
+### Architecture and completed source
 
 Independent `editors/psc1` tooling contains a stdio LSP, bounded project-data adapter, isolated public-API compiler worker, original VS Code extension, and Lean-inspired Infoview. Both distributables bundle the unchanged qualified `.12` compiler and official Lean4.35.0 linear-memory Wasm checker. Compiler source, existing npm package layout, provider internals, self-hosting inputs and core CI are unchanged.
 
@@ -26,7 +54,7 @@ Compiler-backed: real refusals, actual independent admission, source-origin decl
 
 Unsaved project sources, versions/generations, supersession, process-group cancellation, per-job temporary cleanup, project capture bounds, trust gating and script-disabled escaped Infoview implemented. `.lean` opt-in uses explicit PSC1 language mode without automatic takeover.
 
-## Qualification
+### Qualification
 
 Source was assembled in cloud scratch and written through GitHub Git object/ref APIs; no local compiler, dependency installation or test execution is used. Draft PR [199](https://github.com/dwijayuda/pskernel/pull/199) targets the compiler baseline branch.
 
@@ -38,7 +66,7 @@ Run [40585014908](https://github.com/dwijayuda/pskernel/actions/runs/40585014908
 
 See [complete machine-readable receipt](QUALIFICATION_2026-10-28.json). This final work-state/receipt/README update changes documentation only; no additional compiler or editor execution inputs change and no optional test rerun is needed.
 
-## Installable delivery
+### Installable delivery
 
 Qualified [editor artifact 12772441610](https://github.com/dwijayuda/pskernel/actions/runs/40585721463/artifacts/12772441610): 7462227 bytes, ZIP SHA256 `e350b263662d2cf4d321ed8181e3e134ff10494e3deab7f9d25efa84ae471cf0`.
 
@@ -52,10 +80,10 @@ Observed small-fixture full-check worker times: stdio 3612 ms, fresh installed n
 
 The build dependency audit records one MSAL advisory through three dev-only publisher/authentication nodes. No authentication or publication is used and those modules are excluded from the actual bundled runtime inventory. See RESEARCH.md for the upstream range constraint and reason not to force an incompatible major override.
 
-## Remaining scope
+### Remaining scope
 
 This usable Linux editor preview is delivered. Future priorities are public compiler proof-state/binding APIs, more precise diagnostics, large-project performance, non-Linux qualification, and permanent hosting before registry/Marketplace release. No compiler fixed-point or kernel qualification reruns are needed for the delivered tooling because their inputs are unchanged. PR remains draft; no merge or publication is authorized.
 
-## Known limits
+### Known limits
 
 Linux qualification only; `.lean` subset requires explicit project selection. Source closure order/grammar/import restrictions are inherited from PSC1. Parse positions may be module-level. Legacy inline project text lacks disk-file provenance. 64 open sources, 512 declared files, 8 MiB project capture, configurable 30-second deadline. Cold compiler startup and full-project checking are retained; no compiler redesign. Original input artifact expires 2027-01-25 unless retained externally; delivered VSIX/npm packages include the payload and do not fetch it at runtime.

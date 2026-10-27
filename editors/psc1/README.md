@@ -2,7 +2,9 @@
 
 A standalone LSP and a VS Code extension using the genuine qualified PSC1 compiler and official Lean 4.35.0 linear-memory Wasm checker. Both tools are outside compiler self-hosting, G1/G2/G3, and kernel proof development. No compiler or kernel implementation is changed.
 
-**Preview 0.1.1 performance and platform repair:** editor checking now performs one genuine compiler analysis and independent admission of its exact logical graph. It does not create a target publication store. The workflow measures the previous and updated packages on the same Linux runner and runs the delivered packages on native Windows and macOS. See [work state](AI_WORK_STATE.md) for qualification progress; [0.1.0 evidence](QUALIFICATION_2026-10-28.json) is retained as historical baseline evidence. Nothing is published to a package registry or Marketplace.
+**Qualified preview 0.1.1:** [download the updated VSIX and npm package](https://github.com/dwijayuda/pskernel/actions/runs/40591485183/artifacts/12773214308) · [all-platform successful CI](https://github.com/dwijayuda/pskernel/actions/runs/40591485183) · [complete qualification receipt](QUALIFICATION_0.1.1_2026-10-28.json). The same delivered packages passed 23 tests and actual installed-npm/VSIX checks on Linux x64, Windows x64, and macOS arm64. Nothing is published to a registry or Marketplace. The [0.1.0 receipt](QUALIFICATION_2026-10-28.json) remains as historical evidence.
+
+The latest controlled Linux run reduced the median for three distinct small-source edits from **2327 ms to 773.96 ms** (66.74% lower, about 3× faster). Both versions used a 50 ms debounce on the same runner. Unchanged saves started no compiler job (0.39 ms LSP status round-trip); revisiting identical source reused the checked result (51.43 ms including debounce). These are small-fixture observations. With the normal 350 ms debounce, actual installed VS Code reached initial checked status in 1411 ms on Linux, 1480 ms on Windows, and 2307 ms on Apple Silicon. Every distinct source still receives genuine compiler and kernel checking.
 
 ## Install
 

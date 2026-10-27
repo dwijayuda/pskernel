@@ -1,3 +1,13 @@
+# R4 in progress — PSC1 minimal kernel canonical ingress
+
+Current research work follows the R3 continuation on the existing branch. See
+[the R4 profile](docs/PSC1_MIN_KERNEL_R4_PROFILE.md). Initial exact-byte closed-definition
+ingress runtime passes Linux native/generated and finite official comparisons;
+new source semantic/rendering capstones are still qualifying. Raw regular groups,
+generated members, recursors/projections and runtime self-admission remain open.
+Production min/dual refuse, official Wasm remains the default, and all project
+execution is GitHub Actions Linux. No merge/publication is authorized.
+
 # PSC1 AI work state
 
 ## R3 operational profile qualified — continue with R4

@@ -1,4 +1,4 @@
-import CoreIngress
+import CoreSemantics
 
 namespace Ps.MinKernel.CoreEncoding
 open Ps.MinKernel.CoreIngress
@@ -355,9 +355,31 @@ theorem decode_success_has_wire_derivation (bytes : List Nat) (candidate source 
     PacketWire.packet source (psMinCoreEncodeDeclarations source)
       (declarations_wire 128 source wellformed.syntaxBound)
 
+theorem byte_admission_source_model (bytes : List Nat) (candidate : List PsMinCoreDeclaration)
+    (accepted : PsMinCoreAdmission) (h : psMinCoreAdmit bytes candidate = some accepted) :
+    PacketWire accepted.source bytes ∧
+    Ps.MinKernel.CoreTranslation.EnvironmentImage [] accepted.source accepted.normalized ∧
+    ∃ model, Ps.MinKernel.CoreSemantics.SourceHistory [] [] accepted.source accepted.types
+      (Ps.MinKernel.RegularProofs.emptyModel []) model := by
+  obtain ⟨wellformed, image, model, history⟩ :=
+    Ps.MinKernel.CoreSemantics.canonical_source_model bytes candidate accepted h
+  refine ⟨?_, image, model, history⟩
+  rw [wellformed.exactBytes]
+  simpa only [psMinCoreEncode, object_eq, array_eq, append_eq] using
+    PacketWire.packet accepted.source (psMinCoreEncodeDeclarations accepted.source)
+      (declarations_wire 128 accepted.source wellformed.syntaxBound)
+
+theorem byte_admission_consistent (bytes : List Nat) (candidate : List PsMinCoreDeclaration)
+    (accepted : PsMinCoreAdmission) (h : psMinCoreAdmit bytes candidate = some accepted) :
+    ∀ declaration ∈ accepted.source,
+      declaration.type ≠ Ps.MinKernel.CoreSemantics.canonicalFalseType :=
+  Ps.MinKernel.CoreSemantics.canonical_no_false_declaration bytes candidate accepted h
+
 #print axioms number_wire
 #print axioms safe_text
 #print axioms name_wire
 #print axioms expression_wire
 #print axioms decode_success_has_wire_derivation
+#print axioms byte_admission_source_model
+#print axioms byte_admission_consistent
 end Ps.MinKernel.CoreEncoding

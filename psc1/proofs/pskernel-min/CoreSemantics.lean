@@ -427,6 +427,39 @@ theorem canonical_no_empty_constant (bytes : List Nat) (candidate : List PsMinCo
   obtain ⟨model⟩ := modelExists
   exact Empty.elim (model index .empty impossible)
 
+def canonicalFalseType : PsMinCoreExpr := .constant (.str .anonymous [95, 112, 115, 99, 49, 79, 114, 100, 101, 114, 70, 97, 108, 115, 101]) []
+
+theorem false_type_image (type : PsMinRegTy) (h : TypeImage canonicalFalseType type) :
+    type = .empty := by
+  cases h
+  rfl
+
+theorem history_no_false (names : List PsMinCoreName) (globals : List PsMinRegTy)
+    (source : List PsMinCoreDeclaration) (result : List PsMinRegTy)
+    (initial : Model [] globals) (output : Model [] result)
+    (history : SourceHistory names globals source result initial output) :
+    ∀ declaration ∈ source, declaration.type ≠ canonicalFalseType := by
+  induction history with
+  | done names globals model =>
+    intro declaration member
+    cases member
+  | step names globals decl rest result type initial output value fresh ht body tail ih =>
+    intro declaration member
+    rcases List.mem_cons.mp member with head | later
+    · subst declaration
+      intro contradiction
+      rw [contradiction] at ht
+      have empty := false_type_image type ht
+      subst type
+      exact Empty.elim value
+    · exact ih declaration later
+
+theorem canonical_no_false_declaration (bytes : List Nat) (candidate : List PsMinCoreDeclaration)
+    (accepted : PsMinCoreAdmission) (h : psMinCoreAdmit bytes candidate = some accepted) :
+    ∀ declaration ∈ accepted.source, declaration.type ≠ canonicalFalseType := by
+  obtain ⟨_, _, model, history⟩ := canonical_source_model bytes candidate accepted h
+  exact history_no_false [] [] accepted.source accepted.types (emptyModel []) model history
+
 #print axioms infer_evaluates
 #print axioms primitive_semantics
 #print axioms translation_preserves_semantics
@@ -434,4 +467,5 @@ theorem canonical_no_empty_constant (bytes : List Nat) (candidate : List PsMinCo
 #print axioms checked_history_preserves_source
 #print axioms canonical_source_model
 #print axioms canonical_no_empty_constant
+#print axioms canonical_no_false_declaration
 end Ps.MinKernel.CoreSemantics

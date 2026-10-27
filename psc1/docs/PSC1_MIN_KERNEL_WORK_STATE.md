@@ -1,3 +1,12 @@
+# R4 in progress — bounded canonical ingress
+
+See [R4 profile](PSC1_MIN_KERNEL_R4_PROFILE.md) for the current source domain,
+exact byte route and remaining regular-data bridge work. The corrected first-domain
+runtime passes native/actual PSC1-generated Linux tests, including all 28 positive
+packets against the official native checker. Source-body and wire-grammar proof
+capstones are still qualifying. R4 is not yet complete; production min/dual refuse.
+All execution remains GitHub Actions Linux with GPT-6.1 Sol / High as requested.
+
 # PSC1 minimal-kernel work state
 
 ## R3 operational profile qualified — continue with R4

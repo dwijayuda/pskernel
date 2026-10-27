@@ -1,0 +1,128 @@
+name: PSC1 language server and VS Code
+on:
+  push:
+    branches: ['feat/psc1-lsp-vscode-*']
+    paths: ['editors/psc1/**', '.github/workflows/proofscript-editor.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: psc1-editor-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  editor:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: editors/psc1
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Install editor build tools
+        run: |
+          if test -f package-lock.json; then npm ci --ignore-scripts; else npm install --ignore-scripts; fi
+      - name: Record dependency audit for release review
+        run: |
+          mkdir -p dist
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import {spawnSync} from 'node:child_process';
+          const result = spawnSync('npm', ['audit', '--json'], {encoding:'utf8'});
+          const audit = JSON.parse(result.stdout);
+          fs.writeFileSync('dist/dependency-audit.json', JSON.stringify(audit,null,2)+'\n');
+          console.log(JSON.stringify(audit.vulnerabilities || audit.error || {}));
+          if (result.error || result.status > 1) throw Error('Unable to complete dependency audit');
+          JS
+      - name: Capture qualified compiler without rebuilding
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: npm run prepare:compiler
+      - name: Build isolated tooling
+        run: npm run build
+      - name: Real compiler LSP protocol integration
+        run: npm test
+      - name: Capture the exact earlier editor for comparison
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/prepare-baseline.mjs
+      - name: Compare actual edit latency on the same runner
+        run: |
+          PSC1_LSP_ENTRY="$PWD/dist/baseline/package/dist/server.cjs" PSC1_PERF_BASELINE=1 PSC1_PERF_SERVER_COMMIT=34beabcfc3fce89e4c89bcc6aa4e372e0c1bdeb1 PSC1_PERF_LABEL=baseline-0.1.0 PSC1_PERF_OUTPUT=dist/performance-baseline-receipt.json node test/performance.mjs
+          PSC1_PERF_LABEL=candidate-0.1.1 npm run test:performance
+      - name: Package standalone npm and self-contained VSIX
+        run: npm run package
+      - name: Install and run the packed npm server offline
+        run: npm run test:packed
+      - name: Install VSIX and activate in real VS Code
+        run: xvfb-run -a npm run test:vscode
+      - name: Retain exact editor deliverables
+        uses: actions/upload-artifact@v4
+        with:
+          name: proofscript-psc1-editor-${{ github.sha }}
+          path: |
+            editors/psc1/dist/*.vsix
+            editors/psc1/dist/*.tgz
+            editors/psc1/dist/SHA256SUMS
+            editors/psc1/dist/BUILD.json
+            editors/psc1/dist/*-evidence.json
+            editors/psc1/dist/*-receipt.json
+            editors/psc1/package-lock.json
+          retention-days: 90
+      - name: Retain build and test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc1-editor-evidence-${{ github.sha }}
+          path: |
+            editors/psc1/package-lock.json
+            editors/psc1/dist/*.json
+          retention-days: 90
+  native-platforms:
+    needs: editor
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-15]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: editors/psc1
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Install test harness tools
+        run: npm ci --ignore-scripts
+      - name: Download the exact Linux-built installable packages
+        uses: actions/download-artifact@v4
+        with:
+          name: proofscript-psc1-editor-${{ github.sha }}
+          path: editors/psc1/delivered
+      - name: Verify and unpack the delivered packages
+        run: |
+          node scripts/unpack-deliverables.mjs
+      - name: Real compiler LSP integration on the native platform
+        run: npm test
+      - name: Measure native checking latency
+        env:
+          PSC1_PERF_LABEL: native-${{ matrix.os }}-0.1.1
+        run: npm run test:performance
+      - name: Install and run packed npm server offline
+        run: npm run test:packed
+      - name: Install the same VSIX and activate in native VS Code
+        run: npm run test:vscode
+      - name: Retain native platform evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc1-editor-${{ matrix.os }}-evidence-${{ github.sha }}
+          path: editors/psc1/dist/*.json
+          retention-days: 90

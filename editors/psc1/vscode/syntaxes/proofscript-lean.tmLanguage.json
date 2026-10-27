@@ -1,0 +1,5 @@
+{
+  "name": "ProofScript Lean subset",
+  "scopeName": "source.proofscript.lean",
+  "patterns": [{ "include": "source.proofscript" }]
+}

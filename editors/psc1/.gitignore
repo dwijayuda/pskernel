@@ -1,0 +1,13 @@
+node_modules/
+dist/
+lsp/dist/
+lsp/compiler/
+vscode/dist/
+vscode/server/
+vscode/LICENSE
+vscode/NOTICE
+vscode/THIRD_PARTY_NOTICES.txt
+lsp/LICENSE
+lsp/NOTICE
+lsp/THIRD_PARTY_NOTICES.txt
+.vscode-test/

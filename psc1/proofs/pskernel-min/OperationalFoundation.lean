@@ -14,7 +14,7 @@ noncomputable def primitiveValue (data : List Type) (primitive : PsMinOpPrimitiv
   | .natBeq => Nat.beq
   | .natBlt => Nat.blt
   | .boolNot => Bool.not
-  | .boolBeq => fun left right => left == right
+  | .boolBeq => fun (left right : Bool) => left == right
   | .natRec result => fun zero step major =>
     Nat.rec (motive := fun _ => Denote data result) zero step major
   | .listNil _ => []
@@ -55,7 +55,7 @@ noncomputable def primitiveModel (data : List Type) (fuel bound : Nat) (primitiv
 
 theorem nat_iota_zero (data : List Type) (result : PsMinRegTy) (zero : Denote data result)
     (step : Nat → Denote data result → Denote data result) :
-    primitiveValue data (.natRec result) zero step 0 = zero := rfl
+    primitiveValue data (.natRec result) zero step (0 : Nat) = zero := rfl
 
 theorem nat_iota_succ (data : List Type) (result : PsMinRegTy) (zero : Denote data result)
     (step : Nat → Denote data result → Denote data result) (major : Nat) :
@@ -90,12 +90,12 @@ theorem boolEqIte_exact (data : List Type) (result : PsMinRegTy) (left right : B
 theorem boolEqIte_true (data : List Type) (result : PsMinRegTy) (value : Bool)
     (yes no : Denote data result) :
     primitiveValue data (.boolEqIte result) value value yes no = yes := by
-  simp [primitiveValue]
+  cases value <;> rfl
 
 theorem boolEqIte_false (data : List Type) (result : PsMinRegTy) (left right : Bool)
     (h : left ≠ right) (yes no : Denote data result) :
     primitiveValue data (.boolEqIte result) left right yes no = no := by
-  simp [primitiveValue, h]
+  cases left <;> cases right <;> first | exact False.elim (h rfl) | rfl
 
 #print axioms primitiveType_guards
 #print axioms primitiveModel

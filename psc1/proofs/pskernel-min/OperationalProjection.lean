@@ -19,8 +19,8 @@ def recordArgs (fields : List PsMinRegField) (data : List Type)
     Args data (Carrier (singleSpec fields) data) fields :=
   match value with
   | .node tag children =>
-    single_get fields tag.1 ▸ joinArgs data (Carrier (singleSpec fields) data)
-      ([fields].get tag.1) tag.2 children
+    cast (congrArg (Args data (Carrier (singleSpec fields) data)) (single_get fields tag.1))
+      (joinArgs data (Carrier (singleSpec fields) data) ([fields].get tag.1) tag.2 children)
 
 theorem recordArgs_construct (fields : List PsMinRegField) (data : List Type)
     (args : Args data (Carrier (singleSpec fields) data) fields) :
@@ -48,7 +48,7 @@ noncomputable def fieldValue (data : List Type) (self : Type) (fields : List PsM
         have ht : PsMinRegTy.data 0 = type := by simpa [psMinOpFieldType] using h
         cases ht
         exact args.1
-    | succ index => exact ih index h args.2
+    | succ index => cases field <;> exact ih index h args.2
 
 noncomputable def projectionModel (specs : List PsMinRegSpec) :
     (slot field : Nat) → (type : PsMinRegTy) →

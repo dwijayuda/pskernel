@@ -21,14 +21,29 @@ theorem append_eq (left right : List Nat) : psMinByteAppend left right = left ++
   | nil => rfl
   | cons head tail ih => exact congrArg (List.cons head) ih
 
+theorem append_assoc_checked (xs ys zs : List Nat) :
+    (xs ++ ys) ++ zs = xs ++ (ys ++ zs) := by
+  induction xs with
+  | nil => rfl
+  | cons head tail ih => exact congrArg (List.cons head) ih
+
+theorem append_nil_checked (xs : List Nat) : xs ++ [] = xs := by
+  induction xs with
+  | nil => rfl
+  | cons head tail ih => exact congrArg (List.cons head) ih
+
+theorem nil_append_checked (xs : List Nat) : [] ++ xs = xs := rfl
+
 theorem join_tail_eq (values : List (List Nat)) :
     psMinByteJoinTail [44] values =
       match values with | [] => [] | _ :: _ => [44] ++ commaBytes values := by
   induction values with
   | nil => rfl
   | cons first rest ih =>
-    rw [psMinByteJoinTail, append_eq, append_eq, ih]
-    cases rest <;> simp only [commaBytes, List.nil_append, List.append_nil, List.append_assoc]
+    change psMinByteAppend [44] (psMinByteAppend first (psMinByteJoinTail [44] rest)) =
+      [44] ++ commaBytes (first :: rest)
+    rw [append_eq, append_eq, ih]
+    cases rest <;> simp only [commaBytes, nil_append_checked, append_nil_checked, append_assoc_checked]
 
 theorem object_eq (fields : List (List Nat)) :
     psMinByteJoin [123] [44] [125] fields = objectBytes fields := by
@@ -36,7 +51,7 @@ theorem object_eq (fields : List (List Nat)) :
   | nil => rfl
   | cons first rest =>
     cases rest <;> simp only [psMinByteJoin, join_tail_eq, append_eq, objectBytes,
-      commaBytes, List.nil_append, List.append_nil, List.append_assoc]
+      commaBytes, nil_append_checked, append_nil_checked, append_assoc_checked]
 
 theorem array_eq (values : List (List Nat)) :
     psMinByteJoin [91] [44] [93] values = arrayBytes values := by
@@ -44,10 +59,10 @@ theorem array_eq (values : List (List Nat)) :
   | nil => rfl
   | cons first rest =>
     cases rest <;> simp only [psMinByteJoin, join_tail_eq, append_eq, arrayBytes,
-      commaBytes, List.nil_append, List.append_nil, List.append_assoc]
+      commaBytes, nil_append_checked, append_nil_checked, append_assoc_checked]
 
 theorem quote_eq (bytes : List Nat) : psMinCoreQuote bytes = quoteBytes bytes := by
-  simp only [psMinCoreQuote, append_eq, quoteBytes, List.append_assoc]
+  simp only [psMinCoreQuote, append_eq, quoteBytes, append_assoc_checked]
 
 def digitValue : List Nat → Nat
   | [] => 0
@@ -376,6 +391,9 @@ theorem byte_admission_consistent (bytes : List Nat) (candidate : List PsMinCore
       declaration.type ≠ Ps.MinKernel.CoreSemantics.canonicalFalseType :=
   Ps.MinKernel.CoreSemantics.canonical_no_false_declaration bytes candidate accepted h
 
+#print axioms append_assoc_checked
+#print axioms append_nil_checked
+#print axioms nil_append_checked
 #print axioms append_eq
 #print axioms join_tail_eq
 #print axioms object_eq

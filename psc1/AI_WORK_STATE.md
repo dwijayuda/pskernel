@@ -20,7 +20,10 @@ are exported by the frozen unified JS/TS executor; its only export is the servic
 [40491338458](https://github.com/dwijayuda/pskernel/actions/runs/40491338458) verifies
 the complete inventory and exact frozen inputs. [Build40492532684](https://github.com/dwijayuda/pskernel/actions/runs/40492532684)
 at0bdef94ee5c5ac2b603bc41ab27f9edf61d0751b builds/packs all24 named packages.
-Fresh installation/import/kernel/API/output/refusal qualification is pending.
+Final implementation9aefeeb469b4e350348d365ff3e1c149df82ac71 passes42 finite
+package cases in40497178826 and all16 source jobs in40497179005. All37 Core
+criteria remain qualified. The stdlib README is being corrected to describe the
+actual explicit source API, followed by a documentation-only tarball refresh.
 The earlier40492161864 failed because canonical Emscripten build metadata differs
 from the frozen qualified provider metadata. Keep canonical source untouched;
 qualified provider payloads now live under their own dist/implementation.
@@ -42,8 +45,9 @@ load the exact previously qualified C++ native or Emscripten linear-memory Wasm
 provider. Root distribution pins are regenerated for explicit metadata/layout
 changes; existing host/compiled execution code and safety limits remain.
 
-Next: complete focused installed qualification, repair actual failures, publish
-unpublished reproducible tarball artifacts/receipts and finish docs. Do not claim
+Next: finish the documentation-only tarball refresh, record exact delivery
+artifacts/receipts and retain the final metadata/static gate. Existing full-source
+and42-case package qualifications at9aefeeb remain exact checkpoints. Do not claim
 installation alone proves compiler soundness or new G1/G2/G3/fixed points. Preserve
 the exact old qualified source identities and existing normal regression gates.
 

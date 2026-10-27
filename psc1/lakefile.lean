@@ -89,7 +89,7 @@ lean_lib PsCompilerIr where
 
 lean_lib PsBackendCommon where
   srcDir := "packages/backend-common/src"
-  roots := #[`Ps.BackendCommon.Plan, `Ps.BackendCommon.StateExcept, `Ps.BackendCommon.Source, `Ps.BackendCommon.DirectCalls]
+  roots := #[`Ps.BackendCommon.Plan, `Ps.BackendCommon.StateExcept, `Ps.BackendCommon.Source, `Ps.BackendCommon.DirectCalls, `Ps.BackendCommon.Modules]
 
 lean_lib PsErasure where
   srcDir := "packages/erasure/src"
@@ -117,7 +117,8 @@ lean_lib PsBackendTs where
     `Ps.BackendTs.Sh1Target,
     `Ps.BackendTs.Sh1,
     `Ps.BackendTs.Compiler,
-    `Ps.BackendTs.CompilerService
+    `Ps.BackendTs.CompilerService,
+    `Ps.BackendTs.Modules
   ]
 
 -- Target libraries remain outside the portable bootstrap import closure.
@@ -130,7 +131,8 @@ lean_lib PsBackendJs where
     `Ps.BackendJs.Lower,
     `Ps.BackendJs.Validate,
     `Ps.BackendJs.Print,
-    `Ps.BackendJs.CompilerService
+    `Ps.BackendJs.CompilerService,
+    `Ps.BackendJs.Modules
   ]
 
 lean_lib PsBackendRust where
@@ -216,6 +218,7 @@ lean_lib PsHost where
     `Ps.Host.LeanChecked,
     `Ps.Host.DirectSourceMap,
     `Ps.Host.DirectBackend,
+    `Ps.Host.ModularPilot,
     `Ps.Host.BackendProviderInstances,
     `Ps.Host.PortableIr,
     `Ps.Host.BackendProviderProtocol,
@@ -670,3 +673,7 @@ lean_exe psc1_source_trace_tests where
 lean_exe psc1_output_abi_probe where
   srcDir := "scripts"
   root := `OutputAbiProbe
+
+lean_exe psc1_modular_pilot where
+  srcDir := "scripts"
+  root := `ModularPilotMain

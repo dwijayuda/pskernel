@@ -1,0 +1,65 @@
+name: PSC1 genuine modular JS TS compiler package pilot
+on:
+  workflow_dispatch:
+  workflow_call:
+permissions:
+  contents: read
+concurrency:
+  group: psc1-modular-pilot-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  pilot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.4'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache@v4
+        with:
+          path: psc1/.lake
+          key: psc1-modular-native-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/lake-manifest.json', 'psc1/**/*.lean') }}
+          restore-keys: |
+            psc1-modular-native-v1-${{ runner.os }}-
+            psc1-lake-v2-${{ runner.os }}-native-
+      - name: Install pinned Lean and locked development consumers
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
+          npm ci --prefix .. --ignore-scripts --include=optional --no-audit --no-fund
+      - name: Build additive pilot and genuine independent checker
+        id: build
+        run: |
+          set -euo pipefail
+          node packages/pskernel-lean/host/check-pin.mjs
+          lake build psc1_modular_pilot psc1_independent_checker
+      - name: Strict graph planning positives and negative tests
+        run: lake env lean --run test/modular/Plan.lean
+      - name: Compile real compiler Name module and dependent consumer
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: node test/modular/native-probe.mjs
+      - name: Independently checked offline modular packages and negative tests
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: node test/modular/packages.test.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-modular-pilot-${{ github.sha }}
+          path: psc1/dist/modular/
+          retention-days: 90

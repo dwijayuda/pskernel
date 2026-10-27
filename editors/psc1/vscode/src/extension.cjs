@@ -49,7 +49,7 @@ class ProofScriptExtension {
     return {
       trusted: vscode.workspace.isTrusted,
       enableLean: true, // Only explicitly selected proofscript-lean buffers enter the client.
-      debounceMs: config.get('checkDelay', 350),
+      debounceMs: config.get('checkDelay', 150),
       timeoutMs: config.get('checkTimeout', 30000)
     };
   }

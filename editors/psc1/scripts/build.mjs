@@ -3,6 +3,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import assert from 'node:assert/strict';
 import {build} from 'esbuild';
+import {writeKernelPins} from './kernel-pins.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const lsp = path.join(root, 'lsp'), vscode = path.join(root, 'vscode');
 if (!fs.existsSync(path.join(lsp, 'compiler/package/dist/index.js'))) throw Error('Run npm run prepare:compiler first.');
@@ -13,7 +14,8 @@ const serverBundle = await build({entryPoints: [path.join(lsp, 'src/server.mjs')
   platform: 'node', format: 'cjs', target: 'node22', bundle: true, sourcemap: false,
   banner: {js: '#!/usr/bin/env node'}, legalComments: 'eof', metafile: true});
 fs.chmodSync(path.join(lsp, 'dist/server.cjs'), 0o755);
-for (const name of ['worker.mjs', 'checked-types.mjs']) fs.copyFileSync(path.join(lsp, 'src', name), path.join(lsp, 'dist', name));
+writeKernelPins(root, path.join(lsp, 'dist/kernel-pins.mjs'));
+for (const name of ['worker.mjs', 'checked-types.mjs', 'kernel-session.mjs']) fs.copyFileSync(path.join(lsp, 'src', name), path.join(lsp, 'dist', name));
 const clientBundle = await build({entryPoints: [path.join(vscode, 'src/extension.cjs')], outfile: path.join(vscode, 'dist/extension.cjs'),
   platform: 'node', format: 'cjs', target: 'node22', bundle: true, sourcemap: false, external: ['vscode'], legalComments: 'eof', metafile: true});
 const bundledPackages = [...new Set([...Object.keys(serverBundle.metafile.inputs), ...Object.keys(clientBundle.metafile.inputs)]

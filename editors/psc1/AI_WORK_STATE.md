@@ -1,6 +1,16 @@
 # PSC1 LSP / VS Code work state
 
-Updated 2026-10-28 Asia/Jakarta. Branch `feat/psc1-lsp-vscode-20261028`; base `9d0e23c34484e4b1159f3e2428f5452139df530a` from qualified PR197. GitHub/cloud-only development, Linux CI, single-parent non-force expected-HEAD updates. No merge or registry publication.
+Updated 2026-10-28 Asia/Jakarta. Work branch `perf/psc1-editor-checking-20261028`, based on qualified editor0.1.1 documentation commit `7a910a64743cceadc06b2a4a8a20b486d300b7f1`. GitHub/cloud-only source workflow and CI-only execution; expected-head, non-force updates. No merge or registry publication.
+
+## Checking latency follow-up 0.1.2 — qualification in progress
+
+The user asks why checking is slow and requests faster checking. Prior0.1.1 small-source Linux evidence attributes approximately385–390ms to the public compiler candidate path and278–287ms to the universal kernel path, in addition to the normal350ms editor delay. The universal path starts both a health subprocess and a fresh genuine Wasm checker for every call.
+
+This follow-up retains a bounded isolated editor worker and the public Wasm provider handle after immutable release-pin validation. Health initialization is reused; each new canonical graph still goes through a fresh genuine Lean Wasm checking process. The unchanged public compiler candidate API continues to analyze the full declared source closure. No compiler semantics, kernel internals, package inputs, or self-hosting cycles change.
+
+Editor scheduling uses150ms default typing delay, immediate opening/manual checks, edited-project priority, targeted manual cache eviction, and up to128 cached snapshots under the unchanged16MiB byte cap. A worker is retired after128 requests,30 seconds idle, cancellation, timeout, protocol mismatch, or infrastructure failure. Job identities prevent a response being attributed to another source snapshot.
+
+Qualification compares exact0.1.1 and0.1.2 on one Linux runner at equal50ms debounce, separately records normal defaults, captures real process-stage timings, and checks exact source/admission identities. Native platforms execute the exact Linux-built npm/VSIX artifacts. The old compiler and kernel are not rebuilt. Performance gains and deliverability remain pending actual CI results.
 
 ## Qualified 0.1.1 performance and platform follow-up
 

@@ -18,13 +18,19 @@ let cacheBytes = 0;
 const temporaryDirectories = new Set();
 const compilerChildren = new Set();
 let stopping = false;
-const settings = { trusted: false, enableLean: false, debounceMs: 350, timeoutMs: 30000 };
+const settings = { trusted: false, enableLean: false, debounceMs: 150, timeoutMs: 30000 };
 let workspaceFolders = [], generation = 0, timer, running, shutdown = false, semanticRefresh = false, workspaceFolderEvents = false;
-const metrics = { checksStarted: 0, checksCompleted: 0, superseded: 0, timeouts: 0, cacheHits: 0, unchangedSaves: 0, lastElapsedMs: null };
+let compilerWorker, nextJobId = 0;
+const metrics = { checksStarted: 0, checksCompleted: 0, superseded: 0, timeouts: 0, cacheHits: 0, unchangedSaves: 0,
+  workerStarts: 0, workerReuses: 0, workerRetirements: 0, workerProtocolFailures: 0, lastElapsedMs: null };
 const MAX_OPEN_DOCUMENTS = 64;
 const MAX_EDITOR_CHARACTERS = 8 * 1024 * 1024;
 const MAX_CACHE_BYTES = 16 * 1024 * 1024;
-const MAX_CACHE_ENTRIES = 8;
+// Keep room for every open project and its previous snapshot. A small entry cap
+// can otherwise evict each next live project while walking the checking queue.
+const MAX_CACHE_ENTRIES = MAX_OPEN_DOCUMENTS * 2;
+const MAX_WORKER_REQUESTS = 128;
+const WORKER_IDLE_MS = 30000;
 const COMPILER_TARBALL_SHA256 = '9a66dcd0f92aaa60f600674fb91b31bc0d67b211d1e9e004146baa8e96502fcc';
 const smallDocument = doc => doc && doc.getText().length <= MAX_EDITOR_CHARACTERS;
 
@@ -58,20 +64,27 @@ function killRunning() {
   running.cancel();
   running = undefined;
 }
-function invalidate({ force = false } = {}) {
+function invalidate({ force = false, uri, immediate = false } = {}) {
   if (shutdown) return;
   generation++;
   clearTimeout(timer);
   killRunning();
   projects.clear();
-  if (force || !settings.trusted) { resultCache.clear(); cacheBytes = 0; }
+  if ((force && !uri) || !settings.trusted) { resultCache.clear(); cacheBytes = 0; }
+  if (!settings.trusted) retireWorker(compilerWorker);
   for (const uri of [...published]) sendDiagnostics(uri);
   for (const doc of documents.all()) {
     if (!supported(doc)) setState(doc, 'unsupported', 'Use a .ps file or explicitly select PSC1 for a project .lean file.');
     else if (!settings.trusted) setState(doc, 'untrusted', 'Trust this workspace to run the bundled PSC1 compiler. Syntax outline remains available.');
     else setState(doc, 'pending', 'Waiting for the current source snapshot.');
   }
-  if (settings.trusted) timer = setTimeout(() => void checkGeneration(generation), settings.debounceMs);
+  if (settings.trusted) {
+    const expected = generation;
+    timer = setTimeout(() => {
+      timer = undefined;
+      void checkGeneration(expected, { force, uri });
+    }, immediate ? 0 : settings.debounceMs);
+  }
 }
 
 function snapshotKey(project) {
@@ -104,6 +117,13 @@ function rememberResult(key, result) {
   resultCache.set(key, { result, bytes }); cacheBytes += bytes;
 }
 
+function forgetResult(key) {
+  const cached = resultCache.get(key);
+  if (!cached) return;
+  resultCache.delete(key);
+  cacheBytes -= cached.bytes;
+}
+
 function terminateCompiler(child, complete, cleanup = () => {}) {
   if (!child?.pid) { cleanup(); return; }
   if (process.platform !== 'win32' || complete) {
@@ -128,51 +148,141 @@ function terminateCompiler(child, complete, cleanup = () => {}) {
     });
   }
 }
-function compilerJob(project) {
+function retireWorker(worker) {
+  if (!worker || worker.retired) return;
+  worker.retired = true;
+  metrics.workerRetirements++;
+  clearTimeout(worker.idleTimer);
+  if (compilerWorker === worker) compilerWorker = undefined;
+  // Retirement is also a cancellation barrier. A later IPC response from this
+  // process cannot settle or grant authority to a different source snapshot.
+  if (worker.job) {
+    const job = worker.job;
+    worker.job = undefined;
+    clearTimeout(job.timeout);
+    job.resolve(null);
+  }
+  terminateCompiler(worker.child, false, () => {
+    fs.rm(worker.temporary, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }, error => {
+      if (!error) temporaryDirectories.delete(worker.temporary);
+    });
+  });
+}
+
+function settleWorkerJob(worker, result, reusable = false) {
+  if (worker.retired) return;
+  const job = worker.job;
+  worker.job = undefined;
+  if (job) {
+    clearTimeout(job.timeout);
+    job.resolve(result);
+  }
+  if (!reusable || !job || worker.requests >= MAX_WORKER_REQUESTS || shutdown || !settings.trusted) {
+    retireWorker(worker);
+    return;
+  }
+  worker.idleTimer = setTimeout(() => retireWorker(worker), WORKER_IDLE_MS);
+  worker.idleTimer.unref();
+}
+
+function workerFailure(message) {
+  return { state: 'error', summary: String(message).slice(0, 4096), diagnostics: [], declarations: [] };
+}
+
+function createCompilerWorker() {
   const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'psc1-lsp-'));
   temporaryDirectories.add(temporary);
-  let child, settled = false, timeout, stderr = '';
-  let finish;
-  const promise = new Promise(resolve => { finish = (value, complete = false) => {
-    if (settled) return;
-    settled = true;
-    clearTimeout(timeout);
-    // Child temp directories stay within this private per-job directory.
-    terminateCompiler(child, complete, () => {
-      fs.rm(temporary, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }, error => {
-        if (!error) temporaryDirectories.delete(temporary);
-      });
-    });
-    resolve(value);
-  }; });
+  const worker = { temporary, child: undefined, requests: 0, job: undefined,
+    idleTimer: undefined, retired: false, stderr: '' };
   try {
-    child = fork(path.join(distribution, 'dist/worker.mjs'), [], {
+    const child = fork(path.join(distribution, 'dist/worker.mjs'), [], {
       cwd: distribution, detached: process.platform !== 'win32', windowsHide: true,
       execArgv: ['--max-old-space-size=1024'],
       env: { ...process.env, NODE_OPTIONS: '', TMPDIR: temporary, TMP: temporary, TEMP: temporary, ELECTRON_RUN_AS_NODE: '1' },
       stdio: ['ignore', 'ignore', 'pipe', 'ipc'],
     });
+    worker.child = child;
+    compilerWorker = worker;
     compilerChildren.add(child);
-    child.stderr.on('data', chunk => { stderr = (stderr + chunk.toString()).slice(-8192); });
-    child.once('message', value => {
-      if (!value || typeof value !== 'object' || !['checked', 'partial', 'rejected', 'error'].includes(value.state))
-        finish({ state: 'error', summary: 'Invalid compiler adapter response.', diagnostics: [], declarations: [] });
-      else finish(value, true);
+    metrics.workerStarts++;
+    child.stderr.on('data', chunk => { worker.stderr = (worker.stderr + chunk.toString()).slice(-8192); });
+    child.on('message', value => {
+      if (worker.retired) return;
+      const job = worker.job;
+      if (!job || !value || typeof value !== 'object' || Array.isArray(value) ||
+          !Number.isSafeInteger(value.jobId) || value.jobId <= 0 || value.jobId !== job.id ||
+          !['checked', 'partial', 'rejected', 'error'].includes(value.state)) {
+        metrics.workerProtocolFailures++;
+        settleWorkerJob(worker, workerFailure('PSC1_LSP_WORKER_PROTOCOL: Unexpected compiler job response.'));
+        return;
+      }
+      const { jobId: _jobId, ...result } = value;
+      // Source rejection is a completed result. Infrastructure and protocol
+      // failures retire the process, even if a future request might succeed.
+      settleWorkerJob(worker, result, ['checked', 'partial', 'rejected'].includes(result.state));
     });
-    child.once('error', error => finish({ state: 'error', summary: 'Compiler process failed: ' + error.message, diagnostics: [], declarations: [] }));
+    child.once('error', error => {
+      settleWorkerJob(worker, workerFailure('Compiler process failed: ' + error.message));
+    });
     child.once('exit', (code, signal) => {
       compilerChildren.delete(child);
-      finish({ state: 'error', summary: `Compiler process exited (${signal || code}). ${stderr}`.slice(0, 4096), diagnostics: [], declarations: [] });
+      settleWorkerJob(worker, workerFailure('Compiler process exited (' + (signal || code) + '). ' + worker.stderr));
     });
-    timeout = setTimeout(() => {
+    child.once('disconnect', () => {
+      settleWorkerJob(worker, workerFailure('Compiler process disconnected before completing its job.'));
+    });
+    return worker;
+  } catch (error) {
+    retireWorker(worker);
+    throw error;
+  }
+}
+
+function compilerJob(project) {
+  let worker, job;
+  let resolve;
+  const promise = new Promise(complete => { resolve = complete; });
+  try {
+    worker = compilerWorker;
+    if (worker?.job) {
+      // This should be unreachable with the single checking queue. Fail closed
+      // instead of mixing snapshots if scheduling ever violates that contract.
+      metrics.workerProtocolFailures++;
+      retireWorker(worker);
+      throw Error('PSC1_LSP_WORKER_BUSY: The previous compiler job has not settled.');
+    }
+    if (!worker || worker.retired || !worker.child.connected || worker.child.exitCode !== null) {
+      retireWorker(worker);
+      worker = createCompilerWorker();
+    } else {
+      metrics.workerReuses++;
+    }
+    clearTimeout(worker.idleTimer);
+    worker.idleTimer = undefined;
+    const id = ++nextJobId;
+    if (!Number.isSafeInteger(id)) throw Error('PSC1_LSP_JOB_ID_LIMIT');
+    job = { id, resolve, timeout: undefined };
+    worker.job = job;
+    worker.requests++;
+    worker.stderr = '';
+    job.timeout = setTimeout(() => {
+      if (worker.job !== job || worker.retired) return;
       metrics.timeouts++;
-      finish({ state: 'error', summary: `Checking exceeded ${settings.timeoutMs} ms; no verification result was accepted.`, diagnostics: [], declarations: [] });
+      settleWorkerJob(worker, workerFailure('Checking exceeded ' + settings.timeoutMs + ' ms; no verification result was accepted.'));
     }, settings.timeoutMs);
-    child.send({ sources: project.sources, entryModule: project.entryModule, assurance: project.assurance || 'checked' }, error => {
-      if (error) finish({ state: 'error', summary: 'Cannot send compiler snapshot: ' + error.message, diagnostics: [], declarations: [] });
+    worker.child.send({ jobId: id, sources: project.sources, entryModule: project.entryModule,
+      assurance: project.assurance || 'checked' }, error => {
+      if (error && worker.job === job) {
+        settleWorkerJob(worker, workerFailure('Cannot send compiler snapshot: ' + error.message));
+      }
     });
-  } catch (error) { finish({ state: 'error', summary: error.message, diagnostics: [], declarations: [] }); }
-  return { promise, cancel: () => finish(null) };
+  } catch (error) {
+    if (job && worker?.job === job) settleWorkerJob(worker, workerFailure(error.message));
+    else { retireWorker(worker); resolve(workerFailure(error.message)); }
+  }
+  return { promise, cancel: () => {
+    if (job && worker?.job === job) settleWorkerJob(worker, null);
+  } };
 }
 
 function diagnosticFor(file, row) {
@@ -184,9 +294,12 @@ function diagnosticFor(file, row) {
       (precision === 'module' ? '\nThe compiler did not provide a precise source position.' : ''),
     data: { precision, module: row.module, projectGeneration: generation } };
 }
-async function checkGeneration(expected) {
+async function checkGeneration(expected, { force = false, uri } = {}) {
   const current = () => expected === generation && !shutdown && settings.trusted;
   const all = documents.all().filter(supported);
+  // Opening order must not make the source just edited wait behind unrelated
+  // projects. The complete current source closure is still captured and checked.
+  if (uri) all.sort((left, right) => Number(right.uri === uri) - Number(left.uri === uri));
   if (all.length > MAX_OPEN_DOCUMENTS) {
     for (const doc of all) setState(doc, 'error', `At most ${MAX_OPEN_DOCUMENTS} source documents may be open for checking.`);
     return;
@@ -210,6 +323,7 @@ async function checkGeneration(expected) {
   for (const project of snapshots.values()) {
     if (!current()) return;
     const key = snapshotKey(project);
+    if (force && (!uri || project.files.some(file => file.uri === uri))) forgetResult(key);
     let result = cachedResult(key);
     const cacheHit = Boolean(result);
     if (!result) {
@@ -246,6 +360,7 @@ async function checkGeneration(expected) {
       const doc = documents.get(file.uri);
       if (doc) setState(doc, result.state, result.summary, { diagnostics, declarations: mapped.get(file.uri),
         elapsedMs: result.elapsedMs, timings: result.timings, cacheHit, snapshotVersions,
+        reusedKernelHealth: result.reusedKernelHealth,
         receipt: result.receipt, compilerVersion: result.compilerVersion,
         project: { root: project.root, entryModule: project.entryModule, modules: project.files.map(f => f.module) } });
     }
@@ -278,7 +393,7 @@ connection.onInitialize(params => {
   updateSettings(params.initializationOptions);
   semanticRefresh = params.capabilities?.workspace?.semanticTokens?.refreshSupport === true;
   workspaceFolderEvents = params.capabilities?.workspace?.workspaceFolders === true;
-  return { serverInfo: { name: 'PSC1 Language Server', version: '0.1.1' }, capabilities: {
+  return { serverInfo: { name: 'PSC1 Language Server', version: '0.1.2' }, capabilities: {
     positionEncoding: 'utf-16', textDocumentSync: { openClose: true, change: TextDocumentSyncKind.Incremental, save: { includeText: false } },
     hoverProvider: true, definitionProvider: true, documentSymbolProvider: true,
     workspaceSymbolProvider: true, documentHighlightProvider: true,
@@ -305,7 +420,12 @@ connection.onDidChangeWatchedFiles(params => {
   });
   if (relevant) invalidate();
 });
-documents.onDidChangeContent(() => invalidate());
+documents.onDidChangeContent(({ document }) => {
+  // TextDocuments emits this event once for both opening and editing. Registering
+  // another invalidation onDidOpen would cancel and reschedule the same snapshot.
+  const opened = !states.has(document.uri);
+  invalidate({ uri: document.uri, immediate: opened });
+});
 documents.onDidSave(({ document }) => {
   const status = currentState(document.uri);
   if (status) {
@@ -318,13 +438,20 @@ documents.onDidClose(({ document }) => {
   states.delete(document.uri);
   invalidate();
 });
-connection.onRequest('psc1/recheck', () => { invalidate({ force: true }); return { scheduled: true, projectGeneration: generation }; });
-connection.onRequest('psc1/serverInfo', () => ({ name: 'PSC1 Language Server', version: '0.1.1',
+connection.onRequest('psc1/recheck', params => {
+  const requested = typeof params?.uri === 'string' ? openDocument(documents, params.uri) : undefined;
+  if (params?.uri !== undefined && !supported(requested)) return { scheduled: false, projectGeneration: generation };
+  invalidate({ force: true, uri: requested?.uri, immediate: true });
+  return { scheduled: true, projectGeneration: generation };
+});
+connection.onRequest('psc1/serverInfo', () => ({ name: 'PSC1 Language Server', version: '0.1.2',
   protocol: 'LSP over stdio', node: process.version, platform: process.platform,
   compiler: 'proofscript@0.1.0-psc1.12', kernel: 'official Lean 4.35.0, linear-memory Wasm',
   compilerTarballSha256: COMPILER_TARBALL_SHA256,
   compilerSourceUnchanged: true, selfHosting: 'external tooling', settings,
   metrics: { ...metrics, cacheEntries: resultCache.size, cacheBytes },
+  worker: { active: Boolean(compilerWorker), busy: Boolean(compilerWorker?.job), requests: compilerWorker?.requests || 0,
+    maxRequests: MAX_WORKER_REQUESTS, idleMs: WORKER_IDLE_MS },
   checkingScope: 'Logical admission only; editor checks do not publish or validate generated runtime artifacts.',
   limitations: ['No proof-state snapshots or term-level type inference.', 'No binding-aware references, rename, signature help or quick fixes.',
     'Definitions navigate compiler-origin declarations and explicit imports; reference binding is not guessed.', 'Parse errors may have module-level locations.'],
@@ -418,8 +545,10 @@ connection.languages.semanticTokens.on((params, token) => {
   return { data };
 });
 function stop() {
+  if (stopping) return;
   stopping = true;
   shutdown = true; clearTimeout(timer); killRunning();
+  retireWorker(compilerWorker);
   for (const child of compilerChildren) terminateCompiler(child, false);
   compilerChildren.clear();
   resultCache.clear(); cacheBytes = 0;

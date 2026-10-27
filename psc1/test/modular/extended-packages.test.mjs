@@ -99,10 +99,15 @@ function baselineParity(built,input,cwd,kind){
  fs.writeFileSync(requestFile,JSON.stringify(['psc1-modular-pilot/2',candidate.requestId,
    candidate.sourceClosureDigest,input[0].kind,'checked',input.at(-1).module,input.map(s=>[s.module,s.text])]));
  const script=path.resolve('test/modular/TransformParity.lean'),pin=sha256(fs.readFileSync(script));
+ const driver=process.env.PSC1_TRANSFORM_BASELINE_DRIVER,driverSource=process.env.PSC1_TRANSFORM_BASELINE_DRIVER_SOURCE;
+ assert.ok(driver&&driverSource,'native baseline harness required');
+ assert.equal(fs.realpathSync(driver),driver);assert.ok(fs.lstatSync(driver).isFile());
+ assert.equal(sha256(fs.readFileSync(driverSource)),pin);
+ const driverSha256=sha256(fs.readFileSync(driver));
  const directory=path.join(cwd,'baseline-process');
  const execution=JSON.parse(run('python3',[path.resolve('host-tools/process/bounded-process.py'),JSON.stringify({
    command:['/usr/bin/prlimit','--as=4294967296','--stack=8388608','--cpu=240','--',
-     'lake','env','lean','--run',script,requestFile],
+     driver,requestFile],
    directory,timeoutMs:240000,maxBuffer:32*1024*1024
  })],{timeout:245000,cwd:baseline}));
  // Python and its bounded child inherit this explicit baseline cwd.
@@ -113,7 +118,10 @@ function baselineParity(built,input,cwd,kind){
  for(const key of ['originalIr','specializedIr','transformedIr','admissions','referenceJs','referenceTs'])
    assert.deepEqual(report[key],candidate[key],'PSC1_TRANSFORM_BASELINE_'+key);
  assert.equal(sha256(fs.readFileSync(script)),pin);
- record(kind+'-baseline-transform-parity',{status:'passed',baselineCommit:'cc13ebfabf6763703ee1ec75a663002a9134bc74',
+ assert.equal(sha256(fs.readFileSync(driver)),driverSha256);
+ assert.equal(sha256(fs.readFileSync(driverSource)),pin);
+ assert.equal(run('git',['-C',baseline,'status','--porcelain','--untracked-files=no']).trim(),'');
+ record(kind+'-baseline-transform-parity',{status:'passed',baselineCommit:'cc13ebfabf6763703ee1ec75a663002a9134bc74',driverSha256,
    originalIrSha256:sha256(JSON.stringify(report.originalIr)),specializedIrSha256:sha256(JSON.stringify(report.specializedIr)),
    fusedIrSha256:sha256(JSON.stringify(report.transformedIr)),execution});
 }

@@ -22,28 +22,20 @@ jobs:
           run-id: 40442145356
           name: psc1-cli-runtime-inputs-dfb9507ad8700a24a503a4e52bda00f963af279d
           path: psc1/dist/slim-universal
-      - name: Probe actual target consumers and preserve complete refusal diagnostics
+      - name: Reproduce original installed watch driver with live failure diagnostics
         working-directory: psc1
         run: |
           rustup toolchain install 1.90.0 --profile minimal
+          rustup default 1.90.0
           export PSC1_TEST_RUST_ROOT="$(rustup run 1.90.0 rustc --print sysroot)"
           node --input-type=module <<'JS'
-          import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';import {spawn} from 'node:child_process';
-          import {fixture} from './test/installed/cli-fixture.mjs';
-          const f=fixture({consumers:true});
-          assert.equal(f.assembly.sha256,'1f0a6d28aaa01fc52a810ded365b3c16ab5e1db8053542c575e79551b0afffaf');
-          for(const kind of ['ps','lean'])for(const target of ['ts','rust','wasm-core']){
-            const file=path.join(f.directory,'Main.'+kind);fs.writeFileSync(file,'def answer : Nat := 42\n');
-            const args=['compile',file,'--target',target,'--diagnostics=json'];
-            if(target==='rust')args.push('--rust-toolchain-root',process.env.PSC1_TEST_RUST_ROOT);
-            const result=f.call(args);
-            console.log(JSON.stringify({kind,target,status:result.status,stderr:result.stderr,stdout:result.stdout.slice(0,1600)}));
-          }
-          const file=path.join(f.directory,'Main.ps'),out=path.join(f.directory,'watch-store');
-          fs.writeFileSync(file,'def answer : Nat := 42\n');
-          const child=spawn(f.runtime,[f.cli,'build',file,'--target','ts','--out',out,'--watch','--diagnostics=json'],{cwd:f.directory,env:f.env,stdio:['ignore','pipe','pipe']});
-          child.stdout.on('data',b=>process.stdout.write(b));child.stderr.on('data',b=>process.stderr.write(b));
-          const stop=setTimeout(()=>child.kill('SIGTERM'),15000);
-          await new Promise(resolve=>child.on('close',()=>resolve()));clearTimeout(stop);
-          console.log('PSC1_DIAGNOSTIC_ONLY_NOT_QUALIFICATION');
+          import fs from 'node:fs';
+          const file='test/installed/watch.test.mjs';let source=fs.readFileSync(file,'utf8');
+          const start=source.indexOf('async function receipt('),end=source.indexOf('async function failed(',start);
+          if(start<0||end<0)throw Error('watch diagnostic fixture drift');
+          source=source.slice(0,start)+"async function receipt(state, after) {\n  await until(() => {\n    if (state.events.some(e=>e.event.startsWith('failed')) &&\n        !state.diagnostics.every(d=>/WATCH_SUPERSEDED|INPUT_CHANGED/.test(d.message)))\n      throw Error('WATCH_ACTUAL_FAILURE: '+state.stderr);\n    return state.receipts.length > after || state.exit;\n  }, 'current state follows in receipt failure handler').catch(error=>{\n    console.error('WATCH_LIVE_DIAGNOSTICS '+state.stderr);throw error;\n  });\n  assert.equal(state.exit, undefined, state.stderr);\n  return state.receipts[after];\n}\n"+source.slice(end);
+          source=source.replace('function watch(args, cwd, runtime = f.runtime) {',
+            "function watch(args, cwd, runtime = f.runtime) { console.log('WATCH_CASE '+JSON.stringify({args,cwd,runtime}));");
+          fs.writeFileSync(file,source);
           JS
+          node test/installed/watch.test.mjs

@@ -302,3 +302,12 @@ Keep tests for all of these when changing the package:
 - generated compiler -> package -> native provider path;
 - `psc check --kernel lean434`;
 - `psc build --kernel lean434` fail-before-codegen behavior.
+
+## npm package build
+
+npm run build reuses the exact qualified Lean4.35.0 provider artifact under dist/implementation. Canonical provider sources remain unchanged; build:kernel remains the explicit source build. The public checker is the genuine official C++ provider, never a mock. Wasm keeps Emscripten linear memory.
+
+Build from this directory with npm run build, clean generated dist with npm run clean,
+and create a tarball with npm pack. Builds use the pinned qualified inputs and the
+workspace scripts; installation has no build or download hooks. Registry publication
+is not authorized. See [the package guide](../../docs/guides/npm-packages.md).

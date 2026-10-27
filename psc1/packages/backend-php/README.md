@@ -83,3 +83,12 @@ shared ownership, weak collection, cycles and mutation/offset refusals pass Linu
 
 Actual G1/G2/G3 qualification, exact PHP8.5.12/ext-gmp runs and preserved failures
 belong to the [self-host receipt](../../docs/PSC1_PYTHON_PHP_SELFHOST_QUALIFICATION_2026-10-24.json).
+
+## npm package build
+
+This package provides transparent adapters to the existing checked proofscript API and verified source snapshots. Backend compile adapters select their declared output target; the ./compiler entry retains the full existing API. No separately compiled internal compiler implementation or new self-hosting qualification is claimed.
+
+Build from this directory with npm run build, clean generated dist with npm run clean,
+and create a tarball with npm pack. Builds use the pinned qualified inputs and the
+workspace scripts; installation has no build or download hooks. Registry publication
+is not authorized. See [the package guide](../../docs/guides/npm-packages.md).

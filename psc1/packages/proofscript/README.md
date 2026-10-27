@@ -30,3 +30,12 @@ a formally proven sound, consistent, fully Lean-compatible or self-hosted fixed-
 
 Read `psc0/docs/NPM_PACKAGING_ARCHITECTURE.md` in the repository for third-party
 library metadata, source-only stdlib registration and package architecture.
+
+## npm package build
+
+This package owns one copy of the previously qualified JS/TS compiler implementation. The checked API, CLI and default independent linear-memory Wasm kernel remain. Rust/Wasm compiler engines and Python/PHP providers stay explicit optional installations. Other package adapters depend on this existing owner.
+
+Build from this directory with npm run build, clean generated dist with npm run clean,
+and create a tarball with npm pack. Builds use the pinned qualified inputs and the
+workspace scripts; installation has no build or download hooks. Registry publication
+is not authorized. See [the package guide](../../docs/guides/npm-packages.md).

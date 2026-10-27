@@ -95,15 +95,20 @@ theorem projection_iota (fields : List PsMinRegField) (data : List Type)
       fieldValue data (Carrier (singleSpec fields) data) fields index type h args := by
   rw [recordArgs_construct]
 
+theorem projection_head_type (fields : List PsMinRegField) (rest : List PsMinRegSpec)
+    (index : Nat) (type : PsMinRegTy) (h : psMinOpFieldType fields index = some type) :
+    psMinOpProjectionType (singleSpec fields :: rest) 0 index = some (.arr (.data 0) type) := by
+  simpa only [psMinOpProjectionType, singleSpec, h]
+
 theorem actual_projection_iota (fields : List PsMinRegField) (rest : List PsMinRegSpec)
     (index : Nat) (type : PsMinRegTy) (h : psMinOpFieldType fields index = some type)
     (args : Args (dataModel rest) (Carrier (singleSpec fields) (dataModel rest)) fields) :
     projectionModel (singleSpec fields :: rest) 0 index (.arr (.data 0) type)
-      (by simp [psMinOpProjectionType, singleSpec, h])
+      (projection_head_type fields rest index type h)
       (construct (singleSpec fields) (dataModel rest) ⟨0, by simp [singleSpec]⟩ args) =
       fieldValue (dataModel rest) (Carrier (singleSpec fields) (dataModel rest)) fields index type h args := by
   unfold projectionModel
-  dsimp only [singleSpec, Nat.casesAuxOn]
+  dsimp only [singleSpec, Nat.casesAuxOn, psMinOpProjectionType]
   simp only [h]
   exact projection_iota fields (dataModel rest) index type h args
 

@@ -99,6 +99,7 @@ try{
  const cwd=project('all-packages');install(cwd,builds.map(tar));record('all24-offline-install');
  const nodes=path.join(cwd,'node_modules'),rootInstalled=path.join(nodes,'proofscript');
  const compilerInstalled=path.join(nodes,'@proofscript/compiler');
+ const rootCompilerInstalled=path.join(rootInstalled,'node_modules/@proofscript/compiler');
  const exportCode=[
   "import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';",
   "const records=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));let count=0;",
@@ -124,7 +125,7 @@ try{
  let preserved=0;
  for(const pin of frozenAudit.frozenFiles){
   if(pin.path.startsWith('node_modules/')||metadataChanges.has(pin.path))continue;
-  const bytes=fs.readFileSync(path.join(compilerInstalled,'dist/implementation',pin.path));
+  const bytes=fs.readFileSync(path.join(rootCompilerInstalled,'dist/implementation',pin.path));
   assert.equal(bytes.length,pin.bytes);assert.equal(sha256(bytes),pin.sha256);preserved++;
  }
  for(const required of ['selfhost/js/module.js','selfhost/ts/module.js','host-tools/compiler-host-protocol.mjs',
@@ -136,8 +137,8 @@ record('all-advertised-exports-import',{exports:exports.count});
  for(const runtime of [process.execPath,'bun']){
   const observed=script(cwd,'shared.mjs',[
    "import assert from 'node:assert/strict';",
-   "import * as root from 'proofscript';import * as compiler from '@proofscript/compiler';",
-   "import * as foundation from '@proofscript/foundation';import * as syntax from '@proofscript/syntax/compiler';",
+   "import * as root from 'proofscript';import * as compiler from 'proofscript/compiler';",
+   "import * as foundation from 'proofscript/foundation';import * as syntax from 'proofscript/cli';",
    "assert.equal(root.compile,compiler.compile);assert.equal(root.compile,syntax.compile);",
    "assert.equal(root.getCompilerMetadata,compiler.getCompilerMetadata);",
    "const sources=foundation.readSources();assert.ok(sources.length>=5);assert.ok(sources.some(s=>s.module==='Ps.Foundation.Name'));",
@@ -147,11 +148,33 @@ record('all-advertised-exports-import',{exports:exports.count});
   ].join('\n'),[],runtime);
   record('single-shared-runtime-'+(runtime==='bun'?'bun':'node'),JSON.parse(observed));
  }
+ for(const runtime of [process.execPath,'bun']){
+  script(cwd,'standalone-shared.mjs',[
+   "import assert from 'node:assert/strict';",
+   "import * as compiler from '@proofscript/compiler';import * as syntax from '@proofscript/syntax/compiler';",
+   "import * as cli from '@proofscript/cli';",
+   "assert.equal(compiler.compile,syntax.compile);assert.equal(compiler.compile,cli.compile);"
+  ].join('\n'),[],runtime);
+ }
+ record('standalone-owner-shared-api-identity');
  const payloads=[];
  function findBundles(dir){for(const n of fs.readdirSync(dir)){const p=path.join(dir,n),s=fs.lstatSync(p);
   if(s.isDirectory())findBundles(p);else if(n==='module.js'&&p.includes('/selfhost/'))payloads.push(p);}}
- findBundles(nodes);assert.equal(payloads.length,2,'only the original JS and TS compiler executors');
- record('no-per-package-compiler-bundle-duplication',{payloads:payloads.map(p=>path.relative(nodes,p))});
+ // Bundled and explicitly installed packages are separate npm scopes.
+ // The normal one-root install must have exactly one pair. Explicitly installing
+ // the standalone owner as well may retain another copy; it must be the exact
+ // same qualified bytes, owned only by @proofscript/compiler.
+ findBundles(path.join(defaultProject,'node_modules'));
+ assert.equal(payloads.length,2,'one root install contains exactly the qualified JS/TS pair');
+ record('no-per-package-compiler-bundle-duplication',{payloads:payloads.map(p=>path.relative(defaultProject,p))});
+ payloads.length=0;findBundles(nodes);
+ for(const file of payloads){
+  assert.match(file,/\/@proofscript\/compiler\/dist\/implementation\/selfhost\/(js|ts)\/module\.js$/);
+  const kind=file.includes('/selfhost/js/')?'js':'ts';
+  const pin=frozenAudit.frozenFiles.find(p=>p.path==='selfhost/'+kind+'/module.js');
+  assert.equal(sha256(fs.readFileSync(file)),pin.sha256);
+ }
+ record('explicit-standalone-copies-retain-qualified-bytes',{executors:payloads.length,scope:'separate npm installations, no synthetic runtime singleton'});
  const baseline=project('baseline');
  // Root archive may include an enclosing directory. Locate its exact pinned tarball.
  const baseInput=JSON.parse(fs.readFileSync('scripts/npm-packages-input.json')).root;
@@ -258,11 +281,18 @@ record('all-advertised-exports-import',{exports:exports.count});
   const r=call(process.execPath,['--input-type=module','--eval',"import{readSources}from '@proofscript/foundation';readSources();"],cwd);
   assert.notEqual(r.status,0);assert.match(r.stderr,/PSC1_PACKAGE_SOURCE_IDENTITY/);
  }finally{fs.writeFileSync(source,before);}record('modified-source-snapshot-refused');
- const implementation=path.join(compilerInstalled,'dist/implementation'),body=path.join(implementation,'selfhost/js/module.js'),bodyBytes=fs.readFileSync(body);
+ const implementation=path.join(rootCompilerInstalled,'dist/implementation'),body=path.join(implementation,'selfhost/js/module.js'),bodyBytes=fs.readFileSync(body);
  try{fs.appendFileSync(body,"\nthrow Error('tampered-executed');");
   const r=call(process.execPath,[path.join(cwd,'compile.mjs'),JSON.stringify({...samples[0],engine:'js',target:'js'})],cwd);
   assert.notEqual(r.status,0);assert.match(r.stderr,/PSC1_INSTALLED_RESOURCE_IDENTITY/);assert.doesNotMatch(r.stderr,/tampered-executed/);
  }finally{fs.writeFileSync(body,bodyBytes);}record('modified-executable-refused-before-execution');
+ const standaloneBody=path.join(compilerInstalled,'dist/implementation/selfhost/js/module.js'),standaloneBytes=fs.readFileSync(standaloneBody);
+ try{
+  fs.appendFileSync(standaloneBody,"\nthrow Error('tampered-standalone-executed');");
+  const r=call(process.execPath,['--input-type=module','--eval',"import{compile}from'@proofscript/compiler';compile(JSON.parse(process.argv[1]));",JSON.stringify({...samples[0],engine:'js',target:'js'})],cwd);
+  assert.notEqual(r.status,0);assert.match(r.stderr,/PSC1_INSTALLED_RESOURCE_IDENTITY/);assert.doesNotMatch(r.stderr,/tampered-standalone-executed/);
+ }finally{fs.writeFileSync(standaloneBody,standaloneBytes);}
+ record('standalone-owner-tamper-refused');
  const broken=path.join(nodes,'@proofscript/compiler/package.json'),oldMeta=fs.readFileSync(broken);
  try{const m=JSON.parse(oldMeta);m.exports['.'].import='./dist/missing.js';fs.writeFileSync(broken,json(m));
   const r=call(process.execPath,['--input-type=module','--eval',"import '@proofscript/compiler'"],cwd);

@@ -314,6 +314,7 @@
     "existing-optional-compiler-engine-rust",
     "existing-optional-compiler-engine-wasm-core",
     "existing-source-package-compiles-through-shared-compiler",
+    "explicit-standalone-copies-retain-qualified-bytes",
     "fresh-global-cli",
     "fresh-global-cli-checked-publication",
     "fresh-local-cli-check",
@@ -339,6 +340,8 @@
     "semantic-refusal-wrong-body",
     "single-shared-runtime-bun",
     "single-shared-runtime-node",
+    "standalone-owner-shared-api-identity",
+    "standalone-owner-tamper-refused",
     "unchanged-optional-engines-and-sdks-install"
   ],
   "umbrella": "proofscript",

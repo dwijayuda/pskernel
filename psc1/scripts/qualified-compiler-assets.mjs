@@ -130,7 +130,7 @@ function optionalBundle(engine, compiler, assetsRoot, directory, tarballs, versi
   }
   if (engine === 'rust') fs.chmodSync(path.join(payload, 'service.bin'), 0o755);
   const transports = engine === 'rust'
-    ? ['generated-rust-transport.mjs', 'generated-rust-guard.mjs'] : ['generated-wasm-transport.mjs'];
+    ? ['generated-rust-transport.mjs', 'generated-rust-guard.mjs', 'runtime-policy.mjs'] : ['generated-wasm-transport.mjs'];
   for (const file of transports)
     write(path.join(directory, 'runtime', file), fs.readFileSync(path.join('host-tools', file)));
   const manifest = {
@@ -167,7 +167,7 @@ function optionalBundle(engine, compiler, assetsRoot, directory, tarballs, versi
     "export function compileCandidate(request:string):string;\nexport function psCompilerJsServiceCandidate(request:string):string;\n");
   write(path.join(directory, 'README.md'), '# ' + name + '\n\nUnpublished, exactly qualified G3 execution payload from the shared PSC1 compiler. No SDK or install-time build. This package returns candidates only; the root toolchain must independently admit exact graph bytes and validate output. Compiler Wasm retains GC; the separate official C++/Emscripten kernel retains linear memory. Rust execution is Linux x64/glibc only. Other-platform publication and the 240-second selfcompile target have separate qualification.\n');
   write(path.join(directory, 'package.json'), JSON.stringify({
-    name, version, type: 'module', private: true, license: 'UNLICENSED', engines: { node: '22.23.3' },
+    name, version, type: 'module', private: true, license: 'UNLICENSED', engines: { node: '>=22.23.3' },
     main: './index.mjs', types: './index.d.ts',
     exports: { '.': { types: './index.d.ts', import: './index.mjs' },
       './metadata': './BUNDLE_MANIFEST.json', './package.json': './package.json' },

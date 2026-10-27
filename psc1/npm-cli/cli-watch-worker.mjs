@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import {readInput, parseCompilation, captureProject, checkedOptions, captureIdentity, refuse} from './cli-project.mjs';
 import {compile, build} from './universal.mjs';
 import crypto from 'node:crypto';
+try {
 const [file, expected] = process.argv.slice(2);
 const bytes = readInput(file).text;
 if (crypto.createHash('sha256').update(bytes).digest('hex') !== expected)
@@ -21,3 +22,8 @@ const options = checkedOptions(parsed, captured);
 const result = job.command === 'build' ? build(options, {beforePublish: assertCurrent}) : compile(options);
 if (job.command !== 'build') assertCurrent();
 console.log(JSON.stringify(job.command === 'check' ? {...result, source: undefined} : result));
+
+} catch (error) {
+  console.error((error.cliCode ? error.cliCode + ': ' : '') + String(error?.message || error));
+  process.exitCode = 1;
+}

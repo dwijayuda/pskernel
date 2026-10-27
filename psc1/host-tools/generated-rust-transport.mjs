@@ -2,10 +2,11 @@
 import fs from 'node:fs';import path from 'node:path';import os from 'node:os';import crypto from 'node:crypto';
 import assert from 'node:assert/strict';import {spawnSync} from 'node:child_process';import {fileURLToPath} from 'node:url';
 import {linuxProcessIdentity} from './generated-rust-guard.mjs';
+import {requireSupportedRuntime,runtimeArguments} from './runtime-policy.mjs';
 const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
 const guard=fileURLToPath(new URL('./generated-rust-guard.mjs',import.meta.url)),MAX=128*1024*1024;
 export function runGeneratedRustCompiler({executable,executableSha256,request,timeoutMs=240000}){
- assert.equal(process.version,'v22.23.3');assert.equal(process.platform,'linux');
+ requireSupportedRuntime();assert.equal(process.platform,'linux');
  assert.ok(path.isAbsolute(executable));assert.match(executableSha256,/^[a-f0-9]{64}$/);
  assert.equal(typeof request,'string');assert.ok(Buffer.byteLength(request)<=MAX);
  assert.ok(Number.isSafeInteger(timeoutMs)&&timeoutMs>0&&timeoutMs<=240000);
@@ -15,7 +16,7 @@ export function runGeneratedRustCompiler({executable,executableSha256,request,ti
  try{
   // The independent guard survives an outer caller kill long enough to reap the
   // whole compiler process group. The ordinary compiler budget stays240s.
-  const child=spawnSync(process.execPath,[guard,String(process.pid),parentStart,executable,executableSha256,input,output,String(timeoutMs)],
+  const child=spawnSync(process.execPath,runtimeArguments([guard,String(process.pid),parentStart,executable,executableSha256,input,output,String(timeoutMs)]),
    {encoding:'utf8',maxBuffer:1024*1024,stdio:['ignore','pipe','pipe']});
   assert.equal(child.error,undefined,child.error?.message);
   assert.equal(child.status,0,'PSC1_RUST_COMPILER_FAILED: '+(child.stderr||child.stdout));

@@ -29,7 +29,12 @@ Success receipts remain JSON lines on stdout; progress/diagnostics stay on stder
 Linux process groups receive interruption with bounded kill escalation.
 
 Candidate proofscript@0.1.0-psc1.10 is a finite host overlay on exact .7 inputs.
-Frozen compiler/kernel/provider payloads are unchanged. Source/installed policy,
+Frozen compiler/kernel/provider payloads are unchanged. Actual Bun testing exposed
+an additional exact pin in the optional Rust transport. A23-module production
+host audit found this remaining pin. Both optional engine packages are .10 host/
+metadata repacks; every payload byte, fixed point and source identity is compared
+unchanged. Rust transport shares the runtime policy and original Linux lifetime
+guard; Wasm transport is unchanged. Manifest/index pins are explicitly refreshed. Source/installed policy,
 real dependency/config/atomic-save/recovery/watch/refusal/target/signal tests,
 all prior regressions and actual Node/Bun runtime matrices are required.
 Current code is implemented, not yet qualified. CI/results and new ZIP identities

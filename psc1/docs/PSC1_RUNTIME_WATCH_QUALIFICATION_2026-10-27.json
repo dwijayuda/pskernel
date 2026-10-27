@@ -79,10 +79,24 @@
       "run": 40435423712,
       "job": 121962819178,
       "reason": "pinned host formatter required multiline spawn call; proposal preserved AST"
+    },
+    {
+      "commit": "0321fddaef9a526fd68e4e232d4daed66880617a",
+      "run": 40436406870,
+      "job": 121966422439,
+      "reason": "Actual Bun reached the optional Rust transport's independent exact Node pin; audit found it as the remaining pin among23 production host modules. Repack both execution packages' host metadata, update only Rust transport/policy, retain every payload byte."
     }
   ],
   "finalRelease": false,
   "otherPlatformPublication": "unqualified",
   "humanTrial": "pending independent participant",
-  "mergeOrPublish": "not-authorized"
+  "mergeOrPublish": "not-authorized",
+  "executionBundlePolicy": {
+    "version": "0.1.0-psc1.10",
+    "compilerPayloads": "byte-identical",
+    "rustTransport": "shared runtime floor and explicit runtime arguments; original Linux lifetime guard unchanged",
+    "wasmTransport": "unchanged",
+    "metadata": "minimum Node range; manifest/index pins updated",
+    "newFixedPointClaim": false
+  }
 }

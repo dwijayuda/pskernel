@@ -184,9 +184,12 @@ with their existing pinned package diagnostic. The CLI does not install them
 or download an SDK. --rust-toolchain-root remains an explicit host-owned path.
 See the existing checked-dispatch installation guide for those dependencies;
 use this candidate's root and optional tarballs from its package receipt.
-Rust/Wasm engines retain .7 payload packages. The component/Python/PHP tools
-are .8 metadata-only repacks: identical workers/runtimes, without a reverse
-root peer dependency that could make npm prune the installed compiler.
+Rust/Wasm engines use .10 host/metadata repacks with exactly retained G3 native/
+Wasm compiler payloads. The Rust transport uses the shared minimum runtime policy;
+both optional packages' npm engines accept newer Node versions. Their manifests
+and resource pins are refreshed explicitly. Component/Python/PHP tools are .10
+metadata-only repacks with identical workers/runtimes and no reverse root peer
+that could make npm prune the installed compiler.
 
 Projects contain sources and optional assurance only. They cannot choose
 engine, kernel, output, SDKs, checkers, services or publication policy. Pass

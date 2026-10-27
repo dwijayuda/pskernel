@@ -2,6 +2,7 @@
 // Do not rebuild or relabel any compiler/kernel/provider payload or G3 evidence.
 import fs from 'node:fs';
 import {renderSourceGuide} from './render-guide.mjs';
+import {refreshExecutionRuntime} from './execution-runtime.mjs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
@@ -112,9 +113,34 @@ for (const [target, descriptor] of Object.entries(d.dispatchPackages)) {
     tarball: nextTar, sha256: descriptor.tarballSha256});
   fs.unlinkSync(oldTar);
 }
+
+// Optional engine runtime metadata must follow the same minimum policy as the root.
+// Preserve and compare every genuine G3 payload; refresh only finite host resources.
+const repackagedExecutionPackages=[],executionPackages={...original.input.packages};
+for(const engine of ['rust','wasm-core']){
+  const descriptor=d.engines[engine],prior=executionPackages[engine];
+  const oldTar=path.join(out,'tarballs',prior.tarball);
+  assert.equal(sha256(fs.readFileSync(oldTar)),prior.sha256);
+  const directory=path.join(out,'execution-tools',engine);fs.mkdirSync(directory,{recursive:true});
+  for(const name of run('tar',['tzf',oldTar]).split('\n').filter(Boolean))
+    assert.ok(name.startsWith('package/')&&!name.includes('\\')&&!name.split('/').includes('..'));
+  run('tar',['xzf',oldTar,'-C',directory]);
+  const root=path.join(directory,'package');
+  assert.deepEqual(inventory(root),descriptor.files);
+  const refreshed=refreshExecutionRuntime(root,engine,version);
+  const packed=JSON.parse(run('npm',['pack',root,'--ignore-scripts','--json','--pack-destination',path.join(out,'tarballs')]));
+  assert.equal(packed.length,1);
+  const file=packed[0].filename,bytes=fs.readFileSync(path.join(out,'tarballs',file));
+  descriptor.version=version;descriptor.files=refreshed.files;descriptor.tarballSha256=sha256(bytes);
+  executionPackages[engine]={...prior,version,tarball:file,sha256:sha256(bytes),bytes:bytes.length,manifestSha256:refreshed.manifestSha256};
+  repackagedExecutionPackages.push({...refreshed,package:prior.package,version,tarball:file,sha256:sha256(bytes)});
+  fs.unlinkSync(oldTar);
+}
+
 const metaFile = path.join(stage, 'package.json'), meta = JSON.parse(fs.readFileSync(metaFile));
 meta.version = version;
 meta.engines = {...meta.engines, node: '>=22.23.3'};
+for (const engine of ['rust','wasm-core']) meta.peerDependencies[d.engines[engine].package] = version;
 for (const descriptor of Object.values(d.dispatchPackages))
   meta.peerDependencies[descriptor.package] = descriptor.version;
 meta.bin = {proofscript: './npm-cli/proofscript-cli.mjs',
@@ -155,7 +181,8 @@ const packedFile = path.join(out, 'tarballs', packed[0].filename), packedBytes =
 fs.unlinkSync(tar); // Retain the original only in its immutable input archive.
 const receipt = {...original, dispatchPackages: d.dispatchPackages, repackagedTools, sourceCommit: process.env.GITHUB_SHA, version,
   tarball: packed[0].filename, sha256: sha256(packedBytes), bytes: packedBytes.length,
-  hostOnly: true, hostInput: input, preservedPayloadFiles: before.filter(row => !changed.has(row.path)).length,
+  input: {...original.input, packages: executionPackages}, repackagedExecutionPackages,
+   hostOnly: true, hostInput: input, preservedPayloadFiles: before.filter(row => !changed.has(row.path)).length,
   sizeRatio: packedBytes.length / original.previousRootBytes,
   removedBytes: original.previousRootBytes - packedBytes.length,
   originalRootSha256: old.rootSha256,

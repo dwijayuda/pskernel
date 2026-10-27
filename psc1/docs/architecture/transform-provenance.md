@@ -83,6 +83,14 @@ coalescing and arbitrary strongly connected package groups are outside this prof
 
 ## Qualification and reproduction
 
+Source7d7ada7ad7d5f5ca1504527342888d929e1b9959 passes
+[full source40481560025](https://github.com/dwijayuda/pskernel/actions/runs/40481560025):
+16 selected jobs,37/37 finite Practical Core criteria and scoped seven-backend
+execution. Tested mergeaccd2875a6c09ab30f3b3fd02e4c07883d4dd675.
+The [dated receipt](../PSC1_TRANSFORM_OWNERSHIP_QUALIFICATION_2026-10-27.json)
+retains exact source/IR/admission/package/tool identities and all attempts.
+The integrated artifact12722888572 includes both complete installable cohorts.
+
 [Finite v2 contract](../../test/modular/extended-contract.json) defines29 named
 package cases. Existing v1 has28 package cases/14 planner refusals; provenance
 adds12 invariants/eight refusals and extended layout adds eight refusals.
@@ -140,8 +148,10 @@ Pre-commit faults retain the old pointer; post-commit faults explicitly report
 committed durability uncertainty.
 
 This is an executing compiler-component graph, not a complete modular compiler.
-The source-import navigation receipt is read-only navigation, not transformed
-runtime ownership evidence. Complete compiler partitioning, explicit handling of
+The source-import navigation receipt measures125 modules/2692524 source bytes
+from Ps.CompilerUnified.Service. It is read-only navigation, not transformed
+runtime ownership evidence. The separately generated89-module JS service passes
+ten G1 selected-corpus cases; that is not modular self-hosting qualification. Complete compiler partitioning, explicit handling of
 cross-package recursive groups, portable planner qualification, modular G1/G2/G3
 and fixed points, other platforms and the arranged human maintainer trial remain
 pending. Frozen qualified compilers, optional providers and genuine kernel

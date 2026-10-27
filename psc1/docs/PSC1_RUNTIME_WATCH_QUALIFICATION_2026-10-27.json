@@ -1,0 +1,88 @@
+{
+  "schema": "psc1-runtime-watch-qualification/1",
+  "updated": "2026-10-27",
+  "status": "pending-ci",
+  "pullRequest": 193,
+  "baseCommit": "94e0c13f6a4b434f73c859cc0c716cb6fb8d1340",
+  "firstImplementationCommit": "91bcbd107f375eea5cf5f87f15a9be9fe561b7c4",
+  "package": "proofscript",
+  "version": "0.1.0-psc1.10",
+  "runtimePolicy": {
+    "node": ">=22.23.3",
+    "bun": ">=1.4.0",
+    "otherRuntimes": "unqualified",
+    "dependencyMinimum": "bundled independent kernel >=22.23.3",
+    "exactPins": "CI reproduction only"
+  },
+  "watch": {
+    "flags": [
+      "--watch",
+      "-w",
+      "-watch"
+    ],
+    "pollMs": 500,
+    "semantics": "full checked recapture; no semantic incremental cache",
+    "publication": "exact captured-input identity veto immediately before publication",
+    "postGuardEdits": "queued next rebuild",
+    "signals": {
+      "SIGINT": 130,
+      "SIGTERM": 143,
+      "linuxProcessGroupKillEscalationMs": 2000
+    }
+  },
+  "requiredEvidence": [
+    "all prior installed and application gates",
+    "both grammars; JS/TS/Rust/Wasm watch output",
+    "real superseded staged request; pointer preservation",
+    "actual Node22.23.3/24/26 and Bun1.4.0/1.4.4; four compiler engines; both grammars",
+    "Node22.0.0/20 installed refusals",
+    "dependency-selected source gates"
+  ],
+  "previousEvidence": {
+    "sourceRun": 40344469855,
+    "installedRun": 40344458391,
+    "wasmG1Run": 40344458240,
+    "finiteCoreCriteria": 37
+  },
+  "frozenCompiler": {
+    "modules": 122,
+    "members": 4742,
+    "closure": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+    "newG2G3": "not-requested"
+  },
+  "checker": {
+    "lean": "4.35.0",
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "trust": 0,
+    "wasmMemory": "official C++/Emscripten linear"
+  },
+  "limits": {
+    "compilerToolG1Seconds": 240,
+    "independentCheckerSeconds": 120,
+    "semanticFuel": "unchanged",
+    "memoryStackLifetime": "unchanged"
+  },
+  "failedAttempts": [
+    {
+      "commit": "91bcbd107f375eea5cf5f87f15a9be9fe561b7c4",
+      "run": 40435160997,
+      "reason": "historical relocation guard treated new host test as an unchanged move"
+    },
+    {
+      "commit": "bbf511c39d624e517446d645d37a80658ded78f5",
+      "run": 40435231578,
+      "job": 121962203990,
+      "reason": "same guard also required historical test-owner snapshot"
+    },
+    {
+      "commit": "6bc154863011dcc64b77b516700954b8cd33a5d2",
+      "run": 40435423712,
+      "job": 121962819178,
+      "reason": "pinned host formatter required multiline spawn call; proposal preserved AST"
+    }
+  ],
+  "finalRelease": false,
+  "otherPlatformPublication": "unqualified",
+  "humanTrial": "pending independent participant",
+  "mergeOrPublish": "not-authorized"
+}

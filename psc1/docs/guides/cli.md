@@ -1,8 +1,9 @@
 # ProofScript CLI
 
 This guide covers the runtime/watch candidate `proofscript@0.1.0-psc1.10`.
-Its new runtime/watch qualification is pending; the previous .9 layout evidence
-below does not qualify the .10 package. [The layout receipt](../PSC1_LAYOUT_QUALIFICATION_2026-10-26.json)
+Its [runtime/watch receipt](../PSC1_RUNTIME_WATCH_QUALIFICATION_2026-10-27.json)
+records qualification separately; the previous .9 layout evidence below does not
+qualify the .10 package. Install only the matching candidate whose receipt passed. [The layout receipt](../PSC1_LAYOUT_QUALIFICATION_2026-10-26.json)
 records actual CI status, exact source/package identities and artifact information.
 Use its root and matching optional tarballs only after its installed gate passes.
 The preceding .8 qualification remains in the

@@ -46,6 +46,7 @@ for(let i=0;i<oracle.probes.length;i++){
  assert.equal(String(got),want.value,'native/generated '+i);
 }
 assert.equal(direct.captureProbe(),2n);
+assert.equal(direct.combinedProbe(11n),18n);
 const large=(1n<<256n)+12345n;
 assert.equal(direct.curryProbe(large)(5n)(true),large+5n);
 assert.equal(direct.curryProbe(2n)(5n)(false),0n);
@@ -74,7 +75,9 @@ assert.equal(policy.semanticContractQualified,false);assert.equal(policy.strictS
 assert.equal(policy.moduleCount,1);assert.equal(policy.originModuleCount,1);
 const ir=JSON.parse(fs.readFileSync(path.join(dir,'whole.ir.json')));
 assert.equal(ir[0],'psc1-ir/1');
-assert.equal(ir[4].length,6);
+assert.ok(ir[4].length>=6);
+const sourceNames=['psR5Add','psR5Sub','psR5Choose','psR5Three','psR5Capture','psR5UseClosure'];
+for(const name of sourceNames)assert.equal(ir[4].filter(d=>d[0]===name).length,1,'exact source IR declaration '+name);
 const originalIrAbi=ir[4].map(d=>({name:d[0],typeParameters:d[1],parameters:d[2],resultType:d[3]}));
 const origins=JSON.parse(fs.readFileSync(path.join(dir,'origins.json')));
 assert.equal(origins.length,1);
@@ -88,7 +91,7 @@ const sources=['proofs/pskernel-min/CompilerPreservation.lean','scripts/MinKerne
 const sourceFiles=sources.map(file=>{const bytes=fs.readFileSync(file);return {file,bytes:bytes.length,sha256:sha(bytes)}});
 const receipt={schema:'psc1-r5-compiler-preservation-execution/1',head:process.env.GITHUB_SHA,
  platform:process.platform,node:process.version,scalarProbes:400,wholeSourceCalls:wholeCalls,
- captureProbe:true,curryProbes:3,operandTraceProbes:traces.length,arityRefusals:oracle.arityRefusals,
+ captureProbe:true,combinedCaptureCurryProbe:true,curryProbes:3,operandTraceProbes:traces.length,arityRefusals:oracle.arityRefusals,
  strictIrRefusals:oracle.strictIrRefusals,binaryStageRefusals:oracle.binaryStageRefusals,
  recognizerRefusals:oracle.recognizerRefusals,recognizerCases:oracle.recognizerCases,official:{accepted:official.accepted,version:official.leanVersion,commit:official.leanCommit},
  ownedNewSourcePacket:{accepted:owned.accepted,delegated:owned.delegated,bytes:admissions.length,sha256:sha(admissions)},

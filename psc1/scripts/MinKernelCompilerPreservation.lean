@@ -128,6 +128,9 @@ def main : IO Unit := do
   let shadow ← r5Emit (psErasureCurryParameters
     [PsVerifiedIrParameter.mk "same" r5NatType, PsVerifiedIrParameter.mk "same" r5NatType]
     r5NatType (.var "same")).2
+  let combined ← r5Emit (psErasureWrapApplicationCaptures [second, first]
+    (psErasureCurryParameters [PsVerifiedIrParameter.mk "input" r5NatType] r5NatType
+      (r5Binary .natAdd (.var "capturedB") (.var "input"))).2)
   let mut traced : List String := []
   for (_, op, _, _) in operations do
     match psTsEmitIntrinsicFromPrinted op ["left()", "right()"] with
@@ -178,8 +181,8 @@ def main : IO Unit := do
     match psErasePrimitiveApplication psEnvironmentEmpty (psErasureScopeEmpty [])
         eraseOperand (.mk (.constE name []) [operand, operand]) with
     | .ok (.some actual) =>
-        let expected := r5Binary op (r5Nat 1) (r5Nat 1)
-        match psIrEncodeExpr actual, psIrEncodeExpr expected with
+        let expectedIr := r5Binary op (r5Nat 1) (r5Nat 1)
+        match psIrEncodeExpr actual, psIrEncodeExpr expectedIr with
         | .ok left, .ok right =>
             if left == right then recognizerCases := recognizerCases + 1
             else throw (IO.userError "R5_RECOGNIZER_OPERATION_MISMATCH")
@@ -201,6 +204,7 @@ def main : IO Unit := do
     ("export const probes = [" ++ String.intercalate ",\n" functions ++ "];\n" ++
       "export const traced = [" ++ String.intercalate ",\n" traced ++ "];\n" ++
       "export const captureProbe = () => (" ++ capture ++ ");\n" ++
+      "export const combinedProbe = (" ++ combined ++ ");\n" ++
       "export const curryProbe = (" ++ curry ++ ");\n" ++
       "export const shadowProbe = (" ++ shadow ++ ");\n")
   IO.FS.writeFile (dir ++ "/native.json")

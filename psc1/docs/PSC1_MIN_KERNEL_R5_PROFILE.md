@@ -4,7 +4,7 @@ Status: implementation and Linux qualification pending. Continuation setting:
 GPT-6.1 Sol / High. Starting remote HEAD:
 `1ebdb825b05abdb7f6cc960d16b7d5ba41b75f5b`.
 Read [R4's qualified boundary](PSC1_MIN_KERNEL_R4_GUIDELINE.md) first.
-All proofs, builds, compiler execution and tests run on GitHub Actions Linux.
+All proofs, builds, compiler execution and tests run on GitHub Actions Linux. A separate 10-minute compiler-preservation job checks the proof and native fixture before the unchanged 20-minute portability job.
 
 ## Selected batch and proof obligations
 
@@ -24,8 +24,7 @@ Shadowing is explicit and arbitrary capture lengths are covered.
 
 A separate exact-argument Invoke relation defines the curried single-argument
 ABI. Prove actual psErasureCurryParameters corresponds to sequential lexical
-binding for arbitrary parameter lists and matching argument lists. The theorem
-concerns scalar-result bodies; it does not cover arbitrary higher-order effects
+binding for arbitrary parameter lists and matching argument lists. The composed capstone interprets actual capture lets around the actual curried expression through CapturedInvoke, rather than merely returning two unrelated witnesses. The theorem concerns scalar-result bodies; it does not cover arbitrary higher-order effects
 or prove the emitter's generator scheduler.
 
 For Nat add/sub/mul/div/mod/beq/ble/blt and Bool.and/or, prove the actual shared binary lowering stage emits the independently specified operation when its two recursive

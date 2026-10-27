@@ -9,6 +9,7 @@ import CompilerPreservation
 #print axioms Ps.MinKernel.CompilerPreservation.curry_iff
 #print axioms Ps.MinKernel.CompilerPreservation.curry_result_type_nil
 #print axioms Ps.MinKernel.CompilerPreservation.curry_result_type_cons
+#print axioms Ps.MinKernel.CompilerPreservation.wrap_invocation_preserves
 #print axioms Ps.MinKernel.CompilerPreservation.capture_curry_preservation
 #print axioms Ps.MinKernel.CompilerPreservation.mapped_binary
 #print axioms Ps.MinKernel.CompilerPreservation.erase_binary

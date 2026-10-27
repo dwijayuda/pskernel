@@ -168,25 +168,41 @@ theorem curry_result_type_cons (p : PsVerifiedIrParameter) (rest : List PsVerifi
     (psErasureCurryParameters (p :: rest) type body).1 =
       .function [p.type] (psErasureCurryParameters rest type body).1 := rfl
 
+-- First evaluate capture lets, then invoke the resulting curried value.
+-- This separate phase relation keeps captures outside each later argument call.
+inductive CapturedInvoke : Env → PsVerifiedIrExpr → List Value → Value → Prop where
+  | invoke (h : Invoke env body arguments result) :
+      CapturedInvoke env body arguments result
+  | bind (value : Eval env expression v)
+      (body : CapturedInvoke ((name, v) :: env) rest arguments result) :
+      CapturedInvoke env (.letE name type expression rest) arguments result
+
+theorem wrap_invocation_preserves (history : Captures env bindings final)
+    (bodyValue : CapturedInvoke final body arguments result) :
+    CapturedInvoke env (psErasureWrapApplicationCaptures bindings body) arguments result := by
+  induction history generalizing body with
+  | nil => exact bodyValue
+  | cons history value ih =>
+      change CapturedInvoke _ (psErasureWrapApplicationCaptures _
+        (.letE _ _ _ body)) arguments result
+      exact ih (CapturedInvoke.bind value bodyValue)
+
 theorem capture_curry_preservation
     (captures : Captures env bindings captured)
     (parameters : Bindings captured params values final)
     (bodyValue : Eval final body result) :
-    ∃ finalEnv, Captures env bindings finalEnv ∧
-      Invoke finalEnv (psErasureCurryParameters params type body).2 values result :=
-  ⟨captured, captures, (curry_iff parameters).mpr bodyValue⟩
+    CapturedInvoke env (psErasureWrapApplicationCaptures bindings
+      (psErasureCurryParameters params type body).2) values result :=
+  wrap_invocation_preserves captures
+    (CapturedInvoke.invoke ((curry_iff parameters).mpr bodyValue))
 
 theorem mapped_binary (erase : PsExpr → Except PsErasureError PsVerifiedIrExpr)
     (ha : erase a = .ok left) (hb : erase b = .ok right)
     (operation : PsVerifiedIrIntrinsic) :
     psEraseMappedIntrinsic erase operation [a, b] =
       .ok (.intrinsic operation [] [left, right]) := by
-  change (match erase a with
-    | .error e => Except.error e
-    | .ok x => match erase b with
-      | .error e => Except.error e
-      | .ok y => Except.ok (PsVerifiedIrExpr.intrinsic operation [] [x, y])) = _
-  rw [ha, hb]
+  simp only [psEraseMappedIntrinsic, psListMapExcept, psListMapExceptAcc,
+    ha, hb, psListReverse, psListReverseAcc]
 
 theorem erase_binary (operation : Binary)
     (erase : PsExpr → Except PsErasureError PsVerifiedIrExpr)
@@ -272,6 +288,7 @@ end Ps.MinKernel.CompilerPreservation
 #print axioms Ps.MinKernel.CompilerPreservation.curry_iff
 #print axioms Ps.MinKernel.CompilerPreservation.curry_result_type_nil
 #print axioms Ps.MinKernel.CompilerPreservation.curry_result_type_cons
+#print axioms Ps.MinKernel.CompilerPreservation.wrap_invocation_preserves
 #print axioms Ps.MinKernel.CompilerPreservation.capture_curry_preservation
 #print axioms Ps.MinKernel.CompilerPreservation.mapped_binary
 #print axioms Ps.MinKernel.CompilerPreservation.erase_binary

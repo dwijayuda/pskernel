@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 assert.equal(process.platform,'linux');
 assert.equal(process.env.GITHUB_ACTIONS,'true');
 const text=fs.readFileSync('dist/pskernel-min/compiler-preservation/proof.log','utf8');
-const names=["wrap_preserves","wrap_reflects","wrap_iff","two_captures_order","shadowing","curry_iff","curry_result_type_nil","curry_result_type_cons","capture_curry_preservation","mapped_binary","erase_binary","erase_binary_empty_refuses","erase_binary_overapplied_refuses","primitive_stage_preserves","emit_binary_template","emit_binary_empty_refuses","emit_binary_overapplied_refuses","emit_nat_abi","emit_bool_abi","emit_unit_abi"];
+const names=["wrap_preserves","wrap_reflects","wrap_iff","two_captures_order","shadowing","curry_iff","curry_result_type_nil","curry_result_type_cons","wrap_invocation_preserves","capture_curry_preservation","mapped_binary","erase_binary","erase_binary_empty_refuses","erase_binary_overapplied_refuses","primitive_stage_preserves","emit_binary_template","emit_binary_empty_refuses","emit_binary_overapplied_refuses","emit_nat_abi","emit_bool_abi","emit_unit_abi"];
 const reports=[];
 for(const name of names){
  const full='Ps.MinKernel.CompilerPreservation.'+name;

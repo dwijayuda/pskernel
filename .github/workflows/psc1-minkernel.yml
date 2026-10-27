@@ -155,7 +155,53 @@ jobs:
             psc1/packages/pskernel-min/regular-ingress-tests.log
           retention-days: 90
 
+  compiler-preservation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        with:
+          path: psc1/.lake
+          key: psc1-min-native-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/packages/**/*.lean', '!psc1/packages/pskernel-min/**', 'psc1/scripts/*.lean') }}
+          restore-keys: |
+            psc1-min-native-v1-${{ runner.os }}-
+            psc1-lake-v2-${{ runner.os }}-
+      - name: Install pinned Lean
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Prove actual compiler capture, currying and scalar-stage preservation
+        run: |
+          set -euo pipefail
+          mkdir -p dist/pskernel-min/compiler-preservation
+          lake build PsMinCompilerPreservation PsHost 2>&1 | tee dist/pskernel-min/compiler-preservation/build.log
+          lake env lean proofs/pskernel-min/CompilerPreservationTrust.lean 2>&1 | tee dist/pskernel-min/compiler-preservation/proof.log
+          node scripts/minkernel-compiler-preservation-guard.mjs
+      - name: Prepare actual source and native scalar ABI oracle
+        run: |
+          set -euo pipefail
+          lake env lean --run scripts/MinKernelCompilerPreservation.lean 2>&1 | tee dist/pskernel-min/compiler-preservation/native.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-r5-preservation-proof-${{ github.sha }}
+          path: psc1/dist/pskernel-min/compiler-preservation/
+          retention-days: 90
+
   portability-and-closure:
+    needs: compiler-preservation
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     defaults:
@@ -197,13 +243,6 @@ jobs:
         with:
           path: psc1/.lake
           key: ${{ steps.native_cache.outputs.cache-primary-key }}
-      - name: Prove actual compiler capture, currying and scalar-stage preservation
-        run: |
-          set -euo pipefail
-          mkdir -p dist/pskernel-min/compiler-preservation
-          lake build PsMinCompilerPreservation 2>&1 | tee dist/pskernel-min/compiler-preservation/build.log
-          lake env lean proofs/pskernel-min/CompilerPreservationTrust.lean 2>&1 | tee dist/pskernel-min/compiler-preservation/proof.log
-          node scripts/minkernel-compiler-preservation-guard.mjs
       - name: Compile and execute checker source through PSC1 and check exact source admissions
         id: portable
         run: node scripts/minkernel-portability.mjs

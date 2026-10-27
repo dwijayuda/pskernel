@@ -113,6 +113,7 @@ jobs:
       - name: Real installed watch, edits, refusals, superseded attempts and target consumers
         run: |
           export PSC1_TEST_RUST_ROOT="$(rustup run 1.90.0 rustc --print sysroot)"
+          export PSC1_TEST_BUN_RUNTIME="$(command -v bun)"
           node test/installed/watch.test.mjs
       - name: Execute unchanged real applications against the exact frozen source
         env:

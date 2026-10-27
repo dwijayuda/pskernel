@@ -17,7 +17,7 @@ export function runGeneratedRustCompiler({executable,executableSha256,request,ti
   // The independent guard survives an outer caller kill long enough to reap the
   // whole compiler process group. The ordinary compiler budget stays240s.
   const child=spawnSync(process.execPath,runtimeArguments([guard,String(process.pid),parentStart,executable,executableSha256,input,output,String(timeoutMs)]),
-   {encoding:'utf8',maxBuffer:1024*1024,stdio:['ignore','pipe','pipe']});
+   {encoding:'utf8',detached:true,maxBuffer:1024*1024,stdio:['ignore','pipe','pipe']});
   assert.equal(child.error,undefined,child.error?.message);
   assert.equal(child.status,0,'PSC1_RUST_COMPILER_FAILED: '+(child.stderr||child.stdout));
   const event=JSON.parse(child.stdout);assert.equal(event.protocol,'psc1-rust-host-run/1');

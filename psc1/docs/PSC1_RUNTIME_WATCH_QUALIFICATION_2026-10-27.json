@@ -36,7 +36,8 @@
     "real superseded staged request; pointer preservation",
     "actual Node22.23.3/24/26 and Bun1.4.0/1.4.4; four compiler engines; both grammars",
     "Node22.0.0/20 installed refusals",
-    "dependency-selected source gates"
+    "dependency-selected source gates",
+    "actual native Rust compiler cancellation under Node and Bun, no surviving guardian/native descendants"
   ],
   "previousEvidence": {
     "sourceRun": 40344469855,
@@ -97,6 +98,7 @@
     "rustTransport": "shared runtime floor and explicit runtime arguments; original Linux lifetime guard unchanged",
     "wasmTransport": "unchanged",
     "metadata": "minimum Node range; manifest/index pins updated",
-    "newFixedPointClaim": false
+    "newFixedPointClaim": false,
+    "rustGuardian": "detached independent process group; original parent-start-time/deadline/stream/hash and native-group reaping logic unchanged; actual Node/Bun native-cancellation test required"
   }
 }

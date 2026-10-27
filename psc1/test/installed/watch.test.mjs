@@ -13,8 +13,9 @@ async function until(predicate, message, limit = 240000) {
     await sleep(20);
   }
 }
-function watch(args, cwd) {
-  const child = spawn(f.runtime, [...f.flags, f.cli, 'build', ...args, '--watch', '--diagnostics=json'],
+function watch(args, cwd, runtime = f.runtime) {
+  const flags = path.basename(runtime).startsWith('bun') ? ['--no-install','--no-macros','--no-env-file'] : [];
+  const child = spawn(runtime, [...flags, f.cli, 'build', ...args, '--watch', '--diagnostics=json'],
     {cwd, env:f.env, stdio:['ignore','pipe','pipe']});
   const state = {child, receipts:[], events:[], diagnostics:[], stderr:'', exit:undefined};
   active.add(state);
@@ -144,6 +145,37 @@ try {
   assert.deepEqual(fs.readFileSync(path.join(out,'current.json')),pointer);
   cases.push({supersededRealRequest:true,oldDigest,latest,activeSignalExit:143,stopMs:elapsed,
     priorGenerationPreserved:true,diagnostics:state.diagnostics});
+
+  // Exercise real native descendants under both host runtimes. The independent
+  // Rust guardian must survive outer CLI group cancellation long enough to reap.
+  const rustRoot=path.join(f.directory,'node_modules/@proofscript/compiler-rust-linux-x64');
+  const rustArtifact=JSON.parse(fs.readFileSync(path.join(rustRoot,'payload/artifact.json')));
+  const binary=path.join(rustRoot,'payload',rustArtifact.executable);
+  function rustProcesses(){
+    const rows=[];
+    for(const pid of fs.readdirSync('/proc').filter(n=>/^[0-9]+$/.test(n))){
+      try{
+        const cmd=fs.readFileSync('/proc/'+pid+'/cmdline','utf8');
+        if(!cmd.includes(binary))continue;
+        const stat=fs.readFileSync('/proc/'+pid+'/stat','utf8');
+        const state=stat.slice(stat.lastIndexOf(')')+2).split(' ')[0];
+        if(!['Z','X','x'].includes(state))rows.push({pid:Number(pid),exe:fs.readlinkSync('/proc/'+pid+'/exe')});
+      }catch{}
+    }return rows;
+  }
+  for(const runtime of new Set([f.runtime,process.env.PSC1_TEST_BUN_RUNTIME].filter(Boolean))){
+    const dir=path.join(f.directory,'native-cancellation-'+path.basename(runtime));fs.mkdirSync(dir);
+    const file=path.join(dir,'Main.ps'),out=path.join(dir,'out');
+    fs.writeFileSync(file,Array.from({length:4000},(_,i)=>'def value'+i+' : Nat := '+i).join('\n')+'\ndef answer : Nat := 42\n');
+    const state=watch([file,'--engine','rust','--out',out,'--publication-protocol','portable-file'],dir,runtime);
+    let observed;
+    await until(()=>{observed=rustProcesses();return observed.some(row=>row.exe===binary);},
+      'real Rust compiler child must execute before cancellation');
+    const elapsed=await stop(state,'SIGTERM');
+    await until(()=>rustProcesses().length===0,'Rust guardian must reap native compiler descendants',6000);
+    assert.equal(fs.existsSync(path.join(out,'current.json')),false);
+    cases.push({runtime,nativeCancellation:true,observedChildren:observed,stopMs:elapsed,noNativeOrGuardSurvivors:true});
+  }
   const result={schema:'psc1-installed-watch/1',status:'passed',testedCommit:process.env.GITHUB_SHA,
     runtime:f.runtime,cases,scope:'full checked rebuilds of explicit dependencies; no incremental semantic cache'};
   fs.writeFileSync('dist/cli/watch.json',JSON.stringify(result,null,2)+'\n');

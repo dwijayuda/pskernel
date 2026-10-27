@@ -32,8 +32,7 @@ theorem digit_bounds (byte : Nat) (h : psMinRegByteDigit byte = true) :
 
 theorem timesTen_value (value : Nat) : psMinRegByteTimesTen value = 10 * value := by
   unfold psMinRegByteTimesTen
-  simp only [Nat.add_eq, Nat.succ_mul, Nat.zero_mul, Nat.zero_add]
-  ac_rfl
+  simp only [Nat.add_eq, Nat.succ_mul, Nat.zero_mul, Nat.zero_add, Nat.add_assoc]
 
 theorem readTail_value (fuel : Nat) (bytes : List Nat) (initial : Nat)
     (result : PsMinRegByteNumber) (h : psMinRegByteReadTail fuel bytes initial = some result) :
@@ -85,7 +84,7 @@ theorem readNumber_value (bytes : List Nat) (result : PsMinRegByteNumber)
     simp only [psMinRegByteReadNumber] at h
     split at h
     next zero =>
-      have hz : head = 48 := by simpa only [Nat.beq_eq_true] using zero
+      have hz : head = 48 := Nat.eq_of_beq_eq_true zero
       subst head
       cases h
       exact ⟨[48], rfl, .zero⟩
@@ -96,7 +95,8 @@ theorem readNumber_value (bytes : List Nat) (result : PsMinRegByteNumber)
         obtain ⟨lower, upper⟩ := digit_bounds head digit
         refine ⟨head :: tail, congrArg (List.cons head) equation, ?_⟩
         apply Decimal.positive head tail result.value lower upper
-        · simpa only [Nat.beq_eq_true] using nonzero
+        · intro equal
+          exact nonzero (by rw [equal]; rfl)
         · simpa only [Nat.sub_eq] using meaning
       next => contradiction
 
@@ -123,12 +123,14 @@ theorem wire_append (left right : List Token) (a b : List Nat)
     simpa only [List.cons_append, List.append_assoc] using Wire.number value digits (tail ++ b) (tokens ++ right) meaning ih
 
 def Recognizes (tokens : List Token) (parser : List Nat → Option (List Nat)) : Prop :=
-  ∀ bytes rest, parser bytes = some rest → ∃ prefix, Wire tokens prefix ∧ bytes = prefix ++ rest
+  ∀ bytes rest, parser bytes = some rest → ∃ consumed, Wire tokens consumed ∧ bytes = consumed ++ rest
 
 theorem literal_prefix (literal bytes rest : List Nat)
     (h : psMinRegByteLiteral literal bytes = some rest) : bytes = literal ++ rest := by
   induction literal generalizing bytes with
-  | nil => simpa only [psMinRegByteLiteral, Option.some.injEq] using h
+  | nil =>
+    change bytes = rest
+    exact Option.some.inj h
   | cons expected tail ih =>
     cases bytes with
     | nil => simp [psMinRegByteLiteral] at h
@@ -136,7 +138,7 @@ theorem literal_prefix (literal bytes rest : List Nat)
       simp only [psMinRegByteLiteral] at h
       split at h
       next same =>
-        have he : expected = actual := by simpa only [Nat.beq_eq_true] using same
+        have he : expected = actual := Nat.eq_of_beq_eq_true same
         subst actual
         exact congrArg (List.cons expected) (ih next h)
       next => contradiction
@@ -168,7 +170,7 @@ theorem recognizes_number (value : Nat) :
 
 theorem recognizes_empty : Recognizes [] (fun bytes => some bytes) := by
   intro bytes rest checked
-  exact ⟨[], Wire.nil, by simpa only [Option.some.injEq] using checked⟩
+  exact ⟨[], Wire.nil, by simpa only [Option.some.injEq, List.nil_append] using checked⟩
 
 theorem recognizes_then (a b : List Token)
     (first second : List Nat → Option (List Nat))

@@ -85,9 +85,9 @@ theorem type_translation (fuel total visible : Nat) (groups : List PsMinRegCoreP
             all_goals cases h
             all_goals first
               | simpa only [nameEq_sound _ _ (by assumption)] using
-                  TypeImage.list total visible groups element a (ih _ _ ht) ((isType_iff a).mp (by assumption))
+                  TypeImage.list element a (ih _ _ ht) ((isType_iff a).mp (by assumption))
               | simpa only [nameEq_sound _ _ (by assumption)] using
-                  TypeImage.option total visible groups element a (ih _ _ ht) ((isType_iff a).mp (by assumption))
+                  TypeImage.option element a (ih _ _ ht) ((isType_iff a).mp (by assumption))
         next => contradiction
       | _ => simp [psMinRegCoreType] at h
     | _ => simp [psMinRegCoreType] at h

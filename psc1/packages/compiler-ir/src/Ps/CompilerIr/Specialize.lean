@@ -1,4 +1,5 @@
 import Ps.CompilerIr.Check
+import Ps.CompilerIr.Provenance
 import Ps.Foundation.List
 import Ps.Foundation.Name
 import Ps.Foundation.StringSet
@@ -109,6 +110,14 @@ structure PsIrSpecializeState where
   declarations : List PsVerifiedIrDeclaration
   pending : List PsIrSpecializeRequest
   seen : List String
+
+structure PsIrSpecializeStep where
+  state : PsIrSpecializeState
+  origin : PsIrTransformOrigin
+
+structure PsIrSpecializeRun where
+  state : PsIrSpecializeState
+  reversedOrigins : List PsIrTransformOrigin
 
 def psIrSpecializeConcat3 (first second third : String) : String :=
   String.Internal.append first (String.Internal.append second third)
@@ -1353,11 +1362,12 @@ def psIrSpecializeAddDeclaration
     seen := state.seen
   }
 
-def psIrSpecializeProcessStructure
+
+def psIrSpecializeProcessStructureWithOrigin
     (module : PsVerifiedIrModule)
     (state : PsIrSpecializeState)
     (request : PsIrSpecializeRequest) :
-    Except PsIrSpecializeError PsIrSpecializeState :=
+    Except PsIrSpecializeError PsIrSpecializeStep :=
   match
       psIrSpecializeFindStructure
         module.structures
@@ -1396,16 +1406,19 @@ def psIrSpecializeProcessStructure
                 | Except.error error => Except.error error
                 | Except.ok lowered =>
                     Except.ok
-                      (psIrSpecializeAddStructure
+                      (PsIrSpecializeStep.mk (psIrSpecializeAddStructure
                         state
                         (PsVerifiedIrStructure.mk specializedName [] lowered.fields)
                         lowered.requests)
+                        (PsIrTransformOrigin.mk PsIrOriginKind.structure specializedName request.name
+                          request.arguments PsIrOriginRule.specialization))
 
-def psIrSpecializeProcessInductive
+
+def psIrSpecializeProcessInductiveWithOrigin
     (module : PsVerifiedIrModule)
     (state : PsIrSpecializeState)
     (request : PsIrSpecializeRequest) :
-    Except PsIrSpecializeError PsIrSpecializeState :=
+    Except PsIrSpecializeError PsIrSpecializeStep :=
   match
       psIrSpecializeFindInductive
         module.inductives
@@ -1444,16 +1457,19 @@ def psIrSpecializeProcessInductive
                 | Except.error error => Except.error error
                 | Except.ok lowered =>
                     Except.ok
-                      (psIrSpecializeAddInductive
+                      (PsIrSpecializeStep.mk (psIrSpecializeAddInductive
                         state
                         (PsVerifiedIrInductive.mk specializedName [] lowered.constructors)
                         lowered.requests)
+                        (PsIrTransformOrigin.mk PsIrOriginKind.inductive specializedName request.name
+                          request.arguments PsIrOriginRule.specialization))
 
-def psIrSpecializeProcessDeclaration
+
+def psIrSpecializeProcessDeclarationWithOrigin
     (module : PsVerifiedIrModule)
     (state : PsIrSpecializeState)
     (request : PsIrSpecializeRequest) :
-    Except PsIrSpecializeError PsIrSpecializeState :=
+    Except PsIrSpecializeError PsIrSpecializeStep :=
   match
       psIrSpecializeFindDeclaration
         module.declarations
@@ -1506,23 +1522,53 @@ def psIrSpecializeProcessDeclaration
                         | Except.error error => Except.error error
                         | Except.ok loweredBody =>
                             Except.ok
-                              (psIrSpecializeAddDeclaration
+                              (PsIrSpecializeStep.mk (psIrSpecializeAddDeclaration
                                 state
                                 (PsVerifiedIrDeclaration.mk specializedName [] loweredParameters.parameters loweredResult.type loweredBody.expr)
                                 ((psListAppend loweredParameters.requests (psListAppend loweredResult.requests loweredBody.requests))))
+                                (PsIrTransformOrigin.mk PsIrOriginKind.declaration specializedName request.name
+                                  request.arguments PsIrOriginRule.specialization))
 
-def psIrSpecializeProcessRequest
+def psIrSpecializeProcessRequestWithOrigin
     (module : PsVerifiedIrModule)
     (state : PsIrSpecializeState)
     (request : PsIrSpecializeRequest) :
-    Except PsIrSpecializeError PsIrSpecializeState :=
+    Except PsIrSpecializeError PsIrSpecializeStep :=
   match request.kind with
   | PsIrSpecializeKind.structure =>
-      psIrSpecializeProcessStructure module state request
+      psIrSpecializeProcessStructureWithOrigin module state request
   | PsIrSpecializeKind.inductive =>
-      psIrSpecializeProcessInductive module state request
+      psIrSpecializeProcessInductiveWithOrigin module state request
   | PsIrSpecializeKind.declaration =>
-      psIrSpecializeProcessDeclaration module state request
+      psIrSpecializeProcessDeclarationWithOrigin module state request
+
+def psIrSpecializeProcessStructure
+    (module : PsVerifiedIrModule) (state : PsIrSpecializeState)
+    (request : PsIrSpecializeRequest) : Except PsIrSpecializeError PsIrSpecializeState :=
+  match psIrSpecializeProcessStructureWithOrigin module state request with
+  | Except.error error => Except.error error
+  | Except.ok step => Except.ok step.state
+
+def psIrSpecializeProcessInductive
+    (module : PsVerifiedIrModule) (state : PsIrSpecializeState)
+    (request : PsIrSpecializeRequest) : Except PsIrSpecializeError PsIrSpecializeState :=
+  match psIrSpecializeProcessInductiveWithOrigin module state request with
+  | Except.error error => Except.error error
+  | Except.ok step => Except.ok step.state
+
+def psIrSpecializeProcessDeclaration
+    (module : PsVerifiedIrModule) (state : PsIrSpecializeState)
+    (request : PsIrSpecializeRequest) : Except PsIrSpecializeError PsIrSpecializeState :=
+  match psIrSpecializeProcessDeclarationWithOrigin module state request with
+  | Except.error error => Except.error error
+  | Except.ok step => Except.ok step.state
+
+def psIrSpecializeProcessRequest
+    (module : PsVerifiedIrModule) (state : PsIrSpecializeState)
+    (request : PsIrSpecializeRequest) : Except PsIrSpecializeError PsIrSpecializeState :=
+  match psIrSpecializeProcessRequestWithOrigin module state request with
+  | Except.error error => Except.error error
+  | Except.ok step => Except.ok step.state
 
 -- Preserve the original tail-first seed/error order. The original singleton
 -- seed functions remain the only per-item transformation mechanism.
@@ -1571,23 +1617,24 @@ def psIrSpecializeScheduleRequests (requests : List PsIrSpecializeRequest) (sche
     PsIrSpecializeSchedule :=
   psIrSpecializeScheduleWorker requests scheduled [] 0
 
-def psIrSpecializeScheduledLoop (module : PsVerifiedIrModule) (depth : Nat) :
-    PsIrSpecializeState -> PsStringSet -> Except PsIrSpecializeDiagnostic PsIrSpecializeState :=
+def psIrSpecializeScheduledLoopWithOrigins (module : PsVerifiedIrModule) (depth : Nat) (tracing : Bool) :
+    PsIrSpecializeState -> PsStringSet -> List PsIrTransformOrigin ->
+      Except PsIrSpecializeDiagnostic PsIrSpecializeRun :=
   match depth with
   | Nat.zero =>
-      fun (state : PsIrSpecializeState) (_scheduled : PsStringSet) =>
+      fun (state : PsIrSpecializeState) (_scheduled : PsStringSet) (_origins : List PsIrTransformOrigin) =>
         Except.error (PsIrSpecializeDiagnostic.mk "request-loop"
           (String.Internal.append "processed="
             (String.Internal.append (psNatToString (psListLength state.seen))
               (String.Internal.append " pending=" (psNatToString (psListLength state.pending)))))
           PsIrSpecializeError.fuelExhausted Option.none)
   | Nat.succ fuel =>
-      fun (state : PsIrSpecializeState) (scheduled : PsStringSet) =>
-        let smaller : PsIrSpecializeState -> PsStringSet ->
-            Except PsIrSpecializeDiagnostic PsIrSpecializeState :=
-          psIrSpecializeScheduledLoop module fuel;
+      fun (state : PsIrSpecializeState) (scheduled : PsStringSet) (origins : List PsIrTransformOrigin) =>
+        let smaller : PsIrSpecializeState -> PsStringSet -> List PsIrTransformOrigin ->
+            Except PsIrSpecializeDiagnostic PsIrSpecializeRun :=
+          psIrSpecializeScheduledLoopWithOrigins module fuel tracing;
         match state.pending with
-        | List.nil => Except.ok state
+        | List.nil => Except.ok (PsIrSpecializeRun.mk state origins)
         | List.cons request rest =>
             match psIrSpecializeRequestKey request with
             | Option.none =>
@@ -1601,20 +1648,22 @@ def psIrSpecializeScheduledLoop (module : PsVerifiedIrModule) (depth : Nat) :
                   PsIrSpecializeState.mk state.imports state.structures state.inductives
                     state.declarations [] state.seen;
                 let marked : PsIrSpecializeState := psIrSpecializeMarkSeen isolated key;
-                match psIrSpecializeProcessRequest module marked request with
+                match psIrSpecializeProcessRequestWithOrigin module marked request with
                 | Except.error error =>
                     Except.error (PsIrSpecializeDiagnostic.mk "process-request" request.name
                       error (Option.some key))
-                | Except.ok next =>
+                | Except.ok step =>
+                    let next : PsIrSpecializeState := step.state;
                     let added : PsIrSpecializeSchedule :=
                       psIrSpecializeScheduleRequests next.pending scheduled;
                     let combined : PsIrSpecializeState :=
                       PsIrSpecializeState.mk next.imports next.structures next.inductives next.declarations
                         (psListAppend rest added.requests) next.seen;
                     smaller combined added.scheduled
+                      (if tracing then List.cons step.origin origins else origins)
 
-def psIrSpecializeLoopDetailed (module : PsVerifiedIrModule) (depth : Nat)
-    (state : PsIrSpecializeState) : Except PsIrSpecializeDiagnostic PsIrSpecializeState :=
+def psIrSpecializeLoopDetailedWithOrigins (module : PsVerifiedIrModule) (depth : Nat)
+    (state : PsIrSpecializeState) (tracing : Bool) : Except PsIrSpecializeDiagnostic PsIrSpecializeRun :=
   match depth with
   | Nat.zero =>
       Except.error (PsIrSpecializeDiagnostic.mk "request-loop" ""
@@ -1625,7 +1674,23 @@ def psIrSpecializeLoopDetailed (module : PsVerifiedIrModule) (depth : Nat)
       let prepared : PsIrSpecializeState :=
         PsIrSpecializeState.mk state.imports state.structures state.inductives state.declarations
           initial.requests state.seen;
-      psIrSpecializeScheduledLoop module depth prepared initial.scheduled
+      psIrSpecializeScheduledLoopWithOrigins module depth tracing prepared initial.scheduled
+        (if tracing then psListReverse (psIrRetainedOrigins (PsVerifiedIrModule.mk state.imports state.structures
+          state.inductives state.declarations)) else [])
+
+
+def psIrSpecializeScheduledLoop (module : PsVerifiedIrModule) (depth : Nat)
+    (state : PsIrSpecializeState) (scheduled : PsStringSet) :
+    Except PsIrSpecializeDiagnostic PsIrSpecializeState :=
+  match psIrSpecializeScheduledLoopWithOrigins module depth false state scheduled [] with
+  | Except.error diagnostic => Except.error diagnostic
+  | Except.ok result => Except.ok result.state
+
+def psIrSpecializeLoopDetailed (module : PsVerifiedIrModule) (depth : Nat)
+    (state : PsIrSpecializeState) : Except PsIrSpecializeDiagnostic PsIrSpecializeState :=
+  match psIrSpecializeLoopDetailedWithOrigins module depth state false with
+  | Except.error diagnostic => Except.error diagnostic
+  | Except.ok result => Except.ok result.state
 
 def psIrSpecializeLoop (module : PsVerifiedIrModule) (depth : Nat)
     (state : PsIrSpecializeState) : Except PsIrSpecializeError PsIrSpecializeState :=
@@ -1633,8 +1698,8 @@ def psIrSpecializeLoop (module : PsVerifiedIrModule) (depth : Nat)
   | Except.error diagnostic => Except.error diagnostic.error
   | Except.ok result => Except.ok result
 
-def psIrSpecializeModuleDetailed (module : PsVerifiedIrModule) :
-    Except PsIrSpecializeDiagnostic PsVerifiedIrModule :=
+def psIrSpecializeModuleDetailedWithMode (module : PsVerifiedIrModule) (tracing : Bool) :
+    Except PsIrSpecializeDiagnostic PsIrTracedModule :=
   match psIrSpecializeRewriteImports module module.imports with
   | Except.error error =>
       Except.error (PsIrSpecializeDiagnostic.mk "imports" "" error Option.none)
@@ -1659,11 +1724,24 @@ def psIrSpecializeModuleDetailed (module : PsVerifiedIrModule) :
                     PsIrSpecializeState.mk imports.imports structures.fst inductives.fst declarations.fst
                       (psListAppend imports.requests
                         (psListAppend structures.snd (psListAppend inductives.snd declarations.snd))) [];
-                  match psIrSpecializeLoopDetailed module 16384 initial with
+                  match psIrSpecializeLoopDetailedWithOrigins module 16384 initial tracing with
                   | Except.error diagnostic => Except.error diagnostic
                   | Except.ok final =>
-                      Except.ok (PsVerifiedIrModule.mk final.imports final.structures
-                        final.inductives final.declarations)
+                      Except.ok (PsIrTracedModule.mk
+                        (PsVerifiedIrModule.mk final.state.imports final.state.structures
+                          final.state.inductives final.state.declarations)
+                        (psListReverse final.reversedOrigins))
+
+
+def psIrSpecializeModuleDetailedWithOrigins (module : PsVerifiedIrModule) :
+    Except PsIrSpecializeDiagnostic PsIrTracedModule :=
+  psIrSpecializeModuleDetailedWithMode module true
+
+def psIrSpecializeModuleDetailed (module : PsVerifiedIrModule) :
+    Except PsIrSpecializeDiagnostic PsVerifiedIrModule :=
+  match psIrSpecializeModuleDetailedWithMode module false with
+  | Except.error diagnostic => Except.error diagnostic
+  | Except.ok result => Except.ok result.raw
 
 def psIrSpecializeModule (module : PsVerifiedIrModule) :
     Except PsIrSpecializeError PsVerifiedIrModule :=
@@ -1686,19 +1764,30 @@ def psIrSpecializeRecheck
   else
     Except.ok ()
 
-def psIrSpecializeValidatedModuleDetailed (validated : PsValidatedIrModule) :
-    Except PsIrSpecializeDiagnostic PsSpecializedIrModule :=
+def psIrSpecializeValidatedModuleWithMode (validated : PsValidatedIrModule) (tracing : Bool) :
+    Except PsIrSpecializeDiagnostic PsIrTracedModule :=
   match psIrSpecializeRecheck validated.raw true with
   | Except.error error =>
       Except.error (PsIrSpecializeDiagnostic.mk "validation-input" "" error Option.none)
   | Except.ok _ =>
-      match psIrSpecializeModuleDetailed validated.raw with
+      match psIrSpecializeModuleDetailedWithMode validated.raw tracing with
       | Except.error diagnostic => Except.error diagnostic
       | Except.ok raw =>
-          match psIrSpecializeRecheck raw false with
+          match psIrSpecializeRecheck raw.raw false with
           | Except.error error =>
               Except.error (PsIrSpecializeDiagnostic.mk "validation-output" "" error Option.none)
-          | Except.ok _ => Except.ok (PsSpecializedIrModule.mk raw)
+          | Except.ok _ => Except.ok raw
+
+
+def psIrSpecializeValidatedModuleWithOrigins (validated : PsValidatedIrModule) :
+    Except PsIrSpecializeDiagnostic PsIrTracedModule :=
+  psIrSpecializeValidatedModuleWithMode validated true
+
+def psIrSpecializeValidatedModuleDetailed (validated : PsValidatedIrModule) :
+    Except PsIrSpecializeDiagnostic PsSpecializedIrModule :=
+  match psIrSpecializeValidatedModuleWithMode validated false with
+  | Except.error diagnostic => Except.error diagnostic
+  | Except.ok result => Except.ok (PsSpecializedIrModule.mk result.raw)
 
 def psIrSpecializeValidatedModule (validated : PsValidatedIrModule) :
     Except PsIrSpecializeError PsSpecializedIrModule :=

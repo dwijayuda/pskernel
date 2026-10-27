@@ -1,3 +1,5 @@
+import Ps.CompilerIr.Specialize
+import Ps.CompilerIr.Provenance
 import Ps.CompilerIr.Validate
 
 /-! Opt-in bounded module planning. Ownership is supplied by the same captured
@@ -18,6 +20,8 @@ structure PsModulePlan where
   raw : PsVerifiedIrModule
   owners : List PsModuleOwner
   units : List PsModuleUnit
+  packages : List String
+  protocol : String
 
 namespace Ps.Internal.ModuleGraph
 
@@ -100,8 +104,25 @@ def unit (raw : PsVerifiedIrModule) (owners : List PsModuleOwner) (index : Nat) 
 
 end Ps.Internal.ModuleGraph
 
-def psPlanModules (input : PsVerifiedIrModule) (owners : List PsModuleOwner) :
+def psModulePackageSafe (name : String) : Bool :=
+  match name.splitOn "/" with
+  | ["@proofscript", slug] =>
+    slug.startsWith "modular-pilot-" && slug.length <= 128 &&
+      slug.toList.all (fun char =>
+        (char >= 'a' && char <= 'z') || (char >= '0' && char <= '9') || char == '-')
+  | _ => false
+
+def psPlanModulesWithPackages (input : PsVerifiedIrModule) (owners : List PsModuleOwner)
+    (packages : List String) (protocol : String) :
     Except String PsModulePlan := do
+  let legacy := protocol == "psc1-modular-pilot/1"
+  if !legacy && protocol != "psc1-modular-pilot/2" then throw "PSC1_MODULE_PROFILE"
+  if packages.length < 3 || packages.length > (if legacy then 3 else 9) then
+    throw "PSC1_MODULE_UNIT_BOUND"
+  if packages.head? != some "@proofscript/modular-pilot-runtime" then throw "PSC1_MODULE_PACKAGE_RUNTIME"
+  for package in packages do
+    if !psModulePackageSafe package || (packages.filter (fun value => value == package)).length != 1 then
+      throw "PSC1_MODULE_PACKAGE_IDENTITY"
   let validated ← (psStrictValidateModule input).mapError (fun _ => "PSC1_MODULE_STRICT_IR")
   let raw := validated.raw
   if !raw.imports.isEmpty then throw "PSC1_MODULE_EXTERNAL_IMPORT"
@@ -109,7 +130,7 @@ def psPlanModules (input : PsVerifiedIrModule) (owners : List PsModuleOwner) :
     throw "PSC1_MODULE_PILOT_BOUND"
   if owners.length != raw.declarations.length then throw "PSC1_MODULE_OWNER_COVERAGE"
   for item in owners do
-    if item.unit > 2 || !raw.declarations.any (fun d => d.name == item.name) then
+    if item.unit >= packages.length || !raw.declarations.any (fun d => d.name == item.name) then
       throw "PSC1_MODULE_OWNER_COVERAGE"
   for declaration in raw.declarations do
     Ps.Internal.ModuleGraph.safeName declaration.name
@@ -119,13 +140,16 @@ def psPlanModules (input : PsVerifiedIrModule) (owners : List PsModuleOwner) :
     if declaration.parameters.isEmpty &&
         !Ps.Internal.ModuleGraph.staticInitializer 4096 declaration.body then
       throw ("PSC1_MODULE_EAGER_INITIALIZER:" ++ declaration.name)
-  let units ← [0, 1, 2].mapM (Ps.Internal.ModuleGraph.unit raw owners)
-  match units with
-  | [_, producer, consumer] =>
-    if producer.declarations.isEmpty || consumer.declarations.isEmpty then
-      throw "PSC1_MODULE_EMPTY_SOURCE_OWNER"
-  | _ => throw "PSC1_MODULE_UNIT_COVERAGE"
-  return { raw, owners, units }
+  let units ← (List.range packages.length).mapM (Ps.Internal.ModuleGraph.unit raw owners)
+  for unit in units.tail do
+    if unit.declarations.isEmpty then throw "PSC1_MODULE_EMPTY_SOURCE_OWNER"
+  return { raw, owners, units, packages, protocol }
+
+def psPlanModules (input : PsVerifiedIrModule) (owners : List PsModuleOwner) :
+    Except String PsModulePlan :=
+  psPlanModulesWithPackages input owners [
+    "@proofscript/modular-pilot-runtime", "@proofscript/modular-pilot-names",
+    "@proofscript/modular-pilot-consumer"] "psc1-modular-pilot/1"
 
 structure PsModuleImport where
   source : String
@@ -153,3 +177,76 @@ def psModuleTypeNames (raw : PsVerifiedIrModule) : List String :=
 def psModuleCohort (sourceDigest : String) (typed : Bool) : String :=
   "psc1-modular-pilot/1:" ++ (if typed then "ts:" else "js:") ++ sourceDigest
 
+
+/-! Carry value ownership only through complete producer-generated provenance.
+Nominal types remain owned by the shared runtime unit. This metadata neither
+authorizes IR nor proves transform preservation: both raw modules are rechecked. -/
+
+def psModuleOriginKindEqual (left right : PsIrOriginKind) : Bool :=
+  match left, right with
+  | .structure, .structure => true
+  | .inductive, .inductive => true
+  | .declaration, .declaration => true
+  | _, _ => false
+
+def psModuleEntityArity (raw : PsVerifiedIrModule) (kind : PsIrOriginKind)
+    (name : String) : Except String Nat := do
+  let entries := match kind with
+    | .structure => raw.structures.filterMap (fun item =>
+        if item.name == name then some item.typeParameters.length else none)
+    | .inductive => raw.inductives.filterMap (fun item =>
+        if item.name == name then some item.typeParameters.length else none)
+    | .declaration => raw.declarations.filterMap (fun item =>
+        if item.name == name then some item.typeParameters.length else none)
+  match entries with
+  | [arity] => return arity
+  | _ => throw ("PSC1_MODULE_ORIGIN_ENTITY:" ++ name)
+
+def psModuleOriginFor (rows : List PsIrTransformOrigin) (kind : PsIrOriginKind)
+    (name : String) : Except String PsIrTransformOrigin := do
+  match rows.filter (fun row => psModuleOriginKindEqual row.kind kind && row.outputName == name) with
+  | [row] => return row
+  | _ => throw ("PSC1_MODULE_ORIGIN_COVERAGE:" ++ name)
+
+def psModuleCarryOwners (input : PsVerifiedIrModule) (owners : List PsModuleOwner)
+    (output : PsIrTracedModule) : Except String (List PsModuleOwner) := do
+  let _ ← (psStrictValidateModule input).mapError (fun _ => "PSC1_MODULE_ORIGIN_INPUT_IR")
+  let _ ← (psStrictValidateModule output.raw).mapError (fun _ => "PSC1_MODULE_ORIGIN_OUTPUT_IR")
+  if owners.length != input.declarations.length then throw "PSC1_MODULE_ORIGIN_INPUT_OWNERS"
+  for declaration in input.declarations do
+    let _ ← Ps.Internal.ModuleGraph.owner owners declaration.name
+  let count := output.raw.structures.length + output.raw.inductives.length + output.raw.declarations.length
+  if output.origins.length != count then throw "PSC1_MODULE_ORIGIN_COVERAGE"
+  for row in output.origins do
+    let _ ← psModuleEntityArity output.raw row.kind row.outputName
+    let arity ← psModuleEntityArity input row.kind row.inputName
+    match row.rule with
+    | .retained =>
+      if row.outputName != row.inputName || !row.arguments.isEmpty then
+        throw "PSC1_MODULE_ORIGIN_RETAINED"
+    | .specialization =>
+      if arity != row.arguments.length || !psIrSpecializeAllGround row.arguments then
+        throw "PSC1_MODULE_ORIGIN_ARGUMENTS"
+      if psIrSpecializedName row.inputName row.arguments != some row.outputName then
+        throw "PSC1_MODULE_ORIGIN_SPECIALIZATION"
+    | .worker =>
+      if !psModuleOriginKindEqual row.kind .declaration || !row.arguments.isEmpty ||
+          row.outputName == row.inputName || input.declarations.any (fun d => d.name == row.outputName) then
+        throw "PSC1_MODULE_ORIGIN_WORKER"
+  for item in output.raw.structures do
+    let _ ← psModuleOriginFor output.origins .structure item.name
+  for item in output.raw.inductives do
+    let _ ← psModuleOriginFor output.origins .inductive item.name
+  output.raw.declarations.mapM fun declaration => do
+    let row ← psModuleOriginFor output.origins .declaration declaration.name
+    let previous ← Ps.Internal.ModuleGraph.owner owners row.inputName
+    return { name := declaration.name, unit := previous.unit }
+
+def psModuleSpecifierFor (plan : PsModulePlan) (index : Nat) (typed : Bool) : String :=
+  (plan.packages[index]?.getD "invalid-module-index") ++ (if typed then "/ts" else "")
+
+def psModuleSourceIndices (plan : PsModulePlan) : List Nat :=
+  (List.range plan.packages.length).tail
+
+def psModuleCohortFor (plan : PsModulePlan) (sourceDigest : String) (typed : Bool) : String :=
+  plan.protocol ++ ":" ++ (if typed then "ts:" else "js:") ++ sourceDigest

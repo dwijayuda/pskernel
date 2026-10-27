@@ -1,3 +1,4 @@
+import Ps.CompilerIr.Provenance
 import Ps.CompilerIr.Validate
 import Ps.Foundation.StringSet
 
@@ -587,7 +588,7 @@ def companionDeclaration (plan : Plan) (spec : Spec) : Except String PsVerifiedI
   rewriteDeclaration plan
     (PsVerifiedIrDeclaration.mk spec.companion [] spec.parameters spec.result spec.body)
 
-def run (module : PsVerifiedIrModule) : Except String PsVerifiedIrModule :=
+def runWithMode (module : PsVerifiedIrModule) (tracing : Bool) : Except String PsIrTracedModule :=
   let imported : List String := psListMap
     (fun (value : PsVerifiedIrExternalImport) => value.localName) module.imports;
   let structures : List String := psListMap
@@ -607,20 +608,44 @@ def run (module : PsVerifiedIrModule) : Except String PsVerifiedIrModule :=
               match psListMapExcept (companionDeclaration plan) (psListReverse plan.specs) with
               | Except.error error => Except.error error
               | Except.ok companions =>
-                  Except.ok (PsVerifiedIrModule.mk module.imports module.structures module.inductives
-                    (psListAppend declarations companions))
+                  let raw : PsVerifiedIrModule :=
+                    PsVerifiedIrModule.mk module.imports module.structures module.inductives
+                      (psListAppend declarations companions);
+                  let workers : List PsIrTransformOrigin :=
+                    if tracing then psListMap (fun (spec : Spec) =>
+                      PsIrTransformOrigin.mk PsIrOriginKind.declaration spec.companion
+                        spec.original.name [] PsIrOriginRule.worker) (psListReverse plan.specs) else [];
+                  Except.ok (PsIrTracedModule.mk raw
+                    (if tracing then psListAppend (psIrRetainedOrigins module) workers else []))
+
+def runWithOrigins (module : PsVerifiedIrModule) : Except String PsIrTracedModule :=
+  runWithMode module true
+
+def run (module : PsVerifiedIrModule) : Except String PsVerifiedIrModule :=
+  match runWithMode module false with
+  | Except.error error => Except.error error
+  | Except.ok result => Except.ok result.raw
 
 end Ps.Internal.WorkerFusion
 
 -- Input/output wrappers are data: independently recheck their exact raw modules.
 -- This is bounded typing evidence, not a semantic-preservation theorem.
-def psFuseClosedWorkers (input : PsValidatedIrModule) : Except String PsValidatedIrModule :=
+def psFuseClosedWorkersWithMode (input : PsValidatedIrModule) (tracing : Bool) : Except String PsIrTracedModule :=
   match psStrictValidateModule input.raw with
   | Except.error _ => Except.error "PSC1_WORKER_FUSION_INPUT_INVALID"
   | Except.ok checked =>
-      match Ps.Internal.WorkerFusion.run checked.raw with
+      match Ps.Internal.WorkerFusion.runWithMode checked.raw tracing with
       | Except.error error => Except.error error
       | Except.ok raw =>
-          match psStrictValidateModule raw with
+          match psStrictValidateModule raw.raw with
           | Except.error _ => Except.error "PSC1_WORKER_FUSION_OUTPUT_INVALID"
-          | Except.ok output => Except.ok output
+          | Except.ok output => Except.ok (PsIrTracedModule.mk output.raw raw.origins)
+
+
+def psFuseClosedWorkersWithOrigins (input : PsValidatedIrModule) : Except String PsIrTracedModule :=
+  psFuseClosedWorkersWithMode input true
+
+def psFuseClosedWorkers (input : PsValidatedIrModule) : Except String PsValidatedIrModule :=
+  match psFuseClosedWorkersWithMode input false with
+  | Except.error error => Except.error error
+  | Except.ok result => Except.ok (PsValidatedIrModule.mk result.raw)

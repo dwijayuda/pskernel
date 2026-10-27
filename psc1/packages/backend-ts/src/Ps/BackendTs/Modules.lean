@@ -27,11 +27,11 @@ def renderUnit (plan : PsModulePlan) (digest : String)
   let runtimeValues := helpers ++ symbols ++ constructors ++
     (unit.imports.filter (fun item => item.unit == 0)).map (fun item => item.name)
   let imports : List PsModuleImport := if unit.index == 0 then [] else
-    [{ source := psModuleSpecifier 0 true, names := runtimeValues },
-      { source := psModuleSpecifier 0 true, names := runtimeTypes, typeOnly := true }] ++
-      ([1, 2].filterMap fun index =>
+    [{ source := psModuleSpecifierFor plan 0 true, names := runtimeValues },
+      { source := psModuleSpecifierFor plan 0 true, names := runtimeTypes, typeOnly := true }] ++
+      ((psModuleSourceIndices plan).filterMap fun index =>
         let names := (unit.imports.filter (fun item => item.unit == index)).map (fun item => item.name)
-        if names.isEmpty then none else some { source := psModuleSpecifier index true, names })
+        if names.isEmpty then none else some { source := psModuleSpecifierFor plan index true, names })
   let structures ← if unit.index == 0 then
     (plan.raw.structures.mapM (psTsEmitStructure brands)).mapError (fun _ => "PSC1_MODULE_TS_STRUCTURE")
     else pure []
@@ -43,16 +43,16 @@ def renderUnit (plan : PsModulePlan) (digest : String)
       (fun _ => "PSC1_MODULE_TS_PRINT:" ++ declaration.name)
   let header := if unit.index == 0 then
       psTsRuntimeSupport ++ "\nexport const __ps$cohort = " ++
-      psJsonQuote (psModuleCohort digest true) ++ ";\n" ++
+      psJsonQuote (psModuleCohortFor plan digest true) ++ ";\n" ++
       "export { " ++ String.intercalate ", " ((helpers.filter (fun name => name != "__ps$cohort")) ++ symbols) ++ " };\n" ++
       "export type { __ps$Request, __ps$Computation, __ps$Utf8View };\n"
     else String.join (imports.map importText) ++
-      "if (__ps$cohort !== " ++ psJsonQuote (psModuleCohort digest true) ++
+      "if (__ps$cohort !== " ++ psJsonQuote (psModuleCohortFor plan digest true) ++
       ") throw new Error(\"PSC1_MODULE_RUNTIME_COHORT\");\n"
   let typeNames := psModuleTypeNames plan.raw
   let typeExports := if unit.index == 0 || typeNames.isEmpty then "" else
     "export type { " ++ String.intercalate ", " typeNames ++ " } from " ++
-      psJsonQuote (psModuleSpecifier 0 true) ++ ";\n"
+      psJsonQuote (psModuleSpecifierFor plan 0 true) ++ ";\n"
   return {
     unit := unit.index
     source := header ++ String.intercalate "\n" (structures.flatten ++ inductives.flatten) ++ "\n" ++
@@ -67,7 +67,7 @@ end Ps.Internal.ModularTs
 
 def psEmitTsModules (plan : PsModulePlan) (digest : String) :
     Except String (List PsModuleArtifact) := do
-  let rechecked ← psPlanModules plan.raw plan.owners
+  let rechecked ← psPlanModulesWithPackages plan.raw plan.owners plan.packages plan.protocol
   let brands := psTsBuildBrandMap rechecked.raw
   let tags := psTsBuildTagMap rechecked.raw
   rechecked.units.mapM (Ps.Internal.ModularTs.renderUnit rechecked digest brands tags)

@@ -43,20 +43,64 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
           npm ci --prefix .. --ignore-scripts --include=optional --no-audit --no-fund
+      - name: Prepare immutable PR195 transform baseline
+        run: |
+          git worktree add --detach "$RUNNER_TEMP/psc1-origin-baseline" cc13ebfabf6763703ee1ec75a663002a9134bc74
+          echo "PSC1_TRANSFORM_BASELINE=$RUNNER_TEMP/psc1-origin-baseline/psc1" >> "$GITHUB_ENV"
+      - uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/psc1-origin-baseline/psc1/.lake
+          key: psc1-transform-baseline-v1-Linux-cc13ebfabf6763703ee1ec75a663002a9134bc74
+          restore-keys: |
+            psc1-modular-native-v1-Linux-
+      - name: Prepare native baseline harness without modifying baseline sources
+        run: |
+          mkdir -p "$RUNNER_TEMP/psc1-transform-driver"
+          cp test/modular/TransformParity.lean "$RUNNER_TEMP/psc1-transform-driver/TransformParity.lean"
+          cp "$PSC1_TRANSFORM_BASELINE/lean-toolchain" "$RUNNER_TEMP/psc1-transform-driver/lean-toolchain"
+          cat > "$RUNNER_TEMP/psc1-transform-driver/lakefile.lean" <<'LEAN'
+          import Lake
+          open Lake DSL
+          package transformParity
+          require proofscriptSelfhost from "../psc1-origin-baseline/psc1"
+          lean_exe transform_parity where
+            root := `TransformParity
+          LEAN
+          echo "PSC1_TRANSFORM_BASELINE_DRIVER=$RUNNER_TEMP/psc1-transform-driver/.lake/build/bin/transform_parity" >> "$GITHUB_ENV"
+          echo "PSC1_TRANSFORM_BASELINE_DRIVER_SOURCE=$RUNNER_TEMP/psc1-transform-driver/TransformParity.lean" >> "$GITHUB_ENV"
+      - uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/psc1-transform-driver/.lake
+          key: psc1-transform-driver-v1-Linux-cc13-${{ hashFiles('psc1/test/modular/TransformParity.lean') }}
+      - name: Build original transform APIs into the native parity harness
+        working-directory: ${{ runner.temp }}/psc1-transform-driver
+        run: lake build transform_parity
       - name: Build additive pilot and genuine independent checker
         id: build
         run: |
           set -euo pipefail
           node packages/pskernel-lean/host/check-pin.mjs
           lake build psc1_modular_pilot psc1_independent_checker
+      - name: Record current owned source-import closure separately from runtime graph
+        run: node test/modular/source-closure.mjs
+      - name: Transform provenance invariants and ownership refusal tests
+        run: lake env lean --run test/modular/Provenance.lean
+      - name: Extended graph layout and profile refusals
+        run: lake env lean --run test/modular/ExtendedPlan.lean
       - name: Strict graph planning positives and negative tests
         run: lake env lean --run test/modular/Plan.lean
       - name: Compile real compiler Name module and dependent consumer
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: node test/modular/native-probe.mjs
+      - name: Capture extended compiler graph with specialization and worker owners
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: node test/modular/extended-native.mjs
       - name: Independently checked offline modular packages and negative tests
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: node test/modular/packages.test.mjs
+      - name: Execute admitted extended compiler packages and consumers
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: node test/modular/extended-packages.test.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

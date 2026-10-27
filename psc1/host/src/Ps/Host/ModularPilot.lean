@@ -1,6 +1,7 @@
 import Ps.Host.SourceOwnership
 import Ps.BackendJs.Modules
 import Ps.BackendTs.Modules
+import Ps.CompilerIr.WorkerFusion
 import Lean.Data.Json
 
 /-! Native pilot coordinator. It captures through the production elaborator once,
@@ -59,8 +60,34 @@ def artifactJson (item : PsModuleArtifact) : Lean.Json :=
     ("declarations", .str item.declarations), ("imports", Lean.toJson (item.imports.map importJson)),
     ("exports", Lean.toJson item.exports)]
 
-def compile (request : Request) : IO Lean.Json := do
-  if request.sources.length != 2 || request.assurance != "checked" then
+def originKindName : PsIrOriginKind → String
+  | .structure => "structure"
+  | .inductive => "inductive"
+  | .declaration => "declaration"
+
+def originRuleName : PsIrOriginRule → String
+  | .retained => "retained-identity"
+  | .specialization => "specialization"
+  | .worker => "worker"
+
+def transformOriginJson (row : PsIrTransformOrigin) : Except String Lean.Json := do
+  let arguments ← row.arguments.mapM fun type => do
+    let text ← (psIrEncodeType type).mapError (fun _ => "PSC1_MODULE_ORIGIN_TYPE_ENCODING")
+    Lean.Json.parse text
+  return .mkObj [
+    ("kind", .str (originKindName row.kind)), ("rule", .str (originRuleName row.rule)),
+    ("outputName", .str row.outputName), ("inputName", .str row.inputName),
+    ("arguments", Lean.toJson arguments)]
+
+def packageForModule (name : String) : String :=
+  if name == "Ps.Foundation.Name" then "@proofscript/modular-pilot-names"
+  else if name == "Pilot.Consumer" then "@proofscript/modular-pilot-consumer"
+  else "@proofscript/modular-pilot-" ++ ((name.replace "." "-").replace "_" "-").toLower
+
+def compileWithMode (request : Request) (extended : Bool) : IO Lean.Json := do
+  let sourceCount := request.sources.length
+  if request.assurance != "checked" || sourceCount < 2 ||
+      sourceCount > (if extended then 8 else 2) then
     throw (IO.userError "PSC1_MODULE_PILOT_REQUEST_SCOPE")
   let (captured, rows) ← match psOwnershipCapture request with
     | .ok result => pure result
@@ -71,15 +98,28 @@ def compile (request : Request) : IO Lean.Json := do
   let original ← liftResult ((psStrictValidateModule semantic.raw).mapError
     (fun _ => "PSC1_MODULE_ORIGINAL_IR"))
   let owners ← liftResult (originalOwners semantic rows)
-  -- The bounded first profile reuses closed specialization. Worker fusion is
-  -- not selected; new synthesized value owners refuse rather than being guessed.
-  let specialized ← liftResult ((psIrSpecializeValidatedModule original).mapError
-    (fun _ => "PSC1_MODULE_SPECIALIZATION"))
-  let selectedOwners ← liftResult (specialized.raw.declarations.mapM fun declaration =>
-    match owners.find? (fun owner => owner.name == declaration.name) with
-    | some owner => .ok owner
-    | none => .error ("PSC1_MODULE_SYNTHETIC_OWNER_UNQUALIFIED:" ++ declaration.name))
-  let plan ← liftResult (psPlanModules specialized.raw selectedOwners)
+  let specialized ← if extended then
+      liftResult ((psIrSpecializeValidatedModuleWithOrigins original).mapError psIrSpecializeDiagnosticText)
+    else do
+      let value ← liftResult ((psIrSpecializeValidatedModuleDetailed original).mapError psIrSpecializeDiagnosticText)
+      pure (PsIrTracedModule.mk value.raw [])
+  let selectedOwners ← if extended then
+      liftResult (psModuleCarryOwners semantic.raw owners specialized)
+    else
+      liftResult (specialized.raw.declarations.mapM fun declaration =>
+        match owners.find? (fun owner => owner.name == declaration.name) with
+        | some owner => .ok owner
+        | none => .error ("PSC1_MODULE_SYNTHETIC_OWNER_UNQUALIFIED:" ++ declaration.name))
+  let transformed ← if extended then
+      liftResult (psFuseClosedWorkersWithOrigins (.mk specialized.raw))
+    else pure specialized
+  let finalOwners ← if extended then
+      liftResult (psModuleCarryOwners specialized.raw selectedOwners transformed)
+    else pure selectedOwners
+  let protocol := if extended then "psc1-modular-pilot/2" else "psc1-modular-pilot/1"
+  let packages := "@proofscript/modular-pilot-runtime" ::
+    request.sources.map (fun source => packageForModule source.moduleName)
+  let plan ← liftResult (psPlanModulesWithPackages transformed.raw finalOwners packages protocol)
   let js ← liftResult (psEmitJsModules plan request.sourceClosureDigest)
   let ts ← liftResult (psEmitTsModules plan request.sourceClosureDigest)
   let lowered ← liftResult ((psJsLowerSpecializedModule plan.raw).mapError
@@ -92,8 +132,8 @@ def compile (request : Request) : IO Lean.Json := do
     (fun _ => "PSC1_MODULE_ORIGINAL_ENCODING"))
   let transformedIr ← liftResult ((psIrEncodeModule plan.raw).mapError
     (fun _ => "PSC1_MODULE_TRANSFORMED_ENCODING"))
-  return .mkObj [
-    ("protocol", .str "psc1-modular-pilot-candidate/1"),
+  let fields : List (String × Lean.Json) := [
+    ("protocol", .str (if extended then "psc1-modular-pilot-candidate/2" else "psc1-modular-pilot-candidate/1")),
     ("requestId", .str request.requestId),
     ("sourceClosureDigest", .str request.sourceClosureDigest),
     ("grammar", .str request.grammar),
@@ -112,7 +152,26 @@ def compile (request : Request) : IO Lean.Json := do
     ("js", Lean.toJson (js.map artifactJson)), ("ts", Lean.toJson (ts.map artifactJson)),
     ("referenceJs", .str referenceJs), ("referenceTs", .str referenceTs),
     ("behaviorallyVerified", Lean.toJson false),
-    ("profile", .str "closed-specialization/exact-owners/dag/1")]
+    ("profile", .str (if extended then "closed-specialization/explicit-origins/worker-fusion/dag/2"
+      else "closed-specialization/exact-owners/dag/1"))]
+  let extra ← if extended then do
+      let specializedIr ← liftResult ((psIrEncodeModule specialized.raw).mapError
+        (fun _ => "PSC1_MODULE_SPECIALIZED_ENCODING"))
+      let specialization ← liftResult (specialized.origins.mapM transformOriginJson)
+      let fusion ← liftResult (transformed.origins.mapM transformOriginJson)
+      pure [
+        ("packages", Lean.toJson packages),
+        ("sourceModules", Lean.toJson (request.sources.map (fun source => source.moduleName))),
+        ("originalOwners", Lean.toJson (owners.map ownerJson)),
+        ("specializedOwners", Lean.toJson (selectedOwners.map ownerJson)),
+        ("specializedIr", ← liftResult (Lean.Json.parse specializedIr)),
+        ("transformOrigins", Lean.Json.mkObj [
+          ("specialization", Lean.toJson specialization), ("workerFusion", Lean.toJson fusion)])]
+    else pure []
+  return .mkObj (fields ++ extra)
+
+def compile (request : Request) : IO Lean.Json :=
+  compileWithMode request false
 
 def main (args : List String) : IO UInt32 := do
   try
@@ -126,14 +185,22 @@ def main (args : List String) : IO UInt32 := do
     | [file] =>
       let text ← IO.FS.readFile file
       if text.utf8ByteSize > 1024 * 1024 then throw (IO.userError "PSC1_MODULE_REQUEST_BOUND")
+      let parsed ← liftResult (Lean.Json.parse text)
+      let protocol ← liftResult do
+        let cells ← parsed.getArr?
+        let cell : Lean.Json ← match cells[0]? with
+          | some value => pure value
+          | none => throw "PSC1_MODULE_WIRE_PROTOCOL"
+        cell.getStr?
+      if protocol != "psc1-modular-pilot/1" && protocol != "psc1-modular-pilot/2" then
+        throw (IO.userError "PSC1_MODULE_WIRE_PROTOCOL")
       let fields ← liftResult do
-        let parsed ← Lean.Json.parse text
         -- Existing portable decoder owns grammar/assurance/source request syntax.
         let portable ← (psJsonParse parsed.compress).mapError (fun _ => "PSC1_MODULE_WIRE_JSON")
         let .array values := portable | throw "PSC1_MODULE_WIRE_ARRAY"
-        (decodeRequestFieldsForProtocol "psc1-modular-pilot/1" 7 values).mapError
+        (decodeRequestFieldsForProtocol protocol 7 values).mapError
           (fun error => "PSC1_MODULE_WIRE:" ++ error.code)
-      let candidate ← compile fields
+      let candidate ← compileWithMode fields (protocol == "psc1-modular-pilot/2")
       let output := candidate.compress
       if output.utf8ByteSize > 32 * 1024 * 1024 then throw (IO.userError "PSC1_MODULE_RESPONSE_BOUND")
       IO.println output

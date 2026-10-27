@@ -10,6 +10,12 @@ code42eef6ca, source/integrated CI40466377732 and installed/runtime CI4046637262
 pass. The pilot has28 package cases/14 planner refusals; existing Core37/37 and
 seven-backend scoped execution remain qualified.
 
+The [v2 extension](../architecture/transform-provenance.md) adds explicit transform
+parents and actual compiler collections/text/JSON modules while retaining this
+v1 contract and all of its tests. Its [qualification receipt](../PSC1_TRANSFORM_OWNERSHIP_QUALIFICATION_2026-10-27.json)
+records full source40481560025 success:29 v2 cases plus all28 v1 cases,
+37/37 finite Practical Core criteria and scoped seven-backend execution.
+
 ## What is generated
 
 | Package | Responsibility |
@@ -126,7 +132,9 @@ performance improvement or human-comprehension result is claimed. Existing
 qualified bundled executors, Practical Core contract, providers and kernel
 implementations remain separate and unchanged.
 
-Next: carry explicit synthetic declaration provenance through transforms, measure
-the complete compiler dependency graph, then extend the bounded unit/cohort plan
-without duplicating shared runtime state. Only promote after actual complete
-modular compiler and self-host qualifications. See the [roadmap](../PSC1_DEVELOPMENT_ROADMAP.md).
+The [v2 extension](../architecture/transform-provenance.md) now carries explicit
+synthetic ownership through specialization/worker fusion and executes a larger
+five-source graph. Next: measure the complete transformed compiler runtime graph
+and define recursive-group/type-only partition policy. Only promote after actual
+complete modular compiler and self-host qualifications. See the
+[roadmap](../PSC1_DEVELOPMENT_ROADMAP.md).

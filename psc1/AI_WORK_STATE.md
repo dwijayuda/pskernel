@@ -1,5 +1,105 @@
 # PSC1 AI work state
 
+Updated 2026-10-27 Asia/Jakarta. Active branch `feat/psc1-modular-origins-20261027`,
+from PR#195 HEAD `cc13ebfabf6763703ee1ec75a663002a9134bc74`.
+Use connected GitHub/Linux CI only. Single-parent expected-HEAD/non-force updates;
+no merge or registry publication. PR#195 state is archived byte-for-byte in
+[history](docs/history/AI_WORK_STATE_BEFORE_TRANSFORM_OWNERSHIP_2026-10-27.md).
+
+## Transform ownership and extended graph — qualified Linux milestone
+
+PR[#196](https://github.com/dwijayuda/pskernel/pull/196), source checkpoint
+`7d7ada7ad7d5f5ca1504527342888d929e1b9959`, passes
+[full source40481560025](https://github.com/dwijayuda/pskernel/actions/runs/40481560025).
+All16 selected jobs succeed; benchmark is skipped. Tested PR merge:
+`accd2875a6c09ab30f3b3fd02e4c07883d4dd675`.
+Full job122118349828 and gate122128596249 pass; all37 finite Practical Core
+criteria are qualified, zero blocked, with scoped seven-backend execution.
+The required modular job122113153459 passes both contracts.
+[Dated machine-readable receipt](docs/PSC1_TRANSFORM_OWNERSHIP_QUALIFICATION_2026-10-27.json)
+records exact source/package/tool identities, attempts, timings and boundaries.
+Subsequent checkpoint edits record documentation/evidence only.
+The earlier [dedicated40479759828](https://github.com/dwijayuda/pskernel/actions/runs/40479759828)
+also passes at74dd51be44a905e49c3c5d8c505bd10d3ca6a885.
+
+The existing transform engine now returns backend-neutral provenance at actual
+specialization creation sites and worker plan companion allocation. Every value,
+structure and inductive output has one immediate parent record. Closed type
+arguments are explicit. No suffix/prefix inference assigns synthetic owners.
+Retained identity does not assert an unchanged body. Existing public APIs use the
+same implementation with complete origin-list tracing disabled; opt-in APIs
+enable it. No semantic-preservation theorem or zero-overhead claim is made.
+
+Ownership composition strictly checks both modules, complete unique origin
+coverage, existing parents, arity/groundness and rule consistency. It carries
+owners through specialization and then worker fusion. Tests exercise authored
+worker-name collisions and workers whose parents are specialized clones.
+Twelve provenance invariants/eight refusals, eight extended layout refusals,
+and all14 old planner refusals pass.
+
+The explicit v2 profile emits real Foundation.List, Foundation.Name,
+Foundation.Text, Bridge.Json and dependent consumer source as six modules
+including one shared runtime/type owner:seven exact-cohort npm packages.
+124 original value declarations become129 specialized and160 fused, with57
+specialization origins,31 workers and eight specialization-to-worker chains.
+All normal values/types remain covered by strict IR and genuine independent
+official Lean4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc admission.
+
+29 finite v2 package cases pass alongside all28 v1 cases. Actual both-grammar,
+JS/TS, Node22.23.3/Bun1.4.4 execution includes generic collections, high-order
+calls, Unicode names, actual compiler JSON parsing/canonical encoding, huge Nat
+values and depth6000. Strict NodeNext/bundler declaration consumers, shared
+runtime/tag identity, exact seven-tarball reproduction, provenance/code tampering,
+cross-profile mix refusal and before/after-commit transaction outcomes pass.
+
+Immutable PR#195 source atcc13ebfa is built as a separate native baseline harness.
+For both grammars, original/specialized/fused IR, canonical admissions and bundled
+JS/TS bytes match exactly. Integrated baseline requests took432ms/405ms. The baseline tracked
+source stays clean; harness source/binary identities are captured. An initial
+interpreter attempt failed on a missing private standard-library artifact.
+Native compilation avoids that interpreter dependency without bypassing checks.
+
+Primary integrated [artifact12722888572](https://github.com/dwijayuda/pskernel/actions/runs/40481560025/artifacts/12722888572)
+is3380311 bytes, ZIP SHA256
+`e8894ab245d602c50ed10b649cab4f1af77d7901d73be8b82f68616f6130183d`.
+The earlier dedicated artifact12723121434 remains corroborating evidence.
+Its installable-extended-lean/installable-extended-ps directories each contain
+seven matching tarballs and SHA256SUMS. Owned packages use Apache-2.0.
+v1 remains0.1.0-psc1-modular-pilot.0; v2 is0.1.0-psc1-modular-pilot.1.
+These remain experimental components; the proofscript bundled distribution and
+117 previously qualified compiler/kernel/provider payloads are retained.
+
+Limits remain240s producer/baseline,120s checker,4GiB address space,8MiB stack,
+reference fuel4096 and unchanged transform fuels;1MiB requests,32MiB native
+response/cohort,256 surviving IR values/64 nominal types. The explicitly versioned
+v2 source bound is2..8 with at most9 units; v1 stays exactly2 sources/3 units.
+Measured integrated extended requests: Lean710ms/129512KiB maxRSS,
+PS631ms/131608KiB.
+These are component measurements, not whole-compiler performance qualification.
+
+[Architecture](docs/architecture/transform-provenance.md),
+[v2 contract](test/modular/extended-contract.json).
+Read-only unified source-import telemetry measures125 modules/2692524 source
+bytes, digest63dc2ecd6306e8465db860a8f3637e6e7ca129aa9169eaed61484b939728722f.
+It is separate from transformed runtime ownership or complete modular execution.
+Current generated JS service G1 job122117068068 passes ten selected cases using
+its89-module closure4192d19b17060d7e8637189fea14309460cd61645376213b672b499c2e43b934;
+this is selected-service execution, not modular self-hosting or fixed points.
+Full compiler partitioning, cross-unit
+recursive groups/type-only coalescing, portable planner self-host qualification,
+modular G1/G2/G3/fixed points, other platforms and the arranged independent human
+maintainer trial remain pending. Preserve the old successful qualifications
+without relabeling them as this changed compiler source.
+
+Next: measure the complete transformed compiler runtime graph and define a finite
+partition contract for recursive groups/type-only units. The source-import
+navigation receipt alone cannot choose executable package ownership. Preserve
+all passed gates, budgets, independent checking, strict IR and negatives.
+
+## Preserved PR #195 reference
+
+# PSC1 AI work state
+
 Updated 2026-10-27 Asia/Jakarta. Active PR[#195](https://github.com/dwijayuda/pskernel/pull/195),
 branch `feat/psc1-modular-pilot-20261027`, from PR#193 HEAD
 `24d1a9764e8251ab4f4bac65c38fb30f9e8295f4` (re-read unchanged).

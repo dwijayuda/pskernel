@@ -6,7 +6,7 @@ import path from 'node:path';
 import os from 'node:os';
 import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
-import {compileSources,run,sha256,packageNames,packageVersion,umbrellaName} from './compiler.mjs';
+import {compileSources,run,sha256,umbrellaName} from './compiler.mjs';
 import {verifyPrintedGraph} from './graph.mjs';
 import {openPublicationStore} from '../transactional-publication.mjs';
 const workspace=fileURLToPath(new URL('../../',import.meta.url));
@@ -25,12 +25,13 @@ export function files(root,prefix='',rows=[]){
       rows.push({path:relative,bytes:b.length,sha256:sha256(b)});}
   }return rows;
 }
-function metadata(name,dependencies={},unit){
+function metadata(name,dependencies={},unit,settings){
+  const packageVersion=settings.version;
   return {name,version:packageVersion,type:'module',license:'Apache-2.0',engines:{node:'>=22.23.3'},
     exports:{'.':{types:'./dist/js/index.d.mts',import:'./dist/js/index.mjs'},
       './ts':{types:'./dist/ts/index.d.mts',import:'./dist/ts/index.mjs'},
       './package.json':'./package.json'},files:['dist','src','sources','PROVENANCE.json','LICENSE','NOTICE'],
-    dependencies,proofscript:{profile:'psc1-modular-pilot/1',unit,experimental:true,
+    dependencies,proofscript:{profile:settings.protocol,unit,experimental:true,
       admissionAuthority:false,publicationAuthority:false,compilerFrontend:false}};
 }
 function sdk(){
@@ -52,10 +53,11 @@ function pack(root,destination){
   const bytes=fs.readFileSync(path.join(destination,name));
   return{tarball:name,bytes:bytes.length,sha256:sha256(bytes)};
 }
-export function buildPilot({sources,out,producer,checker,sourceVariants,requestId='modular-pilot',publicationFault=()=>{}}){
+export function buildPilot({sources,out,producer,checker,sourceVariants,profile='legacy',requestId='modular-pilot',publicationFault=()=>{}}){
   const publication=openPublicationStore(path.resolve(out),'portable-file');
-  const admitted=compileSources({sources,producer,checker,requestId});
-  const candidate=admitted.candidate,typescript=sdk();
+  const admitted=compileSources({sources,producer,checker,requestId,profile});
+  const candidate=admitted.candidate,settings=admitted.settings,typescript=sdk();
+  const packageNames=settings.packageNames,packageVersion=settings.version;
   const temporary=fs.mkdtempSync(path.join(os.tmpdir(),'psc1-modular-pack-'));
   let stage;
   try{
@@ -66,7 +68,7 @@ export function buildPilot({sources,out,producer,checker,sourceVariants,requestI
       const dependencies=Object.fromEntries([...actualDependencies].sort().map(name=>{
         if(!packageNames.includes(name))fail('PACKAGE_DEPENDENCY');return[name,packageVersion];
       }));
-      const meta=metadata(name,dependencies,index);
+      const meta=metadata(name,dependencies,index,settings);
       put(root,'package.json',json(meta));
       put(root,'LICENSE',fs.readFileSync(path.join(workspace,'LICENSE')));
       put(root,'NOTICE',fs.readFileSync(path.join(workspace,'NOTICE')));
@@ -75,13 +77,14 @@ export function buildPilot({sources,out,producer,checker,sourceVariants,requestI
       // Own sources are data, never imports, plugins, or an authority selector.
       const selected=index===0?[]:[sources[index-1]];
       for(const source of selected){
-        put(root,'sources/'+(index===1?'Name':'Consumer')+'.'+source.kind,source.text);
+        put(root,'sources/'+source.module.split('.').at(-1)+'.'+source.kind,source.text);
         const alternate=sourceVariants?.[source.module];
-        if(alternate&&alternate.kind!==source.kind)put(root,'sources/'+(index===1?'Name':'Consumer')+'.'+alternate.kind,alternate.text);
+        if(alternate&&alternate.kind!==source.kind)put(root,'sources/'+source.module.split('.').at(-1)+'.'+alternate.kind,alternate.text);
       }
       put(root,'PROVENANCE.json',json({schema:'psc1-modular-unit-provenance/1',unit:index,
         sourceClosureDigest:candidate.sourceClosureDigest,candidateSha256:admitted.candidateSha256,
         ownerNames:candidate.units[index].names,origins:candidate.origins,profile:candidate.profile,
+        transformOrigins:candidate.transformOrigins??null,
         generatedTypeScriptMap:'dist/ts/index.mjs.map maps to src/ts/index.mts',
         originalSourceMapping:'declaration origins only; no fabricated Lean line sourcemap',
         fullCompilerSelfHosting:false}));
@@ -114,23 +117,37 @@ export function buildPilot({sources,out,producer,checker,sourceVariants,requestI
     const meta={name:umbrellaName,version:packageVersion,type:'module',license:'Apache-2.0',engines:{node:'>=22.23.3'},
       exports:{'.':{types:'./index.d.mts',import:'./index.mjs'},'./package.json':'./package.json'},
       dependencies:Object.fromEntries(packageNames.map(name=>[name,packageVersion])),
-      proofscript:{profile:'psc1-modular-pilot/1',experimental:true,admissionAuthority:false,publicationAuthority:false}};
+      proofscript:{profile:settings.protocol,experimental:true,admissionAuthority:false,publicationAuthority:false}};
     put(umbrella,'package.json',json(meta));
     put(umbrella,'LICENSE',fs.readFileSync(path.join(workspace,'LICENSE')));
     put(umbrella,'NOTICE',fs.readFileSync(path.join(workspace,'NOTICE')));
     put(umbrella,'loader.mjs',fs.readFileSync(new URL('./loader.mjs',import.meta.url)));
+    const graphType=variant=>{
+      const suffix=variant==='ts'?'/ts':'';
+      const typeFor=name=>'typeof import('+JSON.stringify(name+suffix)+')';
+      const fields=[
+        "readonly variant:"+JSON.stringify(variant), "readonly sourceClosureDigest:string",
+        "readonly runtime:"+typeFor(packageNames[0]),
+        "readonly consumer:"+typeFor(packageNames.at(-1)),
+        "readonly modules:{"+packageNames.map(name=>"readonly "+JSON.stringify(name)+":"+typeFor(name)).join(';')+"}"
+      ];
+      if(packageNames.includes('@proofscript/modular-pilot-names'))
+        fields.push("readonly names:"+typeFor('@proofscript/modular-pilot-names'));
+      return "{"+fields.join(';')+"}";
+    };
     put(umbrella,'index.d.mts',[
-      "export interface PilotIdentity { readonly sourceClosureDigest: string; readonly checkerCommit: string; readonly logicalAdmission: 'accepted'; }",
-      "export declare function verifyPilot(): PilotIdentity;",
-      "export declare function loadPilot(options?:{variant?:'js'}):Promise<{readonly variant:'js';readonly sourceClosureDigest:string;readonly runtime:typeof import('@proofscript/modular-pilot-runtime');readonly names:typeof import('@proofscript/modular-pilot-names');readonly consumer:typeof import('@proofscript/modular-pilot-consumer')}>;",
-      "export declare function loadPilot(options:{variant:'ts'}):Promise<{readonly variant:'ts';readonly sourceClosureDigest:string;readonly runtime:typeof import('@proofscript/modular-pilot-runtime/ts');readonly names:typeof import('@proofscript/modular-pilot-names/ts');readonly consumer:typeof import('@proofscript/modular-pilot-consumer/ts')}>;"
+      "export interface PilotIdentity { readonly sourceClosureDigest:string;readonly checkerCommit:string;readonly logicalAdmission:'accepted'; }",
+      "export declare function verifyPilot():PilotIdentity;",
+      "export declare function loadPilot(options?:{variant?:'js'}):Promise<"+graphType('js')+">;",
+      "export declare function loadPilot(options:{variant:'ts'}):Promise<"+graphType('ts')+">;"
     ].join('\n')+'\n');
-    const cohort={schema:'psc1-modular-installed-cohort/1',version:packageVersion,
+    const cohort={schema:settings.schema,version:packageVersion,protocol:settings.protocol,packageNames,
       sourceClosureDigest:candidate.sourceClosureDigest,grammar:candidate.grammar,
       compilerCommit:process.env.GITHUB_SHA,producerSha256:admitted.resources[0].sha256,
       checkerCommit:admitted.receipt.checkerCommit,admissionsSha256:admitted.receipt.admissionsDigest,
       logicalAdmission:'accepted',behaviorallyVerified:false,
       originalIrSha256:admitted.originalIrSha256,transformedIrSha256:admitted.transformedIrSha256,
+      transformOriginsSha256:candidate.transformOrigins?sha256(json(candidate.transformOrigins)):null,
       typeAbis:{js:'structural-$ps$tag/1',ts:'shared-unique-symbols/1'},packages:records,
       bootstrapFiles:files(umbrella),graphEvidence,
       sourceRecords:sources.map(s=>({module:s.module,kind:s.kind,sha256:sha256(s.text)})),
@@ -145,7 +162,11 @@ export function buildPilot({sources,out,producer,checker,sourceVariants,requestI
     put(stage,'cohort.json',cohortBytes);put(stage,'admissions.json',candidate.admissions);
     put(stage,'original-ir.json',json(candidate.originalIr));put(stage,'transformed-ir.json',json(candidate.transformedIr));
     put(stage,'sources.json',json(sources));
-    put(stage,'qualification-input.json',json({schema:'psc1-modular-pilot-input/1',testedCommit:process.env.GITHUB_SHA,
+    if(candidate.transformOrigins){
+      put(stage,'transform-origins.json',json(candidate.transformOrigins));
+      put(stage,'specialized-ir.json',json(candidate.specializedIr));
+    }
+    put(stage,'qualification-input.json',json({schema:profile==='extended'?'psc1-modular-pilot-input/2':'psc1-modular-pilot-input/1',testedCommit:process.env.GITHUB_SHA,
       cohortSha256,rootTar,packages:records.map(({files,...rest})=>rest),
       admission:admitted.receipt,execution:admitted.execution,typescriptResourcesSha256:typescript.resourcesSha256,
       candidateSha256:admitted.candidateSha256,profile:candidate.profile,scope:'additive pilot; existing qualified compiler untouched'}));

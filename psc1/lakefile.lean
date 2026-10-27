@@ -678,3 +678,8 @@ lean_exe psc1_output_abi_probe where
 lean_exe psc1_modular_pilot where
   srcDir := "scripts"
   root := `ModularPilotMain
+
+-- Read-only transformed graph diagnostic; outside the portable source closure.
+lean_exe psc1_modular_graph_measure where
+  srcDir := "scripts"
+  root := `ModularGraphMeasure

@@ -2,7 +2,7 @@ name: PSC1 exact portable compiler closure export and independent replay diagnos
 on:
   push:
     branches: [work/psc1-pskernel-compiler-replay-20261027]
-    paths: [psc1/scripts/pskernel-compiler-replay-diagnostic.py, .github/workflows/psc1-pskernel-compiler-replay.yml]
+    paths: [psc1/scripts/pskernel-compiler-replay-diagnostic.py, .github/workflows/psc1-pskernel-compiler-replay.yml, psc1/test/PsKernelCompilerStringAliasProofs.lean, psc1/packages/erasure/src/Ps/Erasure/Expr.lean, psc1/lakefile.lean]
   workflow_dispatch:
 permissions:
   contents: read

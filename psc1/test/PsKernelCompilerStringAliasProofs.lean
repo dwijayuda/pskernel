@@ -314,6 +314,7 @@ theorem primitive_dispatch_exact_original_all_inputs
       frozenPrimitiveApplication environment scope erase view := by
   simp only [psErasePrimitiveApplication, frozenPrimitiveApplication,
     portable_disjunction_exact_original]
+  all_goals rfl
 
 end PsKernelCompilerStringAliasProofs
 

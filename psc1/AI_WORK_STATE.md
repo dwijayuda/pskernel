@@ -1,12 +1,32 @@
 # PSC1 AI work state
 
-Updated 2026-10-27 Asia/Jakarta. Active draft [PR #193](https://github.com/dwijayuda/pskernel/pull/193),
-branch `feat/psc1-watch-runtime-20261027`, starts from PR #192 at
-`94e0c13f6a4b434f73c859cc0c716cb6fb8d1340`.
-The qualified implementation is `fdc52207fdf3d809ad99b05a5b738aca21b95139`.
-Fetch live HEAD and CI before changes. Preserve single-parent, expected-HEAD,
-non-force history. Development/builds/tests use connected GitHub and Linux Actions.
-No merge or npm registry publication is authorized.
+Updated 2026-10-27 Asia/Jakarta. Active implementation branch
+`feat/psc1-modular-pilot-20261027`, from PR #193 HEAD
+`24d1a9764e8251ab4f4bac65c38fb30f9e8295f4`.
+
+## Genuine modular compiler package pilot — implementation pending CI
+
+The additive pilot plans actual checked-IR owners from the production elaborator,
+uses the existing closed specializer and JS/TS declaration printers, and emits
+real Foundation.Name compiler code plus a dependent consumer with one shared
+runtime/type owner. Two source modules, at most256 surviving values/64 types,
+exact owners, no external imports, an ordered DAG and conservative initializers
+bound this first profile. Unknown synthesized value owners refuse; no guessed
+prefix ownership. Native emission is candidate-only. The existing external
+official Lean4.35 checker admits the exact canonical Core before execution or
+packaging. Full original/transformed strict IR validation remains.
+
+Native emission, offline npm package installation, Node/Bun execution, strict
+NodeNext/bundler declaration consumers, graph tamper/refusal cases and whole-cohort
+transaction tests are required before qualifying this pilot. No complete modular
+compiler, modular self-host/fixed-point, production CLI replacement or performance
+claim is made. Source-readable module emission uses structured declarations,
+not text splitting or compiler facades. Owned packages use Apache-2.0.
+
+Use connected GitHub/Linux Actions only. Fetch current HEAD and preserve expected-
+HEAD non-force history. No merge or npm registry publication authorized.
+
+## Preserved qualified reference
 
 ## Qualified milestone
 
@@ -119,3 +139,4 @@ The arranged independent maintainer trial still awaits its participant.
 The next packaging slice is the finite genuine module-graph pilot; compiler
 diagnostics/provenance, platform qualification and the human trial retain their
 separate acceptance criteria. Final docs-only checks are visible on PR #193.
+

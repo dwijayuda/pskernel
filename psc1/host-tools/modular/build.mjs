@@ -94,7 +94,7 @@ export function buildPilot({sources,out,producer,checker,sourceVariants,requestI
       if(index===0){
         const infer=path.join(temporary,'js-runtime-types');
         compileTs(typescript,{compilerOptions:{allowJs:true,checkJs:false,declaration:true,emitDeclarationOnly:true,
-          noEmitOnError:true,target:'ES2022',module:'NodeNext',moduleResolution:'NodeNext',types:[],outDir:infer},
+          noEmitOnError:true,target:'ES2022',module:'NodeNext',moduleResolution:'NodeNext',types:[],rootDir:path.join(pkg.root,'dist/js'),outDir:infer},
           files:[path.join(pkg.root,'dist/js/index.mjs')]},path.join(temporary,'infer.json'));
         put(pkg.root,'dist/js/index.d.mts',fs.readFileSync(path.join(infer,'index.d.mts'),'utf8')+candidate.js[index].declarations);
       }else put(pkg.root,'dist/js/index.d.mts',candidate.js[index].declarations);

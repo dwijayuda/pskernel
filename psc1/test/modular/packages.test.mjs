@@ -90,7 +90,7 @@ try{
    const referenceTs=path.join(installed,'reference-ts.mts');fs.writeFileSync(referenceTs,built.candidate.referenceTs);
    const referenceOut=path.join(installed,'reference-out');
    run(process.execPath,[tsc,referenceTs,'--strict','--target','ES2022','--module','NodeNext',
-     '--moduleResolution','NodeNext','--outDir',referenceOut,'--types','node'],{cwd:root});
+     '--moduleResolution','NodeNext','--rootDir',installed,'--outDir',referenceOut,'--types','node'],{cwd:root});
    for(const variant of ['js','ts']){
      const reference=variant==='js'?referenceJs:path.join(referenceOut,'reference-ts.mjs');
      const expected=observe(installed,variant,'reference',reference);

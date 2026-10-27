@@ -59,6 +59,8 @@ jobs:
           set -euo pipefail
           node packages/pskernel-lean/host/check-pin.mjs
           lake build psc1_modular_pilot psc1_independent_checker
+      - name: Strict graph planning positives and negative tests
+        run: lake env lean --run test/modular/Plan.lean
       - name: Compile real compiler Name module and dependent consumer
         run: node test/modular/native-probe.mjs
       - name: Independently checked offline modular packages and negative tests

@@ -41,7 +41,7 @@ if(r){
     const tag=Object.getOwnPropertySymbols(root);
     assert.equal(tag.length,1);assert.equal(tag[0],r.__ps$tag$0);
     assert.equal(r.PsName.anonymous[r.__ps$tag$0],root[r.__ps$tag$0]);
-  }else assert.equal(root.$ps$tag,'PsName.anonymous');
+  }else assert.equal(root.$ps$tag,'anonymous');
 }
 const warmStart=performance.now();
 for(let i=0;i<5;i++){assert.equal(c.pilotDepth(deep),6000n);assert.equal(c.pilotSame(name2,name2),true);}

@@ -189,9 +189,7 @@ theorem primitive_semantics (specs : List PsMinRegSpec) (total visible : Nat)
       have ht := OperationalFoundation.primitiveType_signature remaining (psMinRegSpecCount specs)
         .natSucc 0 0 0 0 0 type checked
       subst type
-      simpa only [actualOrdinary, OperationalProofs.inferModel, OperationalFoundation.primitiveModel,
-        OperationalFoundation.primitiveValue] using
-          (PrimitiveDenotation.head4 (data := dataModel specs) (total := total) (visible := visible) (groups := groups))
+      exact (PrimitiveDenotation.head4 (data := dataModel specs) (total := total) (visible := visible) (groups := groups))
   | head5 =>
     cases evaluation
     rename_i fuel checked
@@ -201,9 +199,7 @@ theorem primitive_semantics (specs : List PsMinRegSpec) (total visible : Nat)
       have ht := OperationalFoundation.primitiveType_signature remaining (psMinRegSpecCount specs)
         .natAdd 0 0 0 0 0 type checked
       subst type
-      simpa only [actualOrdinary, OperationalProofs.inferModel, OperationalFoundation.primitiveModel,
-        OperationalFoundation.primitiveValue] using
-          (PrimitiveDenotation.head5 (data := dataModel specs) (total := total) (visible := visible) (groups := groups))
+      exact (PrimitiveDenotation.head5 (data := dataModel specs) (total := total) (visible := visible) (groups := groups))
   | head6 =>
     cases evaluation
     rename_i fuel checked
@@ -213,9 +209,7 @@ theorem primitive_semantics (specs : List PsMinRegSpec) (total visible : Nat)
       have ht := OperationalFoundation.primitiveType_signature remaining (psMinRegSpecCount specs)
         .natSub 0 0 0 0 0 type checked
       subst type
-      simpa only [actualOrdinary, OperationalProofs.inferModel, OperationalFoundation.primitiveModel,
-        OperationalFoundation.primitiveValue] using
-          (PrimitiveDenotation.head6 (data := dataModel specs) (total := total) (visible := visible) (groups := groups))
+      exact (PrimitiveDenotation.head6 (data := dataModel specs) (total := total) (visible := visible) (groups := groups))
   | head7 =>
     cases evaluation
     rename_i fuel checked
@@ -225,9 +219,7 @@ theorem primitive_semantics (specs : List PsMinRegSpec) (total visible : Nat)
       have ht := OperationalFoundation.primitiveType_signature remaining (psMinRegSpecCount specs)
         .natBeq 0 0 0 0 0 type checked
       subst type
-      simpa only [actualOrdinary, OperationalProofs.inferModel, OperationalFoundation.primitiveModel,
-        OperationalFoundation.primitiveValue] using
-          (PrimitiveDenotation.head7 (data := dataModel specs) (total := total) (visible := visible) (groups := groups))
+      exact (PrimitiveDenotation.head7 (data := dataModel specs) (total := total) (visible := visible) (groups := groups))
   | head8 =>
     cases evaluation
     rename_i fuel checked
@@ -237,9 +229,7 @@ theorem primitive_semantics (specs : List PsMinRegSpec) (total visible : Nat)
       have ht := OperationalFoundation.primitiveType_signature remaining (psMinRegSpecCount specs)
         .natBlt 0 0 0 0 0 type checked
       subst type
-      simpa only [actualOrdinary, OperationalProofs.inferModel, OperationalFoundation.primitiveModel,
-        OperationalFoundation.primitiveValue] using
-          (PrimitiveDenotation.head8 (data := dataModel specs) (total := total) (visible := visible) (groups := groups))
+      exact (PrimitiveDenotation.head8 (data := dataModel specs) (total := total) (visible := visible) (groups := groups))
   | listNil element a ht sort =>
     cases evaluation
     rename_i fuel checked
@@ -249,9 +239,7 @@ theorem primitive_semantics (specs : List PsMinRegSpec) (total visible : Nat)
       have equal := OperationalFoundation.primitiveType_signature remaining (psMinRegSpecCount specs)
         (.listNil a) 0 1 0 0 0 type checked
       subst type
-      simpa only [actualOrdinary, OperationalProofs.inferModel, OperationalFoundation.primitiveModel,
-        OperationalFoundation.primitiveValue] using
-          (PrimitiveDenotation.listNil element a ht sort)
+      exact (PrimitiveDenotation.listNil element a ht sort)
   | listCons element a ht sort =>
     cases evaluation
     rename_i fuel checked
@@ -261,9 +249,7 @@ theorem primitive_semantics (specs : List PsMinRegSpec) (total visible : Nat)
       have equal := OperationalFoundation.primitiveType_signature remaining (psMinRegSpecCount specs)
         (.listCons a) 0 1 0 0 0 type checked
       subst type
-      simpa only [actualOrdinary, OperationalProofs.inferModel, OperationalFoundation.primitiveModel,
-        OperationalFoundation.primitiveValue] using
-          (PrimitiveDenotation.listCons element a ht sort)
+      exact (PrimitiveDenotation.listCons element a ht sort)
   | optionNone element a ht sort =>
     cases evaluation
     rename_i fuel checked
@@ -273,9 +259,7 @@ theorem primitive_semantics (specs : List PsMinRegSpec) (total visible : Nat)
       have equal := OperationalFoundation.primitiveType_signature remaining (psMinRegSpecCount specs)
         (.optionNone a) 0 1 0 0 0 type checked
       subst type
-      simpa only [actualOrdinary, OperationalProofs.inferModel, OperationalFoundation.primitiveModel,
-        OperationalFoundation.primitiveValue] using
-          (PrimitiveDenotation.optionNone element a ht sort)
+      exact (PrimitiveDenotation.optionNone element a ht sort)
   | optionSome element a ht sort =>
     cases evaluation
     rename_i fuel checked
@@ -285,9 +269,7 @@ theorem primitive_semantics (specs : List PsMinRegSpec) (total visible : Nat)
       have equal := OperationalFoundation.primitiveType_signature remaining (psMinRegSpecCount specs)
         (.optionSome a) 0 1 0 0 0 type checked
       subst type
-      simpa only [actualOrdinary, OperationalProofs.inferModel, OperationalFoundation.primitiveModel,
-        OperationalFoundation.primitiveValue] using
-          (PrimitiveDenotation.optionSome element a ht sort)
+      exact (PrimitiveDenotation.optionSome element a ht sort)
 
 theorem recursor_semantics (specs : List PsMinRegSpec) (total visible : Nat)
     (groups : List PsMinRegCorePlan) (globals locals : List PsMinRegTy)
@@ -306,8 +288,7 @@ theorem recursor_semantics (specs : List PsMinRegSpec) (total visible : Nat)
       have ht := OperationalFoundation.primitiveType_signature remaining (psMinRegSpecCount specs)
         (.natRec result) 1 0 0 1 2 type checked
       subst type
-      simpa only [actualOrdinary, OperationalProofs.inferModel, OperationalFoundation.primitiveModel] using
-        (RecursorDenotation.nat motive result meaning)
+      exact (RecursorDenotation.nat motive result meaning)
   | list element motive a result elementType elementSort meaning =>
     cases evaluation
     rename_i fuel checked
@@ -317,8 +298,7 @@ theorem recursor_semantics (specs : List PsMinRegSpec) (total visible : Nat)
       have ht := OperationalFoundation.primitiveType_signature remaining (psMinRegSpecCount specs)
         (.listRec a result) 1 1 0 1 2 type checked
       subst type
-      simpa only [actualOrdinary, OperationalProofs.inferModel, OperationalFoundation.primitiveModel] using
-        (RecursorDenotation.list element motive a result elementType elementSort meaning)
+      exact (RecursorDenotation.list element motive a result elementType elementSort meaning)
   | option element motive a result elementType elementSort meaning =>
     cases evaluation
     rename_i fuel checked
@@ -328,8 +308,7 @@ theorem recursor_semantics (specs : List PsMinRegSpec) (total visible : Nat)
       have ht := OperationalFoundation.primitiveType_signature remaining (psMinRegSpecCount specs)
         (.optionRec a result) 1 1 0 1 2 type checked
       subst type
-      simpa only [actualOrdinary, OperationalProofs.inferModel, OperationalFoundation.primitiveModel] using
-        (RecursorDenotation.option element motive a result elementType elementSort meaning)
+      exact (RecursorDenotation.option element motive a result elementType elementSort meaning)
   | regular name owner slot minors motive result binding meaning =>
     cases evaluation
     exact RecursorDenotation.regular name owner slot minors motive result type binding meaning (by assumption)

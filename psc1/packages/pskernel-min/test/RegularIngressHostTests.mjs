@@ -77,18 +77,19 @@ for(const [index,expected]of [[4095,true],[4096,false]]){
  p=clone();p.admissions[0].declaration.n={k:'n',p:{k:'a'},v:String(index)};
  probe('numeric-name-'+index,p,expected,expected);
 }
-for(const [count,expected]of [[511,true],[512,false],[513,false]]){
+for(const [count,expected]of [[511,true],[512,true],[513,false]]){
  p=clone();const group=enumGroup('Boundary');
  group.declaration.ts[0].cs=Array.from({length:count},(_,i)=>({n:nw('Boundary.c'+i),t:cn('Boundary')}));
  p.admissions=[group];
- // Registry validation consumes one unit before validating this descriptor;
- // exhaustion at the structural ceiling is an intentional conservative refusal.
  probe('constructors-'+count,p,expected,expected);
 }
 for(const [count,expected]of [[512,true],[513,false]]){
  p=clone();p.admissions=Array.from({length:count},(_,i)=>{const g=enumGroup('E'+i);g.declaration.ts[0].cs=[];return g;});
  probe('empty-groups-'+count,p,expected,expected);
 }
+p=clone();p.admissions=Array.from({length:512},(_,i)=>{const g=enumGroup('F'+i);g.declaration.ts[0].cs=[];return g;});
+p.admissions[0].declaration.ts[0].cs=[{n:nw('F0.mk'),t:arrow(nat,cn('F0'))}];
+const exhausted=probe('registry-type-fuel-exhaustion',p,false,true);assert.equal(exhausted.official,true);
 probe('exact-byte-ceiling',' '.repeat(regularIngressLimits.bytes),false);
 probe('over-byte-ceiling',' '.repeat(regularIngressLimits.bytes+1),false);
 fs.writeFileSync(path.join(dir,'source-universe-probes.json'),JSON.stringify(universe,null,2)+'\n');

@@ -176,6 +176,52 @@ Portability/closure artifact 12724978933 is 1644479 B; GitHub-reported ZIP diges
 The dated receipt retains exact source/proof/harness/driver identities and failed
 development attempts. Only terminal passing runs qualify repairs.
 
-Historical broader snapshot at 2026-10-27 10:14 UTC: main 40486414934 and
-installed 40483267987 were in progress. A reporting push may supersede main.
-Query live PR checks before claiming terminal broader qualification.
+Terminal broader regressions pass: [main 40487236627](https://github.com/dwijayuda/pskernel/actions/runs/40487236627)
+at reporting commit `6113d848b49e68ae968ed970a280a75724b83536`,
+full-job 122138003035 and gate-job 122150263364. Every selected dependency passes;
+the benchmark is deliberately unselected. Existing finite Practical Core criteria
+are 37/37 qualified, zero blocked. This remains official-checker regression scope.
+[Installed 40483267987](https://github.com/dwijayuda/pskernel/actions/runs/40483267987)
+passes preflight 122118837091 and installed 122119116648 at 0898adf5. Only the
+projection proof and documentation changed afterward; executable/test/driver/
+contract bytes match the qualified runtime. Exact separate package/artifact
+identities are in the dated receipt. Verified 2026-10-27 11:01:51 UTC.
+Later documentation-only reporting retains these tested source scopes.
+
+## Enlarged runtime source view for R4
+
+Read-only analysis of the verified Linux archive selects the four runtime modules
+through exact same-compile source-origin member names. They contain 108 origin
+members represented by 56 source admission records (8 inductive groups and 48
+constant records), out of 67 records in the complete test bundle. The selected
+record indices are 0–55. The original 67-record stream is preserved; this derived
+view is not a newly admitted environment or complete foundation closure.
+
+There are 36 let and 19 projection occurrences. Projection owners are
+PsMinRegSpec fields 0–5, PsMinRegDeclaration fields 0–1 and PsMinOpDeclaration
+fields 0–1. This replaces neither the old Check-only 12-record diagnostic nor R2's
+37-record diagnostic. R4 must include the connected name/ingress code and its
+foundation when qualifying self-check.
+
+Exact inputs: operational/vectors.source.json SHA256
+`42be1b39805eae7a2dbe9a4a2b5ca5224ca4ee08e876c65307a6306de2110ff2`
+and operational/vectors.admissions.json SHA256
+`c926de2d6ff04426503f5b59f16551d7916000e00a56c33512174cd01f662a3b`.
+The downloaded artifact's ZIP digest was verified before this analysis. No
+project code, compiler, proof checker or test was executed locally.
+
+DefinitionHistory stores each body in its definition-time constant context and
+with its successful admission interpretation. Broader delta conversion also
+needs proved context/name rebasing and any required fuel-coherence laws; do not
+reinterpret unchanged relative indices in a later constant context. R3 adds no
+such general conversion rule.
+
+The 29 selected declaration contracts include 11 canonical axiom declarations,
+5 inductives, 8 constructors, 4 recursors and 1 definition. These are source
+contract kinds, not ambient theorem axioms. The 26 new Lean dependency reports
+are 13 axiom-free and 13 propext-only. Neither count qualifies every unrestricted
+dependent application of the selected declarations.
+
+The source AST identity theorems and typed host conditional laws do not form a
+generic Core-AST evaluation theorem. R4 must connect actual recognized source
+terms to the operational interpretation before using them for raw admission.

@@ -35,10 +35,17 @@ modules are 211 lines/10071 B. The five-module source/test graph is independentl
 admitted by official Lean 4.35. Its bundle is 134690 B TS/318436 B JS, including the
 test/shared runtime, not an isolated checker payload or performance measurement.
 
-Historical broader-regression snapshot at 2026-10-27 10:14 UTC: main 40486414934
-and installed 40483267987 were still in progress. A reporting push may supersede
-main; requery live PR checks. The source/standalone theorem qualification above
-is complete; terminal broader outcomes are recorded separately.
+Terminal broader regressions pass: [main 40487236627](https://github.com/dwijayuda/pskernel/actions/runs/40487236627)
+at reporting commit `6113d848b49e68ae968ed970a280a75724b83536`,
+full-job 122138003035 and gate-job 122150263364. Every selected dependency passes;
+the benchmark is deliberately unselected. Existing finite Practical Core criteria
+are 37/37 qualified, zero blocked. This remains official-checker regression scope.
+[Installed 40483267987](https://github.com/dwijayuda/pskernel/actions/runs/40483267987)
+passes preflight 122118837091 and installed 122119116648 at 0898adf5. Only the
+projection proof and documentation changed afterward; executable/test/driver/
+contract bytes match the qualified runtime. Exact separate package/artifact
+identities are in the dated receipt. Verified 2026-10-27 11:01:51 UTC.
+Later documentation-only reporting retains these tested source scopes.
 
 **Next is R4:** bounded exact byte decoding, exact source-name/slot binding and
 profile translation, then the actual generated checker acceptance-to-model path.

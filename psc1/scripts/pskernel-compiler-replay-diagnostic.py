@@ -43,7 +43,7 @@ assert all(any(p.endswith(name) for p in seen) for name in ['/Ps/Compiler/Api.le
 write('inventory.json',{'source':os.environ['GITHUB_SHA'],'entry':entry,'modules':seen,'sourceCount':len(seen),'scope':'Actual portable compiler library closure; excludes the host IO CLI and its external provider. Compilation is not replay or a fixed-point proof.'})
 start=time.monotonic()
 with (OUT/'admissions.json').open('wb') as output,(OUT/'export.stderr').open('wb') as errors:
- result=subprocess.run(['timeout','--signal=KILL','1800s',str(exe),'admissions',entry],cwd=ROOT,stdout=output,stderr=errors)
+ result=subprocess.run(['/usr/bin/timeout','--signal=KILL','1800s',str(exe),'admissions',entry],cwd=ROOT,stdout=output,stderr=errors)
 record={'source':os.environ['GITHUB_SHA'],'run':os.environ['GITHUB_RUN_ID'],'entry':entry,'compilerSource':compiler_source,'compiler':digest(binary),'intentionalTargetCompilerSourceChange':'Erasure/Expr.lean: three String alias disjunctions expressed as the exact short-circuit if form accepted by the portable parser; retained compiler binary is the bootstrap tool, not the new target compiler','kernelSource':'e58ef33ad14b26dcc85231801b1322551cf34614','kernel':digest(kernel),'sourceCount':len(seen),'exportExitCode':result.returncode,'exportWallSeconds':time.monotonic()-start,'exportStdout':digest((OUT/'admissions.json').read_bytes()),'exportStderr':(OUT/'export.stderr').read_text(errors='replace'),'compilerDeclarationsCheckedByPSKernel':False,'compilerFixedPointEstablished':False,'backendPreservationProved':False,'selfHostQualified':False,'diagnosticOnly':True}
 if result.returncode==0:
  admissions=json.loads((OUT/'admissions.json').read_text());assert admissions['format']=='proofscript-checked-admissions';record['declarationsExported']=len(admissions['admissions']);record['admissionVariantCounts']={}
@@ -51,7 +51,7 @@ if result.returncode==0:
   kind=row.get('kind',row.get('tag','unknown'));record['admissionVariantCounts'][kind]=record['admissionVariantCounts'].get(kind,0)+1
  node=shutil.which('node');assert node
  with (OUT/'admissions.json').open('rb') as source,(OUT/'replay.stdout').open('wb') as output,(OUT/'replay.stderr').open('wb') as errors:
-  replay=subprocess.run(['timeout','--signal=KILL','1500s',node,'--max-old-space-size=2048','scripts/pskernel-canonical-provider.mjs','kernel.mjs'],cwd=detached,env={'PATH':''},stdin=source,stdout=output,stderr=errors)
+  replay=subprocess.run(['/usr/bin/timeout','--signal=KILL','1500s',node,'--max-old-space-size=2048','scripts/pskernel-canonical-provider.mjs','kernel.mjs'],cwd=detached,env={'PATH':''},stdin=source,stdout=output,stderr=errors)
  record['replayExitCode']=replay.returncode;record['replayStdout']=(OUT/'replay.stdout').read_text(errors='replace');record['replayStderr']=(OUT/'replay.stderr').read_text(errors='replace');record['replayEmptyPATH']=True;record['replayDeadlineSeconds']=1500;record['replayOldSpaceMiB']=2048
  write('receipt.json',record)
 else:

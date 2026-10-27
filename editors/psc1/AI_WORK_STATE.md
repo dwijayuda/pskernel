@@ -1,8 +1,41 @@
 # PSC1 LSP / VS Code work state
 
-Updated 2026-10-28 Asia/Jakarta. Branch `feat/psc1-lsp-vscode-20261028`; base `9d0e23c34484e4b1159f3e2428f5452139df530a` from qualified PR197. GitHub/cloud-only development, Linux CI, single-parent non-force expected-HEAD updates. No merge or registry publication.
+Updated 2026-10-28 Asia/Jakarta. Work branch `perf/psc1-editor-checking-20261028`; base `7a910a64743cceadc06b2a4a8a20b486d300b7f1`. GitHub/cloud-only development and CI-only execution. Expected-head, non-force updates. Draft PR 200 targets the earlier editor branch; no merge or registry publication.
 
-## Qualified 0.1.1 performance and platform follow-up
+## Qualified 0.1.2 checking latency update
+
+**All three jobs passed** in [40602478756](https://github.com/dwijayuda/pskernel/actions/runs/40602478756) at exact commit `09bfcea90879e5a7f821bc2a988753d77a18f169`. Runtime implementation is unchanged from `69090f604127289c78982173c06da8f0e7a57bae`; the later source commit corrected only the bundled guides. The post-qualification work-state, guide, research, and receipt update is documentation only.
+
+The editor retains a bounded isolated worker and the unchanged public Wasm provider's verified health handle. Every distinct compiler graph is still admitted by a fresh genuine Lean Wasm process. The compiler candidate path, compiler and provider sources, self-hosting inputs, and kernel semantics remain unchanged. Frozen integrity pins are generated directly from the previously qualified archive and checked before and after provider use. Source/admission hashes match the delivered 0.1.1 baseline for every benchmark sample.
+
+| Measurement | 0.1.1 | 0.1.2 |
+| --- | ---: | ---: |
+| Distinct-edit median, equal 50 ms delay | 1013.36 ms | 749.65 ms |
+| Distinct-edit median, normal defaults | 1307.22 ms | 845.3 ms |
+| Initial source open, normal defaults | 1298.26 ms | 969.46 ms |
+| Repeated identical source, normal defaults | 352.98 ms | 152.42 ms |
+
+Equal-delay latency decreased 26.02%; normal-default latency decreased 35.34%. Three distinct small-source edits per run are observations rather than statistical or large-project guarantees. The normal delay is now 150 ms; open/manual checks are immediate. The edited project goes first. A 128-entry cache retains the existing 16 MiB byte budget; the nine-project regression checks only one new graph after a targeted edit or recheck.
+
+The profile still measures about 465.43 ms in the fresh compiler process, 126.74 ms in repeated health initialization, and 172.32 ms in a genuine Wasm check on the baseline fixture. Process timings include startup and work; they do not isolate the kernel algorithm. Retained sessions remove repeated health initialization, not the fresh Wasm check or full-project compiler analysis.
+
+- Linux x64, Windows x64, and macOS arm64 each passed all 29 automated checks.
+- The exact Linux-built npm tarball and VSIX passed installation and execution on all three platforms.
+- A retained genuine checker accepted, rejected an ill-typed graph, then accepted a different valid graph.
+- Altering a pinned resource in a disposable copy closed the healthy session. Cancellation retired its worker, suppressed old results, and recovered in a fresh worker.
+- Native changed-edit medians at 50 ms delay were 752.24 ms on Windows and 694.25 ms on macOS. These are new-version observations, not controlled native old/new comparisons.
+- Actual installed VS Code initial source-open observations were 1432 ms on Linux, 1490 ms on Windows, and 2409 ms on macOS. Cold application activation has additional costs.
+
+[Installable bundle 12779023197](https://github.com/dwijayuda/pskernel/actions/runs/40602478756/artifacts/12779023197): ZIP 7511749 bytes, SHA256 `08101ffafbb42a598061059cb2ad50cfa32eb2ae4611700897473e2144a9a0bf`.
+
+- `proofscript-lsp-0.1.2.tgz`: 3931649 bytes, SHA256 `84134f6511df32f99fbae492fdbdd2abff8b4e18c10aff33b256c14abd348e13`.
+- `proofscript-psc1-0.1.2.vsix`: 3610978 bytes, SHA256 `af8e69645c299cc038b6810d19177d2aecfc3e54639e6df5f8299a4119f60811`.
+
+[Complete qualification receipt](QUALIFICATION_0.1.2_2026-10-28.json) includes all performance samples, stage profiles, platform receipts, exact package hashes, and earlier attempt history. Run 40601678465 passed its functional/performance/installed Linux checks but failed during a separate evidence upload with ECONNRESET; a retry was superseded by the corrected package guides. No compiler or runtime fix was needed after the first implementation.
+
+Remaining limits: full source-closure compilation, fresh compiler and admission subprocesses, global-generation cancellation across open projects, and a cold worker after idle/cancellation. No persistent Wasm instance, declaration-level incremental compiler, or new proof-state/binding API is claimed.
+
+## Previous qualified 0.1.1 performance and platform follow-up
 
 User reported slow checking and a screenshot of `PSC1_SERVICE_PUBLICATION_PLATFORM_UNQUALIFIED` with Infoview stuck pending. The repair uses existing public candidate-analysis and exact-graph checking APIs, removing duplicate analysis/target publication work. Compiler and kernel sources remain unchanged. The receipt explicitly records logical-admission scope, no target validation, and no publication. The loader preserves client URI identity and unsaved buffers, including Windows aliases. Terminal UI state and dependency-version tracking were repaired. The server now skips unchanged saves, caches up to eight exact source results within 16 MiB, and terminates Windows compiler descendants on cancellation. Cursor selection no longer requires a server round-trip.
 

@@ -1,17 +1,20 @@
-// One immutable source snapshot per process. The server owns cancellation and
-// kills the complete process group, including the unchanged compiler children.
+// One immutable source snapshot per job in a bounded persistent worker. The server
+// owns cancellation and kills the complete tree, including compiler children.
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import path from 'node:path';
 import {admissionDeclarations} from './checked-types.mjs';
+import {createPinnedKernelSession} from './kernel-session.mjs';
 
 const sha256 = value => crypto.createHash('sha256').update(value).digest('hex');
 const compilerRoot = fileURLToPath(new URL('../compiler/package/', import.meta.url));
 const MAX_BYTES = 8 * 1024 * 1024;
 const LEAN_COMMIT = 'eb6cafb7290e8bd5f2937522d8d804f58f02bafc';
 let compilerVersion = 'unavailable';
-let consumed = false;
+const kernelSession = createPinnedKernelSession(compilerRoot);
+let compilerApi;
+let busy = false, retiring = false, lastJobId = 0;
 
 function sourceDigest(sources) {
   return sha256(JSON.stringify(sources.map(source => ({
@@ -97,7 +100,7 @@ function validateCandidate(candidate, options) {
     throw Error('PSC1_LSP_CLOSURE_IDENTITY');
 }
 
-async function analyze(request, timings) {
+async function analyze(request, timings, details) {
   const options = validateRequest(request);
   const manifest = JSON.parse(fs.readFileSync(path.join(compilerRoot, 'package.json'), 'utf8'));
   if (manifest.name !== 'proofscript' || manifest.version !== '0.1.0-psc1.12')
@@ -105,7 +108,16 @@ async function analyze(request, timings) {
   compilerVersion = manifest.version;
   // Resolve only the release we bundle, never workspace node_modules or a path
   // supplied by project metadata. The original host verifies its execution pins.
-  const api = await import(pathToFileURL(path.join(compilerRoot, 'dist/index.js')).href);
+  if (!compilerApi) {
+    kernelSession.verify(timings);
+    const imported = performance.now();
+    try { compilerApi = await import(pathToFileURL(path.join(compilerRoot, 'dist/index.js')).href); }
+    finally {
+      timings.apiImportMs = Math.round(performance.now() - imported);
+      kernelSession.verify(timings);
+    }
+  }
+  const api = compilerApi;
   let prepared;
   const candidateStarted = performance.now();
   try { prepared = api.compileCandidate(options); }
@@ -130,22 +142,22 @@ async function analyze(request, timings) {
   }
   validateCandidate(candidate, options);
   // Editor checking needs logical admission of this exact compiler graph, not
-  // target execution or a publication store. Both called functions are public
-  // APIs of the unchanged qualified distribution. In particular this does not
-  // bypass, modify or spoof the Linux-only publication platform guard.
+  // target execution or a publication store. The unchanged public compiler and
+  // Wasm provider APIs still perform the work; the editor retains health metadata
+  // only. This does not bypass or modify the publication platform guard.
   const admissionsSha256 = sha256(candidate.admissionRequest.admissions);
-  let checked;
+  let checked, checkedDigest;
   const kernelStarted = performance.now();
-  try { checked = await api.checkCanonicalAdmissions(candidate.admissionRequest.admissions, {provider: 'wasm'}); }
-  finally { timings.kernelMs = Math.round(performance.now() - kernelStarted); }
-  if (checked?.schema !== 'psc1-universal-kernel-result/1' || checked.provider !== 'wasm' ||
-      typeof checked.accepted !== 'boolean' || checked.agreement !== true ||
-      checked.admissionsSha256 !== admissionsSha256 || checked.leanVersion !== '4.35.0' ||
-      checked.leanCommit !== LEAN_COMMIT || checked.wasmMemoryModel !== 'linear' ||
-      checked.results?.wasm?.accepted !== checked.accepted ||
-      checked.results.wasm.protocol !== 'pskernel-lean/1' || checked.results.wasm.provider !== 'lean4-cpp' ||
-      checked.results.wasm.leanVersion !== '4.35.0' || checked.results.wasm.leanCommit !== LEAN_COMMIT ||
-      checked.results.wasm.profile !== 'lean4.35-core')
+  try {
+    const observed = await kernelSession.checkCanonicalAdmissions(candidate.admissionRequest.admissions, timings);
+    checked = observed.result;
+    checkedDigest = observed.admissionsSha256;
+    details.reusedKernelHealth = observed.reusedKernelHealth;
+  } finally { timings.kernelMs = Math.round(performance.now() - kernelStarted); }
+  if (checkedDigest !== admissionsSha256 || typeof checked?.accepted !== 'boolean' ||
+      checked.protocol !== 'pskernel-lean/1' || checked.provider !== 'lean4-cpp' ||
+      checked.leanVersion !== '4.35.0' || checked.leanCommit !== LEAN_COMMIT ||
+      checked.profile !== 'lean4.35-core')
     throw Error('PSC1_LSP_CHECKER_IDENTITY');
   if (!checked.accepted)
     throw Error('PSC1_CHECKER_REJECTED: The genuine Lean Wasm kernel rejected the exact compiler admissions.');
@@ -189,18 +201,40 @@ async function analyze(request, timings) {
       sourceClosureDigest: candidate.sourceClosureDigest, admissionsSha256,
       compilerSourceClosureDigest: prepared.compilerSourceClosureDigest,
       kernelProviders: ['wasm'], leanVersion: checked.leanVersion, leanCommit: checked.leanCommit,
-      wasmMemoryModel: checked.wasmMemoryModel, assurance: options.assurance,
+      wasmMemoryModel: 'linear', assurance: options.assurance,
       logicalAdmission: 'accepted', formalPreservation: 'not-provided',
       targetValidation: 'not-run', publication: 'not-requested'}};
 }
 
+function sendResult(payload, retire) {
+  if (!process.connected) { process.exit(1); return; }
+  process.send(payload, error => {
+    if (error || retire) {
+      if (process.connected) process.disconnect();
+      process.exit(1);
+    }
+  });
+}
+
 process.on('message', async request => {
-  if (consumed) return;
-  consumed = true;
+  if (retiring) return;
+  const jobId = request?.jobId;
+  if (!Number.isSafeInteger(jobId) || jobId <= 0 || jobId <= lastJobId || busy) {
+    retiring = true;
+    sendResult({jobId: Number.isSafeInteger(jobId) ? jobId : 0, state: 'error',
+      summary: 'PSC1_LSP_WORKER_PROTOCOL: expected one new positive jobId at a time.',
+      diagnostics: [], declarations: [], goalsAvailable: false, compilerVersion,
+      reusedKernelHealth: false, logicalAdmission: 'unavailable'}, true);
+    return;
+  }
+  busy = true;
+  lastJobId = jobId;
   const started = performance.now();
-  const timings = {candidateMs: 0, kernelMs: 0, metadataMs: 0};
+  const timings = {candidateMs: 0, kernelMs: 0, metadataMs: 0,
+    apiImportMs: 0, kernelInitMs: 0, kernelCheckMs: 0, kernelVerifyMs: 0};
+  const details = {reusedKernelHealth: false};
   let result;
-  try { result = await analyze(request, timings); }
+  try { result = await analyze(request, timings, details); }
   catch (error) {
     const message = String(error?.message || error).slice(0, 8192);
     const rejected = /PSC1_CHECKER_REJECTED|PSC1_SERVICE_ADDITIONAL_CHECKER_REFUSED/.test(message);
@@ -210,14 +244,19 @@ process.on('message', async request => {
         precision: 'module', phase: rejected ? 'kernel' : 'infrastructure'}],
       declarations: [], logicalAdmission: rejected ? 'rejected' : 'unavailable'};
   }
-  let payload = {...result, elapsedMs: Math.round(performance.now() - started), timings, goalsAvailable: false, compilerVersion};
+  if (retiring) return;
+  let payload = {...result, jobId, elapsedMs: Math.round(performance.now() - started), timings,
+    ...details, goalsAvailable: false, compilerVersion};
   if (Buffer.byteLength(JSON.stringify(payload)) > 8 * 1024 * 1024)
-    payload = {state: 'error', summary: 'PSC1_LSP_RESULT_LIMIT: editor metadata exceeds 8 MiB.',
+    payload = {jobId, state: 'error', summary: 'PSC1_LSP_RESULT_LIMIT: editor metadata exceeds 8 MiB.',
       diagnostics: [{module: request?.entryModule || '', message: 'Editor metadata exceeds 8 MiB.',
         code: 'PSC1_LSP_RESULT_LIMIT', precision: 'module', phase: 'infrastructure'}],
       declarations: [], logicalAdmission: 'unavailable', elapsedMs: payload.elapsedMs, timings,
-      goalsAvailable: false, compilerVersion};
-  if (process.connected) process.send(payload, () => { process.disconnect(); process.exit(0); });
-  else process.exit(1);
+      ...details, goalsAvailable: false, compilerVersion};
+  // All compiler/provider subprocesses have returned and cleaned their private
+  // request directories before the next job may enter this worker.
+  retiring = payload.state === 'error';
+  busy = false;
+  sendResult(payload, retiring);
 });
-process.on('disconnect', () => { if (!consumed) process.exit(0); });
+process.on('disconnect', () => process.exit(0));

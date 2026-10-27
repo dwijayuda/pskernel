@@ -9,12 +9,12 @@ import {fileURLToPath} from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const out = path.join(root, 'dist');
 const pin = {
-  schema: 'psc1-editor-performance-baseline/1', version: '0.1.0',
-  commit: '34beabcfc3fce89e4c89bcc6aa4e372e0c1bdeb1',
-  runId: 40585721463, artifactId: 12772441610,
-  zipSha256: 'e350b263662d2cf4d321ed8181e3e134ff10494e3deab7f9d25efa84ae471cf0',
-  tarball: 'proofscript-lsp-0.1.0.tgz',
-  tarballSha256: '29f46476552dfb33a0756b02a1a6e2797b6079195ec222fe547ce651bafae2cd',
+  schema: 'psc1-editor-performance-baseline/1', version: '0.1.1',
+  commit: '45818c359a9005ea98ac38117d3dab473ded8ce8',
+  runId: 40591485183, artifactId: 12773214308,
+  zipSha256: 'a65cc86e0d2f3b26271a9a572006826f5690df5e0845c7fc9d3012664b006ce9',
+  tarball: 'proofscript-lsp-0.1.1.tgz',
+  tarballSha256: '5b0e05b2e7f2627c44b7cb22fe7db636d66d1f26bf4921a56617d28e0f2ff1cb',
 };
 fs.mkdirSync(out, {recursive: true});
 const fetched = spawnSync('gh', ['api', `repos/dwijayuda/pskernel/actions/artifacts/${pin.artifactId}/zip`],
@@ -40,4 +40,4 @@ const extraction = spawnSync('python3', ['-c', [
 ].join('\n'), archive, path.join(out, 'baseline'), pin.tarball, pin.tarballSha256], {encoding: 'utf8'});
 assert.equal(extraction.status, 0, extraction.stderr);
 fs.writeFileSync(path.join(out, 'baseline-input.json'), JSON.stringify(pin, null, 2) + '\n');
-console.log('Verified prior 0.1.0 npm package for the controlled latency comparison.');
+console.log('Verified prior 0.1.1 npm package for the controlled latency comparison.');

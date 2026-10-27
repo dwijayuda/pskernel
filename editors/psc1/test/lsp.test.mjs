@@ -144,6 +144,7 @@ test('real packaged PSC1 checks, imports, versions, editor requests and lifecycl
     });
 
     await t.test('UTF-16 incremental edit repairs source without saving', async () => {
+      const before = await client.request('psc1/serverInfo', {});
       const after = client.messages.length;
       client.notify('textDocument/didChange', {textDocument: {uri: mainUri, version: 3}, contentChanges: [
         {range: {start: {line: 0, character: 13}, end: {line: 0, character: 15}}, text: '🐈'},
@@ -151,6 +152,11 @@ test('real packaged PSC1 checks, imports, versions, editor requests and lifecycl
       ]});
       const status = (await client.waitFor(completed(mainUri, 3), {after})).params;
       assert.equal(status.state, 'checked', JSON.stringify(status));
+      const reused = await client.request('psc1/serverInfo', {});
+      assert.equal(reused.metrics.workerStarts, before.metrics.workerStarts);
+      assert.equal(reused.metrics.workerReuses, before.metrics.workerReuses + 1);
+      assert.equal(status.reusedKernelHealth, true, 'A real source refusal does not invalidate qualified kernel health');
+      assert.equal(status.timings.kernelInitMs, 0);
       await client.waitFor(message => message.method === 'textDocument/publishDiagnostics' &&
         message.params.uri === mainUri && message.params.version === 3 &&
         !message.params.diagnostics.some(d => d.severity === 1), {after});
@@ -158,6 +164,7 @@ test('real packaged PSC1 checks, imports, versions, editor requests and lifecycl
     });
 
     await t.test('superseded in-flight work cannot overwrite the newest document', async () => {
+      const before = await client.request('psc1/serverInfo', {});
       const after = client.messages.length;
       change(client, mainUri, 'def answer : Nat := true\n', 4);
       await client.waitFor(statusFor(mainUri, 4, p => p.state === 'checking'), {after});
@@ -166,7 +173,13 @@ test('real packaged PSC1 checks, imports, versions, editor requests and lifecycl
       const supersession = client.messages.findIndex((m, i) => i >= after && statusFor(mainUri, 5)(m));
       const latest = (await client.waitFor(completed(mainUri, 5), {after})).params;
       assert.equal(latest.state, 'checked', JSON.stringify(latest));
-      await client.request('psc1/serverInfo', {});
+      const recovered = await client.request('psc1/serverInfo', {});
+      assert.ok(recovered.metrics.workerRetirements > before.metrics.workerRetirements,
+        'Cancelling an active job retires its process and health session');
+      assert.ok(recovered.metrics.workerStarts > before.metrics.workerStarts,
+        'The replacement source is checked in a new isolated worker');
+      assert.equal(latest.reusedKernelHealth, false, 'Cancelled worker health cannot authorize its replacement');
+      assert.equal(recovered.metrics.workerProtocolFailures, 0);
       assert.ok(!client.messages.slice(supersession).some(m => completed(mainUri, 4)(m)), 'Stale terminal result published after newer document was accepted');
       const request = client.request('psc1/infoview', {textDocument: {uri: mainUri}, position: {line: 0, character: 5}, version: 5});
       client.notify('$/cancelRequest', {id: request.requestId});
@@ -343,6 +356,105 @@ test('real packaged PSC1 checks, imports, versions, editor requests and lifecycl
   } finally {
     client.dispose();
     await fs.rm(temp, {recursive: true, force: true});
+  }
+});
+
+test('nine independent projects retain exact caches and targeted rechecks', {timeout: 180000}, async t => {
+  const temp = await fs.mkdtemp(path.join(os.tmpdir(), 'psc1-lsp-project-cache-'));
+  const roots = [], uris = [], texts = [], versions = new Map();
+  for (let index = 0; index < 9; index++) {
+    const root = path.join(temp, `project-${index}`); await fs.mkdir(root);
+    const text = `def answer : Nat := ${1000 + index}\n`;
+    await fs.writeFile(path.join(root, 'Main.ps'), text);
+    await fs.writeFile(path.join(root, 'proofscript.json'), JSON.stringify(config([{module: 'Main', path: 'Main.ps'}])));
+    const uri = pathToFileURL(path.join(root, 'Main.ps')).href;
+    roots.push(root); uris.push(uri); texts.push(text); versions.set(uri, 1);
+  }
+  const client = new LspClient(entry, {cwd: temp,
+    env: {...cleanEnvironment(), TMPDIR: temp, TMP: temp, TEMP: temp}});
+  const observations = [];
+  let lastGeneration, previousHash;
+  const allCurrent = async (after, generation) => Promise.all(uris.map(uri => client.waitFor(statusFor(uri,
+    versions.get(uri), status => terminal.has(status.state) && status.projectGeneration === generation), {after})));
+  try {
+    // The deadline below concerns receipt of "checking", before compilation.
+    // It distinguishes immediate open/manual scheduling from this 1800-ms edit debounce.
+    await initialize(client, roots, {debounceMs: 1800});
+    await t.test('opening each project starts immediately and warms nine distinct snapshots', async () => {
+      let finalAfter;
+      for (const [index, uri] of uris.entries()) {
+        const after = client.messages.length; finalAfter = after;
+        open(client, uri, texts[index]);
+        await client.waitFor(statusFor(uri, 1, state => state.state === 'checking'), {after, timeoutMs: 1000});
+        const status = (await client.waitFor(completed(uri, 1), {after})).params;
+        assert.equal(status.state, 'checked', JSON.stringify(status));
+        assert.equal(status.cacheHit, false, 'Each initial project source is distinct');
+        lastGeneration = status.projectGeneration;
+      }
+      const statuses = (await allCurrent(finalAfter, lastGeneration)).map(message => message.params);
+      assert.ok(statuses.every(status => status.state === 'checked'));
+      assert.equal(new Set(statuses.map(status => status.receipt.sourceClosureDigest)).size, 9);
+      assert.equal(new Set(statuses.map(status => status.receipt.admissionsSha256)).size, 9);
+      const info = await client.request('psc1/serverInfo', {});
+      assert.equal(info.metrics.checksStarted, 9);
+      assert.equal(info.metrics.workerStarts, 1);
+      assert.equal(info.metrics.workerReuses, 8);
+      assert.ok(info.metrics.cacheEntries >= 9);
+      assert.equal(info.worker.active, true); assert.equal(info.worker.busy, false);
+      assert.equal(info.worker.requests, 9);
+      observations.push({case: 'nine-independent-snapshots', metrics: info.metrics});
+    });
+    await t.test('editing one project checks exactly one new graph and reuses the other eight', async () => {
+      const before = await client.request('psc1/serverInfo', {});
+      const after = client.messages.length;
+      versions.set(uris[0], 2);
+      change(client, uris[0], 'def answer : Nat := 2000\n', 2);
+      const updated = (await client.waitFor(completed(uris[0], 2), {after})).params;
+      assert.equal(updated.state, 'checked', JSON.stringify(updated));
+      const statuses = (await allCurrent(after, updated.projectGeneration)).map(message => message.params);
+      for (const status of statuses) {
+        assert.equal(status.state, 'checked');
+        assert.equal(status.cacheHit, status.uri !== uris[0]);
+        assert.equal(status.snapshotVersions[status.uri], versions.get(status.uri));
+      }
+      const info = await client.request('psc1/serverInfo', {});
+      assert.equal(info.metrics.checksStarted - before.metrics.checksStarted, 1);
+      assert.equal(info.metrics.workerStarts, before.metrics.workerStarts);
+      assert.equal(info.metrics.workerReuses - before.metrics.workerReuses, 1);
+      assert.ok(info.metrics.cacheHits - before.metrics.cacheHits >= 8);
+      previousHash = updated.receipt.admissionsSha256;
+      observations.push({case: 'single-project-edit', metrics: info.metrics});
+    });
+    await t.test('manual recheck skips edit debounce and preserves unrelated cached projects', async () => {
+      const before = await client.request('psc1/serverInfo', {});
+      const after = client.messages.length;
+      await client.request('psc1/recheck', {uri: uris[0]});
+      await client.waitFor(statusFor(uris[0], 2, state => state.state === 'checking'), {after, timeoutMs: 1000});
+      const checked = (await client.waitFor(completed(uris[0], 2), {after})).params;
+      const statuses = (await allCurrent(after, checked.projectGeneration)).map(message => message.params);
+      assert.equal(checked.state, 'checked');
+      assert.equal(checked.receipt.admissionsSha256, previousHash);
+      assert.ok(statuses.every(status => status.cacheHit === (status.uri !== uris[0])));
+      const info = await client.request('psc1/serverInfo', {});
+      assert.equal(info.metrics.checksStarted - before.metrics.checksStarted, 1);
+      assert.ok(info.metrics.cacheHits - before.metrics.cacheHits >= 8);
+      assert.equal(info.metrics.workerProtocolFailures, 0);
+      assert.equal(info.worker.active, true); assert.equal(info.worker.busy, false);
+      observations.push({case: 'targeted-manual-recheck', metrics: info.metrics});
+    });
+    assert.ok((await fs.readdir(temp)).some(name => name.startsWith('psc1-lsp-')),
+      'An idle retained worker still owns its private temporary directory');
+    const [code] = await client.shutdown(); assert.equal(code, 0);
+    assert.ok(!(await fs.readdir(temp)).some(name => name.startsWith('psc1-lsp-')),
+      'Graceful shutdown removes retained worker staging');
+    const out = path.join(toolsRoot, 'dist'); await fs.mkdir(out, {recursive: true});
+    await fs.writeFile(path.join(out, 'cache-lifecycle-test-receipt.json'), JSON.stringify({
+      schema: 'psc1-cache-lifecycle-tests/1', testedCommit: process.env.GITHUB_SHA,
+      compilerMocks: false, observations, idleWorkerShutdown: 'passed',
+    }, null, 2) + '\n');
+  } finally {
+    client.dispose();
+    await fs.rm(temp, {recursive: true, force: true, maxRetries: 5, retryDelay: 100});
   }
 });
 

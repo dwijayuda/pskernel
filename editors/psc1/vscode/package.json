@@ -2,7 +2,7 @@
   "name": "proofscript-psc1",
   "displayName": "ProofScript PSC1",
   "description": "PSC1 compiler feedback, source navigation, and a Lean-inspired ProofScript Infoview.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "proofscript",
   "license": "Apache-2.0",
   "repository": { "type": "git", "url": "https://github.com/dwijayuda/pskernel.git", "directory": "editors/psc1/vscode" },
@@ -39,7 +39,7 @@
     "configuration": {
       "title": "ProofScript",
       "properties": {
-        "proofscript.checkDelay": { "type": "number", "default": 350, "minimum": 0, "maximum": 2000, "description": "Delay in milliseconds before checking edited source.", "scope": "window" },
+        "proofscript.checkDelay": { "type": "number", "default": 150, "minimum": 0, "maximum": 2000, "description": "Delay in milliseconds before checking edited source. Opening a file and Check Current File start immediately.", "scope": "window" },
         "proofscript.checkTimeout": { "type": "number", "default": 30000, "minimum": 1000, "maximum": 120000, "description": "Maximum milliseconds allowed for one compiler check.", "scope": "window" },
         "proofscript.trace.server": { "type": "string", "enum": ["off", "messages", "verbose"], "default": "off", "description": "Write language server protocol tracing to the ProofScript output channel.", "scope": "window" }
       }

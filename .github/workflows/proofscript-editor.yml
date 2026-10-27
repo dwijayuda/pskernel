@@ -1,7 +1,7 @@
 name: PSC1 language server and VS Code
 on:
   push:
-    branches: ['feat/psc1-lsp-vscode-*']
+    branches: ['feat/psc1-lsp-vscode-*', 'perf/psc1-editor-checking-*']
     paths: ['editors/psc1/**', '.github/workflows/proofscript-editor.yml']
   workflow_dispatch:
 permissions:
@@ -52,8 +52,42 @@ jobs:
         run: node scripts/prepare-baseline.mjs
       - name: Compare actual edit latency on the same runner
         run: |
-          PSC1_LSP_ENTRY="$PWD/dist/baseline/package/dist/server.cjs" PSC1_PERF_BASELINE=1 PSC1_PERF_SERVER_COMMIT=34beabcfc3fce89e4c89bcc6aa4e372e0c1bdeb1 PSC1_PERF_LABEL=baseline-0.1.0 PSC1_PERF_OUTPUT=dist/performance-baseline-receipt.json node test/performance.mjs
-          PSC1_PERF_LABEL=candidate-0.1.1 npm run test:performance
+          PSC1_LSP_ENTRY="$PWD/dist/baseline/package/dist/server.cjs" PSC1_PERF_BASELINE=1 PSC1_PERF_EXPECTED_VERSION=0.1.1 PSC1_PERF_SERVER_COMMIT=45818c359a9005ea98ac38117d3dab473ded8ce8 PSC1_PERF_LABEL=baseline-0.1.1 PSC1_PERF_OUTPUT=dist/performance-baseline-receipt.json node test/performance.mjs
+          PSC1_PERF_LABEL=candidate-0.1.2 npm run test:performance
+      - name: Compare retained checking setup with the unchanged previous editor
+        run: |
+          PSC1_PROFILE_LSP_ROOT="$PWD/dist/baseline/package" PSC1_PROFILE_BASELINE=1 PSC1_PROFILE_E2E_RECEIPT=dist/performance-baseline-receipt.json PSC1_PROFILE_LABEL=baseline-0.1.1 PSC1_PROFILE_OUTPUT=dist/startup-baseline-receipt.json node test/checking-startup-profile.mjs
+          PSC1_PROFILE_E2E_RECEIPT=dist/performance-receipt.json PSC1_PROFILE_LABEL=candidate-0.1.2 PSC1_PROFILE_OUTPUT=dist/startup-candidate-receipt.json node test/checking-startup-profile.mjs
+      - name: Measure the normal editor scheduling defaults
+        run: |
+          PSC1_LSP_ENTRY="$PWD/dist/baseline/package/dist/server.cjs" PSC1_PERF_BASELINE=1 PSC1_PERF_EXPECTED_VERSION=0.1.1 PSC1_PERF_SERVER_COMMIT=45818c359a9005ea98ac38117d3dab473ded8ce8 PSC1_PERF_DEBOUNCE_MS=default PSC1_PERF_LABEL=default-baseline-0.1.1 PSC1_PERF_OUTPUT=dist/performance-default-baseline-receipt.json node test/performance.mjs
+          PSC1_PERF_DEBOUNCE_MS=default PSC1_PERF_LABEL=default-candidate-0.1.2 PSC1_PERF_OUTPUT=dist/performance-default-candidate-receipt.json node test/performance.mjs
+      - name: Verify faster checking preserves the exact admitted source
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const read = file => JSON.parse(fs.readFileSync(file));
+          const baseline = read('dist/performance-baseline-receipt.json');
+          const candidate = read('dist/performance-receipt.json');
+          for (const old of baseline.samples) {
+            const next = candidate.samples.find(sample => sample.kind === old.kind && sample.sourceValue === old.sourceValue && sample.version === old.version);
+            assert.ok(next, 'Matching captured source sample exists');
+            assert.equal(next.admissionsSha256, old.admissionsSha256);
+            assert.equal(next.sourceClosureDigest, old.sourceClosureDigest);
+          }
+          assert.ok(candidate.summary.distinctEditMedianMs < baseline.summary.distinctEditMedianMs, 'Changed-source checking is faster at equal debounce');
+          const evidence = {
+            schema: 'psc1-editor-checking-speedup/1', status: 'passed', commit: process.env.GITHUB_SHA,
+            baseline: baseline.summary, updated: candidate.summary, debounceMs: candidate.debounceMs,
+            distinctEditSpeedup: baseline.summary.distinctEditMedianMs / candidate.summary.distinctEditMedianMs,
+            identicalAdmissionAndSourceHashes: true, compilerMocks: false,
+            normalDefaults: {baseline: read('dist/performance-default-baseline-receipt.json').summary,
+              updated: read('dist/performance-default-candidate-receipt.json').summary},
+          };
+          fs.writeFileSync('dist/checking-speedup-receipt.json', JSON.stringify(evidence, null, 2) + '\n');
+          console.log('PSC1_CHECKING_SPEEDUP ' + JSON.stringify(evidence));
+          JS
       - name: Package standalone npm and self-contained VSIX
         run: npm run package
       - name: Install and run the packed npm server offline
@@ -113,7 +147,7 @@ jobs:
         run: npm test
       - name: Measure native checking latency
         env:
-          PSC1_PERF_LABEL: native-${{ matrix.os }}-0.1.1
+          PSC1_PERF_LABEL: native-${{ matrix.os }}-0.1.2
         run: npm run test:performance
       - name: Install and run packed npm server offline
         run: npm run test:packed

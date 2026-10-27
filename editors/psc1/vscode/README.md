@@ -4,7 +4,7 @@ Edit ProofScript with feedback from the current PSC1 compiler. This extension is
 
 ## Install and open a project
 
-Install the generated `proofscript-psc1-0.1.1.vsix` using **Extensions → … → Install from VSIX**. Disable the previous **ProofScript** extension in this workspace if it is installed: the previous release and this extension both register `.ps` files and ProofScript commands.
+Install the generated `proofscript-psc1-0.1.2.vsix` using **Extensions → … → Install from VSIX**. Disable the previous **ProofScript** extension in this workspace if it is installed: the previous release and this extension both register `.ps` files and ProofScript commands.
 
 Open a folder containing your `proofscript.json` project and a `.ps` source file. The compiler uses the open editor buffers, including unsaved edits. The first source check performs real compiler and kernel work; unchanged saves and previously checked identical source reuse their results. Open **ProofScript: Show Infoview** or press **Ctrl+Shift+Enter** (**Cmd+Shift+Enter** on macOS) to show the right-side Infoview.
 
@@ -41,7 +41,7 @@ Unsaved `.lean` edits are synchronized only after explicitly choosing this mode.
 - **ProofScript: Copy Declared Type**
 - **ProofScript: Use PSC1 for This Lean File**
 
-`proofscript.checkDelay` controls the edit debounce (350 ms by default). `proofscript.checkTimeout` bounds one check (30 seconds by default). `proofscript.trace.server` enables protocol logging in the ProofScript output channel. Verbose logs may contain your source text; review them before sharing.
+`proofscript.checkDelay` controls the edit debounce (150 ms by default). `proofscript.checkTimeout` bounds one check (30 seconds by default). `proofscript.trace.server` enables protocol logging in the ProofScript output channel. Verbose logs may contain your source text; review them before sharing.
 
 The extension runs its bundled server. Project manifests and workspace settings cannot select a shell command, alternate server, or proof checker.
 
@@ -56,6 +56,12 @@ Confirm that the folder is trusted, the source language is ProofScript (or the e
 Source lives in `editors/psc1/vscode`; the standalone server is in `editors/psc1/lsp`. Follow `editors/psc1/README.md` for reproducible packaging and Linux qualification. These tools are outside G1/G2/G3 and kernel proof obligations.
 
 The attached v0.45.0 VSIX informed the layout only. No previous compiler, server, protocol, runtime implementation, or source was transplanted.
+
+## 0.1.2 checking latency
+
+Newly opened files and **Check Current File** start immediately; edits use the configurable 150 ms delay. The edited project goes first, and manual checking preserves the exact cached results of other projects. Up to 128 source snapshots share a 16 MiB cache budget.
+
+The server retains an isolated worker and the genuine Wasm provider's verified health setup. Every new source graph still receives real compiler analysis and a fresh independent kernel check. Compiler resources are checked against immutable release hashes. Cancellation, timeout, failure, 128 requests, or 30 seconds idle retire the worker. Full-project analysis remains; this release does not claim declaration-level incremental compilation.
 
 ## 0.1.1 performance and status repair
 

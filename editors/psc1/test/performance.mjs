@@ -11,7 +11,12 @@ import {LspClient} from './lsp-client.mjs';
 const toolsRoot = fileURLToPath(new URL('../', import.meta.url));
 const entry = process.env.PSC1_LSP_ENTRY || path.join(toolsRoot, 'lsp/dist/server.cjs');
 const baseline = process.env.PSC1_PERF_BASELINE === '1';
+const expectedVersion = process.env.PSC1_PERF_EXPECTED_VERSION || '0.1.2';
+const legacyBaseline = baseline && expectedVersion === '0.1.0';
 const label = process.env.PSC1_PERF_LABEL || (baseline ? 'baseline' : 'candidate');
+const debounceSetting = process.env.PSC1_PERF_DEBOUNCE_MS || '50';
+const debounceOverride = debounceSetting === 'default' ? null : Number(debounceSetting);
+assert.ok(debounceOverride === null || (Number.isSafeInteger(debounceOverride) && debounceOverride >= 0 && debounceOverride <= 5000));
 const output = process.env.PSC1_PERF_OUTPUT || path.join(toolsRoot, 'dist/performance-receipt.json');
 const terminal = new Set(['checked', 'partial', 'rejected', 'error', 'unsupported', 'untrusted']);
 const sourceFor = number => `def answer : Nat := ${number}\n`;
@@ -45,7 +50,7 @@ async function observe(kind, version, send, expectedValue) {
   assert.deepEqual(status.receipt.kernelProviders, ['wasm']);
   assert.ok(status.declarations.some(declaration => declaration.name === 'answer' && declaration.verified));
   assert.match(status.receipt.admissionsSha256, /^[a-f0-9]{64}$/);
-  if (!baseline) {
+  if (!legacyBaseline) {
     assert.equal(status.receipt.targetValidation, 'not-run');
     assert.equal(status.snapshotVersions[uri], version);
   }
@@ -57,6 +62,7 @@ async function observe(kind, version, send, expectedValue) {
     notificationToCheckingMs: checkingIndex < 0 ? null : round(client.messageTimes[checkingIndex] - started),
     compilerReportedMs: status.elapsedMs, phases: status.timings || null,
     cacheHit: status.cacheHit === true, reused: status.reused === true,
+    reusedKernelHealth: status.reusedKernelHealth ?? null,
     checksStarted: info.metrics.checksStarted - before.metrics.checksStarted,
     admissionsSha256: status.receipt.admissionsSha256,
     sourceClosureDigest: status.receipt.sourceClosureDigest};
@@ -75,11 +81,12 @@ try {
     processId: process.pid, rootUri: pathToFileURL(temporary).href,
     capabilities: {workspace: {workspaceFolders: true}, textDocument: {publishDiagnostics: {versionSupport: true}}},
     workspaceFolders: [{uri: pathToFileURL(temporary).href, name: 'latency'}],
-    initializationOptions: {trusted: true, debounceMs: 50, timeoutMs: 60000},
+    initializationOptions: {trusted: true, ...(debounceOverride === null ? {} : {debounceMs: debounceOverride}), timeoutMs: 60000},
   });
   client.notify('initialized', {});
   startupMs = round(performance.now() - launched);
   server = await client.request('psc1/serverInfo', {});
+  assert.equal(server.version, expectedVersion, 'Measure the requested actual server version');
   await observe('cold-open', 1, () => client.notify('textDocument/didOpen', {
     textDocument: {uri, languageId: 'proofscript', version: 1, text: sourceFor(100)},
   }), 100);
@@ -93,7 +100,7 @@ try {
   await fs.writeFile(source, sourceFor(103));
   const saved = await observe('unchanged-save', 4,
     () => client.notify('textDocument/didSave', {textDocument: {uri}}), 103);
-  if (!baseline) {
+  if (!legacyBaseline) {
     assert.equal(saved.status.reused, true);
     assert.equal(saved.status.trigger, 'save');
     assert.equal(saved.row.checksStarted, 0);
@@ -104,25 +111,34 @@ try {
   const prior = samples.find(sample => sample.kind === 'distinct-edit' && sample.sourceValue === 102);
   assert.equal(restored.row.admissionsSha256, prior.admissionsSha256);
   assert.equal(restored.row.sourceClosureDigest, prior.sourceClosureDigest);
-  if (!baseline) {
+  if (!legacyBaseline) {
     assert.equal(restored.row.cacheHit, true);
     assert.equal(restored.row.checksStarted, 0);
   }
   const finalServer = await client.request('psc1/serverInfo', {});
+  const freshSamples = samples.filter(sample => sample.kind === 'cold-open' || sample.kind === 'distinct-edit');
+  assert.equal(new Set(freshSamples.map(sample => sample.sourceClosureDigest)).size, 4);
+  assert.equal(new Set(freshSamples.map(sample => sample.admissionsSha256)).size, 4);
+  if (expectedVersion === '0.1.2') {
+    assert.equal(finalServer.metrics.workerStarts, 1);
+    assert.equal(finalServer.metrics.workerReuses, 3);
+    freshSamples.forEach((sample, index) => assert.equal(sample.reusedKernelHealth, index > 0));
+  }
   const [code] = await client.shutdown(); assert.equal(code, 0);
   const edits = samples.filter(sample => sample.kind === 'distinct-edit').map(sample => sample.notificationToCheckedMs);
   const receipt = {schema: 'psc1-editor-end-to-end-latency/1', status: 'passed', label, baseline,
     testedCommit: process.env.PSC1_PERF_SERVER_COMMIT || (baseline ? null : process.env.GITHUB_SHA || null),
     measurementHarnessCommit: process.env.GITHUB_SHA || null, measuredServer: server,
     node: process.version, platform: process.platform, architecture: process.arch,
-    cpu: os.cpus()[0]?.model, startupMs, debounceMs: 50,
+    cpu: os.cpus()[0]?.model, startupMs, debounceMs: server.settings.debounceMs,
+    debounceSelection: debounceOverride === null ? 'server-default' : 'explicit-controlled-override',
     compilerMocks: false, everyDistinctSnapshotIndependentlyChecked: true, reusedSamplesDisclosed: true,
     summary: {coldOpenMs: samples[0].notificationToCheckedMs,
       distinctEditMedianMs: round(median(edits)), distinctEditMaxMs: round(Math.max(...edits)),
       unchangedSaveMs: saved.row.notificationToCheckedMs,
       repeatedSnapshotMs: restored.row.notificationToCheckedMs},
     finalMetrics: finalServer.metrics, samples,
-    interpretation: 'Wall latency includes debounce, compiler and independent kernel checking. Three distinct edits are observations, not a statistically stable benchmark.'};
+    interpretation: 'Wall latency includes scheduling, compiler and independent kernel checking. Three distinct edits are observations, not a statistically stable benchmark. Cached/save samples retain historical compiler phase fields; checksStarted=0 means those phases did not run again.'};
   await fs.mkdir(path.dirname(output), {recursive: true});
   await fs.writeFile(output, JSON.stringify(receipt, null, 2) + '\n');
   console.log('PSC1_EDITOR_LATENCY', JSON.stringify({label, platform: process.platform, summary: receipt.summary,

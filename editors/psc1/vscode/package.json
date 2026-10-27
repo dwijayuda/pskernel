@@ -1,0 +1,60 @@
+{
+  "name": "proofscript-psc1",
+  "displayName": "ProofScript PSC1",
+  "description": "PSC1 compiler feedback, source navigation, and a Lean-inspired ProofScript Infoview.",
+  "version": "0.1.0",
+  "publisher": "proofscript",
+  "license": "Apache-2.0",
+  "repository": { "type": "git", "url": "https://github.com/dwijayuda/pskernel.git", "directory": "editors/psc1/vscode" },
+  "bugs": { "url": "https://github.com/dwijayuda/pskernel/issues" },
+  "homepage": "https://github.com/dwijayuda/pskernel/tree/feat/psc1-lsp-vscode-20261028/editors/psc1",
+  "engines": { "vscode": "^1.143.1" },
+  "categories": ["Programming Languages"],
+  "keywords": ["ProofScript", "PSC1", "Lean", "LSP", "formal verification"],
+  "main": "./dist/extension.cjs",
+  "extensionKind": ["workspace"],
+  "activationEvents": ["onLanguage:proofscript", "onLanguage:proofscript-lean"],
+  "capabilities": {
+    "untrustedWorkspaces": { "supported": "limited", "description": "Syntax highlighting is available; genuine compiler checking requires a trusted workspace." },
+    "virtualWorkspaces": { "supported": false, "description": "PSC1 project checking requires filesystem-backed source files." }
+  },
+  "contributes": {
+    "languages": [
+      { "id": "proofscript", "aliases": ["ProofScript", "proofscript"], "extensions": [".ps"], "configuration": "./language-configuration.json" },
+      { "id": "proofscript-lean", "aliases": ["ProofScript Lean subset", "proofscript-lean"], "configuration": "./language-configuration.json" }
+    ],
+    "grammars": [
+      { "language": "proofscript", "scopeName": "source.proofscript", "path": "./syntaxes/proofscript.tmLanguage.json" },
+      { "language": "proofscript-lean", "scopeName": "source.proofscript.lean", "path": "./syntaxes/proofscript-lean.tmLanguage.json" }
+    ],
+    "commands": [
+      { "command": "proofscript.showInfoview", "title": "ProofScript: Show Infoview", "icon": "$(layout-sidebar-right)" },
+      { "command": "proofscript.restartServer", "title": "ProofScript: Restart Language Server", "icon": "$(refresh)" },
+      { "command": "proofscript.serverInfo", "title": "ProofScript: Show Server Information" },
+      { "command": "proofscript.showOutput", "title": "ProofScript: Show Output", "icon": "$(output)" },
+      { "command": "proofscript.recheck", "title": "ProofScript: Check Current File", "icon": "$(check)" },
+      { "command": "proofscript.copyDeclaredType", "title": "ProofScript: Copy Declared Type" },
+      { "command": "proofscript.usePSC1Lean", "title": "ProofScript: Use PSC1 for This Lean File" }
+    ],
+    "configuration": {
+      "title": "ProofScript",
+      "properties": {
+        "proofscript.checkDelay": { "type": "number", "default": 350, "minimum": 0, "maximum": 2000, "description": "Delay in milliseconds before checking edited source.", "scope": "window" },
+        "proofscript.checkTimeout": { "type": "number", "default": 30000, "minimum": 1000, "maximum": 120000, "description": "Maximum milliseconds allowed for one compiler check.", "scope": "window" },
+        "proofscript.trace.server": { "type": "string", "enum": ["off", "messages", "verbose"], "default": "off", "description": "Write language server protocol tracing to the ProofScript output channel.", "scope": "window" }
+      }
+    },
+    "viewsContainers": { "secondarySidebar": [{ "id": "proofscript-psc1", "title": "ProofScript", "icon": "./media/proofscript.svg" }] },
+    "views": { "proofscript-psc1": [{ "id": "proofscript.infoview", "name": "Infoview", "type": "webview", "contextualTitle": "ProofScript Infoview" }] },
+    "menus": {
+      "view/title": [
+        { "command": "proofscript.recheck", "when": "view == proofscript.infoview", "group": "navigation@1" },
+        { "command": "proofscript.restartServer", "when": "view == proofscript.infoview", "group": "navigation@2" },
+        { "command": "proofscript.showOutput", "when": "view == proofscript.infoview", "group": "navigation@3" }
+      ],
+      "editor/title": [{ "command": "proofscript.showInfoview", "when": "editorLangId == proofscript || editorLangId == proofscript-lean", "group": "navigation" }],
+      "commandPalette": [{ "command": "proofscript.usePSC1Lean", "when": "resourceExtname == .lean" }]
+    },
+    "keybindings": [{ "command": "proofscript.showInfoview", "key": "ctrl+shift+enter", "mac": "cmd+shift+enter", "when": "editorLangId == proofscript || editorLangId == proofscript-lean" }]
+  }
+}

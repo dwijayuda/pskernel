@@ -1,0 +1,13 @@
+{
+  "schema": "psc1-editor-compiler-input/1",
+  "repository": "dwijayuda/pskernel",
+  "baselineCommit": "9d0e23c34484e4b1159f3e2428f5452139df530a",
+  "qualificationRun": 40501926898,
+  "artifactId": 12732813811,
+  "zipSha256": "ae67a85d75f46b6bfb512c232fc72b2a441cb195d0d2a9c8393752defb5be78a",
+  "tarball": "proofscript-0.1.0-psc1.12.tgz",
+  "tarballSha256": "9a66dcd0f92aaa60f600674fb91b31bc0d67b211d1e9e004146baa8e96502fcc",
+  "version": "0.1.0-psc1.12",
+  "leanVersion": "4.35.0",
+  "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+}

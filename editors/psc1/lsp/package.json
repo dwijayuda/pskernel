@@ -1,0 +1,11 @@
+{
+  "name": "@proofscript/lsp",
+  "version": "0.1.0",
+  "description": "PSC1 stdio language server with the qualified compiler and genuine Lean Wasm checker",
+  "license": "Apache-2.0",
+  "engines": { "node": ">=22.23.3" },
+  "bin": { "psc1-lsp": "dist/server.cjs" },
+  "files": ["dist", "compiler", "README.md", "LICENSE", "NOTICE", "THIRD_PARTY_NOTICES.txt"],
+  "repository": { "type": "git", "url": "https://github.com/dwijayuda/pskernel.git", "directory": "editors/psc1/lsp" },
+  "publishConfig": { "access": "public" }
+}

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "ProofScript",
+  "scopeName": "source.proofscript",
+  "patterns": [
+    { "include": "#comments" },
+    { "name": "string.quoted.double.proofscript", "begin": "\"", "end": "\"", "patterns": [{ "name": "constant.character.escape.proofscript", "match": "\\\\." }] },
+    { "name": "keyword.control.proofscript", "match": "\\b(if|then|else|match|with|do|let|mut|return|for|in|while|by|where|termination_by|decreasing_by)\\b" },
+    { "name": "keyword.declaration.proofscript", "match": "\\b(import|public|private|protected|namespace|section|end|open|export|variable|universe|universes|def|const|function|theorem|lemma|example|abbrev|opaque|axiom|inductive|structure|class|instance|deriving|partial|unsafe|noncomputable)\\b" },
+    { "name": "support.type.proofscript", "match": "\\b(Nat|Int|Bool|String|Char|Unit|Prop|Type|Sort|Array|List|Option|Except|IO|UInt8|UInt16|UInt32|UInt64|USize)\\b" },
+    { "name": "constant.language.proofscript", "match": "\\b(true|false)\\b" },
+    { "name": "constant.numeric.proofscript", "match": "\\b(?:0[xX][0-9A-Fa-f]+|[0-9]+)\\b" },
+    { "name": "keyword.other.directive.proofscript", "match": "#(?:check|eval|print)\\b" },
+    { "name": "keyword.operator.proofscript", "match": ":=|=>|->|←|→|↔|∀|∃|λ|[+*/%=<>!&|×≤≥∧∨¬]" },
+    { "name": "punctuation.section.proofscript", "match": "[{}()\\[\\],:]" }
+  ],
+  "repository": {
+    "comments": { "patterns": [
+      { "name": "comment.line.double-dash.proofscript", "begin": "--", "end": "$" },
+      { "include": "#block-comment" }
+    ] },
+    "block-comment": { "name": "comment.block.proofscript", "begin": "/-", "end": "-/", "patterns": [{ "include": "#block-comment" }] }
+  }
+}

@@ -1,4 +1,4 @@
-name: PSC1 exact-candidate checked-target diagnostic
+name: PSC1 pinned Rust SDK identity diagnostic
 on:
   push:
     branches: ['diagnostic/psc1-cli-targets-20261027']
@@ -10,8 +10,14 @@ jobs:
   diagnostic:
     runs-on: ubuntu-24.04
     timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [ambient, isolated]
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: e44760463bbca7d2372c3402e58f8731ffa9bb69
       - uses: actions/setup-node@v4
         with:
           node-version: '22.23.3'
@@ -19,30 +25,40 @@ jobs:
         with:
           github-token: ${{ github.token }}
           repository: dwijayuda/pskernel
-          run-id: 40442145356
-          name: psc1-cli-runtime-inputs-dfb9507ad8700a24a503a4e52bda00f963af279d
+          run-id: 40451321025
+          name: psc1-cli-runtime-inputs-e44760463bbca7d2372c3402e58f8731ffa9bb69
           path: psc1/dist/slim-universal
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: '1.4.4'
-      - name: Reproduce original installed watch driver with live failure diagnostics
+      - name: Compare exact SDK resources without changing the SDK or consumer
         working-directory: psc1
+        env:
+          SDK_PROFILE: ${{ matrix.profile }}
         run: |
+          if [ "$SDK_PROFILE" = isolated ]; then
+            export RUSTUP_HOME="$RUNNER_TEMP/psc1-isolated-rustup"
+            export CARGO_HOME="$RUNNER_TEMP/psc1-isolated-cargo"
+          fi
           rustup toolchain install 1.90.0 --profile minimal
-          rustup default 1.90.0
-          export PSC1_TEST_RUST_ROOT="$(rustup run 1.90.0 rustc --print sysroot)"
-          export PSC1_TEST_BUN_RUNTIME="$(command -v bun)"
-          node test/installed/cli.test.mjs
-          PSC1_TEST_RUNTIME="$(command -v bun)" node test/installed/runtime-compatibility.test.mjs
+          export SDK_ROOT="$(rustup run 1.90.0 rustc --print sysroot)"
+          rustup component list --toolchain 1.90.0 --installed
           node --input-type=module <<'JS'
-          import fs from 'node:fs';
-          const file='test/installed/watch.test.mjs';let source=fs.readFileSync(file,'utf8');
-          const start=source.indexOf('async function receipt('),end=source.indexOf('async function failed(',start);
-          if(start<0||end<0)throw Error('watch diagnostic fixture drift');
-          source=source.slice(0,start)+"async function receipt(state, after) {\n  await until(() => {\n    if (state.caseArgs?.includes('--target') && state.events.some(e=>e.event.startsWith('failed')) &&\n        !state.diagnostics.every(d=>/WATCH_SUPERSEDED|INPUT_CHANGED/.test(d.message)))\n      throw Error('WATCH_ACTUAL_FAILURE: '+state.stderr);\n    return state.receipts.length > after || state.exit;\n  }, 'current state follows in receipt failure handler').catch(error=>{\n    console.error('WATCH_LIVE_DIAGNOSTICS '+state.stderr);throw error;\n  });\n  assert.equal(state.exit, undefined, state.stderr);\n  return state.receipts[after];\n}\n"+source.slice(end);
-          source=source.replace('function watch(args, cwd, runtime = f.runtime) {',
-            "function watch(args, cwd, runtime = f.runtime) { console.log('WATCH_CASE '+JSON.stringify({args,cwd,runtime}));");
-          source=source.replace('const state = {child,', 'const state = {caseArgs:args,child,');
-          fs.writeFileSync(file,source);
+          import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import assert from 'node:assert/strict';import {execFileSync} from 'node:child_process';
+          const root='dist/slim-universal',r=JSON.parse(fs.readFileSync(root+'/package-receipt.json'));
+          assert.equal(r.sha256,'f62554265c54f5506eeaa9ba73407e1651a10b4b74e41cd7adddfa0ef425ac8e');
+          const bytes=fs.readFileSync(root+'/tarballs/'+r.tarball),sha=b=>crypto.createHash('sha256').update(b).digest('hex');
+          assert.equal(sha(bytes),r.sha256);
+          const d=JSON.parse(execFileSync('tar',['xOf',root+'/tarballs/'+r.tarball,'package/UNIVERSAL_DISTRIBUTION.json']));
+          const pins=d.targetConsumers.rust.toolchain.files,missing=[],different=[];
+          for(const pin of pins){const file=path.join(process.env.SDK_ROOT,pin.path);
+            if(!fs.existsSync(file)){missing.push(pin);continue;}
+            const bytes=fs.readFileSync(file),actual={bytes:bytes.length,sha256:sha(bytes)};
+            if(actual.bytes!==pin.bytes||actual.sha256!==pin.sha256)different.push({path:pin.path,expected:{bytes:pin.bytes,sha256:pin.sha256},actual,...(bytes.length<8192?{text:bytes.toString('utf8')}:{})});
+          }
+          const pin=pins.find(p=>p.path==='lib/rustlib/components'),text=fs.readFileSync(path.join(process.env.SDK_ROOT,pin.path),'utf8');
+          const lines=text.trimEnd().split('\n');assert.ok(lines.length<=8);
+          let canonical;
+          function permutations(prefix,remaining){if(!remaining.length){const bytes=Buffer.from(prefix.join('\n')+'\n');if(bytes.length===pin.bytes&&sha(bytes)===pin.sha256)canonical=bytes.toString('utf8');return;}
+            for(let i=0;i<remaining.length;i++)permutations([...prefix,remaining[i]],[...remaining.slice(0,i),...remaining.slice(i+1)]);
+          }
+          permutations([],lines);
+          console.log('PSC1_SDK_IDENTITY_DIAGNOSTIC '+JSON.stringify({profile:process.env.SDK_PROFILE,root:process.env.SDK_ROOT,pinCount:pins.length,missing,different,actualComponents:text,qualifiedComponentOrder:canonical,qualification:false}));
           JS
-          node test/installed/watch.test.mjs

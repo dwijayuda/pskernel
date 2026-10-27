@@ -12,8 +12,8 @@ R4 proved native source-model consistency and executed the complete connected
 checker through PSC1-generated JavaScript. It did not prove the compiler correct.
 R5 begins compiler preservation with the actual application-capture/currying
 sub-stage in Ps.Erasure.Expr and the selected scalar primitive emitter in
-Ps.BackendTs.Expr. These are existing production compiler functions, imported
-directly into the separate proof library, with no copied executable implementation.
+Ps.BackendTs.Expr. These are production compiler functions, imported
+directly into the separate proof library, with no copied executable implementation. The former local binary lowering body is extracted into psEraseBinaryIntrinsicApplication and the actual recognizer calls it.
 
 The independent scalar IR semantics covers Nat, Bool and Unit values, lexical
 name lookup, lets, conditionals, ten binary operations and Bool.not. Unsupported
@@ -28,16 +28,13 @@ binding for arbitrary parameter lists and matching argument lists. The theorem
 concerns scalar-result bodies; it does not cover arbitrary higher-order effects
 or prove the emitter's generator scheduler.
 
-For Nat add/sub/mul/div/mod/beq/ble/blt and Bool.and/or, prove the actual primitive
-recognizer emits the independently specified operation when its two recursive
+For Nat add/sub/mul/div/mod/beq/ble/blt and Bool.and/or, prove the actual shared binary lowering stage emits the independently specified operation when its two recursive
 operand erasures succeed. Compose with independent operand values and arithmetic
 meaning. This is a local compositional erasure theorem: it does not establish that
-the complete recursive eraser supplies those operand premises or selects this
-branch for every source term. Under/overapplication refuses.
+the complete recursive eraser supplies those operand premises or selects this branch for every source term. In particular, source-name dispatch uses opaque bootstrap String.Internal functions and is not proved by these stage equations. Under/overapplication refuses.
 
-Prove exact actual output-template correspondence and arity refusal for all ten
-operations, and the Nat/Bool/Unit literal ABI. The independent templates describe
-text. They are not a formal JavaScript parser or an ECMAScript engine model.
+Prove exact actual token-composition correspondence and arity refusal for all ten
+operations, and the Nat/Bool/Unit literal ABI. The independent templates specify token lists under the existing opaque psTsJoin operation. Neither character-level concatenation nor decimal rendering is proved here. They are not a formal JavaScript parser or an ECMAScript engine model.
 
 Every new theorem must print a unique dependency report containing no axioms or
 exactly propext. Existing R0–R4 guards, 10/20-minute timeouts, 256 MiB old-space
@@ -57,7 +54,7 @@ This finite observation does not establish effectful-IR preservation.
 Actual capture ordering, currying and shadowing expressions execute in Node.
 A separate one-module source fixture passes the actual atomic SH/1 source API,
 original IR check and target check, then independent official admission and the
-existing generated R4B exact-byte API. Its generated functions exercise computed
+existing generated R4B exact-byte API. The exact original IR, structured origins and emitted artifacts are retained from that same computation. Its generated functions exercise computed
 partial application, lexical closures and scalar operations over 294 calls.
 Negative original IR must fail the actual checked-emission boundary.
 
@@ -102,3 +99,40 @@ self-admission pass, selected broader regressions are terminal, and immutable
 source/run/job/artifact identities are recorded. A final reporting-only commit
 then receives its own selected checks. Preserve all earlier history and use
 one-parent, nonforce expected-HEAD updates.
+
+## Next preservation batches
+
+The capstones above leave explicit composition obligations. A next batch must
+relate actual recursive Core erasure to the source semantics, establish erased
+type/proof telescope invariants and prove capture-name freshness prevents
+interference with existing locals. Extend the value model to closures, calls
+and regular data before claiming higher-order or recursor preservation.
+
+Record/tag/field and nominal carrier representations then need an exact
+connection to the emitted constructor/projection/match syntax. The current
+generator protocol needs a simulation covering both continuation-preserving
+requests and complete-result tail requests, including repeated invocations.
+Finally connect the proved target syntax to the actual emitted text, and state
+the TypeScript transformation and ECMAScript implementation assumptions.
+
+These steps are general mechanisms. A successful finite source packet,
+IR-typing report, nominal module-origin census or bundle hash cannot replace
+them. Compiler admission coverage also remains a different obligation from
+compiler-stage semantic preservation.
+
+## Pinned bootstrap string boundary
+
+Inspection of [Lean's pinned String bootstrap declarations](https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Init/Data/String/Bootstrap.lean)
+shows String.Internal.append, length, get, next and atEnd are opaque externs.
+The compiler's name-to-text dispatch and emitted text composition use them.
+They have executable implementations, but the corresponding character equations
+are unavailable to the kernel merely by reduction. The first R5 attempt correctly
+failed when it treated those equations as definitional. No new axiom, native_decide
+bridge or arbitrary string-model premise is added to make that attempt pass.
+
+The source code now exposes the pure binary lowering body as a shared function,
+and the source recognizer calls it. Its stage proof is unconditional with respect
+to names/strings. Exact emitter equations retain the original opaque token join;
+literal Nat equations retain opaque append and psNatToString. Actual native and
+generated text behavior remains independently tested, with string/numeral
+semantics and source-name dispatch listed as open composition obligations.

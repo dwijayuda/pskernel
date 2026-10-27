@@ -26,6 +26,9 @@ const oracle=JSON.parse(fs.readFileSync(path.join(dir,'native.json')));
 assert.equal(oracle.probes.length,400);
 assert.equal(oracle.arityRefusals,30);
 assert.equal(oracle.strictIrRefusals,4);
+assert.equal(oracle.binaryStageRefusals,30);
+assert.equal(oracle.recognizerRefusals,30);
+assert.equal(oracle.recognizerCases,10);
 const admissions=fs.readFileSync(path.join(dir,'whole.admissions.json'));
 const official=JSON.parse(run('.lake/build/bin/psc1_independent_checker',['--check'],admissions));
 assert.equal(official.accepted,true);
@@ -69,7 +72,14 @@ assert.equal(policy.sourceAccepted,true);assert.equal(policy.targetAccepted,true
 assert.equal(policy.originalIrAccepted,true);assert.equal(policy.providerChecked,false);
 assert.equal(policy.semanticContractQualified,false);assert.equal(policy.strictSh1Qualified,false);
 assert.equal(policy.moduleCount,1);assert.equal(policy.originModuleCount,1);
-const paths=['direct.ts','direct.js','whole.ts','whole.js','whole.admissions.json','source.lean','native.json'];
+const ir=JSON.parse(fs.readFileSync(path.join(dir,'whole.ir.json')));
+assert.equal(ir[0],'psc1-ir/1');
+assert.equal(ir[4].length,6);
+const originalIrAbi=ir[4].map(d=>({name:d[0],typeParameters:d[1],parameters:d[2],resultType:d[3]}));
+const origins=JSON.parse(fs.readFileSync(path.join(dir,'origins.json')));
+assert.equal(origins.length,1);
+assert.equal(origins[0].batches.length,6);
+const paths=['direct.ts','direct.js','whole.ts','whole.js','whole.admissions.json','whole.ir.json','origins.json','source.lean','native.json'];
 const files=paths.map(file=>{const bytes=fs.readFileSync(path.join(dir,file));return {file,bytes:bytes.length,sha256:sha(bytes)}});
 const sources=['proofs/pskernel-min/CompilerPreservation.lean','scripts/MinKernelCompilerPreservation.lean',
  'scripts/minkernel-compiler-preservation.mjs',
@@ -79,9 +89,10 @@ const sourceFiles=sources.map(file=>{const bytes=fs.readFileSync(file);return {f
 const receipt={schema:'psc1-r5-compiler-preservation-execution/1',head:process.env.GITHUB_SHA,
  platform:process.platform,node:process.version,scalarProbes:400,wholeSourceCalls:wholeCalls,
  captureProbe:true,curryProbes:3,operandTraceProbes:traces.length,arityRefusals:oracle.arityRefusals,
- strictIrRefusals:oracle.strictIrRefusals,official:{accepted:official.accepted,version:official.leanVersion,commit:official.leanCommit},
+ strictIrRefusals:oracle.strictIrRefusals,binaryStageRefusals:oracle.binaryStageRefusals,
+ recognizerRefusals:oracle.recognizerRefusals,recognizerCases:oracle.recognizerCases,official:{accepted:official.accepted,version:official.leanVersion,commit:official.leanCommit},
  ownedNewSourcePacket:{accepted:owned.accepted,delegated:owned.delegated,bytes:admissions.length,sha256:sha(admissions)},
- policy,files,sourceFiles,resourceUsage:process.resourceUsage(),
+ policy,originalIrAbi,files,sourceFiles,resourceUsage:process.resourceUsage(),
  boundary:'Actual sub-stage theorems, template correspondence and finite engine/ABI tests. No full compiler or ECMAScript preservation theorem; no production promotion.'};
 fs.writeFileSync(path.join(dir,'execution.json'),JSON.stringify(receipt,null,2)+'\n');
 console.log('PSC1_R5_COMPILER_PRESERVATION_PASS '+JSON.stringify(receipt));

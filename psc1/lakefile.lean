@@ -674,4 +674,4 @@ lean_exe psc1_output_abi_probe where
 -- Proof-only R5 library; excluded from every executable/compiler import graph.
 lean_lib PsMinCompilerPreservation where
   srcDir := "proofs/pskernel-min"
-  roots := #[`CompilerPreservation]
+  roots := #[`CompilerPreservation, `CompilerPreservationTrust]

@@ -201,7 +201,8 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist/pskernel-min/compiler-preservation
-          lake build PsMinCompilerPreservation 2>&1 | tee dist/pskernel-min/compiler-preservation/proof.log
+          lake build PsMinCompilerPreservation 2>&1 | tee dist/pskernel-min/compiler-preservation/build.log
+          lake env lean proofs/pskernel-min/CompilerPreservationTrust.lean 2>&1 | tee dist/pskernel-min/compiler-preservation/proof.log
           node scripts/minkernel-compiler-preservation-guard.mjs
       - name: Compile and execute checker source through PSC1 and check exact source admissions
         id: portable

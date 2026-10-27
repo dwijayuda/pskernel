@@ -2,6 +2,7 @@ import Ps.Erasure.Expr
 import Ps.BackendTs.Sh1
 import Ps.Host.ProjectCompiler
 import Ps.Bridge.Json
+import Ps.CompilerIr.Encode
 
 -- Host-only Linux oracle and artifact producer. Not a runtime kernel import.
 def r5NatType : PsVerifiedIrType := .primitive .nat
@@ -23,6 +24,63 @@ def r5Source : String :=
   "def psR5Three (a : Nat) (b : Nat) (c : Nat) : Nat := Nat.add a (Nat.add b c)\n" ++
   "def psR5Capture (a : Nat) (b : Nat) (c : Nat) : Nat :=\n  let pending : Nat -> Nat := psR5Three (Nat.add a 1) (Nat.add b 2)\n  pending c\n" ++
   "def psR5UseClosure (seed : Nat) (value : Nat) : Nat :=\n  let captured := Nat.add seed 1\n  let fn : Nat -> Nat := fun (arg : Nat) => Nat.add captured arg\n  fn value\n"
+
+def r5OriginRole (role : PsElabOriginRole) : String :=
+  match role with
+  | .sourceDeclaration => "sourceDeclaration"
+  | .inductiveType => "inductiveType"
+  | .structureType => "structureType"
+  | .constructor => "constructor"
+  | .recursor => "recursor"
+  | .normalizedWorker => "normalizedWorker"
+  | .publicWrapper => "publicWrapper"
+
+def r5OriginMember (member : PsElabMemberOrigin) : String :=
+  psJsonObject [("index", toString member.index),
+    ("nameWire", psEncodeCodecName member.name),
+    ("role", psJsonQuote (r5OriginRole member.role))]
+
+def r5OriginBatch (batch : PsElabBatchOrigin) : String :=
+  psJsonObject [("sourceIndex", toString batch.sourceIndex),
+    ("sourceName", psJsonArray (batch.sourceName.segments.map psJsonQuote)),
+    ("members", psJsonArray (batch.members.map r5OriginMember))]
+
+def r5OriginModule (origin : PsSh1ModuleOrigin) : String :=
+  psJsonObject [("moduleName", psJsonArray (origin.moduleName.map psJsonQuote)),
+    ("coreStart", toString origin.coreStart),
+    ("batches", psJsonArray (origin.batches.map r5OriginBatch))]
+
+
+def r5CompilerFailure (error : PsCompilerError) : String :=
+  match error with
+  | .elaboration failure => psHostElabErrorText failure
+  | .leanFrontend failure =>
+    match failure with
+    | .lex error => psHostLexErrorText error
+    | .parse error => psHostParseErrorText error
+  | .proofScriptFrontend failure =>
+    match failure with
+    | .lex error => psHostLexErrorText error
+    | .parse error => psHostParseErrorText error
+  | .translation _ => "translation refused"
+  | .admission _ => "canonical admission encoding refused"
+  | .erasure _ => "erasure refused"
+
+-- Linux CI transport only. The source-owned compiler performs all frontend,
+-- canonical preparation and strict original/transformed IR checks.
+def r5SourceFailure (error : PsSh1EmitError) : String :=
+  match error with
+  | .source sourceError =>
+    match sourceError with
+    | .policy finding => finding.code ++ ": " ++ finding.detail
+    | .origin moduleName failure =>
+      moduleName ++ ": " ++ psHostElabErrorText failure.error
+    | .compiler moduleName failure => moduleName ++ ": " ++ r5CompilerFailure failure
+  | .compiler failure => r5CompilerFailure failure
+  | .checkedEmit _ => "strict IR or emitter refused"
+  | .target finding => finding.code ++ ": " ++ finding.detail
+
+
 
 def main : IO Unit := do
   let dir := "dist/pskernel-min/compiler-preservation"
@@ -91,6 +149,42 @@ def main : IO Unit := do
       match psTsEmitIntrinsicFromPrinted op args with
       | .error .intrinsicArity => arityRefusals := arityRefusals + 1
       | _ => throw (IO.userError "R5_BOOL_ARITY_GUARD_CHANGED")
+  let nominalOperations : List (PsName × PsVerifiedIrIntrinsic) := [
+    (psNatAddName, PsVerifiedIrIntrinsic.natAdd),
+    (psNatSubName, PsVerifiedIrIntrinsic.natSub),
+    (psNatMulName, PsVerifiedIrIntrinsic.natMul),
+    (psNatDivName, PsVerifiedIrIntrinsic.natDiv),
+    (psNatModName, PsVerifiedIrIntrinsic.natMod),
+    (psNatBeqName, PsVerifiedIrIntrinsic.natEq),
+    (psNatBleName, PsVerifiedIrIntrinsic.natLe),
+    (psNatBltName, PsVerifiedIrIntrinsic.natLt),
+    ((PsName.str (PsName.str PsName.anonymous "Bool") "and"), PsVerifiedIrIntrinsic.boolAnd),
+    ((PsName.str (PsName.str PsName.anonymous "Bool") "or"), PsVerifiedIrIntrinsic.boolOr)]
+  let eraseOperand : PsExpr → Except PsErasureError PsVerifiedIrExpr :=
+    fun _ => .ok (r5Nat 1)
+  let operand : PsExpr := .lit (.natural 1)
+  let mut binaryStageRefusals := 0
+  let mut recognizerRefusals := 0
+  let mut recognizerCases := 0
+  for (name, op) in nominalOperations do
+    for args in [[], [operand], [operand, operand, operand]] do
+      match psEraseBinaryIntrinsicApplication eraseOperand op args with
+      | .error .unsupportedApplication => binaryStageRefusals := binaryStageRefusals + 1
+      | _ => throw (IO.userError "R5_BINARY_STAGE_ARITY_CHANGED")
+      match psErasePrimitiveApplication psEnvironmentEmpty (psErasureScopeEmpty [])
+          eraseOperand (.mk (.constE name []) args) with
+      | .error .unsupportedApplication => recognizerRefusals := recognizerRefusals + 1
+      | _ => throw (IO.userError "R5_RECOGNIZER_ARITY_CHANGED")
+    match psErasePrimitiveApplication psEnvironmentEmpty (psErasureScopeEmpty [])
+        eraseOperand (.mk (.constE name []) [operand, operand]) with
+    | .ok (.some actual) =>
+        let expected := r5Binary op (r5Nat 1) (r5Nat 1)
+        match psIrEncodeExpr actual, psIrEncodeExpr expected with
+        | .ok left, .ok right =>
+            if left == right then recognizerCases := recognizerCases + 1
+            else throw (IO.userError "R5_RECOGNIZER_OPERATION_MISMATCH")
+        | _, _ => throw (IO.userError "R5_RECOGNIZER_IR_ENCODING_REFUSED")
+    | _ => throw (IO.userError "R5_RECOGNIZER_REFUSED")
   let invalid : List PsVerifiedIrExpr := [
     r5Binary .natAdd (r5Bool true) (r5Nat 1),
     .ifE (r5Nat 1) (r5Nat 2) (r5Nat 3),
@@ -112,18 +206,26 @@ def main : IO Unit := do
   IO.FS.writeFile (dir ++ "/native.json")
     (psJsonObject [("schema", psJsonQuote "psc1-r5-native-oracle/1"),
       ("probes", psJsonArray expected), ("arityRefusals", toString arityRefusals),
-      ("strictIrRefusals", toString strictRefusals)] ++ "\n")
+      ("strictIrRefusals", toString strictRefusals),
+      ("binaryStageRefusals", toString binaryStageRefusals),
+      ("recognizerRefusals", toString recognizerRefusals),
+      ("recognizerCases", toString recognizerCases)] ++ "\n")
   IO.FS.writeFile (dir ++ "/source.lean") r5Source
   let inputs := [psSh1SourceInput ["R5", "Scalar"] r5Source]
   match psCompilerSh1TypeScriptSources psSh1DefaultSourceOptions psIrCheckDefaultOptions
       PsCompilerSourceKind.lean inputs with
-  | .error _ => throw (IO.userError "R5_ACTUAL_SOURCE_COMPILATION_REFUSED")
+  | .error error => throw (IO.userError ("R5_ACTUAL_SOURCE_COMPILATION_REFUSED: " ++ r5SourceFailure error))
   | .ok result =>
       if !result.sourcePolicy.accepted || !result.targetPolicy.accepted ||
           !result.checkReport.accepted || !result.checkReport.traversalComplete then
         throw (IO.userError "R5_SOURCE_OR_IR_GUARD_REFUSED")
       IO.FS.writeFile (dir ++ "/whole.ts") result.typeScript
       IO.FS.writeFile (dir ++ "/whole.admissions.json") result.admissions
+      match psIrEncodeModule result.originalIr with
+      | .error _ => throw (IO.userError "R5_ORIGINAL_IR_ENCODING_REFUSED")
+      | .ok text => IO.FS.writeFile (dir ++ "/whole.ir.json") text
+      IO.FS.writeFile (dir ++ "/origins.json")
+        (psJsonArray (result.origins.map r5OriginModule) ++ "\n")
       IO.FS.writeFile (dir ++ "/source-policy.json")
         (psJsonObject [("sourceAccepted", "true"), ("targetAccepted", "true"),
           ("originalIrAccepted", "true"), ("providerChecked", toString result.providerChecked),

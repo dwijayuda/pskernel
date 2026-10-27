@@ -90,7 +90,8 @@ inductive Eval : Env → PsVerifiedIrExpr → Value → Prop where
 -- bindingsRev is the actual compiler accumulator: its tail runs first.
 inductive Captures : Env → List (PsVerifiedIrParameter × PsVerifiedIrExpr) → Env → Prop where
   | nil (env) : Captures env [] env
-  | cons (history : Captures env rest middle)
+  | cons {binding : PsVerifiedIrParameter × PsVerifiedIrExpr}
+      (history : Captures env rest middle)
       (value : Eval middle binding.2 v) :
       Captures env (binding :: rest) ((binding.1.name, v) :: middle)
 
@@ -130,16 +131,18 @@ theorem two_captures_order (first second : PsVerifiedIrParameter × PsVerifiedIr
 
 theorem shadowing (env : Env) (name : String) (old fresh : Value) :
     lookup ((name, fresh) :: (name, old) :: env) name = some fresh := by
-  simp only [lookup, if_pos rfl]
+  simp [lookup]
 
 inductive Bindings : Env → List PsVerifiedIrParameter → List Value → Env → Prop where
   | nil (env) : Bindings env [] [] env
-  | cons (tail : Bindings ((p.name, v) :: env) rest values final) :
+  | cons {p : PsVerifiedIrParameter}
+      (tail : Bindings ((p.name, v) :: env) rest values final) :
       Bindings env (p :: rest) (v :: values) final
 
 inductive Invoke : Env → PsVerifiedIrExpr → List Value → Value → Prop where
   | done (h : Eval env body result) : Invoke env body [] result
-  | argument (h : Invoke ((p.name, v) :: env) body values result) :
+  | argument {p : PsVerifiedIrParameter}
+      (h : Invoke ((p.name, v) :: env) body values result) :
       Invoke env (.lambda [p] type body) (v :: values) result
 
 theorem curry_iff (bindings : Bindings env parameters arguments final) :
@@ -179,38 +182,34 @@ theorem mapped_binary (erase : PsExpr → Except PsErasureError PsVerifiedIrExpr
     psEraseMappedIntrinsic erase operation [a, b] =
       .ok (.intrinsic operation [] [left, right]) := by
   change (match erase a with
-    | .error e => .error e
+    | .error e => Except.error e
     | .ok x => match erase b with
-      | .error e => .error e
-      | .ok y => .ok (.intrinsic operation [] [x, y])) = _
+      | .error e => Except.error e
+      | .ok y => Except.ok (PsVerifiedIrExpr.intrinsic operation [] [x, y])) = _
   rw [ha, hb]
 
 theorem erase_binary (operation : Binary)
     (erase : PsExpr → Except PsErasureError PsVerifiedIrExpr)
     (ha : erase a = .ok left) (hb : erase b = .ok right)
-    (environment : PsEnvironment) (scope : PsErasureScope) :
-    psErasePrimitiveApplication environment scope erase
-      ⟨.constE (coreName operation) [], [a, b]⟩ =
+    :
+    psEraseBinaryIntrinsicApplication erase (irOperation operation) [a, b] =
       .ok (some (.intrinsic (irOperation operation) [] [left, right])) := by
-  cases operation <;>
-    change (match psEraseMappedIntrinsic erase _ [a, b] with
-      | .error e => .error e
-      | .ok value => .ok (some value)) = _
-  all_goals rw [mapped_binary erase ha hb]
+  change (match psEraseMappedIntrinsic erase (irOperation operation) [a, b] with
+      | .error e => Except.error e
+      | .ok value => Except.ok (some value)) = _
+  rw [mapped_binary erase ha hb]
 
 theorem erase_binary_empty_refuses (operation : Binary)
     (erase : PsExpr → Except PsErasureError PsVerifiedIrExpr)
-    (environment : PsEnvironment) (scope : PsErasureScope) :
-    psErasePrimitiveApplication environment scope erase
-      ⟨.constE (coreName operation) [], []⟩ =
+    :
+    psEraseBinaryIntrinsicApplication erase (irOperation operation) [] =
       .error .unsupportedApplication := by
   cases operation <;> rfl
 
 theorem erase_binary_overapplied_refuses (operation : Binary)
     (erase : PsExpr → Except PsErasureError PsVerifiedIrExpr)
-    (environment : PsEnvironment) (scope : PsErasureScope) (a b c : PsExpr) :
-    psErasePrimitiveApplication environment scope erase
-      ⟨.constE (coreName operation) [], [a, b, c]⟩ =
+    (a b c : PsExpr) :
+    psEraseBinaryIntrinsicApplication erase (irOperation operation) [a, b, c] =
       .error .unsupportedApplication := by
   cases operation <;> rfl
 
@@ -219,29 +218,30 @@ theorem primitive_stage_preserves
     (ha : erase a = .ok left) (hb : erase b = .ok right)
     (leftValue : Eval env left av) (rightValue : Eval env right bv)
     (value : meaning operation av bv = some result)
-    (environment : PsEnvironment) (scope : PsErasureScope) :
-    ∃ ir, psErasePrimitiveApplication environment scope erase
-      ⟨.constE (coreName operation) [], [a, b]⟩ = .ok (some ir) ∧ Eval env ir result :=
-  ⟨_, erase_binary operation erase ha hb environment scope,
+    :
+    ∃ ir, psEraseBinaryIntrinsicApplication erase (irOperation operation) [a, b] = .ok (some ir) ∧ Eval env ir result :=
+  ⟨_, erase_binary operation erase ha hb,
     Eval.binary leftValue rightValue value⟩
 
 -- Independently stated exact output templates. These equations do not assert
 -- that arbitrary operand text is safe or that an ECMAScript engine is verified.
-def binaryText : Binary → String → String → String
-  | .add, left, right => "(" ++ left ++ " + " ++ right ++ ")"
-  | .sub, left, right => "((__ps_a: bigint, __ps_b: bigint) => (__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(" ++ left ++ ", " ++ right ++ ")"
-  | .mul, left, right => "(" ++ left ++ " * " ++ right ++ ")"
-  | .div, left, right => "((__ps_a: bigint, __ps_b: bigint) => (__ps_b === 0n ? 0n : __ps_a / __ps_b))(" ++ left ++ ", " ++ right ++ ")"
-  | .mod, left, right => "((__ps_a: bigint, __ps_b: bigint) => (__ps_b === 0n ? __ps_a : __ps_a % __ps_b))(" ++ left ++ ", " ++ right ++ ")"
-  | .eq, left, right => "(((" ++ left ++ ") as bigint) === ((" ++ right ++ ") as bigint))"
-  | .le, left, right => "(" ++ left ++ " <= " ++ right ++ ")"
-  | .lt, left, right => "(" ++ left ++ " < " ++ right ++ ")"
-  | .and, left, right => "(" ++ left ++ " && " ++ right ++ ")"
-  | .or, left, right => "(" ++ left ++ " || " ++ right ++ ")"
+def binaryTokens : Binary → String → String → List String
+  | .add, left, right => ["(", left, " + ", right, ")"]
+  | .sub, left, right => ["((__ps_a: bigint, __ps_b: bigint) => ", "(__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(", left, ", ", right, ")"]
+  | .mul, left, right => ["(", left, " * ", right, ")"]
+  | .div, left, right => ["((__ps_a: bigint, __ps_b: bigint) => ", "(__ps_b === 0n ? 0n : __ps_a / __ps_b))(", left, ", ", right, ")"]
+  | .mod, left, right => ["((__ps_a: bigint, __ps_b: bigint) => ", "(__ps_b === 0n ? __ps_a : __ps_a % __ps_b))(", left, ", ", right, ")"]
+  | .eq, left, right => ["(((", left, ") as bigint) === ((", right, ") as bigint))"]
+  | .le, left, right => ["(", left, " <= ", right, ")"]
+  | .lt, left, right => ["(", left, " < ", right, ")"]
+  | .and, left, right => ["(", left, " && ", right, ")"]
+  | .or, left, right => ["(", left, " || ", right, ")"]
 
+-- This is exact token composition under the existing opaque join operation.
+-- No character-level String.Internal law is asserted.
 theorem emit_binary_template (op : Binary) (left right : String) :
     psTsEmitIntrinsicFromPrinted (irOperation op) [left, right] =
-      .ok (binaryText op left right) := by
+      .ok (psTsJoin "" (binaryTokens op left right)) := by
   cases op <;> rfl
 
 theorem emit_binary_empty_refuses (op : Binary) :
@@ -254,10 +254,11 @@ theorem emit_binary_overapplied_refuses (op : Binary) (a b c : String) :
   cases op <;> rfl
 
 theorem emit_nat_abi (n : Nat) :
-    psTsEmitLiteral (.natural n) = .ok (psNatToString n ++ "n") := rfl
+    psTsEmitLiteral (.natural n) = .ok (String.Internal.append (psNatToString n) "n") := rfl
 
 theorem emit_bool_abi (b : Bool) :
-    psTsEmitLiteral (.bool b) = .ok (if b then "true" else "false") := rfl
+    psTsEmitLiteral (.bool b) = .ok (if b then "true" else "false") := by
+  cases b <;> rfl
 
 theorem emit_unit_abi : psTsEmitLiteral .unit = .ok "undefined" := rfl
 

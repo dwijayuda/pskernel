@@ -12,7 +12,7 @@ theorem byteEq_sound (left right : List Nat) (h : psMinByteEq left right = true)
     | cons other rest =>
       simp only [psMinByteEq] at h
       split at h
-      next same => exact congrArg₂ List.cons (Nat.eq_of_beq_eq_true same) (ih rest h)
+      next same => exact congrArg2 List.cons (Nat.eq_of_beq_eq_true same) (ih rest h)
       next => contradiction
 
 theorem byteEq_refl (bytes : List Nat) : psMinByteEq bytes bytes = true := by
@@ -27,7 +27,7 @@ theorem nameEq_sound (left right : PsMinCoreName) (h : psMinCoreNameEq left righ
     | str other rest =>
       simp only [psMinCoreNameEq] at h
       split at h
-      next same => exact congrArg₂ PsMinCoreName.str (ih other same) (byteEq_sound _ _ h)
+      next same => exact congrArg2 PsMinCoreName.str (ih other same) (byteEq_sound _ _ h)
       next => contradiction
     | _ => simp [psMinCoreNameEq] at h
   | num parent value ih =>
@@ -35,7 +35,7 @@ theorem nameEq_sound (left right : PsMinCoreName) (h : psMinCoreNameEq left righ
     | num other number =>
       simp only [psMinCoreNameEq] at h
       split at h
-      next same => exact congrArg₂ PsMinCoreName.num (ih other same) (Nat.eq_of_beq_eq_true h)
+      next same => exact congrArg2 PsMinCoreName.num (ih other same) (Nat.eq_of_beq_eq_true h)
       next => contradiction
     | _ => simp [psMinCoreNameEq] at h
 
@@ -54,7 +54,7 @@ theorem exprEq_sound (fuel : Nat) (left right : PsMinCoreExpr)
     all_goals first
       | exact congrArg PsMinCoreExpr.bvar (Nat.eq_of_beq_eq_true h)
       | exact congrArg PsMinCoreExpr.natural (Nat.eq_of_beq_eq_true h)
-      | exact congrArg₂ PsMinCoreExpr.constant (nameEq_sound _ _ (by assumption)) (byteEq_sound _ _ h)
+      | exact congrArg2 PsMinCoreExpr.constant (nameEq_sound _ _ (by assumption)) (byteEq_sound _ _ h)
       | congr 1 <;> first
           | exact nameEq_sound _ _ (by assumption)
           | exact Nat.eq_of_beq_eq_true (by assumption)
@@ -76,7 +76,7 @@ theorem lengthAtMost_sound (fuel : Nat) (bytes : List Nat)
 -- Unicode, numeric overflow, excessive depth and unsupported level instances.
 structure WellFormedBytes (bytes : List Nat) (source : List PsMinCoreDeclaration) : Prop where
   byteBound : bytes.length ≤ 65536
-  syntax : psMinCoreDeclarationsValid 128 source = true
+  syntaxBound : psMinCoreDeclarationsValid 128 source = true
   exactBytes : bytes = psMinCoreEncode source
 
 theorem decode_success_is_well_formed (bytes : List Nat)
@@ -142,10 +142,7 @@ theorem fresh_no_shadowing (names : List PsMinCoreName) (name : PsMinCoreName)
   all_goals try contradiction
   all_goals repeat' split at h
   all_goals try contradiction
-  all_goals refine ⟨by intro h; cases h, ?_, ?_⟩
-  all_goals intro hm
-  all_goals have ht := (member_iff _ _).mpr hm
-  all_goals simp_all
+  all_goals simp_all [← member_iff]
 
 -- Each step keeps the original declaration (including name, height, type and
 -- body), its definition-time newest-first name context, and both translations.

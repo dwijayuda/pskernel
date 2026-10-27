@@ -1,0 +1,5 @@
+-- Higher-order helpers are kept in an imported module.
+-- The Main module below exposes only ordinary scalar results.
+def applyTwice(step : Nat -> Nat, initial : Nat) : Nat := step(step(initial))
+
+def addOne(value : Nat) : Nat := value + 1

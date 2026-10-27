@@ -1,0 +1,11 @@
+import Support
+
+-- Both possible premises lead to the same conclusion R.
+theorem eitherCases(P : Prop, Q : Prop, R : Prop, choice : Either(P, Q), onLeft : P -> R, onRight : Q -> R) : R :=
+  choice(R, onLeft, onRight)
+
+-- If both sides imply P, the encoded disjunction also implies P.
+theorem eitherCollapse(P : Prop, choice : Either(P, P)) : P :=
+  choice(P, fun (left : P) => left, fun (right : P) => right)
+
+def exampleNumber : Nat := 12

@@ -1,0 +1,24 @@
+{
+  "title": "Transport a proof along Leibniz equality",
+  "summary": "Apply Same(a, b) to a predicate and its proof at a, obtaining a proof at b. This is substitution for the equality defined in Support.ps.",
+  "concepts": [
+    "Leibniz equality",
+    "substitution",
+    "proof transport",
+    "dependent application"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "exampleNumber": 15
+  },
+  "files": [
+    {
+      "module": "Support",
+      "path": "Support.ps"
+    },
+    {
+      "module": "Main",
+      "path": "Main.ps"
+    }
+  ]
+}

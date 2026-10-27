@@ -1,0 +1,10 @@
+-- The exponent decreases structurally; the base stays unchanged.
+-- Keeping the invariant argument visible makes the recursive dependency clear.
+def power(exponent : Nat, base : Nat) : Nat :=
+  match exponent with {
+    | Nat.zero => 1
+    | Nat.succ previous => base * power(previous, base)
+  }
+
+def fifthPowerOfTwo : Nat := power(5, 2)
+def cubeOfThree : Nat := power(3, 3)

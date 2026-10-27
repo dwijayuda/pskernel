@@ -1,0 +1,8 @@
+-- Both branches continue with a new value for score.
+def result : Nat :=
+  let calculation : Id(Nat) := do {
+    let mut score : Nat := 10
+    if (true) { score := score + 5 } else { score := score + 2 }
+    return score
+  }
+  calculation

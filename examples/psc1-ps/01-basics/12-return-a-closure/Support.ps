@@ -1,0 +1,6 @@
+-- The returned lambda refers to offset from the surrounding function.
+-- Each created function keeps its own captured offset.
+def makeAdder(offset : Nat) : Nat -> Nat := fun value => offset + value
+
+def addSeven : Nat -> Nat := makeAdder(7)
+def addTwenty : Nat -> Nat := makeAdder(20)

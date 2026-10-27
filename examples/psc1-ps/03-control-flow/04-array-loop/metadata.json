@@ -1,0 +1,13 @@
+{
+  "title": "Loop over an array",
+  "summary": "Multiply the entries of an array literal. The product is 105.",
+  "concepts": [
+    "Array",
+    "for",
+    "product"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "result": 105
+  }
+}

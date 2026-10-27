@@ -1,0 +1,8 @@
+{
+  "title": "A generic Maybe type and reusable fallback",
+  "summary": "Define a polymorphic optional container and instantiate its generic getOr function for Nat and Bool.",
+  "concepts": ["type parameters", "implicit binders", "polymorphism", "generic inductive", "module imports"],
+  "expected": "checked",
+  "expectedExports": {"sample": 7},
+  "files": [{"module": "Data", "path": "Data.ps"}, {"module": "Main", "path": "Main.ps"}]
+}

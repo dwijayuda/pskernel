@@ -1,0 +1,8 @@
+-- A local proof can be named just like another immutable local value.
+-- ProofScript separates these terms with a newline, not a semicolon.
+theorem stepByStep(P : Prop, Q : Prop, R : Prop, first : P -> Q, second : Q -> R, premise : P) : R := {
+  let middle : Q := first(premise)
+  second(middle)
+}
+
+def exampleNumber : Nat := 7

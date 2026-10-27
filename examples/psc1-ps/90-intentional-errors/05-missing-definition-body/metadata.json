@@ -1,0 +1,11 @@
+{
+  "title": "Intentional error: unfinished definition",
+  "summary": "The assignment marker must be followed by a term. Repair by adding 42 after :=.",
+  "concepts": [
+    "intentional error",
+    "parse error",
+    "incomplete source"
+  ],
+  "expected": "rejected",
+  "expectedPhase": "parse"
+}

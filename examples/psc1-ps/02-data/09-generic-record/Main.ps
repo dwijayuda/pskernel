@@ -1,0 +1,8 @@
+import Data
+
+-- The annotation fixes A = Nat for the generated constructor.
+def inspectTag(value : Nat) : Nat :=
+  let item : Tagged(Nat) := Tagged.mk(value, 9)
+  numericContents(item) * 100 + numericSerial(item)
+
+def sample : Nat := inspectTag(12)

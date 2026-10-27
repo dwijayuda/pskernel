@@ -1,0 +1,13 @@
+-- The recursive tail field builds a finite chain of elements.
+inductive Chain(A : Type) where {
+  | empty
+  | link(head : A, tail : Chain(A))
+}
+
+-- This recursive call consumes the tail exposed by the match.
+-- It is structural recursion, so no partial declaration is needed.
+def chainLength(values : Chain(Nat)) : Nat :=
+  match values with {
+    | Chain.empty => 0
+    | Chain.link head tail => 1 + chainLength(tail)
+  }

@@ -1,0 +1,11 @@
+import Support
+
+-- By definition, equality evidence transports every Nat predicate.
+theorem sameSubst(a : Nat, b : Nat, equality : Same(a, b), P : Nat -> Prop, atA : P(a)) : P(b) :=
+  equality(P, atA)
+
+-- Fix the predicate first; the remaining result is a proof-producing function.
+theorem transport(a : Nat, b : Nat, equality : Same(a, b), P : Nat -> Prop) : P(a) -> P(b) :=
+  fun (atA : P(a)) => equality(P, atA)
+
+def exampleNumber : Nat := 15

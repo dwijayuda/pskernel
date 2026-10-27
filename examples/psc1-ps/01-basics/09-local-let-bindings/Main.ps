@@ -1,0 +1,10 @@
+-- Local let bindings belong to this function body.
+-- They are separated by newlines in .ps.
+def ticketBill(count : Nat, price : Nat, discount : Nat) : Nat :=
+  let subtotal : Nat := count * price
+  let afterDiscount : Nat := subtotal - discount
+  let bookingFee : Nat := 500
+  afterDiscount + bookingFee
+
+-- The last expression is the result of the function body.
+def result : Nat := ticketBill(3, 4000, 1000)

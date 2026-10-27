@@ -1,0 +1,13 @@
+{
+  "title": "Use one assumption twice",
+  "summary": "A proof of P can fill both P inputs of P -> P -> Q.",
+  "concepts": [
+    "contraction",
+    "reusable proofs",
+    "function application"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "exampleNumber": 6
+  }
+}

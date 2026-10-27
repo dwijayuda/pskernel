@@ -1,0 +1,8 @@
+import Support
+
+-- The consumer for Both(Q, P) expects Q first and P second.
+theorem bothSwap(P : Prop, Q : Prop, pair : Both(P, Q)) : Both(Q, P) :=
+  fun (R : Prop) => fun (consume : Q -> P -> R) =>
+    pair(R, fun (left : P) => fun (right : Q) => consume(right, left))
+
+def exampleNumber : Nat := 10

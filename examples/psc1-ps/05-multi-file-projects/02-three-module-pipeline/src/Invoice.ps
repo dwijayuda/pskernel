@@ -1,0 +1,6 @@
+import Units
+
+namespace Invoice
+def total(quantity : Nat, unitDollars : Nat, shippingCents : Nat) : Nat :=
+  quantity * Units.cents(unitDollars) + shippingCents
+end Invoice

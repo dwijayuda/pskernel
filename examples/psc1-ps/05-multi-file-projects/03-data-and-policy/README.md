@@ -1,0 +1,27 @@
+# Separate a data model from its policy
+
+Define a mode in one module and a scalar policy in another. Main exposes a simple Nat result of 10.
+
+This example should finish as **Checked** in PSC1 editor 0.1.1.
+
+## Concepts
+
+inductive data, imported helpers, pattern matching.
+
+## Open the example
+
+Open this folder in VS Code, or open `Main.ps` from the top-level examples workspace. Keep all listed files together; `proofscript.json` supplies the exact dependency order. Use **ProofScript: Show Infoview** to inspect current declarations and messages.
+
+## Source files
+
+- [src/Domain.ps](src/Domain.ps) — module `Domain`.
+- [src/Policy.ps](src/Policy.ps) — module `Policy`.
+- [Main.ps](Main.ps) — module `Main`.
+
+## Expected exported values
+
+- `result` = `10`.
+
+These values are checked by executing the emitted JavaScript in the archive qualification. The Infoview displays types and verification status; it does not evaluate expressions as a REPL.
+
+[Back to the complete index](../../INDEX.md).

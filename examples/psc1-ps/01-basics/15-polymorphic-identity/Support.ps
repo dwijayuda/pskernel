@@ -1,0 +1,3 @@
+-- {A : Type} is an implicit type parameter.
+-- The compiler infers A from the argument and expected result type.
+def keep {A : Type}(value : A) : A := value

@@ -1,0 +1,14 @@
+{
+  "title": "String parameters and admitted operations",
+  "summary": "Build a greeting using the exact String operations exposed by the current compiler fixtures, and inspect its length. The greeting is Hello, Ada!.",
+  "concepts": [
+    "String",
+    "string parameters",
+    "String.Internal.append",
+    "String.Internal.length"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "result": "Hello, Ada!"
+  }
+}

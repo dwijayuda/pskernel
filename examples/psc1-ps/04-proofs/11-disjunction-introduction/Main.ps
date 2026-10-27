@@ -1,0 +1,11 @@
+import Support
+
+-- A proof on the left selects the handler for P.
+theorem eitherLeft(P : Prop, Q : Prop, proof : P) : Either(P, Q) :=
+  fun (R : Prop) => fun (onLeft : P -> R) => fun (onRight : Q -> R) => onLeft(proof)
+
+-- A proof on the right selects the handler for Q.
+theorem eitherRight(P : Prop, Q : Prop, proof : Q) : Either(P, Q) :=
+  fun (R : Prop) => fun (onLeft : P -> R) => fun (onRight : Q -> R) => onRight(proof)
+
+def exampleNumber : Nat := 11

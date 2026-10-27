@@ -1,0 +1,8 @@
+import Data
+
+-- The two traversals consume the same immutable tree in different ways.
+def treeExample : Nat :=
+  let tree : NumberTree :=
+    NumberTree.branch(NumberTree.leaf(4),
+      NumberTree.branch(NumberTree.leaf(7), NumberTree.leaf(9)))
+  treeTotal(tree) * 100 + leafCount(tree)

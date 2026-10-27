@@ -1,0 +1,12 @@
+-- Multiplication binds more tightly than addition.
+def notebooks : Nat := 3
+def notebookPrice : Nat := 2500
+def deliveryFee : Nat := 1500
+
+def deliveredSubtotal : Nat := notebooks * notebookPrice + deliveryFee
+
+-- Parentheses make a different grouping explicit.
+-- Here the delivery fee is added once, after calculating both product lines.
+def pens : Nat := 2
+def penPrice : Nat := 1500
+def result : Nat := (notebooks * notebookPrice) + (pens * penPrice) + deliveryFee

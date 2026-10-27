@@ -1,0 +1,9 @@
+-- previous captures amount = 3, before the later assignment.
+def result : Nat :=
+  let calculation : Id(Nat) := do {
+    let mut amount : Nat := 3
+    let previous : Nat -> Nat := fun value => amount + value
+    amount := 100
+    return previous(4)
+  }
+  calculation

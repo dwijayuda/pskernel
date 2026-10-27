@@ -1,0 +1,9 @@
+-- compose(outer, inner) creates a function that applies inner first.
+def compose(outer : Nat -> Nat, inner : Nat -> Nat) : Nat -> Nat :=
+  fun value => outer(inner(value))
+
+def increment(value : Nat) : Nat := value + 1
+def double(value : Nat) : Nat := value * 2
+
+def doubleAfterIncrement : Nat -> Nat := compose(double, increment)
+def incrementAfterDouble : Nat -> Nat := compose(increment, double)

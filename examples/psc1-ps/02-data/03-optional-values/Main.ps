@@ -1,0 +1,16 @@
+-- Option distinguishes a missing value from a present value, including zero.
+-- The expected Option(Nat) type determines the constructors' type parameter.
+def discount(isMember : Bool) : Nat :=
+  let offered : Option(Nat) :=
+    if (isMember) { Option.some(15) } else { Option.none }
+  match offered with {
+    | Option.none => 0
+    | Option.some amount => amount
+  }
+
+def totalAfterDiscount(price : Nat, isMember : Bool) : Nat :=
+  price - discount(isMember)
+
+-- Nat subtraction saturates at zero if the discount exceeds the price.
+def memberPrice : Nat := totalAfterDiscount(40, true)
+def visitorPrice : Nat := totalAfterDiscount(40, false)

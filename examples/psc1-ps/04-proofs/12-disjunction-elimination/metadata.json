@@ -1,0 +1,23 @@
+{
+  "title": "Reason from both possible cases",
+  "summary": "To obtain R from Either(P, Q), supply one proof function for each possibility.",
+  "concepts": [
+    "Church encoding",
+    "disjunction elimination",
+    "case analysis"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "exampleNumber": 12
+  },
+  "files": [
+    {
+      "module": "Support",
+      "path": "Support.ps"
+    },
+    {
+      "module": "Main",
+      "path": "Main.ps"
+    }
+  ]
+}

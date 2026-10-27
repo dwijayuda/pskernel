@@ -1,0 +1,10 @@
+-- >= is a comparison proposition used here as an if condition.
+-- The compiler supplies its checked decision path for this supported case.
+def discountPercent(total : Nat) : Nat :=
+  if (total >= 10000) { 10 } else { 0 }
+
+-- == computes a Bool. It is different from the proposition-forming =.
+def sameTotal(left : Nat, right : Nat) : Bool := left == right
+
+def result : Nat :=
+  if (sameTotal(12000, 12000)) { discountPercent(12000) } else { 0 }

@@ -1,0 +1,15 @@
+{
+  "title": "Typed values",
+  "summary": "Declare Nat, Bool, and String values explicitly, then select a numeric result with a Boolean flag. The result is 12.",
+  "concepts": [
+    "explicit types",
+    "Nat",
+    "Bool",
+    "String",
+    "constant references"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "result": 12
+  }
+}

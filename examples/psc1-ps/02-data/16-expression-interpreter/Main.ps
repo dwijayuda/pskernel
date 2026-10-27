@@ -1,0 +1,10 @@
+import Data
+
+-- Build the syntax tree for (2 + 3) * 4, then interpret it.
+-- Changing the constructor nesting changes grouping explicitly.
+def expressionExample : Nat :=
+  let expression : Expression :=
+    Expression.multiply(
+      Expression.add(Expression.literal(2), Expression.literal(3)),
+      Expression.literal(4))
+  evaluate(expression)

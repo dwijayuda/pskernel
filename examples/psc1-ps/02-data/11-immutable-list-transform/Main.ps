@@ -1,0 +1,7 @@
+import Data
+
+-- Keep the original value available after computing a transformed value.
+def transformExample : Nat :=
+  let original : Numbers := Numbers.link(2, Numbers.link(5, Numbers.empty))
+  let changed : Numbers := addTen(original)
+  total(changed) * 100 + total(original)

@@ -1,0 +1,13 @@
+{
+  "title": "Change the order of assumptions",
+  "summary": "Transform P -> Q -> R into Q -> P -> R without changing the conclusion.",
+  "concepts": [
+    "exchange",
+    "curried implication",
+    "comma-separated calls"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "exampleNumber": 5
+  }
+}

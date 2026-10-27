@@ -1,0 +1,9 @@
+import Data
+
+def lengthExample(includeThird : Bool) : Nat :=
+  let tail : Chain(Nat) :=
+    if (includeThird) { Chain.link(30, Chain.empty) } else { Chain.empty }
+  let values : Chain(Nat) := Chain.link(10, Chain.link(20, tail))
+  chainLength(values)
+
+def sample : Nat := lengthExample(true)

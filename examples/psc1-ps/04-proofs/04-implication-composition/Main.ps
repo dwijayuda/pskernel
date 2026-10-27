@@ -1,0 +1,9 @@
+-- Follow two checked proof-producing functions.
+theorem compose(P : Prop, Q : Prop, R : Prop, first : P -> Q, second : Q -> R) : P -> R :=
+  fun (premise : P) => second(first(premise))
+
+-- The same proof with its premise supplied as a declaration parameter.
+theorem chain(P : Prop, Q : Prop, R : Prop, first : P -> Q, second : Q -> R, premise : P) : R :=
+  second(first(premise))
+
+def exampleNumber : Nat := 4

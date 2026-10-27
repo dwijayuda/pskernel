@@ -1,0 +1,6 @@
+-- Nat -> Nat describes a function from a natural number to a natural number.
+-- A lambda creates such a function without a separate top-level declaration.
+def result : Nat :=
+  let increment : Nat -> Nat := fun value => value + 1
+  let triple : Nat -> Nat := fun value => value * 3
+  triple(increment(4))

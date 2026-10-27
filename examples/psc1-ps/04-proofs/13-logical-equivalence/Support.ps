@@ -1,0 +1,3 @@
+-- A Church encoding of having implications in both directions.
+def Equivalent(P : Prop, Q : Prop) : Prop :=
+  (R : Prop) -> ((P -> Q) -> (Q -> P) -> R) -> R

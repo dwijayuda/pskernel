@@ -1,0 +1,13 @@
+{
+  "title": "Return early from a loop",
+  "summary": "Find the first element greater than five. The return leaves the enclosing Id block; the result is 9.",
+  "concepts": [
+    "early return",
+    "loop search",
+    "control flow"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "result": 9
+  }
+}

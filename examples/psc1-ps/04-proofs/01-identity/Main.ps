@@ -1,0 +1,10 @@
+-- A theorem is a declaration with a proof term.
+-- h is an assumption supplied to this theorem, not a new global axiom.
+theorem identity(P : Prop, h : P) : P := h
+
+-- P -> P is an implication. A function that returns its input proves it.
+theorem identityFunction(P : Prop) : P -> P :=
+  fun (h : P) => h
+
+-- A small scalar value keeps this project useful to the bounded JS entry ABI.
+def exampleNumber : Nat := 1

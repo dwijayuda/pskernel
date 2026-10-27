@@ -1,0 +1,6 @@
+import Support
+
+-- A function can be supplied by name or created with a lambda.
+-- applyTwice feeds the first output into the second call.
+def doubledTwice : Nat := applyTwice(fun value => value * 2, 3)
+def result : Nat := applyTwice(addOne, 8)

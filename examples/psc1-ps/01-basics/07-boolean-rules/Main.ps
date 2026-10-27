@@ -1,0 +1,10 @@
+-- Each input is a Bool, so these expressions also have type Bool.
+def shouldShip(paid : Bool, inStock : Bool, cancelled : Bool) : Bool :=
+  paid && inStock && !cancelled
+
+def needsAttention(overdue : Bool, addressMissing : Bool) : Bool :=
+  overdue || addressMissing
+
+def readyOrder : Bool := shouldShip(true, true, false)
+def cancelledOrder : Bool := shouldShip(true, true, true)
+def result : Bool := readyOrder && !cancelledOrder && needsAttention(false, true)

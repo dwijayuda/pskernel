@@ -1,0 +1,8 @@
+{
+  "title": "A two-parameter Either type",
+  "summary": "Represent alternatives with different payload types and handle each alternative without a cast.",
+  "concepts": ["multiple type parameters", "sum types", "constructor inference", "typed alternatives"],
+  "expected": "checked",
+  "expectedExports": {"sample": 42},
+  "files": [{"module": "Data", "path": "Data.ps"}, {"module": "Main", "path": "Main.ps"}]
+}

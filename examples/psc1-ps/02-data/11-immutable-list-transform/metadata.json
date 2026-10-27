@@ -1,0 +1,8 @@
+{
+  "title": "Transforming an immutable recursive list",
+  "summary": "Rebuild a list with transformed elements, sum both versions, and keep the original available.",
+  "concepts": ["recursive construction", "structural map", "structural fold", "immutable values"],
+  "expected": "checked",
+  "expectedExports": {"transformExample": 2707},
+  "files": [{"module": "Data", "path": "Data.ps"}, {"module": "Main", "path": "Main.ps"}]
+}

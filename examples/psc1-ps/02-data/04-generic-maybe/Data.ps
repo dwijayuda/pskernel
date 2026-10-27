@@ -1,0 +1,12 @@
+-- One type definition can store values of different types.
+inductive MaybeValue(A : Type) where {
+  | missing
+  | present(value : A)
+}
+
+-- The implicit A is inferred from the fallback and the supplied container.
+def getOr {A : Type}(fallback : A, value : MaybeValue(A)) : A :=
+  match value with {
+    | MaybeValue.missing => fallback
+    | MaybeValue.present item => item
+  }

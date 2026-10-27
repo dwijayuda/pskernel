@@ -1,0 +1,11 @@
+-- EitherValue carries a value from exactly one of two selected types.
+inductive EitherValue(A : Type, B : Type) where {
+  | left(value : A)
+  | right(value : B)
+}
+
+def score(value : EitherValue(Nat, Bool)) : Nat :=
+  match value with {
+    | EitherValue.left amount => amount
+    | EitherValue.right approved => if (approved) { 100 } else { 0 }
+  }

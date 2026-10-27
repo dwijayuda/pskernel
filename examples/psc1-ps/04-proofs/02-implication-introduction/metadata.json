@@ -1,0 +1,14 @@
+{
+  "title": "Introduce an implication",
+  "summary": "Keep a proof of P while accepting an additional assumption Q; the result proves P -> Q -> P.",
+  "concepts": [
+    "implication",
+    "lambda",
+    "unused assumption",
+    "right-associative arrows"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "exampleNumber": 2
+  }
+}

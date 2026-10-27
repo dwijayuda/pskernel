@@ -1,0 +1,14 @@
+{
+  "title": "Comparisons and Boolean equality",
+  "summary": "Use a threshold comparison as an if condition and == as a Bool-valued equality check. The final discount is 10.",
+  "concepts": [
+    "comparison conditions",
+    "Boolean equality",
+    "Nat",
+    "nested calls"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "result": 10
+  }
+}

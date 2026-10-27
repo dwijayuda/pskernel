@@ -1,0 +1,10 @@
+-- A conditional is an expression: it produces the selected branch value.
+-- The branches of each function must agree on their result type.
+def collectionMessage(ready : Bool) : String :=
+  if (ready) { "Ready to collect" } else { "Still preparing" }
+
+def shippingFee(localPickup : Bool) : Nat :=
+  if (localPickup) { 0 } else { 1500 }
+
+def feeForPickup : Nat := shippingFee(true)
+def result : String := collectionMessage(true)

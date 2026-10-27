@@ -1,0 +1,10 @@
+-- Nat subtraction never produces a negative number.
+-- An overdraw therefore produces zero, not a negative balance.
+def remainingStock(available : Nat, requested : Nat) : Nat := available - requested
+
+def ordinaryOrder : Nat := remainingStock(20, 7)
+def oversizedOrder : Nat := remainingStock(5, 9)
+
+-- This example is about arithmetic semantics, not a stock-validation policy.
+-- A real order system should separately check whether the request is allowed.
+def result : Nat := oversizedOrder

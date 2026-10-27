@@ -1,0 +1,8 @@
+{
+  "title": "A custom generic list and structural length",
+  "summary": "Build a recursive generic container and count its elements by recursing on the exposed tail.",
+  "concepts": ["recursive inductive", "generic data", "structural recursion", "base case", "recursive tail"],
+  "expected": "checked",
+  "expectedExports": {"sample": 3},
+  "files": [{"module": "Data", "path": "Data.ps"}, {"module": "Main", "path": "Main.ps"}]
+}

@@ -1,0 +1,11 @@
+import Support
+
+-- Same(n, n) unfolds to: for every predicate P, P(n) implies P(n).
+-- This is a direct proof term; no Eq.refl constant or tactic is assumed.
+theorem sameRefl(n : Nat) : Same(n, n) :=
+  fun (P : Nat -> Prop) => fun (atN : P(n)) => atN
+
+-- Specialize the general theorem to a concrete natural number.
+theorem fortyTwoSame : Same(42, 42) := sameRefl(42)
+
+def exampleNumber : Nat := 14

@@ -1,0 +1,13 @@
+{
+  "title": "Apply an implication",
+  "summary": "Apply a proof of P -> Q to a proof of P to obtain a proof of Q.",
+  "concepts": [
+    "modus ponens",
+    "function application",
+    "implication elimination"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "exampleNumber": 3
+  }
+}

@@ -1,0 +1,4 @@
+-- A Church encoding of a logical disjunction.
+-- Supply one handler for P and one for Q to obtain a result proposition.
+def Either(P : Prop, Q : Prop) : Prop :=
+  (R : Prop) -> (P -> R) -> (Q -> R) -> R

@@ -1,0 +1,14 @@
+{
+  "title": "Mutable accumulator",
+  "summary": "Update a local accumulator inside a checked Id block. The final balance is 12.",
+  "concepts": [
+    "Id",
+    "do",
+    "let mut",
+    "assignment"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "result": 12
+  }
+}

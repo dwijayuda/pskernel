@@ -1,0 +1,8 @@
+{
+  "title": "Folding a binary tree",
+  "summary": "Traverse both recursive children to calculate a leaf total and a leaf count from the same tree.",
+  "concepts": ["binary tree", "multiple recursive fields", "structural fold", "recursive pattern matching"],
+  "expected": "checked",
+  "expectedExports": {"treeExample": 2003},
+  "files": [{"module": "Data", "path": "Data.ps"}, {"module": "Main", "path": "Main.ps"}]
+}

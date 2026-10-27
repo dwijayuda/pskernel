@@ -1,0 +1,13 @@
+{
+  "title": "Loop over a list",
+  "summary": "Add the elements of a finite list. The total is 12.",
+  "concepts": [
+    "for",
+    "List",
+    "accumulation"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "result": 12
+  }
+}

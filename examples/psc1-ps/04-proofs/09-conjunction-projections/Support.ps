@@ -1,0 +1,4 @@
+-- A Church encoding: possessing Both(P, Q) lets us use both proofs.
+-- This is a local definition, not a claim that the full Lean library is present.
+def Both(P : Prop, Q : Prop) : Prop :=
+  (R : Prop) -> (P -> Q -> R) -> R

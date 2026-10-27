@@ -1,0 +1,6 @@
+-- The arrow associates to the right: P -> (Q -> P).
+-- No proof of P or Q is manufactured; callers supply the assumptions.
+theorem keepFirst(P : Prop, Q : Prop) : P -> Q -> P :=
+  fun (proofOfP : P) => fun (proofOfQ : Q) => proofOfP
+
+def exampleNumber : Nat := 2

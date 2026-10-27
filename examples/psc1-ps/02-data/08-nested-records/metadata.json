@@ -1,0 +1,7 @@
+{
+  "title": "Nested records for a shipping calculation",
+  "summary": "Embed a destination inside a parcel and follow nested field projections to calculate a delivery cost.",
+  "concepts": ["nested structures", "composition", "chained projections", "Bool record fields"],
+  "expected": "checked",
+  "expectedExports": {"sample": 26}
+}

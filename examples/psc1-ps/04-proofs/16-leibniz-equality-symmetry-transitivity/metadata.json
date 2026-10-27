@@ -1,0 +1,24 @@
+{
+  "title": "Reverse and compose Leibniz equality",
+  "summary": "Derive symmetry and transitivity from the explicitly defined predicate-transport equality, using reflexivity and function composition.",
+  "concepts": [
+    "Leibniz equality",
+    "symmetry",
+    "transitivity",
+    "predicate abstraction"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "exampleNumber": 16
+  },
+  "files": [
+    {
+      "module": "Support",
+      "path": "Support.ps"
+    },
+    {
+      "module": "Main",
+      "path": "Main.ps"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "title": "Extract either part of a conjunction",
+  "summary": "Select the left or right proof from the local Church encoding of conjunction.",
+  "concepts": [
+    "Church encoding",
+    "conjunction elimination",
+    "projection"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "exampleNumber": 9
+  },
+  "files": [
+    {
+      "module": "Support",
+      "path": "Support.ps"
+    },
+    {
+      "module": "Main",
+      "path": "Main.ps"
+    }
+  ]
+}

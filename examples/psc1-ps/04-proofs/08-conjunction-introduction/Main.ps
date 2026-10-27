@@ -1,0 +1,8 @@
+import Support
+
+-- Both is explicitly defined in Support.ps.
+-- To supply both proofs to any consumer, call that consumer with each proof.
+theorem bothIntro(P : Prop, Q : Prop, left : P, right : Q) : Both(P, Q) :=
+  fun (R : Prop) => fun (consume : P -> Q -> R) => consume(left, right)
+
+def exampleNumber : Nat := 8

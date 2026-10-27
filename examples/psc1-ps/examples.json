@@ -1,0 +1,1578 @@
+{
+  "schema": "psc1-ps-example-catalog/1",
+  "date": "2026-10-28",
+  "compiler": "proofscript@0.1.0-psc1.12",
+  "editor": "proofscript.proofscript-psc1@0.1.1",
+  "examples": [
+    {
+      "id": "01-basics/01-typed-values",
+      "category": "Values, functions, and expressions",
+      "title": "Typed values",
+      "summary": "Declare Nat, Bool, and String values explicitly, then select a numeric result with a Boolean flag. The result is 12.",
+      "concepts": [
+        "explicit types",
+        "Nat",
+        "Bool",
+        "String",
+        "constant references"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "result": 12
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "01-basics/02-arithmetic-precedence",
+      "category": "Values, functions, and expressions",
+      "title": "Arithmetic and parentheses",
+      "summary": "Compare ordinary arithmetic precedence with explicit grouping in a small order calculation. The final bill is 12000.",
+      "concepts": [
+        "addition",
+        "multiplication",
+        "parentheses",
+        "operator precedence"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "result": 12000
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "01-basics/03-natural-subtraction",
+      "category": "Values, functions, and expressions",
+      "title": "Natural-number subtraction",
+      "summary": "Use subtraction for a remaining stock count and observe that Nat subtraction stops at zero. The result is zero.",
+      "concepts": [
+        "Nat",
+        "subtraction",
+        "saturation",
+        "typed functions"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "result": 0
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "01-basics/04-division-and-remainder",
+      "category": "Values, functions, and expressions",
+      "title": "Division and remainder",
+      "summary": "Split 29 items into boxes of six and reconstruct the original count from the quotient and remainder. The result is 29.",
+      "concepts": [
+        "Nat.div",
+        "Nat.mod",
+        "quotient",
+        "remainder"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "result": 29
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "01-basics/05-reusable-functions",
+      "category": "Values, functions, and expressions",
+      "title": "Reusable functions with several arguments",
+      "summary": "Define rectangle area and perimeter functions, then call them with different dimensions. The final area is 35.",
+      "concepts": [
+        "functions",
+        "typed parameters",
+        "multiple arguments",
+        "function calls"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "result": 35
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "01-basics/06-conditional-values",
+      "category": "Values, functions, and expressions",
+      "title": "Conditionals produce values",
+      "summary": "Select a status message and a shipping fee using Boolean inputs. The final message is Ready to collect.",
+      "concepts": [
+        "if expressions",
+        "Bool",
+        "String branches",
+        "Nat branches"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "result": "Ready to collect"
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "01-basics/07-boolean-rules",
+      "category": "Values, functions, and expressions",
+      "title": "Combine Boolean rules",
+      "summary": "Use conjunction, disjunction, and negation for two small scheduling rules. The final combined result is true.",
+      "concepts": [
+        "Bool",
+        "conjunction",
+        "disjunction",
+        "negation"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "result": true
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "01-basics/08-comparisons-and-equality",
+      "category": "Values, functions, and expressions",
+      "title": "Comparisons and Boolean equality",
+      "summary": "Use a threshold comparison as an if condition and == as a Bool-valued equality check. The final discount is 10.",
+      "concepts": [
+        "comparison conditions",
+        "Boolean equality",
+        "Nat",
+        "nested calls"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "result": 10
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "01-basics/09-local-let-bindings",
+      "category": "Values, functions, and expressions",
+      "title": "Name intermediate calculations with let",
+      "summary": "Break a ticket-price calculation into typed local steps. Three tickets at 4000 with a 1000 discount and 500 fee produce 11500.",
+      "concepts": [
+        "local let",
+        "scope",
+        "intermediate values",
+        "readable calculations"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "result": 11500
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "01-basics/10-lambda-values",
+      "category": "Values, functions, and expressions",
+      "title": "Functions as local values",
+      "summary": "Give two anonymous functions explicit function types and call them inside a local calculation. The result is 15.",
+      "concepts": [
+        "lambda",
+        "function types",
+        "local functions",
+        "function application"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "result": 15
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "01-basics/11-apply-a-function-twice",
+      "category": "Values, functions, and expressions",
+      "title": "Pass a function as an argument",
+      "summary": "Write applyTwice once and reuse it with two different transformations. Incrementing twice from 8 produces 10.",
+      "concepts": [
+        "higher-order functions",
+        "function parameters",
+        "reuse",
+        "lambdas"
+      ],
+      "expected": "checked",
+      "files": [
+        {
+          "module": "Support",
+          "path": "Support.ps"
+        },
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "expectedExports": {
+        "result": 10
+      },
+      "entryModule": "Main"
+    },
+    {
+      "id": "01-basics/12-return-a-closure",
+      "category": "Values, functions, and expressions",
+      "title": "Return a function that remembers a value",
+      "summary": "Build an adder that captures its offset, then call the returned function. Adding seven to 35 produces 42.",
+      "concepts": [
+        "closures",
+        "function results",
+        "captured parameters",
+        "function types"
+      ],
+      "expected": "checked",
+      "files": [
+        {
+          "module": "Support",
+          "path": "Support.ps"
+        },
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "expectedExports": {
+        "result": 42
+      },
+      "entryModule": "Main"
+    },
+    {
+      "id": "01-basics/13-function-composition",
+      "category": "Values, functions, and expressions",
+      "title": "Compose two transformations",
+      "summary": "Combine an increment with a doubling operation in both orders. The final result of doubling after incrementing 5 is 12.",
+      "concepts": [
+        "composition",
+        "higher-order functions",
+        "order of operations",
+        "function results"
+      ],
+      "expected": "checked",
+      "files": [
+        {
+          "module": "Support",
+          "path": "Support.ps"
+        },
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "expectedExports": {
+        "result": 12
+      },
+      "entryModule": "Main"
+    },
+    {
+      "id": "01-basics/14-namespaces",
+      "category": "Values, functions, and expressions",
+      "title": "Organize declarations in a namespace",
+      "summary": "Group related pricing declarations and access them through qualified names. Two tickets plus one booking fee produce 8500.",
+      "concepts": [
+        "namespace",
+        "qualified names",
+        "scope",
+        "functions"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "result": 8500
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "01-basics/15-polymorphic-identity",
+      "category": "Values, functions, and expressions",
+      "title": "One function for several types",
+      "summary": "Use an implicit type parameter to reuse identity for Nat, Bool, and String. The final Nat result is 17.",
+      "concepts": [
+        "polymorphism",
+        "implicit type parameters",
+        "contextual inference",
+        "identity"
+      ],
+      "expected": "checked",
+      "files": [
+        {
+          "module": "Support",
+          "path": "Support.ps"
+        },
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "expectedExports": {
+        "result": 17
+      },
+      "entryModule": "Main"
+    },
+    {
+      "id": "01-basics/16-string-functions",
+      "category": "Values, functions, and expressions",
+      "title": "String parameters and admitted operations",
+      "summary": "Build a greeting using the exact String operations exposed by the current compiler fixtures, and inspect its length. The greeting is Hello, Ada!.",
+      "concepts": [
+        "String",
+        "string parameters",
+        "String.Internal.append",
+        "String.Internal.length"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "result": "Hello, Ada!"
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "02-data/01-traffic-signals",
+      "category": "Data types, records, and recursion",
+      "title": "Traffic signals: an enum and exhaustive matching",
+      "summary": "Represent three states with nullary constructors and translate the selected state into a waiting time.",
+      "concepts": [
+        "inductive enum",
+        "nullary constructors",
+        "exhaustive pattern matching",
+        "local typed values"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "sample": 5
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "02-data/02-commands-with-payloads",
+      "category": "Data types, records, and recursion",
+      "title": "Commands with different payloads",
+      "summary": "Use one sum type for a reset command, an increment, and a command with two numeric fields.",
+      "concepts": [
+        "algebraic data type",
+        "constructor payloads",
+        "multiple pattern binders",
+        "command interpretation"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "sample": 32
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "02-data/03-optional-values",
+      "category": "Data types, records, and recursion",
+      "title": "Optional values and an explicit default",
+      "summary": "Handle an optional membership discount with Option.none and Option.some before calculating a price.",
+      "concepts": [
+        "Option",
+        "constructor inference",
+        "missing values",
+        "pattern matching",
+        "Nat subtraction"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "memberPrice": 25,
+        "visitorPrice": 40
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "02-data/04-generic-maybe",
+      "category": "Data types, records, and recursion",
+      "title": "A generic Maybe type and reusable fallback",
+      "summary": "Define a polymorphic optional container and instantiate its generic getOr function for Nat and Bool.",
+      "concepts": [
+        "type parameters",
+        "implicit binders",
+        "polymorphism",
+        "generic inductive",
+        "module imports"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "sample": 7
+      },
+      "files": [
+        {
+          "module": "Data",
+          "path": "Data.ps"
+        },
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "02-data/05-generic-either",
+      "category": "Data types, records, and recursion",
+      "title": "A two-parameter Either type",
+      "summary": "Represent alternatives with different payload types and handle each alternative without a cast.",
+      "concepts": [
+        "multiple type parameters",
+        "sum types",
+        "constructor inference",
+        "typed alternatives"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "sample": 42
+      },
+      "files": [
+        {
+          "module": "Data",
+          "path": "Data.ps"
+        },
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "02-data/06-nested-tuples",
+      "category": "Data types, records, and recursion",
+      "title": "Nested tuples and destructuring",
+      "summary": "Unpack a nested product into local names and use the fields in a small weighted-score calculation.",
+      "concepts": [
+        "Prod",
+        "nested tuples",
+        "destructuring let",
+        "typed local patterns"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "sample": 48
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "02-data/07-rectangle-record",
+      "category": "Data types, records, and recursion",
+      "title": "A rectangle record with field projections",
+      "summary": "Construct a record and read its named fields to calculate area and perimeter.",
+      "concepts": [
+        "structure",
+        "generated constructor",
+        "field projection",
+        "record values"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "sampleArea": 40,
+        "samplePerimeter": 26
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "02-data/08-nested-records",
+      "category": "Data types, records, and recursion",
+      "title": "Nested records for a shipping calculation",
+      "summary": "Embed a destination inside a parcel and follow nested field projections to calculate a delivery cost.",
+      "concepts": [
+        "nested structures",
+        "composition",
+        "chained projections",
+        "Bool record fields"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "sample": 26
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "02-data/09-generic-record",
+      "category": "Data types, records, and recursion",
+      "title": "A record with a type parameter",
+      "summary": "Use a generic record that pairs a typed value with a numeric serial and read both fields.",
+      "concepts": [
+        "generic structure",
+        "type parameter",
+        "constructor inference",
+        "field projection"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "sample": 1209
+      },
+      "files": [
+        {
+          "module": "Data",
+          "path": "Data.ps"
+        },
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "02-data/10-custom-list-length",
+      "category": "Data types, records, and recursion",
+      "title": "A custom generic list and structural length",
+      "summary": "Build a recursive generic container and count its elements by recursing on the exposed tail.",
+      "concepts": [
+        "recursive inductive",
+        "generic data",
+        "structural recursion",
+        "base case",
+        "recursive tail"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "sample": 3
+      },
+      "files": [
+        {
+          "module": "Data",
+          "path": "Data.ps"
+        },
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "02-data/11-immutable-list-transform",
+      "category": "Data types, records, and recursion",
+      "title": "Transforming an immutable recursive list",
+      "summary": "Rebuild a list with transformed elements, sum both versions, and keep the original available.",
+      "concepts": [
+        "recursive construction",
+        "structural map",
+        "structural fold",
+        "immutable values"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "transformExample": 2707
+      },
+      "files": [
+        {
+          "module": "Data",
+          "path": "Data.ps"
+        },
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "02-data/12-triangular-recursion",
+      "category": "Data types, records, and recursion",
+      "title": "Structural recursion over natural numbers",
+      "summary": "Compute a triangular number by matching on Nat.zero and Nat.succ and recursing on the predecessor.",
+      "concepts": [
+        "Nat constructors",
+        "structural recursion",
+        "recursive sum",
+        "total definition"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "sample": 21
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "02-data/13-factorial-recursion",
+      "category": "Data types, records, and recursion",
+      "title": "Factorial as a recursive product",
+      "summary": "Use a multiplicative base case and a structurally smaller recursive call to define factorial.",
+      "concepts": [
+        "structural recursion",
+        "multiplicative identity",
+        "Nat multiplication",
+        "total recursion"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "emptyProduct": 1,
+        "sample": 120
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "02-data/14-power-recursion",
+      "category": "Data types, records, and recursion",
+      "title": "Recursion with an invariant parameter",
+      "summary": "Compute natural powers while decreasing the exponent and preserving the base argument across recursive calls.",
+      "concepts": [
+        "multiple arguments",
+        "structural recursion",
+        "invariant parameter",
+        "natural powers"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "fifthPowerOfTwo": 32,
+        "cubeOfThree": 27
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "02-data/15-binary-tree-total",
+      "category": "Data types, records, and recursion",
+      "title": "Folding a binary tree",
+      "summary": "Traverse both recursive children to calculate a leaf total and a leaf count from the same tree.",
+      "concepts": [
+        "binary tree",
+        "multiple recursive fields",
+        "structural fold",
+        "recursive pattern matching"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "treeExample": 2003
+      },
+      "files": [
+        {
+          "module": "Data",
+          "path": "Data.ps"
+        },
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "02-data/16-expression-interpreter",
+      "category": "Data types, records, and recursion",
+      "title": "A tiny expression interpreter",
+      "summary": "Represent arithmetic syntax as a recursive data type and evaluate its tree with a total interpreter.",
+      "concepts": [
+        "abstract syntax tree",
+        "interpreter",
+        "recursive algebraic data type",
+        "structural recursion"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "expressionExample": 20
+      },
+      "files": [
+        {
+          "module": "Data",
+          "path": "Data.ps"
+        },
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "03-control-flow/01-mutable-accumulator",
+      "category": "Checked finite control flow",
+      "title": "Mutable accumulator",
+      "summary": "Update a local accumulator inside a checked Id block. The final balance is 12.",
+      "concepts": [
+        "Id",
+        "do",
+        "let mut",
+        "assignment"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "result": 12
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "03-control-flow/02-branch-updates",
+      "category": "Checked finite control flow",
+      "title": "Branch updates",
+      "summary": "A branch updates a local value and the continuation sees that update. The result is 15.",
+      "concepts": [
+        "branch join",
+        "mutable state",
+        "if"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "result": 15
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "03-control-flow/03-list-loop",
+      "category": "Checked finite control flow",
+      "title": "Loop over a list",
+      "summary": "Add the elements of a finite list. The total is 12.",
+      "concepts": [
+        "for",
+        "List",
+        "accumulation"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "result": 12
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "03-control-flow/04-array-loop",
+      "category": "Checked finite control flow",
+      "title": "Loop over an array",
+      "summary": "Multiply the entries of an array literal. The product is 105.",
+      "concepts": [
+        "Array",
+        "for",
+        "product"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "result": 105
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "03-control-flow/05-range-loop",
+      "category": "Checked finite control flow",
+      "title": "Half-open numeric ranges",
+      "summary": "Visit 1,2,3,4,5 using a half-open range; the result is 15.",
+      "concepts": [
+        "numeric range",
+        "for",
+        "exclusive upper bound"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "result": 15
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "03-control-flow/06-early-return",
+      "category": "Checked finite control flow",
+      "title": "Return early from a loop",
+      "summary": "Find the first element greater than five. The return leaves the enclosing Id block; the result is 9.",
+      "concepts": [
+        "early return",
+        "loop search",
+        "control flow"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "result": 9
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "03-control-flow/07-nested-loops",
+      "category": "Checked finite control flow",
+      "title": "Nested finite loops",
+      "summary": "Add every product in a 3 by 3 multiplication table. The result is 36.",
+      "concepts": [
+        "nested loops",
+        "finite iteration",
+        "accumulation"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "result": 36
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "03-control-flow/08-captured-local-value",
+      "category": "Checked finite control flow",
+      "title": "A closure captures the current value",
+      "summary": "A closure keeps the value present when it is created. Updating the later local binding does not change the captured value; the result is 7.",
+      "concepts": [
+        "closure capture",
+        "mutable local",
+        "lexical scope"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "result": 7
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "04-proofs/01-identity",
+      "category": "Proof terms and explicit logical encodings",
+      "title": "Identity: reuse an existing proof",
+      "summary": "A proof of P is sufficient to establish P. Also writes the same implication as an explicit lambda.",
+      "concepts": [
+        "Prop",
+        "theorem",
+        "proof terms",
+        "identity",
+        "typed lambda"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "exampleNumber": 1
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "04-proofs/02-implication-introduction",
+      "category": "Proof terms and explicit logical encodings",
+      "title": "Introduce an implication",
+      "summary": "Keep a proof of P while accepting an additional assumption Q; the result proves P -> Q -> P.",
+      "concepts": [
+        "implication",
+        "lambda",
+        "unused assumption",
+        "right-associative arrows"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "exampleNumber": 2
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "04-proofs/03-modus-ponens",
+      "category": "Proof terms and explicit logical encodings",
+      "title": "Apply an implication",
+      "summary": "Apply a proof of P -> Q to a proof of P to obtain a proof of Q.",
+      "concepts": [
+        "modus ponens",
+        "function application",
+        "implication elimination"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "exampleNumber": 3
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "04-proofs/04-implication-composition",
+      "category": "Proof terms and explicit logical encodings",
+      "title": "Compose two implications",
+      "summary": "Chain P -> Q with Q -> R to prove P -> R.",
+      "concepts": [
+        "hypothetical syllogism",
+        "composition",
+        "nested calls"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "exampleNumber": 4
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "04-proofs/05-swap-assumptions",
+      "category": "Proof terms and explicit logical encodings",
+      "title": "Change the order of assumptions",
+      "summary": "Transform P -> Q -> R into Q -> P -> R without changing the conclusion.",
+      "concepts": [
+        "exchange",
+        "curried implication",
+        "comma-separated calls"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "exampleNumber": 5
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "04-proofs/06-reuse-an-assumption",
+      "category": "Proof terms and explicit logical encodings",
+      "title": "Use one assumption twice",
+      "summary": "A proof of P can fill both P inputs of P -> P -> Q.",
+      "concepts": [
+        "contraction",
+        "reusable proofs",
+        "function application"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "exampleNumber": 6
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "04-proofs/07-local-proof-step",
+      "category": "Proof terms and explicit logical encodings",
+      "title": "Name an intermediate proof",
+      "summary": "Use a typed immutable let binding to make a two-step argument explicit.",
+      "concepts": [
+        "local proof",
+        "let binding",
+        "elaboration",
+        "proof composition"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "exampleNumber": 7
+      },
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "04-proofs/08-conjunction-introduction",
+      "category": "Proof terms and explicit logical encodings",
+      "title": "Construct a conjunction with functions",
+      "summary": "Define a Church encoding of conjunction and prove its introduction rule from proofs of both components.",
+      "concepts": [
+        "Church encoding",
+        "conjunction",
+        "dependent Pi",
+        "higher-order proof"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "exampleNumber": 8
+      },
+      "files": [
+        {
+          "module": "Support",
+          "path": "Support.ps"
+        },
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "04-proofs/09-conjunction-projections",
+      "category": "Proof terms and explicit logical encodings",
+      "title": "Extract either part of a conjunction",
+      "summary": "Select the left or right proof from the local Church encoding of conjunction.",
+      "concepts": [
+        "Church encoding",
+        "conjunction elimination",
+        "projection"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "exampleNumber": 9
+      },
+      "files": [
+        {
+          "module": "Support",
+          "path": "Support.ps"
+        },
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "04-proofs/10-conjunction-commutativity",
+      "category": "Proof terms and explicit logical encodings",
+      "title": "Swap the components of a conjunction",
+      "summary": "Prove Both(P, Q) -> Both(Q, P) by changing the order supplied to the consumer.",
+      "concepts": [
+        "Church encoding",
+        "conjunction commutativity",
+        "higher-order proof"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "exampleNumber": 10
+      },
+      "files": [
+        {
+          "module": "Support",
+          "path": "Support.ps"
+        },
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "04-proofs/11-disjunction-introduction",
+      "category": "Proof terms and explicit logical encodings",
+      "title": "Choose a side of a disjunction",
+      "summary": "Construct the local Church encoding of Either(P, Q) from a proof of P or a proof of Q.",
+      "concepts": [
+        "Church encoding",
+        "disjunction",
+        "introduction rules"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "exampleNumber": 11
+      },
+      "files": [
+        {
+          "module": "Support",
+          "path": "Support.ps"
+        },
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "04-proofs/12-disjunction-elimination",
+      "category": "Proof terms and explicit logical encodings",
+      "title": "Reason from both possible cases",
+      "summary": "To obtain R from Either(P, Q), supply one proof function for each possibility.",
+      "concepts": [
+        "Church encoding",
+        "disjunction elimination",
+        "case analysis"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "exampleNumber": 12
+      },
+      "files": [
+        {
+          "module": "Support",
+          "path": "Support.ps"
+        },
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "04-proofs/13-logical-equivalence",
+      "category": "Proof terms and explicit logical encodings",
+      "title": "Implications in both directions",
+      "summary": "Use a local Church encoding of equivalence to prove reflexivity and symmetry.",
+      "concepts": [
+        "Church encoding",
+        "logical equivalence",
+        "reflexivity",
+        "symmetry"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "exampleNumber": 13
+      },
+      "files": [
+        {
+          "module": "Support",
+          "path": "Support.ps"
+        },
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "04-proofs/14-leibniz-equality-reflexivity",
+      "category": "Proof terms and explicit logical encodings",
+      "title": "Reflexivity of explicitly defined Leibniz equality",
+      "summary": "For every predicate, a proof at n is already a proof at n; this establishes Same(n, n). Same is defined locally, not the built-in Eq.",
+      "concepts": [
+        "Leibniz equality",
+        "reflexivity",
+        "predicate",
+        "dependent function"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "exampleNumber": 14
+      },
+      "files": [
+        {
+          "module": "Support",
+          "path": "Support.ps"
+        },
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "04-proofs/15-leibniz-equality-substitution",
+      "category": "Proof terms and explicit logical encodings",
+      "title": "Transport a proof along Leibniz equality",
+      "summary": "Apply Same(a, b) to a predicate and its proof at a, obtaining a proof at b. This is substitution for the equality defined in Support.ps.",
+      "concepts": [
+        "Leibniz equality",
+        "substitution",
+        "proof transport",
+        "dependent application"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "exampleNumber": 15
+      },
+      "files": [
+        {
+          "module": "Support",
+          "path": "Support.ps"
+        },
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "04-proofs/16-leibniz-equality-symmetry-transitivity",
+      "category": "Proof terms and explicit logical encodings",
+      "title": "Reverse and compose Leibniz equality",
+      "summary": "Derive symmetry and transitivity from the explicitly defined predicate-transport equality, using reflexivity and function composition.",
+      "concepts": [
+        "Leibniz equality",
+        "symmetry",
+        "transitivity",
+        "predicate abstraction"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "exampleNumber": 16
+      },
+      "files": [
+        {
+          "module": "Support",
+          "path": "Support.ps"
+        },
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "05-multi-file-projects/01-import-a-helper",
+      "category": "Imports and project organization",
+      "title": "Import a helper module",
+      "summary": "Keep a reusable function in a separate source module, then call it from Main. The result is 42.",
+      "concepts": [
+        "import",
+        "module order",
+        "namespace"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "result": 42
+      },
+      "files": [
+        {
+          "module": "Numbers",
+          "path": "lib/Numbers.ps"
+        },
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "05-multi-file-projects/02-three-module-pipeline",
+      "category": "Imports and project organization",
+      "title": "Three-module calculation pipeline",
+      "summary": "Compose a transitive dependency chain: Units -> Invoice -> Main. The final total is 950 cents.",
+      "concepts": [
+        "transitive imports",
+        "project manifest",
+        "reuse"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "result": 950
+      },
+      "files": [
+        {
+          "module": "Units",
+          "path": "src/Units.ps"
+        },
+        {
+          "module": "Invoice",
+          "path": "src/Invoice.ps"
+        },
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "05-multi-file-projects/03-data-and-policy",
+      "category": "Imports and project organization",
+      "title": "Separate a data model from its policy",
+      "summary": "Define a mode in one module and a scalar policy in another. Main exposes a simple Nat result of 10.",
+      "concepts": [
+        "inductive data",
+        "imported helpers",
+        "pattern matching"
+      ],
+      "expected": "checked",
+      "expectedExports": {
+        "result": 10
+      },
+      "files": [
+        {
+          "module": "Domain",
+          "path": "src/Domain.ps"
+        },
+        {
+          "module": "Policy",
+          "path": "src/Policy.ps"
+        },
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "90-intentional-errors/01-bool-is-not-nat",
+      "category": "Intentional compiler diagnostics",
+      "title": "Intentional error: Bool supplied where Nat is required",
+      "summary": "The value true has type Bool, so it cannot initialize a Nat. Repair by replacing true with 42.",
+      "concepts": [
+        "intentional error",
+        "type mismatch",
+        "Bool",
+        "Nat"
+      ],
+      "expected": "rejected",
+      "expectedPhase": "elaboration",
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "90-intentional-errors/02-unknown-name",
+      "category": "Intentional compiler diagnostics",
+      "title": "Intentional error: unresolved identifier",
+      "summary": "missingNumber has no declaration or local binding. Repair by replacing it with a natural-number literal or defining it before use.",
+      "concepts": [
+        "intentional error",
+        "name resolution",
+        "scope"
+      ],
+      "expected": "rejected",
+      "expectedPhase": "elaboration",
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "90-intentional-errors/03-number-is-not-a-proof",
+      "category": "Intentional compiler diagnostics",
+      "title": "Intentional error: a number cannot prove an arbitrary proposition",
+      "summary": "The theorem claims a proof of arbitrary P but supplies the Nat literal 0. Repair by accepting a premise of type P and returning it.",
+      "concepts": [
+        "intentional error",
+        "proof refusal",
+        "Prop",
+        "type mismatch"
+      ],
+      "expected": "rejected",
+      "expectedPhase": "elaboration",
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "90-intentional-errors/04-wrong-call-argument",
+      "category": "Intentional compiler diagnostics",
+      "title": "Intentional error: a function receives the wrong argument type",
+      "summary": "successor requires Nat, but its call supplies false. Repair the call to successor(41).",
+      "concepts": [
+        "intentional error",
+        "function call",
+        "argument checking"
+      ],
+      "expected": "rejected",
+      "expectedPhase": "elaboration",
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "90-intentional-errors/05-missing-definition-body",
+      "category": "Intentional compiler diagnostics",
+      "title": "Intentional error: unfinished definition",
+      "summary": "The assignment marker must be followed by a term. Repair by adding 42 after :=.",
+      "concepts": [
+        "intentional error",
+        "parse error",
+        "incomplete source"
+      ],
+      "expected": "rejected",
+      "expectedPhase": "parse",
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    },
+    {
+      "id": "90-intentional-errors/06-comparison-chain",
+      "category": "Intentional compiler diagnostics",
+      "title": "Intentional error: unparenthesized comparison chain",
+      "summary": "The selected comparison operators do not associate, so 1 < 2 < 3 is refused. A simple repair is an if condition containing one comparison.",
+      "concepts": [
+        "intentional error",
+        "parse error",
+        "nonassociative operators"
+      ],
+      "expected": "rejected",
+      "expectedPhase": "parse",
+      "files": [
+        {
+          "module": "Main",
+          "path": "Main.ps"
+        }
+      ],
+      "entryModule": "Main"
+    }
+  ]
+}

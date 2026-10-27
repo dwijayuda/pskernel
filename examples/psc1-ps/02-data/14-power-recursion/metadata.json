@@ -1,0 +1,7 @@
+{
+  "title": "Recursion with an invariant parameter",
+  "summary": "Compute natural powers while decreasing the exponent and preserving the base argument across recursive calls.",
+  "concepts": ["multiple arguments", "structural recursion", "invariant parameter", "natural powers"],
+  "expected": "checked",
+  "expectedExports": {"fifthPowerOfTwo": 32, "cubeOfThree": 27}
+}

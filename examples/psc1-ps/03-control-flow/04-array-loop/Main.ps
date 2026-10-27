@@ -1,0 +1,9 @@
+-- Array literals use # before the brackets.
+def result : Nat :=
+  let calculation : Id(Nat) := do {
+    let mut product : Nat := 1
+    let values : Array(Nat) := #[3, 5, 7]
+    for value in values { product := product * value }
+    return product
+  }
+  calculation

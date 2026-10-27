@@ -1,0 +1,16 @@
+-- A structure groups named fields and provides a generated .mk constructor.
+structure Rectangle where {
+  width : Nat
+  height : Nat
+}
+
+def area(width : Nat, height : Nat) : Nat :=
+  let rectangle : Rectangle := Rectangle.mk(width, height)
+  rectangle.width * rectangle.height
+
+def perimeter(width : Nat, height : Nat) : Nat :=
+  let rectangle : Rectangle := Rectangle.mk(width, height)
+  2 * (rectangle.width + rectangle.height)
+
+def sampleArea : Nat := area(8, 5)
+def samplePerimeter : Nat := perimeter(8, 5)

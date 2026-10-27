@@ -1,0 +1,13 @@
+{
+  "title": "Branch updates",
+  "summary": "A branch updates a local value and the continuation sees that update. The result is 15.",
+  "concepts": [
+    "branch join",
+    "mutable state",
+    "if"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "result": 15
+  }
+}

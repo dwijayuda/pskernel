@@ -1,0 +1,14 @@
+{
+  "title": "Conditionals produce values",
+  "summary": "Select a status message and a shipping fee using Boolean inputs. The final message is Ready to collect.",
+  "concepts": [
+    "if expressions",
+    "Bool",
+    "String branches",
+    "Nat branches"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "result": "Ready to collect"
+  }
+}

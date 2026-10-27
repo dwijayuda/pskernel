@@ -1,0 +1,6 @@
+import Support
+
+-- The composition helpers live in Support.ps.
+-- These orders differ: 2 * (5 + 1) is 12; (2 * 5) + 1 is 11.
+def otherOrder : Nat := incrementAfterDouble(5)
+def result : Nat := doubleAfterIncrement(5)

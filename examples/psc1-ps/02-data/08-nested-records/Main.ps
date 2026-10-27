@@ -1,0 +1,18 @@
+structure Destination where {
+  distance : Nat
+  remote : Bool
+}
+
+structure Parcel where {
+  weight : Nat
+  destination : Destination
+}
+
+-- Fields may themselves be records. Chained projection follows that shape.
+def shippingCost(isRemote : Bool) : Nat :=
+  let destination : Destination := Destination.mk(8, isRemote)
+  let parcel : Parcel := Parcel.mk(4, destination)
+  parcel.weight * 2 + parcel.destination.distance +
+    (if (parcel.destination.remote) { 10 } else { 0 })
+
+def sample : Nat := shippingCost(true)

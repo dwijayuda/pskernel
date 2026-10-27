@@ -1,0 +1,14 @@
+import Support
+
+theorem sameRefl(n : Nat) : Same(n, n) :=
+  fun (P : Nat -> Prop) => fun (atN : P(n)) => atN
+
+-- Transport reflexivity using the predicate: x is the same as a.
+theorem sameSymm(a : Nat, b : Nat, equality : Same(a, b)) : Same(b, a) :=
+  equality(fun (x : Nat) => Same(x, a), sameRefl(a))
+
+-- First transport from a to b, then from b to c.
+theorem sameTrans(a : Nat, b : Nat, c : Nat, first : Same(a, b), second : Same(b, c)) : Same(a, c) :=
+  fun (P : Nat -> Prop) => fun (atA : P(a)) => second(P, first(P, atA))
+
+def exampleNumber : Nat := 16

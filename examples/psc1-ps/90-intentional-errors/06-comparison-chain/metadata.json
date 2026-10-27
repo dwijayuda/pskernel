@@ -1,0 +1,11 @@
+{
+  "title": "Intentional error: unparenthesized comparison chain",
+  "summary": "The selected comparison operators do not associate, so 1 < 2 < 3 is refused. A simple repair is an if condition containing one comparison.",
+  "concepts": [
+    "intentional error",
+    "parse error",
+    "nonassociative operators"
+  ],
+  "expected": "rejected",
+  "expectedPhase": "parse"
+}

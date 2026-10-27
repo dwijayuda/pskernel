@@ -1,0 +1,11 @@
+-- Tuple values use parentheses and commas. Prod spells their product type.
+-- The nested pattern introduces three local names from one captured value.
+def weightedScore(enabled : Bool) : Nat :=
+  let packet : Prod(Nat, Prod(Bool, Nat)) := (12, (enabled, 3))
+  let (amount, (active, weight)) : Prod(Nat, Prod(Bool, Nat)) := packet
+  if (active) { amount * weight } else { amount }
+
+-- A function call with two arguments differs from one tuple argument.
+def addTwo(left : Nat, right : Nat) : Nat := left + right
+
+def sample : Nat := addTwo(weightedScore(true), weightedScore(false))

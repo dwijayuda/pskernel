@@ -1,0 +1,4 @@
+-- INTENTIONAL ERROR: this project is expected to be rejected.
+-- Comparison chains are not part of this surface grammar.
+-- One repair: def answer : Bool := if (1 < 2) { true } else { false }
+def answer : Bool := 1 < 2 < 3

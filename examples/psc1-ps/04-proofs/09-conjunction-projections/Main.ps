@@ -1,0 +1,11 @@
+import Support
+
+-- Choose the result proposition P and a consumer that keeps its P input.
+theorem bothLeft(P : Prop, Q : Prop, pair : Both(P, Q)) : P :=
+  pair(P, fun (left : P) => fun (right : Q) => left)
+
+-- Choose Q instead and keep the other input.
+theorem bothRight(P : Prop, Q : Prop, pair : Both(P, Q)) : Q :=
+  pair(Q, fun (left : P) => fun (right : Q) => right)
+
+def exampleNumber : Nat := 9

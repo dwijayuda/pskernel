@@ -1,0 +1,17 @@
+inductive Numbers where {
+  | empty
+  | link(head : Nat, tail : Numbers)
+}
+
+-- Rebuilding a constructor creates a new value from the transformed fields.
+def addTen(values : Numbers) : Numbers :=
+  match values with {
+    | Numbers.empty => Numbers.empty
+    | Numbers.link head tail => Numbers.link(head + 10, addTen(tail))
+  }
+
+def total(values : Numbers) : Nat :=
+  match values with {
+    | Numbers.empty => 0
+    | Numbers.link head tail => head + total(tail)
+  }

@@ -1,0 +1,8 @@
+{
+  "title": "A tiny expression interpreter",
+  "summary": "Represent arithmetic syntax as a recursive data type and evaluate its tree with a total interpreter.",
+  "concepts": ["abstract syntax tree", "interpreter", "recursive algebraic data type", "structural recursion"],
+  "expected": "checked",
+  "expectedExports": {"expressionExample": 20},
+  "files": [{"module": "Data", "path": "Data.ps"}, {"module": "Main", "path": "Main.ps"}]
+}

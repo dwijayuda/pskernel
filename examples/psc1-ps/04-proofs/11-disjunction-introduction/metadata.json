@@ -1,0 +1,23 @@
+{
+  "title": "Choose a side of a disjunction",
+  "summary": "Construct the local Church encoding of Either(P, Q) from a proof of P or a proof of Q.",
+  "concepts": [
+    "Church encoding",
+    "disjunction",
+    "introduction rules"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "exampleNumber": 11
+  },
+  "files": [
+    {
+      "module": "Support",
+      "path": "Support.ps"
+    },
+    {
+      "module": "Main",
+      "path": "Main.ps"
+    }
+  ]
+}

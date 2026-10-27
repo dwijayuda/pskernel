@@ -1,0 +1,14 @@
+{
+  "title": "Name an intermediate proof",
+  "summary": "Use a typed immutable let binding to make a two-step argument explicit.",
+  "concepts": [
+    "local proof",
+    "let binding",
+    "elaboration",
+    "proof composition"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "exampleNumber": 7
+  }
+}

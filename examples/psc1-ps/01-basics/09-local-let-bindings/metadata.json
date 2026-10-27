@@ -1,0 +1,14 @@
+{
+  "title": "Name intermediate calculations with let",
+  "summary": "Break a ticket-price calculation into typed local steps. Three tickets at 4000 with a 1000 discount and 500 fee produce 11500.",
+  "concepts": [
+    "local let",
+    "scope",
+    "intermediate values",
+    "readable calculations"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "result": 11500
+  }
+}

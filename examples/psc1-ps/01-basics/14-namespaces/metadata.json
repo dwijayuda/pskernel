@@ -1,0 +1,14 @@
+{
+  "title": "Organize declarations in a namespace",
+  "summary": "Group related pricing declarations and access them through qualified names. Two tickets plus one booking fee produce 8500.",
+  "concepts": [
+    "namespace",
+    "qualified names",
+    "scope",
+    "functions"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "result": 8500
+  }
+}

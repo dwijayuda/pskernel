@@ -1,0 +1,7 @@
+{
+  "title": "Optional values and an explicit default",
+  "summary": "Handle an optional membership discount with Option.none and Option.some before calculating a price.",
+  "concepts": ["Option", "constructor inference", "missing values", "pattern matching", "Nat subtraction"],
+  "expected": "checked",
+  "expectedExports": {"memberPrice": 25, "visitorPrice": 40}
+}

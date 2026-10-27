@@ -1,0 +1,8 @@
+-- [lower:upper] includes lower and excludes upper.
+def result : Nat :=
+  let calculation : Id(Nat) := do {
+    let mut total : Nat := 0
+    for index in [1:6] { total := total + index }
+    return total
+  }
+  calculation

@@ -1,0 +1,14 @@
+{
+  "title": "Arithmetic and parentheses",
+  "summary": "Compare ordinary arithmetic precedence with explicit grouping in a small order calculation. The final bill is 12000.",
+  "concepts": [
+    "addition",
+    "multiplication",
+    "parentheses",
+    "operator precedence"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "result": 12000
+  }
+}

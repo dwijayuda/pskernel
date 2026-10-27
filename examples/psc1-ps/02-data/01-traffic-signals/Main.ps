@@ -1,0 +1,20 @@
+-- An enum is an inductive type whose constructors carry no extra data.
+-- Every constructor is handled explicitly by the match below.
+inductive Signal where {
+  | stop
+  | caution
+  | go
+}
+
+def waitingSeconds(code : Nat) : Nat :=
+  let signal : Signal :=
+    if (code == 0) { Signal.stop }
+    else { if (code == 1) { Signal.caution } else { Signal.go } }
+  match signal with {
+    | Signal.stop => 30
+    | Signal.caution => 5
+    | Signal.go => 0
+  }
+
+-- Try changing 1 to 0 or 2. The selected branch changes the result.
+def sample : Nat := waitingSeconds(1)

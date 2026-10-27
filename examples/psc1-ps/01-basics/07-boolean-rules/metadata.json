@@ -1,0 +1,14 @@
+{
+  "title": "Combine Boolean rules",
+  "summary": "Use conjunction, disjunction, and negation for two small scheduling rules. The final combined result is true.",
+  "concepts": [
+    "Bool",
+    "conjunction",
+    "disjunction",
+    "negation"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "result": true
+  }
+}

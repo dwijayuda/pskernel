@@ -1,0 +1,10 @@
+-- The base case is one because it is the identity for multiplication.
+-- The recursive call is on previous, not on an arithmetic guess at a bound.
+def factorial(value : Nat) : Nat :=
+  match value with {
+    | Nat.zero => 1
+    | Nat.succ previous => value * factorial(previous)
+  }
+
+def emptyProduct : Nat := factorial(0)
+def sample : Nat := factorial(5)

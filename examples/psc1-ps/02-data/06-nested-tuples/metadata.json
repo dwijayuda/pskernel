@@ -1,0 +1,7 @@
+{
+  "title": "Nested tuples and destructuring",
+  "summary": "Unpack a nested product into local names and use the fields in a small weighted-score calculation.",
+  "concepts": ["Prod", "nested tuples", "destructuring let", "typed local patterns"],
+  "expected": "checked",
+  "expectedExports": {"sample": 48}
+}

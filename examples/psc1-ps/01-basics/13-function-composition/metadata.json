@@ -1,0 +1,24 @@
+{
+  "title": "Compose two transformations",
+  "summary": "Combine an increment with a doubling operation in both orders. The final result of doubling after incrementing 5 is 12.",
+  "concepts": [
+    "composition",
+    "higher-order functions",
+    "order of operations",
+    "function results"
+  ],
+  "expected": "checked",
+  "files": [
+    {
+      "module": "Support",
+      "path": "Support.ps"
+    },
+    {
+      "module": "Main",
+      "path": "Main.ps"
+    }
+  ],
+  "expectedExports": {
+    "result": 12
+  }
+}

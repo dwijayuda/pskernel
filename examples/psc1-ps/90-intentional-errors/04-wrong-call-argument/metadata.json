@@ -1,0 +1,11 @@
+{
+  "title": "Intentional error: a function receives the wrong argument type",
+  "summary": "successor requires Nat, but its call supplies false. Repair the call to successor(41).",
+  "concepts": [
+    "intentional error",
+    "function call",
+    "argument checking"
+  ],
+  "expected": "rejected",
+  "expectedPhase": "elaboration"
+}

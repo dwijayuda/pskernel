@@ -1,0 +1,12 @@
+{
+  "title": "Intentional error: Bool supplied where Nat is required",
+  "summary": "The value true has type Bool, so it cannot initialize a Nat. Repair by replacing true with 42.",
+  "concepts": [
+    "intentional error",
+    "type mismatch",
+    "Bool",
+    "Nat"
+  ],
+  "expected": "rejected",
+  "expectedPhase": "elaboration"
+}

@@ -1,0 +1,17 @@
+-- A branch contains two smaller trees, so both recursive calls are structural.
+inductive NumberTree where {
+  | leaf(value : Nat)
+  | branch(left : NumberTree, right : NumberTree)
+}
+
+def treeTotal(tree : NumberTree) : Nat :=
+  match tree with {
+    | NumberTree.leaf value => value
+    | NumberTree.branch left right => treeTotal(left) + treeTotal(right)
+  }
+
+def leafCount(tree : NumberTree) : Nat :=
+  match tree with {
+    | NumberTree.leaf value => 1
+    | NumberTree.branch left right => leafCount(left) + leafCount(right)
+  }

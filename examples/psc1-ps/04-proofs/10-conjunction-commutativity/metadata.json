@@ -1,0 +1,23 @@
+{
+  "title": "Swap the components of a conjunction",
+  "summary": "Prove Both(P, Q) -> Both(Q, P) by changing the order supplied to the consumer.",
+  "concepts": [
+    "Church encoding",
+    "conjunction commutativity",
+    "higher-order proof"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "exampleNumber": 10
+  },
+  "files": [
+    {
+      "module": "Support",
+      "path": "Support.ps"
+    },
+    {
+      "module": "Main",
+      "path": "Main.ps"
+    }
+  ]
+}

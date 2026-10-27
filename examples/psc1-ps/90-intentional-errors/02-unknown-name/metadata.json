@@ -1,0 +1,11 @@
+{
+  "title": "Intentional error: unresolved identifier",
+  "summary": "missingNumber has no declaration or local binding. Repair by replacing it with a natural-number literal or defining it before use.",
+  "concepts": [
+    "intentional error",
+    "name resolution",
+    "scope"
+  ],
+  "expected": "rejected",
+  "expectedPhase": "elaboration"
+}

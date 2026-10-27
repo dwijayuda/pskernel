@@ -1,0 +1,9 @@
+import Support
+
+-- The generic helper lives in Support.ps; these uses have concrete types.
+def keptNumber : Nat := keep(17)
+def keptFlag : Bool := keep(true)
+def keptText : String := keep("same value")
+
+-- The nested call also preserves the concrete type.
+def result : Nat := keep(keep(keptNumber))

@@ -1,0 +1,13 @@
+{
+  "title": "Half-open numeric ranges",
+  "summary": "Visit 1,2,3,4,5 using a half-open range; the result is 15.",
+  "concepts": [
+    "numeric range",
+    "for",
+    "exclusive upper bound"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "result": 15
+  }
+}

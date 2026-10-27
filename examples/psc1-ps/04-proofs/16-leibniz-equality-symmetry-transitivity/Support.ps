@@ -1,0 +1,4 @@
+-- Leibniz equality over Nat: every predicate true at a is true at b.
+-- Same is defined here. It is not the built-in Eq or an imported library.
+def Same(a : Nat, b : Nat) : Prop :=
+  (P : Nat -> Prop) -> P(a) -> P(b)

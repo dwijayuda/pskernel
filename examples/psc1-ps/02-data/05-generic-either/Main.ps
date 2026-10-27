@@ -1,0 +1,9 @@
+import Data
+
+-- Both branches have the same container type but different payload types.
+def chooseScore(useAmount : Bool) : Nat :=
+  let chosen : EitherValue(Nat, Bool) :=
+    if (useAmount) { EitherValue.left(42) } else { EitherValue.right(true) }
+  score(chosen)
+
+def sample : Nat := chooseScore(true)

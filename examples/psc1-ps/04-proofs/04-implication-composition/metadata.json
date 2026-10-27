@@ -1,0 +1,13 @@
+{
+  "title": "Compose two implications",
+  "summary": "Chain P -> Q with Q -> R to prove P -> R.",
+  "concepts": [
+    "hypothetical syllogism",
+    "composition",
+    "nested calls"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "exampleNumber": 4
+  }
+}

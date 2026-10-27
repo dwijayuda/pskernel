@@ -1,0 +1,14 @@
+{
+  "title": "Reusable functions with several arguments",
+  "summary": "Define rectangle area and perimeter functions, then call them with different dimensions. The final area is 35.",
+  "concepts": [
+    "functions",
+    "typed parameters",
+    "multiple arguments",
+    "function calls"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "result": 35
+  }
+}

@@ -1,0 +1,10 @@
+-- These are the String operation names exposed by this PSC1 distribution.
+-- No optional library import is needed for these admitted operations.
+def greet(name : String) : String :=
+  let beginning : String := String.Internal.append("Hello, ", name)
+  String.Internal.append(beginning, "!")
+
+def result : String := greet("Ada")
+
+-- The ASCII greeting contains eleven characters, including spaces/punctuation.
+def greetingLength : Nat := String.Internal.length(result)

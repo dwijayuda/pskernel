@@ -1,0 +1,49 @@
+name: PSC1 checked example collection
+
+on:
+  push:
+    branches: ['examples/psc1-ps-*']
+    paths:
+      - 'examples/psc1-ps/**'
+      - '.github/workflows/psc1-examples.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: psc1-examples-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  examples:
+    name: Genuine compiler, kernel, and runtime examples
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Capture unchanged qualified compiler
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node editors/psc1/scripts/prepare-compiler.mjs
+      - name: Verify checking and runtime observations
+        run: node examples/psc1-ps/_ci/validate.mjs
+      - name: Package example ZIP
+        run: python3 examples/psc1-ps/_ci/package.py
+      - name: Upload ready-to-use ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc1-ps-examples-${{ github.sha }}
+          path: examples/psc1-ps/_dist/*
+          if-no-files-found: error
+      - name: Upload validation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: psc1-ps-examples-evidence-${{ github.sha }}
+          path: examples/psc1-ps/validation-results.json
+          if-no-files-found: warn

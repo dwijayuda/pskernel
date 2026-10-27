@@ -1,0 +1,7 @@
+{
+  "title": "Traffic signals: an enum and exhaustive matching",
+  "summary": "Represent three states with nullary constructors and translate the selected state into a waiting time.",
+  "concepts": ["inductive enum", "nullary constructors", "exhaustive pattern matching", "local typed values"],
+  "expected": "checked",
+  "expectedExports": {"sample": 5}
+}

@@ -1,0 +1,12 @@
+{
+  "title": "Intentional error: a number cannot prove an arbitrary proposition",
+  "summary": "The theorem claims a proof of arbitrary P but supplies the Nat literal 0. Repair by accepting a premise of type P and returning it.",
+  "concepts": [
+    "intentional error",
+    "proof refusal",
+    "Prop",
+    "type mismatch"
+  ],
+  "expected": "rejected",
+  "expectedPhase": "elaboration"
+}

@@ -1,0 +1,18 @@
+{
+  "schema": "proofscript-project/1",
+  "entryModule": "Main",
+  "files": [
+    {
+      "module": "Units",
+      "path": "src/Units.ps"
+    },
+    {
+      "module": "Invoice",
+      "path": "src/Invoice.ps"
+    },
+    {
+      "module": "Main",
+      "path": "Main.ps"
+    }
+  ]
+}

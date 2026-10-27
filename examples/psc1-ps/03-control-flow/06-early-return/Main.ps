@@ -1,0 +1,9 @@
+-- Once 9 is found, the final return 0 is not reached.
+def result : Nat :=
+  let search : Id(Nat) := do {
+    for value in [1, 4, 9, 12] {
+      if (5 < value) { return value }
+    }
+    return 0
+  }
+  search

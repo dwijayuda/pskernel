@@ -1,0 +1,10 @@
+-- A namespace gives declarations qualified names such as Tickets.unitPrice.
+namespace Tickets
+def unitPrice : Nat := 4000
+def bookingFee : Nat := 500
+
+def total(count : Nat) : Nat := count * unitPrice + bookingFee
+end Tickets
+
+-- Outside the namespace, use the qualified name.
+def result : Nat := Tickets.total(2)

@@ -1,0 +1,13 @@
+import Support
+
+-- Every proposition implies itself in each direction.
+theorem equivalentReflexive(P : Prop) : Equivalent(P, P) :=
+  fun (R : Prop) => fun (consume : (P -> P) -> (P -> P) -> R) =>
+    consume(fun (proof : P) => proof, fun (proof : P) => proof)
+
+-- Reverse the order of the forward and backward implications.
+theorem equivalentSymmetric(P : Prop, Q : Prop, evidence : Equivalent(P, Q)) : Equivalent(Q, P) :=
+  fun (R : Prop) => fun (consume : (Q -> P) -> (P -> Q) -> R) =>
+    evidence(R, fun (forward : P -> Q) => fun (backward : Q -> P) => consume(backward, forward))
+
+def exampleNumber : Nat := 13

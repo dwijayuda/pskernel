@@ -1,0 +1,7 @@
+{
+  "title": "Structural recursion over natural numbers",
+  "summary": "Compute a triangular number by matching on Nat.zero and Nat.succ and recursing on the predecessor.",
+  "concepts": ["Nat constructors", "structural recursion", "recursive sum", "total definition"],
+  "expected": "checked",
+  "expectedExports": {"sample": 21}
+}

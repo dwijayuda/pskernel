@@ -1,0 +1,9 @@
+-- In .ps, parameters are written inside parentheses and separated by commas.
+-- A call also uses parentheses: rectangleArea(5, 7).
+def rectangleArea(width : Nat, height : Nat) : Nat := width * height
+
+def rectanglePerimeter(width : Nat, height : Nat) : Nat := 2 * (width + height)
+
+def smallArea : Nat := rectangleArea(3, 4)
+def smallPerimeter : Nat := rectanglePerimeter(3, 4)
+def result : Nat := rectangleArea(5, 7)

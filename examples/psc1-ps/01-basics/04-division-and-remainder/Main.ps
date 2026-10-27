@@ -1,0 +1,9 @@
+-- These calls use the compiler's admitted Nat operations.
+-- 29 items fill four boxes of six, with five items left over.
+def itemCount : Nat := 29
+def boxSize : Nat := 6
+def fullBoxes : Nat := Nat.div(itemCount, boxSize)
+def looseItems : Nat := Nat.mod(itemCount, boxSize)
+
+-- Reconstruct the original count without dropping the remainder.
+def result : Nat := fullBoxes * boxSize + looseItems

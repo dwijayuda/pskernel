@@ -1,0 +1,6 @@
+-- An implication is used by applying it to a proof of its premise.
+-- ProofScript calls put the opening parenthesis directly after the function.
+theorem modusPonens(P : Prop, Q : Prop, implication : P -> Q, premise : P) : Q :=
+  implication(premise)
+
+def exampleNumber : Nat := 3

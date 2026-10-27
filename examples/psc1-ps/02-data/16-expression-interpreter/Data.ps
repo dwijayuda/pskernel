@@ -1,0 +1,14 @@
+-- This tiny language has only literals, addition, and multiplication.
+-- Its syntax is data: evaluation is a separate, total recursive function.
+inductive Expression where {
+  | literal(value : Nat)
+  | add(left : Expression, right : Expression)
+  | multiply(left : Expression, right : Expression)
+}
+
+def evaluate(expression : Expression) : Nat :=
+  match expression with {
+    | Expression.literal value => value
+    | Expression.add left right => evaluate(left) + evaluate(right)
+    | Expression.multiply left right => evaluate(left) * evaluate(right)
+  }

@@ -1,0 +1,7 @@
+{
+  "title": "Commands with different payloads",
+  "summary": "Use one sum type for a reset command, an increment, and a command with two numeric fields.",
+  "concepts": ["algebraic data type", "constructor payloads", "multiple pattern binders", "command interpretation"],
+  "expected": "checked",
+  "expectedExports": {"sample": 32}
+}

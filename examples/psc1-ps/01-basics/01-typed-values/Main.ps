@@ -1,0 +1,9 @@
+-- A declaration gives a name to an expression and states its type.
+-- Nat represents nonnegative whole numbers; Bool contains true and false.
+def seats : Nat := 12
+def reservationsOpen : Bool := true
+def eventName : String := "ProofScript workshop"
+
+-- Refer to a previously declared value by its name.
+-- The two branches have the same type, Nat.
+def result : Nat := if (reservationsOpen) { seats } else { 0 }

@@ -1,0 +1,7 @@
+import Domain
+
+def priority(mode : Mode) : Nat :=
+  match mode with {
+    | Mode.standard => 1
+    | Mode.urgent => 10
+  }

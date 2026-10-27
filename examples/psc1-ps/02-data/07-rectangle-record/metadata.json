@@ -1,0 +1,7 @@
+{
+  "title": "A rectangle record with field projections",
+  "summary": "Construct a record and read its named fields to calculate area and perimeter.",
+  "concepts": ["structure", "generated constructor", "field projection", "record values"],
+  "expected": "checked",
+  "expectedExports": {"sampleArea": 40, "samplePerimeter": 26}
+}

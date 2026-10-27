@@ -1,0 +1,5 @@
+-- Ordinary implication permits using the same proof more than once.
+theorem reuse(P : Prop, Q : Prop, needsTwo : P -> P -> Q) : P -> Q :=
+  fun (proofOfP : P) => needsTwo(proofOfP, proofOfP)
+
+def exampleNumber : Nat := 6

@@ -1,0 +1,14 @@
+{
+  "title": "Functions as local values",
+  "summary": "Give two anonymous functions explicit function types and call them inside a local calculation. The result is 15.",
+  "concepts": [
+    "lambda",
+    "function types",
+    "local functions",
+    "function application"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "result": 15
+  }
+}

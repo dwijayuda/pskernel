@@ -1,0 +1,11 @@
+import Data
+
+-- The same generic helper is instantiated for both Nat and Bool.
+-- Data.ps owns the generic implementation; this entry exposes a scalar result.
+def selectedAmount(hasValue : Bool) : Nat :=
+  let amount : MaybeValue(Nat) :=
+    if (hasValue) { MaybeValue.present(24) } else { MaybeValue.missing }
+  let enabled : MaybeValue(Bool) := MaybeValue.present(true)
+  if (getOr(false, enabled)) { getOr(7, amount) } else { 0 }
+
+def sample : Nat := selectedAmount(false)

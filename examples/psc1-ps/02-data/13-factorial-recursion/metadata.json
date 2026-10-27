@@ -1,0 +1,7 @@
+{
+  "title": "Factorial as a recursive product",
+  "summary": "Use a multiplicative base case and a structurally smaller recursive call to define factorial.",
+  "concepts": ["structural recursion", "multiplicative identity", "Nat multiplication", "total recursion"],
+  "expected": "checked",
+  "expectedExports": {"emptyProduct": 1, "sample": 120}
+}

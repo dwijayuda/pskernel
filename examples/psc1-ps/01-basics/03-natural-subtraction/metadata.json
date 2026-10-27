@@ -1,0 +1,14 @@
+{
+  "title": "Natural-number subtraction",
+  "summary": "Use subtraction for a remaining stock count and observe that Nat subtraction stops at zero. The result is zero.",
+  "concepts": [
+    "Nat",
+    "subtraction",
+    "saturation",
+    "typed functions"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "result": 0
+  }
+}

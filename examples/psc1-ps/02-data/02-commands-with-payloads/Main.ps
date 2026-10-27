@@ -1,0 +1,22 @@
+-- Each constructor describes a different shape of command.
+-- Constructor arguments are recovered as names in a matching branch.
+inductive Command where {
+  | reset
+  | add(amount : Nat)
+  | scaleAndAdd(factor : Nat, offset : Nat)
+}
+
+def applyCommand(code : Nat, current : Nat) : Nat :=
+  let command : Command :=
+    if (code == 0) { Command.reset }
+    else {
+      if (code == 1) { Command.add(5) }
+      else { Command.scaleAndAdd(3, 2) }
+    }
+  match command with {
+    | Command.reset => 0
+    | Command.add amount => current + amount
+    | Command.scaleAndAdd factor offset => current * factor + offset
+  }
+
+def sample : Nat := applyCommand(2, 10)

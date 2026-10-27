@@ -1,0 +1,13 @@
+{
+  "title": "Nested finite loops",
+  "summary": "Add every product in a 3 by 3 multiplication table. The result is 36.",
+  "concepts": [
+    "nested loops",
+    "finite iteration",
+    "accumulation"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "result": 36
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "title": "Reflexivity of explicitly defined Leibniz equality",
+  "summary": "For every predicate, a proof at n is already a proof at n; this establishes Same(n, n). Same is defined locally, not the built-in Eq.",
+  "concepts": [
+    "Leibniz equality",
+    "reflexivity",
+    "predicate",
+    "dependent function"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "exampleNumber": 14
+  },
+  "files": [
+    {
+      "module": "Support",
+      "path": "Support.ps"
+    },
+    {
+      "module": "Main",
+      "path": "Main.ps"
+    }
+  ]
+}

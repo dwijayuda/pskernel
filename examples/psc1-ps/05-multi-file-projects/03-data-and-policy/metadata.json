@@ -1,0 +1,27 @@
+{
+  "title": "Separate a data model from its policy",
+  "summary": "Define a mode in one module and a scalar policy in another. Main exposes a simple Nat result of 10.",
+  "concepts": [
+    "inductive data",
+    "imported helpers",
+    "pattern matching"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "result": 10
+  },
+  "files": [
+    {
+      "module": "Domain",
+      "path": "src/Domain.ps"
+    },
+    {
+      "module": "Policy",
+      "path": "src/Policy.ps"
+    },
+    {
+      "module": "Main",
+      "path": "Main.ps"
+    }
+  ]
+}

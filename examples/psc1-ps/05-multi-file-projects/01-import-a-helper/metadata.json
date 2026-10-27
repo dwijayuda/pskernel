@@ -1,0 +1,23 @@
+{
+  "title": "Import a helper module",
+  "summary": "Keep a reusable function in a separate source module, then call it from Main. The result is 42.",
+  "concepts": [
+    "import",
+    "module order",
+    "namespace"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "result": 42
+  },
+  "files": [
+    {
+      "module": "Numbers",
+      "path": "lib/Numbers.ps"
+    },
+    {
+      "module": "Main",
+      "path": "Main.ps"
+    }
+  ]
+}

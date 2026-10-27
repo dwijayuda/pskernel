@@ -1,0 +1,27 @@
+{
+  "title": "Three-module calculation pipeline",
+  "summary": "Compose a transitive dependency chain: Units -> Invoice -> Main. The final total is 950 cents.",
+  "concepts": [
+    "transitive imports",
+    "project manifest",
+    "reuse"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "result": 950
+  },
+  "files": [
+    {
+      "module": "Units",
+      "path": "src/Units.ps"
+    },
+    {
+      "module": "Invoice",
+      "path": "src/Invoice.ps"
+    },
+    {
+      "module": "Main",
+      "path": "Main.ps"
+    }
+  ]
+}

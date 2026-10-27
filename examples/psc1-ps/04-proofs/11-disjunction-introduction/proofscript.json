@@ -1,0 +1,14 @@
+{
+  "schema": "proofscript-project/1",
+  "entryModule": "Main",
+  "files": [
+    {
+      "module": "Support",
+      "path": "Support.ps"
+    },
+    {
+      "module": "Main",
+      "path": "Main.ps"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+-- The value field is generic; the serial field is always a natural number.
+structure Tagged(A : Type) where {
+  value : A
+  serial : Nat
+}
+
+def numericContents(item : Tagged(Nat)) : Nat := item.value
+def numericSerial(item : Tagged(Nat)) : Nat := item.serial

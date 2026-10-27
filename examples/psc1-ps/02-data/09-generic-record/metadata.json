@@ -1,0 +1,8 @@
+{
+  "title": "A record with a type parameter",
+  "summary": "Use a generic record that pairs a typed value with a numeric serial and read both fields.",
+  "concepts": ["generic structure", "type parameter", "constructor inference", "field projection"],
+  "expected": "checked",
+  "expectedExports": {"sample": 1209},
+  "files": [{"module": "Data", "path": "Data.ps"}, {"module": "Main", "path": "Main.ps"}]
+}

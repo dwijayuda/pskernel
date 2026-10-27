@@ -1,0 +1,15 @@
+{
+  "title": "Identity: reuse an existing proof",
+  "summary": "A proof of P is sufficient to establish P. Also writes the same implication as an explicit lambda.",
+  "concepts": [
+    "Prop",
+    "theorem",
+    "proof terms",
+    "identity",
+    "typed lambda"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "exampleNumber": 1
+  }
+}

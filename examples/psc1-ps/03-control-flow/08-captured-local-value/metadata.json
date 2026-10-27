@@ -1,0 +1,13 @@
+{
+  "title": "A closure captures the current value",
+  "summary": "A closure keeps the value present when it is created. Updating the later local binding does not change the captured value; the result is 7.",
+  "concepts": [
+    "closure capture",
+    "mutable local",
+    "lexical scope"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "result": 7
+  }
+}

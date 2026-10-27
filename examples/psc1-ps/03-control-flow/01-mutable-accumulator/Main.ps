@@ -1,0 +1,9 @@
+-- Mutable variables are local to this do block.
+def result : Nat :=
+  let calculation : Id(Nat) := do {
+    let mut balance : Nat := 10
+    balance := balance + 5
+    balance := balance - 3
+    return balance
+  }
+  calculation

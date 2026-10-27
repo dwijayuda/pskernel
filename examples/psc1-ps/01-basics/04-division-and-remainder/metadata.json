@@ -1,0 +1,14 @@
+{
+  "title": "Division and remainder",
+  "summary": "Split 29 items into boxes of six and reconstruct the original count from the quotient and remainder. The result is 29.",
+  "concepts": [
+    "Nat.div",
+    "Nat.mod",
+    "quotient",
+    "remainder"
+  ],
+  "expected": "checked",
+  "expectedExports": {
+    "result": 29
+  }
+}

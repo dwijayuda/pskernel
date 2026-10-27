@@ -1,0 +1,5 @@
+-- Reorder the inputs, then feed them to the original proof in its order.
+theorem swap(P : Prop, Q : Prop, R : Prop, original : P -> Q -> R) : Q -> P -> R :=
+  fun (proofOfQ : Q) => fun (proofOfP : P) => original(proofOfP, proofOfQ)
+
+def exampleNumber : Nat := 5

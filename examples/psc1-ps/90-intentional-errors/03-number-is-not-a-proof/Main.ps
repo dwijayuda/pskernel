@@ -1,0 +1,6 @@
+-- INTENTIONAL ERROR: this project is expected to be rejected.
+-- 0 is a natural number, not evidence for every possible proposition.
+-- Repair: theorem supplied(P : Prop, proof : P) : P := proof
+theorem notAProof(P : Prop) : P := 0
+
+def exampleNumber : Nat := 3

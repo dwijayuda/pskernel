@@ -210,6 +210,17 @@ function build(dir){
  put(marker,json(r));built.set(dir,r);records.push(r);return r;
 }
 for(const dir of selected?[selected]:dirs)build(dir);
+
+const sourceRows=dirs.map(dir=>({directory:dir,name:read(path.join('packages',dir,'package.json')).name,files:sourceFiles(path.join('packages',dir))}));
+const sourceOwner=new Map(sourceRows.flatMap(row=>row.files.map(file=>[file.module,row.name])));
+put(path.join(out,'source-dependencies.json'),json(sourceRows.map(row=>({
+ directory:row.directory,name:row.name,sourceModules:row.files.map(f=>f.module),
+ sourceDependencies:[...new Set(row.files.flatMap(f=>f.imports).map(name=>sourceOwner.get(name)).filter(name=>name&&name!==row.name))].sort(),
+ externalOrInternalWorkspaceImports:[...new Set(row.files.flatMap(f=>f.imports).filter(name=>!sourceOwner.has(name)))].sort(),
+ runtimeDependencies:read(path.join('packages',row.directory,'package.json')).dependencies??{},
+ scope:'source import inventory only; runtime adapters reuse proofscript and do not execute internal source imports'
+}))));
+
 put(path.join(out,'package-builds.json'),json({schema:'psc1-existing-package-builds/1',
  testedCommit:process.env.GITHUB_SHA,version:input.version,implementationOwner:'proofscript',
  independentCompilerModularity:'deferred',packages:records,

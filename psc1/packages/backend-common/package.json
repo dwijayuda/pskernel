@@ -7,7 +7,7 @@
     "npmArchitecture": "psc1-existing-packages-shared-root/1",
     "implementationOwner": "proofscript",
     "internalCompilerModules": false,
-    "packageKind": "shared-backend-adapter",
+    "packageKind": "source-only",
     "canonicalSources": "src",
     "sourceVariants": [
       "lean",

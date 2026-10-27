@@ -117,6 +117,56 @@ try{
   const response=JSON.parse(script(cwd,'targets.mjs',code,[JSON.stringify(options)]));
   assert.equal(response.target,target);assert.ok(response.source.length>0);record('checked-installed-target-'+target);
  }
+ // Optional execution engines, validators and SDKs retain their original archives.
+ const extras=JSON.parse(fs.readFileSync(path.join(out,'qualified-bundles.json'))),extraTars=new Map();
+ function findExtras(dir){for(const n of fs.readdirSync(dir)){const p=path.join(dir,n);if(fs.statSync(p).isDirectory())findExtras(p);else if(n.endsWith('.tgz'))extraTars.set(n,p);}}
+ findExtras(path.join(out,'qualified-bundles'));
+ const external=extras.filter(e=>!builds.some(b=>b.name===e.meta.name));
+ for(const e of external)assert.equal(sha256(fs.readFileSync(extraTars.get(e.tarball))),e.sha256);
+ install(cwd,external.map(e=>extraTars.get(e.tarball)));record('unchanged-optional-engines-and-sdks-install');
+ const tsc=path.join(nodes,'typescript/bin/tsc');
+ fs.writeFileSync(path.join(cwd,'consumer.mts'),[
+  "import{compile,getCompilerMetadata}from '@proofscript/compiler';",
+  "import{readSources}from '@proofscript/foundation';",
+  "import{compile as compileJs}from '@proofscript/backend-js';",
+  "import{createKernel}from '@proofscript/pskernel-lean-wasm';",
+  "const sources=readSources();const source:string=sources[0].text;",
+  "const v:string=getCompilerMetadata().version;",
+  "const r=compileJs({sources:[{module:'Main',kind:'lean',text:'def answer : Nat := 42'}],entryModule:'Main'});",
+  "const accepted:'accepted'=r.logicalAdmission;",
+  "const kernel=await createKernel();const ok:boolean=(await kernel.checkCanonicalAdmissions('{}')).accepted;",
+  "// @ts-expect-error kind is a closed grammar",
+  "compile({sources:[{module:'Main',kind:'unknown',text:''}],entryModule:'Main'});",
+  "// @ts-expect-error no private low-level helper is exposed",
+  "import{psNameAppendStr}from '@proofscript/foundation';"
+ ].join('\n'));
+ fs.writeFileSync(path.join(cwd,'tsconfig.json'),JSON.stringify({compilerOptions:{strict:true,noEmit:true,target:'ES2022',
+  module:'NodeNext',moduleResolution:'NodeNext',types:[],lib:['ES2022','DOM']},files:['consumer.mts']}));
+ run(process.execPath,[tsc,'--project','tsconfig.json'],cwd);record('accurate-strict-public-declarations');
+ for(const engine of ['rust','wasm-core']){
+  const options={...samples[0],engine,target:'js'};
+  const actual=JSON.parse(script(cwd,'compile.mjs',"import{compile}from 'proofscript';const r=compile(JSON.parse(process.argv[2]));console.log(JSON.stringify({source:r.source,admission:r.logicalAdmission,ir:r.irValidation}));",[JSON.stringify(options)]));
+  const expected=JSON.parse(script(cwd,'compile.mjs',"import{compile}from 'proofscript';const r=compile(JSON.parse(process.argv[2]));console.log(JSON.stringify({source:r.source,admission:r.logicalAdmission,ir:r.irValidation}));",[JSON.stringify({...options,engine:'js'})]));
+  assert.deepEqual(actual,expected);record('existing-optional-compiler-engine-'+engine);
+ }
+ for(const target of ['ts','rust','wasm-component']){
+  const options=target==='wasm-component'?{sources:[{module:'Entry',kind:'lean',text:'def answer : Bool := true'}],entryModule:'Entry',engine:'js',target}:
+   {...samples[0],engine:'js',target};
+  const response=JSON.parse(script(cwd,'more-targets.mjs',"import{compile}from 'proofscript';const r=compile(JSON.parse(process.argv[2]));if(r.logicalAdmission!=='accepted')throw Error('unchecked');console.log(JSON.stringify({target:r.target,source:r.source}));",[JSON.stringify(options)]));
+  assert.equal(response.target,target);assert.ok(response.source.length>0);record('checked-installed-target-'+target);
+ }
+ // Compile actual source snapshots from a separately installed existing package.
+ const foundationCode=[
+  "import{readSources}from '@proofscript/foundation';import{compile}from '@proofscript/compiler';",
+  "const sources=[...readSources()];const text=sources.map(s=>'import '+s.module).join('\\n')+'\\ndef answer : String := psNameToString (psNameAppendStr PsName.anonymous \"café\")\\n';",
+  "sources.push({module:'Entry',kind:'lean',text});const r=compile({sources,entryModule:'Entry'});",
+  "if(r.logicalAdmission!=='accepted')throw Error('unchecked');console.log(JSON.stringify(r.source));"
+ ].join('\n');
+ const foundationOutput=JSON.parse(script(cwd,'source-package.mjs',foundationCode));
+ fs.writeFileSync(path.join(cwd,'foundation-output.mjs'),foundationOutput);
+ script(cwd,'foundation-observe.mjs',"import{answer}from './foundation-output.mjs';if(answer!=='café')throw Error('source package output');");
+ record('existing-source-package-compiles-through-shared-compiler');
+
  for(const fixture of refusals.slice(0,4)){
   const code="import{compile}from 'proofscript';try{compile(JSON.parse(process.argv[2]));throw Error('unexpected-acceptance')}catch(e){if(String(e).includes('unexpected-acceptance'))throw e;console.log('refused')}";
   const options={sources:[{module:'Entry',kind:fixture.grammar,text:fixture.source}],entryModule:'Entry',assurance:fixture.assurance};
@@ -156,6 +206,8 @@ try{
   record('clean-build-pack-reproduces-'+dir);
  }
  verifyTars();
+ for(const p of contract.packages)run('npm',['run','build'],path.join(root,'packages',p.directory));
+ record('individual-build-command-all24');
  const report={schema:'psc1-simple-npm-package-qualification/1',testedCommit:process.env.GITHUB_SHA,
   status:'passed',modularNpmDistribution:'qualified-linux-packaging-scope',independentCompilerInternalModularity:'deferred',
   cases,packages:builds.map(({files,...r})=>r),sharedImplementationOwner:'proofscript',

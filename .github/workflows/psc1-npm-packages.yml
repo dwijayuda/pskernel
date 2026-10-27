@@ -35,6 +35,11 @@ jobs:
           npm run check:workspace
           npm run build:packages
           node scripts/check-workspace.mjs --built
+      - name: Prepare the existing pinned Rust target SDK
+        run: |
+          rustup toolchain uninstall 1.90.0 || true
+          rustup toolchain install 1.90.0 --profile minimal
+          node scripts/npm-packages-sdk.mjs
       - name: Fresh offline installations, checked output and refusal qualification
         run: node scripts/npm-packages-installed.mjs
       - uses: actions/upload-artifact@v4

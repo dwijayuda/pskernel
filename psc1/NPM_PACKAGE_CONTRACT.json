@@ -7,7 +7,7 @@
     {
       "directory": "backend-common",
       "name": "@proofscript/backend-common",
-      "kind": "shared-backend-adapter",
+      "kind": "source-only",
       "beforeVersion": "0.1.0-psc1.1",
       "beforeExports": null,
       "beforeDistFiles": 0

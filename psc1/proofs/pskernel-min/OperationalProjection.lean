@@ -50,6 +50,66 @@ noncomputable def fieldValue (data : List Type) (self : Type) (fields : List PsM
         exact args.1
     | succ index => cases field <;> exact ih index h args.2
 
+def headLookup (fields : List PsMinRegField) (index : Nat) : Option PsMinRegTy :=
+  psMinOpProjectionType [singleSpec fields] 0 index
+
+theorem head_signature (fields : List PsMinRegField) (index : Nat) (type : PsMinRegTy)
+    (h : headLookup fields index = some type) :
+    ∃ result, psMinOpFieldType fields index = some result ∧ type = .arr (.data 0) result := by
+  cases hf : psMinOpFieldType fields index with
+  | none => simp [headLookup, psMinOpProjectionType, singleSpec, hf] at h
+  | some result =>
+    have ht : PsMinRegTy.arr (.data 0) result = type := by
+      simpa [headLookup, psMinOpProjectionType, singleSpec, hf] using h
+    exact ⟨result, hf, ht.symm⟩
+
+theorem head_arrow_signature (fields : List PsMinRegField) (index : Nat)
+    (domain result : PsMinRegTy) (h : headLookup fields index = some (.arr domain result)) :
+    domain = .data 0 ∧ psMinOpFieldType fields index = some result := by
+  obtain ⟨actual, hf, ht⟩ := head_signature fields index _ h
+  have eqs := PsMinRegTy.arr.inj ht
+  exact ⟨eqs.1, by simpa only [eqs.2] using hf⟩
+
+-- Select the result from the supplied arrow code, never by eliminating a
+-- computed Option into Type. All lookup evidence below stays in Prop.
+noncomputable def headModel (fields : List PsMinRegField) (data : List Type)
+    (index : Nat) (type : PsMinRegTy) (h : headLookup fields index = some type) :
+    Denote (Carrier (singleSpec fields) data :: data) type := by
+  cases type with
+  | arr domain result =>
+    have facts := head_arrow_signature fields index domain result h
+    cases facts.1
+    exact fun value => fieldValue data (Carrier (singleSpec fields) data)
+      fields index result facts.2 (recordArgs fields data value)
+  | empty =>
+    exfalso
+    obtain ⟨result, hf, ht⟩ := head_signature fields index _ h
+    cases ht
+  | unit =>
+    exfalso
+    obtain ⟨result, hf, ht⟩ := head_signature fields index _ h
+    cases ht
+  | nat =>
+    exfalso
+    obtain ⟨result, hf, ht⟩ := head_signature fields index _ h
+    cases ht
+  | boolean =>
+    exfalso
+    obtain ⟨result, hf, ht⟩ := head_signature fields index _ h
+    cases ht
+  | data slot =>
+    exfalso
+    obtain ⟨result, hf, ht⟩ := head_signature fields index _ h
+    cases ht
+  | list element =>
+    exfalso
+    obtain ⟨result, hf, ht⟩ := head_signature fields index _ h
+    cases ht
+  | option element =>
+    exfalso
+    obtain ⟨result, hf, ht⟩ := head_signature fields index _ h
+    cases ht
+
 noncomputable def projectionModel (specs : List PsMinRegSpec) :
     (slot field : Nat) → (type : PsMinRegTy) →
       psMinOpProjectionType specs slot field = some type → Denote (dataModel specs) type := by
@@ -76,15 +136,8 @@ noncomputable def projectionModel (specs : List PsMinRegSpec) :
           cases others with
           | cons other more => simp [psMinOpProjectionType] at h
           | nil =>
-            cases hf : psMinOpFieldType fields field with
-            | none => simp [psMinOpProjectionType, hf] at h
-            | some result =>
-              have ht : PsMinRegTy.arr (PsMinRegTy.data 0) result = type := by
-                simpa [psMinOpProjectionType, hf] using h
-              cases ht
-              exact fun value => fieldValue (dataModel rest) (Carrier (singleSpec fields) (dataModel rest))
-                fields field result hf (recordArgs fields (dataModel rest) value)
-
+            exact headModel fields (dataModel rest) field type
+              (by simpa only [headLookup, psMinOpProjectionType, singleSpec] using h)
 termination_by structural specs
 
 theorem projection_iota (fields : List PsMinRegField) (data : List Type)
@@ -108,8 +161,8 @@ theorem actual_projection_iota (fields : List PsMinRegField) (rest : List PsMinR
       (construct (singleSpec fields) (dataModel rest) ⟨0, by simp [singleSpec]⟩ args) =
       fieldValue (dataModel rest) (Carrier (singleSpec fields) (dataModel rest)) fields index type h args := by
   unfold projectionModel
-  dsimp only [singleSpec, Nat.casesAuxOn, psMinOpProjectionType]
-  simpa -implicitDefEqProofs only [h] using!
+  dsimp only [singleSpec, Nat.casesAuxOn]
+  simpa -implicitDefEqProofs only [headModel] using!
     projection_iota fields (dataModel rest) index type h args
 
 #print axioms projectionModel

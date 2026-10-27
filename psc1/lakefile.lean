@@ -670,3 +670,8 @@ lean_exe psc1_source_trace_tests where
 lean_exe psc1_output_abi_probe where
   srcDir := "scripts"
   root := `OutputAbiProbe
+
+-- Proof-only R5 library; excluded from every executable/compiler import graph.
+lean_lib PsMinCompilerPreservation where
+  srcDir := "proofs/pskernel-min"
+  roots := #[`CompilerPreservation]

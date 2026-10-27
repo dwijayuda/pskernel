@@ -8,6 +8,7 @@ on:
       - psc1/proofs/pskernel-min/**/*.lean
       - psc1/scripts/minkernel-*
       - psc1/scripts/MinKernelSourceCompile.lean
+      - psc1/scripts/MinKernelCompilerPreservation.lean
       - .github/workflows/psc1-minkernel.yml
   workflow_dispatch:
 permissions:
@@ -196,6 +197,12 @@ jobs:
         with:
           path: psc1/.lake
           key: ${{ steps.native_cache.outputs.cache-primary-key }}
+      - name: Prove actual compiler capture, currying and scalar-stage preservation
+        run: |
+          set -euo pipefail
+          mkdir -p dist/pskernel-min/compiler-preservation
+          lake build PsMinCompilerPreservation 2>&1 | tee dist/pskernel-min/compiler-preservation/proof.log
+          node scripts/minkernel-compiler-preservation-guard.mjs
       - name: Compile and execute checker source through PSC1 and check exact source admissions
         id: portable
         run: node scripts/minkernel-portability.mjs
@@ -225,6 +232,9 @@ jobs:
       - name: Check regular ingress source universes and resource boundaries
         if: ${{ !cancelled() && steps.regular_ingress.outcome == 'success' }}
         run: node --max-old-space-size=256 packages/pskernel-min/test/RegularIngressHostTests.mjs
+      - name: Check actual scalar emitter ABI and source partial-application integration
+        if: ${{ !cancelled() && steps.regular_ingress.outcome == 'success' }}
+        run: node --max-old-space-size=256 scripts/minkernel-compiler-preservation.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

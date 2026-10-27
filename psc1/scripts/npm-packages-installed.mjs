@@ -89,7 +89,11 @@ try{
   const bytes=fs.readFileSync(path.join(rootInstalled,'dist/implementation',pin.path));
   assert.equal(bytes.length,pin.bytes);assert.equal(sha256(bytes),pin.sha256);preserved++;
  }
- assert.ok(preserved>50);record('qualified-root-execution-files-byte-preserved',{files:preserved,metadataChanges:[...metadataChanges]});
+ for(const required of ['selfhost/js/module.js','selfhost/ts/module.js','host-tools/compiler-host-protocol.mjs',
+  'host-tools/generated-compiler-session.mjs','npm-cli/compiler-api.mjs'])
+  assert.ok(frozenAudit.frozenFiles.some(pin=>pin.path===required),'required qualified execution file:'+required);
+ assert.equal(preserved,frozenAudit.frozenFiles.filter(pin=>!pin.path.startsWith('node_modules/')&&!metadataChanges.has(pin.path)).length);
+ record('qualified-root-execution-files-byte-preserved',{files:preserved,metadataChanges:[...metadataChanges]});
 record('all-advertised-exports-import',{exports:exports.count});
  for(const runtime of [process.execPath,'bun']){
   const observed=script(cwd,'shared.mjs',[
@@ -246,6 +250,7 @@ record('all-advertised-exports-import',{exports:exports.count});
  verifyTars();
  for(const p of contract.packages)run('npm',['run','build'],path.join(root,'packages',p.directory));
  record('individual-build-command-all24');
+ run('npm',['run','build:packages'],root); // Restore the complete inventory after per-package cache checks.
  assert.deepEqual(cases.map(c=>c.name).sort(),contract.requiredCases,'finite distribution case coverage');
  const report={schema:'psc1-simple-npm-package-qualification/1',testedCommit:process.env.GITHUB_SHA,
   status:'passed',modularNpmDistribution:'qualified-linux-packaging-scope',independentCompilerInternalModularity:'deferred',

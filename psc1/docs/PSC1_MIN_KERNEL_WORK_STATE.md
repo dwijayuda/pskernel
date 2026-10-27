@@ -101,3 +101,8 @@ criteria. Existing official-checked generations cannot substitute for this gate.
 Only then can production min/dual integration, graph benchmarks or self-hosting
 be claimed. Full current-backend regressions remain required for changed compiler
 source; unchanged frozen payload evidence retains its exact original boundary.
+
+The historical SH1 source profile also refuses namespace commands. The current
+candidate therefore uses flat PsMin*/psMin* runtime identifiers, preserving the
+same calculus and theorem names. Its changed source identity requires a fresh
+proof/portable qualification; the earlier passing proofs are not relabeled.

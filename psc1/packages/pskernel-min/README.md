@@ -10,11 +10,11 @@ admission format or its complete self-hosting closure. The research host adapter
 explicitly refuses canonical `min`/`dual` until that bridge is proved and qualified.
 Official Lean remains the default production verifier.
 
-Core API, in namespace `Ps.MinKernel`:
+Core API (flat names follow the portable source conventions):
 
 ```lean
-checkEnvironment : Nat -> Nat -> List Declaration -> Option (List Ty)
-infer : Nat -> List Ty -> List Ty -> Expr -> Option Ty
+psMinCheckEnvironment : Nat -> Nat -> List PsMinDeclaration -> Option (List PsMinTy)
+psMinInfer : Nat -> List PsMinTy -> List PsMinTy -> PsMinExpr -> Option PsMinTy
 ```
 
 Constants refer to the most recently admitted declaration at index zero. Bodies

@@ -10,26 +10,26 @@ literals, lambdas, applications and sequential closed definitions.
 
 `Ps.MinKernel.Proofs.tyEq_sound` proves successful executable type equality implies
 syntactic type equality. `inferModel` constructs a denotation directly from an
-actual `infer` success equation. `checkDeclarationsModel` constructs the model of
+actual `psMinInfer` success equation. `checkDeclarationsModel` constructs the model of
 the successful sequential fold from an initial model. `environmentModel` starts
 that construction from the empty environment.
 
 ```lean
 minKernel_hasModel
-  (h : checkEnvironment termFuel declarationFuel declarations = some types) :
+  (h : psMinCheckEnvironment termFuel declarationFuel declarations = some types) :
   Nonempty (Model types)
 
 minKernel_consistent
-  (h : checkEnvironment termFuel declarationFuel declarations = some types)
-  (expression : Expr) :
-  infer queryFuel types [] expression ≠ some Ty.empty
+  (h : psMinCheckEnvironment termFuel declarationFuel declarations = some types)
+  (expression : PsMinExpr) :
+  psMinInfer queryFuel types [] expression ≠ some PsMinTy.empty
 ```
 
 The statements quantify over all input declarations, fuel choices, returned type
 environments and closed query expressions. The caller cannot supply arbitrary
 axioms in this calculus. The theorem does not assume that an unchecked foundation
 already has a model. An Empty-to-Empty function is allowed; a closed Empty
-inhabitant cannot pass. The contradiction type is this calculus's `Ty.empty`,
+inhabitant cannot pass. The contradiction type is this calculus's `PsMinTy.empty`,
 interpreted as Lean `Empty`, not a name-based test against arbitrary Lean.False.
 
 The model interprets types using Lean `Empty`, `Unit`, `Nat` and function types.

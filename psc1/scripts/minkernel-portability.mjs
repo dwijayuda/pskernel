@@ -42,7 +42,7 @@ run(process.execPath, [resolveTypeScriptCli(), ...typeScriptProfileArgs([
   '--strict', '--skipLibCheck', '--noEmitOnError', '--pretty', 'false'])]);
 const cold = performance.now();
 const module = await import(pathToFileURL(path.resolve(stem + '.js')).href);
-const exportName = Object.keys(module).filter(key => /rawVector$/.test(key));
+const exportName = Object.keys(module).filter(key => /^psMinRawVector$/.test(key));
 assert.equal(exportName.length, 1, 'exact unique portable vector export; exports=' + Object.keys(module));
 const vector = module[exportName[0]];
 const observations = [];

@@ -1,97 +1,93 @@
-namespace Ps.MinKernel
-
 /- Runtime only. No proof imports, implicit foundation or unchecked constants. -/
-inductive Ty where
+inductive PsMinTy where
   | empty
   | unit
   | nat
-  | arr (domain : Ty) (result : Ty)
+  | arr (domain : PsMinTy) (result : PsMinTy)
 
-inductive Expr where
+inductive PsMinExpr where
   | var (index : Nat)
   | constant (index : Nat)
   | unit
   | nat (value : Nat)
-  | lam (domain : Ty) (body : Expr)
-  | app (fn : Expr) (argument : Expr)
+  | lam (domain : PsMinTy) (body : PsMinExpr)
+  | app (fn : PsMinExpr) (argument : PsMinExpr)
 
-structure Declaration where
-  type : Ty
-  value : Expr
+structure PsMinDeclaration where
+  type : PsMinTy
+  value : PsMinExpr
 
-def tyEq (fuel : Nat) (left : Ty) (right : Ty) : Bool :=
+def psMinTyEq (fuel : Nat) (left : PsMinTy) (right : PsMinTy) : Bool :=
   match fuel with
   | 0 => false
   | Nat.succ remaining =>
     match left with
-    | Ty.empty =>
+    | PsMinTy.empty =>
       match right with
-      | Ty.empty => true
+      | PsMinTy.empty => true
       | _ => false
-    | Ty.unit =>
+    | PsMinTy.unit =>
       match right with
-      | Ty.unit => true
+      | PsMinTy.unit => true
       | _ => false
-    | Ty.nat =>
+    | PsMinTy.nat =>
       match right with
-      | Ty.nat => true
+      | PsMinTy.nat => true
       | _ => false
-    | Ty.arr a b =>
+    | PsMinTy.arr a b =>
       match right with
-      | Ty.arr c d => if tyEq remaining a c then tyEq remaining b d else false
+      | PsMinTy.arr c d => if psMinTyEq remaining a c then psMinTyEq remaining b d else false
       | _ => false
 
-def lookup (types : List Ty) (index : Nat) : Option Ty :=
+def psMinLookup (types : List PsMinTy) (index : Nat) : Option PsMinTy :=
   match types with
   | List.nil => Option.none
   | List.cons head tail =>
     match index with
     | 0 => Option.some head
-    | Nat.succ previous => lookup tail previous
+    | Nat.succ previous => psMinLookup tail previous
 
-def infer (fuel : Nat) (globals : List Ty) (locals : List Ty)
-    (expression : Expr) : Option Ty :=
+def psMinInfer (fuel : Nat) (globals : List PsMinTy) (locals : List PsMinTy)
+    (expression : PsMinExpr) : Option PsMinTy :=
   match fuel with
   | 0 => Option.none
   | Nat.succ remaining =>
     match expression with
-    | Expr.var index => lookup locals index
-    | Expr.constant index => lookup globals index
-    | Expr.unit => Option.some Ty.unit
-    | Expr.nat _ => Option.some Ty.nat
-    | Expr.lam domain body =>
-      match infer remaining globals (List.cons domain locals) body with
+    | PsMinExpr.var index => psMinLookup locals index
+    | PsMinExpr.constant index => psMinLookup globals index
+    | PsMinExpr.unit => Option.some PsMinTy.unit
+    | PsMinExpr.nat _ => Option.some PsMinTy.nat
+    | PsMinExpr.lam domain body =>
+      match psMinInfer remaining globals (List.cons domain locals) body with
       | Option.none => Option.none
-      | Option.some result => Option.some (Ty.arr domain result)
-    | Expr.app fn argument =>
-      match infer remaining globals locals fn with
+      | Option.some result => Option.some (PsMinTy.arr domain result)
+    | PsMinExpr.app fn argument =>
+      match psMinInfer remaining globals locals fn with
       | Option.none => Option.none
       | Option.some functionType =>
         match functionType with
-        | Ty.arr domain result =>
-          match infer remaining globals locals argument with
+        | PsMinTy.arr domain result =>
+          match psMinInfer remaining globals locals argument with
           | Option.none => Option.none
           | Option.some argumentType =>
-            if tyEq remaining domain argumentType then Option.some result else Option.none
+            if psMinTyEq remaining domain argumentType then Option.some result else Option.none
         | _ => Option.none
 
-def checkDeclarations (termFuel : Nat) (declarationFuel : Nat)
-    (globals : List Ty) (declarations : List Declaration) : Option (List Ty) :=
+def psMinCheckDeclarations (termFuel : Nat) (declarationFuel : Nat)
+    (globals : List PsMinTy) (declarations : List PsMinDeclaration) : Option (List PsMinTy) :=
   match declarations with
   | List.nil => Option.some globals
   | List.cons declaration rest =>
     match declarationFuel with
     | 0 => Option.none
     | Nat.succ remaining =>
-      match infer termFuel globals List.nil declaration.value with
+      match psMinInfer termFuel globals List.nil declaration.value with
       | Option.none => Option.none
-      | Option.some inferred =>
-        if tyEq termFuel inferred declaration.type then
-          checkDeclarations termFuel remaining (List.cons declaration.type globals) rest
+      | Option.some psMinInferred =>
+        if psMinTyEq termFuel psMinInferred declaration.type then
+          psMinCheckDeclarations termFuel remaining (List.cons declaration.type globals) rest
         else Option.none
 
-def checkEnvironment (termFuel : Nat) (declarationFuel : Nat)
-    (declarations : List Declaration) : Option (List Ty) :=
-  checkDeclarations termFuel declarationFuel List.nil declarations
-
-end Ps.MinKernel
+def psMinCheckEnvironment (termFuel : Nat) (declarationFuel : Nat)
+    (declarations : List PsMinDeclaration) : Option (List PsMinTy) :=
+  psMinCheckDeclarations termFuel declarationFuel List.nil declarations

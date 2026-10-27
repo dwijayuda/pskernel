@@ -1,39 +1,36 @@
 import Ps.MinKernel.Check
 
-namespace Ps.MinKernel.Tests
 
-def accepted (termFuel declarationFuel : Nat) (declarations : List Declaration) : Bool :=
-  match checkEnvironment termFuel declarationFuel declarations with
+def psMinAccepted (termFuel declarationFuel : Nat) (declarations : List PsMinDeclaration) : Bool :=
+  match psMinCheckEnvironment termFuel declarationFuel declarations with
   | Option.some _ => true
   | Option.none => false
 
-def inferred (fuel : Nat) (expression : Expr) (type : Ty) : Bool :=
-  match infer fuel List.nil List.nil expression with
-  | Option.some result => tyEq fuel result type
+def psMinInferred (fuel : Nat) (expression : PsMinExpr) (type : PsMinTy) : Bool :=
+  match psMinInfer fuel List.nil List.nil expression with
+  | Option.some result => psMinTyEq fuel result type
   | Option.none => false
 
-def identityNat : Expr := Expr.lam Ty.nat (Expr.var 0)
+def psMinIdentityNat : PsMinExpr := PsMinExpr.lam PsMinTy.nat (PsMinExpr.var 0)
 
-def rawVector (index : Nat) : Bool :=
-  if Nat.beq index 0 then accepted 16 16 List.nil
-  else if Nat.beq index 1 then accepted 16 16 (List.cons (Declaration.mk (Ty.arr Ty.nat Ty.nat) identityNat) List.nil)
-  else if Nat.beq index 2 then accepted 16 16
-      (List.cons (Declaration.mk Ty.nat (Expr.nat 7)) (List.cons (Declaration.mk Ty.nat (Expr.constant 0)) List.nil))
-  else if Nat.beq index 3 then inferred 16 (Expr.lam Ty.empty (Expr.var 0)) (Ty.arr Ty.empty Ty.empty)
-  else if Nat.beq index 4 then inferred 16 (Expr.app identityNat (Expr.nat 7)) Ty.nat
-  else if Nat.beq index 5 then accepted 16 16 (List.cons (Declaration.mk Ty.nat Expr.unit) List.nil)
-  else if Nat.beq index 6 then inferred 16 (Expr.app (Expr.nat 7) Expr.unit) Ty.nat
-  else if Nat.beq index 7 then inferred 16 (Expr.var 0) Ty.nat
-  else if Nat.beq index 8 then accepted 16 16 (List.cons (Declaration.mk Ty.nat (Expr.constant 0)) List.nil)
-  else if Nat.beq index 9 then accepted 16 16 (List.cons (Declaration.mk Ty.empty Expr.unit) List.nil)
-  else if Nat.beq index 10 then accepted 0 16 (List.cons (Declaration.mk Ty.nat (Expr.nat 7)) List.nil)
-  else if Nat.beq index 11 then accepted 16 0 (List.cons (Declaration.mk Ty.nat (Expr.nat 7)) List.nil)
-  else if Nat.beq index 12 then inferred 1 identityNat (Ty.arr Ty.nat Ty.nat)
-  else if Nat.beq index 13 then tyEq 1 (Ty.arr Ty.nat Ty.nat) (Ty.arr Ty.nat Ty.nat)
-  else if Nat.beq index 14 then accepted 16 16
-      (List.cons (Declaration.mk Ty.nat (Expr.nat 7)) (List.cons (Declaration.mk Ty.empty (Expr.constant 0)) List.nil))
-  else if Nat.beq index 15 then inferred 16
-      (Expr.app (Expr.lam Ty.empty (Expr.var 0)) (Expr.nat 7)) Ty.empty
+def psMinRawVector (index : Nat) : Bool :=
+  if Nat.beq index 0 then psMinAccepted 16 16 List.nil
+  else if Nat.beq index 1 then psMinAccepted 16 16 (List.cons (PsMinDeclaration.mk (PsMinTy.arr PsMinTy.nat PsMinTy.nat) psMinIdentityNat) List.nil)
+  else if Nat.beq index 2 then psMinAccepted 16 16
+      (List.cons (PsMinDeclaration.mk PsMinTy.nat (PsMinExpr.nat 7)) (List.cons (PsMinDeclaration.mk PsMinTy.nat (PsMinExpr.constant 0)) List.nil))
+  else if Nat.beq index 3 then psMinInferred 16 (PsMinExpr.lam PsMinTy.empty (PsMinExpr.var 0)) (PsMinTy.arr PsMinTy.empty PsMinTy.empty)
+  else if Nat.beq index 4 then psMinInferred 16 (PsMinExpr.app psMinIdentityNat (PsMinExpr.nat 7)) PsMinTy.nat
+  else if Nat.beq index 5 then psMinAccepted 16 16 (List.cons (PsMinDeclaration.mk PsMinTy.nat PsMinExpr.unit) List.nil)
+  else if Nat.beq index 6 then psMinInferred 16 (PsMinExpr.app (PsMinExpr.nat 7) PsMinExpr.unit) PsMinTy.nat
+  else if Nat.beq index 7 then psMinInferred 16 (PsMinExpr.var 0) PsMinTy.nat
+  else if Nat.beq index 8 then psMinAccepted 16 16 (List.cons (PsMinDeclaration.mk PsMinTy.nat (PsMinExpr.constant 0)) List.nil)
+  else if Nat.beq index 9 then psMinAccepted 16 16 (List.cons (PsMinDeclaration.mk PsMinTy.empty PsMinExpr.unit) List.nil)
+  else if Nat.beq index 10 then psMinAccepted 0 16 (List.cons (PsMinDeclaration.mk PsMinTy.nat (PsMinExpr.nat 7)) List.nil)
+  else if Nat.beq index 11 then psMinAccepted 16 0 (List.cons (PsMinDeclaration.mk PsMinTy.nat (PsMinExpr.nat 7)) List.nil)
+  else if Nat.beq index 12 then psMinInferred 1 psMinIdentityNat (PsMinTy.arr PsMinTy.nat PsMinTy.nat)
+  else if Nat.beq index 13 then psMinTyEq 1 (PsMinTy.arr PsMinTy.nat PsMinTy.nat) (PsMinTy.arr PsMinTy.nat PsMinTy.nat)
+  else if Nat.beq index 14 then psMinAccepted 16 16
+      (List.cons (PsMinDeclaration.mk PsMinTy.nat (PsMinExpr.nat 7)) (List.cons (PsMinDeclaration.mk PsMinTy.empty (PsMinExpr.constant 0)) List.nil))
+  else if Nat.beq index 15 then psMinInferred 16
+      (PsMinExpr.app (PsMinExpr.lam PsMinTy.empty (PsMinExpr.var 0)) (PsMinExpr.nat 7)) PsMinTy.empty
   else false
-
-end Ps.MinKernel.Tests

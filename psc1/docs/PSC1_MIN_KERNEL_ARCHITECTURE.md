@@ -32,8 +32,8 @@ no reason to add substitution, WHNF, delta/iota reduction or a cache to this
 fragment. This is a specific restricted calculus, not Lean Core with omitted cases.
 
 `packages/pskernel-min/src/Ps/MinKernel/Check.lean` is the single executable module.
-Its public operations are `tyEq`, `lookup`, `infer`, `checkDeclarations` and
-`checkEnvironment`. It imports no proof, reference kernel or compiler module.
+Its public operations are `psMinTyEq`, `psMinLookup`, `psMinInfer`, `psMinCheckDeclarations` and
+`psMinCheckEnvironment`. It imports no proof, reference kernel or compiler module.
 The runtime Lake project has explicit roots. A separate full-Lean proof project
 builds this exact source in place and imports it into `MainTheorem.lean`.
 No proof artifact is needed to compile the executable source under PSC1.

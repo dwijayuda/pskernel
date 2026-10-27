@@ -1,12 +1,10 @@
 import Ps.MinKernel.Tests.Vectors
 
-open Ps.MinKernel
-open Ps.MinKernel.Tests
 
 def main : IO Unit := do
   for index in List.range 16 do
     let expected := decide (index < 5)
-    let actual := rawVector index
+    let actual := psMinRawVector index
     if actual != expected then
       throw (IO.userError s!"PSC1 min fragment vector {index}: expected {expected}, got {actual}")
     IO.println s!"PSC1_MIN_VECTOR {index} {actual}"

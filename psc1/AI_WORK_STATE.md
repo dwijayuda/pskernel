@@ -1,30 +1,65 @@
 # PSC1 AI work state
 
-Updated 2026-10-27 Asia/Jakarta. Active implementation branch
-`feat/psc1-modular-pilot-20261027`, from PR #193 HEAD
-`24d1a9764e8251ab4f4bac65c38fb30f9e8295f4`.
+Updated 2026-10-27 Asia/Jakarta. Active PR[#195](https://github.com/dwijayuda/pskernel/pull/195),
+branch `feat/psc1-modular-pilot-20261027`, from PR#193 HEAD
+`24d1a9764e8251ab4f4bac65c38fb30f9e8295f4` (re-read unchanged).
+Single-parent expected-HEAD non-force history; no merge or registry publication.
 
-## Genuine modular compiler package pilot — implementation pending CI
+## Genuine modular compiler-component pilot
 
-The additive pilot plans actual checked-IR owners from the production elaborator,
-uses the existing closed specializer and JS/TS declaration printers, and emits
-real Foundation.Name compiler code plus a dependent consumer with one shared
-runtime/type owner. Two source modules, at most256 surviving values/64 types,
-exact owners, no external imports, an ordered DAG and conservative initializers
-bound this first profile. Unknown synthesized value owners refuse; no guessed
-prefix ownership. Native emission is candidate-only. The existing external
-official Lean4.35 checker admits the exact canonical Core before execution or
-packaging. Full original/transformed strict IR validation remains.
+Implemented and dedicated Linux CI passed at
+`8473b22e2840f32543543f89ad238b3907b4e93c` /
+[40465513856](https://github.com/dwijayuda/pskernel/actions/runs/40465513856).
+Broader source and integrated-gate qualification are pending.
 
-Native emission, offline npm package installation, Node/Bun execution, strict
-NodeNext/bundler declaration consumers, graph tamper/refusal cases and whole-cohort
-transaction tests are required before qualifying this pilot. No complete modular
-compiler, modular self-host/fixed-point, production CLI replacement or performance
-claim is made. Source-readable module emission uses structured declarations,
-not text splitting or compiler facades. Owned packages use Apache-2.0.
+Actual existing Foundation.Name compiler source plus a dependent consumer emit
+as three real packages (shared runtime/types, names bodies, consumer bodies) and
+a small integrity-loading umbrella. Both .lean/.ps, JS/TS, Node22.23.3/Bun1.4.4
+execute against bundled same-IR observations, including Unicode, higher-order
+calls, constructor identity, recursion and depth6000. Four strict NodeNext/bundler
+consumers, exact same-input four-tarball reproduction, file/directory/symlink/
+version/cohort refusals and before/after-commit transaction outcomes pass.
+28 finite package cases plus14 pure planner refusals pass.
 
-Use connected GitHub/Linux Actions only. Fetch current HEAD and preserve expected-
-HEAD non-force history. No merge or npm registry publication authorized.
+The production elaborator captures once. Exact tagged origins/erasure names own
+every surviving value; unknown synthesized owners refuse. Existing closed
+specialization, strict original/transformed IR and external genuine official
+Lean4.35.0/`eb6cafb7290e8bd5f2937522d8d804f58f02bafc` admission remain.
+No mock checker, facade compiler or emitted-text splitting. Producer240s/4GiB/
+8MiB stack, checker120s, reference fuel4096, input1MiB/output+cohort32MiB,
+two sources/three units/256 values/64 types. Worker fusion and open generic values
+are outside this first profile. Shared type/tag plan and one WeakMap/cache per
+variant; JS structural tags and TS unique-symbol ABI stay distinct.
+
+Dedicated artifact12716482631,436266 bytes, ZIP SHA256
+`0b2b520c731dfd63f04f0521f483faba748bf29d92e5f532c2efac4c61e0e1bd`.
+It contains installable-lean/installable-ps four-tarball directories, SHA256SUMS,
+canonical admissions/IR/source snapshots, cohort pins and qualification JSON.
+These are experimental unpublished component packages, version
+`0.1.0-psc1-modular-pilot.0`; owned code/packages Apache-2.0.
+
+Measured native candidate requests: Lean77ms/79840KiB maxRSS; PS83ms/79592KiB.
+Runtime receipts retain module-load/workload/warm timings and process-reported
+maxRSS. These are bounded component observations, not whole-compiler benchmarks,
+isolated workload memory or a performance-improvement claim.
+
+[Guide](docs/guides/modular-pilot.md), [finite contract](test/modular/contract.json).
+Installed verification assumes a trusted bootstrap/pin and stable package files;
+metadata grants no checker/host/publication authority. Flat npm-cohort transaction
+qualification does not qualify arbitrary nested service publication or another OS.
+
+CI integration: the pilot becomes a reusable selected focused gate and a required
+final dependency. Its independent stages retain evidence even if another stage
+fails; any failure still fails the job/gate. Production CLI does not import these
+new host modules; isolated pilot-only edits use this gate, while shared host/CLI
+changes retain the entire existing installed workflow.
+
+Next: finish integrated/full source validation; preserve exact evidence. Then
+carry explicit synthetic ownership through transforms and measure the complete
+compiler dependency graph before extending the profile. Complete modular compiler,
+portable planner self-hosting, modular G1/G2/G3/fixed points, seven-backend modular
+application parity, macOS/Windows release and arranged human trial remain pending.
+Existing qualified bundled executors/kernels/optional providers are unchanged.
 
 ## Preserved qualified reference
 

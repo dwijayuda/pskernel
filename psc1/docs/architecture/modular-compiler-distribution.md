@@ -3,8 +3,12 @@
 Decision, 2026-10-27: target real generated JS/TS modules grouped by source
 responsibility for the final npm compiler distribution. Keep the current qualified
 bundled executors as the release reference until the modular artifact graph has
-its own genuine installed and self-host qualification. This is a future packaging/
-emission decision, not an assertion that modular generation is implemented.
+its own genuine installed and self-host qualification. The bounded compiler-component pilot is now implemented and passes its dedicated
+Linux gate at8473b22e2840f32543543f89ad238b3907b4e93c /40465513856.
+[Current pilot guide](../guides/modular-pilot.md) gives exact scope, APIs, invariants,
+resource limits and remaining work. Full compiler-family packaging and modular
+self-host promotion remain future work. Broader source/integrated-gate validation
+for this change is pending.
 
 ## Evidence behind the decision
 
@@ -35,7 +39,8 @@ The
 [JS stack-safe printer](https://github.com/dwijayuda/pskernel/blob/91c5d898adea8e8d184b7927adf2ed988af8c2d8/psc1/packages/backend-js/src/Ps/BackendJs/Print.lean#L2174)
 and
 [TS module emitter](https://github.com/dwijayuda/pskernel/blob/91c5d898adea8e8d184b7927adf2ed988af8c2d8/psc1/packages/backend-ts/src/Ps/BackendTs/Module.lean#L1154)
-return one source module today. Multi-file execution requires compiler-owned
+return one source module in the preserved bundled path. The additive Modules.lean
+emitters now implement the bounded DAG pilot; general multi-file execution requires compiler-owned
 partition/link output plus host graph validation/publication, not renamed folders.
 
 ## Recommended package shape
@@ -134,10 +139,12 @@ require runtime and declaration entry points to agree.
 [Rust crates/modules](https://doc.rust-lang.org/reference/crates-and-source-files.html)
 support modular source within a compiled crate.
 
-Implementation priority: finish and qualify the active runtime/watch package,
-then implement the small module-graph pilot. This document changes neither
+Implementation priority: integrate and qualify the bounded pilot alongside all
+existing source regressions, then carry synthetic ownership and a measured complete
+compiler graph into the next explicit profile. This document changes neither
 current compiler semantics nor the frozen Practical Core language scope. There
-is no claim of independently compiled PSC1 npm pass packages yet.
+is no claim of independently compiled complete PSC1 pass packages or modular
+self-hosted compiler generations yet.
 
 ## License for the final cohort
 

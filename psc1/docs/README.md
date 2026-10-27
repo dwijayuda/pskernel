@@ -20,6 +20,7 @@ from immutable evidence; dated records remain preserved.
 | How does a tiny program become checked output? | [Source-linked walkthrough](./guides/compilation-walkthrough.md), [pass contracts](./reference/pass-contracts.md) |
 | Which capabilities are actually qualified? | [Current package scope](./PSC1_CAPABILITIES.md) |
 | How can a new maintainer work without AI? | [Exercise and evidence rubric](./development/maintainer-exercise.md) |
+| How does the real modular JS/TS component pilot work? | [Pilot guide](./guides/modular-pilot.md), [finite contract](../test/modular/contract.json) |
 | What remains unfinished? | [One development roadmap](./PSC1_DEVELOPMENT_ROADMAP.md) |
 | What must Practical Core v1 support? | [Finite language contract](./PSC1_PRACTICAL_CORE_V1_CONTRACT.json) |
 | What must npm distribution qualify? | [Finite distribution contract](../NPM_DISTRIBUTION_CONTRACT.json) |

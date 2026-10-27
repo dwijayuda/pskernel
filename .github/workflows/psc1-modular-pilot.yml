@@ -1,18 +1,7 @@
 name: PSC1 genuine modular JS TS compiler package pilot
 on:
   workflow_dispatch:
-  push:
-    branches: ['feat/psc1-modular-pilot-20261027']
-    paths:
-      - .github/workflows/psc1-modular-pilot.yml
-      - psc1/packages/backend-common/src/Ps/BackendCommon/Modules.lean
-      - psc1/packages/backend-js/src/Ps/BackendJs/Modules.lean
-      - psc1/packages/backend-ts/src/Ps/BackendTs/Modules.lean
-      - psc1/host/src/Ps/Host/ModularPilot.lean
-      - psc1/scripts/ModularPilotMain.lean
-      - psc1/host-tools/modular/**
-      - psc1/test/modular/**
-      - psc1/lakefile.lean
+  workflow_call:
 permissions:
   contents: read
 concurrency:

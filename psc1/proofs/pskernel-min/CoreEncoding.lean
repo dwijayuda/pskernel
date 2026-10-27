@@ -1,0 +1,350 @@
+import CoreIngress
+
+namespace Ps.MinKernel.CoreEncoding
+open Ps.MinKernel.CoreIngress
+
+-- This grammar uses mathematical list concatenation and decimal place values.
+-- It is independent of the runtime append/join/decimal encoder implementation.
+def commaBytes : List (List Nat) → List Nat
+  | [] => []
+  | first :: rest =>
+    match rest with
+    | [] => first
+    | _ :: _ => first ++ [44] ++ commaBytes rest
+
+def objectBytes (fields : List (List Nat)) : List Nat := [123] ++ commaBytes fields ++ [125]
+def arrayBytes (values : List (List Nat)) : List Nat := [91] ++ commaBytes values ++ [93]
+def quoteBytes (bytes : List Nat) : List Nat := [34] ++ bytes ++ [34]
+
+theorem append_eq (left right : List Nat) : psMinByteAppend left right = left ++ right := by
+  induction left with
+  | nil => rfl
+  | cons head tail ih => exact congrArg (List.cons head) ih
+
+theorem join_tail_eq (values : List (List Nat)) :
+    psMinByteJoinTail [44] values =
+      match values with | [] => [] | _ :: _ => [44] ++ commaBytes values := by
+  induction values with
+  | nil => rfl
+  | cons first rest ih =>
+    cases rest <;> simp only [psMinByteJoinTail, append_eq, commaBytes, ih,
+      List.append_nil, List.append_assoc]
+
+theorem object_eq (fields : List (List Nat)) :
+    psMinByteJoin [123] [44] [125] fields = objectBytes fields := by
+  cases fields with
+  | nil => rfl
+  | cons first rest =>
+    cases rest <;> simp only [psMinByteJoin, join_tail_eq, append_eq, objectBytes,
+      commaBytes, List.append_nil, List.append_assoc]
+
+theorem array_eq (values : List (List Nat)) :
+    psMinByteJoin [91] [44] [93] values = arrayBytes values := by
+  cases values with
+  | nil => rfl
+  | cons first rest =>
+    cases rest <;> simp only [psMinByteJoin, join_tail_eq, append_eq, arrayBytes,
+      commaBytes, List.append_nil, List.append_assoc]
+
+theorem quote_eq (bytes : List Nat) : psMinCoreQuote bytes = quoteBytes bytes := by
+  simp only [psMinCoreQuote, append_eq, quoteBytes, List.append_assoc]
+
+def digitValue : List Nat → Nat
+  | [] => 0
+  | digit :: rest => digit + 10 * digitValue rest
+
+inductive NonzeroDigits : List Nat → Prop where
+  | top (digit : Nat) (positive : 0 < digit) (small : digit < 10) : NonzeroDigits [digit]
+  | low (digit : Nat) (rest : List Nat) (small : digit < 10) (tail : NonzeroDigits rest) :
+      NonzeroDigits (digit :: rest)
+
+def CanonicalDigits (digits : List Nat) : Prop := digits = [0] ∨ NonzeroDigits digits
+
+inductive DigitBytes : List Nat → List Nat → Prop where
+  | nil : DigitBytes [] []
+  | cons (digit rest bytes) (tail : DigitBytes rest bytes) :
+      DigitBytes (digit :: rest) (bytes ++ [48 + digit])
+
+inductive NumberWire (value : Nat) (bytes : List Nat) : Prop where
+  | literal (digits : List Nat) (canonical : CanonicalDigits digits)
+      (valueIdentity : digitValue digits = value) (symbols : DigitBytes digits bytes) :
+      NumberWire value bytes
+
+theorem increment_value (digits : List Nat) :
+    digitValue (psMinDecimalIncrement digits) = digitValue digits + 1 := by
+  induction digits with
+  | nil => rfl
+  | cons digit rest ih =>
+    cases heq : Nat.beq digit 9 with
+    | true =>
+      have hd := Nat.eq_of_beq_eq_true heq
+      subst digit
+      simp only [psMinDecimalIncrement, heq, digitValue, ih]
+      omega
+    | false =>
+      simp only [psMinDecimalIncrement, heq, digitValue]
+      omega
+
+theorem increment_nonzero (digits : List Nat) (h : NonzeroDigits digits) :
+    NonzeroDigits (psMinDecimalIncrement digits) := by
+  induction h with
+  | top digit positive small =>
+    cases heq : Nat.beq digit 9 with
+    | true =>
+      have hd := Nat.eq_of_beq_eq_true heq
+      subst digit
+      simpa only [psMinDecimalIncrement, heq] using
+        NonzeroDigits.low 0 [1] (by decide) (NonzeroDigits.top 1 (by decide) (by decide))
+    | false =>
+      have ne : digit ≠ 9 := by intro equal; subst digit; contradiction
+      simpa only [psMinDecimalIncrement, heq] using
+        NonzeroDigits.top (Nat.succ digit) (by omega) (by omega)
+  | low digit rest small tail ih =>
+    cases heq : Nat.beq digit 9 with
+    | true =>
+      simpa only [psMinDecimalIncrement, heq] using
+        NonzeroDigits.low 0 (psMinDecimalIncrement rest) (by decide) ih
+    | false =>
+      have ne : digit ≠ 9 := by intro equal; subst digit; contradiction
+      simpa only [psMinDecimalIncrement, heq] using
+        NonzeroDigits.low (Nat.succ digit) rest (by omega) tail
+
+theorem digits_canonical (value : Nat) : CanonicalDigits (psMinDecimalDigits value) := by
+  induction value with
+  | zero => exact Or.inl rfl
+  | succ value ih =>
+    apply Or.inr
+    rcases ih with zero | nonzero
+    · rw [psMinDecimalDigits, zero]
+      exact NonzeroDigits.top 1 (by decide) (by decide)
+    · exact increment_nonzero _ nonzero
+
+theorem decimal_value (value : Nat) : digitValue (psMinDecimalDigits value) = value := by
+  induction value with
+  | zero => rfl
+  | succ value ih =>
+    rw [psMinDecimalDigits, increment_value, ih]
+
+theorem decimal_symbols (digits : List Nat) : DigitBytes digits (psMinDecimalBytes digits) := by
+  induction digits with
+  | nil => exact .nil
+  | cons digit rest ih =>
+    simpa only [psMinDecimalBytes, append_eq] using DigitBytes.cons digit rest (psMinDecimalBytes rest) ih
+
+theorem number_wire (value : Nat) : NumberWire value (psMinCoreNumber value) :=
+  ⟨psMinDecimalDigits value, digits_canonical value, decimal_value value, decimal_symbols _⟩
+
+inductive ASCIIText : List Nat → Prop where
+  | nil : ASCIIText []
+  | cons (head tail) (lower : 32 ≤ head) (upper : head ≤ 126)
+      (noQuote : head ≠ 34) (noEscape : head ≠ 92) (rest : ASCIIText tail) :
+      ASCIIText (head :: tail)
+
+theorem safe_text (fuel : Nat) (bytes : List Nat) (h : psMinCoreSafeText fuel bytes = true) :
+    ASCIIText bytes := by
+  induction fuel generalizing bytes with
+  | zero =>
+    cases bytes with
+    | nil => exact .nil
+    | cons head tail => cases h
+  | succ fuel ih =>
+    cases bytes with
+    | nil => exact .nil
+    | cons head tail =>
+      simp only [psMinCoreSafeText] at h
+      repeat' split at h
+      all_goals try contradiction
+      apply ASCIIText.cons head tail
+      · have hn : ¬ head < 32 := by simpa only [Nat.blt_eq] using (by assumption : Nat.blt head 32 = false)
+        omega
+      · have hn : ¬ 126 < head := by simpa only [Nat.blt_eq] using (by assumption : Nat.blt 126 head = false)
+        omega
+      · intro equal; subst head; contradiction
+      · intro equal; subst head; contradiction
+      · exact ih tail h
+
+inductive NameWire : PsMinCoreName → List Nat → Prop where
+  | anonymous : NameWire .anonymous [123, 34, 107, 34, 58, 34, 97, 34, 125]
+  | str (parent text parentBytes) (hp : NameWire parent parentBytes) (ht : ASCIIText text) :
+      NameWire (.str parent text) (objectBytes [([34, 107, 34, 58] ++ [34, 115, 34]), ([34, 112, 34, 58] ++ parentBytes), ([34, 118, 34, 58] ++ quoteBytes text)])
+  | num (parent value parentBytes numberBytes) (hp : NameWire parent parentBytes)
+      (hn : NumberWire value numberBytes) :
+      NameWire (.num parent value) (objectBytes [([34, 107, 34, 58] ++ [34, 110, 34]), ([34, 112, 34, 58] ++ parentBytes), ([34, 118, 34, 58] ++ quoteBytes numberBytes)])
+
+theorem name_wire (fuel : Nat) (name : PsMinCoreName) (h : psMinCoreNameValid fuel name = true) :
+    NameWire name (psMinCoreEncodeName name) := by
+  induction fuel generalizing name with
+  | zero => cases h
+  | succ fuel ih =>
+    cases name with
+    | anonymous => exact .anonymous
+    | str parent text =>
+      simp only [psMinCoreNameValid] at h
+      split at h
+      next validText =>
+        simpa only [psMinCoreEncodeName, object_eq, append_eq, quote_eq] using
+          NameWire.str parent text (psMinCoreEncodeName parent) (ih parent h) (safe_text _ _ validText)
+      next => contradiction
+    | num parent value =>
+      simp only [psMinCoreNameValid] at h
+      split at h
+      next validNumber =>
+        simpa only [psMinCoreEncodeName, object_eq, append_eq, quote_eq] using
+          NameWire.num parent value (psMinCoreEncodeName parent) (psMinCoreNumber value)
+            (ih parent h) (number_wire value)
+      next => contradiction
+
+inductive LevelWire : Nat → List Nat → Prop where
+  | zero : LevelWire 0 [123, 34, 107, 34, 58, 34, 122, 34, 125]
+  | succ (level bytes) (inner : LevelWire level bytes) :
+      LevelWire (Nat.succ level) (objectBytes [([34, 107, 34, 58] ++ [34, 115, 34]), ([34, 111, 34, 58] ++ bytes)])
+
+inductive LevelsWire : List Nat → List (List Nat) → Prop where
+  | nil : LevelsWire [] []
+  | cons (level rest bytes chunks) (head : LevelWire level bytes) (tail : LevelsWire rest chunks) :
+      LevelsWire (level :: rest) (bytes :: chunks)
+
+theorem level_wire (level : Nat) : LevelWire level (psMinCoreEncodeLevel level) := by
+  induction level with
+  | zero => exact .zero
+  | succ level ih =>
+    simpa only [psMinCoreEncodeLevel, object_eq, append_eq] using LevelWire.succ level _ ih
+
+theorem levels_wire (levels : List Nat) : LevelsWire levels (psMinCoreEncodeLevels levels) := by
+  induction levels with
+  | nil => exact .nil
+  | cons level rest ih => exact .cons level rest _ _ (level_wire level) ih
+
+inductive BinderWire : Nat → List Nat → Prop where
+  | explicit : BinderWire 0 [34, 100, 101, 102, 97, 117, 108, 116, 34]
+  | implicit : BinderWire 1 [34, 105, 109, 112, 108, 105, 99, 105, 116, 34]
+  | strictImplicit : BinderWire 2 [34, 115, 116, 114, 105, 99, 116, 73, 109, 112, 108, 105, 99, 105, 116, 34]
+  | instanceImplicit : BinderWire 3 [34, 105, 110, 115, 116, 73, 109, 112, 108, 105, 99, 105, 116, 34]
+
+theorem binder_wire (binder : Nat) (h : Nat.blt binder 4 = true) :
+    BinderWire binder (psMinCoreBinderBytes binder) := by
+  have bound : binder < 4 := by simpa only [Nat.blt_eq] using h
+  have cases : binder = 0 ∨ binder = 1 ∨ binder = 2 ∨ binder = 3 := by omega
+  rcases cases with h | h | h | h <;> subst binder
+  · exact .explicit
+  · exact .implicit
+  · exact .strictImplicit
+  · exact .instanceImplicit
+
+inductive ExprWire : PsMinCoreExpr → List Nat → Prop where
+  | bvar (index numberBytes) (hn : NumberWire index numberBytes) :
+      ExprWire (.bvar index) (objectBytes [([34, 105, 34, 58] ++ numberBytes), ([34, 107, 34, 58] ++ [34, 98, 34])])
+  | natural (value numberBytes) (hn : NumberWire value numberBytes) :
+      ExprWire (.natural value) (objectBytes [([34, 107, 34, 58] ++ [34, 110, 97, 116, 34]), ([34, 118, 34, 58] ++ quoteBytes numberBytes)])
+  | constant (name levels nameBytes chunks) (hn : NameWire name nameBytes)
+      (hl : LevelsWire levels chunks) :
+      ExprWire (.constant name levels) (objectBytes [([34, 107, 34, 58] ++ [34, 99, 111, 110, 115, 116, 34]), ([34, 108, 115, 34, 58] ++ arrayBytes chunks), ([34, 110, 34, 58] ++ nameBytes)])
+  | app (fn arg f a) (hf : ExprWire fn f) (ha : ExprWire arg a) :
+      ExprWire (.app fn arg) (objectBytes [([34, 97, 34, 58] ++ a), ([34, 102, 34, 58] ++ f), ([34, 107, 34, 58] ++ [34, 97, 112, 112, 34])])
+  | lam (name binder type body n bi t b) (hn : NameWire name n) (hbi : BinderWire binder bi)
+      (ht : ExprWire type t) (hb : ExprWire body b) :
+      ExprWire (.lam name binder type body) (objectBytes [([34, 98, 34, 58] ++ b), ([34, 98, 105, 34, 58] ++ bi), ([34, 107, 34, 58] ++ [34, 108, 97, 109, 34]), ([34, 110, 34, 58] ++ n), ([34, 116, 34, 58] ++ t)])
+  | forallE (name binder type body n bi t b) (hn : NameWire name n) (hbi : BinderWire binder bi)
+      (ht : ExprWire type t) (hb : ExprWire body b) :
+      ExprWire (.forallE name binder type body) (objectBytes [([34, 98, 34, 58] ++ b), ([34, 98, 105, 34, 58] ++ bi), ([34, 107, 34, 58] ++ [34, 102, 111, 114, 97, 108, 108, 34]), ([34, 110, 34, 58] ++ n), ([34, 116, 34, 58] ++ t)])
+  | letE (name type value body n t v b) (hn : NameWire name n)
+      (ht : ExprWire type t) (hv : ExprWire value v) (hb : ExprWire body b) :
+      ExprWire (.letE name type value body) (objectBytes [([34, 98, 34, 58] ++ b), ([34, 107, 34, 58] ++ [34, 108, 101, 116, 34]), ([34, 110, 34, 58] ++ n), ([34, 116, 34, 58] ++ t), ([34, 118, 34, 58] ++ v)])
+
+theorem expression_wire (fuel : Nat) (expr : PsMinCoreExpr) (h : psMinCoreExprValid fuel expr = true) :
+    ExprWire expr (psMinCoreEncodeExpr expr) := by
+  induction fuel generalizing expr with
+  | zero => cases h
+  | succ fuel ih =>
+    cases expr with
+    | bvar index =>
+      simpa only [psMinCoreEncodeExpr, object_eq, append_eq] using ExprWire.bvar index _ (number_wire index)
+    | natural value =>
+      simpa only [psMinCoreEncodeExpr, object_eq, append_eq, quote_eq] using ExprWire.natural value _ (number_wire value)
+    | constant name levels =>
+      simp only [psMinCoreExprValid] at h
+      repeat' split at h
+      all_goals try contradiction
+      simpa only [psMinCoreEncodeExpr, object_eq, array_eq, append_eq] using
+        ExprWire.constant name levels _ _ (name_wire 16 name (by assumption)) (levels_wire levels)
+    | app fn arg =>
+      simp only [psMinCoreExprValid] at h
+      split at h
+      next hf =>
+        simpa only [psMinCoreEncodeExpr, object_eq, append_eq] using ExprWire.app fn arg _ _ (ih fn hf) (ih arg h)
+      next => contradiction
+    | lam name binder type body =>
+      simp only [psMinCoreExprValid] at h
+      repeat' split at h
+      all_goals try contradiction
+      simpa only [psMinCoreEncodeExpr, object_eq, append_eq] using
+        ExprWire.lam name binder type body _ _ _ _ (name_wire 16 name (by assumption))
+          (binder_wire binder (by assumption)) (ih type (by assumption)) (ih body h)
+    | forallE name binder type body =>
+      simp only [psMinCoreExprValid] at h
+      repeat' split at h
+      all_goals try contradiction
+      simpa only [psMinCoreEncodeExpr, object_eq, append_eq] using
+        ExprWire.forallE name binder type body _ _ _ _ (name_wire 16 name (by assumption))
+          (binder_wire binder (by assumption)) (ih type (by assumption)) (ih body h)
+    | letE name type value body =>
+      simp only [psMinCoreExprValid] at h
+      repeat' split at h
+      all_goals try contradiction
+      simpa only [psMinCoreEncodeExpr, object_eq, append_eq] using
+        ExprWire.letE name type value body _ _ _ _ (name_wire 16 name (by assumption))
+          (ih type (by assumption)) (ih value (by assumption)) (ih body h)
+
+inductive DeclarationWire : PsMinCoreDeclaration → List Nat → Prop where
+  | definition (name height type value n h t v) (hn : NameWire name n) (hh : NumberWire height h)
+      (ht : ExprWire type t) (hv : ExprWire value v) :
+      DeclarationWire (.mk name height type value)
+        (objectBytes [([34, 100, 101, 99, 108, 97, 114, 97, 116, 105, 111, 110, 34, 58] ++ objectBytes [([34, 104, 34, 58] ++ objectBytes [([34, 104, 34, 58] ++ quoteBytes h), ([34, 107, 34, 58] ++ [34, 114, 101, 103, 117, 108, 97, 114, 34])]), ([34, 107, 34, 58] ++ [34, 100, 101, 102, 105, 110, 105, 116, 105, 111, 110, 34]), ([34, 108, 112, 34, 58] ++ [91, 93]), ([34, 110, 34, 58] ++ n), ([34, 115, 34, 58] ++ [34, 115, 97, 102, 101, 34]), ([34, 116, 34, 58] ++ t), ([34, 118, 34, 58] ++ v)]), ([34, 107, 105, 110, 100, 34, 58] ++ [34, 99, 111, 110, 115, 116, 97, 110, 116, 34])])
+
+inductive DeclarationsWire : List PsMinCoreDeclaration → List (List Nat) → Prop where
+  | nil : DeclarationsWire [] []
+  | cons (decl rest bytes chunks) (head : DeclarationWire decl bytes) (tail : DeclarationsWire rest chunks) :
+      DeclarationsWire (decl :: rest) (bytes :: chunks)
+
+inductive PacketWire : List PsMinCoreDeclaration → List Nat → Prop where
+  | packet (source chunks) (decls : DeclarationsWire source chunks) :
+      PacketWire source (objectBytes [([34, 97, 100, 109, 105, 115, 115, 105, 111, 110, 115, 34, 58] ++ arrayBytes chunks), ([34, 102, 111, 114, 109, 97, 116, 34, 58] ++ [34, 112, 114, 111, 111, 102, 115, 99, 114, 105, 112, 116, 45, 99, 104, 101, 99, 107, 101, 100, 45, 97, 100, 109, 105, 115, 115, 105, 111, 110, 115, 34]), ([34, 118, 101, 114, 115, 105, 111, 110, 34, 58] ++ [50])])
+
+theorem declarations_wire (fuel : Nat) (source : List PsMinCoreDeclaration)
+    (h : psMinCoreDeclarationsValid fuel source = true) :
+    DeclarationsWire source (psMinCoreEncodeDeclarations source) := by
+  induction fuel generalizing source with
+  | zero =>
+    cases source with
+    | nil => exact .nil
+    | cons decl rest => cases h
+  | succ fuel ih =>
+    cases source with
+    | nil => exact .nil
+    | cons decl rest =>
+      simp only [psMinCoreDeclarationsValid] at h
+      repeat' split at h
+      all_goals try contradiction
+      apply DeclarationsWire.cons
+      · cases decl with
+        | mk name height type value =>
+          simpa only [psMinCoreEncodeDeclaration, object_eq, append_eq, quote_eq] using
+            DeclarationWire.definition name height type value _ _ _ _
+              (name_wire 16 name (by assumption)) (number_wire height)
+              (expression_wire 48 type (by assumption)) (expression_wire 48 value (by assumption))
+      · exact ih rest h
+
+theorem decode_success_has_wire_derivation (bytes : List Nat) (candidate source : List PsMinCoreDeclaration)
+    (h : psMinCoreDecodeCertificate bytes candidate = some source) : PacketWire source bytes := by
+  obtain ⟨_, wellformed⟩ := decode_success_is_well_formed bytes candidate source h
+  rw [wellformed.exactBytes]
+  simpa only [psMinCoreEncode, object_eq, array_eq, append_eq] using
+    PacketWire.packet source (psMinCoreEncodeDeclarations source)
+      (declarations_wire 128 source wellformed.syntaxBound)
+
+#print axioms number_wire
+#print axioms safe_text
+#print axioms name_wire
+#print axioms expression_wire
+#print axioms decode_success_has_wire_derivation
+end Ps.MinKernel.CoreEncoding

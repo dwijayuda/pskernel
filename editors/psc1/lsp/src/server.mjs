@@ -1,10 +1,11 @@
 import path from 'node:path';
 import fs from 'node:fs';
 import os from 'node:os';
-import { fork } from 'node:child_process';
+import crypto from 'node:crypto';
+import { fork, execFile, execFileSync } from 'node:child_process';
 import { createConnection, TextDocuments, TextDocumentSyncKind, ResponseError, LSPErrorCodes } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { loadProject } from './project.mjs';
+import { loadProject, fileIdentity, openDocument } from './project.mjs';
 import { keywords, outline, wordAt, lexicalHighlights, originDeclarations, compilerPosition, contains, importAt } from './syntax.mjs';
 
 // esbuild bundles this entry as CommonJS. All executable paths are installation-owned.
@@ -12,12 +13,19 @@ const distribution = path.resolve(__dirname, '..');
 const connection = createConnection(process.stdin, process.stdout);
 const documents = new TextDocuments(TextDocument);
 const states = new Map(), projects = new Map(), published = new Set();
+const resultCache = new Map();
+let cacheBytes = 0;
 const temporaryDirectories = new Set();
+const compilerChildren = new Set();
+let stopping = false;
 const settings = { trusted: false, enableLean: false, debounceMs: 350, timeoutMs: 30000 };
 let workspaceFolders = [], generation = 0, timer, running, shutdown = false, semanticRefresh = false, workspaceFolderEvents = false;
-const metrics = { checksStarted: 0, checksCompleted: 0, superseded: 0, timeouts: 0, lastElapsedMs: null };
+const metrics = { checksStarted: 0, checksCompleted: 0, superseded: 0, timeouts: 0, cacheHits: 0, unchangedSaves: 0, lastElapsedMs: null };
 const MAX_OPEN_DOCUMENTS = 64;
 const MAX_EDITOR_CHARACTERS = 8 * 1024 * 1024;
+const MAX_CACHE_BYTES = 16 * 1024 * 1024;
+const MAX_CACHE_ENTRIES = 8;
+const COMPILER_TARBALL_SHA256 = '9a66dcd0f92aaa60f600674fb91b31bc0d67b211d1e9e004146baa8e96502fcc';
 const smallDocument = doc => doc && doc.getText().length <= MAX_EDITOR_CHARACTERS;
 
 function supported(doc) {
@@ -25,10 +33,12 @@ function supported(doc) {
     (settings.enableLean && doc.uri.endsWith('.lean') && ['proofscript-lean', 'lean'].includes(doc.languageId)));
 }
 function updateSettings(value = {}) {
+  const before = JSON.stringify(settings);
   if (typeof value.trusted === 'boolean') settings.trusted = value.trusted;
   if (typeof value.enableLean === 'boolean') settings.enableLean = value.enableLean;
   for (const [name, minimum, maximum] of [['debounceMs', 0, 2000], ['timeoutMs', 1000, 120000]])
     if (Number.isFinite(value[name])) settings[name] = Math.max(minimum, Math.min(maximum, value[name]));
+  return before !== JSON.stringify(settings);
 }
 function sendDiagnostics(uri, diagnostics = []) {
   const version = documents.get(uri)?.version;
@@ -48,12 +58,13 @@ function killRunning() {
   running.cancel();
   running = undefined;
 }
-function invalidate() {
+function invalidate({ force = false } = {}) {
   if (shutdown) return;
   generation++;
   clearTimeout(timer);
   killRunning();
   projects.clear();
+  if (force || !settings.trusted) { resultCache.clear(); cacheBytes = 0; }
   for (const uri of [...published]) sendDiagnostics(uri);
   for (const doc of documents.all()) {
     if (!supported(doc)) setState(doc, 'unsupported', 'Use a .ps file or explicitly select PSC1 for a project .lean file.');
@@ -62,20 +73,76 @@ function invalidate() {
   }
   if (settings.trusted) timer = setTimeout(() => void checkGeneration(generation), settings.debounceMs);
 }
+
+function snapshotKey(project) {
+  // Only a byte-identical ordered source closure and the same assurance/compiler
+  // can reuse an accepted result. Versions/URIs are remapped from the new capture.
+  return crypto.createHash('sha256').update(JSON.stringify({
+    compiler: COMPILER_TARBALL_SHA256, entryModule: project.entryModule,
+    assurance: project.assurance || 'checked',
+    sources: project.files.map(file => [file.module, file.kind, file.sha256]),
+  })).digest('hex');
+}
+function cachedResult(key) {
+  const cached = resultCache.get(key);
+  if (!cached) return null;
+  resultCache.delete(key); resultCache.set(key, cached);
+  metrics.cacheHits++;
+  return cached.result;
+}
+function rememberResult(key, result) {
+  // Infrastructure failures can be transient and must never become sticky.
+  if (!['checked', 'partial', 'rejected'].includes(result.state)) return;
+  const bytes = Buffer.byteLength(JSON.stringify(result));
+  if (bytes > MAX_CACHE_BYTES) return;
+  const previous = resultCache.get(key);
+  if (previous) { cacheBytes -= previous.bytes; resultCache.delete(key); }
+  while (resultCache.size && (resultCache.size >= MAX_CACHE_ENTRIES || cacheBytes + bytes > MAX_CACHE_BYTES)) {
+    const oldest = resultCache.keys().next().value;
+    cacheBytes -= resultCache.get(oldest).bytes; resultCache.delete(oldest);
+  }
+  resultCache.set(key, { result, bytes }); cacheBytes += bytes;
+}
+
+function terminateCompiler(child, complete, cleanup = () => {}) {
+  if (!child?.pid) { cleanup(); return; }
+  if (process.platform !== 'win32' || complete) {
+    try {
+      if (process.platform !== 'win32') process.kill(-child.pid, 'SIGKILL');
+      else child.kill('SIGKILL');
+    } catch { /* Already exited. */ }
+    cleanup(); return;
+  }
+  // Node's Windows child.kill does not kill grandchildren. Use the OS utility
+  // directly, with an installation/system-owned path and no shell or PATH lookup.
+  const taskkill = path.join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'taskkill.exe');
+  const args = ['/PID', String(child.pid), '/T', '/F'];
+  const options = { windowsHide: true, timeout: 5000, stdio: 'ignore' };
+  if (stopping) {
+    try { execFileSync(taskkill, args, options); } catch { try { child.kill('SIGKILL'); } catch {} }
+    cleanup();
+  } else {
+    execFile(taskkill, args, options, () => {
+      try { child.kill('SIGKILL'); } catch { /* Tree has exited. */ }
+      cleanup();
+    });
+  }
+}
 function compilerJob(project) {
   const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'psc1-lsp-'));
   temporaryDirectories.add(temporary);
   let child, settled = false, timeout, stderr = '';
   let finish;
-  const promise = new Promise(resolve => { finish = value => {
+  const promise = new Promise(resolve => { finish = (value, complete = false) => {
     if (settled) return;
     settled = true;
     clearTimeout(timeout);
-    if (child?.pid) {
-      try { if (process.platform !== 'win32') process.kill(-child.pid, 'SIGKILL'); else child.kill('SIGKILL'); } catch { /* Already exited. */ }
-    }
     // Child temp directories stay within this private per-job directory.
-    setTimeout(() => fs.rm(temporary, { recursive: true, force: true }, () => temporaryDirectories.delete(temporary)), 100).unref();
+    terminateCompiler(child, complete, () => {
+      fs.rm(temporary, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }, error => {
+        if (!error) temporaryDirectories.delete(temporary);
+      });
+    });
     resolve(value);
   }; });
   try {
@@ -85,14 +152,18 @@ function compilerJob(project) {
       env: { ...process.env, NODE_OPTIONS: '', TMPDIR: temporary, TMP: temporary, TEMP: temporary, ELECTRON_RUN_AS_NODE: '1' },
       stdio: ['ignore', 'ignore', 'pipe', 'ipc'],
     });
+    compilerChildren.add(child);
     child.stderr.on('data', chunk => { stderr = (stderr + chunk.toString()).slice(-8192); });
     child.once('message', value => {
       if (!value || typeof value !== 'object' || !['checked', 'partial', 'rejected', 'error'].includes(value.state))
         finish({ state: 'error', summary: 'Invalid compiler adapter response.', diagnostics: [], declarations: [] });
-      else finish(value);
+      else finish(value, true);
     });
     child.once('error', error => finish({ state: 'error', summary: 'Compiler process failed: ' + error.message, diagnostics: [], declarations: [] }));
-    child.once('exit', (code, signal) => finish({ state: 'error', summary: `Compiler process exited (${signal || code}). ${stderr}`.slice(0, 4096), diagnostics: [], declarations: [] }));
+    child.once('exit', (code, signal) => {
+      compilerChildren.delete(child);
+      finish({ state: 'error', summary: `Compiler process exited (${signal || code}). ${stderr}`.slice(0, 4096), diagnostics: [], declarations: [] });
+    });
     timeout = setTimeout(() => {
       metrics.timeouts++;
       finish({ state: 'error', summary: `Checking exceeded ${settings.timeoutMs} ms; no verification result was accepted.`, diagnostics: [], declarations: [] });
@@ -138,19 +209,26 @@ async function checkGeneration(expected) {
   }
   for (const project of snapshots.values()) {
     if (!current()) return;
-    for (const file of project.files) {
-      const doc = documents.get(file.uri);
-      if (doc) setState(doc, 'checking', 'PSC1 compilation and independent Lean kernel checking are running.');
+    const key = snapshotKey(project);
+    let result = cachedResult(key);
+    const cacheHit = Boolean(result);
+    if (!result) {
+      for (const file of project.files) {
+        const doc = documents.get(file.uri);
+        if (doc) setState(doc, 'checking', 'PSC1 elaboration and independent Lean kernel checking are running.');
+      }
+      metrics.checksStarted++;
+      const job = compilerJob(project);
+      running = job;
+      result = await job.promise;
+      if (running === job) running = undefined;
+      if (!current() || !result) return;
+      metrics.checksCompleted++;
+      metrics.lastElapsedMs = result.elapsedMs ?? null;
+      rememberResult(key, result);
     }
-    metrics.checksStarted++;
-    const job = compilerJob(project);
-    running = job;
-    const result = await job.promise;
-    if (running === job) running = undefined;
-    if (!current() || !result) return;
-    metrics.checksCompleted++;
-    metrics.lastElapsedMs = result.elapsedMs ?? null;
     const mapped = new Map();
+    const snapshotVersions = Object.fromEntries(project.files.map(file => [file.uri, file.version]));
     for (const file of project.files) {
       const doc = documents.get(file.uri) || TextDocument.create(file.uri, file.uri.endsWith('.ps') ? 'proofscript' : 'proofscript-lean', 0, file.text);
       const ds = (result.declarations || []).filter(d => d.module === file.module).sort((a, b) => a.line - b.line || a.column - b.column);
@@ -167,7 +245,8 @@ async function checkGeneration(expected) {
       sendDiagnostics(file.uri, diagnostics);
       const doc = documents.get(file.uri);
       if (doc) setState(doc, result.state, result.summary, { diagnostics, declarations: mapped.get(file.uri),
-        elapsedMs: result.elapsedMs, receipt: result.receipt, compilerVersion: result.compilerVersion,
+        elapsedMs: result.elapsedMs, timings: result.timings, cacheHit, snapshotVersions,
+        receipt: result.receipt, compilerVersion: result.compilerVersion,
         project: { root: project.root, entryModule: project.entryModule, modules: project.files.map(f => f.module) } });
     }
     if (semanticRefresh) connection.languages.semanticTokens.refresh().catch(() => {});
@@ -199,7 +278,7 @@ connection.onInitialize(params => {
   updateSettings(params.initializationOptions);
   semanticRefresh = params.capabilities?.workspace?.semanticTokens?.refreshSupport === true;
   workspaceFolderEvents = params.capabilities?.workspace?.workspaceFolders === true;
-  return { serverInfo: { name: 'PSC1 Language Server', version: '0.1.0' }, capabilities: {
+  return { serverInfo: { name: 'PSC1 Language Server', version: '0.1.1' }, capabilities: {
     positionEncoding: 'utf-16', textDocumentSync: { openClose: true, change: TextDocumentSyncKind.Incremental, save: { includeText: false } },
     hoverProvider: true, definitionProvider: true, documentSymbolProvider: true,
     workspaceSymbolProvider: true, documentHighlightProvider: true,
@@ -214,22 +293,39 @@ connection.onInitialized(() => {
     invalidate();
   });
 });
-connection.onNotification('psc1/configuration', value => { updateSettings(value); invalidate(); });
-connection.onDidChangeConfiguration(params => { updateSettings(params.settings?.proofscript || params.settings || {}); invalidate(); });
-connection.onDidChangeWatchedFiles(() => invalidate());
+connection.onNotification('psc1/configuration', value => { if (updateSettings(value)) invalidate(); });
+connection.onDidChangeConfiguration(params => { if (updateSettings(params.settings?.proofscript || params.settings || {})) invalidate(); });
+connection.onDidChangeWatchedFiles(params => {
+  const relevant = params.changes.some(change => {
+    const file = fileIdentity(change.uri);
+    if (!file) return false;
+    if (path.basename(file) === 'proofscript.json') return true;
+    // An open buffer is the source of truth, including during its disk save.
+    return ['.ps', '.lean'].includes(path.extname(file)) && !openDocument(documents, change.uri);
+  });
+  if (relevant) invalidate();
+});
 documents.onDidChangeContent(() => invalidate());
-documents.onDidSave(() => invalidate());
+documents.onDidSave(({ document }) => {
+  const status = currentState(document.uri);
+  if (status) {
+    metrics.unchangedSaves++;
+    connection.sendNotification('psc1/documentStatus', { ...status, reused: true, trigger: 'save' });
+  }
+});
 documents.onDidClose(({ document }) => {
   sendDiagnostics(document.uri);
   states.delete(document.uri);
   invalidate();
 });
-connection.onRequest('psc1/recheck', () => { invalidate(); return { scheduled: true, projectGeneration: generation }; });
-connection.onRequest('psc1/serverInfo', () => ({ name: 'PSC1 Language Server', version: '0.1.0',
+connection.onRequest('psc1/recheck', () => { invalidate({ force: true }); return { scheduled: true, projectGeneration: generation }; });
+connection.onRequest('psc1/serverInfo', () => ({ name: 'PSC1 Language Server', version: '0.1.1',
   protocol: 'LSP over stdio', node: process.version, platform: process.platform,
   compiler: 'proofscript@0.1.0-psc1.12', kernel: 'official Lean 4.35.0, linear-memory Wasm',
-  compilerTarballSha256: '9a66dcd0f92aaa60f600674fb91b31bc0d67b211d1e9e004146baa8e96502fcc',
-  compilerSourceUnchanged: true, selfHosting: 'external tooling', settings, metrics,
+  compilerTarballSha256: COMPILER_TARBALL_SHA256,
+  compilerSourceUnchanged: true, selfHosting: 'external tooling', settings,
+  metrics: { ...metrics, cacheEntries: resultCache.size, cacheBytes },
+  checkingScope: 'Logical admission only; editor checks do not publish or validate generated runtime artifacts.',
   limitations: ['No proof-state snapshots or term-level type inference.', 'No binding-aware references, rename, signature help or quick fixes.',
     'Definitions navigate compiler-origin declarations and explicit imports; reference binding is not guessed.', 'Parse errors may have module-level locations.'],
 }));
@@ -322,7 +418,11 @@ connection.languages.semanticTokens.on((params, token) => {
   return { data };
 });
 function stop() {
+  stopping = true;
   shutdown = true; clearTimeout(timer); killRunning();
+  for (const child of compilerChildren) terminateCompiler(child, false);
+  compilerChildren.clear();
+  resultCache.clear(); cacheBytes = 0;
   for (const directory of temporaryDirectories) {
     try { fs.rmSync(directory, { recursive: true, force: true }); } catch { /* Process exit must still terminate children. */ }
   }

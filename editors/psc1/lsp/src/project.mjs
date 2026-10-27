@@ -3,7 +3,7 @@
 // Preserve the existing proofscript-project/1 contract and declared source order;
 // the real compiler remains responsible for import and semantic validation.
 import fs from 'node:fs/promises';
-import {constants} from 'node:fs';
+import {constants, lstatSync} from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {fileURLToPath, pathToFileURL} from 'node:url';
@@ -32,9 +32,39 @@ function sourceText(document) {
   return typeof document?.getText === 'function' ? document.getText() : document?.text;
 }
 
-function overlay(documents, uri) {
-  return documents?.get?.(uri);
+// A file URI is a transport identifier, not a filesystem identity. In particular
+// VS Code encodes Windows drive colons while Node's pathToFileURL does not.
+// Decode before comparing, then retain the client's exact URI in every reply.
+export function fileIdentity(uri) {
+  try {
+    const file = path.resolve(fileURLToPath(uri));
+    return process.platform === 'win32' ? file.replace(/^[A-Z]:/, drive => drive.toLowerCase()) : file;
+  } catch { return null; }
 }
+
+function sameIdentity(left, right) {
+  if (left === right) return Boolean(left);
+  if (!left || !right || process.platform !== 'win32' || left.toLowerCase() !== right.toLowerCase()) return false;
+  // Windows also supports case-sensitive directories. Confirm an existing-file
+  // case alias rather than merging paths merely because their spelling folds.
+  try {
+    const a = lstatSync(left, {bigint: true}), b = lstatSync(right, {bigint: true});
+    return a.isFile() && b.isFile() && !a.isSymbolicLink() && !b.isSymbolicLink() &&
+      a.ino !== 0n && a.dev === b.dev && a.ino === b.ino;
+  } catch { return false; }
+}
+
+export function openDocument(documents, uri) {
+  const direct = documents?.get?.(uri);
+  if (direct) return direct;
+  const selected = fileIdentity(uri);
+  if (!selected) return undefined;
+  const values = typeof documents?.all === 'function' ? documents.all() : documents?.values?.() || [];
+  for (const document of values) if (sameIdentity(fileIdentity(document.uri), selected)) return document;
+  return undefined;
+}
+
+const overlay = openDocument;
 
 async function readRegular(file, limit = MAX_INPUT_BYTES) {
   const uri = fileUri(file);
@@ -74,9 +104,9 @@ async function boundedText(file, documents, limit = MAX_INPUT_BYTES) {
     const text = sourceText(document);
     if (typeof text !== 'string' || Buffer.byteLength(text) > limit)
       refuse('INPUT_KIND_SIZE', 'The open document exceeds the byte limit.', uri);
-    return {text, version: document.version ?? null};
+    return {text, version: document.version ?? null, uri: document.uri};
   }
-  return {text: await readRegular(file, limit), version: null};
+  return {text: await readRegular(file, limit), version: null, uri};
 }
 
 async function findConfig(file, documents, workspaceFolders) {
@@ -181,16 +211,17 @@ export async function loadProject(uri, documents, workspaceFolders = []) {
         refuse('PROJECT_FILES', 'Each project file needs a unique module and a relative path.', configUri);
       const file = await containedSource(root, row.path, documents, configUri);
       const sourceKind = path.extname(file).slice(1);
-      if (!['ps', 'lean'].includes(sourceKind) || paths.has(file))
+      const identity = fileIdentity(fileUri(file));
+      if (!['ps', 'lean'].includes(sourceKind) || [...paths].some(previous => sameIdentity(previous, identity)))
         refuse('PROJECT_FILES', 'Project files must be distinct .ps or .lean sources.', configUri);
       const captured = await boundedText(file, documents, MAX_INPUT_BYTES - total);
       total += Buffer.byteLength(captured.text);
-      names.add(row.module); paths.add(file);
+      names.add(row.module); paths.add(identity);
       sources.push({module: row.module, kind: sourceKind, text: captured.text});
-      files.push({uri: fileUri(file), module: row.module, kind: sourceKind, text: captured.text,
+      files.push({uri: captured.uri, module: row.module, kind: sourceKind, text: captured.text,
         version: captured.version, sha256: hash(captured.text)});
     }
-    if (!paths.has(selected))
+    if (![...paths].some(file => sameIdentity(file, fileIdentity(uri))))
       refuse('SOURCE_NOT_DECLARED', 'This file is not listed in the nearest proofscript.json project.', uri);
   } else {
     // Inline project text has no file provenance. Never pretend a similarly

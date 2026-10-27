@@ -1,6 +1,6 @@
 {
   "name": "psc1-editor-development",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "type": "module",
   "description": "Independent PSC1 editor tooling; outside all compiler self-hosting cycles",
@@ -11,7 +11,8 @@
     "test": "node --test test/*.test.mjs",
     "package": "node scripts/package.mjs",
     "test:vscode": "node test/run-vscode.mjs",
-    "test:packed": "node test/npm-smoke.mjs"
+    "test:packed": "node test/npm-smoke.mjs",
+    "test:performance": "node test/performance.mjs"
   },
   "devDependencies": {
     "@vscode/test-electron": "3.1.0",

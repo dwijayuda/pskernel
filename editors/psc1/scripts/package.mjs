@@ -6,6 +6,7 @@ import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const out = path.join(root, 'dist');
+const extensionVersion = JSON.parse(fs.readFileSync(path.join(root, 'vscode/package.json'))).version;
 fs.mkdirSync(out, {recursive: true});
 const run = (cmd, args, cwd) => {
   const result = spawnSync(cmd, args, {cwd, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024});
@@ -14,7 +15,7 @@ const run = (cmd, args, cwd) => {
   assert.equal(result.status, 0, `${cmd} failed`);
 };
 run('npm', ['pack', '--ignore-scripts', '--pack-destination', out], path.join(root, 'lsp'));
-run(process.execPath, [path.join(root, 'node_modules/@vscode/vsce/vsce'), 'package', '--no-dependencies', '--allow-missing-repository', '--out', path.join(out, 'proofscript-psc1-0.1.0.vsix')], path.join(root, 'vscode'));
+run(process.execPath, [path.join(root, 'node_modules/@vscode/vsce/vsce'), 'package', '--no-dependencies', '--allow-missing-repository', '--out', path.join(out, `proofscript-psc1-${extensionVersion}.vsix`)], path.join(root, 'vscode'));
 const files = fs.readdirSync(out).filter(file => /\.(vsix|tgz)$/.test(file)).sort().map(file => {
   const bytes = fs.readFileSync(path.join(out, file));
   return {file, bytes: bytes.length, sha256: crypto.createHash('sha256').update(bytes).digest('hex')};

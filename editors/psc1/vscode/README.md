@@ -4,16 +4,16 @@ Edit ProofScript with feedback from the current PSC1 compiler. This extension is
 
 ## Install and open a project
 
-Install the generated `proofscript-psc1-0.1.0.vsix` using **Extensions → … → Install from VSIX**. Disable the previous **ProofScript** extension in this workspace if it is installed: the previous release and this extension both register `.ps` files and ProofScript commands.
+Install the generated `proofscript-psc1-0.1.1.vsix` using **Extensions → … → Install from VSIX**. Disable the previous **ProofScript** extension in this workspace if it is installed: the previous release and this extension both register `.ps` files and ProofScript commands.
 
-Open a folder containing your `proofscript.json` project and a `.ps` source file. The compiler uses the open editor buffers, including unsaved edits. Allow the first check to finish. Open **ProofScript: Show Infoview** or press **Ctrl+Shift+Enter** (**Cmd+Shift+Enter** on macOS) to show the right-side Infoview.
+Open a folder containing your `proofscript.json` project and a `.ps` source file. The compiler uses the open editor buffers, including unsaved edits. The first source check performs real compiler and kernel work; unchanged saves and previously checked identical source reuse their results. Open **ProofScript: Show Infoview** or press **Ctrl+Shift+Enter** (**Cmd+Shift+Enter** on macOS) to show the right-side Infoview.
 
-VS Code 1.143.1 or newer is required; this is the editor baseline used for qualification. Linux is the qualification platform for this release. The bundled server uses VS Code's Node runtime, which must be at least 22.23.3 under the compiler's existing runtime policy. The extension checks that minimum before starting and reports a clear error on an older runtime. Compiler checking does not require a manual Lean installation.
+VS Code 1.143.1 or newer is required; this is the editor baseline used for qualification. See the parent work-state document for exact Linux, Windows, and macOS qualification evidence. The bundled server uses VS Code's Node runtime, which must be at least 22.23.3 under the compiler's existing runtime policy. The extension checks that minimum before starting and reports a clear error on an older runtime. Compiler checking does not require a manual Lean installation.
 
 ## Understand the feedback
 
 - **Checking / Waiting for check**: current source has no completed check result yet. Previous success markers are removed immediately on edits.
-- **Checked**: the real PSC1 pipeline accepted the current source. A blue double check beside a declaration is shown only when the server explicitly reports that declaration as verified.
+- **Checked**: the real PSC1 compiler analyzed the current source and the genuine kernel accepted its exact logical declarations. A blue double check beside a declaration is shown only when the server explicitly reports that declaration as verified.
 - **Partially checked**: some declarations have a weaker assurance boundary, such as partial runtime declarations. The overall status stays amber. Those declarations receive no verified marker.
 - **Rejected**: the compiler rejected the current source. Read the diagnostic or Infoview message.
 - **Check unavailable / Unsupported**: the service failed or the compiler could not support this case. These states never imply proof success.
@@ -56,3 +56,7 @@ Confirm that the folder is trusted, the source language is ProofScript (or the e
 Source lives in `editors/psc1/vscode`; the standalone server is in `editors/psc1/lsp`. Follow `editors/psc1/README.md` for reproducible packaging and Linux qualification. These tools are outside G1/G2/G3 and kernel proof obligations.
 
 The attached v0.45.0 VSIX informed the layout only. No previous compiler, server, protocol, runtime implementation, or source was transplanted.
+
+## 0.1.1 performance and status repair
+
+The editor no longer calls the compiler artifact-publication pipeline during editing. This removes duplicate compilation and the Linux-only publication-store error while retaining genuine logical checking. Infoview cursor movement uses current compiler-reported declaration ranges locally. Windows file URI aliases preserve unsaved source buffers, and terminal errors appear as **Check unavailable** rather than remaining **Waiting for check**. Exact timings and platform results are retained with the workflow artifacts.

@@ -5,6 +5,7 @@ import {once} from 'node:events';
 export class LspClient {
   constructor(entry, {cwd, env = process.env} = {}) {
     this.messages = [];
+    this.messageTimes = [];
     this.stderr = '';
     this.nextId = 1;
     this.pending = new Map();
@@ -58,6 +59,7 @@ export class LspClient {
       this.buffer = this.buffer.subarray(end);
       if (message.jsonrpc !== '2.0') throw new Error('Non-JSON-RPC2 message');
       const index = this.messages.push(message) - 1;
+      this.messageTimes.push(performance.now());
       if (message.id !== undefined && !message.method) {
         const p = this.pending.get(message.id);
         if (p) {

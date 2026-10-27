@@ -19,12 +19,20 @@ const change = (client, uri, text, version) => client.notify('textDocument/didCh
   textDocument: {uri, version}, contentChanges: [{text}],
 });
 const config = files => ({schema: 'proofscript-project/1', entryModule: 'Main', files});
+// VS Code and Node encode file URIs differently on Windows. The exact spelling
+// sent by a client must keep identifying its open buffer and its notifications.
+function encodedClientUri(file, colon = '%3a') {
+  let uri = pathToFileURL(file).href.replace(/Main\.(ps|lean)$/, '%4dain.$1');
+  if (process.platform === 'win32') uri = uri.replace(/^file:\/\/\/([A-Za-z]):/, `file:///$1${colon}`);
+  return uri;
+}
 const cleanEnvironment = () => {
-  const env = {...process.env, PATH: path.dirname(process.execPath)};
+  const env = {...process.env};
   for (const key of Object.keys(env)) {
-    if (key.startsWith('PSC1_') || ['NODE_OPTIONS', 'LEAN_PATH', 'ELAN_TOOLCHAIN',
+    if (key.toUpperCase() === 'PATH' || key.startsWith('PSC1_') || ['NODE_OPTIONS', 'LEAN_PATH', 'ELAN_TOOLCHAIN',
       'LD_LIBRARY_PATH', 'DYLD_LIBRARY_PATH'].includes(key)) delete env[key];
   }
+  env.PATH = path.dirname(process.execPath);
   return env;
 };
 
@@ -60,7 +68,7 @@ test('real packaged PSC1 checks, imports, versions, editor requests and lifecycl
   const multi = path.join(temp, 'import project');
   await fs.mkdir(single); await fs.mkdir(multi);
   const mainFile = path.join(single, 'Main.ps');
-  const mainUri = pathToFileURL(mainFile).href;
+  const mainUri = encodedClientUri(mainFile);
   // Deliberately contradictory disk state proves the server checks the buffer.
   await fs.writeFile(mainFile, 'def answer : Nat := true\n');
   await fs.writeFile(path.join(single, 'proofscript.json'), JSON.stringify(config([{module: 'Main', path: 'Main.ps'}])));
@@ -88,6 +96,11 @@ test('real packaged PSC1 checks, imports, versions, editor requests and lifecycl
       assert.equal(status.compilerVersion, '0.1.0-psc1.12');
       assert.equal(status.receipt.logicalAdmission, 'accepted');
       assert.deepEqual(status.receipt.kernelProviders, ['wasm']);
+      assert.match(status.receipt.sourceClosureDigest, /^[a-f0-9]{64}$/);
+      assert.match(status.receipt.admissionsSha256, /^[a-f0-9]{64}$/);
+      assert.equal(status.receipt.targetValidation, 'not-run');
+      assert.equal(status.receipt.publication, 'not-requested');
+      assert.equal(status.snapshotVersions[mainUri], 1);
       assert.ok(status.declarations.some(d => d.name === 'answer' && d.verified === true), JSON.stringify(status));
       assert.ok(!status.diagnostics.some(d => d.severity === 1));
       observations.push({case: 'unsaved-valid', state: status.state, elapsedMs: status.elapsedMs});
@@ -163,10 +176,28 @@ test('real packaged PSC1 checks, imports, versions, editor requests and lifecycl
       observations.push({case: 'inflight-supersession-and-cancellation', state: latest.state});
     });
 
-    await t.test('save and explicit recheck preserve the real compiler result', async () => {
+    await t.test('unchanged save keeps its accepted snapshot without rerunning the compiler', async () => {
       await fs.writeFile(mainFile, 'def answer : Nat := 44\n');
+      const previous = await client.request('psc1/infoview', {
+        textDocument: {uri: mainUri}, position: {line: 0, character: 6}, version: 5,
+      });
+      const before = await client.request('psc1/serverInfo', {});
       const after = client.messages.length;
       client.notify('textDocument/didSave', {textDocument: {uri: mainUri}});
+      const status = (await client.waitFor(statusFor(mainUri, 5,
+        p => p.reused === true && p.trigger === 'save'), {after})).params;
+      assert.equal(status.state, 'checked', JSON.stringify(status));
+      assert.equal(status.projectGeneration, previous.projectGeneration);
+      assert.equal(status.receipt.admissionsSha256, previous.receipt.admissionsSha256);
+      assert.equal(status.snapshotVersions[mainUri], 5);
+      const saved = await client.request('psc1/serverInfo', {});
+      assert.equal(saved.metrics.checksStarted, before.metrics.checksStarted);
+      observations.push({case: 'unchanged-save-reuse', checksStarted: saved.metrics.checksStarted,
+        generation: status.projectGeneration});
+    });
+
+    await t.test('explicit recheck preserves the real compiler result', async () => {
+      const after = client.messages.length;
       await client.request('psc1/recheck', {uri: mainUri});
       const status = (await client.waitFor(completed(mainUri, 5), {after})).params;
       assert.equal(status.state, 'checked', JSON.stringify(status));
@@ -188,6 +219,12 @@ test('real packaged PSC1 checks, imports, versions, editor requests and lifecycl
         p => terminal.has(p.state) && p.projectGeneration > libFirst.projectGeneration), {after: changedAfter})).params;
       assertRejected(rejected);
       assert.notEqual(rejected.projectGeneration, first.projectGeneration);
+      const sibling = await client.request('psc1/infoview', {
+        textDocument: {uri: mainUri}, position: {line: 0, character: 6}, version: 5,
+      });
+      assert.equal(sibling.state, 'checked', 'An error in an independent project must not leave this project pending');
+      assert.equal(sibling.snapshotVersions[mainUri], 5);
+      assert.ok(!Object.hasOwn(sibling.snapshotVersions, libUri), 'Project snapshots must not claim unrelated buffers');
       const restoredAfter = client.messages.length;
       client.notify('textDocument/didClose', {textDocument: {uri: libUri}});
       const restored = (await client.waitFor(statusFor(importedUri, 1,
@@ -251,11 +288,49 @@ test('real packaged PSC1 checks, imports, versions, editor requests and lifecycl
       observations.push({case: 'untrusted-metadata-refusal-and-watch-recovery', state: restored.state});
     });
 
+    await t.test('restored source reuses an exact checked snapshot at the new document version', async () => {
+      const original = await client.request('psc1/infoview', {
+        textDocument: {uri: mainUri}, position: {line: 0, character: 15}, version: 10,
+      });
+      const after = client.messages.length;
+      change(client, mainUri, '/- 😀 -/ def answer : Nat := 43\n', 11);
+      const changed = (await client.waitFor(completed(mainUri, 11), {after})).params;
+      assert.equal(changed.state, 'checked', JSON.stringify(changed));
+      assert.notEqual(changed.receipt.admissionsSha256, original.receipt.admissionsSha256);
+      const beforeRestore = await client.request('psc1/serverInfo', {});
+      const restoredAfter = client.messages.length;
+      change(client, mainUri, '/- 😀 -/ def answer : Nat := 42\n', 12);
+      const restored = (await client.waitFor(completed(mainUri, 12), {after: restoredAfter})).params;
+      assert.equal(restored.state, 'checked', JSON.stringify(restored));
+      assert.equal(restored.cacheHit, true);
+      assert.equal(restored.snapshotVersions[mainUri], 12);
+      assert.equal(restored.receipt.admissionsSha256, original.receipt.admissionsSha256);
+      assert.equal(restored.receipt.sourceClosureDigest, original.receipt.sourceClosureDigest);
+      const reused = await client.request('psc1/serverInfo', {});
+      assert.equal(reused.metrics.checksStarted, beforeRestore.metrics.checksStarted);
+      assert.ok(reused.metrics.cacheHits > beforeRestore.metrics.cacheHits);
+      observations.push({case: 'exact-snapshot-cache', version: restored.version, cacheHit: restored.cacheHit,
+        checksStarted: reused.metrics.checksStarted, cacheHits: reused.metrics.cacheHits});
+    });
+
     await t.test('close clears open-buffer diagnostics and graceful shutdown exits zero', async () => {
       const after = client.messages.length;
       client.notify('textDocument/didClose', {textDocument: {uri: mainUri}});
       await client.waitFor(message => message.method === 'textDocument/publishDiagnostics' &&
         message.params.uri === mainUri && message.params.diagnostics.length === 0, {after});
+      // Reopening an equivalent URI tests upper/lower hex aliases and prevents
+      // the previous spelling from hiding a new unsaved source snapshot.
+      // Windows normally resolves main.ps to the same file as Main.ps. The
+      // project adapter must match the file identity, not a raw URI string.
+      const reopenedFile = process.platform === 'win32' ? path.join(single, 'main.ps') : mainFile;
+      const reopenedUri = encodedClientUri(reopenedFile, '%3A').replace('%4d', '%4D');
+      const reopenedAfter = client.messages.length;
+      open(client, reopenedUri, 'def answer : Nat := true\n', 1);
+      const reopened = (await client.waitFor(completed(reopenedUri, 1), {after: reopenedAfter})).params;
+      assertRejected(reopened);
+      assert.equal(reopened.uri, reopenedUri);
+      assert.equal(reopened.snapshotVersions[reopenedUri], 1);
+      client.notify('textDocument/didClose', {textDocument: {uri: reopenedUri}});
       const [code, signal] = await client.shutdown();
       assert.equal(code, 0); assert.equal(signal, null);
     });

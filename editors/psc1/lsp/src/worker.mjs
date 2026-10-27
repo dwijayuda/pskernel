@@ -9,6 +9,7 @@ import {admissionDeclarations} from './checked-types.mjs';
 const sha256 = value => crypto.createHash('sha256').update(value).digest('hex');
 const compilerRoot = fileURLToPath(new URL('../compiler/package/', import.meta.url));
 const MAX_BYTES = 8 * 1024 * 1024;
+const LEAN_COMMIT = 'eb6cafb7290e8bd5f2937522d8d804f58f02bafc';
 let compilerVersion = 'unavailable';
 let consumed = false;
 
@@ -53,7 +54,50 @@ function validateRequest(request) {
     entryModule: request.entryModule, assurance, engine: 'js', target: 'js', kernel: 'wasm'};
 }
 
-async function analyze(request) {
+function validateCandidate(candidate, options) {
+  const envelope = candidate.admissionRequest;
+  if (candidate.candidateOnly !== true || candidate.admission !== 'not-run' ||
+      candidate.protocol !== 'psc1-compiler-service/1' || candidate.target !== 'js' ||
+      candidate.grammar !== options.sources[0].kind || candidate.assurance !== options.assurance ||
+      candidate.sourceClosureDigest !== sourceDigest(options.sources) ||
+      typeof candidate.requestId !== 'string' || !candidate.requestId ||
+      envelope?.protocol !== 'psc1-compiler-host/1' || envelope.op !== 'admit' ||
+      envelope.requestId !== candidate.requestId || envelope.target !== 'js' ||
+      envelope.sourceClosureDigest !== candidate.sourceClosureDigest ||
+      typeof envelope.admissions !== 'string' || Buffer.byteLength(envelope.admissions) > 128 * 1024 * 1024 ||
+      !Array.isArray(candidate.origins) || candidate.origins.length !== options.sources.length ||
+      !Array.isArray(candidate.partialNames) ||
+      candidate.partialNames.some(name => typeof name !== 'string' || !name) ||
+      new Set(candidate.partialNames).size !== candidate.partialNames.length)
+    throw Error('PSC1_LSP_CANDIDATE_IDENTITY');
+  // Preserve the existing host's complete source-member/ordinary-partial count
+  // consistency checks. These validate transport metadata, not proof semantics.
+  let sourceMembers = 0;
+  candidate.origins.forEach((origin, index) => {
+    const source = options.sources[index];
+    if (!Array.isArray(origin) || origin.length !== 4 || origin[0] !== source.module ||
+        origin[1] !== Buffer.byteLength(source.text) || !Array.isArray(origin[2]) || !Array.isArray(origin[3]))
+      throw Error('PSC1_LSP_ORIGIN_IDENTITY');
+    origin[3].forEach((declaration, sourceIndex) => {
+      if (!Array.isArray(declaration) || declaration.length !== 5 || declaration[0] !== sourceIndex ||
+          typeof declaration[1] !== 'string' || !Number.isSafeInteger(declaration[2]) ||
+          !Number.isSafeInteger(declaration[3]) || !Array.isArray(declaration[4]))
+        throw Error('PSC1_LSP_ORIGIN_IDENTITY');
+      declaration[4].forEach((member, memberIndex) => {
+        if (!Array.isArray(member) || member.length !== 2 || member[0] !== memberIndex ||
+            typeof member[1] !== 'string' || !member[1]) throw Error('PSC1_LSP_ORIGIN_IDENTITY');
+        sourceMembers++;
+      });
+    });
+  });
+  if (!sourceMembers || candidate.sourceDeclarations !== sourceMembers ||
+      !Number.isSafeInteger(candidate.logicalDeclarations) ||
+      candidate.logicalDeclarations !== sourceMembers + candidate.partialNames.length ||
+      (options.assurance === 'checked' && candidate.partialNames.length !== 0))
+    throw Error('PSC1_LSP_CLOSURE_IDENTITY');
+}
+
+async function analyze(request, timings) {
   const options = validateRequest(request);
   const manifest = JSON.parse(fs.readFileSync(path.join(compilerRoot, 'package.json'), 'utf8'));
   if (manifest.name !== 'proofscript' || manifest.version !== '0.1.0-psc1.12')
@@ -62,7 +106,15 @@ async function analyze(request) {
   // Resolve only the release we bundle, never workspace node_modules or a path
   // supplied by project metadata. The original host verifies its execution pins.
   const api = await import(pathToFileURL(path.join(compilerRoot, 'dist/index.js')).href);
-  const prepared = api.compileCandidate(options);
+  let prepared;
+  const candidateStarted = performance.now();
+  try { prepared = api.compileCandidate(options); }
+  finally { timings.candidateMs = Math.round(performance.now() - candidateStarted); }
+  if (prepared?.status !== 'candidate-only' || prepared.engine !== 'js' || prepared.target !== 'js' ||
+      prepared.logicalAdmission !== 'not-run' || prepared.publicationAuthority !== false ||
+      !/^[a-f0-9]{64}$/.test(prepared.compilerSourceClosureDigest) ||
+      prepared.compilerSourceClosureDigest !== manifest.proofscript?.compilerSourceClosureDigest)
+    throw Error('PSC1_LSP_COMPILER_IDENTITY');
   const candidate = prepared.candidate;
   if (!candidate || !['candidate', 'refused'].includes(candidate.status))
     throw Error('PSC1_LSP_CANDIDATE_PROTOCOL');
@@ -76,18 +128,28 @@ async function analyze(request) {
         ...(precision === 'declaration' ? {line: candidate.line, column: candidate.column} : {}),
         precision, phase: candidate.phase}], logicalAdmission: 'not-run'};
   }
-  if (candidate.candidateOnly !== true || candidate.admission !== 'not-run' ||
-      candidate.sourceClosureDigest !== sourceDigest(options.sources) ||
-      candidate.admissionRequest?.sourceClosureDigest !== candidate.sourceClosureDigest ||
-      typeof candidate.admissionRequest?.admissions !== 'string' || !Array.isArray(candidate.origins))
-    throw Error('PSC1_LSP_CANDIDATE_IDENTITY');
-  const checked = api.compile(options);
-  if (checked.status !== 'accepted' || checked.logicalAdmission !== 'accepted' ||
-      checked.receipt?.logicalAdmission !== 'accepted' ||
-      checked.receipt.sourceClosureDigest !== candidate.sourceClosureDigest ||
-      checked.compilerSourceClosureDigest !== prepared.compilerSourceClosureDigest ||
-      checked.receipt.admissionsSha256 !== sha256(candidate.admissionRequest.admissions))
-    throw Error('PSC1_LSP_CHECKED_IDENTITY');
+  validateCandidate(candidate, options);
+  // Editor checking needs logical admission of this exact compiler graph, not
+  // target execution or a publication store. Both called functions are public
+  // APIs of the unchanged qualified distribution. In particular this does not
+  // bypass, modify or spoof the Linux-only publication platform guard.
+  const admissionsSha256 = sha256(candidate.admissionRequest.admissions);
+  let checked;
+  const kernelStarted = performance.now();
+  try { checked = await api.checkCanonicalAdmissions(candidate.admissionRequest.admissions, {provider: 'wasm'}); }
+  finally { timings.kernelMs = Math.round(performance.now() - kernelStarted); }
+  if (checked?.schema !== 'psc1-universal-kernel-result/1' || checked.provider !== 'wasm' ||
+      typeof checked.accepted !== 'boolean' || checked.agreement !== true ||
+      checked.admissionsSha256 !== admissionsSha256 || checked.leanVersion !== '4.35.0' ||
+      checked.leanCommit !== LEAN_COMMIT || checked.wasmMemoryModel !== 'linear' ||
+      checked.results?.wasm?.accepted !== checked.accepted ||
+      checked.results.wasm.protocol !== 'pskernel-lean/1' || checked.results.wasm.provider !== 'lean4-cpp' ||
+      checked.results.wasm.leanVersion !== '4.35.0' || checked.results.wasm.leanCommit !== LEAN_COMMIT ||
+      checked.results.wasm.profile !== 'lean4.35-core')
+    throw Error('PSC1_LSP_CHECKER_IDENTITY');
+  if (!checked.accepted)
+    throw Error('PSC1_CHECKER_REJECTED: The genuine Lean Wasm kernel rejected the exact compiler admissions.');
+  const metadataStarted = performance.now();
   const admitted = admissionDeclarations(candidate.admissionRequest.admissions);
   const partialNames = new Set(Array.isArray(candidate.partialNames) ? candidate.partialNames : []);
   const sources = new Map(options.sources.map(source => [source.module, source]));
@@ -117,24 +179,28 @@ async function analyze(request) {
     }
   }
   const partial = partialNames.size > 0;
+  timings.metadataMs = Math.round(performance.now() - metadataStarted);
   return {state: partial ? 'partial' : 'checked',
     summary: partial ? 'Logical declarations passed the genuine Lean checker; partial runtime bodies remain unverified.' :
-      'The current source snapshot passed PSC1 compilation and the genuine Lean checker.',
+      'The current source snapshot was analyzed by PSC1 and its exact logical declarations passed the genuine Lean checker.',
     diagnostics: [], declarations, logicalAdmission: 'accepted',
-    receipt: {sourceClosureDigest: checked.receipt.sourceClosureDigest,
-      admissionsSha256: checked.receipt.admissionsSha256,
-      compilerSourceClosureDigest: checked.compilerSourceClosureDigest,
-      kernelProviders: checked.kernelProviders, assurance: options.assurance,
-      logicalAdmission: checked.logicalAdmission, formalPreservation: checked.formalPreservation,
-      publication: checked.publication}};
+    receipt: {schema: 'psc1-editor-logical-admission/1',
+      scope: 'Exact compiler-produced canonical graph independently checked; no target execution or publication.',
+      sourceClosureDigest: candidate.sourceClosureDigest, admissionsSha256,
+      compilerSourceClosureDigest: prepared.compilerSourceClosureDigest,
+      kernelProviders: ['wasm'], leanVersion: checked.leanVersion, leanCommit: checked.leanCommit,
+      wasmMemoryModel: checked.wasmMemoryModel, assurance: options.assurance,
+      logicalAdmission: 'accepted', formalPreservation: 'not-provided',
+      targetValidation: 'not-run', publication: 'not-requested'}};
 }
 
 process.on('message', async request => {
   if (consumed) return;
   consumed = true;
   const started = performance.now();
+  const timings = {candidateMs: 0, kernelMs: 0, metadataMs: 0};
   let result;
-  try { result = await analyze(request); }
+  try { result = await analyze(request, timings); }
   catch (error) {
     const message = String(error?.message || error).slice(0, 8192);
     const rejected = /PSC1_CHECKER_REJECTED|PSC1_SERVICE_ADDITIONAL_CHECKER_REFUSED/.test(message);
@@ -144,12 +210,12 @@ process.on('message', async request => {
         precision: 'module', phase: rejected ? 'kernel' : 'infrastructure'}],
       declarations: [], logicalAdmission: rejected ? 'rejected' : 'unavailable'};
   }
-  let payload = {...result, elapsedMs: Math.round(performance.now() - started), goalsAvailable: false, compilerVersion};
+  let payload = {...result, elapsedMs: Math.round(performance.now() - started), timings, goalsAvailable: false, compilerVersion};
   if (Buffer.byteLength(JSON.stringify(payload)) > 8 * 1024 * 1024)
     payload = {state: 'error', summary: 'PSC1_LSP_RESULT_LIMIT: editor metadata exceeds 8 MiB.',
       diagnostics: [{module: request?.entryModule || '', message: 'Editor metadata exceeds 8 MiB.',
         code: 'PSC1_LSP_RESULT_LIMIT', precision: 'module', phase: 'infrastructure'}],
-      declarations: [], logicalAdmission: 'unavailable', elapsedMs: payload.elapsedMs,
+      declarations: [], logicalAdmission: 'unavailable', elapsedMs: payload.elapsedMs, timings,
       goalsAvailable: false, compilerVersion};
   if (process.connected) process.send(payload, () => { process.disconnect(); process.exit(0); });
   else process.exit(1);

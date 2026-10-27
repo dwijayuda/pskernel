@@ -2,16 +2,16 @@
 
 A standalone LSP and a VS Code extension using the genuine qualified PSC1 compiler and official Lean 4.35.0 linear-memory Wasm checker. Both tools are outside compiler self-hosting, G1/G2/G3, and kernel proof development. No compiler or kernel implementation is changed.
 
-**Qualified Linux preview 0.1.0:** [download VSIX and npm package](https://github.com/dwijayuda/pskernel/actions/runs/40585721463/artifacts/12772441610), [successful CI](https://github.com/dwijayuda/pskernel/actions/runs/40585721463), [exact qualification receipt](QUALIFICATION_2026-10-28.json). The actual installed VSIX passed in VS Code 1.143.1 with embedded Node 24.21.0; standalone npm passed under Node 22.23.3. All 16 automated tests passed. Nothing is published to a package registry or Marketplace.
+**Preview 0.1.1 performance and platform repair:** editor checking now performs one genuine compiler analysis and independent admission of its exact logical graph. It does not create a target publication store. The workflow measures the previous and updated packages on the same Linux runner and runs the delivered packages on native Windows and macOS. See [work state](AI_WORK_STATE.md) for qualification progress; [0.1.0 evidence](QUALIFICATION_2026-10-28.json) is retained as historical baseline evidence. Nothing is published to a package registry or Marketplace.
 
 ## Install
 
 Download the `proofscript-psc1-editor-<commit>` artifact from the [editor workflow](https://github.com/dwijayuda/pskernel/actions/workflows/proofscript-editor.yml). Check the included `SHA256SUMS` and `BUILD.json` before using its artifacts.
 
-- VS Code: use **Extensions: Install from VSIX…** with `proofscript-psc1-0.1.0.vsix`, or `code --install-extension proofscript-psc1-0.1.0.vsix`. Use the currently qualified VS Code version or newer, as stated in the extension manifest. Disable the old ProofScript extension if installed; both register `.ps`.
-- Other editors: `npm install --global --offline --ignore-scripts ./proofscript-lsp-0.1.0.tgz`, then run `psc1-lsp --stdio`. Node >=22.23.3 is required. Configure the LSP client to send `initializationOptions: {trusted: true}` only for a workspace you trust.
+- VS Code: use **Extensions: Install from VSIX…** with `proofscript-psc1-0.1.1.vsix`, or `code --install-extension proofscript-psc1-0.1.1.vsix`. Use the currently qualified VS Code version or newer, as stated in the extension manifest. Disable the old ProofScript extension if installed; both register `.ps`.
+- Other editors: `npm install --global --offline --ignore-scripts ./proofscript-lsp-0.1.1.tgz`, then run `psc1-lsp --stdio`. Node >=22.23.3 is required. Configure the LSP client to send `initializationOptions: {trusted: true}` only for a workspace you trust.
 
-The VSIX and npm package each contain the same unmodified qualified compiler package. Users need no Lean installation, compiler build, npm network access, external server executable, or install hooks. Qualification currently covers Linux; this is not a claim of Windows/macOS release qualification. The VS Code extension runs in the workspace extension host, including a Linux remote workspace.
+The VSIX and npm package each contain the same unmodified qualified compiler package. Users need no Lean installation, compiler build, npm network access, external server executable, or install hooks. Native platform qualification results are recorded in the work-state document; compiler publication qualification is unchanged. The VS Code extension runs in the workspace extension host, including a Linux remote workspace.
 
 Open a folder containing `proofscript.json` and `.ps` sources:
 
@@ -51,11 +51,15 @@ Select that PSC1 mode for every open `.lean` dependency whose unsaved edits shou
 
 Binding-aware references, safe rename, signature help, term-level inferred types, proof tactics/goals, and semantic quick fixes remain unavailable. They need new public compiler information rather than a second elaborator in the LSP.
 
+## What a checked marker establishes
+
+The existing public `compileCandidate()` API analyzes the captured source once. The existing public `checkCanonicalAdmissions()` API independently checks that candidate's exact admissions with the genuine pinned Wasm kernel. A positive status requires exact source/compiler/admissions identity and accepted checker results. The editor receipt records `targetValidation: "not-run"` and `publication: "not-requested"`: a checked declaration establishes logical admission, not target execution, artifact publication, or formal source-to-backend preservation. Compiler build/publication APIs and their platform restrictions are unchanged.
+
 ## Projects, responsiveness, and trust
 
 The loader uses the nearest `proofscript.json` inside the applicable workspace folder and the existing strict `proofscript-project/1` contract. It preserves declared order and file inventory. The real compiler validates exact transitive closure, imports, and semantics. Unsaved buffers override disk files; no temporary edits are written into projects. Legacy inline-source project JSON is refused with an explicit mapping limitation because it does not establish which disk source corresponds to its inline text.
 
-Checks are debounced (350 ms by default) and run in a separate child process. Changes cancel the old process group, including compiler descendants on Linux, and supersede every response associated with the earlier project generation. Current document versions accompany diagnostics. One compiler job runs at a time; current project state is bounded and old analysis is discarded. Limits are 64 open source documents, 512 declared source files, and 8 MiB per project. Existing compiler/checker resource limits remain unchanged; the editor applies an additional 30-second default job deadline, configurable up to 120 seconds.
+Checks are debounced (350 ms by default) and run in a separate child process. Changes cancel the old process group, including compiler descendants on Linux, and supersede every response associated with the earlier project generation. Current document versions accompany diagnostics. One compiler job runs at a time. An eight-entry, 16 MiB LRU result cache reuses only byte-identical ordered source closures with the same assurance and compiler identity. Changed sources still receive genuine new analysis and kernel checking. Unchanged saves do not restart a check; explicit recheck bypasses the cache. Current document versions and all captured dependency versions accompany each terminal status. Windows cancellation terminates the compiler process tree through the system taskkill utility. Limits are 64 open source documents, 512 declared source files, and 8 MiB per project. Existing compiler/checker resource limits remain unchanged; the editor applies an additional 30-second default job deadline, configurable up to 120 seconds.
 
 Configuration and source files cannot select executables, load plugins, or change kernel authority. The extension uses only its bundled server. Untrusted workspaces retain syntax features without compiler execution. The Infoview uses escaped text and a script-disabled content-security policy; messages cannot execute HTML or scripts.
 
@@ -70,12 +74,13 @@ npm ci --ignore-scripts
 npm run prepare:compiler
 npm run build
 npm test
+npm run test:performance
 npm run package
 npm run test:packed
 xvfb-run -a npm run test:vscode
 ```
 
-`prepare:compiler` downloads the exact artifact pinned by `compiler-input.json`, verifies both archive and tarball SHA-256, and extracts the complete unchanged compiler. It needs a GitHub token with artifact read access through `gh`. Before the dependency lock is first captured, the workflow uses `npm install --ignore-scripts`; the final dependency lock is committed for subsequent `npm ci` runs.
+`prepare:compiler` downloads the exact artifact pinned by `compiler-input.json`, verifies both archive and tarball SHA-256, and extracts the complete unchanged compiler. It needs a GitHub token with artifact read access through `gh`. The committed dependency lock is used with `npm ci`. Native CI verifies and executes the same Linux-built tarball and VSIX rather than substituting rebuilt platform artifacts.
 
 The build bundles the client and server libraries, retains upstream licenses, and copies the compiler unchanged into both distributables. No npm or Marketplace publication occurs. The integration suite uses real compiler outputs, genuine independent-admission receipts, and actual installed artifacts. It does not rerun compiler fixed points or kernel qualification.
 

@@ -2,6 +2,12 @@
 
 Updated 2026-10-28 Asia/Jakarta. Branch `feat/psc1-lsp-vscode-20261028`; base `9d0e23c34484e4b1159f3e2428f5452139df530a` from qualified PR197. GitHub/cloud-only development, Linux CI, single-parent non-force expected-HEAD updates. No merge or registry publication.
 
+## Active 0.1.1 performance and platform follow-up
+
+User reported slow checking and a screenshot of `PSC1_SERVICE_PUBLICATION_PLATFORM_UNQUALIFIED` with Infoview stuck pending. The repair uses existing public candidate-analysis and exact-graph checking APIs, removing duplicate analysis/target publication work. Compiler and kernel sources remain unchanged. The receipt explicitly records logical-admission scope, no target validation, and no publication. The loader preserves client URI identity and unsaved buffers, including Windows aliases. Terminal UI state and dependency-version tracking were repaired. The server now skips unchanged saves, caches up to eight exact source results within 16 MiB, and terminates Windows compiler descendants on cancellation. Cursor selection no longer requires a server round-trip.
+
+Version 0.1.1 is under qualification. The updated workflow compares the previous immutable 0.1.0 npm package with this candidate on the same Linux runner, then installs the exact new artifacts on Windows and macOS. No local compiler execution, tests or dependency installation have been run. The historical sections below describe 0.1.0 and are not new-version qualification claims.
+
 ## Architecture and completed source
 
 Independent `editors/psc1` tooling contains a stdio LSP, bounded project-data adapter, isolated public-API compiler worker, original VS Code extension, and Lean-inspired Infoview. Both distributables bundle the unchanged qualified `.12` compiler and official Lean4.35.0 linear-memory Wasm checker. Compiler source, existing npm package layout, provider internals, self-hosting inputs and core CI are unchanged.

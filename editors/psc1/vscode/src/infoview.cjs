@@ -14,11 +14,60 @@ function escapeHtml(value) {
 
 function stateLabel(state) { return labels[state] || 'Not checked'; }
 
+const terminalStates = new Set(['checked', 'partial', 'rejected', 'error', 'unsupported', 'untrusted']);
+const successfulStates = new Set(['checked', 'partial']);
+
+function canReplaceStatus(previous, incoming) {
+  if (!previous || previous.version !== incoming.version) return true;
+  if (!Number.isFinite(previous.projectGeneration) || !Number.isFinite(incoming.projectGeneration)) return true;
+  if (incoming.projectGeneration < previous.projectGeneration) return false;
+  return incoming.projectGeneration !== previous.projectGeneration ||
+    !terminalStates.has(previous.state) || terminalStates.has(incoming.state);
+}
+
+/** Source-version metadata comes from the compiler capture, never from a timer. */
+function snapshotMatches(status, openVersions, normalizeUri = value => value) {
+  if (!status?.snapshotVersions || typeof status.snapshotVersions !== 'object' || Array.isArray(status.snapshotVersions)) return null;
+  const entries = Object.entries(status.snapshotVersions);
+  if (!entries.length) return false;
+  return entries.every(([uri, version]) => {
+    const current = openVersions.get(normalizeUri(uri));
+    return version === null ? current === undefined : Number.isInteger(version) && current === version;
+  });
+}
+
+function includesSource(status, uri, normalizeUri = value => value) {
+  return Boolean(status?.snapshotVersions && Object.keys(status.snapshotVersions).some(source => normalizeUri(source) === uri));
+}
+
+function infoAtPosition(status, position) {
+  if (!status) return null;
+  const contains = range => range && (position.line > range.start.line ||
+    (position.line === range.start.line && position.character >= range.start.character)) &&
+    (position.line < range.end.line || (position.line === range.end.line && position.character <= range.end.character));
+  const declarations = Array.isArray(status.declarations) ? status.declarations : [];
+  const declaration = declarations.find(item => contains(item.selectionRange)) ||
+    [...declarations].reverse().find(item => contains(item.range)) || null;
+  return { ...status, declaration, goalsAvailable: false, messages: status.diagnostics || [] };
+}
+
+function failureAdvice(info, messages) {
+  const content = [info?.summary, ...messages.map(message => message.message)].join('\n');
+  if (content.includes('PSC1_SERVICE_PUBLICATION_PLATFORM_UNQUALIFIED')) {
+    return 'This compiler build cannot complete checking on the current platform. Install the updated PSC1 extension build. Use “ProofScript: Show Server Information” to inspect the platform and runtime.';
+  }
+  if (content.includes('PSC1_RUNTIME_VERSION')) {
+    return 'Update VS Code so its bundled Node runtime meets the compiler minimum, then restart the ProofScript language server.';
+  }
+  return null;
+}
+
 /** No scripts, command links, workspace resources, or unescaped compiler text. */
 function renderInfoview(info, location, nonce) {
   const state = Object.hasOwn(labels, info?.state) ? info.state : 'pending';
   const declaration = info?.declaration;
-  const messages = Array.isArray(info?.messages) ? info.messages : (info?.diagnostics || []);
+  const messages = Array.isArray(info?.diagnostics) ? info.diagnostics : (Array.isArray(info?.messages) ? info.messages : []);
+  const advice = failureAdvice(info, messages);
   const currentLine = location?.line ?? -1;
   const nearby = messages.filter(message => message.range &&
     message.range.start.line <= currentLine && message.range.end.line >= currentLine);
@@ -66,7 +115,8 @@ summary:focus-visible { outline:1px solid var(--vscode-focusBorder); outline-off
 .details { font-size:11px; } footer { margin-top:24px; color:var(--vscode-descriptionForeground); font-size:11px; }
 </style></head><body class="state-${state}">
 <header><div class="location">${title}</div><div class="status" role="status">${stateLabel(state)}</div>
-<p class="summary">${escapeHtml(info?.summary || 'Waiting for compiler feedback.')}</p></header>
+<p class="summary">${escapeHtml(info?.summary || 'Waiting for compiler feedback.')}</p>
+${advice ? `<p class="hint">${escapeHtml(advice)}</p>` : ''}</header>
 ${declarationSection}${goals}
 ${nearby.length ? `<section><h2>Messages at cursor</h2>${nearby.map(renderMessage).join('')}</section>` : ''}
 <section><h2>All messages (${messages.length})</h2>${messages.length ? messages.map(renderMessage).join('') : '<p class="hint">No compiler messages for this snapshot.</p>'}</section>
@@ -75,4 +125,4 @@ ${nearby.length ? `<section><h2>Messages at cursor</h2>${nearby.map(renderMessag
 </body></html>`;
 }
 
-module.exports = { escapeHtml, stateLabel, renderInfoview };
+module.exports = { escapeHtml, stateLabel, renderInfoview, canReplaceStatus, snapshotMatches, includesSource, infoAtPosition, terminalStates, successfulStates };

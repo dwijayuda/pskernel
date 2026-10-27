@@ -32,6 +32,11 @@ assert.equal(oracle.binaryStageRefusals,30);
 assert.equal(oracle.recognizerRefusals,30);
 assert.equal(oracle.recognizerCases,10);
 const admissions=fs.readFileSync(path.join(dir,'whole.admissions.json'));
+// The source API emits one NDJSON transport LF. The byte profile requires EOF.
+assert.equal(admissions.at(-1),10,'pinned source transport LF');
+const canonicalAdmissions=admissions.subarray(0,admissions.length-1);
+assert.equal(canonicalAdmissions.at(-1),125,'canonical packet closes at EOF');
+fs.writeFileSync(path.join(dir,'whole.canonical.admissions.json'),canonicalAdmissions);
 run(process.execPath,[resolveTypeScriptCli(),...typeScriptProfileArgs([
  path.join(dir,'direct.ts'),path.join(dir,'stages.ts'),path.join(dir,'whole.ts'),'--target','ES2022','--module','ES2022',
  '--moduleResolution','bundler','--strict','--skipLibCheck','--noEmitOnError','--pretty','false'])]);
@@ -76,9 +81,22 @@ const official=JSON.parse(run('.lake/build/bin/psc1_independent_checker',['--che
 assert.equal(official.accepted,true);
 assert.equal(official.leanVersion,'4.35.0');
 assert.equal(official.leanCommit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
+const canonicalOfficial=JSON.parse(run('.lake/build/bin/psc1_independent_checker',['--check'],canonicalAdmissions));
+assert.equal(canonicalOfficial.accepted,true);
+assert.equal(canonicalOfficial.leanVersion,'4.35.0');
+assert.equal(canonicalOfficial.leanCommit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
 const generated=await import(pathToFileURL(path.resolve('dist/pskernel-min/regular-ingress/vectors.js')).href);
-const owned=createRegularCoreIngress(generated)(new Uint8Array(admissions));
-assert.equal(owned.accepted,true,'R4B exact new source packet');
+const byteCheck=createRegularCoreIngress(generated);
+const framed=byteCheck(new Uint8Array(admissions));
+assert.equal(framed.accepted,false,'transport LF remains outside the byte profile');
+assert.equal(framed.delegated,false);
+const owned=byteCheck(new Uint8Array(canonicalAdmissions));
+fs.writeFileSync(path.join(dir,'byte-admission.json'),JSON.stringify({
+ originalTransport:{accepted:framed.accepted,code:framed.code,delegated:framed.delegated,bytes:admissions.length,sha256:sha(admissions)},
+ canonical:{accepted:owned.accepted,code:owned.code,delegated:owned.delegated,bytes:canonicalAdmissions.length,sha256:sha(canonicalAdmissions)},
+ transform:'Remove exactly one terminal transport LF; preserve every preceding byte.',
+ officialOriginal:official.accepted,officialCanonical:canonicalOfficial.accepted},null,2)+'\n');
+assert.equal(owned.accepted,true,'R4B exact canonical source packet '+JSON.stringify(owned));
 assert.equal(owned.delegated,false);
 const policy=JSON.parse(fs.readFileSync(path.join(dir,'source-policy.json')));
 assert.equal(policy.sourceAccepted,true);assert.equal(policy.targetAccepted,true);
@@ -96,7 +114,7 @@ assert.equal(origins.length,1);
 assert.equal(origins[0].batches.length,6);
 const stageIr=JSON.parse(fs.readFileSync(path.join(dir,'stages.ir.json')));
 assert.equal(stageIr[0],'psc1-ir/1');assert.equal(stageIr[4].length,4);
-const paths=['direct.ts','direct.js','stages.ts','stages.js','stages.ir.json','whole.ts','whole.js','whole.admissions.json','whole.ir.json','origins.json','source.lean','native.json'];
+const paths=['direct.ts','direct.js','stages.ts','stages.js','stages.ir.json','whole.ts','whole.js','whole.admissions.json','whole.canonical.admissions.json','byte-admission.json','whole.ir.json','origins.json','source.lean','native.json'];
 const files=paths.map(file=>{const bytes=fs.readFileSync(path.join(dir,file));return {file,bytes:bytes.length,sha256:sha(bytes)}});
 assert.equal(sha(fs.readFileSync('packages/pskernel-min/src/Ps/MinKernel/Tests/CompilerScalar.lean')),
  sha(fs.readFileSync(path.join(dir,'source.lean'))),'exact same physical source');
@@ -111,7 +129,10 @@ const receipt={schema:'psc1-r5-compiler-preservation-execution/1',head:process.e
  literalAbiProbes:3,checkedStructuralIrDeclarations:4,captureProbe:true,combinedCaptureCurryProbe:true,curryProbes:3,operandTraceProbes:traces.length,arityRefusals:oracle.arityRefusals,
  strictIrRefusals:oracle.strictIrRefusals,binaryStageRefusals:oracle.binaryStageRefusals,
  recognizerRefusals:oracle.recognizerRefusals,recognizerCases:oracle.recognizerCases,official:{accepted:official.accepted,version:official.leanVersion,commit:official.leanCommit},
- ownedNewSourcePacket:{accepted:owned.accepted,delegated:owned.delegated,bytes:admissions.length,sha256:sha(admissions)},
+ originalTransportPacket:{bytes:admissions.length,sha256:sha(admissions),officialAccepted:official.accepted,
+  ownedRefused:!framed.accepted,code:framed.code,delegated:framed.delegated},
+ ownedNewSourcePacket:{accepted:owned.accepted,delegated:owned.delegated,bytes:canonicalAdmissions.length,sha256:sha(canonicalAdmissions),officialAccepted:canonicalOfficial.accepted,
+  framing:'Exactly one terminal source-API transport LF removed; all other bytes preserved'},
  policy,originalIrAbi,files,sourceFiles,resourceUsage:process.resourceUsage(),
  boundary:'Actual sub-stage theorems, template correspondence and finite engine/ABI tests. No full compiler or ECMAScript preservation theorem; no production promotion.'};
 fs.writeFileSync(path.join(dir,'execution.json'),JSON.stringify(receipt,null,2)+'\n');

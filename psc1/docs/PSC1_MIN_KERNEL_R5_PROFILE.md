@@ -152,3 +152,18 @@ finite native/generated ABI comparisons before the longer portability job. Its
 fast receipt explicitly excludes official and R4B byte admission, which remain
 required in portability. Superseded focused runs cancel; only terminal success
 for every selected job at the final stable source can qualify the batch.
+
+## Canonical bytes versus source transport framing
+
+The actual source API ends its admission message with one NDJSON transport LF.
+The exact R4B byte profile deliberately requires compact input and EOF. The
+original 8834-byte fixture message therefore refuses, as the existing trailing
+input policy requires. Its native/generated source execution and official
+transport admission are separate successful steps.
+
+The harness retains the exact original message and its hash, asserts its final
+byte is LF, removes exactly that final framing byte, and retains the distinct
+canonical bytes/hash. Every preceding byte is preserved. Both forms receive
+independent official admission checks; only the canonical form must pass R4B.
+The original LF-framed form remains an explicit R4B refusal, without delegation.
+No whitespace policy, decoder, fuel/size limit or acceptance rule is widened.

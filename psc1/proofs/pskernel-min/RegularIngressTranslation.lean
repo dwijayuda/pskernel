@@ -1,4 +1,5 @@
 import RegularIngressModel
+import Ps.MinKernel.Profile.RegularIngressOperational
 import CoreTranslation
 
 namespace Ps.MinKernel.RegularIngressTranslation
@@ -257,6 +258,80 @@ theorem group_translation (initial final : PsMinRegCoreState) (source : PsMinReg
 #print axioms all_constructor_fields_translation
 #print axioms constructor_count_exact
 #print axioms group_translation
+
+
+inductive OrderedPlans : Nat → List PsMinRegCorePlan → Prop where
+  | nil : OrderedPlans 0 []
+  | cons (count : Nat) (source : PsMinRegCoreGroup) (spec : PsMinRegSpec)
+      (groups : List PsMinRegCorePlan) (rest : OrderedPlans count groups) :
+      OrderedPlans (Nat.succ count) (⟨source, spec, count⟩ :: groups)
+
+theorem ordered_member_bound (count : Nat) (groups : List PsMinRegCorePlan)
+    (order : OrderedPlans count groups) (plan : PsMinRegCorePlan) (member : plan ∈ groups) :
+    plan.ordinal < count := by
+  induction order with
+  | nil => cases member
+  | cons count source spec groups rest ih =>
+    cases member with
+    | head => exact Nat.lt_succ_self count
+    | tail _ member => exact Nat.lt_trans (ih member) (Nat.lt_succ_self count)
+
+theorem ordered_member_spec (count : Nat) (groups : List PsMinRegCorePlan)
+    (order : OrderedPlans count groups) (plan : PsMinRegCorePlan) (member : plan ∈ groups) :
+    psMinRegCoreSpecAt (psMinRegCoreSpecs groups) (count - (plan.ordinal + 1)) = some plan.spec := by
+  induction order with
+  | nil => cases member
+  | cons count source spec groups rest ih =>
+    cases member with
+    | head =>
+      simp only [Nat.succ_eq_add_one, Nat.sub_self, psMinRegCoreSpecs, psMinRegCoreSpecAt]
+    | tail _ member =>
+      have bounded : plan.ordinal + 1 ≤ count :=
+        Nat.succ_le_of_lt (ordered_member_bound count groups rest plan member)
+      have position : Nat.succ count - (plan.ordinal + 1) = Nat.succ (count - (plan.ordinal + 1)) :=
+        Nat.succ_sub bounded
+      rw [position]
+      exact ih member
+
+theorem build_plans_order (fuel : Nat) (entries : List PsMinRegCoreEntry)
+    (initial final : PsMinRegCoreState) (order : OrderedPlans initial.count initial.groups)
+    (h : psMinRegCoreBuildPlans fuel entries initial = some final) :
+    OrderedPlans final.count final.groups := by
+  induction fuel generalizing entries initial final with
+  | zero =>
+    cases entries with
+    | nil => cases h; exact order
+    | cons entry rest => simp [psMinRegCoreBuildPlans] at h
+  | succ fuel ih =>
+    cases entries with
+    | nil => cases h; exact order
+    | cons entry rest =>
+      cases entry with
+      | definition declaration =>
+        simp only [psMinRegCoreBuildPlans] at h
+        split at h
+        next fresh => exact ih rest _ final order h
+        next => contradiction
+      | inductiveE group =>
+        cases hg : psMinRegCoreBuildGroup initial group with
+        | none => simp [psMinRegCoreBuildPlans, hg] at h
+        | some next =>
+          have tail : psMinRegCoreBuildPlans fuel rest next = some final := by
+            simpa only [psMinRegCoreBuildPlans, hg] using h
+          obtain ⟨spec, image, groups, count⟩ := group_translation initial next group hg
+          have nextOrder : OrderedPlans next.count next.groups := by
+            rw [groups, count]
+            exact .cons initial.count group spec initial.groups order
+          exact ih rest next final nextOrder tail
+
+theorem actual_plans_order (entries : List PsMinRegCoreEntry) (state : PsMinRegCoreState)
+    (h : psMinRegCorePlans entries = some state) : OrderedPlans state.count state.groups :=
+  build_plans_order 512 entries _ state OrderedPlans.nil h
+
+#print axioms ordered_member_bound
+#print axioms ordered_member_spec
+#print axioms build_plans_order
+#print axioms actual_plans_order
 
 -- A mathematical ambient-code lift, independent of the partial lowering code.
 def liftCode (amount : Nat) : PsMinRegTy → PsMinRegTy

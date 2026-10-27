@@ -52,7 +52,9 @@ theorem lift_input (type : PsMinRegTy) (amount : Nat) :
 theorem denote_prefix_lift (heads data : List Type) (type : PsMinRegTy) :
     Denote (heads ++ data) (psMinRegCoreLiftCode type heads.length) = Denote data type := by
   induction heads with
-  | nil => rw [lift_zero]; rfl
+  | nil =>
+    change Denote data (psMinRegCoreLiftCode type 0) = Denote data type
+    rw [lift_zero]
   | cons head tail ih =>
     change Denote (head :: (tail ++ data)) (psMinRegCoreLiftCode type (Nat.succ tail.length)) = Denote data type
     rw [lift_succ, denote_lift]

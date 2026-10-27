@@ -53,12 +53,15 @@ def renderUnit (plan : PsModulePlan) (digest : String)
   let typeExports := if unit.index == 0 || typeNames.isEmpty then "" else
     "export type { " ++ String.intercalate ", " typeNames ++ " } from " ++
       psJsonQuote (psModuleSpecifier 0 true) ++ ";\n"
-  return { unit := unit.index,
+  return {
+    unit := unit.index
     source := header ++ String.intercalate "\n" (structures.flatten ++ inductives.flatten) ++ "\n" ++
-      typeExports ++ String.intercalate "\n" declarations ++ "\n",
-    declarations := "", imports,
+      typeExports ++ String.intercalate "\n" declarations ++ "\n"
+    declarations := ""
+    imports := imports
     exports := (if unit.index == 0 then helpers ++ symbols ++ constructors else []) ++
-      unit.declarations.map (fun d => d.name) }
+      unit.declarations.map (fun d => d.name)
+  }
 
 end Ps.Internal.ModularTs
 

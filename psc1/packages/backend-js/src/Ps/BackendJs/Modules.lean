@@ -49,7 +49,7 @@ def declarationType (declaration : PsVerifiedIrDeclaration) : Except String Stri
   return "export declare function " ++ declaration.name ++ "(" ++
     String.intercalate ", " parameters ++ "): " ++ result ++ ";\n"
 
-def unitImports (plan : PsModulePlan) (unit : PsModuleUnit) : List PsModuleImport :=
+def unitImports (_plan : PsModulePlan) (unit : PsModuleUnit) : List PsModuleImport :=
   if unit.index == 0 then []
   else
     let runtimeValues := helpers ++ (unit.imports.filter (fun item => item.unit == 0)).map (fun item => item.name)
@@ -81,9 +81,13 @@ def renderUnit (plan : PsModulePlan) (lowered : PsJsIrModule)
       String.intercalate ", " types ++ " } from " ++ psJsonQuote (psModuleSpecifier 0 false) ++ ";\n"
   let declarations ← unit.declarations.mapM declarationType
   let nominal ← if unit.index == 0 then nominalTypes plan.raw else pure ""
-  return { unit := unit.index, source := header ++ String.join printed,
-    declarations := typeHeader ++ nominal ++ String.join declarations,
-    imports, exports := (if unit.index == 0 then helpers else []) ++ selected.map (fun d => d.name) }
+  return {
+    unit := unit.index
+    source := header ++ String.join printed
+    declarations := typeHeader ++ nominal ++ String.join declarations
+    imports := imports
+    exports := (if unit.index == 0 then helpers else []) ++ selected.map (fun d => d.name)
+  }
 
 end Ps.Internal.ModularJs
 

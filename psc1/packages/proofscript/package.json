@@ -48,7 +48,11 @@
     "defaultKernel": "wasm",
     "defaultEngine": "js",
     "compilerSourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
-    "finalCrossPlatformRelease": false
+    "finalCrossPlatformRelease": false,
+    "compilerInputGrammars": [
+      "lean",
+      "ps"
+    ]
   },
   "scripts": {
     "build": "node ../../scripts/build-packages.mjs build --package proofscript",

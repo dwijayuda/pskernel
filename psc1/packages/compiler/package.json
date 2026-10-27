@@ -44,10 +44,13 @@
     "packageKind": "shared-compiler-adapter",
     "canonicalSources": "src",
     "sourceVariants": [
+      "lean"
+    ],
+    "publishingRequiresQualification": true,
+    "compilerInputGrammars": [
       "lean",
       "ps"
-    ],
-    "publishingRequiresQualification": true
+    ]
   },
   "scripts": {
     "build": "node ../../scripts/build-packages.mjs build --package compiler",

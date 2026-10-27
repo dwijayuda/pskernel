@@ -10,8 +10,7 @@
     "packageKind": "shared-backend-adapter",
     "canonicalSources": "src",
     "sourceVariants": [
-      "lean",
-      "ps"
+      "lean"
     ],
     "publishingRequiresQualification": true,
     "schema": "psc1-checked-dispatch-package/1",
@@ -20,7 +19,11 @@
     "authority": "candidate-only",
     "compilerFrontend": false,
     "admissionAuthority": false,
-    "publicationAuthority": false
+    "publicationAuthority": false,
+    "compilerInputGrammars": [
+      "lean",
+      "ps"
+    ]
   },
   "license": "Apache-2.0",
   "type": "module",

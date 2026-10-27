@@ -208,6 +208,7 @@ try{
  verifyTars();
  for(const p of contract.packages)run('npm',['run','build'],path.join(root,'packages',p.directory));
  record('individual-build-command-all24');
+ assert.deepEqual(cases.map(c=>c.name).sort(),contract.requiredCases,'finite distribution case coverage');
  const report={schema:'psc1-simple-npm-package-qualification/1',testedCommit:process.env.GITHUB_SHA,
   status:'passed',modularNpmDistribution:'qualified-linux-packaging-scope',independentCompilerInternalModularity:'deferred',
   cases,packages:builds.map(({files,...r})=>r),sharedImplementationOwner:'proofscript',

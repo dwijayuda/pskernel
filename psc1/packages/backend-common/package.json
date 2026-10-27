@@ -10,10 +10,13 @@
     "packageKind": "source-only",
     "canonicalSources": "src",
     "sourceVariants": [
+      "lean"
+    ],
+    "publishingRequiresQualification": true,
+    "compilerInputGrammars": [
       "lean",
       "ps"
-    ],
-    "publishingRequiresQualification": true
+    ]
   },
   "dependencies": {
     "proofscript": "0.1.0-psc1.12"

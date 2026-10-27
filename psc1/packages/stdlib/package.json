@@ -46,7 +46,11 @@
       "lean",
       "ps"
     ],
-    "publishingRequiresQualification": true
+    "publishingRequiresQualification": true,
+    "compilerInputGrammars": [
+      "lean",
+      "ps"
+    ]
   },
   "scripts": {
     "build": "node ../../scripts/build-packages.mjs build --package stdlib",

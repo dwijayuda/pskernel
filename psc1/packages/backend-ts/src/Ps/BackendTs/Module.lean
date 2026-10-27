@@ -822,10 +822,10 @@ def psTsSaturatedSelfWithFuel (self target : String) (arity fuel : Nat) :
             else
               let shadows : PsVerifiedIrMatchBinding -> Bool :=
                 fun (binding : PsVerifiedIrMatchBinding) => psStringEq binding.name self;
-              let unsafe : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr) -> Bool :=
+              let shadowed : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr) -> Bool :=
                 fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>
                   psListAny shadows (Prod.fst (Prod.snd alternative));
-              if psListAny unsafe alternatives then Option.none
+              if psListAny shadowed alternatives then Option.none
               else
                 match psTsEtaAlternatives smaller alternatives with
                 | Option.none => Option.none

@@ -96,7 +96,7 @@ fs.writeFileSync(path.join(dir,'byte-admission.json'),JSON.stringify({
  canonical:{accepted:owned.accepted,code:owned.code,delegated:owned.delegated,bytes:canonicalAdmissions.length,sha256:sha(canonicalAdmissions)},
  transform:'Remove exactly one terminal transport LF; preserve every preceding byte.',
  officialOriginal:official.accepted,officialCanonical:canonicalOfficial.accepted},null,2)+'\n');
-assert.equal(owned.accepted,true,'R4B exact canonical source packet '+JSON.stringify(owned));
+assert.equal(owned.accepted,true,'R4B exact canonical source packet: '+owned.code);
 assert.equal(owned.delegated,false);
 const policy=JSON.parse(fs.readFileSync(path.join(dir,'source-policy.json')));
 assert.equal(policy.sourceAccepted,true);assert.equal(policy.targetAccepted,true);

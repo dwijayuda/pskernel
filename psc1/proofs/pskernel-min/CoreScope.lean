@@ -1,5 +1,4 @@
 import Ps.Core.Subst
-import Lean
 
 namespace Ps.MinKernel.CoreScope
 
@@ -12,20 +11,25 @@ theorem instantiate_lift_worker (expression replacement : PsExpr) (depth : Nat) 
   | bvar index =>
     by_cases h : Nat.ble depth index = true
     · have hle : depth ≤ index := by simpa only [Nat.ble_eq] using h
+      have less : depth < Nat.add index 1 := by
+        simpa only [Nat.add_one] using Nat.lt_succ_of_le hle
       have hne : ¬ Nat.beq (Nat.add index 1) depth = true := by
-        simp only [Nat.beq_eq]
-        omega
+        intro equal
+        have equal' : Nat.add index 1 = depth := by simpa only [Nat.beq_eq] using equal
+        exact (Nat.ne_of_gt less) equal'
       have hlt : Nat.blt depth (Nat.add index 1) = true := by
-        simp only [Nat.blt_eq]
-        omega
+        simpa only [Nat.blt_eq] using less
       simp [psExprLiftBVarsWorker, psExprInstantiateAtWorker, h, hne, hlt]
     · have hle : ¬ depth ≤ index := by simpa only [Nat.ble_eq] using h
       have hne : ¬ Nat.beq index depth = true := by
-        simp only [Nat.beq_eq]
-        omega
+        intro equal
+        have equal' : index = depth := by simpa only [Nat.beq_eq] using equal
+        apply hle
+        simpa only [equal'] using (Nat.le_refl depth)
       have hlt : ¬ Nat.blt depth index = true := by
-        simp only [Nat.blt_eq]
-        omega
+        intro less
+        have less' : depth < index := by simpa only [Nat.blt_eq] using less
+        exact hle (Nat.le_of_lt less')
       simp [psExprLiftBVarsWorker, psExprInstantiateAtWorker, h, hne, hlt]
   | fvar id => rfl
   | mvar id => rfl

@@ -61,7 +61,7 @@ Current checked publication is Linux-qualified; compile does not publish.
 `;
 const hints = [
   [/OPTIONAL_PACKAGE_MISSING/, 'Install the exact optional package named in the diagnostic; no fallback is used.'],
-  [/RUNTIME_VERSION|NODE_PIN/, 'Use Node >=22.23.3 or Bun >=1.4.0. Exact CI versions are reproduction records, not installation pins.'],
+  [/RUNTIME_VERSION|NODE_PIN/, 'Use Node >=22.23.3 or Bun >=1.4.4. Exact CI versions are reproduction records, not installation pins.'],
   [/WATCH_SUPERSEDED/, 'The watch supervisor will retry the latest inputs; the previous checked generation is preserved.'],
   [/ENOENT/, 'Check declared source paths. Watch mode resumes when missing files are restored.'],
   [/OUTPUT_DIRECTORY/, 'Pass --out directory to psc build.'],

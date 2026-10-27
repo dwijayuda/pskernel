@@ -142,7 +142,7 @@ tested runtime versions and executable hashes separately. The new Node/Bun
 matrix must pass before claiming this candidate qualified; later untested
 versions are a compatibility policy, not automatically new CI evidence.
 
-Bun >=1.4.0 is the additional runtime under qualification. After the npm tarball
+Bun >=1.4.4 is the additional runtime under qualification. After the npm tarball
 installation above, run the locally installed CLI explicitly under Bun:
 
 ```sh

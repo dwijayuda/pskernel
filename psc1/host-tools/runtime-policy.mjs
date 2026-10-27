@@ -1,6 +1,6 @@
 // User compatibility policy. Qualification receipts still record exact executable identities.
 export const minimumNodeVersion = '22.23.3';
-export const minimumBunVersion = '1.4.0';
+export const minimumBunVersion = '1.4.4';
 function atLeast(actual, minimum) {
   const match = /^(\d+)\.(\d+)\.(\d+)$/.exec(actual || '');
   if (!match) return false; // Do not silently qualify prerelease/custom version syntax.

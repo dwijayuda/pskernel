@@ -10,7 +10,7 @@ No merge or npm publication authorized.
 
 The .9 package refuses any Node version except22.23.3 before checking.
 This host change replaces both installed/session exact-version refusals with
-Node>=22.23.3 or Bun>=1.4.0 policy. Exact CI executable versions/hashes remain
+Node>=22.23.3 or Bun>=1.4.4 policy. Exact CI executable versions/hashes remain
 reproduction evidence. Bun uses a separate parse-only JS consumer (its --check
 flag has different semantics), retains the independent official kernel and
 mandatory public-API consumer, and child launches disable automatic installation,
@@ -107,3 +107,17 @@ unexplained; retain its evidence rather than claiming a diagnosed product fix.
 
 [Runtime/watch receipt](docs/PSC1_RUNTIME_WATCH_QUALIFICATION_2026-10-27.json)
 owns exact attempts, package hashes and remaining evidence boundaries.
+
+## Bun minimum correction
+
+Run40446238737 at f35fc543 passed the complete installed job121998272919:
+root SHA256254ea9e8571e87e9b3bf38f94a2c5257eea52321dffbafa7d1a0ee7247d3ef07,
+3831107 bytes; all11 watch cases,16 applications/264 observations/eight global
+application cases,32 checked publications/143 refusals and remaining gates.
+Node22.23.3/24/26 positive and Node20/22.0 negative rows passed. Overall promotion
+was blocked by actual Bun1.4.0 WebAssembly.Module.exports descriptor failure on
+the generated Wasm GC compiler. Actual Bun1.4.4 passes all four engines.
+Support Bun>=1.4.4 and test Bun1.4.0 refusal, preserving export/ABI validation.
+A new cohort run must finish before qualifying its changed root hashes.
+The six existing dispatch/publication commands now have separate CI steps for
+visibility; all commands, assertions and resource limits remain.

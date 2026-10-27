@@ -15,8 +15,10 @@ if (process.env.PSC1_EXPECT_RUNTIME_REFUSAL === '1') {
   const denied = f.call(['--identity','--diagnostics=json']);
   assert.notEqual(denied.status,0);assert.match(denied.stderr,/PSC1_RUNTIME_VERSION/);
   fs.mkdirSync('dist/cli/runtime',{recursive:true});
-  fs.writeFileSync('dist/cli/runtime/node-'+actual.node+'-refusal.json',JSON.stringify({
-    status:'passed-negative',versions:actual,diagnostic:denied.stderr,testedCommit:process.env.GITHUB_SHA},null,2));
+  fs.writeFileSync('dist/cli/runtime/'+(actual.bun?'bun-'+actual.bun:'node-'+actual.node)+'-refusal.json',JSON.stringify({
+    schema:'psc1-runtime-compatibility/1',status:'passed-negative',versions:actual,
+    executable:f.runtime,executableSha256:crypto.createHash('sha256').update(fs.readFileSync(f.runtime)).digest('hex'),
+    diagnostic:denied.stderr,testedCommit:process.env.GITHUB_SHA},null,2));
   fs.rmSync(f.directory,{recursive:true,force:true});
   console.log('PSC1_RUNTIME_MINIMUM_REFUSAL: PASS');process.exit(0);
 }

@@ -122,14 +122,18 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: node scripts/cli-application-regressions.mjs
-      - name: Preserve every existing installed dispatch and publication regression
-        run: |
-          node scripts/checked-component-tests.mjs
-          node scripts/transactional-publication-tests.mjs
-          node scripts/checked-dispatch-installed.mjs
-          node scripts/slim-universal-installed.mjs
-          node scripts/slim-universal-io-preflight.mjs
-          node scripts/checked-publication-installed.mjs
+      - name: Preserve component grammar and ABI refusals
+        run: node scripts/checked-component-tests.mjs
+      - name: Preserve transactional publication regressions
+        run: node scripts/transactional-publication-tests.mjs
+      - name: Preserve checked dispatch regressions
+        run: node scripts/checked-dispatch-installed.mjs
+      - name: Preserve slim universal installed regressions
+        run: node scripts/slim-universal-installed.mjs
+      - name: Preserve installed IO adapter preflight
+        run: node scripts/slim-universal-io-preflight.mjs
+      - name: Preserve checked publication cases and refusals
+        run: node scripts/checked-publication-installed.mjs
       - name: Preserve all actual application and target consumer regressions
         env:
           GH_TOKEN: ${{ github.token }}
@@ -179,7 +183,7 @@ jobs:
           - {label: node-minimum, node: '22.23.3', bun: '', negative: ''}
           - {label: node24, node: '24', bun: '', negative: ''}
           - {label: node26, node: '26', bun: '', negative: ''}
-          - {label: bun-minimum, node: '22.23.3', bun: '1.4.0', negative: ''}
+          - {label: bun-older-refusal, node: '22.23.3', bun: '1.4.0', negative: '1'}
           - {label: node20-refusal, node: '20', bun: '', negative: '1'}
     defaults:
       run:
@@ -203,7 +207,9 @@ jobs:
         run: |
           if [ -n '${{ matrix.bun }}' ]; then
             export PSC1_TEST_RUNTIME="$(command -v bun)"
-            bun --no-install --no-macros --no-env-file test/host/runtime-policy.test.mjs
+            if [ -z '${{ matrix.negative }}' ]; then
+              bun --no-install --no-macros --no-env-file test/host/runtime-policy.test.mjs
+            fi
           elif [ -z '${{ matrix.negative }}' ]; then
             node test/host/runtime-policy.test.mjs
           fi
@@ -255,7 +261,7 @@ jobs:
           r.runtimeEvidence=rows.map(row=>({status:row.status,versions:row.versions,executableSha256:row.executableSha256}));
           fs.writeFileSync('installable/package-receipt.json',JSON.stringify(r,null,2)+'\n');
           fs.cpSync('runtime-evidence','installable/runtime-evidence',{recursive:true});
-          fs.writeFileSync('installable/INSTALL.txt','Requires Node >=22.23.3, or Bun >=1.4.0 as explicitly qualified.\n\nExtract this ZIP. In its tarballs directory run:\n  npm install --offline --ignore-scripts ./'+r.tarball+'\n  npm exec -- psc --help\n\nThe default compiler and independent Lean Wasm checker are included. Optional output SDKs and Rust/compiler-Wasm engines are in the full toolchain artifact from this same workflow.\nProject-owned components: Apache-2.0. Third-party notices retained. No registry publication; Linux qualification only.\n');
+          fs.writeFileSync('installable/INSTALL.txt','Requires Node >=22.23.3, or Bun >=1.4.4 as explicitly qualified.\n\nExtract this ZIP. In its tarballs directory run:\n  npm install --offline --ignore-scripts ./'+r.tarball+'\n  npm exec -- psc --help\n\nThe default compiler and independent Lean Wasm checker are included. Optional output SDKs and Rust/compiler-Wasm engines are in the full toolchain artifact from this same workflow.\nProject-owned components: Apache-2.0. Third-party notices retained. No registry publication; Linux qualification only.\n');
           console.log('PSC1_INSTALLABLE_ROOT '+JSON.stringify({tarball:r.tarball,sha256:r.sha256,bytes:r.bytes,runtimes:r.runtimeEvidence}));
           JS
       - uses: actions/upload-artifact@v4

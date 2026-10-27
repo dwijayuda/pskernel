@@ -9,9 +9,10 @@ for (const version of ['22.23.3', '24.0.0', '26.1.2', '30.0.0'])
   assert.equal(requireSupportedRuntime({node: version}).version, version);
 for (const version of ['20.19.0', '21.9.0', '22.0.0', '22.23.2', '22.0.0-rc.1', 'invalid'])
   assert.throws(() => requireSupportedRuntime({node: version}), /PSC1_RUNTIME_VERSION/);
-for (const version of ['1.4.0', '1.4.4', '2.0.0'])
+for (const version of ['1.4.4', '1.5.0', '2.0.0'])
   assert.equal(requireSupportedRuntime({node: '0.0.0', bun: version}).name, 'bun');
-assert.throws(() => requireSupportedRuntime({node: '22.23.3', bun: '1.3.0'}), /requires bun/);
+for (const version of ['1.3.0', '1.4.0', '1.4.3'])
+  assert.throws(() => requireSupportedRuntime({node: '22.23.3', bun: version}), /requires bun/);
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'psc1-syntax-'));
 try {
   for (const [text, accepted] of [

@@ -1,7 +1,7 @@
 {
   "schema": "psc1-runtime-watch-qualification/1",
   "updated": "2026-10-27",
-  "status": "source-qualified-installed-retry-pending",
+  "status": "source-and-installed-qualified-bun-minimum-correction-pending",
   "pullRequest": 193,
   "baseCommit": "94e0c13f6a4b434f73c859cc0c716cb6fb8d1340",
   "firstImplementationCommit": "91bcbd107f375eea5cf5f87f15a9be9fe561b7c4",
@@ -9,7 +9,7 @@
   "version": "0.1.0-psc1.11",
   "runtimePolicy": {
     "node": ">=22.23.3",
-    "bun": ">=1.4.0",
+    "bun": ">=1.4.4",
     "otherRuntimes": "unqualified",
     "dependencyMinimum": "bundled independent kernel >=22.23.3",
     "exactPins": "CI reproduction only"
@@ -34,8 +34,8 @@
     "all prior installed and application gates",
     "both grammars; JS/TS/Rust/Wasm watch output",
     "real superseded staged request; pointer preservation",
-    "actual Node22.23.3/24/26 and Bun1.4.0/1.4.4; four compiler engines; both grammars",
-    "Node22.0.0/20 installed refusals",
+    "actual Node22.23.3/24/26 and Bun1.4.4; four compiler engines; both grammars",
+    "Node22.0.0/20 and Bun1.4.0 installed refusals",
     "dependency-selected source gates",
     "actual native Rust compiler cancellation under Node and Bun, no surviving guardian/native descendants"
   ],
@@ -101,6 +101,12 @@
         121993470995
       ],
       "reason": "Installed full-watch initial non-JS target receipt timed out; original test captured stderr before waiting and hid the actual child diagnostic. No candidate qualification. Added live per-case/failure diagnostics at f35fc543e18aaef45404470627b9631ac50181b6; no timeout or admission relaxation."
+    },
+    {
+      "commit": "f35fc543e18aaef45404470627b9631ac50181b6",
+      "run": 40446238737,
+      "job": 122013012001,
+      "reason": "Actual Bun1.4.0 fails WebAssembly.Module.exports on the genuine generated Wasm GC compiler. Bun1.4.4 passes the same workload. Preserve export checks; support Bun>=1.4.4, add actual Bun1.4.0 refusal. Node22.23.3/24/26 and Node20/22.0 refusal rows passed. No artifact promotion."
     }
   ],
   "finalRelease": false,
@@ -192,21 +198,27 @@
   },
   "installedQualification": {
     "run": 40446238737,
+    "job": 121998272919,
     "commit": "f35fc543e18aaef45404470627b9631ac50181b6",
-    "status": "pending",
-    "passed": [
-      "source preflight",
-      "nine owned tarballs and two preserved vendor SDK archives",
-      "55 offline local/global CLI requests",
-      "actual Bun1.4.4 four engines/both grammars and watch",
-      "all11 full watch cases",
-      "frozen practical applications"
-    ],
-    "pending": [
-      "existing dispatch/publication regressions",
-      "remaining target-consumer gates",
-      "six-entry runtime matrix",
-      "seven-row installable root seal"
-    ]
+    "status": "full-installed-passed-runtime-matrix-failed",
+    "rootSha256": "254ea9e8571e87e9b3bf38f94a2c5257eea52321dffbafa7d1a0ee7247d3ef07",
+    "rootBytes": 3831107,
+    "watchCases": 11,
+    "applications": 16,
+    "applicationCases": 264,
+    "globalApplicationCases": 8,
+    "checkedPublicationCases": 32,
+    "checkedPublicationRefusals": 143
+  },
+  "selectedSourceQualification": {
+    "run": 40446244175,
+    "commit": "f35fc543e18aaef45404470627b9631ac50181b6",
+    "status": "success",
+    "fullBaselineRun": 40442150370
+  },
+  "documentationQualification": {
+    "run": 40450336220,
+    "commit": "3927e69f7e8c62b9965fb943d11deca1097e4ace",
+    "status": "success"
   }
 }

@@ -2,24 +2,85 @@
 
 Updated 2026-10-27 Asia/Jakarta. Active branch `feat/psc1-modular-origins-20261027`,
 from PR#195 HEAD `cc13ebfabf6763703ee1ec75a663002a9134bc74`.
+Use connected GitHub/Linux CI only. Single-parent expected-HEAD/non-force updates;
+no merge or registry publication. PR#195 state is archived byte-for-byte in
+[history](docs/history/AI_WORK_STATE_BEFORE_TRANSFORM_OWNERSHIP_2026-10-27.md).
 
-## Transform provenance and extended modular graph — implementation pending CI
+## Transform ownership and extended graph — dedicated gate passed, full source pending
 
-The specialization and worker-fusion creation sites now return explicit immediate
-parent provenance. Existing raw-IR APIs project the same transform results;
-no synthetic-name-prefix ownership inference is used. Ownership composition
-rechecks both raw modules and complete, unique value/type origin coverage.
-Tests cover generic instantiation, actual worker creation, authored-name collisions,
-missing/duplicate/unknown origins, open arguments and invalid IR. These changes
-are unqualified until actual Linux CI completes. Next: extend the bounded module
-graph to real compiler collections/text/JSON components, qualify both grammars,
-Node/Bun JS/TS packages and compare transforms against the PR#195 implementation.
+Code `74dd51be44a905e49c3c5d8c505bd10d3ca6a885` passes
+[40479759828](https://github.com/dwijayuda/pskernel/actions/runs/40479759828),
+job122106814693. Full source/current generated-compiler qualification remains
+required before claiming this source checkpoint qualified. Subsequent changes
+add documentation, source-import telemetry and reusable CI scheduling only.
 
-Use GitHub/Linux CI only; exact independent Lean4.35 admission, strict IR, limits,
-negative tests and frozen compiler/kernel/provider payloads remain required.
-Preserve expected-HEAD non-force history. No merge or registry publication.
+The existing transform engine now returns backend-neutral provenance at actual
+specialization creation sites and worker plan companion allocation. Every value,
+structure and inductive output has one immediate parent record. Closed type
+arguments are explicit. No suffix/prefix inference assigns synthetic owners.
+Retained identity does not assert an unchanged body. Existing public APIs use the
+same implementation with complete origin-list tracing disabled; opt-in APIs
+enable it. No semantic-preservation theorem or zero-overhead claim is made.
 
-## Preserved PR #195 qualification
+Ownership composition strictly checks both modules, complete unique origin
+coverage, existing parents, arity/groundness and rule consistency. It carries
+owners through specialization and then worker fusion. Tests exercise authored
+worker-name collisions and workers whose parents are specialized clones.
+Twelve provenance invariants/eight refusals, eight extended layout refusals,
+and all14 old planner refusals pass.
+
+The explicit v2 profile emits real Foundation.List, Foundation.Name,
+Foundation.Text, Bridge.Json and dependent consumer source as six modules
+including one shared runtime/type owner:seven exact-cohort npm packages.
+124 original value declarations become129 specialized and160 fused, with57
+specialization origins,31 workers and eight specialization-to-worker chains.
+All normal values/types remain covered by strict IR and genuine independent
+official Lean4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc admission.
+
+29 finite v2 package cases pass alongside all28 v1 cases. Actual both-grammar,
+JS/TS, Node22.23.3/Bun1.4.4 execution includes generic collections, high-order
+calls, Unicode names, actual compiler JSON parsing/canonical encoding, huge Nat
+values and depth6000. Strict NodeNext/bundler declaration consumers, shared
+runtime/tag identity, exact seven-tarball reproduction, provenance/code tampering,
+cross-profile mix refusal and before/after-commit transaction outcomes pass.
+
+Immutable PR#195 source atcc13ebfa is built as a separate native baseline harness.
+For both grammars, original/specialized/fused IR, canonical admissions and bundled
+JS/TS bytes match exactly. Baseline requests took205ms/200ms. The baseline tracked
+source stays clean; harness source/binary identities are captured. An initial
+interpreter attempt failed on a missing private standard-library artifact.
+Native compilation avoids that interpreter dependency without bypassing checks.
+
+Dedicated [artifact12723121434](https://github.com/dwijayuda/pskernel/actions/runs/40479759828/artifacts/12723121434)
+is3371592 bytes, ZIP SHA256
+`d908d69f05b9d95a65dedcb7949217a461c7c7e08f01a00335a306f6358ae3aa`.
+Its installable-extended-lean/installable-extended-ps directories each contain
+seven matching tarballs and SHA256SUMS. Owned packages use Apache-2.0.
+v1 remains0.1.0-psc1-modular-pilot.0; v2 is0.1.0-psc1-modular-pilot.1.
+These remain experimental components; the proofscript bundled distribution and
+117 previously qualified compiler/kernel/provider payloads are retained.
+
+Limits remain240s producer/baseline,120s checker,4GiB address space,8MiB stack,
+reference fuel4096 and unchanged transform fuels;1MiB requests,32MiB native
+response/cohort,256 surviving IR values/64 nominal types. The explicitly versioned
+v2 source bound is2..8 with at most9 units; v1 stays exactly2 sources/3 units.
+Measured extended requests: Lean328ms/129584KiB maxRSS, PS332ms/131672KiB.
+These are component measurements, not whole-compiler performance qualification.
+
+[Architecture](docs/architecture/transform-provenance.md),
+[v2 contract](test/modular/extended-contract.json).
+Read-only unified source-import telemetry is separate from transformed runtime
+ownership or complete modular execution. Full compiler partitioning, cross-unit
+recursive groups/type-only coalescing, portable planner self-host qualification,
+modular G1/G2/G3/fixed points, other platforms and the arranged independent human
+maintainer trial remain pending. Preserve the old successful qualifications
+without relabeling them as this changed compiler source.
+
+Next: complete full source/generated-compiler CI; fix actual failures without
+relaxing budgets, checkers, strict IR, negatives or source identities. Then use
+the measured complete source/runtime graph to define the next finite profile.
+
+## Preserved PR #195 reference
 
 # PSC1 AI work state
 

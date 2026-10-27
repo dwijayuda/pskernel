@@ -10,6 +10,11 @@ code42eef6ca, source/integrated CI40466377732 and installed/runtime CI4046637262
 pass. The pilot has28 package cases/14 planner refusals; existing Core37/37 and
 seven-backend scoped execution remain qualified.
 
+The [v2 extension](../architecture/transform-provenance.md) adds explicit transform
+parents and actual compiler collections/text/JSON modules while retaining this
+v1 contract and all of its tests. Full source qualification of that extension is
+tracked in AI_WORK_STATE.md.
+
 ## What is generated
 
 | Package | Responsibility |

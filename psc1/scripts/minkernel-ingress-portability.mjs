@@ -82,6 +82,40 @@ for(const [id,input]of hostile) {
   observations.push({id:'host-'+id,accepted:false,code:result.code});
 }
 assert.equal(touched,0,'hostile input getters/proxies must never be invoked');
+const resourceObservations=[];
+const clone=()=>JSON.parse(cases[1].source);
+const resource=(id,packet,expected)=>{
+  const text=typeof packet==='string'?packet:JSON.stringify(packet);
+  const bytes=new Uint8Array(Buffer.from(text));
+  const start=performance.now(),result=check(bytes),elapsedMs=performance.now()-start;
+  assert.equal(result.accepted,expected,id+' '+result.code);
+  resourceObservations.push({id,accepted:result.accepted,bytes:bytes.length,elapsedMs,code:result.code});
+};
+let packet=clone();packet.admissions[0].declaration.v.v='4095';resource('maximum-natural',packet,true);
+packet=clone();packet.admissions[0].declaration.v.v='4096';resource('excess-natural',packet,false);
+packet=clone();packet.admissions[0].declaration.h.h='4095';resource('maximum-height',packet,true);
+packet=clone();packet.admissions[0].declaration.h.h='4096';resource('excess-height',packet,false);
+packet=clone();packet.admissions[0].declaration.n.v='a'.repeat(128);resource('maximum-name-text',packet,true);
+packet=clone();packet.admissions[0].declaration.n.v='a'.repeat(129);resource('excess-name-text',packet,false);
+for(const [components,expected]of [[15,true],[16,false]]){
+  packet=clone();let name={k:'a'};
+  for(let i=0;i<components;i++)name={k:'s',p:name,v:'a'};
+  packet.admissions[0].declaration.n=name;resource('name-components-'+components,packet,expected);
+}
+for(const [count,expected]of [[128,true],[129,false]]){
+  packet=clone();const d=packet.admissions[0];
+  packet.admissions=Array.from({length:count},(_,i)=>{
+    const row=JSON.parse(JSON.stringify(d));row.declaration.n.v='n'+i;return row;
+  });
+  resource('declarations-'+count,packet,expected);
+}
+resource('exact-byte-ceiling',' '.repeat(65536),false);
+const withOwnGetters=new Uint8Array(sample);
+Object.defineProperty(withOwnGetters,'length',{get(){touched++;throw Error('own-length');}});
+Object.defineProperty(withOwnGetters,Symbol.iterator,{get(){touched++;throw Error('own-iterator');}});
+assert.equal(check(withOwnGetters).accepted,true,'intrinsic snapshot ignores own accessors');
+assert.equal(touched,0);
+
 const numbered=cases.filter(c=>c.expected);
 const common=[];
 for(const c of numbered) {
@@ -142,7 +176,8 @@ const receipt={schema:'psc1-min-core-ingress-portability/1',commit:process.env.G
   generatedTsBytes:fs.statSync(stem+'.ts').size,generatedJsBytes:fs.statSync(stem+'.js').size,
   generatedJsSha256:sha(fs.readFileSync(stem+'.js')),hostSha256:sha(fs.readFileSync('packages/pskernel-min/host/ingress.mjs')),
   positiveCases:cases.filter(c=>c.expected).length,refusalCases:cases.filter(c=>!c.expected).length,
-  hostileHostCases:hostile.length,observations,commonOfficialCases:common,census,
+  hostileHostCases:hostile.length,resourceObservations,hostResourceUsage:process.resourceUsage(),
+  heapUsedBytes:process.memoryUsage().heapUsed,observations,commonOfficialCases:common,census,
   boundary:'Safe Lean exact-byte certificate and normalized checker source proofs; generated-code/runtime preservation remains explicit trust'};
 fs.writeFileSync(path.join(dir,'receipt.json'),JSON.stringify(receipt,null,2)+'\n');
 console.log('PSC1_MIN_CORE_INGRESS_PASS '+JSON.stringify(receipt));

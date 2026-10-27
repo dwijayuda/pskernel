@@ -55,6 +55,8 @@ theorem infer_evaluates (fuel : Nat)
       simpa -implicitDefEqProofs only [OperationalProofs.inferModel, Nat.recAux, OperationalFoundation.primitiveModel] using!
         (OpEval.primitive (globals := globals) (G := G) locals L schema level parameters indices motives minors)
     | lam domain body =>
+      unfold OperationalProofs.inferModel
+      dsimp only [Nat.recAux]
       cases hv : psMinRegTyValid remaining (psMinRegSpecCount []) domain with
       | false => simp [psMinOpInfer, hv] at h
       | true =>
@@ -65,9 +67,11 @@ theorem infer_evaluates (fuel : Nat)
           cases ht
           apply OpEval.lam
           intro value
-          simpa -implicitDefEqProofs only [OperationalProofs.inferModel, Nat.recAux, hv, hb] using!
+          simpa -implicitDefEqProofs only [] using!
             ih (domain :: locals) body result (consModel ([]) value L) hb
     | app fn argument =>
+      unfold OperationalProofs.inferModel
+      dsimp only [Nat.recAux]
       cases hf : psMinOpInfer remaining [] globals locals fn with
       | none => simp [psMinOpInfer, hf] at h
       | some functionType =>
@@ -83,13 +87,15 @@ theorem infer_evaluates (fuel : Nat)
               have same := typeEq_sound remaining _ _ heq
               cases same
               subst type
-              simpa -implicitDefEqProofs only [OperationalProofs.inferModel, Nat.recAux, hf, ha, heq] using!
+              simpa -implicitDefEqProofs only [] using!
                 OpEval.app locals L fn argument domain result
                   (OperationalProofs.inferModel remaining [] globals locals fn (.arr domain result) G L hf)
                   (OperationalProofs.inferModel remaining [] globals locals argument domain G L ha)
                   (ih locals fn (.arr domain result) L hf) (ih locals argument domain L ha)
         | _ => simp [psMinOpInfer, hf] at h
     | letE annotation value body =>
+      unfold OperationalProofs.inferModel
+      dsimp only [Nat.recAux]
       cases hv : psMinRegTyValid remaining (psMinRegSpecCount []) annotation with
       | false => simp [psMinOpInfer, hv] at h
       | true =>
@@ -104,7 +110,7 @@ theorem infer_evaluates (fuel : Nat)
             have hs : psMinOpInfer remaining [] globals (annotation :: locals) body = some type := by
               simpa [psMinOpInfer, hv, hb, heq] using h
             let v := OperationalProofs.inferModel remaining [] globals locals value annotation G L hb
-            simpa -implicitDefEqProofs only [OperationalProofs.inferModel, Nat.recAux, hv, hb, heq] using!
+            simpa -implicitDefEqProofs only [] using!
               OpEval.letE locals L annotation value body type v
                 (OperationalProofs.inferModel remaining [] globals (annotation :: locals) body type
                   G (consModel ([]) v L) hs)

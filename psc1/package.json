@@ -5,7 +5,7 @@
   "description": "PSC1 checked native compiler workspace",
   "type": "module",
   "bin": {
-    "psc": "./npm-cli/psc.js"
+    "psc": "./npm-cli/proofscript-cli.mjs"
   },
   "workspaces": [
     "packages/*",
@@ -15,7 +15,7 @@
   "scripts": {
     "psc": "node npm-cli/psc.js",
     "clean": "node scripts/clean.mjs",
-    "check:workspace": "node scripts/bootstrap-closure-contract-tests.mjs && node scripts/check-workspace.mjs",
+    "check:workspace": "node scripts/check-workspace.mjs",
     "check:source:bootstrap": "node check-psc1-source.mjs",
     "check:source:all": "node check-psc1-source.mjs --all-portable",
     "check:source": "npm run check:source:bootstrap",
@@ -108,7 +108,7 @@
     "selfhost": "node packages/cli/bin/psc.mjs selfhost --compiler dist/bootstrap/packages/compiler/index.js --workspace dist/bootstrap/workspace --out dist/selfhost",
     "verify:selfhost": "npm run verify:source && npm run verify:compiler",
     "fixed-point": "npm run bootstrap && npm run selfhost && npm run verify:selfhost",
-    "build": "npm run build:auto",
+    "build": "npm run build:packages",
     "test": "npm run test:all",
     "check": "npm run check:workspace && npm run check:source:all && npm run check:layout && npm run check:selfhost-project-prelude && npm run check:selfhost-foundation && npm run check:selfhost-source-syntax && npm run check:structure-recursor-normalization && npm run check:bootstrap-closure && npm run check:ir-neutrality && npm run test:all",
     "selfhost:emit-ps": "npm run bootstrap:emit",
@@ -133,7 +133,10 @@
     "npm:pack:native": "node scripts/npm-native-distribution.mjs",
     "test:npm-libraries": "node scripts/npm-library-resolution-tests.mjs",
     "npm:archive:psc0": "node scripts/npm-distribution.mjs",
-    "npm:inspect:psc0": "node scripts/npm-distribution.mjs --inspect"
+    "npm:inspect:psc0": "node scripts/npm-distribution.mjs --inspect",
+    "build:compiler": "npm run build:auto",
+    "build:packages": "node scripts/build-packages.mjs build",
+    "clean:packages": "node scripts/build-packages.mjs clean"
   },
   "devDependencies": {
     "typescript": "7.0.2"

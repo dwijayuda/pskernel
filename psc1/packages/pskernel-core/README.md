@@ -94,3 +94,12 @@ explicit bootstrap/release checkpoints.
 Declarations remain explicitly prefixed rather than relying on Lean namespace
 conveniences. Tests compare the portable implementation against
 the frozen reference implementation before each semantic slice is promoted.
+
+## npm package build
+
+This is a source package. Its default API exposes sourcePackage and readSources; it does not export the compiler's private internal functions or provide a proof checker. The ./compiler entry transparently re-exports the existing checked proofscript API.
+
+Build from this directory with npm run build, clean generated dist with npm run clean,
+and create a tarball with npm pack. Builds use the pinned qualified inputs and the
+workspace scripts; installation has no build or download hooks. Registry publication
+is not authorized. See [the package guide](../../docs/guides/npm-packages.md).

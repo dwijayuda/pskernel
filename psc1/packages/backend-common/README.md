@@ -13,3 +13,12 @@ semantics, and run the focused guard plus selected source/package gates from
 [the contributor guide](../../CONTRIBUTING.md). Source imports/Lake roots and the
 [generated map](../../docs/reference/repository-map.md) determine exact dependencies.
 Do not infer installed capability or independent admission from this package's presence.
+
+## npm package build
+
+This is a source package. Its default API exposes sourcePackage and readSources. The ./compiler subpath transparently re-exports the existing checked root API; shared planner internals are not exposed as invented runtime helpers.
+
+Build from this directory with npm run build, clean generated dist with npm run clean,
+and create a tarball with npm pack. Builds use the pinned qualified inputs and the
+workspace scripts; installation has no build or download hooks. Registry publication
+is not authorized. See [the package guide](../../docs/guides/npm-packages.md).

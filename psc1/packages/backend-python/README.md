@@ -66,3 +66,12 @@ The hash-bound qualification transport executes exact source bytes and ignores
 unlisted .pyc caches, including during probes and generated-consumer execution.
 Current compiler generation results, exact Python3.14.8 evidence and limits are
 tracked in the [self-host receipt](../../docs/PSC1_PYTHON_PHP_SELFHOST_QUALIFICATION_2026-10-24.json).
+
+## npm package build
+
+This package provides transparent adapters to the existing checked proofscript API and verified source snapshots. Backend compile adapters select their declared output target; the ./compiler entry retains the full existing API. No separately compiled internal compiler implementation or new self-hosting qualification is claimed.
+
+Build from this directory with npm run build, clean generated dist with npm run clean,
+and create a tarball with npm pack. Builds use the pinned qualified inputs and the
+workspace scripts; installation has no build or download hooks. Registry publication
+is not authorized. See [the package guide](../../docs/guides/npm-packages.md).

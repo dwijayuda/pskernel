@@ -1,32 +1,37 @@
-# proofscript — minimal PSC0 npm compiler
+# ProofScript PSC1
 
-`proofscript` is a globally installable npm CLI package (`psc`). It bundles
-only 13 core packages: 12 modules in the bounded self-host compiler closure,
-plus the generated JavaScript `@proofscript/pskernel-core` admission checker.
+This package owns one qualified shared compiler implementation and the normal
+ProofScript CLI. The default install includes JS/TS executors, the four core
+output emitters, and a genuine independent official Lean 4.35.0 checker compiled
+with Emscripten to linear-memory Wasm.
 
-Optional modules are published/installed separately: `@proofscript/backend-rust`,
-`@proofscript/backend-wasm`, `@proofscript/backend-js`, `@proofscript/stdlib`,
-`@proofscript/cli`, `@proofscript/pskernel-lean`, and
-`@proofscript/pskernel-lean-wasm`. No optional package is included in
-the `proofscript` tarball itself.
+Install the unpublished .12 tarball from its matching CI cohort:
 
-TypeScript 7.0.2 is an exact npm dependency but **not bundled** into the tarball.
-The npm installer resolves `@typescript/typescript-win32-x64` on Windows x64
-or `@typescript/typescript-linux-x64` on Linux x64. Each archive includes
-pre-downloaded tarballs for offline installations on these two platforms.
+    npm install -g ./proofscript-0.1.0-psc1.12.tgz
+    psc --help
+    psc init --kind lean
+    psc check Main.lean
+    psc build Main.lean --target js --out dist/app
 
-After intentional public registry publication:
+No installation script downloads binaries, installs a native SDK, or builds the
+compiler from source. Rust/Wasm compiler execution engines, native checking,
+Python/PHP providers, and target SDKs remain explicit optional installations.
+Their existing runtime/platform and ABI constraints still apply.
 
-```sh
-npm install -g proofscript
-psc init my-app
-psc build src/Main.ps
-```
+The public programmatic API exports compile, build, compileCandidate,
+getCompilerMetadata, checkCanonicalAdmissions and the existing publication/kernel
+helpers. Independent checking and strict original/transformed IR validation
+remain part of checked compilation. Candidate APIs have no publication authority.
 
-Before publication, install the local `proofscript-0.1.0-psc0.1.tgz`
-using instructions from the ZIP's INSTALL.md. The JS checker has bounded
-independent negative/positive admission conformance evidence but is not
-a formally proven sound, consistent, fully Lean-compatible or self-hosted fixed-point kernel.
+Other existing @proofscript packages provide source interfaces or transparent
+adapters to this owner. There is no duplicate compiler bundle in each package.
+Private elaborator/Core functions are not exposed through fabricated exports.
 
-Read `psc0/docs/NPM_PACKAGING_ARCHITECTURE.md` in the repository for third-party
-library metadata, source-only stdlib registration and package architecture.
+From the repository checkout, npm run build creates dist from pinned qualified
+inputs, npm run clean removes dist, and npm pack creates the release tarball.
+The generated provider/compiler bodies retain their original qualification
+identities. The .12 distribution does not claim new modular G2/G3 fixed points.
+Canonical source and old successful CI evidence remain preserved.
+
+[Build, package inventory and limitations](../../docs/guides/npm-packages.md).
+Apache-2.0; upstream notices are retained. No registry publication is authorized.

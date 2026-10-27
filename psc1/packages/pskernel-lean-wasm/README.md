@@ -134,3 +134,12 @@ The CI gate validates all of the following before this package should be treated
 - artifact upload of the `.cjs`, `.wasm`, and any generated worker files.
 
 The current Node prebuilt has passed the full build, health, acceptance, genuine kernel-rejection, prebuilt-integrity, native/WASM differential, and fresh packed-npm consumer gates. The checked-in `wasm/` bytes are verified against `PREBUILT_WASM_MANIFEST.json`. Browser and in-process transport support remain separate milestones.
+
+## npm package build
+
+npm run build reuses the exact qualified Lean4.35.0 provider artifact under dist/implementation. Canonical provider sources remain unchanged; build:kernel remains the explicit source build. The public checker is the genuine official C++ provider, never a mock. Wasm keeps Emscripten linear memory.
+
+Build from this directory with npm run build, clean generated dist with npm run clean,
+and create a tarball with npm pack. Builds use the pinned qualified inputs and the
+workspace scripts; installation has no build or download hooks. Registry publication
+is not authorized. See [the package guide](../../docs/guides/npm-packages.md).

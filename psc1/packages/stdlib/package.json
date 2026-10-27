@@ -1,20 +1,27 @@
 {
   "name": "@proofscript/stdlib",
-  "version": "0.1.0-psc0.1",
-  "description": "Optional ProofScript PSC0 standard-library source modules",
+  "version": "0.1.0-psc1.12",
+  "description": "ProofScript PSC1 stdlib: source package",
   "type": "module",
   "private": false,
   "license": "Apache-2.0",
-  "main": "./dist/index.mjs",
+  "main": "./dist/index.js",
   "exports": {
-    ".": "./dist/index.mjs",
-    "./package.json": "./package.json"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json",
+    "./sources": "./dist/source-manifest.json",
+    "./compiler": {
+      "types": "./dist/compiler.d.ts",
+      "import": "./dist/compiler.js"
+    }
   },
   "files": [
     "dist/",
     "src/",
     "README.md",
-    "SOURCE_CONVERSION.json",
     "LICENSE",
     "NOTICE"
   ],
@@ -27,19 +34,30 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dwijayuda/pskernel.git",
-    "directory": "psc0/packages/stdlib"
+    "directory": "psc1/packages/stdlib"
   },
   "proofscript": {
-    "library": {
-      "schemaVersion": 1,
-      "modulePrefix": "ProofScript",
-      "sourceRoot": "src"
-    },
+    "npmArchitecture": "psc1-existing-packages-shared-root/1",
+    "implementationOwner": "proofscript",
+    "internalCompilerModules": false,
+    "packageKind": "source-only",
+    "canonicalSources": "src",
     "sourceVariants": [
-      "ps",
-      "lean"
+      "lean",
+      "ps"
     ],
-    "status": "experimental; opt-in",
-    "standardLibrarySourceRoot": "psc0/stdlib/ProofScript"
+    "publishingRequiresQualification": true,
+    "compilerInputGrammars": [
+      "lean",
+      "ps"
+    ]
+  },
+  "scripts": {
+    "build": "node ../../scripts/build-packages.mjs build --package stdlib",
+    "clean": "node ../../scripts/build-packages.mjs clean --package stdlib"
+  },
+  "types": "./dist/index.d.ts",
+  "dependencies": {
+    "proofscript": "0.1.0-psc1.12"
   }
 }

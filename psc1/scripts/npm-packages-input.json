@@ -1,0 +1,20 @@
+{
+  "schema": "psc1-simple-npm-package-input/1",
+  "root": {
+    "run": 40466372623,
+    "job": 122080085921,
+    "artifact": 12718935961,
+    "commit": "42eef6ca6409e9637b189bf3f064f37649ae62ed",
+    "zipSha256": "2cb9cb5aab74898148670b019bdc71c9b63db8c90c6d009a6b8bbea30b56c101",
+    "tarball": "proofscript-0.1.0-psc1.11.tgz",
+    "tarballSha256": "4b7b88a395c00e1e757e7239026349d0bfbecc3e09b24ed8f6563d18f663a7c1"
+  },
+  "version": "0.1.0-psc1.12",
+  "full": {
+    "run": 40466372623,
+    "job": 122062828886,
+    "artifact": 12718244619,
+    "commit": "42eef6ca6409e9637b189bf3f064f37649ae62ed",
+    "zipSha256": "6f8ecaac8d8319edf16cf3d74bc78a73b1e7934d524289327e94298cf7c2e641"
+  }
+}

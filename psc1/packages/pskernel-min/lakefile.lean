@@ -66,3 +66,8 @@ lean_lib PsMinRegularCoreIngress where
 lean_exe minkernel_regular_ingress_tests where
   srcDir := "test"
   root := `RegularIngressTests
+
+-- R5 test-only source; excluded from the connected checker scope.
+lean_lib PsMinCompilerScalarFixture where
+  srcDir := "src"
+  roots := #[`Ps.MinKernel.Tests.CompilerScalar]

@@ -675,3 +675,8 @@ lean_exe psc1_output_abi_probe where
 lean_lib PsMinCompilerPreservation where
   srcDir := "proofs/pskernel-min"
   roots := #[`CompilerPreservation, `CompilerPreservationTrust]
+
+-- Registered test fixture for native/reference/source compilation, never a checker root.
+lean_lib PsMinCompilerScalarFixture where
+  srcDir := "packages/pskernel-min/src"
+  roots := #[`Ps.MinKernel.Tests.CompilerScalar]

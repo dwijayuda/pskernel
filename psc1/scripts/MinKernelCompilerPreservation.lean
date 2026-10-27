@@ -3,6 +3,7 @@ import Ps.BackendTs.Sh1
 import Ps.Host.ProjectCompiler
 import Ps.Bridge.Json
 import Ps.CompilerIr.Encode
+import Ps.MinKernel.Tests.CompilerScalar
 
 -- Host-only Linux oracle and artifact producer. Not a runtime kernel import.
 def r5NatType : PsVerifiedIrType := .primitive .nat
@@ -17,13 +18,8 @@ def r5Emit (expr : PsVerifiedIrExpr) : IO String :=
   | .ok text => pure text
   | .error _ => throw (IO.userError "R5_EXPR_EMISSION_REFUSED")
 
-def r5Source : String :=
-  "def psR5Add (a : Nat) (b : Nat) : Nat := Nat.add a b\n" ++
-  "def psR5Sub (a : Nat) (b : Nat) : Nat := Nat.sub a b\n" ++
-  "def psR5Choose (flag : Bool) (a : Nat) (b : Nat) : Nat :=\n  if flag then Nat.add a b else Nat.sub a b\n" ++
-  "def psR5Three (a : Nat) (b : Nat) (c : Nat) : Nat := Nat.add a (Nat.add b c)\n" ++
-  "def psR5Capture (a : Nat) (b : Nat) (c : Nat) : Nat :=\n  let pending : Nat -> Nat := psR5Three (Nat.add a 1) (Nat.add b 2)\n  pending c\n" ++
-  "def psR5UseClosure (seed : Nat) (value : Nat) : Nat :=\n  let captured := Nat.add seed 1\n  let fn : Nat -> Nat := fun (arg : Nat) => Nat.add captured arg\n  fn value\n"
+def r5SourcePath : String :=
+  "packages/pskernel-min/src/Ps/MinKernel/Tests/CompilerScalar.lean"
 
 def r5OriginRole (role : PsElabOriginRole) : String :=
   match role with
@@ -188,6 +184,22 @@ def main : IO Unit := do
             else throw (IO.userError "R5_RECOGNIZER_OPERATION_MISMATCH")
         | _, _ => throw (IO.userError "R5_RECOGNIZER_IR_ENCODING_REFUSED")
     | _ => throw (IO.userError "R5_RECOGNIZER_REFUSED")
+  let mut wholeExpected : List String := []
+  for a in values do
+    for b in values do
+      let aa := psJsonQuote (toString a)
+      let bb := psJsonQuote (toString b)
+      let rows : List (String × List String × Nat) := [
+        ("psR5Add", [aa, bb], psR5Add a b),
+        ("psR5Sub", [aa, bb], psR5Sub a b),
+        ("psR5Choose", ["true", aa, bb], psR5Choose true a b),
+        ("psR5Choose", ["false", aa, bb], psR5Choose false a b),
+        ("psR5Capture", [aa, bb, psJsonQuote "7"], psR5Capture a b 7),
+        ("psR5UseClosure", [aa, bb], psR5UseClosure a b)]
+      for (name, args, value) in rows do
+        wholeExpected := wholeExpected ++ [psJsonObject [
+          ("export", psJsonQuote name), ("arguments", psJsonArray args),
+          ("value", psJsonQuote (toString value))]]
   let invalid : List PsVerifiedIrExpr := [
     r5Binary .natAdd (r5Bool true) (r5Nat 1),
     .ifE (r5Nat 1) (r5Nat 2) (r5Nat 3),
@@ -209,13 +221,15 @@ def main : IO Unit := do
       "export const shadowProbe = (" ++ shadow ++ ");\n")
   IO.FS.writeFile (dir ++ "/native.json")
     (psJsonObject [("schema", psJsonQuote "psc1-r5-native-oracle/1"),
-      ("probes", psJsonArray expected), ("arityRefusals", toString arityRefusals),
+      ("probes", psJsonArray expected), ("wholeProbes", psJsonArray wholeExpected),
+      ("arityRefusals", toString arityRefusals),
       ("strictIrRefusals", toString strictRefusals),
       ("binaryStageRefusals", toString binaryStageRefusals),
       ("recognizerRefusals", toString recognizerRefusals),
       ("recognizerCases", toString recognizerCases)] ++ "\n")
-  IO.FS.writeFile (dir ++ "/source.lean") r5Source
-  let inputs := [psSh1SourceInput ["R5", "Scalar"] r5Source]
+  let sourceText ← IO.FS.readFile r5SourcePath
+  IO.FS.writeFile (dir ++ "/source.lean") sourceText
+  let inputs := [psSh1SourceInput ["Ps", "MinKernel", "Tests", "CompilerScalar"] sourceText]
   match psCompilerSh1TypeScriptSources psSh1DefaultSourceOptions psIrCheckDefaultOptions
       PsCompilerSourceKind.lean inputs with
   | .error error => throw (IO.userError ("R5_ACTUAL_SOURCE_COMPILATION_REFUSED: " ++ r5SourceFailure error))

@@ -45,21 +45,20 @@ Lake root outside the kernel/runtime and compiler self-host import graphs.
 The host-only Linux driver uses actual erasure/currying and expression-emission
 functions to produce direct TypeScript. Native mathematical oracles are compared
 with strict-TSC-compiled JavaScript on 400 scalar cases, including zero divisors,
-saturating subtraction, the 2^53 boundary and 256-bit naturals. Actual emitted
+saturating subtraction, the 2^53 boundary and naturals beyond the 256-bit boundary. Actual emitted
 operand instrumentation records single evaluation and left/right order for the
 eight Nat operators, and the expected Boolean short-circuit behavior separately.
 This finite observation does not establish effectful-IR preservation.
 
 Actual capture ordering, currying and shadowing expressions execute in Node.
-A separate one-module source fixture passes the actual atomic SH/1 source API,
+A separate registered test-only source fixture passes the actual atomic SH/1 source API,
 original IR check and target check, then independent official admission and the
 existing generated R4B exact-byte API. The exact original IR, structured origins and emitted artifacts are retained from that same computation. Its generated functions exercise computed
-partial application, lexical closures and scalar operations over 294 calls.
+partial application, lexical closures and scalar operations over 294 calls compared with native execution of the exact same physical source file.
 Negative original IR must fail the actual checked-emission boundary.
 
 Repeat the complete current compiler admission census, all earlier R0–R4 tests,
-and full connected ten-module R4 checker self-admission. R5 introduces no new
-executable minimal-kernel module: the connected runtime remains ten modules,
+and full connected ten-module R4 checker self-admission. R5 introduces a separate test fixture but no new executable minimal-kernel runtime module: the connected runtime remains ten modules,
 rather than incorporating proof/host harness sources into its census.
 
 ## Preservation and trust ledger

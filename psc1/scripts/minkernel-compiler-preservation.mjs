@@ -53,15 +53,14 @@ assert.equal(direct.curryProbe(2n)(5n)(false),0n);
 assert.equal(direct.shadowProbe(71n)(23n),23n);
 const traces=direct.traced.map(f=>f());
 assert.deepEqual(traces.map(x=>x.trace),[...Array(8).fill('LR'),'L','LR','LR','L']);
-const values=[0n,1n,2n,9007199254740991n,9007199254740992n,9007199254740993n,large];
+assert.equal(oracle.wholeProbes.length,294);
 let wholeCalls=0;
-for(const a of values)for(const b of values){
- assert.equal(whole.psR5Add(a,b),a+b);wholeCalls++;
- assert.equal(whole.psR5Sub(a,b),a>=b?a-b:0n);wholeCalls++;
- assert.equal(whole.psR5Choose(true,a,b),a+b);wholeCalls++;
- assert.equal(whole.psR5Choose(false,a,b),a>=b?a-b:0n);wholeCalls++;
- assert.equal(whole.psR5Capture(a,b,7n),a+b+10n);wholeCalls++;
- assert.equal(whole.psR5UseClosure(a,b),a+b+1n);wholeCalls++;
+for(const row of oracle.wholeProbes){
+ const args=row.arguments.map(x=>typeof x==='boolean'?x:BigInt(x));
+ const got=whole[row.export](...args);
+ assert.equal(typeof got,'bigint',row.export+' representation');
+ assert.equal(String(got),row.value,row.export+' actual native/generated');
+ wholeCalls++;
 }
 assert.equal(wholeCalls,294);
 const generated=await import(pathToFileURL(path.resolve('dist/pskernel-min/regular-ingress/vectors.js')).href);
@@ -84,7 +83,9 @@ assert.equal(origins.length,1);
 assert.equal(origins[0].batches.length,6);
 const paths=['direct.ts','direct.js','whole.ts','whole.js','whole.admissions.json','whole.ir.json','origins.json','source.lean','native.json'];
 const files=paths.map(file=>{const bytes=fs.readFileSync(path.join(dir,file));return {file,bytes:bytes.length,sha256:sha(bytes)}});
-const sources=['proofs/pskernel-min/CompilerPreservation.lean','scripts/MinKernelCompilerPreservation.lean',
+assert.equal(sha(fs.readFileSync('packages/pskernel-min/src/Ps/MinKernel/Tests/CompilerScalar.lean')),
+ sha(fs.readFileSync(path.join(dir,'source.lean'))),'exact same physical source');
+const sources=['packages/pskernel-min/src/Ps/MinKernel/Tests/CompilerScalar.lean','proofs/pskernel-min/CompilerPreservation.lean','scripts/MinKernelCompilerPreservation.lean',
  'scripts/minkernel-compiler-preservation.mjs',
  'packages/erasure/src/Ps/Erasure/Expr.lean','packages/backend-ts/src/Ps/BackendTs/Expr.lean',
  'packages/backend-ts/src/Ps/BackendTs/Type.lean','packages/backend-ts/src/Ps/BackendTs/RuntimeSupport.lean'];

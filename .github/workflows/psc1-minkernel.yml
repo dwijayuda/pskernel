@@ -186,7 +186,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist/pskernel-min/compiler-preservation
-          lake build PsMinCompilerPreservation PsHost 2>&1 | tee dist/pskernel-min/compiler-preservation/build.log
+          lake build PsMinCompilerPreservation PsHost PsMinCompilerScalarFixture 2>&1 | tee dist/pskernel-min/compiler-preservation/build.log
           lake env lean proofs/pskernel-min/CompilerPreservationTrust.lean 2>&1 | tee dist/pskernel-min/compiler-preservation/proof.log
           node scripts/minkernel-compiler-preservation-guard.mjs
       - name: Prepare actual source and native scalar ABI oracle
@@ -237,7 +237,7 @@ jobs:
         run: |
           set -euo pipefail
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build PsBackendTs psc1_independent_checker psc1_source_census_probe psc2_joint_closure_inventory
+          lake build PsBackendTs psc1_independent_checker psc1_source_census_probe psc2_joint_closure_inventory PsMinCompilerScalarFixture
       - uses: actions/cache/save@v4
         if: ${{ !cancelled() && steps.native_build.outcome == 'success' && steps.native_cache.outputs.cache-hit != 'true' }}
         with:

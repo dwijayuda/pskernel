@@ -1,5 +1,6 @@
 // Host-only orchestration. Generated wire data cannot choose tools or publish.
 import fs from 'node:fs';
+import { requireSupportedRuntime, syntaxArguments, runtimeArguments } from './runtime-policy.mjs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { spawnSync } from 'node:child_process';
@@ -90,7 +91,7 @@ export function createGeneratedJsCompilerSession({
   serviceDependencies = [],
   additionalCheckers = [],
 }) {
-  if (process.version !== 'v22.23.3') fail('PSC1_SERVICE_NODE_PIN');
+  requireSupportedRuntime();
   if (
     typeof requestId !== 'string' ||
     !requestId ||
@@ -295,7 +296,7 @@ export function createGeneratedJsCompilerSession({
       env.PSC1_BACKEND_REQUEST_SHA256 = digestEnv.PSC1_BACKEND_REQUEST_SHA256;
     } else delete env.PSC1_BACKEND_REQUEST_SHA256;
     if (componentTools || optionalProvider) verifyTools();
-    const result = spawnSync(executable, args, {
+    const result = spawnSync(executable, executable === process.execPath ? runtimeArguments(args) : args, {
       encoding: 'utf8',
       env,
       timeout: 240000,
@@ -500,7 +501,7 @@ export function createGeneratedJsCompilerSession({
         for (const checker of extraChecks) {
           verifyTools();
           const started = Date.now();
-          const checked = spawnSync(process.execPath, [checker.script.path], {
+          const checked = spawnSync(process.execPath, runtimeArguments([checker.script.path]), {
             input: admissions,
             encoding: 'utf8',
             timeout: 120000,
@@ -554,7 +555,7 @@ export function createGeneratedJsCompilerSession({
         );
         if (['js', 'ts', 'wasm-core'].includes(target)) {
           if (target !== 'wasm-core')
-            run('target-syntax', ['--check', path.join(stage, targetArtifact.runtimeFile)]);
+            run('target-syntax', syntaxArguments(path.join(stage, targetArtifact.runtimeFile)));
           const apiCode =
             "import {pathToFileURL} from 'node:url';" +
             'let api=await import(pathToFileURL(process.argv[1]).href);' +

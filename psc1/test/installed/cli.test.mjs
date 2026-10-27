@@ -53,7 +53,7 @@ function observe(result) {
 for (const name of ['psc', 'psc1', 'proofscript']) {
   assert.match(run(path.join(consumer, 'node_modules/.bin', name), ['--help']), /--showConfig/);
   assert.equal(run(path.join(prefix, 'bin', name), ['--version']).trim(),
-    'proofscript 0.1.0-psc1.9');
+    'proofscript 0.1.0-psc1.10');
 }
 const identity = JSON.parse(run(cli, ['--identity']));
 assert.equal(identity.defaultKernel, 'wasm');

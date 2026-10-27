@@ -1,5 +1,6 @@
 // Independent target consumers. No parser/elaborator/IR transform is implemented here.
 import fs from 'node:fs';
+import { requireSupportedRuntime } from './runtime-policy.mjs';
 import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -27,7 +28,7 @@ export function prepareCheckedTarget(
       targetFile: 'target.mjs',
       runtimeFile: 'target.mjs',
       files: ['target.mjs'],
-      consumer: 'node22.23.3',
+      consumer: requireSupportedRuntime().label,
     };
   }
   if (target === 'ts') {
@@ -183,7 +184,7 @@ export function prepareCheckedTarget(
         'target-wasm-transport.mjs',
         'target.mjs',
       ],
-      consumer: 'node22.23.3-WebAssembly-GC-import-free-typed-transport',
+      consumer: requireSupportedRuntime().label + '-WebAssembly-GC-import-free-typed-transport',
     };
   }
   fail('CHECKED_TARGET_UNSUPPORTED');

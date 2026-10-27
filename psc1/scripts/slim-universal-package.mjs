@@ -54,7 +54,7 @@ const hostFiles=[
  'host-tools/transactional-publication.mjs','host-tools/checked-targets.mjs','host-tools/generated-wasm-transport.mjs','host-tools/generated-compiler-session.mjs','host-tools/compiler-host-protocol.mjs','host-tools/installed-engine-resolver.mjs',
  'host-tools/typed-io.mjs','host-tools/typed-io.d.ts',
  'scripts/compiler-closure-contract.mjs','scripts/generated-compiler-runner.mjs','scripts/universal-candidate-runner.mjs',
- 'npm-cli/proofscript-cli.mjs','npm-cli/cli-project.mjs',
+ 'npm-cli/proofscript-cli.mjs','npm-cli/cli-project.mjs','npm-cli/cli-watch.mjs','npm-cli/cli-watch-worker.mjs','host-tools/runtime-policy.mjs',
  'npm-cli/universal.mjs','npm-cli/universal-cli.mjs','npm-cli/universal-kernel-checker.mjs','npm-cli/universal-wasm-checker.mjs','npm-cli/universal-native-checker.mjs','npm-cli/universal.d.ts'
 ];
 for(const file of hostFiles)copy(file,path.join(stage,file));fs.chmodSync(path.join(stage,'npm-cli/universal-cli.mjs'),0o755);fs.chmodSync(path.join(stage,'npm-cli/proofscript-cli.mjs'),0o755);
@@ -87,7 +87,7 @@ for(const [target,descriptor]of Object.entries(dispatchPackages)){
 const peers=Object.fromEntries(['nativeKernel','rust','wasm-core'].map(k=>[packages[k].package,packages[k].version]));
 for(const descriptor of Object.values(dispatchPackages))peers[descriptor.package]=descriptor.version;
 peers.typescript='7.0.2';peers[rustConsumer.package]=rustConsumer.version;
-const meta={name:'proofscript',version,type:'module',private:true,license:'UNLICENSED',engines:{node:'22.23.3'},
+const meta={name:'proofscript',version,type:'module',private:true,license:'UNLICENSED',engines:{node:'>=22.0.0'},
  main:'./npm-cli/universal.mjs',types:'./npm-cli/universal.d.ts',
  exports:{'./io':{types:'./host-tools/typed-io.d.ts',import:'./host-tools/typed-io.mjs'},'.':{types:'./npm-cli/universal.d.ts',import:'./npm-cli/universal.mjs'},'./kernel':{types:'./npm-cli/universal.d.ts',import:'./npm-cli/universal.mjs'},'./metadata':'./UNIVERSAL_DISTRIBUTION.json','./package.json':'./package.json'},
  bin:{proofscript:'./npm-cli/proofscript-cli.mjs',psc:'./npm-cli/proofscript-cli.mjs',psc1:'./npm-cli/proofscript-cli.mjs'},

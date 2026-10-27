@@ -61,10 +61,15 @@ const values = new Map([
 const aliases = new Map([['-p', '--project'], ['-o', '--out']]);
 export function parseCompilation(args) {
   const options = new Map();
-  let file, showConfig = false, positionalOnly = false;
+  let file, showConfig = false, watch = false, positionalOnly = false;
   for (let i = 0; i < args.length; i++) {
     let argument = args[i];
     if (argument === '--' && !positionalOnly) { positionalOnly = true; continue; }
+    if (!positionalOnly && ['--watch', '-w', '-watch'].includes(argument)) {
+      if (watch) refuse('ARGUMENT', 'Duplicate --watch.');
+      watch = true;
+      continue;
+    }
     if (!positionalOnly && argument === '--showConfig') {
       if (showConfig) refuse('ARGUMENT', 'Duplicate --showConfig.');
       showConfig = true;
@@ -94,7 +99,8 @@ export function parseCompilation(args) {
     refuse('SOURCE_OR_PROJECT_REQUIRED', 'Choose a source file or --project, not both.');
   if (options.has('--provider') && options.has('--kernel'))
     refuse('ARGUMENT', '--provider and --kernel select the same option; choose one.');
-  return {options, file, showConfig};
+  if (watch && showConfig) refuse('ARGUMENT', '--watch cannot be combined with --showConfig.');
+  return {options, file, showConfig, watch};
 }
 
 function configFile(selected, cwd) {
@@ -105,7 +111,7 @@ function configFile(selected, cwd) {
   return file;
 }
 
-function sourceFile(root, relative) {
+function sourceFile(root, relative, allowMissing = false) {
   if (typeof relative !== 'string' || !relative ||
       relative.includes('\\') || relative.includes(':') || relative.includes('\0') ||
       path.posix.isAbsolute(relative) ||
@@ -115,9 +121,14 @@ function sourceFile(root, relative) {
   const inside = path.relative(root, absolute);
   if (!inside || inside.startsWith('..' + path.sep) || path.isAbsolute(inside))
     refuse('PROJECT_SOURCE_PATH', 'Source path leaves the project directory.');
-  for (let cursor = absolute; cursor !== root; cursor = path.dirname(cursor))
-    if (fs.lstatSync(cursor).isSymbolicLink())
-      refuse('PROJECT_SOURCE_PATH', 'Source path contains a symlink: ' + relative);
+  for (let cursor = absolute; cursor !== root; cursor = path.dirname(cursor)) {
+    try {
+      if (fs.lstatSync(cursor).isSymbolicLink())
+        refuse('PROJECT_SOURCE_PATH', 'Source path contains a symlink: ' + relative);
+    } catch (error) {
+      if (!allowMissing || error.code !== 'ENOENT') throw error;
+    }
+  }
   return absolute;
 }
 
@@ -226,3 +237,29 @@ export function initializeProject(args, cwd = process.cwd()) {
   }, null, 2) + '\n', {flag: 'wx'});
   return {created: [source, config], next: ['psc check', 'psc build --out dist/app']};
 }
+
+// Observe declared paths, including temporarily missing files after editor renames.
+// This grants no source/tool authority; every attempt still uses captureProject().
+export function declaredWatchPaths(parsed, cwd = process.cwd()) {
+  if (parsed.file) return [path.resolve(cwd, parsed.file)];
+  const config = configFile(parsed.options.get('--project'), cwd);
+  const data = JSON.parse(readInput(config).text);
+  const files = data?.schema === 'proofscript-project/1' ? data.files : [];
+  if (!Array.isArray(files) || files.length > maxProjectFiles)
+    refuse('PROJECT_FILES', 'Invalid watch source inventory.');
+  return [config, ...files.map(item => sourceFile(path.dirname(config), item?.path, true))];
+}
+export function checkedOptions(parsed, captured) {
+  const o = parsed.options;
+  return {...captured.project,
+    engine: o.get('--engine') || 'js',
+    kernel: o.get('--kernel') || o.get('--provider') || 'wasm',
+    assurance: o.get('--assurance') || captured.project.assurance || 'checked',
+    ...(o.has('--target') ? {target: o.get('--target')} : {}),
+    ...(o.has('--output-abi') ? {outputAbi: o.get('--output-abi')} : {}),
+    ...(o.has('--out') ? {out: o.get('--out')} : {}),
+    ...(o.has('--publication-protocol') ? {publicationProtocol: o.get('--publication-protocol')} : {}),
+    ...(o.has('--rust-toolchain-root') ? {rustToolchainRoot: path.resolve(o.get('--rust-toolchain-root'))} : {}),
+  };
+}
+export const captureIdentity = captured => digest(JSON.stringify(captured));

@@ -41,6 +41,9 @@ jobs:
           node test/host/process-location.test.mjs
           node --check npm-cli/proofscript-cli.mjs
           node --check npm-cli/cli-project.mjs
+          node --check npm-cli/cli-watch.mjs
+          node --check npm-cli/cli-watch-worker.mjs
+          node test/host/runtime-policy.test.mjs
           node --check scripts/cli-package.mjs
           node --check scripts/cli-installed.mjs
           node scripts/cli-source-tests.mjs
@@ -74,6 +77,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: node scripts/cli-package.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-cli-runtime-inputs-${{ github.sha }}
+          path: |
+            psc1/dist/slim-universal/tarballs/
+            psc1/dist/slim-universal/package-receipt.json
+          retention-days: 90
       - name: Real offline local/global project workflow and npm script execution
         run: node scripts/cli-installed.mjs
       - name: Prepare unchanged external consumers for existing full regression gates
@@ -87,6 +97,10 @@ jobs:
           tar xJf "$RUNNER_TEMP/wasmtime.tar.xz" -C "$RUNNER_TEMP/wasmtime"
           install -m 755 "$(find "$RUNNER_TEMP/wasmtime" -type f -name wasmtime -print -quit)" "$RUNNER_TEMP/wasmtime/wasmtime"
           echo "PSC1_WASMTIME=$RUNNER_TEMP/wasmtime/wasmtime" >> "$GITHUB_ENV"
+      - name: Real installed watch, edits, refusals, superseded attempts and target consumers
+        run: |
+          export PSC1_TEST_RUST_ROOT="$(rustup run 1.90.0 rustc --print sysroot)"
+          node test/installed/watch.test.mjs
       - name: Execute unchanged real applications against the exact frozen source
         env:
           GH_TOKEN: ${{ github.token }}
@@ -111,9 +125,10 @@ jobs:
           import fs from 'node:fs';import assert from 'node:assert/strict';
           const file='dist/slim-universal/package-receipt.json',r=JSON.parse(fs.readFileSync(file));
           assert.equal(JSON.parse(fs.readFileSync('dist/cli/installed.json')).status,'passed');
+          assert.equal(JSON.parse(fs.readFileSync('dist/cli/watch.json')).status,'passed');
           for(const f of ['installed-qualification.json','checked-dispatch.json','checked-publication.json','checked-publication-types.json'])
             assert.equal(JSON.parse(fs.readFileSync('dist/slim-universal/'+f)).status,'passed');
-          r.scope='qualified Linux host layout/CLI milestone; unchanged compiler/kernel/provider payloads; human trial pending';
+          r.scope='qualified Linux runtime/watch host milestone; unchanged compiler/kernel/provider payloads; independent runtime matrix required';
           r.cliQualification='passed';r.previousInstalledAndApplicationGates='passed';
           fs.writeFileSync(file,JSON.stringify(r,null,2)+'\n');
           console.log('PSC1_CLI_QUALIFIED '+JSON.stringify({commit:process.env.GITHUB_SHA,sha256:r.sha256,bytes:r.bytes,version:r.version}));
@@ -132,4 +147,53 @@ jobs:
             psc1/dist/slim-universal/compiler-kernel-admission.json
             psc1/dist/slim-universal/cli-frozen-application-stores.tar.gz
             psc1/dist/transactional-publication/
+          retention-days: 90
+
+  runtime:
+    needs: installed
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {label: node-minimum, node: '22.0.0', bun: '', negative: ''}
+          - {label: node-qualification, node: '22.23.3', bun: '', negative: ''}
+          - {label: node24, node: '24', bun: '', negative: ''}
+          - {label: node26, node: '26', bun: '', negative: ''}
+          - {label: bun-minimum, node: '22.23.3', bun: '1.4.0', negative: ''}
+          - {label: bun-current, node: '22.23.3', bun: '1.4.4', negative: ''}
+          - {label: node20-refusal, node: '20', bun: '', negative: '1'}
+    defaults:
+      run:
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: oven-sh/setup-bun@v2
+        if: matrix.bun != ''
+        with:
+          bun-version: ${{ matrix.bun }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-cli-runtime-inputs-${{ github.sha }}
+          path: psc1/dist/slim-universal
+      - name: Actual installed runtime and all four compiler engines, both grammars
+        env:
+          PSC1_EXPECT_RUNTIME_REFUSAL: ${{ matrix.negative }}
+        run: |
+          if [ -n '${{ matrix.bun }}' ]; then
+            export PSC1_TEST_RUNTIME="$(command -v bun)"
+            bun --no-install --no-macros --no-env-file test/host/runtime-policy.test.mjs
+          elif [ -z '${{ matrix.negative }}' ]; then
+            node test/host/runtime-policy.test.mjs
+          fi
+          node test/installed/runtime-compatibility.test.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-cli-runtime-${{ matrix.label }}-${{ github.sha }}
+          path: psc1/dist/cli/runtime/
           retention-days: 90

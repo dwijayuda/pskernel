@@ -1,5 +1,6 @@
 // Host-owned protocol boundary. Never imported by generated portable code.
 import crypto from 'node:crypto';
+import {runtimeArguments} from './runtime-policy.mjs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 const digest = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -10,7 +11,7 @@ const checkerIdentity = Object.freeze({ protocol: 'pskernel-lean/1', provider: '
 
 export function runIndependentChecker(executable, canonicalAdmissions, checkerScript) {
   if(checkerScript!==undefined&&(typeof checkerScript!=='string'||!path.isAbsolute(checkerScript)))fail('PSC1_CHECKER_SCRIPT_INVALID');
-  const result = spawnSync(executable, checkerScript?[checkerScript,'--check']:['--check'], { input: canonicalAdmissions,
+  const result = spawnSync(executable, executable === process.execPath ? runtimeArguments(checkerScript?[checkerScript,'--check']:['--check']) : checkerScript?[checkerScript,'--check']:['--check'], { input: canonicalAdmissions,
     encoding: 'utf8', timeout: 120000, maxBuffer: 32 * 1024 * 1024 });
   if (result.error || result.status !== 0) fail('PSC1_CHECKER_PROCESS_FAILED');
   let response;

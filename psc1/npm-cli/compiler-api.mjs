@@ -1,5 +1,6 @@
 // Installed host API. Reuses the existing checked session; no compiler semantics here.
 import fs from 'node:fs';
+import { runtimeArguments } from '../host-tools/runtime-policy.mjs';
 import path from 'node:path';
 import os from 'node:os';
 import crypto from 'node:crypto';
@@ -176,15 +177,18 @@ export function compile(options) {
     fs.rmSync(temporary, { recursive: true, force: true });
   }
 }
-export function build(options) {
+// A trusted host may veto publication after checking; it cannot manufacture admission.
+export function build(options, { beforePublish } = {}) {
+  if (beforePublish !== undefined && typeof beforePublish !== 'function') fail('PUBLICATION_GUARD');
   // Both pointer layouts require qualified Linux durability. Other platforms use compile().
   if (process.platform !== 'linux')
     fail('PUBLICATION_PLATFORM_UNQUALIFIED: use the checked compile API or compile stdout command');
   if (typeof options?.out !== 'string' || !options.out) fail('OUTPUT_DIRECTORY');
   const selected = selection(options),
     session = sessionFor(selected, path.resolve(options.out)),
-    receipt = session.execute(),
-    published = session.publish();
+    receipt = session.execute();
+  if (beforePublish) beforePublish();
+  const published = session.publish();
   return Object.freeze({
     status: 'accepted',
     engine: selected.engine,
@@ -251,14 +255,14 @@ export function compileCandidate(options) {
     verify();
     const ran = spawnSync(
       process.execPath,
-      [
+      runtimeArguments([
         path.join(installationRoot, 'host-tools/execution/unified-candidate-runner.mjs'),
         engine.candidate.path,
         engine.candidate.sha256,
         engine.candidateKind,
         input,
         output,
-      ],
+      ]),
       {
         encoding: 'utf8',
         timeout: 240000,

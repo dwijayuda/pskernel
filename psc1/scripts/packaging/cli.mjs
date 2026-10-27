@@ -1,4 +1,4 @@
-// Host-only .9 layout assembly from exact .7 artifacts that passed the installed replay.
+// Host-only .10 runtime/watch assembly from exact .7 artifacts that passed the installed replay.
 // Do not rebuild or relabel any compiler/kernel/provider payload or G3 evidence.
 import fs from 'node:fs';
 import {renderSourceGuide} from './render-guide.mjs';
@@ -58,7 +58,7 @@ function inventory(directory, prefix = '') {
 const before = inventory(stage);
 const d = JSON.parse(fs.readFileSync(path.join(stage, 'UNIVERSAL_DISTRIBUTION.json')));
 assert.equal(d.compilerSourceClosureDigest, qualification.compilerSourceClosureDigest);
-const relocatedHosts = new Set(["host-tools/generated-compiler-session.mjs","npm-cli/universal.mjs","npm-cli/universal-cli.mjs","scripts/compiler-closure-contract.mjs","scripts/generated-compiler-runner.mjs","scripts/universal-candidate-runner.mjs"]);
+const relocatedHosts = new Set(["host-tools/installed-engine-resolver.mjs","host-tools/compiler-host-protocol.mjs","host-tools/checked-targets.mjs","host-tools/generated-compiler-session.mjs","npm-cli/universal.mjs","npm-cli/universal-cli.mjs","scripts/compiler-closure-contract.mjs","scripts/generated-compiler-runner.mjs","scripts/universal-candidate-runner.mjs"]);
 // All frozen executable payloads must match the qualified input. Finite host overlays
 // have a separate exact-body/import-path correspondence gate and installed tests.
 for (const pin of d.hostFiles.filter(p => /^(host-tools|npm-cli|scripts)\//.test(p.path))) {
@@ -66,13 +66,13 @@ for (const pin of d.hostFiles.filter(p => /^(host-tools|npm-cli|scripts)\//.test
     assert.equal(sha256(fs.readFileSync(pin.path)), pin.sha256, 'current production changed: ' + pin.path);
   assert.equal(sha256(fs.readFileSync(path.join(stage, pin.path))), pin.sha256);
 }
-const version = '0.1.0-psc1.9';
-const added = ["npm-cli/proofscript-cli.mjs","npm-cli/cli-project.mjs","npm-cli/compiler-api.mjs","npm-cli/checked-command-cli.mjs","host-tools/contracts/compiler-closure.mjs","host-tools/execution/generated-service-runner.mjs","host-tools/execution/unified-candidate-runner.mjs"];
+const version = '0.1.0-psc1.10';
+const added = ["host-tools/runtime-policy.mjs","npm-cli/cli-watch.mjs","npm-cli/cli-watch-worker.mjs","npm-cli/proofscript-cli.mjs","npm-cli/cli-project.mjs","npm-cli/compiler-api.mjs","npm-cli/checked-command-cli.mjs","host-tools/contracts/compiler-closure.mjs","host-tools/execution/generated-service-runner.mjs","host-tools/execution/unified-candidate-runner.mjs"];
 for (const file of [...relocatedHosts, ...added]) {
   fs.mkdirSync(path.dirname(path.join(stage,file)),{recursive:true});
   fs.copyFileSync(file,path.join(stage,file));
 }
-fs.chmodSync(path.join(stage, added[0]), 0o755);
+fs.chmodSync(path.join(stage, 'npm-cli/proofscript-cli.mjs'), 0o755);
 // Emit-only providers do not import the root. Their reverse optional root peer
 // was version-coupled to .7 and npm can prune a .8 root when adding them.
 // Compatibility authority remains the root's exact file/manifest pins.
@@ -114,6 +114,7 @@ for (const [target, descriptor] of Object.entries(d.dispatchPackages)) {
 }
 const metaFile = path.join(stage, 'package.json'), meta = JSON.parse(fs.readFileSync(metaFile));
 meta.version = version;
+meta.engines = {...meta.engines, node: '>=22.0.0'};
 for (const descriptor of Object.values(d.dispatchPackages))
   meta.peerDependencies[descriptor.package] = descriptor.version;
 meta.bin = {proofscript: './npm-cli/proofscript-cli.mjs',
@@ -158,7 +159,8 @@ const receipt = {...original, dispatchPackages: d.dispatchPackages, repackagedTo
   sizeRatio: packedBytes.length / original.previousRootBytes,
   removedBytes: original.previousRootBytes - packedBytes.length,
   originalRootSha256: old.rootSha256,
-  scope: 'host layout/CLI only; unchanged qualified G3s/kernels/providers; installed qualification pending'};
+  runtimePolicy: {node: '>=22.0.0', bun: '>=1.4.0', exactCiRuntimes: 'recorded separately'},
+   scope: 'host runtime/watch only; unchanged qualified G3s/kernels/providers; installed and runtime qualification pending'};
 fs.writeFileSync(path.join(out, 'package-receipt.json'), JSON.stringify(receipt, null, 2) + '\n');
 console.log('PSC1_CLI_PACKAGE: ' + JSON.stringify({version, tarball: receipt.tarball,
   sha256: receipt.sha256, bytes: receipt.bytes, preservedPayloadFiles: receipt.preservedPayloadFiles}));

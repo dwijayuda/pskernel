@@ -6,6 +6,8 @@ import path from 'node:path';
 import os from 'node:os';
 import {spawn} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
+import {watchProject} from './cli-watch.mjs';
+import {runtimeArguments} from '../host-tools/runtime-policy.mjs';
 import {captureProject, describeProject, initializeProject, parseCompilation,
   refuse} from './cli-project.mjs';
 
@@ -39,6 +41,7 @@ Options:
   -p, --project path             Source data only; cannot choose tools or output
   -o, --out directory            Required for build; forbidden for check/compile
   --diagnostics text|json        Errors on stderr (default text)
+  -w, --watch, -watch           Recheck declared inputs after edits (500 ms polling)
   --showConfig                  Inspect only; logicalAdmission remains not-run
   -h, --help                    Show this help
 
@@ -47,7 +50,8 @@ Examples:
   npm exec -- psc check
   npm exec -- psc build --out dist/app --publication-protocol portable-file
   psc compile Main.lean --engine ts
-  psc build Main.ps --target ts --out dist/ts
+  psc build Main.ps --target ts --out dist/ts --watch
+  psc build -p . --target rust --out dist/rust -w
 
 check retains target emission/consumer checks; it is not a new frontend-only mode.
 Success receipts remain JSON on stdout; errors use stderr and a nonzero exit.
@@ -57,7 +61,9 @@ Current checked publication is Linux-qualified; compile does not publish.
 `;
 const hints = [
   [/OPTIONAL_PACKAGE_MISSING/, 'Install the exact optional package named in the diagnostic; no fallback is used.'],
-  [/NODE_PIN/, 'Use the exact Node version required by this package (currently 22.23.3).'],
+  [/RUNTIME_VERSION|NODE_PIN/, 'Use Node >=22.0.0 or Bun >=1.4.0. Exact CI versions are reproduction records, not installation pins.'],
+  [/WATCH_SUPERSEDED/, 'The watch supervisor will retry the latest inputs; the previous checked generation is preserved.'],
+  [/ENOENT/, 'Check declared source paths. Watch mode resumes when missing files are restored.'],
   [/OUTPUT_DIRECTORY/, 'Pass --out directory to psc build.'],
   [/PUBLICATION_PLATFORM_UNQUALIFIED/, 'Use psc compile on this platform; publication needs platform qualification.'],
   [/COMMITTED_DURABILITY_UNCERTAIN/, 'Publication may already be committed. Inspect the store; do not assume rollback.'],
@@ -93,31 +99,45 @@ function presentation(args) {
 // Individual compiler/tool/checker limits remain inside the unchanged host.
 // Stream stdout without changing JSON receipts; cap diagnostic buffering at32MiB.
 // Signals are forwarded and retain130/143. No shell, downloader or fallback.
-async function execute(args, mode) {
-  const child = spawn(process.execPath, [path.join(here, 'universal-cli.mjs'), ...args],
-    {stdio: ['inherit', 'pipe', 'pipe'], windowsHide: true});
+async function execute(args, mode, worker = 'universal-cli.mjs') {
+  if (!['universal-cli.mjs', 'cli-watch-worker.mjs'].includes(worker)) refuse('WORKER', 'Unknown CLI worker.');
+  const child = spawn(process.execPath, runtimeArguments([path.join(here, worker), ...args]),
+    {stdio: ['inherit', 'pipe', 'pipe'], detached: process.platform !== 'win32', windowsHide: true});
+  let requestedSignal, escalation;
+  const kill = signal => {
+    try {
+      if (process.platform !== 'win32' && child.pid) process.kill(-child.pid, signal);
+      else child.kill(signal);
+    } catch (error) { if (error.code !== 'ESRCH') throw error; }
+  };
   child.stdout.pipe(process.stdout);
   const parts = [];
   let bytes = 0, overflow = false, launchError;
   child.stderr.on('data', chunk => {
     bytes += chunk.length;
-    if (bytes > 32 * 1024 * 1024) { overflow = true; child.kill('SIGKILL'); }
+    if (bytes > 32 * 1024 * 1024) { overflow = true; kill('SIGKILL'); }
     else parts.push(chunk);
   });
   const signals = new Map(['SIGINT', 'SIGTERM'].map(signal => {
-    const handler = () => child.kill(signal);
+    const handler = () => {
+      requestedSignal = signal; kill(signal);
+      escalation ??= setTimeout(() => kill('SIGKILL'), 2000);
+      escalation.unref();
+    };
     process.on(signal, handler);
     return [signal, handler];
   }));
   child.on('error', error => { launchError = error; });
   const outcome = await new Promise(resolve =>
     child.on('close', (code, signal) => resolve({code, signal})));
+  clearTimeout(escalation);
   for (const [signal, handler] of signals) process.off(signal, handler);
   const stderr = Buffer.concat(parts).toString('utf8');
   if (launchError) diagnostic(launchError, mode, 'PSC1_CLI_LAUNCH_FAILED');
   else if (overflow) diagnostic('PSC1_CLI_DIAGNOSTIC_LIMIT: child stderr exceeded32MiB.', mode);
   else if (stderr && outcome.code !== 0) diagnostic(stderr, mode);
   else if (stderr) process.stderr.write(stderr);
+  if (requestedSignal) return requestedSignal === 'SIGINT' ? 130 : 143;
   return launchError || overflow ? 1 :
     outcome.code ?? (outcome.signal === 'SIGINT' ? 130 : outcome.signal === 'SIGTERM' ? 143 : 1);
 }
@@ -150,7 +170,9 @@ try {
         'Run psc build --out dist/app.');
     const captured = captureProject(parsed);
     if (parsed.showConfig) console.log(JSON.stringify(describeProject(parsed, captured), null, 2));
-    else {
+    else if (parsed.watch) {
+      process.exitCode = await watchProject({command, parsed, execute, diagnostic, mode});
+    } else {
       temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'proofscript-cli-project-'));
       const project = path.join(temporary, 'sources.json');
       fs.writeFileSync(project, JSON.stringify(captured.project), {flag: 'wx', mode: 0o600});

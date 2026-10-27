@@ -272,13 +272,14 @@ theorem ctor_get (constructors : List (List PsMinRegField)) (index : Fin constru
       | succ value => exact ih ⟨value, Nat.lt_of_succ_lt_succ bound⟩
 
 def signatures (specs : List PsMinRegSpec) : SignatureModel specs (dataModel specs) := by
-  induction specs with
+  cases specs with
   | nil =>
     constructor
     · intro slot index type success; simp [psMinRegCtorTypeAt] at success
     · intro fuel slot sortLevel parameters indices motives minors result type success
       simp [psMinRegRecursorTypeAt] at success
-  | cons spec rest ih =>
+  | cons spec rest =>
+    let ih := signatures rest
     constructor
     · intro slot index type success
       cases slot with
@@ -319,6 +320,8 @@ def signatures (specs : List PsMinRegSpec) : SignatureModel specs (dataModel spe
           cases heq
           exact cast (denote_lift (Carrier spec (dataModel rest)) (dataModel rest) prior).symm
             (ih.recValue fuel slot sortLevel parameters indices motives minors result prior ht)
+
+termination_by structural specs
 
 #print axioms join_split
 #print axioms fold_construct

@@ -10,8 +10,8 @@ def generic : PsVerifiedIrDeclaration := {
   name := "genericIdentity"
   typeParameters := [{ name := "T" }]
   parameters := [{ name := "value", type := .typeParameter "T" }]
-  resultType := .typeParameter "T"
-  body := .var "value"
+  resultType := .function [.typeParameter "T"] (.typeParameter "T")
+  body := .lambda [{ name := "other", type := .typeParameter "T" }] (.typeParameter "T") (.var "value")
 }
 
 def curved : PsVerifiedIrDeclaration := {
@@ -29,7 +29,7 @@ def caller : PsVerifiedIrDeclaration := {
   parameters := [{ name := "value", type := nat }]
   resultType := nat
   body := .call (.call (.var "curved") [] [
-    .call (.var "genericIdentity") [nat] [.var "value"]]) [] [.literal (.natural 1)]
+    .call (.call (.var "genericIdentity") [nat] [.var "value"]) [] [.literal (.natural 0)]]) [] [.literal (.natural 1)]
 }
 
 def collision : PsVerifiedIrDeclaration := {
@@ -78,11 +78,16 @@ def check : IO Unit := do
   let fused ← value (psFuseClosedWorkersWithOrigins (.mk specialized.raw))
   let fusedOwners ← value (psModuleCarryOwners specialized.raw selected fused)
   let workers := fused.origins.filter (fun row => match row.rule with | .worker => true | _ => false)
-  require (workers.length == 1) "one-worker-companion"
-  let [worker] := workers | throw (IO.userError "worker origin count")
+  require (workers.length == 2) "two-worker-companions"
+  let [worker] := workers.filter (fun row => row.inputName == "curved") | throw (IO.userError "worker origin count")
   require (worker.inputName == "curved" && worker.outputName != "curved$worker") "fresh-name-collision"
   require ((← value (Ps.Internal.ModuleGraph.owner fusedOwners worker.outputName)).unit == 1) "worker-parent-owner"
   require ((← value (Ps.Internal.ModuleGraph.owner fusedOwners "curved$worker")).unit == 2) "authored-lookalike-owner"
+  let [clonedWorker] := workers.filter (fun row => row.inputName == clone.outputName)
+    | throw (IO.userError "specialized worker origin count")
+  require ((← value (Ps.Internal.ModuleGraph.owner fusedOwners clonedWorker.outputName)).unit == 1)
+    "specialization-to-worker-owner-composition"
+  require (clonedWorker.inputName == clone.outputName) "explicit-two-stage-parent-chain"
   let originalApi ← value ((psIrSpecializeValidatedModule checked).mapError (fun _ => "legacy specialize failed"))
   let oldFusion ← value (psFuseClosedWorkers (.mk originalApi.raw))
   require ((psIrEncodeModule oldFusion.raw).toOption == (psIrEncodeModule fused.raw).toOption) "legacy-api-byte-parity"
@@ -100,7 +105,7 @@ def check : IO Unit := do
   refusal (psModuleCarryOwners input [] specialized) "missing-input-owners"
   let invalid := { fused.raw with declarations := [{ caller with body := .var "unbound" }] }
   refusal (psModuleCarryOwners specialized.raw selected { fused with raw := invalid }) "invalid-output-ir"
-  IO.println "PSC1_TRANSFORM_ORIGINS_TESTS_PASSED 8-invariants 8-refusals"
+  IO.println "PSC1_TRANSFORM_ORIGINS_TESTS_PASSED 10-invariants 8-refusals"
 
 end TransformOriginTest
 

@@ -47,3 +47,13 @@ def extendedCanonical (source : String) : String :=
 def extendedDepth (name : PsName) : Nat := psNameDepth name
 
 def extendedSame (left right : PsName) : Bool := psNameEq left right
+
+
+def extendedGenericLeft {alpha : Type} (left : alpha) : alpha -> alpha :=
+  fun (_right : alpha) => left
+
+def extendedGenericResult (value : Nat) : Nat :=
+  extendedGenericLeft value (Nat.add value 1)
+
+def extendedGenericString (text : String) : String :=
+  extendedGenericLeft text "ignored"

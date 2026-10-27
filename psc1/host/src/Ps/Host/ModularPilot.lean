@@ -183,8 +183,12 @@ def main (args : List String) : IO UInt32 := do
       let text ← IO.FS.readFile file
       if text.utf8ByteSize > 1024 * 1024 then throw (IO.userError "PSC1_MODULE_REQUEST_BOUND")
       let parsed ← liftResult (Lean.Json.parse text)
-      let .arr cells := parsed | throw (IO.userError "PSC1_MODULE_WIRE_ARRAY")
-      let some (.str protocol) := cells[0]? | throw (IO.userError "PSC1_MODULE_WIRE_PROTOCOL")
+      let protocol ← liftResult do
+        let cells ← parsed.getArr?
+        let cell : Lean.Json ← match cells[0]? with
+          | some value => pure value
+          | none => throw "PSC1_MODULE_WIRE_PROTOCOL"
+        cell.getStr?
       if protocol != "psc1-modular-pilot/1" && protocol != "psc1-modular-pilot/2" then
         throw (IO.userError "PSC1_MODULE_WIRE_PROTOCOL")
       let fields ← liftResult do

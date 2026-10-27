@@ -22,12 +22,18 @@ jobs:
           run-id: 40442145356
           name: psc1-cli-runtime-inputs-dfb9507ad8700a24a503a4e52bda00f963af279d
           path: psc1/dist/slim-universal
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.4'
       - name: Reproduce original installed watch driver with live failure diagnostics
         working-directory: psc1
         run: |
           rustup toolchain install 1.90.0 --profile minimal
           rustup default 1.90.0
           export PSC1_TEST_RUST_ROOT="$(rustup run 1.90.0 rustc --print sysroot)"
+          export PSC1_TEST_BUN_RUNTIME="$(command -v bun)"
+          node test/installed/cli.test.mjs
+          PSC1_TEST_RUNTIME="$(command -v bun)" node test/installed/runtime-compatibility.test.mjs
           node --input-type=module <<'JS'
           import fs from 'node:fs';
           const file='test/installed/watch.test.mjs';let source=fs.readFileSync(file,'utf8');

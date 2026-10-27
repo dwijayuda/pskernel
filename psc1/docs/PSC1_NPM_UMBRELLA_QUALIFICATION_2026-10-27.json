@@ -6,13 +6,13 @@
   "basePullRequest": 197,
   "baseCommit": "9d0e23c34484e4b1159f3e2428f5452139df530a",
   "implementationCommit": "acbf4e70707ee86b7b3b973d71b0aefe646f9883",
-  "testedMergeCommit": "1bec01c2af82bb562bae094c43340a288aa3de01",
+  "testedMergeCommit": "10a6d84e07d24bde3587e5a951ca55d4a5243361",
   "packageRun": {
-    "id": 40507930195,
-    "url": "https://github.com/dwijayuda/pskernel/actions/runs/40507930195",
+    "id": 40509034127,
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/40509034127",
     "status": "success",
-    "headCommit": "acbf4e70707ee86b7b3b973d71b0aefe646f9883",
-    "jobId": 122201943395
+    "headCommit": "892e1895b6be54f2fff4957a66b34d293c4105b8",
+    "jobId": 122205738648
   },
   "status": "qualified-linux-npm-umbrella-scope",
   "version": "0.1.0-psc1.13",
@@ -54,7 +54,7 @@
   },
   "qualification": {
     "schema": "psc1-simple-npm-package-qualification/1",
-    "testedCommit": "1bec01c2af82bb562bae094c43340a288aa3de01",
+    "testedCommit": "10a6d84e07d24bde3587e5a951ca55d4a5243361",
     "status": "passed",
     "modularNpmDistribution": "qualified-linux-packaging-scope",
     "independentCompilerInternalModularity": "deferred",
@@ -548,28 +548,28 @@
   },
   "artifacts": [
     {
-      "id": 12736306462,
-      "name": "psc1-npm-packages-1bec01c2af82bb562bae094c43340a288aa3de01",
-      "bytes": 172959068,
-      "sha256": "97c8e58eb2c2983391a62d132b416dedfd69a3db3c46d03fae4c2b096d1df2c7",
-      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40507930195/artifacts/12736306462",
-      "expiresAt": "2027-01-25T12:57:38Z"
+      "id": 12737035264,
+      "name": "psc1-npm-packages-10a6d84e07d24bde3587e5a951ca55d4a5243361",
+      "bytes": 172959063,
+      "sha256": "aa2d43d29b24fc5df243d6ad90748a2710b94cf93da56441a0108c638aafb7fc",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40509034127/artifacts/12737035264",
+      "expiresAt": "2027-01-25T13:05:36Z"
     },
     {
-      "id": 12736032172,
-      "name": "proofscript-optional-packages-0.1.0-psc1.13-1bec01c2af82bb562bae094c43340a288aa3de01",
+      "id": 12736781848,
+      "name": "proofscript-optional-packages-0.1.0-psc1.13-10a6d84e07d24bde3587e5a951ca55d4a5243361",
       "bytes": 198623191,
-      "sha256": "38bce99f8dcf0291fab0fcb941500f70f103b5a701f2970c6f5f1be0b069a54d",
-      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40507930195/artifacts/12736032172",
-      "expiresAt": "2027-01-25T12:57:38Z"
+      "sha256": "c88036b06889606bcc3bc4b9af2d888ccffe2d1330187e932e2602230d1e0eff",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40509034127/artifacts/12736781848",
+      "expiresAt": "2027-01-25T13:05:36Z"
     },
     {
-      "id": 12735868794,
-      "name": "proofscript-installable-packages-0.1.0-psc1.13-1bec01c2af82bb562bae094c43340a288aa3de01",
+      "id": 12736333322,
+      "name": "proofscript-installable-packages-0.1.0-psc1.13-10a6d84e07d24bde3587e5a951ca55d4a5243361",
       "bytes": 8917501,
-      "sha256": "e90081f5723e28cb7f9f742684eb06a2112976706a095ce464273d085adc8dd5",
-      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40507930195/artifacts/12735868794",
-      "expiresAt": "2027-01-25T12:57:38Z"
+      "sha256": "80a0082b533ca7f0f1280df4beb5e2f7678a376f97624f7e7ee7b58edf0cd594",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40509034127/artifacts/12736333322",
+      "expiresAt": "2027-01-25T13:05:36Z"
     }
   ],
   "rootTarball": {
@@ -648,72 +648,128 @@
     }
   ],
   "broaderSourceCI": {
-    "runId": 40507930222,
-    "status": "in_progress",
-    "conclusion": null,
+    "runId": 40509034008,
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/40509034008",
+    "headCommit": "892e1895b6be54f2fff4957a66b34d293c4105b8",
+    "testedMergeCommit": "10a6d84e07d24bde3587e5a951ca55d4a5243361",
+    "status": "completed",
+    "conclusion": "success",
+    "selectedJobsPassed": 16,
+    "skippedJobs": [
+      "benchmark"
+    ],
     "jobs": [
       {
-        "id": 122202678974,
+        "id": 122206234179,
         "name": "static",
         "status": "completed",
         "conclusion": "success"
       },
       {
-        "id": 122203034089,
-        "name": "lossless / lossless",
-        "status": "in_progress",
-        "conclusion": null
-      },
-      {
-        "id": 122203034282,
-        "name": "modular / pilot",
-        "status": "completed",
-        "conclusion": "success"
-      },
-      {
-        "id": 122203034359,
-        "name": "native / native",
-        "status": "completed",
-        "conclusion": "success"
-      },
-      {
-        "id": 122203034364,
-        "name": "focused / focused (core)",
-        "status": "in_progress",
-        "conclusion": null
-      },
-      {
-        "id": 122203034412,
+        "id": 122206750785,
         "name": "source-bindings / trace",
         "status": "completed",
         "conclusion": "success"
       },
       {
-        "id": 122203034429,
-        "name": "focused / focused (applications)",
-        "status": "in_progress",
-        "conclusion": null
+        "id": 122206750884,
+        "name": "native / native",
+        "status": "completed",
+        "conclusion": "success"
       },
       {
-        "id": 122203035053,
+        "id": 122206750913,
+        "name": "focused / focused (core)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 122206750957,
         "name": "focused / php-application",
         "status": "completed",
         "conclusion": "success"
       },
       {
-        "id": 122203035468,
+        "id": 122206750971,
+        "name": "focused / focused (applications)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 122206750981,
+        "name": "modular / pilot",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 122206751079,
+        "name": "lossless / lossless",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 122206752996,
         "name": "benchmark",
         "status": "completed",
         "conclusion": "skipped"
       },
       {
-        "id": 122204618970,
+        "id": 122208327019,
         "name": "source-bindings / integration",
-        "status": "in_progress",
-        "conclusion": null
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 122209373290,
+        "name": "g1 / host-session-boundary",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 122209373360,
+        "name": "closures / selected-closure (rust-compiler, ordinary-checked)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 122209373468,
+        "name": "closures / selected-closure (directjs-compiler, ordinary-checked)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 122209373544,
+        "name": "g1 / generated-js",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 122209373605,
+        "name": "closures / selected-closure (semantic-compiler, checked)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 122210880274,
+        "name": "full / linux-scoped",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 122226966890,
+        "name": "gate",
+        "status": "completed",
+        "conclusion": "success"
       }
     ],
-    "scope": "pending at receipt creation; not claimed passed, and not the distribution qualification above"
+    "practicalCore": {
+      "qualified": 37,
+      "blocked": 0,
+      "contractReleaseReady": true,
+      "scope": "finite Practical Core v1 criteria; not final universal platform/publication qualification"
+    },
+    "sevenBackendExecution": "passed-scoped-execution, both lean/ps source grammars",
+    "scope": "current-source regression, selected G1/closure/modular pilot and independent checking; no new modular G2/G3 claim"
   },
   "preservedSourceQualification": {
     "run": 40497179005,
@@ -733,5 +789,115 @@
     "registry publication and merge require authorization"
   ],
   "noRegistryPublication": true,
-  "noMerge": true
+  "noMerge": true,
+  "previousPackageQualification": {
+    "run": {
+      "id": 40507930195,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40507930195",
+      "status": "success",
+      "headCommit": "acbf4e70707ee86b7b3b973d71b0aefe646f9883",
+      "jobId": 122201943395
+    },
+    "artifacts": [
+      {
+        "id": 12736306462,
+        "name": "psc1-npm-packages-1bec01c2af82bb562bae094c43340a288aa3de01",
+        "bytes": 172959068,
+        "sha256": "97c8e58eb2c2983391a62d132b416dedfd69a3db3c46d03fae4c2b096d1df2c7",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40507930195/artifacts/12736306462",
+        "expiresAt": "2027-01-25T12:57:38Z"
+      },
+      {
+        "id": 12736032172,
+        "name": "proofscript-optional-packages-0.1.0-psc1.13-1bec01c2af82bb562bae094c43340a288aa3de01",
+        "bytes": 198623191,
+        "sha256": "38bce99f8dcf0291fab0fcb941500f70f103b5a701f2970c6f5f1be0b069a54d",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40507930195/artifacts/12736032172",
+        "expiresAt": "2027-01-25T12:57:38Z"
+      },
+      {
+        "id": 12735868794,
+        "name": "proofscript-installable-packages-0.1.0-psc1.13-1bec01c2af82bb562bae094c43340a288aa3de01",
+        "bytes": 8917501,
+        "sha256": "e90081f5723e28cb7f9f742684eb06a2112976706a095ce464273d085adc8dd5",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40507930195/artifacts/12735868794",
+        "expiresAt": "2027-01-25T12:57:38Z"
+      }
+    ],
+    "testedMergeCommit": "1bec01c2af82bb562bae094c43340a288aa3de01"
+  },
+  "finalQualifiedHead": "892e1895b6be54f2fff4957a66b34d293c4105b8",
+  "legacyCLICompatibility": {
+    "runId": 40507924067,
+    "headCommit": "acbf4e70707ee86b7b3b973d71b0aefe646f9883",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 122202627183,
+        "name": "preflight",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 122203321836,
+        "name": "installed",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 122226847993,
+        "name": "runtime (node24, 24)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 122226848035,
+        "name": "runtime (node22-older-refusal, 22.0.0, 1)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 122226848096,
+        "name": "runtime (bun-older-refusal, 22.23.3, 1.4.0, 1)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 122226848149,
+        "name": "runtime (node20-refusal, 20, 1)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 122226848168,
+        "name": "runtime (node26, 26)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 122226848264,
+        "name": "runtime (node-minimum, 22.23.3)",
+        "status": "completed",
+        "conclusion": "success"
+      },
+      {
+        "id": 122227752776,
+        "name": "installable",
+        "status": "completed",
+        "conclusion": "success"
+      }
+    ],
+    "packageVersion": "0.1.0-psc1.11",
+    "tarballSha256": "050cf05918edf786f5ca55f03239835e30e361f4ce61eec5ff0c3dcafcaf600a",
+    "scope": "preserved older slim CLI/runtime/watch regression; not the new .13 distribution artifact"
+  },
+  "finalAudit": {
+    "canonicalCompilerKernelOrProductionHostBodyEdits": [],
+    "singleParentHistory": true,
+    "fullSourceAndPackagesPassed": true,
+    "all24TarballHashesMatchEarlierQualifiedPackageRun": true,
+    "noNewImplementationFixRequired": true,
+    "documentationOnlyCompletionUpdate": true
+  }
 }

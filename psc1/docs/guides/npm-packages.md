@@ -145,9 +145,9 @@ seven checked targets, genuine native/Wasm acceptance/refusal, accurate types,
 optional engines, semantic/tamper/dependency refusals and reproducible builds.
 
 [Exact .13 qualification](../PSC1_NPM_UMBRELLA_QUALIFICATION_2026-10-27.json)
-records all 53 cases/125 exports at acbf4e70, [run40507930195](https://github.com/dwijayuda/pskernel/actions/runs/40507930195).
-[Default ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40507930195/artifacts/12735868794) is 8917501 bytes; its root tarball is 4455215 bytes.
-[Optional ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40507930195/artifacts/12736032172) is 198623191 bytes.
-All package sizes/hashes accompany the delivery. Broader source CI is recorded separately. Universal non-Linux consumers, permanent bootstrap retention and the arranged
+records all 53 cases/125 exports at892e1895, [run40509034127](https://github.com/dwijayuda/pskernel/actions/runs/40509034127).
+[Default ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40509034127/artifacts/12736333322) is 8917501 bytes; its root tarball is 4455215 bytes.
+[Optional ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40509034127/artifacts/12736781848) is 198623191 bytes.
+All package sizes/hashes accompany the delivery. Full source40509034008 passes all16 selected jobs/37 Core criteria and scoped seven-backend execution. The older .11 CLI compatibility run40507924067 also passes; the delivered umbrella remains .13. Universal non-Linux consumers, permanent bootstrap retention and the arranged
 independent human maintainer trial remain separate release tasks.
 No merge or npm registry publication is authorized.

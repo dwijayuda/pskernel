@@ -21,8 +21,9 @@ The previous .12 qualification remains preserved in its dated receipt and PR #19
 
 ## Actual qualification
 
-Implementation `acbf4e70707ee86b7b3b973d71b0aefe646f9883` passes [40507930195](https://github.com/dwijayuda/pskernel/actions/runs/40507930195),
-job122201943395, tested merge `1bec01c2af82bb562bae094c43340a288aa3de01`:
+Implementation acbf4e70 is retained. Final qualified HEAD `892e1895b6be54f2fff4957a66b34d293c4105b8`
+passes [40509034127](https://github.com/dwijayuda/pskernel/actions/runs/40509034127),
+job122205738648, tested merge `10a6d84e07d24bde3587e5a951ca55d4a5243361`:
 **53/53 finite package cases and 125 advertised exports** pass.
 The root-only fixture installs its one tarball offline with an empty npm cache,
 checks all 20 core packages/86 core exports, Node/Bun shared API identity, actual
@@ -49,8 +50,8 @@ checks every standalone executor's exact bytes and rejects tampering in both own
 
 ## Artifacts and installation
 
-[Default ZIP 12735868794](https://github.com/dwijayuda/pskernel/actions/runs/40507930195/artifacts/12735868794): 8917501 bytes, 21 matching tarballs.
-[Optional ZIP 12736032172](https://github.com/dwijayuda/pskernel/actions/runs/40507930195/artifacts/12736032172): 198623191 bytes, nine tarballs.
+[Default ZIP 12736333322](https://github.com/dwijayuda/pskernel/actions/runs/40509034127/artifacts/12736333322): 8917501 bytes, 21 matching tarballs.
+[Optional ZIP 12736781848](https://github.com/dwijayuda/pskernel/actions/runs/40509034127/artifacts/12736781848): 198623191 bytes, nine tarballs.
 Root proofscript-0.1.0-psc1.13.tgz: 4455215 bytes, SHA256 `62d8b6843328e197a3fcb4acf47bd497c2642a4bfab9b4920808e1dcbf2ee9d3`.
 Standalone compiler tarball: 3270363 bytes. Full per-package hashes/sizes
 are in the receipt, PACKAGES.json and SHA256SUMS.
@@ -78,10 +79,19 @@ Owned code is Apache-2.0; all qualified-input/upstream notices remain.
 Frozen G3 source identity stays122 modules/4742 members and closure
 073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9.
 Current development source has125 source-import modules. No new fixed-point claim.
-Previous canonical source full40497179005 passes16 selected jobs and37/37 Core
-criteria at9aefeeb. Broader .13 source run40507930222 is still in progress at this
-receipt; do not call it passed. Packaging qualification above is independently
-complete and exact. Re-query live workflow state before future claims.
+Final current-source [40509034008](https://github.com/dwijayuda/pskernel/actions/runs/40509034008)
+passes all16 selected jobs (benchmark intentionally skipped), all37 Practical Core
+criteria/zero blocked, both grammars/scoped seven-backend execution, retained modular
+pilots/source bindings and selected generated G1/closure checks at892e1895,
+tested merge10a6d84e07d24bde3587e5a951ca55d4a5243361.
+The superseded40507930222 was cancelled; it is not failure evidence.
+The separate older .11 CLI workflow40507924067 also passes all9 jobs, including
+runtime/refusal/installable checks. Its .11 tarball is compatibility context and
+must not replace the .13 umbrella artifacts.
+No new code failure remains. All24 .13 tarball hashes match the earlier qualified
+40507930195; the root tarball SHA256 above is unchanged. This final update changes
+only work-state/evidence/guides and requires the ordinary documentation/static gate.
+Previous qualifications and all commit history remain preserved.
 
 ## Remaining work
 

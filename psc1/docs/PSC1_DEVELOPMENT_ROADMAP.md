@@ -34,7 +34,7 @@ to the existing @proofscript/compiler package. Adapters depend on compiler, neve
 root. Python/PHP/native and engine/SDK payloads remain optional. The package build
 and installed qualification check all runtime/peer edges for cycles, root-only
 offline local/global installation, all core exports and shared runtime identity.
-Linux [40507930195](https://github.com/dwijayuda/pskernel/actions/runs/40507930195) passes all53 finite package cases/125 exports at acbf4e70. [Exact receipt](PSC1_NPM_UMBRELLA_QUALIFICATION_2026-10-27.json). Root-only installation contains one executor pair; standalone installs may have a separate npm scope, also identity/hash/tamper checked. Broader source CI40507930222 remains in progress at receipt creation. Canonical compiler/kernel/host bodies remain
+Linux [40507930195](https://github.com/dwijayuda/pskernel/actions/runs/40507930195) passes all53 finite package cases/125 exports at acbf4e70. [Exact receipt](PSC1_NPM_UMBRELLA_QUALIFICATION_2026-10-27.json). Root-only installation contains one executor pair; standalone installs may have a separate npm scope, also identity/hash/tamper checked. Final package40509034127 passes all53 cases/125 exports at892e1895. Full source40509034008 passes all16 selected jobs,37/37 Core criteria/zero blocked and scoped seven-backend execution. Superseded40507930222 was cancelled. Older .11 CLI40507924067 also passes all9 compatibility jobs; it is separate from the .13 artifact. Canonical compiler/kernel/host bodies remain
 unchanged; no new compiler-internal modularization or fixed point is claimed.
 
 ## Preserved simple npm distribution (.12)

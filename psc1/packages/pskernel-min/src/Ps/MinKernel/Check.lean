@@ -2,18 +2,18 @@ namespace Ps.MinKernel
 
 /- Runtime only. No proof imports, implicit foundation or unchecked constants. -/
 inductive Ty where
-  | empty : Ty
-  | unit : Ty
-  | nat : Ty
-  | arr : Ty → Ty → Ty
+  | empty
+  | unit
+  | nat
+  | arr (domain : Ty) (result : Ty)
 
 inductive Expr where
-  | var : Nat → Expr
-  | constant : Nat → Expr
-  | unit : Expr
-  | nat : Nat → Expr
-  | lam : Ty → Expr → Expr
-  | app : Expr → Expr → Expr
+  | var (index : Nat)
+  | constant (index : Nat)
+  | unit
+  | nat (value : Nat)
+  | lam (domain : Ty) (body : Expr)
+  | app (fn : Expr) (argument : Expr)
 
 structure Declaration where
   type : Ty
@@ -65,12 +65,15 @@ def infer (fuel : Nat) (globals : List Ty) (locals : List Ty)
       | some result => some (Ty.arr domain result)
     | Expr.app fn argument =>
       match infer remaining globals locals fn with
-      | some (Ty.arr domain result) =>
-        match infer remaining globals locals argument with
-        | none => none
-        | some argumentType =>
-          if tyEq remaining domain argumentType then some result else none
-      | _ => none
+      | none => none
+      | some functionType =>
+        match functionType with
+        | Ty.arr domain result =>
+          match infer remaining globals locals argument with
+          | none => none
+          | some argumentType =>
+            if tyEq remaining domain argumentType then some result else none
+        | _ => none
 
 def checkDeclarations (termFuel : Nat) (declarationFuel : Nat)
     (globals : List Ty) (declarations : List Declaration) : Option (List Ty) :=

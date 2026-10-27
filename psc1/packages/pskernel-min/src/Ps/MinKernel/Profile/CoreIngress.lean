@@ -35,7 +35,7 @@ def psMinCoreType (fuel : Nat) : PsMinCoreExpr -> Option PsMinRegTy :=
   match fuel with
   | Nat.zero => fun _ => Option.none
   | Nat.succ rest => fun expr =>
-    let smaller := psMinCoreType rest;
+    let smaller : PsMinCoreExpr -> Option PsMinRegTy := psMinCoreType rest;
     match expr with
     | .constant name levels =>
       if psMinByteEq levels List.nil then
@@ -131,7 +131,8 @@ def psMinCoreTranslate (fuel : Nat) : List PsMinCoreName -> PsMinCoreExpr -> Opt
   match fuel with
   | Nat.zero => fun _ _ => Option.none
   | Nat.succ rest => fun names expr =>
-    let smaller := psMinCoreTranslate rest names;
+    let recur : List PsMinCoreName -> PsMinCoreExpr -> Option PsMinOpTerm := psMinCoreTranslate rest;
+    let smaller : PsMinCoreExpr -> Option PsMinOpTerm := recur names;
     match psMinCoreConditionalView expr with
     | Option.some view =>
       match psMinCoreType rest view.type with
@@ -185,14 +186,17 @@ def psMinCoreTranslateDeclarations (termFuel declarationFuel : Nat) :
   | Nat.zero => fun _ decls => match decls with
     | List.nil => Option.some List.nil
     | List.cons _ _ => Option.none
-  | Nat.succ rest => fun names decls => match decls with
+  | Nat.succ rest => fun names decls =>
+    let smaller : List PsMinCoreName -> List PsMinCoreDeclaration -> Option (List PsMinOpDeclaration) :=
+      psMinCoreTranslateDeclarations termFuel rest;
+    match decls with
     | List.nil => Option.some List.nil
     | List.cons decl tail => if psMinCoreFresh names decl.name then
       match psMinCoreType termFuel decl.type with
       | Option.none => Option.none
       | Option.some type => match psMinCoreTranslate termFuel names decl.value with
         | Option.none => Option.none
-        | Option.some value => match psMinCoreTranslateDeclarations termFuel rest (List.cons decl.name names) tail with
+        | Option.some value => match smaller (List.cons decl.name names) tail with
           | Option.none => Option.none
           | Option.some declarations => Option.some (List.cons (PsMinOpDeclaration.mk type value) declarations)
       else Option.none

@@ -25,7 +25,8 @@ structure PsMinCoreDeclaration where
 def psMinByteAppend (left : List Nat) : List Nat -> List Nat :=
   match left with
   | List.nil => fun right => right
-  | List.cons head tail => fun right => List.cons head (psMinByteAppend tail right)
+  | List.cons head tail => fun right => let smaller : List Nat -> List Nat := psMinByteAppend tail;
+      List.cons head (smaller right)
 
 def psMinByteEq (left : List Nat) : List Nat -> Bool :=
   match left with
@@ -34,7 +35,8 @@ def psMinByteEq (left : List Nat) : List Nat -> Bool :=
     | List.cons _ _ => false
   | List.cons head tail => fun right => match right with
     | List.nil => false
-    | List.cons other rest => if Nat.beq head other then psMinByteEq tail rest else false
+    | List.cons other rest => let smaller : List Nat -> Bool := psMinByteEq tail;
+      if Nat.beq head other then smaller rest else false
 
 def psMinByteLengthAtMost (fuel : Nat) : List Nat -> Bool :=
   match fuel with
@@ -43,18 +45,23 @@ def psMinByteLengthAtMost (fuel : Nat) : List Nat -> Bool :=
     | List.cons _ _ => false
   | Nat.succ rest => fun bytes => match bytes with
     | List.nil => true
-    | List.cons _ tail => psMinByteLengthAtMost rest tail
+    | List.cons _ tail =>
+      let smaller : List Nat -> Bool := psMinByteLengthAtMost rest; smaller tail
 
 def psMinCoreNameEq (left : PsMinCoreName) : PsMinCoreName -> Bool :=
   match left with
   | .anonymous => fun right => match right with
     | .anonymous => true
     | _ => false
-  | .str parent bytes => fun right => match right with
-    | .str other rest => if psMinCoreNameEq parent other then psMinByteEq bytes rest else false
+  | .str parent bytes => fun right =>
+    let smaller : PsMinCoreName -> Bool := psMinCoreNameEq parent;
+    match right with
+    | .str other rest => if smaller other then psMinByteEq bytes rest else false
     | _ => false
-  | .num parent value => fun right => match right with
-    | .num other number => if psMinCoreNameEq parent other then Nat.beq value number else false
+  | .num parent value => fun right =>
+    let smaller : PsMinCoreName -> Bool := psMinCoreNameEq parent;
+    match right with
+    | .num other number => if smaller other then Nat.beq value number else false
     | _ => false
 
 def psMinCoreSafeText (fuel : Nat) : List Nat -> Bool :=
@@ -68,21 +75,24 @@ def psMinCoreSafeText (fuel : Nat) : List Nat -> Bool :=
       if Nat.blt head 32 then false else
       if Nat.blt 126 head then false else
       if Nat.beq head 34 then false else
-      if Nat.beq head 92 then false else psMinCoreSafeText rest tail
+      if Nat.beq head 92 then false else
+      let smaller : List Nat -> Bool := psMinCoreSafeText rest; smaller tail
 
 def psMinCoreNameValid (fuel : Nat) : PsMinCoreName -> Bool :=
   match fuel with
   | Nat.zero => fun _ => false
-  | Nat.succ rest => fun name => match name with
+  | Nat.succ rest => fun name =>
+    let smaller : PsMinCoreName -> Bool := psMinCoreNameValid rest;
+    match name with
     | .anonymous => true
-    | .str parent bytes => if psMinCoreSafeText 128 bytes then psMinCoreNameValid rest parent else false
-    | .num parent value => if Nat.blt value 4096 then psMinCoreNameValid rest parent else false
+    | .str parent bytes => if psMinCoreSafeText 128 bytes then smaller parent else false
+    | .num parent value => if Nat.blt value 4096 then smaller parent else false
 
 def psMinCoreExprEq (fuel : Nat) : PsMinCoreExpr -> PsMinCoreExpr -> Bool :=
   match fuel with
   | Nat.zero => fun _ _ => false
   | Nat.succ rest => fun left right =>
-    let smaller := psMinCoreExprEq rest;
+    let smaller : PsMinCoreExpr -> PsMinCoreExpr -> Bool := psMinCoreExprEq rest;
     match left with
     | .bvar index => match right with
       | .bvar other => Nat.beq index other
@@ -118,7 +128,7 @@ def psMinCoreExprValid (fuel : Nat) : PsMinCoreExpr -> Bool :=
   match fuel with
   | Nat.zero => fun _ => false
   | Nat.succ rest => fun expr =>
-    let smaller := psMinCoreExprValid rest;
+    let smaller : PsMinCoreExpr -> Bool := psMinCoreExprValid rest;
     match expr with
     | .bvar index => Nat.blt index 4096
     | .natural value => Nat.blt value 4096
@@ -210,11 +220,13 @@ def psMinCoreDeclarationsValid (fuel : Nat) : List PsMinCoreDeclaration -> Bool 
   | Nat.zero => fun decls => match decls with
     | List.nil => true
     | List.cons _ _ => false
-  | Nat.succ rest => fun decls => match decls with
+  | Nat.succ rest => fun decls =>
+    let smaller : List PsMinCoreDeclaration -> Bool := psMinCoreDeclarationsValid rest;
+    match decls with
     | List.nil => true
     | List.cons decl tail => if psMinCoreNameValid 16 decl.name then
         if Nat.blt decl.height 4096 then if psMinCoreExprValid 48 decl.type then
-        if psMinCoreExprValid 48 decl.value then psMinCoreDeclarationsValid rest tail
+        if psMinCoreExprValid 48 decl.value then smaller tail
         else false else false else false else false
 
 -- Any parser may propose a candidate; success binds *all* original bytes.

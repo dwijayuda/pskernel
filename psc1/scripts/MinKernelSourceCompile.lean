@@ -1,6 +1,21 @@
 import Ps.BackendTs.Sh1
 import Ps.Host.ProjectCompiler
 
+def minKernelCompilerFailure (error : PsCompilerError) : String :=
+  match error with
+  | .elaboration failure => psHostElabErrorText failure
+  | .leanFrontend failure =>
+    match failure with
+    | .lex error => psHostLexErrorText error
+    | .parse error => psHostParseErrorText error
+  | .proofScriptFrontend failure =>
+    match failure with
+    | .lex error => psHostLexErrorText error
+    | .parse error => psHostParseErrorText error
+  | .translation _ => "translation refused"
+  | .admission _ => "canonical admission encoding refused"
+  | .erasure _ => "erasure refused"
+
 -- Linux CI transport only. The source-owned compiler performs all frontend,
 -- canonical preparation and strict original/transformed IR checks.
 def minKernelSourceFailure (error : PsSh1EmitError) : String :=
@@ -10,8 +25,8 @@ def minKernelSourceFailure (error : PsSh1EmitError) : String :=
     | .policy finding => finding.code ++ ": " ++ finding.detail
     | .origin moduleName failure =>
       moduleName ++ ": " ++ psHostElabErrorText failure.error
-    | .compiler moduleName _ => moduleName ++ ": source compiler refused"
-  | .compiler _ => "compiler refused"
+    | .compiler moduleName failure => moduleName ++ ": " ++ minKernelCompilerFailure failure
+  | .compiler failure => minKernelCompilerFailure failure
   | .checkedEmit _ => "strict IR or emitter refused"
   | .target finding => finding.code ++ ": " ++ finding.detail
 

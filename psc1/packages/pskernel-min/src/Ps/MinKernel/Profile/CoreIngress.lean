@@ -51,7 +51,7 @@ def psMinCoreType (fuel : Nat) : PsMinCoreExpr -> Option PsMinRegTy :=
         | Option.none => Option.none
         | Option.some b => Option.some (PsMinRegTy.arr a b)
     | .app fn arg => match fn with
-      | .constant name levels => if psMinByteEq levels [1] then
+      | .constant name levels => if psMinByteEq levels List.nil then
           match smaller arg with
           | Option.none => Option.none
           | Option.some a => if psMinCoreNameEq name (PsMinCoreName.str PsMinCoreName.anonymous [76, 105, 115, 116]) then Option.some (PsMinRegTy.list a) else
@@ -115,7 +115,7 @@ def psMinCoreConditionalView (expr : PsMinCoreExpr) : Option PsMinCoreConditiona
 def psMinCoreTypedPrimitive (fuel : Nat) (expr : PsMinCoreExpr) : Option PsMinOpTerm :=
   match expr with
   | .app fn type => match fn with
-    | .constant name levels => if psMinByteEq levels [1] then
+    | .constant name levels => if psMinByteEq levels List.nil then
       match psMinCoreType fuel type with
       | Option.none => Option.none
       | Option.some a =>

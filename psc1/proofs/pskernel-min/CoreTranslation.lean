@@ -14,9 +14,9 @@ inductive TypeImage : PsMinCoreExpr → PsMinRegTy → Prop where
   | arr (name binder domain body a b) (ha : TypeImage domain a) (hb : TypeImage body b) :
       TypeImage (.forallE name binder domain body) (.arr a b)
   | list (element a) (ha : TypeImage element a) :
-      TypeImage (.app (.constant (.str PsMinCoreName.anonymous [76, 105, 115, 116]) [1]) element) (.list a)
+      TypeImage (.app (.constant (.str PsMinCoreName.anonymous [76, 105, 115, 116]) []) element) (.list a)
   | option (element a) (ha : TypeImage element a) :
-      TypeImage (.app (.constant (.str PsMinCoreName.anonymous [79, 112, 116, 105, 111, 110]) [1]) element) (.option a)
+      TypeImage (.app (.constant (.str PsMinCoreName.anonymous [79, 112, 116, 105, 111, 110]) []) element) (.option a)
 
 theorem type_translation (fuel : Nat) (expr : PsMinCoreExpr) (code : PsMinRegTy)
     (h : psMinCoreType fuel expr = some code) : TypeImage expr code := by
@@ -93,13 +93,13 @@ inductive PrimitiveImage : PsMinCoreExpr → PsMinOpTerm → Prop where
   | head7 : PrimitiveImage (.constant (.str (.str PsMinCoreName.anonymous [78, 97, 116]) [98, 101, 113]) []) (.primitive .natBeq 0 0 0 0 0)
   | head8 : PrimitiveImage (.constant (.str (.str PsMinCoreName.anonymous [78, 97, 116]) [98, 108, 116]) []) (.primitive .natBlt 0 0 0 0 0)
   | listNil (element a) (ha : TypeImage element a) :
-      PrimitiveImage (.app (.constant (.str (.str PsMinCoreName.anonymous [76, 105, 115, 116]) [110, 105, 108]) [1]) element) (.primitive (.listNil a) 0 1 0 0 0)
+      PrimitiveImage (.app (.constant (.str (.str PsMinCoreName.anonymous [76, 105, 115, 116]) [110, 105, 108]) []) element) (.primitive (.listNil a) 0 1 0 0 0)
   | listCons (element a) (ha : TypeImage element a) :
-      PrimitiveImage (.app (.constant (.str (.str PsMinCoreName.anonymous [76, 105, 115, 116]) [99, 111, 110, 115]) [1]) element) (.primitive (.listCons a) 0 1 0 0 0)
+      PrimitiveImage (.app (.constant (.str (.str PsMinCoreName.anonymous [76, 105, 115, 116]) [99, 111, 110, 115]) []) element) (.primitive (.listCons a) 0 1 0 0 0)
   | optionNone (element a) (ha : TypeImage element a) :
-      PrimitiveImage (.app (.constant (.str (.str PsMinCoreName.anonymous [79, 112, 116, 105, 111, 110]) [110, 111, 110, 101]) [1]) element) (.primitive (.optionNone a) 0 1 0 0 0)
+      PrimitiveImage (.app (.constant (.str (.str PsMinCoreName.anonymous [79, 112, 116, 105, 111, 110]) [110, 111, 110, 101]) []) element) (.primitive (.optionNone a) 0 1 0 0 0)
   | optionSome (element a) (ha : TypeImage element a) :
-      PrimitiveImage (.app (.constant (.str (.str PsMinCoreName.anonymous [79, 112, 116, 105, 111, 110]) [115, 111, 109, 101]) [1]) element) (.primitive (.optionSome a) 0 1 0 0 0)
+      PrimitiveImage (.app (.constant (.str (.str PsMinCoreName.anonymous [79, 112, 116, 105, 111, 110]) [115, 111, 109, 101]) []) element) (.primitive (.optionSome a) 0 1 0 0 0)
 
 theorem primitive_translation (name : PsMinCoreName) (term : PsMinOpTerm)
     (h : psMinCorePrimitive name = some term) : PrimitiveImage (.constant name []) term := by

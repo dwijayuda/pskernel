@@ -82,7 +82,7 @@ for(const [id,input]of hostile) {
   observations.push({id:'host-'+id,accepted:false,code:result.code});
 }
 assert.equal(touched,0,'hostile input getters/proxies must never be invoked');
-const numbered=cases.filter(c=>c.expected).slice(0,5);
+const numbered=cases.filter(c=>c.expected);
 const common=[];
 for(const c of numbered) {
   const answer=JSON.parse(run('.lake/build/bin/psc1_independent_checker',['--check'],c.source));
@@ -124,10 +124,15 @@ const add=n=>{
 };
 for(const n of [...references.values()])add(n);
 const foundation=prelude.filter(d=>reached.has(key(d.nameWire)));
+const semanticContracts=JSON.parse(fs.readFileSync('dist/pskernel-min/operational/foundation-contracts.json','utf8'));
+const foundationUnion=new Map(foundation.map(d=>[key(d.nameWire),d]));
+for(const d of semanticContracts.contracts)foundationUnion.set(key(d.nameWire),d);
 const census={authoritative:false,runtimeModules:6,testModules:1,
   originMembers:runtimeNames.size,runtimeAdmissionRecords:runtimeRecords.length,
   runtimeRecordIndices:runtimeRecords.map(x=>x.index),completeSourceAdmissionRecords:records.length,
   selectedFoundationDeclarations:foundation.length,selectedFoundation:foundation,
+  sourceLanguageFoundationDeclarations:semanticContracts.contracts.length,
+  combinedFoundationDeclarations:foundationUnion.size,combinedFoundation:[...foundationUnion.values()],
   boundary:'Exact source-only syntactic closure; not minimal-checker self-admission or a foundation-adequacy theorem'};
 fs.writeFileSync(path.join(dir,'runtime-frontier.json'),JSON.stringify(census,null,2)+'\n');
 const receipt={schema:'psc1-min-core-ingress-portability/1',commit:process.env.GITHUB_SHA,

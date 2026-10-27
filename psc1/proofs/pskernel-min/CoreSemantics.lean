@@ -8,76 +8,72 @@ open Ps.MinKernel.CoreIngress
 
 -- Independent denotational rules. These contain no call to source translation
 -- or to the operational checker; their values use the concrete R2/R3 model.
-inductive OpEval (specs : List PsMinRegSpec) (globals : List PsMinRegTy)
-    (G : Model (dataModel specs) globals) :
-    (locals : List PsMinRegTy) → Model (dataModel specs) locals →
-    PsMinOpTerm → (type : PsMinRegTy) → Denote (dataModel specs) type → Prop where
+inductive OpEval (globals : List PsMinRegTy)
+    (G : Model ([]) globals) :
+    (locals : List PsMinRegTy) → Model ([]) locals →
+    PsMinOpTerm → (type : PsMinRegTy) → Denote ([]) type → Prop where
   | base (locals L expression type fuel)
-      (h : psMinRegInfer fuel specs globals locals expression = some type) :
-      OpEval specs globals G locals L (.base expression) type
-        (RegularProofs.inferModel fuel specs (dataModel specs) globals locals expression type
-          (signatures specs) G L h)
-  | projection (locals L slot field type)
-      (h : psMinOpProjectionType specs slot field = some type) :
-      OpEval specs globals G locals L (.projection slot field) type
-        (OperationalProjection.projectionModel specs slot field type h)
+      (h : psMinRegInfer fuel [] globals locals expression = some type) :
+      OpEval globals G locals L (.base expression) type
+        (RegularProofs.inferModel fuel [] ([]) globals locals expression type
+          (signatures []) G L h)
   | primitive (locals L schema level parameters indices motives minors) :
-      OpEval specs globals G locals L (.primitive schema level parameters indices motives minors)
-        (psMinOpPrimitiveSignature schema) (OperationalFoundation.primitiveValue (dataModel specs) schema)
-  | lam (locals L domain body result) (fn : Denote (dataModel specs) domain → Denote (dataModel specs) result)
-      (hb : ∀ value, OpEval specs globals G (domain :: locals) (consModel (dataModel specs) value L)
+      OpEval globals G locals L (.primitive schema level parameters indices motives minors)
+        (psMinOpPrimitiveSignature schema) (OperationalFoundation.primitiveValue ([]) schema)
+  | lam (locals L domain body result) (fn : Denote ([]) domain → Denote ([]) result)
+      (hb : ∀ value, OpEval globals G (domain :: locals) (consModel ([]) value L)
         body result (fn value)) :
-      OpEval specs globals G locals L (.lam domain body) (.arr domain result) fn
+      OpEval globals G locals L (.lam domain body) (.arr domain result) fn
   | app (locals L fn argument domain result)
-      (f : Denote (dataModel specs) domain → Denote (dataModel specs) result)
-      (a : Denote (dataModel specs) domain)
-      (hf : OpEval specs globals G locals L fn (.arr domain result) f)
-      (ha : OpEval specs globals G locals L argument domain a) :
-      OpEval specs globals G locals L (.app fn argument) result (f a)
-  | letE (locals L type value body result) (v : Denote (dataModel specs) type)
-      (b : Denote (dataModel specs) result)
-      (hv : OpEval specs globals G locals L value type v)
-      (hb : OpEval specs globals G (type :: locals) (consModel (dataModel specs) v L) body result b) :
-      OpEval specs globals G locals L (.letE type value body) result b
+      (f : Denote ([]) domain → Denote ([]) result)
+      (a : Denote ([]) domain)
+      (hf : OpEval globals G locals L fn (.arr domain result) f)
+      (ha : OpEval globals G locals L argument domain a) :
+      OpEval globals G locals L (.app fn argument) result (f a)
+  | letE (locals L type value body result) (v : Denote ([]) type)
+      (b : Denote ([]) result)
+      (hv : OpEval globals G locals L value type v)
+      (hb : OpEval globals G (type :: locals) (consModel ([]) v L) body result b) :
+      OpEval globals G locals L (.letE type value body) result b
 
-theorem infer_evaluates (fuel : Nat) (specs : List PsMinRegSpec)
+theorem infer_evaluates (fuel : Nat)
     (globals locals : List PsMinRegTy) (expression : PsMinOpTerm) (type : PsMinRegTy)
-    (G : Model (dataModel specs) globals) (L : Model (dataModel specs) locals)
-    (h : psMinOpInfer fuel specs globals locals expression = some type) :
-    OpEval specs globals G locals L expression type
-      (OperationalProofs.inferModel fuel specs globals locals expression type G L h) := by
+    (G : Model ([]) globals) (L : Model ([]) locals)
+    (h : psMinOpInfer fuel [] globals locals expression = some type) :
+    OpEval globals G locals L expression type
+      (OperationalProofs.inferModel fuel [] globals locals expression type G L h) := by
   induction fuel generalizing locals expression type with
   | zero => simp [psMinOpInfer] at h
   | succ remaining ih =>
     cases expression with
     | base expression => exact .base locals L expression type remaining h
-    | projection slot field => exact .projection locals L slot field type h
+    | projection slot field => simp [psMinOpInfer, psMinOpProjectionType] at h
     | primitive schema level parameters indices motives minors =>
-      have ht := OperationalFoundation.primitiveType_signature remaining (psMinRegSpecCount specs)
+      have ht := OperationalFoundation.primitiveType_signature remaining (0)
         schema level parameters indices motives minors type h
       subst type
-      simpa only [OperationalProofs.inferModel, OperationalFoundation.primitiveModel] using
-        (OpEval.primitive (specs := specs) (globals := globals) (G := G) locals L schema level parameters indices motives minors)
+      simpa -implicitDefEqProofs only [OperationalProofs.inferModel, Nat.recAux, OperationalFoundation.primitiveModel] using!
+        (OpEval.primitive (globals := globals) (G := G) locals L schema level parameters indices motives minors)
     | lam domain body =>
-      cases hv : psMinRegTyValid remaining (psMinRegSpecCount specs) domain with
+      cases hv : psMinRegTyValid remaining (0) domain with
       | false => simp [psMinOpInfer, hv] at h
       | true =>
-        cases hb : psMinOpInfer remaining specs globals (domain :: locals) body with
+        cases hb : psMinOpInfer remaining [] globals (domain :: locals) body with
         | none => simp [psMinOpInfer, hv, hb] at h
         | some result =>
           have ht : .arr domain result = type := by simpa [psMinOpInfer, hv, hb] using h
           cases ht
           apply OpEval.lam
           intro value
-          simpa only [OperationalProofs.inferModel, hv, hb] using
-            ih (domain :: locals) body result (consModel (dataModel specs) value L) hb
+          simpa -implicitDefEqProofs only [OperationalProofs.inferModel, Nat.recAux, hv, hb] using!
+            ih (domain :: locals) body result (consModel ([]) value L) hb
     | app fn argument =>
-      cases hf : psMinOpInfer remaining specs globals locals fn with
+      cases hf : psMinOpInfer remaining [] globals locals fn with
       | none => simp [psMinOpInfer, hf] at h
       | some functionType =>
         cases functionType with
         | arr domain result =>
-          cases ha : psMinOpInfer remaining specs globals locals argument with
+          cases ha : psMinOpInfer remaining [] globals locals argument with
           | none => simp [psMinOpInfer, hf, ha] at h
           | some argumentType =>
             cases heq : psMinRegTyEq remaining domain argumentType with
@@ -86,18 +82,18 @@ theorem infer_evaluates (fuel : Nat) (specs : List PsMinRegSpec)
               have ht : result = type := by simpa [psMinOpInfer, hf, ha, heq] using h
               have same := typeEq_sound remaining _ _ heq
               cases same
-              cases ht
-              simpa only [OperationalProofs.inferModel, hf, ha, heq] using
+              subst type
+              simpa -implicitDefEqProofs only [OperationalProofs.inferModel, Nat.recAux, hf, ha, heq] using!
                 OpEval.app locals L fn argument domain result
-                  (OperationalProofs.inferModel remaining specs globals locals fn (.arr domain result) G L hf)
-                  (OperationalProofs.inferModel remaining specs globals locals argument domain G L ha)
+                  (OperationalProofs.inferModel remaining [] globals locals fn (.arr domain result) G L hf)
+                  (OperationalProofs.inferModel remaining [] globals locals argument domain G L ha)
                   (ih locals fn (.arr domain result) L hf) (ih locals argument domain L ha)
         | _ => simp [psMinOpInfer, hf] at h
     | letE annotation value body =>
-      cases hv : psMinRegTyValid remaining (psMinRegSpecCount specs) annotation with
+      cases hv : psMinRegTyValid remaining (0) annotation with
       | false => simp [psMinOpInfer, hv] at h
       | true =>
-        cases hb : psMinOpInfer remaining specs globals locals value with
+        cases hb : psMinOpInfer remaining [] globals locals value with
         | none => simp [psMinOpInfer, hv, hb] at h
         | some inferred =>
           cases heq : psMinRegTyEq remaining inferred annotation with
@@ -105,15 +101,15 @@ theorem infer_evaluates (fuel : Nat) (specs : List PsMinRegSpec)
           | true =>
             have same := typeEq_sound remaining _ _ heq
             cases same
-            have hs : psMinOpInfer remaining specs globals (annotation :: locals) body = some type := by
+            have hs : psMinOpInfer remaining [] globals (annotation :: locals) body = some type := by
               simpa [psMinOpInfer, hv, hb, heq] using h
-            let v := OperationalProofs.inferModel remaining specs globals locals value annotation G L hb
-            simpa only [OperationalProofs.inferModel, hv, hb, heq] using
+            let v := OperationalProofs.inferModel remaining [] globals locals value annotation G L hb
+            simpa -implicitDefEqProofs only [OperationalProofs.inferModel, Nat.recAux, hv, hb, heq] using!
               OpEval.letE locals L annotation value body type v
-                (OperationalProofs.inferModel remaining specs globals (annotation :: locals) body type
-                  G (consModel (dataModel specs) v L) hs)
+                (OperationalProofs.inferModel remaining [] globals (annotation :: locals) body type
+                  G (consModel ([]) v L) hs)
                 (ih locals value annotation L hb)
-                (ih (annotation :: locals) body type (consModel (dataModel specs) v L) hs)
+                (ih (annotation :: locals) body type (consModel ([]) v L) hs)
 
 -- Direct meanings of the selected *source* constants and typed instances.
 inductive PrimitiveDenotation : PsMinCoreExpr → (type : PsMinRegTy) → Denote [] type → Prop where
@@ -127,14 +123,14 @@ inductive PrimitiveDenotation : PsMinCoreExpr → (type : PsMinRegTy) → Denote
   | head7 : PrimitiveDenotation (.constant (.str (.str PsMinCoreName.anonymous [78, 97, 116]) [98, 101, 113]) []) (.arr .nat (.arr .nat .boolean)) (Nat.beq)
   | head8 : PrimitiveDenotation (.constant (.str (.str PsMinCoreName.anonymous [78, 97, 116]) [98, 108, 116]) []) (.arr .nat (.arr .nat .boolean)) (Nat.blt)
   | listNil (element a) (ht : TypeImage element a) :
-      PrimitiveDenotation (.app (.constant (.str (.str PsMinCoreName.anonymous [76, 105, 115, 116]) [110, 105, 108]) [1]) element) (.list a) ([] : List (Denote [] a))
+      PrimitiveDenotation (.app (.constant (.str (.str PsMinCoreName.anonymous [76, 105, 115, 116]) [110, 105, 108]) []) element) (.list a) ([] : List (Denote [] a))
   | listCons (element a) (ht : TypeImage element a) :
-      PrimitiveDenotation (.app (.constant (.str (.str PsMinCoreName.anonymous [76, 105, 115, 116]) [99, 111, 110, 115]) [1]) element) (.arr a (.arr (.list a) (.list a)))
+      PrimitiveDenotation (.app (.constant (.str (.str PsMinCoreName.anonymous [76, 105, 115, 116]) [99, 111, 110, 115]) []) element) (.arr a (.arr (.list a) (.list a)))
         (@List.cons (Denote [] a))
   | optionNone (element a) (ht : TypeImage element a) :
-      PrimitiveDenotation (.app (.constant (.str (.str PsMinCoreName.anonymous [79, 112, 116, 105, 111, 110]) [110, 111, 110, 101]) [1]) element) (.option a) (none : Option (Denote [] a))
+      PrimitiveDenotation (.app (.constant (.str (.str PsMinCoreName.anonymous [79, 112, 116, 105, 111, 110]) [110, 111, 110, 101]) []) element) (.option a) (none : Option (Denote [] a))
   | optionSome (element a) (ht : TypeImage element a) :
-      PrimitiveDenotation (.app (.constant (.str (.str PsMinCoreName.anonymous [79, 112, 116, 105, 111, 110]) [115, 111, 109, 101]) [1]) element) (.arr a (.option a))
+      PrimitiveDenotation (.app (.constant (.str (.str PsMinCoreName.anonymous [79, 112, 116, 105, 111, 110]) [115, 111, 109, 101]) []) element) (.arr a (.option a))
         (@Option.some (Denote [] a))
 
 inductive CoreEval (names : List PsMinCoreName) (globals : List PsMinRegTy) (G : Model [] globals) :
@@ -173,7 +169,7 @@ inductive CoreEval (names : List PsMinCoreName) (globals : List PsMinRegTy) (G :
 theorem primitive_semantics (globals locals : List PsMinRegTy) (G : Model [] globals)
     (L : Model [] locals) (source : PsMinCoreExpr) (term : PsMinOpTerm)
     (type : PsMinRegTy) (value : Denote [] type)
-    (image : PrimitiveImage source term) (evaluation : OpEval [] globals G locals L term type value) :
+    (image : PrimitiveImage source term) (evaluation : OpEval globals G locals L term type value) :
     PrimitiveDenotation source type value := by
   cases image with
   | head0 =>
@@ -237,10 +233,10 @@ theorem translation_preserves_semantics (names : List PsMinCoreName)
     (source : PsMinCoreExpr) (term : PsMinOpTerm) (image : TermImage names source term)
     (globals locals : List PsMinRegTy) (G : Model [] globals) (L : Model [] locals)
     (type : PsMinRegTy) (value : Denote [] type)
-    (evaluation : OpEval [] globals G locals L term type value) :
+    (evaluation : OpEval globals G locals L term type value) :
     CoreEval names globals G locals L source type value := by
   induction image generalizing locals type with
-  | variable index =>
+  | «variable» index =>
     cases evaluation
     rename_i fuel checked
     cases fuel with
@@ -307,10 +303,73 @@ theorem checked_source_semantics (translationFuel checkingFuel : Nat) (names : L
     CoreEval names globals G locals L source type
       (OperationalProofs.inferModel checkingFuel [] globals locals term type G L checked) :=
   translation_preserves_semantics _ _ _ (term_translation _ _ _ _ translated)
-    _ _ _ _ _ _ (infer_evaluates _ _ _ _ _ _ _ _ checked)
+    _ _ _ _ _ _ (infer_evaluates _ _ _ _ _ _ _ checked)
+
+-- Source bodies keep their definition-time name and value contexts.
+-- This history mentions only source syntax and the independent CoreEval rules.
+inductive SourceHistory :
+    (names : List PsMinCoreName) → (globals : List PsMinRegTy) →
+    List PsMinCoreDeclaration → (result : List PsMinRegTy) →
+    Model [] globals → Model [] result → Prop where
+  | done (names globals) (model : Model [] globals) :
+      SourceHistory names globals [] globals model model
+  | step (names globals) (decl : PsMinCoreDeclaration) (rest result declaredType)
+      (initial : Model [] globals) (output : Model [] result) (value : Denote [] declaredType)
+      (fresh : psMinCoreFresh names decl.name = true)
+      (typeMeaning : TypeImage decl.type declaredType)
+      (bodyMeaning : CoreEval names globals initial [] (emptyModel []) decl.value declaredType value)
+      (tail : SourceHistory (decl.name :: names) (declaredType :: globals) rest result
+        (consModel [] value initial) output) :
+      SourceHistory names globals (decl :: rest) result initial output
+
+theorem checked_history_preserves_source (names : List PsMinCoreName) (globals : List PsMinRegTy)
+    (source : List PsMinCoreDeclaration) (normalized : List PsMinOpDeclaration)
+    (result : List PsMinRegTy) (initial : Model [] globals) (output : Model [] result)
+    (image : EnvironmentImage names source normalized)
+    (history : OperationalProofs.DefinitionHistory 128 [] globals normalized result initial output) :
+    SourceHistory names globals source result initial output := by
+  induction image generalizing globals result initial output with
+  | nil names =>
+    cases history
+    exact .done names globals initial
+  | step names decl rest type value tail fresh ht hv next ih =>
+    cases history with
+    | step declaration rest inferred valid checked same output history =>
+      have heq : inferred = type := typeEq_sound 128 _ _ same
+      have body := translation_preserves_semantics names decl.value value hv
+        globals [] initial (emptyModel []) inferred
+        (OperationalProofs.inferModel 128 [] globals [] value inferred initial (emptyModel []) checked)
+        (infer_evaluates 128 globals [] value inferred initial (emptyModel []) checked)
+      cases heq
+      exact .step names globals decl rest result type initial output
+        (OperationalProofs.inferModel 128 [] globals [] value type initial (emptyModel []) checked)
+        fresh ht body (ih _ _ _ _ history)
+
+theorem canonical_source_model (bytes : List Nat) (candidate : List PsMinCoreDeclaration)
+    (accepted : PsMinCoreAdmission) (h : psMinCoreAdmit bytes candidate = some accepted) :
+    WellFormedBytes bytes accepted.source ∧
+    EnvironmentImage [] accepted.source accepted.normalized ∧
+    ∃ model, SourceHistory [] [] accepted.source accepted.types (emptyModel []) model := by
+  obtain ⟨bytesExact, correspondence, modelExists, model, history⟩ :=
+    canonical_admission_has_model bytes candidate accepted h
+  have image := environment_translation 64 [] accepted.source accepted.normalized correspondence
+  exact ⟨bytesExact, image, model,
+    checked_history_preserves_source [] [] accepted.source accepted.normalized accepted.types
+      (emptyModel []) model image history⟩
+
+theorem canonical_no_empty_constant (bytes : List Nat) (candidate : List PsMinCoreDeclaration)
+    (accepted : PsMinCoreAdmission) (h : psMinCoreAdmit bytes candidate = some accepted) (index : Nat) :
+    psMinRegLookup accepted.types index ≠ some PsMinRegTy.empty := by
+  intro impossible
+  obtain ⟨_, _, modelExists, _⟩ := canonical_admission_has_model bytes candidate accepted h
+  obtain ⟨model⟩ := modelExists
+  exact Empty.elim (model index .empty impossible)
 
 #print axioms infer_evaluates
 #print axioms primitive_semantics
 #print axioms translation_preserves_semantics
 #print axioms checked_source_semantics
+#print axioms checked_history_preserves_source
+#print axioms canonical_source_model
+#print axioms canonical_no_empty_constant
 end Ps.MinKernel.CoreSemantics

@@ -9,7 +9,7 @@ inductive PsMinRegTerm where
   | lam (domain : PsMinRegTy) (body : PsMinRegTerm)
   | app (fn : PsMinRegTerm) (argument : PsMinRegTerm)
   | ctor (dataIndex : Nat) (constructorIndex : Nat)
-  | recursor (dataIndex : Nat) (universe : Nat) (parameters : Nat) (indices : Nat)
+  | recursor (dataIndex : Nat) (sortLevel : Nat) (parameters : Nat) (indices : Nat)
       (motives : Nat) (minors : Nat) (result : PsMinRegTy)
 
 structure PsMinRegDeclaration where
@@ -54,8 +54,8 @@ def psMinRegInfer (fuel : Nat) (specs : List PsMinRegSpec)
         | _ => Option.none
     | PsMinRegTerm.ctor dataIndex constructorIndex =>
       psMinRegCtorTypeAt specs dataIndex constructorIndex
-    | PsMinRegTerm.recursor dataIndex universe parameters indices motives minors result =>
-      psMinRegRecursorTypeAt remaining specs dataIndex universe parameters indices motives minors result
+    | PsMinRegTerm.recursor dataIndex sortLevel parameters indices motives minors result =>
+      psMinRegRecursorTypeAt remaining specs dataIndex sortLevel parameters indices motives minors result
 
 def psMinRegCheckDeclarations (termFuel declarationFuel : Nat) (specs : List PsMinRegSpec)
     (globals : List PsMinRegTy) (declarations : List PsMinRegDeclaration) : Option (List PsMinRegTy) :=

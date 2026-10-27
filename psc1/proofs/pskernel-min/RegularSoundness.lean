@@ -101,8 +101,8 @@ def inferModel (fuel : Nat) (specs : List PsMinRegSpec) (data : List Type)
       cases ht
       exact value
     | ctor slot index => exact signatureModel.ctorValue slot index type h
-    | recursor slot universe parameters indices motives minors result =>
-      exact signatureModel.recValue remaining slot universe parameters indices motives minors result type h
+    | recursor slot sortLevel parameters indices motives minors result =>
+      exact signatureModel.recValue remaining slot sortLevel parameters indices motives minors result type h
     | lam domain body =>
       cases hv : psMinRegTyValid remaining (psMinRegSpecCount specs) domain with
       | false => simp [psMinRegInfer, hv] at h

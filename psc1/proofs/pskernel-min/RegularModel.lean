@@ -243,9 +243,9 @@ def dataModel : List PsMinRegSpec → List Type
 structure SignatureModel (specs : List PsMinRegSpec) (data : List Type) where
   ctorValue : (slot constructorIndex : Nat) → (type : PsMinRegTy) →
     psMinRegCtorTypeAt specs slot constructorIndex = some type → Denote data type
-  recValue : (fuel slot universe parameters indices motives minors : Nat) →
+  recValue : (fuel slot sortLevel parameters indices motives minors : Nat) →
     (result type : PsMinRegTy) →
-    psMinRegRecursorTypeAt fuel specs slot universe parameters indices motives minors result = some type → Denote data type
+    psMinRegRecursorTypeAt fuel specs slot sortLevel parameters indices motives minors result = some type → Denote data type
 
 -- These lemmas connect positional lookup to the actual constructor index.
 theorem ctor_bound (constructors : List (List PsMinRegField)) (index : Nat) (fields : List PsMinRegField)
@@ -273,7 +273,7 @@ def signatures (specs : List PsMinRegSpec) : SignatureModel specs (dataModel spe
   | nil =>
     constructor
     · intro slot index type success; simp [psMinRegCtorTypeAt] at success
-    · intro fuel slot universe parameters indices motives minors result type success
+    · intro fuel slot sortLevel parameters indices motives minors result type success
       simp [psMinRegRecursorTypeAt] at success
   | cons spec rest ih =>
     constructor
@@ -298,24 +298,24 @@ def signatures (specs : List PsMinRegSpec) : SignatureModel specs (dataModel spe
           cases heq
           exact cast (denote_lift (Carrier spec (dataModel rest)) (dataModel rest) prior).symm
             (ih.ctorValue slot index prior ht)
-    · intro fuel slot universe parameters indices motives minors result type success
+    · intro fuel slot sortLevel parameters indices motives minors result type success
       cases slot with
       | zero =>
         by_cases allowed : psMinRegRecursorAllowed fuel (Nat.succ (psMinRegSpecCount rest)) spec
-            universe parameters indices motives minors result = true
+            sortLevel parameters indices motives minors result = true
         · have ht : psMinRegRecursorTy result spec.constructors = type := by
             simpa [psMinRegRecursorTypeAt, allowed] using success
           cases ht
           exact recursorValue spec (dataModel rest) result
         · simp [psMinRegRecursorTypeAt, allowed] at success
       | succ slot =>
-        cases ht : psMinRegRecursorTypeAt fuel rest slot universe parameters indices motives minors result with
+        cases ht : psMinRegRecursorTypeAt fuel rest slot sortLevel parameters indices motives minors result with
         | none => simp [psMinRegRecursorTypeAt, ht] at success
         | some prior =>
           have heq : psMinRegLiftTy prior = type := by simpa [psMinRegRecursorTypeAt, ht] using success
           cases heq
           exact cast (denote_lift (Carrier spec (dataModel rest)) (dataModel rest) prior).symm
-            (ih.recValue fuel slot universe parameters indices motives minors result prior ht)
+            (ih.recValue fuel slot sortLevel parameters indices motives minors result prior ht)
 
 #print axioms join_split
 #print axioms fold_construct

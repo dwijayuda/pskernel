@@ -195,8 +195,8 @@ def psMinRegCtorTypeAt (specs : List PsMinRegSpec) (dataIndex constructorIndex :
       | Option.some type => Option.some (psMinRegLiftTy type)
 
 def psMinRegRecursorAllowed (fuel bound : Nat) (spec : PsMinRegSpec)
-    (universe parameters indices motives minors : Nat) (result : PsMinRegTy) : Bool :=
-  if Nat.beq universe 1 then
+    (sortLevel parameters indices motives minors : Nat) (result : PsMinRegTy) : Bool :=
+  if Nat.beq sortLevel 1 then
     if Nat.beq parameters 0 then
       if Nat.beq indices 0 then
         if Nat.beq motives 1 then
@@ -210,17 +210,17 @@ def psMinRegRecursorAllowed (fuel bound : Nat) (spec : PsMinRegSpec)
 
 -- Result codes are relative to the selected family and its earlier registry.
 def psMinRegRecursorTypeAt (fuel : Nat) (specs : List PsMinRegSpec)
-    (dataIndex universe parameters indices motives minors : Nat) (result : PsMinRegTy) : Option PsMinRegTy :=
+    (dataIndex sortLevel parameters indices motives minors : Nat) (result : PsMinRegTy) : Option PsMinRegTy :=
   match specs with
   | List.nil => Option.none
   | List.cons spec rest =>
     match dataIndex with
     | Nat.zero =>
       if psMinRegRecursorAllowed fuel (Nat.succ (psMinRegSpecCount rest)) spec
-          universe parameters indices motives minors result then
+          sortLevel parameters indices motives minors result then
         Option.some (psMinRegRecursorTy result spec.constructors)
       else Option.none
     | Nat.succ previous =>
-      match psMinRegRecursorTypeAt fuel rest previous universe parameters indices motives minors result with
+      match psMinRegRecursorTypeAt fuel rest previous sortLevel parameters indices motives minors result with
       | Option.none => Option.none
       | Option.some type => Option.some (psMinRegLiftTy type)

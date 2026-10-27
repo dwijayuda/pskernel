@@ -38,11 +38,11 @@ def sourceSignature : SignatureModel [psMinRegTySpec] [PsMinTy] := by
               cases ht
               exact PsMinTy.arr
             | succ index => simp [psMinRegCtorTypeAt, psMinRegTySpec, psMinRegMakeSpec, psMinRegCtorAt] at h
-  · intro fuel slot universe parameters indices motives minors result type h
+  · intro fuel slot sortLevel parameters indices motives minors result type h
     cases slot with
     | succ slot => simp [psMinRegRecursorTypeAt] at h
     | zero =>
-      by_cases allowed : psMinRegRecursorAllowed fuel 1 psMinRegTySpec universe parameters indices motives minors result = true
+      by_cases allowed : psMinRegRecursorAllowed fuel 1 psMinRegTySpec sortLevel parameters indices motives minors result = true
       · have ht : psMinRegRecursorTy result psMinRegTySpec.constructors = type := by
           simpa [psMinRegRecursorTypeAt, psMinRegSpecCount, allowed] using h
         cases ht

@@ -46,9 +46,9 @@ def order (fuel : Nat) (edges : List (Nat × Nat)) (done : List Nat)
       return group :: (← order remaining edges (done ++ group) tail)
 
 def target (groups : List (List Nat)) (source : Nat) : Except String Nat := do
-  let matches := (List.range groups.length).filter (fun index =>
+  let assignedIndices := (List.range groups.length).filter (fun index =>
     (groups[index]?.getD []).contains source)
-  match matches with
+  match assignedIndices with
   | [index] => return index
   | _ => throw "PSC1_PARTITION_SOURCE_COVERAGE"
 

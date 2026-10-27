@@ -45,6 +45,9 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
           npm ci --prefix .. --ignore-scripts --include=optional --no-audit --no-fund
+      - name: Check modular host and test source syntax
+        run: |
+          for file in host-tools/modular/*.mjs test/modular/*.mjs; do node --check "$file"; done
       - name: Prepare immutable PR195 transform baseline
         run: |
           git worktree add --detach "$RUNNER_TEMP/psc1-origin-baseline" cc13ebfabf6763703ee1ec75a663002a9134bc74

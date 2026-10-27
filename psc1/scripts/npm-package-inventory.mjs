@@ -32,3 +32,16 @@ const report={schema:'psc1-existing-npm-package-inventory/1',testedCommit:proces
  distinction:'Existing source packages are not independently executing compiler internals; adapters may reuse one checked qualified implementation.'};
 fs.writeFileSync(path.join(out,'inventory.json'),JSON.stringify(report,null,2)+'\n');
 console.log('PSC1_NPM_INVENTORY '+JSON.stringify({count:report.count,packages:inventory.map(({sources,dist,...r})=>({...r,metadata:undefined,sources:sources.length,dist:dist.length})),root:rootMeta,exports:report.exportedCompilerSymbols}));
+
+const all=await readQualifiedArtifact(input.full,path.join(out,'qualified-bundles'));
+const tars=[];
+function collect(root){for(const n of fs.readdirSync(root)){const p=path.join(root,n);if(fs.statSync(p).isDirectory())collect(p);else if(n.endsWith('.tgz'))tars.push(p);}}
+collect(all);
+const extras=[];
+for(const tar of tars){
+ const metaRun=spawnSync('tar',['xOf',tar,'package/package.json'],{encoding:'utf8',timeout:120000});
+ assert.equal(metaRun.status,0,metaRun.stderr);
+ const meta=JSON.parse(metaRun.stdout);extras.push({tarball:path.basename(tar),sha256:sha256(fs.readFileSync(tar)),bytes:fs.statSync(tar).size,meta});
+}
+fs.writeFileSync(path.join(out,'qualified-bundles.json'),JSON.stringify(extras,null,2)+'\n');
+console.log('PSC1_NPM_QUALIFIED_BUNDLES '+JSON.stringify(extras.filter(e=>e.meta.name.startsWith('@proofscript/'))));

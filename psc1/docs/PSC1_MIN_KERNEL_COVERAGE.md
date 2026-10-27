@@ -32,8 +32,17 @@ arities, constants, projection owners, admission kinds, inductive groups and
 constructors. Its source records retain imports and actual source-origin members.
 Foundation declarations and used foundation axioms are counted separately.
 The audit never treats an enum member or a source grep as measured logical usage.
-Run-specific numerical results belong to that exact-commit artifact; this document
-does not manufacture unobserved counts.
+The census at `23888f344c836b7a2c24ba2449cc420a19bc2974`, run 40442690663,
+measured 4742 source Core members / 4747 logical members, 3465 canonical admission
+records, 308 inductive groups, and 115 implicit foundation declarations including
+60 axioms. Actual expression occurrences: application 230478, bound variable 52868,
+constant 244702, forall 12986, lambda 43860, let 5955, Nat literal 2862,
+projection 7168, sort 531 and String literal 5875. Levels: parameter 128,
+successor 11786 and zero 11786; no max/imax occurrence in this retained graph.
+No named Array/Quot/Quotient references occurred in that compiler graph; this
+does not remove those types from the supported surface-language contract.
+These are occurrence counts, not distinct-node counts or reduction execution counts.
+Later receipts retain their own commit and exact artifacts.
 
 The probe's wall time includes parsing, elaboration, independent native checking
 and IR construction. It is not isolated minimal-checker performance. Syntax counts
@@ -50,7 +59,7 @@ single Lean grammar lane does not establish grammar parity or generated executio
 | Constants | Structured names and explicit universe arguments; dependency-ordered canonical declarations | Only declarations in the restricted accepted environment |
 | Pi/function types | `PsExpr.forallE`, including dependent telescopes | Simple arrows only; dependent Pi unsupported |
 | Lambdas/applications | Typed binders and arbitrary Core applications | Only the proved simply typed rules |
-| Let | `PsExpr.letE` | Only if explicitly implemented and covered by the initial theorem; otherwise refuse |
+| Let | `PsExpr.letE` | Unsupported |
 | Beta reduction | Logical function computation | No general Lean conversion claim |
 | Delta reduction | Definitions plus regular reducibility heights | No arbitrary unfolding or recursive definition claim |
 | Zeta reduction | Core let substitution | No claim beyond the theorem's declared fragment |
@@ -59,7 +68,7 @@ single Lean grammar lane does not establish grammar parity or generated executio
 | Inductive declarations | Canonical groups contain type/constructor types; official Lean generates checked recursors | Unsupported |
 | Structural recursion | Frontend elaborates to recursor applications | Unsupported |
 | Primitive projections | `PsExpr.proj`, with actual owner counts in the audit | Unsupported |
-| Nat | Prelude has an inductive, constructors and recursor; arithmetic constants have pinned types | Unsupported foundation |
+| Nat | Prelude has an inductive, constructors and recursor; arithmetic constants have pinned types | STLC type/literals only; canonical foundation, recursor and arithmetic unsupported |
 | Int | Pinned primitive type/function declarations | Unsupported foundation |
 | Bool | Pinned type/constants/decisions; logical admission and target representation differ | Unsupported foundation |
 | String/Char | Literals plus pinned primitive operations | Unsupported foundation |

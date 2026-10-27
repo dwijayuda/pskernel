@@ -1,5 +1,28 @@
 # PSC1 AI work state
 
+## Minimal-kernel research branch, 2026-10-27 Asia/Jakarta
+
+Research work is isolated on `research/psc1-minkernel-consistency-selfhost-20261027`,
+based exactly on qualified layout HEAD94e0c13f6a4b434f73c859cc0c716cb6fb8d1340.
+[Dedicated work state](docs/PSC1_MIN_KERNEL_WORK_STATE.md),
+[architecture](docs/PSC1_MIN_KERNEL_ARCHITECTURE.md),
+[proof status](docs/PSC1_MIN_KERNEL_PROOF_STATUS.md) and
+[measured coverage](docs/PSC1_MIN_KERNEL_COVERAGE.md) own this research scope.
+
+The initial executable Empty/Unit/Nat/arrow fragment has a machine-checked
+acceptance-to-model bridge and consistency theorem (standard propext only).
+Current PSC1 source-subset portability/generated execution is being qualified.
+The current124-module/4747-logical-member graph needs dependent checking,
+308 inductive groups and a115-declaration foundation containing60 axioms.
+The fragment qualifies0 complete compiler modules and0/37 Practical Core criteria.
+Min/dual canonical mode explicitly refuses without fallback; official Lean4.35
+Wasm remains production default and official/native packages are unchanged.
+No new minimal-checker G1/G2/G3, full-compiler consistency or release is claimed.
+No local builds/tests, merge, npm publication or parent-branch writes.
+
+## Preserved layout baseline state
+
+
 Updated 2026-10-26 Asia/Jakarta. Active draft [PR #192](https://github.com/dwijayuda/pskernel/pull/192),
 refactor/psc1-layout-20261026, follows PR #191 at b426f9763ed2a576135ed2089671d48e21f1ff32.
 Qualified implementation: 03729a50f1ef352e47fd3d566e1459ffae93c2af.

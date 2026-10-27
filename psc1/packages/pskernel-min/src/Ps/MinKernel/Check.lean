@@ -43,55 +43,55 @@ def tyEq (fuel : Nat) (left : Ty) (right : Ty) : Bool :=
 
 def lookup (types : List Ty) (index : Nat) : Option Ty :=
   match types with
-  | [] => none
-  | head :: tail =>
+  | List.nil => Option.none
+  | List.cons head tail =>
     match index with
-    | 0 => some head
+    | 0 => Option.some head
     | Nat.succ previous => lookup tail previous
 
 def infer (fuel : Nat) (globals : List Ty) (locals : List Ty)
     (expression : Expr) : Option Ty :=
   match fuel with
-  | 0 => none
+  | 0 => Option.none
   | Nat.succ remaining =>
     match expression with
     | Expr.var index => lookup locals index
     | Expr.constant index => lookup globals index
-    | Expr.unit => some Ty.unit
-    | Expr.nat _ => some Ty.nat
+    | Expr.unit => Option.some Ty.unit
+    | Expr.nat _ => Option.some Ty.nat
     | Expr.lam domain body =>
-      match infer remaining globals (domain :: locals) body with
-      | none => none
-      | some result => some (Ty.arr domain result)
+      match infer remaining globals (List.cons domain locals) body with
+      | Option.none => Option.none
+      | Option.some result => Option.some (Ty.arr domain result)
     | Expr.app fn argument =>
       match infer remaining globals locals fn with
-      | none => none
-      | some functionType =>
+      | Option.none => Option.none
+      | Option.some functionType =>
         match functionType with
         | Ty.arr domain result =>
           match infer remaining globals locals argument with
-          | none => none
-          | some argumentType =>
-            if tyEq remaining domain argumentType then some result else none
-        | _ => none
+          | Option.none => Option.none
+          | Option.some argumentType =>
+            if tyEq remaining domain argumentType then Option.some result else Option.none
+        | _ => Option.none
 
 def checkDeclarations (termFuel : Nat) (declarationFuel : Nat)
     (globals : List Ty) (declarations : List Declaration) : Option (List Ty) :=
   match declarations with
-  | [] => some globals
-  | declaration :: rest =>
+  | List.nil => Option.some globals
+  | List.cons declaration rest =>
     match declarationFuel with
-    | 0 => none
+    | 0 => Option.none
     | Nat.succ remaining =>
-      match infer termFuel globals [] declaration.value with
-      | none => none
-      | some inferred =>
+      match infer termFuel globals List.nil declaration.value with
+      | Option.none => Option.none
+      | Option.some inferred =>
         if tyEq termFuel inferred declaration.type then
-          checkDeclarations termFuel remaining (declaration.type :: globals) rest
-        else none
+          checkDeclarations termFuel remaining (List.cons declaration.type globals) rest
+        else Option.none
 
 def checkEnvironment (termFuel : Nat) (declarationFuel : Nat)
     (declarations : List Declaration) : Option (List Ty) :=
-  checkDeclarations termFuel declarationFuel [] declarations
+  checkDeclarations termFuel declarationFuel List.nil declarations
 
 end Ps.MinKernel

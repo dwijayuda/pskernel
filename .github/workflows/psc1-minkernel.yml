@@ -3,8 +3,9 @@ on:
   push:
     branches: [research/psc1-minkernel-consistency-selfhost-20261027]
     paths:
-      - psc1/packages/pskernel-min/**
-      - psc1/proofs/pskernel-min/**
+      - psc1/packages/pskernel-min/**/*.lean
+      - psc1/packages/pskernel-min/host/*.mjs
+      - psc1/proofs/pskernel-min/**/*.lean
       - psc1/scripts/minkernel-*
       - psc1/scripts/MinKernelSourceCompile.lean
       - .github/workflows/psc1-minkernel.yml
@@ -83,10 +84,11 @@ jobs:
         with:
           path: ~/.elan
           key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
-      - uses: actions/cache@v4
+      - uses: actions/cache/restore@v4
+        id: native_cache
         with:
           path: psc1/.lake
-          key: psc1-min-native-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/packages/**/*.lean', 'psc1/scripts/*.lean') }}
+          key: psc1-min-native-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/packages/**/*.lean', '!psc1/packages/pskernel-min/**', 'psc1/scripts/*.lean') }}
           restore-keys: |
             psc1-min-native-v1-${{ runner.os }}-
             psc1-lake-v2-${{ runner.os }}-
@@ -98,10 +100,16 @@ jobs:
           npm install --prefix "$RUNNER_TEMP/min-ts" --ignore-scripts --no-audit --no-fund typescript@7.0.2
           echo "PSC0_TSC=$RUNNER_TEMP/min-ts/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
       - name: Build current PSC1 source seed and official reference checker
+        id: native_build
         run: |
           set -euo pipefail
           node packages/pskernel-lean/host/check-pin.mjs
           lake build PsBackendTs psc1_independent_checker psc1_source_census_probe psc2_joint_closure_inventory
+      - uses: actions/cache/save@v4
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' && steps.native_cache.outputs.cache-hit != 'true' }}
+        with:
+          path: psc1/.lake
+          key: ${{ steps.native_cache.outputs.cache-primary-key }}
       - name: Compile and execute checker source through PSC1 and check exact source admissions
         run: node scripts/minkernel-portability.mjs
       - name: Measure complete current compiler admission graph and foundation

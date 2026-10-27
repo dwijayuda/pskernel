@@ -74,6 +74,7 @@ function hydrate(dir,source){
   const target=path.join(dir,pin.path),bytes=fs.readFileSync(path.join(source,pin.path));
   if(fs.existsSync(target))assert.equal(sha256(fs.readFileSync(target)),pin.sha256,'canonical/prebuilt conflict:'+target);
   else put(target,bytes);
+  fs.chmodSync(target,fs.statSync(path.join(source,pin.path)).mode & 0o777);
  }
 }
 function sourceFiles(dir){
@@ -109,6 +110,7 @@ const records=[],built=new Map(),packedRoots=new Map();
 function build(dir){
  if(built.has(dir))return built.get(dir);
  const packageRoot=path.join(root,'packages',dir),meta=read(path.join(packageRoot,'package.json'));
+ if(dir==='stdlib')fs.cpSync(path.join(root,'stdlib/ProofScript'),path.join(packageRoot,'src/ProofScript'),{recursive:true});
  const stamp=sha256(json({input,meta,source:sourceFiles(packageRoot),builder:sha256(fs.readFileSync(fileURLToPath(import.meta.url))),
   rootMetadata:dir==='proofscript'?dirs.map(name=>['package.json','README.md','LICENSE','NOTICE'].map(file=>{const p=path.join(root,'packages',name,file);return fs.existsSync(p)?sha256(fs.readFileSync(p)):null;})):null}));
  const marker=path.join(out,'build-cache',dir+'.json');
@@ -138,7 +140,23 @@ function build(dir){
  if(dir==='proofscript'){
   const impl=path.join(packageRoot,'dist/implementation');
   fs.cpSync(frozen,impl,{recursive:true,filter:p=>p!==path.join(frozen,'node_modules')});
+  // Update distribution metadata before sealing it; execution code stays exact.
+  put(path.join(impl,'package.json'),json({...audit.rootMetadata,version:meta.version,
+   dependencies:meta.dependencies,peerDependencies:meta.peerDependencies}));
+  const metadataChanges=new Set(['package.json','DEPENDENCY_LOCK.json','npm-shrinkwrap.json']);
+  for(const file of ['DEPENDENCY_LOCK.json','npm-shrinkwrap.json']){
+   const target=path.join(impl,file);if(!fs.existsSync(target))continue;
+   const lock=read(target);lock.version=meta.version;
+   if(lock.packages?.[''])Object.assign(lock.packages[''],{version:meta.version,dependencies:meta.dependencies,peerDependencies:meta.peerDependencies});
+   if(lock.packages?.['node_modules/@proofscript/pskernel-lean-wasm'])lock.packages['node_modules/@proofscript/pskernel-lean-wasm'].version=meta.dependencies['@proofscript/pskernel-lean-wasm'];
+   put(target,json(lock));
+  }
   const d=read(path.join(impl,'UNIVERSAL_DISTRIBUTION.json'));d.version=meta.version;
+  d.hostFiles=d.hostFiles.map(pin=>{
+   const bytes=fs.readFileSync(path.join(impl,pin.path));
+   if(!metadataChanges.has(pin.path)){assert.equal(bytes.length,pin.bytes);assert.equal(sha256(bytes),pin.sha256);return pin;}
+   return{...pin,bytes:bytes.length,sha256:sha256(bytes)};
+  });
   const kernel=packedRoots.get('pskernel-lean-wasm');
   assert.ok(kernel);const kernelMeta=read(path.join(kernel,'package.json'));
   function repinMetadata(descriptor,dir){
@@ -156,7 +174,7 @@ function build(dir){
   const originalPin=fs.readFileSync(path.join(impl,'DISTRIBUTION_PIN.mjs'),'utf8');
   put(path.join(impl,'DISTRIBUTION_PIN.mjs'),originalPin.replace(/expectedDistributionSha256\s*=\s*['"][a-f0-9]{64}['"]/,
     "expectedDistributionSha256 = "+JSON.stringify(sha256(json(d)))));
-  put(path.join(impl,'package.json'),json({...audit.rootMetadata,version:meta.version}));
+
   const bundled=path.join(packageRoot,'node_modules/@proofscript/pskernel-lean-wasm');
   if(fs.existsSync(bundled)){inventory(bundled);fs.rmSync(bundled,{recursive:true});}
   fs.cpSync(kernel,bundled,{recursive:true});

@@ -34,6 +34,8 @@ try{
  const defaultProject=project('default'),rootBuild=builds.find(r=>r.name==='proofscript');
  install(defaultProject,[tar(rootBuild)]);
  const defaultRoot=path.join(defaultProject,'node_modules/proofscript');
+ const installedImpl=path.join(defaultRoot,'dist/implementation'),d=JSON.parse(fs.readFileSync(path.join(installedImpl,'UNIVERSAL_DISTRIBUTION.json')));
+ for(const pin of d.hostFiles){const b=fs.readFileSync(path.join(installedImpl,pin.path));assert.equal(sha256(b),pin.sha256,'packed host pin:'+pin.path);}
  const identity=JSON.parse(run(path.join(defaultProject,'node_modules/.bin/psc'),['--identity'],defaultProject));
  assert.equal(identity.version,contract.version);assert.equal(identity.defaultKernel,'wasm');
  assert.equal(identity.engines.rust.installed,false);assert.equal(identity.engines['wasm-core'].installed,false);

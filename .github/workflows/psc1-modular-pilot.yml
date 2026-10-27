@@ -46,6 +46,19 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
           npm ci --prefix .. --ignore-scripts --include=optional --no-audit --no-fund
+      - name: Prepare immutable PR195 transform baseline
+        run: |
+          git worktree add --detach "$RUNNER_TEMP/psc1-origin-baseline" cc13ebfabf6763703ee1ec75a663002a9134bc74
+          echo "PSC1_TRANSFORM_BASELINE=$RUNNER_TEMP/psc1-origin-baseline/psc1" >> "$GITHUB_ENV"
+      - uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/psc1-origin-baseline/psc1/.lake
+          key: psc1-transform-baseline-v1-Linux-cc13ebfabf6763703ee1ec75a663002a9134bc74
+          restore-keys: |
+            psc1-modular-native-v1-Linux-
+      - name: Build original transform and printer APIs at immutable baseline
+        working-directory: ${{ runner.temp }}/psc1-origin-baseline/psc1
+        run: lake build Ps.Host.SourceOwnership Ps.BackendJs.Print Ps.BackendTs.Module
       - name: Build additive pilot and genuine independent checker
         id: build
         run: |
@@ -54,6 +67,8 @@ jobs:
           lake build psc1_modular_pilot psc1_independent_checker
       - name: Transform provenance invariants and ownership refusal tests
         run: lake env lean --run test/modular/Provenance.lean
+      - name: Extended graph layout and profile refusals
+        run: lake env lean --run test/modular/ExtendedPlan.lean
       - name: Strict graph planning positives and negative tests
         run: lake env lean --run test/modular/Plan.lean
       - name: Compile real compiler Name module and dependent consumer

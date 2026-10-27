@@ -98,8 +98,11 @@ def compileWithMode (request : Request) (extended : Bool) : IO Lean.Json := do
   let original ← liftResult ((psStrictValidateModule semantic.raw).mapError
     (fun _ => "PSC1_MODULE_ORIGINAL_IR"))
   let owners ← liftResult (originalOwners semantic rows)
-  let specialized ← liftResult ((psIrSpecializeValidatedModuleWithOrigins original).mapError
-    psIrSpecializeDiagnosticText)
+  let specialized ← if extended then
+      liftResult ((psIrSpecializeValidatedModuleWithOrigins original).mapError psIrSpecializeDiagnosticText)
+    else do
+      let value ← liftResult ((psIrSpecializeValidatedModuleDetailed original).mapError psIrSpecializeDiagnosticText)
+      pure (PsIrTracedModule.mk value.raw [])
   let selectedOwners ← if extended then
       liftResult (psModuleCarryOwners semantic.raw owners specialized)
     else

@@ -68,6 +68,10 @@ def refusal {α : Type} (result : Except String α) (label : String) : IO Unit :
 def check : IO Unit := do
   let checked ← value ((psStrictValidateModule input).mapError (fun _ => "fixture invalid"))
   let specialized ← value ((psIrSpecializeValidatedModuleWithOrigins checked).mapError psIrSpecializeDiagnosticText)
+  let normal ← value ((psIrSpecializeValidatedModuleWithMode checked false).mapError psIrSpecializeDiagnosticText)
+  require normal.origins.isEmpty "legacy-specialization-tracing-disabled"
+  let normalWorker ← value (psFuseClosedWorkersWithMode (.mk normal.raw) false)
+  require normalWorker.origins.isEmpty "legacy-worker-tracing-disabled"
   let selected ← value (psModuleCarryOwners input owners specialized)
   let genericRows := specialized.origins.filter (fun row =>
     row.inputName == "genericIdentity" && psModuleOriginKindEqual row.kind .declaration)
@@ -105,7 +109,7 @@ def check : IO Unit := do
   refusal (psModuleCarryOwners input [] specialized) "missing-input-owners"
   let invalid := { fused.raw with declarations := [{ caller with body := .var "unbound" }] }
   refusal (psModuleCarryOwners specialized.raw selected { fused with raw := invalid }) "invalid-output-ir"
-  IO.println "PSC1_TRANSFORM_ORIGINS_TESTS_PASSED 10-invariants 8-refusals"
+  IO.println "PSC1_TRANSFORM_ORIGINS_TESTS_PASSED 12-invariants 8-refusals"
 
 end TransformOriginTest
 

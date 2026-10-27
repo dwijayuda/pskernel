@@ -588,7 +588,7 @@ def companionDeclaration (plan : Plan) (spec : Spec) : Except String PsVerifiedI
   rewriteDeclaration plan
     (PsVerifiedIrDeclaration.mk spec.companion [] spec.parameters spec.result spec.body)
 
-def runWithOrigins (module : PsVerifiedIrModule) : Except String PsIrTracedModule :=
+def runWithMode (module : PsVerifiedIrModule) (tracing : Bool) : Except String PsIrTracedModule :=
   let imported : List String := psListMap
     (fun (value : PsVerifiedIrExternalImport) => value.localName) module.imports;
   let structures : List String := psListMap
@@ -612,14 +612,17 @@ def runWithOrigins (module : PsVerifiedIrModule) : Except String PsIrTracedModul
                     PsVerifiedIrModule.mk module.imports module.structures module.inductives
                       (psListAppend declarations companions);
                   let workers : List PsIrTransformOrigin :=
-                    psListMap (fun (spec : Spec) =>
+                    if tracing then psListMap (fun (spec : Spec) =>
                       PsIrTransformOrigin.mk PsIrOriginKind.declaration spec.companion
-                        spec.original.name [] PsIrOriginRule.worker) (psListReverse plan.specs);
+                        spec.original.name [] PsIrOriginRule.worker) (psListReverse plan.specs) else [];
                   Except.ok (PsIrTracedModule.mk raw
-                    (psListAppend (psIrRetainedOrigins module) workers))
+                    (if tracing then psListAppend (psIrRetainedOrigins module) workers else []))
+
+def runWithOrigins (module : PsVerifiedIrModule) : Except String PsIrTracedModule :=
+  runWithMode module true
 
 def run (module : PsVerifiedIrModule) : Except String PsVerifiedIrModule :=
-  match runWithOrigins module with
+  match runWithMode module false with
   | Except.error error => Except.error error
   | Except.ok result => Except.ok result.raw
 
@@ -627,19 +630,22 @@ end Ps.Internal.WorkerFusion
 
 -- Input/output wrappers are data: independently recheck their exact raw modules.
 -- This is bounded typing evidence, not a semantic-preservation theorem.
-def psFuseClosedWorkersWithOrigins (input : PsValidatedIrModule) : Except String PsIrTracedModule :=
+def psFuseClosedWorkersWithMode (input : PsValidatedIrModule) (tracing : Bool) : Except String PsIrTracedModule :=
   match psStrictValidateModule input.raw with
   | Except.error _ => Except.error "PSC1_WORKER_FUSION_INPUT_INVALID"
   | Except.ok checked =>
-      match Ps.Internal.WorkerFusion.runWithOrigins checked.raw with
+      match Ps.Internal.WorkerFusion.runWithMode checked.raw tracing with
       | Except.error error => Except.error error
       | Except.ok raw =>
           match psStrictValidateModule raw.raw with
           | Except.error _ => Except.error "PSC1_WORKER_FUSION_OUTPUT_INVALID"
-          | Except.ok _output => Except.ok raw
+          | Except.ok output => Except.ok (PsIrTracedModule.mk output.raw raw.origins)
 
+
+def psFuseClosedWorkersWithOrigins (input : PsValidatedIrModule) : Except String PsIrTracedModule :=
+  psFuseClosedWorkersWithMode input true
 
 def psFuseClosedWorkers (input : PsValidatedIrModule) : Except String PsValidatedIrModule :=
-  match psFuseClosedWorkersWithOrigins input with
+  match psFuseClosedWorkersWithMode input false with
   | Except.error error => Except.error error
   | Except.ok result => Except.ok (PsValidatedIrModule.mk result.raw)

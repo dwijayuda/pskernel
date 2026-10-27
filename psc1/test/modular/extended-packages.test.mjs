@@ -17,7 +17,8 @@ const sources=files.map(([module,file])=>({module,kind:'lean',text:fs.readFileSy
 const temporary=fs.mkdtempSync(path.join(os.tmpdir(),'psc1-extended-packages-'));
 const producer=path.resolve('.lake/build/bin/psc1_modular_pilot'),tsc=path.resolve('../node_modules/typescript/bin/tsc');
 const observation=fs.readFileSync('test/modular/extended-observe.mjs','utf8');
-const result={schema:'psc1-extended-modular-qualification/2',testedCommit:process.env.GITHUB_SHA,
+const contract=JSON.parse(fs.readFileSync('test/modular/extended-contract.json','utf8'));
+const result={contractSha256:sha256(JSON.stringify(contract)),schema:'psc1-extended-modular-qualification/2',testedCommit:process.env.GITHUB_SHA,
  scope:'five-source compiler component graph with explicit specialization/worker provenance; not whole-compiler modular self-hosting',
  cases:[],profiles:[],wholeCompilerQualified:false,modularSelfHosted:false};
 const record=(name,data={status:'passed'})=>{result.cases.push({name,...data});console.log('PSC1_EXTENDED_CASE '+name);};
@@ -88,6 +89,35 @@ function audit(c){
    workers:c.transformOrigins.workerFusion.filter(row=>row.rule==='worker').length,
    specializedWorkers:chained.length,unitValues:c.units.map(unit=>unit.names.length)};
 }
+
+function baselineParity(built,input,cwd,kind){
+ const baseline=process.env.PSC1_TRANSFORM_BASELINE;
+ assert.ok(baseline,'PSC1_TRANSFORM_BASELINE is required; baseline parity cannot be skipped');
+ assert.equal(run('git',['-C',baseline,'rev-parse','HEAD']).trim(),'cc13ebfabf6763703ee1ec75a663002a9134bc74');
+ assert.equal(run('git',['-C',baseline,'status','--porcelain','--untracked-files=no']).trim(),'');
+ const candidate=built.candidate,requestFile=path.join(cwd,'baseline-request.json');
+ fs.writeFileSync(requestFile,JSON.stringify(['psc1-modular-pilot/2',candidate.requestId,
+   candidate.sourceClosureDigest,input[0].kind,'checked',input.at(-1).module,input.map(s=>[s.module,s.text])]));
+ const script=path.resolve('test/modular/TransformParity.lean'),pin=sha256(fs.readFileSync(script));
+ const directory=path.join(cwd,'baseline-process');
+ const execution=JSON.parse(run('python3',[path.resolve('host-tools/process/bounded-process.py'),JSON.stringify({
+   command:['/usr/bin/prlimit','--as=4294967296','--stack=8388608','--cpu=240','--',
+     'lake','env','lean','--run',script,requestFile],
+   directory,timeoutMs:240000,maxBuffer:32*1024*1024
+ })],{timeout:245000,cwd:baseline}));
+ // Python and its bounded child inherit this explicit baseline cwd.
+ assert.equal(execution.error,null,fs.readFileSync(path.join(directory,'tool.stderr.txt'),'utf8'));
+ assert.equal(execution.status,0,fs.readFileSync(path.join(directory,'tool.stderr.txt'),'utf8'));
+ const report=JSON.parse(fs.readFileSync(path.join(directory,'tool.stdout.txt'),'utf8'));
+ assert.equal(report.leanVersion,'4.35.0');assert.equal(report.leanCommit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
+ for(const key of ['originalIr','specializedIr','transformedIr','admissions','referenceJs','referenceTs'])
+   assert.deepEqual(report[key],candidate[key],'PSC1_TRANSFORM_BASELINE_'+key);
+ assert.equal(sha256(fs.readFileSync(script)),pin);
+ record(kind+'-baseline-transform-parity',{status:'passed',baselineCommit:'cc13ebfabf6763703ee1ec75a663002a9134bc74',
+   originalIrSha256:sha256(JSON.stringify(report.originalIr)),specializedIrSha256:sha256(JSON.stringify(report.specializedIr)),
+   fusedIrSha256:sha256(JSON.stringify(report.transformedIr)),execution});
+}
+
 function refuse(cwd,label,change,restore){
  try{
   change();
@@ -109,6 +139,7 @@ try{
   builds.push(built);
   const c=built.candidate,originAudit=audit(c);record(kind+'-origin-composition',{status:'passed',...originAudit});
   const cwd=install(built,'installed-'+kind);
+  baselineParity(built,input,cwd,kind);
   for(const resolution of ['NodeNext','Bundler']){declarations(cwd,resolution);record(kind+'-'+resolution);}
   const referenceJs=path.join(cwd,'reference-js.mjs');fs.writeFileSync(referenceJs,c.referenceJs);
   fs.writeFileSync(path.join(cwd,'reference-ts.mts'),c.referenceTs);
@@ -157,8 +188,28 @@ try{
      publicationFault:point=>{if(point==='before-commit')throw Error('extended-injected');}}),/extended-injected/);
    assert.deepEqual(fs.readFileSync(path.join(out,'current.json')),pointer);
    assert.equal(readPublication(out,'portable-file').generation,built.generation);record('extended-before-commit-retains-prior');
+   let uncertain;
+   try{buildPilot({sources:input,out,profile:'extended',sourceVariants:variants,requestId:'extended-after-commit',
+     publicationFault:point=>{if(point==='after-commit')throw Error('extended-after-commit');}});}
+   catch(error){uncertain=error;}
+   assert.equal(uncertain?.message,'PSC1_SERVICE_PUBLICATION_COMMITTED_DURABILITY_UNCERTAIN');
+   assert.equal(uncertain.committedPublication.durability,'unconfirmed');
+   const committed=readPublication(out,'portable-file');
+   assert.equal(committed.generation,uncertain.committedPublication.generation);
+   assert.notEqual(committed.generation,built.generation);
+   const committedInput=JSON.parse(fs.readFileSync(path.join(committed.directory,'qualification-input.json')));
+   const recovered=install({...committedInput,directory:committed.directory},'extended-committed');
+   observe(recovered,'ts');record('extended-after-commit-reports-uncertainty');
   }
  }
+ const mixed=install(builds[0],'cross-profile');
+ const prior=readPublication(path.resolve('dist/modular/lean-cohort'),'portable-file');
+ const priorInput=JSON.parse(fs.readFileSync(path.join(prior.directory,'qualification-input.json')));
+ const legacy=install({...priorInput,directory:prior.directory},'legacy-source');
+ const destination=path.join(mixed,'node_modules/@proofscript/modular-pilot-runtime');
+ fs.rmSync(destination,{recursive:true});
+ fs.cpSync(path.join(legacy,'node_modules/@proofscript/modular-pilot-runtime'),destination,{recursive:true});
+ refuse(mixed,'cross-profile-package-mix',()=>{},()=>{});
  assert.notEqual(builds[0].receipt.sourceClosureDigest,builds[1].receipt.sourceClosureDigest);
  assert.deepEqual(builds[0].candidate.originalIr,builds[1].candidate.originalIr);
  assert.deepEqual(builds[0].candidate.specializedIr,builds[1].candidate.specializedIr);
@@ -168,6 +219,7 @@ try{
  record('package-slug-collision',{status:'refused'});
  assert.throws(()=>compileSources({sources:[...sources,...sources],profile:'extended'}),/PSC1_MODULAR_SOURCE_SCOPE/);
  record('extended-source-bound',{status:'refused'});
+ assert.deepEqual(result.cases.map(row=>row.name).sort(),contract.requiredCases);
  result.status='passed';fs.writeFileSync('dist/modular/extended-qualification.json',JSON.stringify(result,null,2)+'\n');
  console.log('PSC1_EXTENDED_QUALIFIED '+JSON.stringify(result));
 }finally{fs.rmSync(temporary,{recursive:true,force:true});}

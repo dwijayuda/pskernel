@@ -7,7 +7,7 @@ import Ps.MinKernel.Tests.RegularVectors
 namespace Ps.MinKernel.RegularSource
 open Ps.MinKernel.RegularModel Ps.MinKernel.RegularProofs
 
-def sourceSignature : SignatureModel [psMinRegTySpec] [PsMinTy] := by
+noncomputable def sourceSignature : SignatureModel [psMinRegTySpec] [PsMinTy] := by
   constructor
   · intro slot index type h
     cases slot with
@@ -57,15 +57,15 @@ theorem source_instance_checked :
     psMinRegInfer 128 [psMinRegTySpec] [] [PsMinRegTy.data 0] psMinRegTyInstance = some PsMinRegTy.boolean := by
   rfl
 
-def checkedValue (major : PsMinTy) : Bool :=
+noncomputable def checkedValue (major : PsMinTy) : Bool :=
   inferModel 128 [psMinRegTySpec] [PsMinTy] [] [PsMinRegTy.data 0] psMinRegTyInstance PsMinRegTy.boolean
     sourceSignature (emptyModel [PsMinTy]) (consModel [PsMinTy] major (emptyModel [PsMinTy])) source_instance_checked
 
-def actualRecursorValue (major : PsMinTy) : Bool :=
+noncomputable def actualRecursorValue (major : PsMinTy) : Bool :=
   PsMinTy.rec (motive := fun _ => Bool) false false true (fun _ _ _ _ => false) major
 
 theorem checked_source_semantics (major : PsMinTy) : checkedValue major = actualRecursorValue major := by
-  cases major <;> rfl
+  cases major <;> simp only [checkedValue, inferModel, sourceSignature] <;> rfl
 
 theorem source_iota (major : PsMinTy) : actualRecursorValue major =
     (match major with | .nat => true | _ => false) := by
@@ -108,7 +108,7 @@ inductive SourceAnnotation : PsMinRegTy → PsExpr → Prop where
 def sourcePartialRecursor : PsExpr :=
   PsExpr.app (PsExpr.constE (PsName.str (root "PsMinTy") "rec") [PsLevel.succ PsLevel.zero]) sourceMotive
 
-def sourceRecursorFunction : Denote [PsMinTy] (psMinRegRecursorTy PsMinRegTy.boolean psMinRegTySpec.constructors) :=
+noncomputable def sourceRecursorFunction : Denote [PsMinTy] (psMinRegRecursorTy PsMinRegTy.boolean psMinRegTySpec.constructors) :=
   fun empty unit nat arr major => PsMinTy.rec (motive := fun _ => Bool) empty unit nat arr major
 
 inductive CoreEval : (locals : List PsMinRegTy) → Model [PsMinTy] locals →
@@ -141,7 +141,8 @@ inductive CoreEval : (locals : List PsMinRegTy) → Model [PsMinTy] locals →
 theorem actual_core_instance_model (major : PsMinTy) :
     CoreEval [PsMinRegTy.data 0] (consModel [PsMinTy] major (emptyModel [PsMinTy]))
       sourceCoreInstance PsMinRegTy.boolean (actualRecursorValue major) := by
-  let model := consModel [PsMinTy] major (emptyModel [PsMinTy])
+  let model : Model [PsMinTy] [PsMinRegTy.data 0] :=
+    consModel [PsMinTy] (type := PsMinRegTy.data 0) major (emptyModel [PsMinTy])
   have arr : CoreEval [PsMinRegTy.data 0] model sourceArrMinor
       (psMinRegMinorTy PsMinRegTy.boolean [PsMinRegField.recursive, PsMinRegField.recursive])
       (fun (_ _ : PsMinTy) (_ _ : Bool) => false) := by

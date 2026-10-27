@@ -45,7 +45,7 @@ theorem extend_decoded_succeeds_with_shared_meaning
     ⟨result, ran, resultLayout, resultDecoded, size⟩
   refine ⟨result, ?_, resultLayout, resultDecoded, size⟩
   simpa only [psKernelExprV2OrdinaryExtendDecoded, Nat.ble_eq, within, ite_true,
-    HSub.hSub, instHSub, Sub.sub, Nat.instSub] using ran
+    HSub.hSub, instHSub, Sub.sub] using ran
 
 theorem extend_decoded_ok_preserves_shared_meaning
     (arena : PsKernelExprV2PagedArena) (built result : PsKernelExprV2Decoded)

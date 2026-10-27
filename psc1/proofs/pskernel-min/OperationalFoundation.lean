@@ -97,6 +97,24 @@ theorem boolEqIte_false (data : List Type) (result : PsMinRegTy) (left right : B
     primitiveValue data (.boolEqIte result) left right yes no = no := by
   cases left <;> cases right <;> first | exact False.elim (h rfl) | rfl
 
+theorem derived_natPred (data : List Type) (major : Nat) :
+    primitiveValue data .natPred major =
+      primitiveValue data (.natRec .nat) (0 : Nat) (fun (n : Nat) (_ : Nat) => n) major := by
+  cases major <;> rfl
+
+theorem derived_boolNot (data : List Type) (value : Bool) :
+    primitiveValue data .boolNot value =
+      primitiveValue data (.boolEqIte .boolean) value true false true := by
+  cases value <;> rfl
+
+theorem derived_boolBeq (data : List Type) (left right : Bool) :
+    primitiveValue data .boolBeq left right =
+      primitiveValue data (.boolEqIte .boolean) left right true false := by
+  cases left <;> cases right <;> rfl
+
+#print axioms derived_natPred
+#print axioms derived_boolNot
+#print axioms derived_boolBeq
 #print axioms primitiveType_guards
 #print axioms primitiveModel
 #print axioms nat_iota_succ

@@ -1,7 +1,8 @@
 # Runtime compatibility and checked watch
 
 Decision record, 2026-10-27. Implementation starts from PR#192 at
-94e0c13f6a4b434f73c859cc0c716cb6fb8d1340. New qualification is pending.
+94e0c13f6a4b434f73c859cc0c716cb6fb8d1340. The Linux milestone is qualified at fdc52207fdf3d809ad99b05a5b738aca21b95139;
+[actual receipt](../PSC1_RUNTIME_WATCH_QUALIFICATION_2026-10-27.json) records scope and artifacts.
 [User guide](../guides/cli.md), [roadmap](../PSC1_DEVELOPMENT_ROADMAP.md).
 
 ## Research and decisions
@@ -112,3 +113,15 @@ disposable runner and verifies all61 resources before expensive tests. The user
 recipe provisions a separate SDK and passes --rust-toolchain-root explicitly.
 Earlier opaque timeout logs did not identify their target/error; this observed
 reproduction explains one concrete failure class, not every historical attempt.
+
+## Qualified Linux checkpoint
+
+Full source40453128053 passes37/37 finite criteria and seven-backend scoped
+execution. Installed/runtime40453124171 passes all previous/new gates at
+fdc52207fdf3d809ad99b05a5b738aca21b95139. The seven-row seal covers actual
+Node22.23.3/24.21.0/26.12.1 and Bun1.4.4 plus Node20.20.2/22.0.0 and Bun1.4.0
+refusals. Every supported row executes four compiler engines/both grammars and
+live edits/refusals; the full installed watch suite adds typed targets, config/
+dependency recovery, superseded-input veto and actual native Node/Bun reaping.
+The SDK-free installable ZIP is3909615 bytes; exact hashes are in the receipt.
+This is a scoped milestone; the final cross-platform release remains pending.

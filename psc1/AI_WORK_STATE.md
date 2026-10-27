@@ -1,138 +1,121 @@
 # PSC1 AI work state
 
-Updated 2026-10-27 Asia/Jakarta. Runtime/watch development starts from PR #192
-HEAD 94e0c13f6a4b434f73c859cc0c716cb6fb8d1340, active draft PR#193, branch
-feat/psc1-watch-runtime-20261027. Fetch live HEAD/CI before updates; preserve
-single-parent expected-HEAD non-force history. Connected GitHub/Linux Actions only.
-No merge or npm publication authorized.
+Updated 2026-10-27 Asia/Jakarta. Active draft [PR #193](https://github.com/dwijayuda/pskernel/pull/193),
+branch `feat/psc1-watch-runtime-20261027`, starts from PR #192 at
+`94e0c13f6a4b434f73c859cc0c716cb6fb8d1340`.
+The qualified implementation is `fdc52207fdf3d809ad99b05a5b738aca21b95139`.
+Fetch live HEAD and CI before changes. Preserve single-parent, expected-HEAD,
+non-force history. Development/builds/tests use connected GitHub and Linux Actions.
+No merge or npm registry publication is authorized.
 
-## Current implementation and qualification
+## Qualified milestone
 
-The .9 package refuses any Node version except22.23.3 before checking.
-This host change replaces both installed/session exact-version refusals with
-Node>=22.23.3 or Bun>=1.4.4 policy. Exact CI executable versions/hashes remain
-reproduction evidence. Bun uses a separate parse-only JS consumer (its --check
-flag has different semantics), retains the independent official kernel and
-mandatory public-API consumer, and child launches disable automatic installation,
-macros and implicit env-file loading. Other runtimes remain unqualified.
+`proofscript@0.1.0-psc1.11` supports Node >=22.23.3 and Bun >=1.4.4.
+The bundled kernel's existing minimum determines the Node floor. User runtimes
+have minimum ranges; exact CI versions and executable hashes are reproduction
+evidence. Actual positives: Node22.23.3,24.21.0,26.12.1 and Bun1.4.4.
+Actual older-runtime refusals: Node20.20.2,22.0.0 and Bun1.4.0.
 
-CLI check/compile/build accept --watch, -w and -watch. The supervisor polls
-only explicit sources/config paths every500ms, debounces saves, recaptures full
-bounded exact-byte projects and serializes genuine checked subprocesses.
-Invalid/deleted inputs wait for repair, including newly declared missing files.
-No semantic/incremental cache or implicit dependency loading is introduced.
-A private worker recaptures before execution and revalidates the same captured
-inputs immediately before build publication (or before compile/check stdout).
-A trusted host can veto publication; it cannot manufacture admission.
-Edits after that final guard are handled by the next queued rebuild.
-Success receipts remain JSON lines on stdout; progress/diagnostics stay on stderr.
-Linux process groups receive interruption with bounded kill escalation.
+CLI check/compile/build accept `--watch`, `-w` and `-watch`.
+Initial project capture remains bounded and explicit. The supervisor polls declared
+sources/config paths every500ms, debounces saves, serializes full checked attempts
+and recaptures exact bytes. Repair after deletion/invalid input, atomic saves,
+newly declared missing files and config edits are tested.
+A private worker validates its request and captured-input identity, then recaptures
+immediately before publication or compile/check stdout. Edits after that guard
+queue the next rebuild. The trusted host callback can veto publication.
+Success receipts remain JSON lines on stdout; progress/diagnostics use stderr.
+Linux cancellation retains130/143, bounded kill escalation and actual native-child
+reaping under Node/Bun. There is no semantic incremental cache or speed claim.
 
-Candidate proofscript@0.1.0-psc1.11 is a finite host overlay on exact .7 inputs.
-Frozen compiler/kernel/provider payloads are unchanged. Actual Bun testing exposed
-an additional exact pin in the optional Rust transport. A23-module production
-host audit found this remaining pin. Both optional engine packages are .11 host/
-metadata repacks; every payload byte, fixed point and source identity is compared
-unchanged. Rust transport shares the runtime policy and original Linux lifetime
-guard; Wasm transport is unchanged. Manifest/index pins are explicitly refreshed. Source/installed policy,
-real dependency/config/atomic-save/recovery/watch/refusal/target/signal tests,
-all prior regressions and actual Node/Bun runtime matrices are required.
-Full source run40442150370 at dfb9507ad8700a24a503a4e52bda00f963af279d
-passed all selected source gates, scoped seven-backend execution and37/37 finite
-Practical Core criteria. Installed artifact qualification is tracked separately.
+| Evidence | Exact result |
+| --- | --- |
+| [Full source40453128053](https://github.com/dwijayuda/pskernel/actions/runs/40453128053) | Success:15 jobs; benchmark skipped. Full job122023477972; gate122031524959. All37 finite Practical Core criteria qualified, zero blocked; scoped execution across seven backends. Branch headfdc52207fdf3d809ad99b05a5b738aca21b95139; tested PR merge55a2314e964f649ecaee2923766668a83450d5df. |
+| [Installed/runtime40453124171](https://github.com/dwijayuda/pskernel/actions/runs/40453124171) | Success at the exact implementation commit. All prior gates retained;55 local/global CLI requests;11 full watch cases;16 applications/264 observations/eight global application cases;32 checked publications/143 refusals. |
+| Runtime seal122035904319 | Seven rows: four supported runtimes, each four compiler engines/both grammars and two watch cases; three older-runtime refusals. Total32 positive compiler cases/eight runtime-watch cases. |
+| Rust SDK preflight | All61 existing resource pins match a fresh minimal1.90.0 SDK. Production verifier unchanged. |
+| Licensing |50 current owned source manifests and nine owned installable tarballs use Apache-2.0; two vendor SDK tarballs remain byte-identical. |
 
-## Preserved evidence and boundaries
+[Dated machine-readable receipt](docs/PSC1_RUNTIME_WATCH_QUALIFICATION_2026-10-27.json)
+owns full identities, attempts, runtime binary hashes and retained boundaries.
 
-[Prior layout state](docs/history/AI_WORK_STATE_BEFORE_RUNTIME_WATCH_2026-10-27.md)
-retains exact .9/root/archive hashes, full source40344469855 (37/37 finite
-criteria), installed40344458391, current-source WasmG1/40344458240 and final docs
-40352122925. This change does not rerun or promote unchanged frozen G2/G3.
-Frozen122-module closure remains
-073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9;
-development source124 modules is distinct. All seven mappings remain.
+## Installable artifacts
 
-Official Lean4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/trust0,
-strict original/transformed IR, exact source/body pairing, negatives, semantic
-fuel, resource/lifetime/memory/stack policies remain. Compiler/tools/G1 stay240s;
-independent checker120s; manual correctness and240s performance stay separate.
-Kernel-Wasm stays official C++/Emscripten linear memory; compiler-Wasm stays GC.
-Python/PHP remain optional. No final cross-platform/public registry qualification.
+[Small installable ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40453124171/artifacts/12713556078)
+is 3909615 bytes, SHA256
+`ace62708681e9272de4347c2a8365cd781222077e3bdf7d2167240a0c804a2d8`.
+It contains the SDK-free root tarball, LICENSE/NOTICE, installation instructions
+and seven runtime evidence records.
+The tarball `proofscript-0.1.0-psc1.11.tgz` is 3831384 bytes, SHA256
+`e2ab0b357a4f5836c021cb1d4b1772ee182811f532c1bfa864c94de14f22f6f2`.
 
-[Roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) remains the single queue.
-The independent unassisted maintainer trial is still pending its arranged
-participant; no AI/CI human-understanding claim.
+[Full toolchain ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40453124171/artifacts/12713391747)
+is 206787702 bytes, SHA256
+`d14b1530f8768359a980225f1b0ef8616dc9cfab9c640f83cc1a5611b9a9090d`.
+It retains all eleven tarballs, including optional Rust/Wasm execution engines,
+output SDKs, Python/PHP providers and full installed evidence.
+These are unpublished artifacts. The [CLI guide](docs/guides/cli.md) describes
+installation, target/engine distinction and explicit SDK selection.
+Install commands never download a missing SDK or execute source-package plugins.
 
-## Latest owner steering: modular execution and Apache-2.0
+## Diagnosed failures and reproducible fixes
 
-The owner selected Apache-2.0 for all project-owned code. Root/PSC1 licenses and
-notices plus50 active owned package manifests are updated; third-party licenses
-and historical qualified archives remain intact. Nine owned installable tarballs
-receive a finite license/notice/metadata overlay; original executable bytes are
-compared unchanged and integrity descriptors refreshed. Two vendor SDK tarballs
-are retained byte-for-byte. Real tarball licensing and engine-strict installation
-are required; no merge/publication authorization is implied.
+Actual Bun1.4.0 failed WebAssembly.Module.exports on the genuine generated Wasm GC
+compiler in run40446238737, despite passing policy-only checks. Bun1.4.4 passes
+the same workload. Keep export/no-delegation validation; require measured Bun>=1.4.4.
+Versions1.4.1–1.4.3 remain unqualified/refused; no first-upstream-fix claim.
+
+Live watch diagnostics in run40451321025 exposed a Rust target refusal at
+lib/rustlib/components. Diagnostic40452300522 found the same cargo/std/rustc
+components with different bookkeeping line order; the other60 pins matched.
+Fresh minimal provisioning matched all61 unchanged pins. Exact-candidate replay
+40452569506 then passed all11 watch cases and actual Bun1.4.0 refusal.
+Canonical CI provisions that disposable SDK afresh and verifies every pin early.
+User instructions use a separate explicit SDK; the CLI never rewrites user SDKs.
+
+Older opaque receipt-timeout logs did not identify their target/error.
+The later SDK reproduction identifies a concrete failure class; it does not
+retroactively prove every earlier timeout's cause. Live per-case diagnostics and
+all original assertions/limits are retained. Earlier hashes are preserved in the
+dated receipt and never promoted to the corrected cohort.
+The six existing dispatch/publication commands now have separate visible CI steps.
+
+## Licensing, modular execution and preserved evidence
+
+The owner selected Apache-2.0 for all ProofScript-owned source, documentation and
+generated compiler components. Current packages include the grant and NOTICE.
+Upstream copyrights/licenses, LEAN_LICENSE and other SDK notices remain intact.
+Historical archives/receipts retain their original bytes and snapshot metadata.
+The compiler license does not determine a user's application license.
+[License policy](docs/reference/licensing.md).
 
 [Modular distribution decision](docs/architecture/modular-compiler-distribution.md)
-inspects the supplied PSC0 archive without executing it. Its core/elab/erasure
-entries re-export compiler and declare independent package compilation false;
-those facades are not actual separated execution. Adopt genuine source-owned
-JS/TS module graphs and cohesive exact-cohort packages for final release. Keep
-native Rust/Wasm execution efficient, with organized source/debug output. The
-module-graph pilot and its own self-host/fixed-point qualification are pending;
-no textual split or package-name-only completion claim.
+inspects the supplied PSC0 archive without execution. Its core/elab/erasure entries
+re-export the compiler and declare independent compilation false.
+Genuine source-owned JS/TS modules and cohesive exact-cohort packages are the
+chosen final architecture. The module-graph producer/consumer pilot and its own
+G1/G2/G3/fixed-point qualification remain pending. Qualified bundled executors
+remain available; no textual split or facade completion claim.
 
-## Actual current evidence
+Frozen G3 compiler payloads retain122 modules/4742 Core members and closure
+`073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9`.
+Development source has124 modules/4742 members. Source qualification and frozen
+executor qualification remain distinct. This host/license milestone compares
+compiler/kernel/provider payload bytes unchanged and makes no new frozen G2/G3
+promotion. [Prior layout state](docs/history/AI_WORK_STATE_BEFORE_RUNTIME_WATCH_2026-10-27.md)
+retains preceding exact artifacts, source identities and fixed-point references.
 
-Full source [run40442150370](https://github.com/dwijayuda/pskernel/actions/runs/40442150370)
-is terminal success at dfb9507ad8700a24a503a4e52bda00f963af279d. The source
-qualification records37 qualified finite criteria, zero blocked and scoped actual
-execution across all seven targets; this does not promote different frozen executors.
+Official Lean4.35.0/`eb6cafb7290e8bd5f2937522d8d804f58f02bafc`/trust0,
+independent admission, strict original/transformed IR, exact source/body pairing,
+negative tests, semantic fuel and memory/stack/lifetime policies remain.
+Compiler/tools/G1 stay240s; independent checking stays120s; manual correctness
+profiles remain separate from the240s performance target.
+Kernel-Wasm stays official C++/Emscripten linear memory; compiler-Wasm stays GC.
+Python/PHP remain optional; PSKernel-Core research remains separate.
+Windows/macOS publication and final public release remain unqualified.
+The arranged independent maintainer trial still awaits its participant.
 
-Installed [run40446238737](https://github.com/dwijayuda/pskernel/actions/runs/40446238737)
-tests f35fc543e18aaef45404470627b9631ac50181b6. It has passed source preflight,
-actual nine-owned/two-vendor tarball license assertions,55 local/global CLI requests,
-Bun1.4.4 four-engine/both-grammar compilation/refusals and all11 full watch cases.
-Existing application/publication gates and runtime matrix remain pending.
-
-Earlier main run40442145356 attempts at dfb9507 timed out waiting for the first
-non-JS target watch receipt. Their test passed an early empty stderr string and
-hid live failure details. f35fc543 adds per-case and dynamic failure diagnostics
-without relaxing assertions/timeouts. Exact candidate root
-1f0a6d28aaa01fc52a810ded365b3c16ab5e1db8053542c575e79551b0afffaf
-also passed target probe40443670655 and full-watch probes40444312302 and40445125239.
-The latter includes all11 cases after55 CLI requests and real Bun compilation,
-with actual native-child reaping under Node/Bun. Diagnostic branch results are
-not substituted for main qualification. Earlier intermittent timeout remains
-unexplained; retain its evidence rather than claiming a diagnosed product fix.
-
-[Runtime/watch receipt](docs/PSC1_RUNTIME_WATCH_QUALIFICATION_2026-10-27.json)
-owns exact attempts, package hashes and remaining evidence boundaries.
-
-## Bun minimum correction
-
-Run40446238737 at f35fc543 passed the complete installed job121998272919:
-root SHA256254ea9e8571e87e9b3bf38f94a2c5257eea52321dffbafa7d1a0ee7247d3ef07,
-3831107 bytes; all11 watch cases,16 applications/264 observations/eight global
-application cases,32 checked publications/143 refusals and remaining gates.
-Node22.23.3/24/26 positive and Node20/22.0 negative rows passed. Overall promotion
-was blocked by actual Bun1.4.0 WebAssembly.Module.exports descriptor failure on
-the generated Wasm GC compiler. Actual Bun1.4.4 passes all four engines.
-Support Bun>=1.4.4 and test Bun1.4.0 refusal, preserving export/ABI validation.
-A new cohort run must finish before qualifying its changed root hashes.
-The six existing dispatch/publication commands now have separate CI steps for
-visibility; all commands, assertions and resource limits remain.
-
-## Reproduced external SDK drift
-
-Main run40451321025 at e4476046 passed licensing,55CLI requests and actual
-Bun1.4.4, then refused Rust target lib/rustlib/components. The new live watch
-diagnostics exposed a resource mismatch rather than an opaque receipt timeout.
-Diagnostic40452300522 measured identical cargo/std/rustc components with different
-bookkeeping order in the ambient SDK; all other60 resource pins matched. A fresh
-minimal SDK matched all61 pins. Diagnostic40452569506 then passed all11 original
-watch cases and the actual older-Bun refusal against exact e447 root
-f62554265c54f5506eeaa9ba73407e1651a10b4b74e41cd7adddfa0ef425ac8e.
-Canonical Linux CI now reprovisions that disposable SDK and verifies all61 pins
-before expensive regression gates. No consumer, hash, kernel or resource policy
-is weakened. User instructions use a separate explicit SDK; the CLI never repairs
-or rewrites user SDK resources. Corrected-cohort full qualification remains pending.
+[Roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) is the authoritative remaining queue.
+The next packaging slice is the finite genuine module-graph pilot; compiler
+diagnostics/provenance, platform qualification and the human trial retain their
+separate acceptance criteria. Final docs-only checks are visible on PR #193.

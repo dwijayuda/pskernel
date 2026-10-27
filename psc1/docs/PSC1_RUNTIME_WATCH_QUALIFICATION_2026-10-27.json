@@ -1,7 +1,7 @@
 {
   "schema": "psc1-runtime-watch-qualification/1",
   "updated": "2026-10-27",
-  "status": "corrected-bun-floor-and-exact-sdk-provisioning-qualification-pending",
+  "status": "qualified-linux-runtime-watch-apache2",
   "pullRequest": 193,
   "baseCommit": "94e0c13f6a4b434f73c859cc0c716cb6fb8d1340",
   "firstImplementationCommit": "91bcbd107f375eea5cf5f87f15a9be9fe561b7c4",
@@ -133,7 +133,8 @@
     "ownedSourceManifests": 50,
     "requiredOwnedTarballs": 9,
     "thirdPartySdkTarballsPreserved": 2,
-    "policy": "owned source/artifacts licensed; third-party notices and immutable prior archives retained"
+    "policy": "owned source/artifacts licensed; third-party notices and immutable prior archives retained",
+    "status": "passed-source-and-actual-installed-tarballs"
   },
   "preLicenseCheckpoint": {
     "commit": "91c5d898adea8e8d184b7927adf2ed988af8c2d8",
@@ -157,22 +158,21 @@
     "oldExecutors": "retained references; no new modular fixed-point claim"
   },
   "sourceQualification": {
-    "run": 40442150370,
-    "commit": "dfb9507ad8700a24a503a4e52bda00f963af279d",
+    "run": 40453128053,
+    "branchHeadCommit": "fdc52207fdf3d809ad99b05a5b738aca21b95139",
+    "testedMergeCommit": "55a2314e964f649ecaee2923766668a83450d5df",
     "status": "success",
+    "fullJob": 122023477972,
+    "gateJob": 122031524959,
     "finiteCriteria": {
       "qualified": 37,
       "blocked": 0
     },
+    "successfulJobs": 15,
+    "skippedBenchmark": 1,
     "sevenBackendExecution": "passed-scoped-execution",
-    "compilerSourceCommit": "0c28eb59b8e33451501ae50f42897235768a1f9d",
-    "scope": "dependency-selected gates plus full source qualification; distinct frozen compiler closure retained",
-    "gateJob": 121996287127,
-    "fullJob": 121988203998,
-    "jobs": {
-      "success": 15,
-      "skippedBenchmark": 1
-    }
+    "targetExecutionBundles": 14,
+    "scope": "full selected source release qualification; distinct frozen G3 closure retained"
   },
   "diagnosticEvidence": {
     "qualification": false,
@@ -200,33 +200,29 @@
         "scope": "55 CLI requests, Bun actual compatibility, all11 full watch cases including native Node/Bun reap"
       }
     ],
-    "unresolved": "Earlier full-watch receipt timeout not reproduced after live diagnostics; root cause remains open. Successful probes are not qualification."
+    "unresolved": "Earlier opaque receipt-timeout logs do not identify their target/error. A later live reproduction identifies ambient Rust SDK component ordering; fresh provisioning matches every unchanged pin and passes all watch cases. No claim that all older timeouts have a directly observed cause."
   },
   "installedQualification": {
-    "run": 40446238737,
-    "job": 121998272919,
-    "commit": "f35fc543e18aaef45404470627b9631ac50181b6",
-    "status": "full-installed-passed-runtime-matrix-failed",
-    "rootSha256": "254ea9e8571e87e9b3bf38f94a2c5257eea52321dffbafa7d1a0ee7247d3ef07",
-    "rootBytes": 3831107,
+    "run": 40453124171,
+    "job": 122020402621,
+    "commit": "fdc52207fdf3d809ad99b05a5b738aca21b95139",
+    "status": "success",
+    "rootSha256": "e2ab0b357a4f5836c021cb1d4b1772ee182811f532c1bfa864c94de14f22f6f2",
+    "rootBytes": 3831384,
     "watchCases": 11,
+    "cliRequests": 55,
     "applications": 16,
     "applicationCases": 264,
     "globalApplicationCases": 8,
     "checkedPublicationCases": 32,
     "checkedPublicationRefusals": 143,
-    "latestFailedRun": 40451321025
+    "allPreviousGates": "passed"
   },
   "selectedSourceQualification": {
     "run": 40446244175,
     "commit": "f35fc543e18aaef45404470627b9631ac50181b6",
     "status": "success",
     "fullBaselineRun": 40442150370
-  },
-  "documentationQualification": {
-    "run": 40450336220,
-    "commit": "3927e69f7e8c62b9965fb943d11deca1097e4ace",
-    "status": "success"
   },
   "rustSdkProvisioning": {
     "resourcePins": 61,
@@ -251,6 +247,131 @@
       "qualification": false
     },
     "ci": "fresh minimal1.90.0 on disposable runner; exact production verifyFile preflight",
-    "user": "explicit separate fresh SDK via --rust-toolchain-root"
+    "user": "explicit separate fresh SDK via --rust-toolchain-root",
+    "canonical": {
+      "run": 40453124171,
+      "job": 122020402621,
+      "status": "passed",
+      "resources": 61,
+      "componentsSha256": "a13769c18a7a74ea492ab633b644d6c238ae81e536d30d3f168eddb57e86000e",
+      "mutatedVerifier": false
+    }
+  },
+  "previousSourceQualification": {
+    "run": 40442150370,
+    "commit": "dfb9507ad8700a24a503a4e52bda00f963af279d",
+    "status": "success",
+    "finiteCriteria": {
+      "qualified": 37,
+      "blocked": 0
+    },
+    "sevenBackendExecution": "passed-scoped-execution",
+    "compilerSourceCommit": "0c28eb59b8e33451501ae50f42897235768a1f9d",
+    "scope": "dependency-selected gates plus full source qualification; distinct frozen compiler closure retained",
+    "gateJob": 121996287127,
+    "fullJob": 121988203998,
+    "jobs": {
+      "success": 15,
+      "skippedBenchmark": 1
+    }
+  },
+  "previousInstalledQualification": {
+    "run": 40446238737,
+    "job": 121998272919,
+    "commit": "f35fc543e18aaef45404470627b9631ac50181b6",
+    "status": "full-installed-passed-runtime-matrix-failed",
+    "rootSha256": "254ea9e8571e87e9b3bf38f94a2c5257eea52321dffbafa7d1a0ee7247d3ef07",
+    "rootBytes": 3831107,
+    "watchCases": 11,
+    "applications": 16,
+    "applicationCases": 264,
+    "globalApplicationCases": 8,
+    "checkedPublicationCases": 32,
+    "checkedPublicationRefusals": 143,
+    "latestFailedRun": 40451321025
+  },
+  "implementationCommit": "fdc52207fdf3d809ad99b05a5b738aca21b95139",
+  "runtimeQualification": {
+    "run": 40453124171,
+    "status": "success",
+    "sealJob": 122035904319,
+    "positiveCompilerCases": 32,
+    "positiveWatchCases": 8,
+    "rows": [
+      {
+        "status": "passed-negative",
+        "runtime": "bun",
+        "version": "1.4.0",
+        "executableSha256": "33d56b070be6a9e3da0ab013038b43d1645d0534ca811ecdba4472599117eb4b"
+      },
+      {
+        "status": "passed",
+        "runtime": "bun",
+        "version": "1.4.4",
+        "executableSha256": "10702245766b225e70bbf6235fd6b47214fd94b4760d00ffaed8ab0df57ac235"
+      },
+      {
+        "status": "passed-negative",
+        "runtime": "node",
+        "version": "20.20.2",
+        "executableSha256": "6295488653f0d93b0a157841746fef7e72cc4328cfb60c4bbe0ca2668a836ffd"
+      },
+      {
+        "status": "passed-negative",
+        "runtime": "node",
+        "version": "22.0.0",
+        "executableSha256": "0570891fc6e07540b25f18b753445fc16d4428b8a894cca5cf9805c2feee230f"
+      },
+      {
+        "status": "passed",
+        "runtime": "node",
+        "version": "22.23.3",
+        "executableSha256": "fde6a4bf8d0562f7751d1a2d6cb9b417c4cfe107bbcb0aa3e9a24e125e348f48"
+      },
+      {
+        "status": "passed",
+        "runtime": "node",
+        "version": "24.21.0",
+        "executableSha256": "7fde7b8afa198da66257f42ee2001d874c7355631e6d1579a5fb5ef1f246df4c"
+      },
+      {
+        "status": "passed",
+        "runtime": "node",
+        "version": "26.12.1",
+        "executableSha256": "08f12d42fb304468e8ee86247fe686aae5b225836ea65e9d6566c11ae6ba2e8e"
+      }
+    ],
+    "bunMinimumEvidence": "installed Bun1.4.4 four-engine/both-grammar and live-watch gate; no duplicate same-version matrix row"
+  },
+  "installable": {
+    "artifact": 12713556078,
+    "name": "proofscript-installable-0.1.0-psc1.11-fdc52207fdf3d809ad99b05a5b738aca21b95139",
+    "zipBytes": 3909615,
+    "zipSha256": "ace62708681e9272de4347c2a8365cd781222077e3bdf7d2167240a0c804a2d8",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/40453124171/artifacts/12713556078",
+    "tarball": "proofscript-0.1.0-psc1.11.tgz",
+    "tarballSha256": "e2ab0b357a4f5836c021cb1d4b1772ee182811f532c1bfa864c94de14f22f6f2",
+    "tarballBytes": 3831384,
+    "scope": "SDK-free root with default compiler and independent Lean Wasm checker; Linux-qualified"
+  },
+  "fullToolchain": {
+    "artifact": 12713391747,
+    "name": "psc1-cli-toolchain-fdc52207fdf3d809ad99b05a5b738aca21b95139",
+    "zipBytes": 206787702,
+    "zipSha256": "d14b1530f8768359a980225f1b0ef8616dc9cfab9c640f83cc1a5611b9a9090d",
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/40453124171/artifacts/12713391747",
+    "scope": "all eleven tarballs including optional engines, SDKs/providers and qualification evidence"
+  },
+  "previousCheckpointDocumentationQualification": {
+    "run": 40450336220,
+    "commit": "3927e69f7e8c62b9965fb943d11deca1097e4ace",
+    "status": "success"
+  },
+  "finalDocumentationScope": "docs-only reconciliation after qualification; current PR checks carry its separate static result",
+  "cancelledSetupAttempt": {
+    "commit": "2f95c644c120d0d34478efe7e8ce1566576b6383",
+    "run": 40453078186,
+    "sourceRun": 40453082651,
+    "reason": "SDK receipt newline corrected before qualification at fdc52207; superseded runs cancelled"
   }
 }

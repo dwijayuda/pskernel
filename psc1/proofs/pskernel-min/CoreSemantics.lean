@@ -123,14 +123,14 @@ inductive PrimitiveDenotation : PsMinCoreExpr → (type : PsMinRegTy) → Denote
   | head6 : PrimitiveDenotation (.constant (.str (.str PsMinCoreName.anonymous [78, 97, 116]) [115, 117, 98]) []) (.arr .nat (.arr .nat .nat)) (Nat.sub)
   | head7 : PrimitiveDenotation (.constant (.str (.str PsMinCoreName.anonymous [78, 97, 116]) [98, 101, 113]) []) (.arr .nat (.arr .nat .boolean)) (Nat.beq)
   | head8 : PrimitiveDenotation (.constant (.str (.str PsMinCoreName.anonymous [78, 97, 116]) [98, 108, 116]) []) (.arr .nat (.arr .nat .boolean)) (Nat.blt)
-  | listNil (element a) (ht : TypeImage element a) :
+  | listNil (element a) (ht : TypeImage element a) (sort : sourceSort a = 1) :
       PrimitiveDenotation (.app (.constant (.str (.str PsMinCoreName.anonymous [76, 105, 115, 116]) [110, 105, 108]) []) element) (.list a) ([] : List (Denote [] a))
-  | listCons (element a) (ht : TypeImage element a) :
+  | listCons (element a) (ht : TypeImage element a) (sort : sourceSort a = 1) :
       PrimitiveDenotation (.app (.constant (.str (.str PsMinCoreName.anonymous [76, 105, 115, 116]) [99, 111, 110, 115]) []) element) (.arr a (.arr (.list a) (.list a)))
         (@List.cons (Denote [] a))
-  | optionNone (element a) (ht : TypeImage element a) :
+  | optionNone (element a) (ht : TypeImage element a) (sort : sourceSort a = 1) :
       PrimitiveDenotation (.app (.constant (.str (.str PsMinCoreName.anonymous [79, 112, 116, 105, 111, 110]) [110, 111, 110, 101]) []) element) (.option a) (none : Option (Denote [] a))
-  | optionSome (element a) (ht : TypeImage element a) :
+  | optionSome (element a) (ht : TypeImage element a) (sort : sourceSort a = 1) :
       PrimitiveDenotation (.app (.constant (.str (.str PsMinCoreName.anonymous [79, 112, 116, 105, 111, 110]) [115, 111, 109, 101]) []) element) (.arr a (.option a))
         (@Option.some (Denote [] a))
 
@@ -159,7 +159,7 @@ inductive CoreEval (names : List PsMinCoreName) (globals : List PsMinRegTy) (G :
       CoreEval names globals G locals L (.letE name sourceType value body) result b
   | conditional (locals L sourceType left right yes no result)
       (l r : Bool) (y n : Denote [] result)
-      (ht : TypeImage sourceType result)
+      (ht : TypeImage sourceType result) (sort : sourceSort result = 1)
       (hl : CoreEval names globals G locals L left .boolean l)
       (hr : CoreEval names globals G locals L right .boolean r)
       (hy : CoreEval names globals G locals L yes result y)
@@ -225,10 +225,10 @@ theorem primitive_semantics (globals locals : List PsMinRegTy) (G : Model [] glo
     cases evaluation
     exact PrimitiveDenotation.head8
 
-  | listNil element a ht => cases evaluation; exact PrimitiveDenotation.listNil element a ht
-  | listCons element a ht => cases evaluation; exact PrimitiveDenotation.listCons element a ht
-  | optionNone element a ht => cases evaluation; exact PrimitiveDenotation.optionNone element a ht
-  | optionSome element a ht => cases evaluation; exact PrimitiveDenotation.optionSome element a ht
+  | listNil element a ht sort => cases evaluation; exact PrimitiveDenotation.listNil element a ht sort
+  | listCons element a ht sort => cases evaluation; exact PrimitiveDenotation.listCons element a ht sort
+  | optionNone element a ht sort => cases evaluation; exact PrimitiveDenotation.optionNone element a ht sort
+  | optionSome element a ht sort => cases evaluation; exact PrimitiveDenotation.optionSome element a ht sort
 
 theorem translation_preserves_semantics (names : List PsMinCoreName)
     (source : PsMinCoreExpr) (term : PsMinOpTerm) (image : TermImage names source term)
@@ -280,7 +280,7 @@ theorem translation_preserves_semantics (names : List PsMinCoreName)
     · exact ht
     · exact ihv _ _ _ _ (by assumption)
     · exact ihb _ _ _ _ (by assumption)
-  | conditional sourceType left right yes no t l r y n ht hl hr hy hn ihl ihr ihy ihn =>
+  | conditional sourceType left right yes no t l r y n ht sort hl hr hy hn ihl ihr ihy ihn =>
     cases evaluation
     rename_i domain0 arg0 noEval fn0 head0
     cases head0
@@ -292,6 +292,7 @@ theorem translation_preserves_semantics (names : List PsMinCoreName)
     cases primitiveEval
     apply CoreEval.conditional
     · exact ht
+    · exact sort
     · exact ihl _ _ _ _ leftEval
     · exact ihr _ _ _ _ rightEval
     · exact ihy _ _ _ _ yesEval

@@ -143,7 +143,7 @@ const left=cn('Bool.true'),right=cn('Bool.true');
 const proposition=aps(cn('Eq',[1]),boolType,left,right),decision=aps(cn('Bool.decEq'),left,right);
 mkProbe('ite-proposition-level-one',falseArrow,aps(cn('ite',[1]),falseArrow,proposition,decision,identity,identity));
 mkProbe('ite-proposition-level-zero',falseArrow,aps(cn('ite',[0]),falseArrow,proposition,decision,identity,identity));
-fs.writeFileSync(path.join(dir,'source-universe-probes.json'),JSON.stringify(universeProbes,null,2)+'\\n');
+fs.writeFileSync(path.join(dir,'source-universe-probes.json'),JSON.stringify(universeProbes,null,2)+'\n');
 console.log('PSC1_MIN_SOURCE_UNIVERSE_PROBES '+JSON.stringify(universeProbes));
 for(const result of universeProbes)assert.ok(!result.minimal||result.official,'accepted ill-typed source '+result.id);
 

@@ -4,6 +4,14 @@ import OperationalSource
 namespace Ps.MinKernel.CoreTranslation
 open Ps.MinKernel.CoreIngress
 
+def sourceSort : PsMinRegTy → Nat
+  | .empty => 0
+  | .arr _ result => sourceSort result
+  | _ => 1
+
+theorem isType_iff (code : PsMinRegTy) : psMinCoreIsType code = true ↔ sourceSort code = 1 := by
+  induction code <;> simp_all [psMinCoreIsType, sourceSort]
+
 -- Independent grammar for the first canonical domain. There is no axiom,
 -- arbitrary name/hash predicate, dependent alias or generic proof erasure rule.
 inductive TypeImage : PsMinCoreExpr → PsMinRegTy → Prop where
@@ -13,9 +21,9 @@ inductive TypeImage : PsMinCoreExpr → PsMinRegTy → Prop where
   | boolean : TypeImage (.constant (.str PsMinCoreName.anonymous [66, 111, 111, 108]) []) .boolean
   | arr (name binder domain body a b) (ha : TypeImage domain a) (hb : TypeImage body b) :
       TypeImage (.forallE name binder domain body) (.arr a b)
-  | list (element a) (ha : TypeImage element a) :
+  | list (element a) (ha : TypeImage element a) (sort : sourceSort a = 1) :
       TypeImage (.app (.constant (.str PsMinCoreName.anonymous [76, 105, 115, 116]) []) element) (.list a)
-  | option (element a) (ha : TypeImage element a) :
+  | option (element a) (ha : TypeImage element a) (sort : sourceSort a = 1) :
       TypeImage (.app (.constant (.str PsMinCoreName.anonymous [79, 112, 116, 105, 111, 110]) []) element) (.option a)
 
 theorem type_translation (fuel : Nat) (expr : PsMinCoreExpr) (code : PsMinRegTy)
@@ -65,8 +73,8 @@ theorem type_translation (fuel : Nat) (expr : PsMinCoreExpr) (code : PsMinRegTy)
             all_goals try contradiction
             all_goals cases h
             all_goals first
-              | simpa only [nameEq_sound _ _ (by assumption)] using TypeImage.list arg a (ih _ _ ht)
-              | simpa only [nameEq_sound _ _ (by assumption)] using TypeImage.option arg a (ih _ _ ht)
+              | simpa only [nameEq_sound _ _ (by assumption)] using TypeImage.list arg a (ih _ _ ht) ((isType_iff a).mp (by assumption))
+              | simpa only [nameEq_sound _ _ (by assumption)] using TypeImage.option arg a (ih _ _ ht) ((isType_iff a).mp (by assumption))
         next => contradiction
       | _ => simp [psMinCoreType] at h
     | _ => simp [psMinCoreType] at h
@@ -92,13 +100,13 @@ inductive PrimitiveImage : PsMinCoreExpr → PsMinOpTerm → Prop where
   | head6 : PrimitiveImage (.constant (.str (.str PsMinCoreName.anonymous [78, 97, 116]) [115, 117, 98]) []) (.primitive .natSub 0 0 0 0 0)
   | head7 : PrimitiveImage (.constant (.str (.str PsMinCoreName.anonymous [78, 97, 116]) [98, 101, 113]) []) (.primitive .natBeq 0 0 0 0 0)
   | head8 : PrimitiveImage (.constant (.str (.str PsMinCoreName.anonymous [78, 97, 116]) [98, 108, 116]) []) (.primitive .natBlt 0 0 0 0 0)
-  | listNil (element a) (ha : TypeImage element a) :
+  | listNil (element a) (ha : TypeImage element a) (sort : sourceSort a = 1) :
       PrimitiveImage (.app (.constant (.str (.str PsMinCoreName.anonymous [76, 105, 115, 116]) [110, 105, 108]) []) element) (.primitive (.listNil a) 0 1 0 0 0)
-  | listCons (element a) (ha : TypeImage element a) :
+  | listCons (element a) (ha : TypeImage element a) (sort : sourceSort a = 1) :
       PrimitiveImage (.app (.constant (.str (.str PsMinCoreName.anonymous [76, 105, 115, 116]) [99, 111, 110, 115]) []) element) (.primitive (.listCons a) 0 1 0 0 0)
-  | optionNone (element a) (ha : TypeImage element a) :
+  | optionNone (element a) (ha : TypeImage element a) (sort : sourceSort a = 1) :
       PrimitiveImage (.app (.constant (.str (.str PsMinCoreName.anonymous [79, 112, 116, 105, 111, 110]) [110, 111, 110, 101]) []) element) (.primitive (.optionNone a) 0 1 0 0 0)
-  | optionSome (element a) (ha : TypeImage element a) :
+  | optionSome (element a) (ha : TypeImage element a) (sort : sourceSort a = 1) :
       PrimitiveImage (.app (.constant (.str (.str PsMinCoreName.anonymous [79, 112, 116, 105, 111, 110]) [115, 111, 109, 101]) []) element) (.primitive (.optionSome a) 0 1 0 0 0)
 
 theorem primitive_translation (name : PsMinCoreName) (term : PsMinOpTerm)
@@ -137,10 +145,10 @@ theorem typed_primitive_translation (fuel : Nat) (source : PsMinCoreExpr) (term 
           all_goals try contradiction
           all_goals cases h
           all_goals first
-            | simpa only [nameEq_sound _ _ (by assumption)] using PrimitiveImage.listNil element a (type_translation _ _ _ ht)
-            | simpa only [nameEq_sound _ _ (by assumption)] using PrimitiveImage.listCons element a (type_translation _ _ _ ht)
-            | simpa only [nameEq_sound _ _ (by assumption)] using PrimitiveImage.optionNone element a (type_translation _ _ _ ht)
-            | simpa only [nameEq_sound _ _ (by assumption)] using PrimitiveImage.optionSome element a (type_translation _ _ _ ht)
+            | simpa only [nameEq_sound _ _ (by assumption)] using PrimitiveImage.listNil element a (type_translation _ _ _ ht) ((isType_iff a).mp (by assumption))
+            | simpa only [nameEq_sound _ _ (by assumption)] using PrimitiveImage.listCons element a (type_translation _ _ _ ht) ((isType_iff a).mp (by assumption))
+            | simpa only [nameEq_sound _ _ (by assumption)] using PrimitiveImage.optionNone element a (type_translation _ _ _ ht) ((isType_iff a).mp (by assumption))
+            | simpa only [nameEq_sound _ _ (by assumption)] using PrimitiveImage.optionSome element a (type_translation _ _ _ ht) ((isType_iff a).mp (by assumption))
       next => contradiction
     | _ => simp [psMinCoreTypedPrimitive] at h
   | _ => simp [psMinCoreTypedPrimitive] at h
@@ -188,7 +196,7 @@ inductive TermImage (names : List PsMinCoreName) : PsMinCoreExpr → PsMinOpTerm
   | letE (name type value body t v b) (ht : TypeImage type t)
       (hv : TermImage names value v) (hb : TermImage names body b) :
       TermImage names (.letE name type value body) (.letE t v b)
-  | conditional (type left right yes no t l r y n) (ht : TypeImage type t)
+  | conditional (type left right yes no t l r y n) (ht : TypeImage type t) (sort : sourceSort t = 1)
       (hl : TermImage names left l) (hr : TermImage names right r)
       (hy : TermImage names yes y) (hn : TermImage names no n) :
       TermImage names (conditionalSyntax type left right yes no)
@@ -206,23 +214,27 @@ theorem term_translation (fuel : Nat) (names : List PsMinCoreName)
       cases ht : psMinCoreType fuel view.type with
       | none => simp [ht] at h
       | some t =>
-        cases hl : psMinCoreTranslate fuel names view.left with
-        | none => simp [ht, hl] at h
-        | some l =>
-          cases hr : psMinCoreTranslate fuel names view.right with
-          | none => simp [ht, hl, hr] at h
-          | some r =>
-            cases hy : psMinCoreTranslate fuel names view.yes with
-            | none => simp [ht, hl, hr, hy] at h
-            | some y =>
-              cases hn : psMinCoreTranslate fuel names view.no with
-              | none => simp [ht, hl, hr, hy, hn] at h
-              | some n =>
-                simp only [ht, hl, hr, hy, hn, Option.some.injEq] at h
-                subst term
-                rw [conditional_exact _ _ hv]
-                exact .conditional _ _ _ _ _ _ _ _ _ _ (type_translation _ _ _ ht)
-                  (ih _ _ hl) (ih _ _ hr) (ih _ _ hy) (ih _ _ hn)
+        simp only [ht] at h
+        split at h
+        next sort =>
+          cases hl : psMinCoreTranslate fuel names view.left with
+          | none => simp [ht, hl] at h
+          | some l =>
+            cases hr : psMinCoreTranslate fuel names view.right with
+            | none => simp [ht, hl, hr] at h
+            | some r =>
+              cases hy : psMinCoreTranslate fuel names view.yes with
+              | none => simp [ht, hl, hr, hy] at h
+              | some y =>
+                cases hn : psMinCoreTranslate fuel names view.no with
+                | none => simp [ht, hl, hr, hy, hn] at h
+                | some n =>
+                  simp only [ht, hl, hr, hy, hn, Option.some.injEq] at h
+                  subst term
+                  rw [conditional_exact _ _ hv]
+                  exact .conditional _ _ _ _ _ _ _ _ _ _ (type_translation _ _ _ ht) ((isType_iff t).mp sort)
+                    (ih _ _ hl) (ih _ _ hr) (ih _ _ hy) (ih _ _ hn)
+        next => contradiction
     | none =>
       cases hp : psMinCoreTypedPrimitive fuel source with
       | some p =>

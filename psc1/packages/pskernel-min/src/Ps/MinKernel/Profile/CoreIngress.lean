@@ -31,6 +31,14 @@ def psMinCoreFresh (names : List PsMinCoreName) (name : PsMinCoreName) : Bool :=
   | _ => if psMinCoreNameMember psMinCoreReservedRoots (psMinCoreNameRoot name) then false else
     if psMinCoreNameMember names name then false else true
 
+-- Source Prop and Type are distinct in the pinned non-cumulative foundation.
+-- The Empty code represents the exact empty proposition; a Pi has its codomain sort.
+def psMinCoreIsType (code : PsMinRegTy) : Bool :=
+  match code with
+  | PsMinRegTy.empty => false
+  | PsMinRegTy.arr _ result => psMinCoreIsType result
+  | _ => true
+
 def psMinCoreType (fuel : Nat) : PsMinCoreExpr -> Option PsMinRegTy :=
   match fuel with
   | Nat.zero => fun _ => Option.none
@@ -54,8 +62,8 @@ def psMinCoreType (fuel : Nat) : PsMinCoreExpr -> Option PsMinRegTy :=
       | .constant name levels => if psMinByteEq levels List.nil then
           match smaller arg with
           | Option.none => Option.none
-          | Option.some a => if psMinCoreNameEq name (PsMinCoreName.str PsMinCoreName.anonymous [76, 105, 115, 116]) then Option.some (PsMinRegTy.list a) else
-              if psMinCoreNameEq name (PsMinCoreName.str PsMinCoreName.anonymous [79, 112, 116, 105, 111, 110]) then Option.some (PsMinRegTy.option a) else Option.none
+          | Option.some a => if psMinCoreIsType a then if psMinCoreNameEq name (PsMinCoreName.str PsMinCoreName.anonymous [76, 105, 115, 116]) then Option.some (PsMinRegTy.list a) else
+              if psMinCoreNameEq name (PsMinCoreName.str PsMinCoreName.anonymous [79, 112, 116, 105, 111, 110]) then Option.some (PsMinRegTy.option a) else Option.none else Option.none
         else Option.none
       | _ => Option.none
     | _ => Option.none
@@ -119,10 +127,10 @@ def psMinCoreTypedPrimitive (fuel : Nat) (expr : PsMinCoreExpr) : Option PsMinOp
       match psMinCoreType fuel type with
       | Option.none => Option.none
       | Option.some a =>
-        if psMinCoreNameEq name (PsMinCoreName.str (PsMinCoreName.str PsMinCoreName.anonymous [76, 105, 115, 116]) [110, 105, 108]) then Option.some (PsMinOpTerm.primitive (PsMinOpPrimitive.listNil a) 0 1 0 0 0) else
+        if psMinCoreIsType a then if psMinCoreNameEq name (PsMinCoreName.str (PsMinCoreName.str PsMinCoreName.anonymous [76, 105, 115, 116]) [110, 105, 108]) then Option.some (PsMinOpTerm.primitive (PsMinOpPrimitive.listNil a) 0 1 0 0 0) else
         if psMinCoreNameEq name (PsMinCoreName.str (PsMinCoreName.str PsMinCoreName.anonymous [76, 105, 115, 116]) [99, 111, 110, 115]) then Option.some (PsMinOpTerm.primitive (PsMinOpPrimitive.listCons a) 0 1 0 0 0) else
         if psMinCoreNameEq name (PsMinCoreName.str (PsMinCoreName.str PsMinCoreName.anonymous [79, 112, 116, 105, 111, 110]) [110, 111, 110, 101]) then Option.some (PsMinOpTerm.primitive (PsMinOpPrimitive.optionNone a) 0 1 0 0 0) else
-        if psMinCoreNameEq name (PsMinCoreName.str (PsMinCoreName.str PsMinCoreName.anonymous [79, 112, 116, 105, 111, 110]) [115, 111, 109, 101]) then Option.some (PsMinOpTerm.primitive (PsMinOpPrimitive.optionSome a) 0 1 0 0 0) else Option.none
+        if psMinCoreNameEq name (PsMinCoreName.str (PsMinCoreName.str PsMinCoreName.anonymous [79, 112, 116, 105, 111, 110]) [115, 111, 109, 101]) then Option.some (PsMinOpTerm.primitive (PsMinOpPrimitive.optionSome a) 0 1 0 0 0) else Option.none else Option.none
       else Option.none
     | _ => Option.none
   | _ => Option.none
@@ -137,7 +145,7 @@ def psMinCoreTranslate (fuel : Nat) : List PsMinCoreName -> PsMinCoreExpr -> Opt
     | Option.some view =>
       match psMinCoreType rest view.type with
       | Option.none => Option.none
-      | Option.some type => match smaller view.left with
+      | Option.some type => if psMinCoreIsType type then match smaller view.left with
         | Option.none => Option.none
         | Option.some left => match smaller view.right with
           | Option.none => Option.none
@@ -148,6 +156,7 @@ def psMinCoreTranslate (fuel : Nat) : List PsMinCoreName -> PsMinCoreExpr -> Opt
               | Option.some no => Option.some
                 (PsMinOpTerm.app (PsMinOpTerm.app (PsMinOpTerm.app (PsMinOpTerm.app
                   (PsMinOpTerm.primitive (PsMinOpPrimitive.boolEqIte type) 1 1 0 0 0) left) right) yes) no)
+        else Option.none
     | Option.none =>
       match psMinCoreTypedPrimitive rest expr with
       | Option.some primitive => Option.some primitive

@@ -9,15 +9,16 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 async function until(predicate, message, limit = 240000) {
   const start = Date.now();
   while (!predicate()) {
-    if (Date.now() - start > limit) throw Error('WATCH_TEST_TIMEOUT: ' + message);
+    if (Date.now() - start > limit) throw Error('WATCH_TEST_TIMEOUT: ' + (typeof message === 'function' ? message() : message));
     await sleep(20);
   }
 }
 function watch(args, cwd, runtime = f.runtime) {
+  console.log('WATCH_CASE '+JSON.stringify({args,cwd,runtime}));
   const flags = path.basename(runtime).startsWith('bun') ? ['--no-install','--no-macros','--no-env-file'] : [];
   const child = spawn(runtime, [...flags, f.cli, 'build', ...args, '--watch', '--diagnostics=json'],
     {cwd, env:f.env, stdio:['ignore','pipe','pipe']});
-  const state = {child, receipts:[], events:[], diagnostics:[], stderr:'', exit:undefined};
+  const state = {caseArgs:args,child, receipts:[], events:[], diagnostics:[], stderr:'', exit:undefined};
   active.add(state);
   let stdout = '', stderr = '';
   child.stdout.on('data', chunk => {
@@ -43,12 +44,18 @@ function watch(args, cwd, runtime = f.runtime) {
   return state;
 }
 async function receipt(state, after) {
-  await until(() => state.receipts.length > after || state.exit, state.stderr);
+  await until(() => {
+    if (state.error) throw Error('WATCH_SPAWN_FAILED: '+state.error);
+    if (state.caseArgs.includes('--target') && state.events.some(e=>e.event.startsWith('failed')) &&
+        !state.diagnostics.every(d=>/WATCH_SUPERSEDED|INPUT_CHANGED/.test(d.message)))
+      throw Error('WATCH_ACTUAL_FAILURE: '+state.stderr);
+    return state.receipts.length > after || state.exit;
+  }, () => JSON.stringify({args:state.caseArgs,after,events:state.events,stderr:state.stderr}));
   assert.equal(state.exit, undefined, state.stderr);
   return state.receipts[after];
 }
 async function failed(state, after) {
-  await until(() => state.events.filter(e => e.event.startsWith('failed')).length > after || state.exit, state.stderr);
+  await until(() => state.events.filter(e => e.event.startsWith('failed')).length > after || state.exit, () => state.stderr);
   assert.equal(state.exit, undefined, state.stderr);
 }
 async function stop(state, signal='SIGINT') {

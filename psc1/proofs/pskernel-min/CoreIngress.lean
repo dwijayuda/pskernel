@@ -69,10 +69,13 @@ theorem exprEq_sound (fuel : Nat) (left right : PsMinCoreExpr)
 theorem lengthAtMost_sound (fuel : Nat) (bytes : List Nat)
     (h : psMinByteLengthAtMost fuel bytes = true) : bytes.length ≤ fuel := by
   induction fuel generalizing bytes with
-  | zero => cases bytes <;> simp_all [psMinByteLengthAtMost]
+  | zero =>
+    cases bytes with
+    | nil => exact Nat.le_refl 0
+    | cons head tail => cases h
   | succ fuel ih =>
     cases bytes with
-    | nil => simp
+    | nil => exact Nat.zero_le _
     | cons head tail =>
       exact Nat.succ_le_succ (ih tail h)
 
@@ -135,7 +138,7 @@ theorem member_iff (names : List PsMinCoreName) (name : PsMinCoreName) :
     cases hb : psMinCoreNameEq name head with
     | true =>
       have heq := nameEq_sound _ _ hb
-      simp [psMinCoreNameMember, hb, heq]
+      simp [psMinCoreNameMember, heq, nameEq_refl]
     | false =>
       constructor
       · intro h

@@ -122,6 +122,30 @@ jobs:
           assert.equal(result.error,undefined);assert.equal(result.status,0,result.stderr);
           const sdk=result.stdout.trim(),pins=d.targetConsumers.rust.toolchain.files;
           assert.ok(path.isAbsolute(sdk));assert.equal(pins.length,61);
+          // Rustup installs minimal-profile components concurrently; bookkeeping
+          // line order can vary. Restore only an exact permutation whose bytes
+          // match the already-qualified pin, after every other resource matches.
+          const componentPin=pins.find(pin=>pin.path==='lib/rustlib/components');
+          assert.ok(componentPin);
+          for(const pin of pins.filter(pin=>pin!==componentPin))verifyFile(sdk,pin,512*1024*1024);
+          const componentFile=path.join(sdk,componentPin.path),before=fs.readFileSync(componentFile);
+          const crypto=await import('node:crypto');
+          const digest=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
+          if(digest(before)!==componentPin.sha256){
+            assert.equal(fs.realpathSync(componentFile),componentFile);
+            assert.ok(fs.lstatSync(componentFile).isFile());assert.ok(before.length<4096);
+            const text=before.toString('utf8');assert.ok(text.endsWith('\n'));
+            const lines=text.slice(0,-1).split('\n');
+            assert.deepEqual([...lines].sort(),['cargo-x86_64-unknown-linux-gnu','rust-std-x86_64-unknown-linux-gnu','rustc-x86_64-unknown-linux-gnu'].sort());
+            const permutations=values=>values.length===0?[[]]:values.flatMap((v,i)=>
+              permutations(values.filter((_,j)=>i!==j)).map(rest=>[v,...rest]));
+            const candidates=permutations(lines).map(values=>Buffer.from(values.join('\n')+'\n'));
+            const matching=candidates.filter(bytes=>bytes.length===componentPin.bytes&&digest(bytes)===componentPin.sha256);
+            assert.equal(matching.length,1,'no unique exact pinned component ordering');
+            assert.deepEqual(fs.readFileSync(componentFile),before);
+            fs.writeFileSync(componentFile,matching[0],{flag:'r+'});
+            console.log('PSC1_CLI_RUST_METADATA_RESTORED '+JSON.stringify({beforeSha256:digest(before),afterSha256:digest(matching[0]),beforeLines:lines,afterLines:matching[0].toString().trimEnd().split('\n')}));
+          }
           for(const pin of pins)verifyFile(sdk,pin,512*1024*1024);
           const receipt={schema:'psc1-cli-rust-sdk/1',testedCommit:process.env.GITHUB_SHA,status:'passed',sdk,resourcePins:pins};
           fs.mkdirSync('dist/cli',{recursive:true});fs.writeFileSync('dist/cli/rust-sdk.json',JSON.stringify(receipt,null,2)+'\n');

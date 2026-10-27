@@ -684,6 +684,199 @@ def psTsFlattenLines (groups : List (List String)) : List String :=
   | List.nil => List.nil
   | List.cons lines rest => psTsAppendLines lines (psTsFlattenLines rest)
 
+
+-- A saturated forwarding declaration can expose a structurally recursive
+-- callee's result lambdas as ordinary parameters. Arguments must be exactly
+-- the already evaluated caller parameters, and fresh throughout the callee.
+-- Only the existing pure-tail recognizer may emit the specialized result.
+-- The original callee and every partial application keep their original ABI.
+structure PsTsSaturatedSpine where
+  head : PsVerifiedIrExpr
+  arguments : List PsVerifiedIrExpr
+
+def psTsSaturatedSpineWithFuel (fuel : Nat) :
+    PsVerifiedIrExpr -> List PsVerifiedIrExpr -> Option PsTsSaturatedSpine :=
+  match fuel with
+  | Nat.zero => fun (_expr : PsVerifiedIrExpr) (_arguments : List PsVerifiedIrExpr) => Option.none
+  | Nat.succ remaining =>
+      fun (expr : PsVerifiedIrExpr) (arguments : List PsVerifiedIrExpr) =>
+        match expr with
+        | PsVerifiedIrExpr.call fn types actual =>
+            if psListIsEmpty types then
+              psTsSaturatedSpineWithFuel remaining fn (psListAppend actual arguments)
+            else Option.none
+        | _ => Option.some (PsTsSaturatedSpine.mk expr arguments)
+
+structure PsTsSaturatedBind where
+  bindings : List (Prod PsVerifiedIrParameter PsVerifiedIrExpr)
+  remaining : List PsVerifiedIrExpr
+
+def psTsSaturatedBindPrefix (parameters : List PsVerifiedIrParameter) :
+    List PsVerifiedIrExpr -> Option PsTsSaturatedBind :=
+  match parameters with
+  | List.nil => fun (arguments : List PsVerifiedIrExpr) =>
+      Option.some (PsTsSaturatedBind.mk List.nil arguments)
+  | List.cons parameter rest =>
+      fun (arguments : List PsVerifiedIrExpr) =>
+        match arguments with
+        | List.nil => Option.none
+        | List.cons argument tail =>
+            match psTsSaturatedBindPrefix rest tail with
+            | Option.none => Option.none
+            | Option.some next => Option.some (PsTsSaturatedBind.mk
+                (List.cons (Prod.mk parameter argument) next.bindings) next.remaining)
+
+def psTsSaturatedLetBindings
+    (bindings : List (Prod PsVerifiedIrParameter PsVerifiedIrExpr))
+    (body : PsVerifiedIrExpr) : PsVerifiedIrExpr :=
+  match bindings with
+  | List.nil => body
+  | List.cons binding rest =>
+      let parameter := Prod.fst binding;
+      PsVerifiedIrExpr.letE parameter.name parameter.type (Prod.snd binding)
+        (psTsSaturatedLetBindings rest body)
+
+def psTsSaturatedApplyWithFuel (fuel : Nat) :
+    PsVerifiedIrExpr -> List PsVerifiedIrExpr -> Option PsVerifiedIrExpr :=
+  match fuel with
+  | Nat.zero => fun (_fn : PsVerifiedIrExpr) (_arguments : List PsVerifiedIrExpr) => Option.none
+  | Nat.succ remaining =>
+      fun (fn : PsVerifiedIrExpr) (arguments : List PsVerifiedIrExpr) =>
+        if psListIsEmpty arguments then Option.some fn
+        else
+          let smaller : PsVerifiedIrExpr -> List PsVerifiedIrExpr -> Option PsVerifiedIrExpr :=
+            psTsSaturatedApplyWithFuel remaining;
+          match fn with
+          | PsVerifiedIrExpr.lambda parameters _ body =>
+              if psListIsEmpty parameters then Option.none
+              else
+                match psTsSaturatedBindPrefix parameters arguments with
+                | Option.none => Option.none
+                | Option.some bound =>
+                    match smaller body bound.remaining with
+                    | Option.none => Option.none
+                    | Option.some result => Option.some (psTsSaturatedLetBindings bound.bindings result)
+          | PsVerifiedIrExpr.letE name type value body =>
+              match smaller body arguments with
+              | Option.none => Option.none
+              | Option.some result => Option.some (PsVerifiedIrExpr.letE name type value result)
+          | PsVerifiedIrExpr.ifE condition left right =>
+              match smaller left arguments with
+              | Option.none => Option.none
+              | Option.some first =>
+                  match smaller right arguments with
+                  | Option.none => Option.none
+                  | Option.some second => Option.some (PsVerifiedIrExpr.ifE condition first second)
+          | PsVerifiedIrExpr.matchE name types scrutinee alternatives =>
+              let apply : PsVerifiedIrExpr -> Option PsVerifiedIrExpr :=
+                fun (body : PsVerifiedIrExpr) => smaller body arguments;
+              match psTsEtaAlternatives apply alternatives with
+              | Option.none => Option.none
+              | Option.some branches => Option.some (PsVerifiedIrExpr.matchE name types scrutinee branches)
+          | _ => Option.none
+
+-- Rewrite only complete self-call spines in tail position. Any escaping or
+-- partially applied self reference makes the entire optimization decline.
+def psTsSaturatedSelfWithFuel (self target : String) (arity fuel : Nat) :
+    PsVerifiedIrExpr -> Option PsVerifiedIrExpr :=
+  match fuel with
+  | Nat.zero => fun (_expr : PsVerifiedIrExpr) => Option.none
+  | Nat.succ remaining =>
+      fun (expr : PsVerifiedIrExpr) =>
+        let smaller : PsVerifiedIrExpr -> Option PsVerifiedIrExpr :=
+          psTsSaturatedSelfWithFuel self target arity remaining;
+        match expr with
+        | PsVerifiedIrExpr.call _ _ _ =>
+            match psTsSaturatedSpineWithFuel 4096 expr List.nil with
+            | Option.none => Option.none
+            | Option.some spine =>
+                match spine.head with
+                | PsVerifiedIrExpr.var name =>
+                    if psStringEq name self then
+                      if Nat.beq (psListLength spine.arguments) arity then
+                        let uses : PsVerifiedIrExpr -> Bool :=
+                          fun (value : PsVerifiedIrExpr) => psTsExprUsesNameWithFuel 4096 value self;
+                        if psListAny uses spine.arguments then Option.none
+                        else Option.some (PsVerifiedIrExpr.call (PsVerifiedIrExpr.var target) List.nil spine.arguments)
+                      else Option.none
+                    else if psTsExprUsesNameWithFuel 4096 expr self then Option.none else Option.some expr
+                | _ => if psTsExprUsesNameWithFuel 4096 expr self then Option.none else Option.some expr
+        | PsVerifiedIrExpr.letE name type value body =>
+            if psStringEq name self then Option.none
+            else if psTsExprUsesNameWithFuel 4096 value self then Option.none
+            else
+              match smaller body with
+              | Option.none => Option.none
+              | Option.some result => Option.some (PsVerifiedIrExpr.letE name type value result)
+        | PsVerifiedIrExpr.ifE condition left right =>
+            if psTsExprUsesNameWithFuel 4096 condition self then Option.none
+            else
+              match smaller left with
+              | Option.none => Option.none
+              | Option.some first =>
+                  match smaller right with
+                  | Option.none => Option.none
+                  | Option.some second => Option.some (PsVerifiedIrExpr.ifE condition first second)
+        | PsVerifiedIrExpr.matchE name types scrutinee alternatives =>
+            if psTsExprUsesNameWithFuel 4096 scrutinee self then Option.none
+            else
+              match psTsEtaAlternatives smaller alternatives with
+              | Option.none => Option.none
+              | Option.some branches => Option.some (PsVerifiedIrExpr.matchE name types scrutinee branches)
+        | _ => if psTsExprUsesNameWithFuel 4096 expr self then Option.none else Option.some expr
+
+def psTsFindSaturatedCallee (name : String) (declarations : List PsVerifiedIrDeclaration) :
+    Option PsVerifiedIrDeclaration :=
+  match declarations with
+  | List.nil => Option.none
+  | List.cons declaration rest =>
+      if psStringEq name declaration.name then Option.some declaration
+      else psTsFindSaturatedCallee name rest
+
+def psTsEmitSaturatedTailLoop (brands tags : List (Prod String String))
+    (declarations : List PsVerifiedIrDeclaration) (declaration : PsVerifiedIrDeclaration) : Option String :=
+  if psListIsEmpty declaration.typeParameters then
+    match psTsSaturatedSpineWithFuel 4096 declaration.body List.nil with
+    | Option.none => Option.none
+    | Option.some spine =>
+        if psTsTailParametersMatch declaration.parameters spine.arguments then
+          match spine.head with
+          | PsVerifiedIrExpr.var name =>
+              if psStringEq name declaration.name then Option.none
+              else
+                match psTsFindSaturatedCallee name declarations with
+                | Option.none => Option.none
+                | Option.some callee =>
+                    if psListIsEmpty callee.typeParameters then
+                      if Nat.blt (psListLength callee.parameters) (psListLength declaration.parameters) then
+                        let fn := PsVerifiedIrExpr.lambda callee.parameters callee.resultType callee.body;
+                        if psTsEtaArgumentsFresh fn spine.arguments then
+                          if psTsExprUsesNameWithFuel 4096 callee.body declaration.name then Option.none
+                          else
+                            match psTsSaturatedApplyWithFuel 4096 fn spine.arguments with
+                            | Option.none => Option.none
+                            | Option.some applied =>
+                                match psTsSaturatedSelfWithFuel name declaration.name
+                                    (psListLength declaration.parameters) 4096 applied with
+                                | Option.none => Option.none
+                                | Option.some body =>
+                                    let specialized := { declaration with body := body };
+                                    psTsEmitTailLoop brands tags specialized
+                        else Option.none
+                      else Option.none
+                    else Option.none
+          | _ => Option.none
+        else Option.none
+  else Option.none
+
+def psTsEmitDeclarationInModule (brands tags : List (Prod String String))
+    (declarations : List PsVerifiedIrDeclaration) (declaration : PsVerifiedIrDeclaration) :
+    Except PsTsEmitError String :=
+  match psTsEmitSaturatedTailLoop brands tags declarations declaration with
+  | Option.some emitted => Except.ok emitted
+  | Option.none => psTsEmitDeclaration brands tags declaration
+
+
 def psTsEmitModule
     (module : PsVerifiedIrModule) :
     Except PsTsEmitError String :=
@@ -695,7 +888,7 @@ def psTsEmitModule
       match psListMapExcept (psTsEmitInductive tags) module.inductives with
       | Except.error error => Except.error error
       | Except.ok inductives =>
-          match psListMapExcept (psTsEmitDeclaration brands tags) module.declarations with
+          match psListMapExcept (psTsEmitDeclarationInModule brands tags module.declarations) module.declarations with
           | Except.error error => Except.error error
           | Except.ok declarations =>
               let header : List String := ["// generated from pskernel-admitted ProofScript checked core", psTsRuntimeSupport];

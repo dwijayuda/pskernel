@@ -27,8 +27,8 @@ theorem join_tail_eq (values : List (List Nat)) :
   induction values with
   | nil => rfl
   | cons first rest ih =>
-    cases rest <;> simp only [psMinByteJoinTail, append_eq, commaBytes, ih,
-      List.append_nil, List.append_assoc]
+    rw [psMinByteJoinTail, append_eq, append_eq, ih]
+    cases rest <;> simp only [commaBytes, List.nil_append, List.append_nil, List.append_assoc]
 
 theorem object_eq (fields : List (List Nat)) :
     psMinByteJoin [123] [44] [125] fields = objectBytes fields := by
@@ -36,7 +36,7 @@ theorem object_eq (fields : List (List Nat)) :
   | nil => rfl
   | cons first rest =>
     cases rest <;> simp only [psMinByteJoin, join_tail_eq, append_eq, objectBytes,
-      commaBytes, List.append_nil, List.append_assoc]
+      commaBytes, List.nil_append, List.append_nil, List.append_assoc]
 
 theorem array_eq (values : List (List Nat)) :
     psMinByteJoin [91] [44] [93] values = arrayBytes values := by
@@ -44,7 +44,7 @@ theorem array_eq (values : List (List Nat)) :
   | nil => rfl
   | cons first rest =>
     cases rest <;> simp only [psMinByteJoin, join_tail_eq, append_eq, arrayBytes,
-      commaBytes, List.append_nil, List.append_assoc]
+      commaBytes, List.nil_append, List.append_nil, List.append_assoc]
 
 theorem quote_eq (bytes : List Nat) : psMinCoreQuote bytes = quoteBytes bytes := by
   simp only [psMinCoreQuote, append_eq, quoteBytes, List.append_assoc]
@@ -79,10 +79,10 @@ theorem increment_value (digits : List Nat) :
     | true =>
       have hd := Nat.eq_of_beq_eq_true heq
       subst digit
-      simp only [psMinDecimalIncrement, heq, digitValue, ih]
+      simp only [psMinDecimalIncrement, heq, Bool.false_eq_true, ite_true, ite_false, digitValue, ih]
       omega
     | false =>
-      simp only [psMinDecimalIncrement, heq, digitValue]
+      simp only [psMinDecimalIncrement, heq, Bool.false_eq_true, ite_true, ite_false, digitValue]
       omega
 
 theorem increment_nonzero (digits : List Nat) (h : NonzeroDigits digits) :
@@ -93,20 +93,20 @@ theorem increment_nonzero (digits : List Nat) (h : NonzeroDigits digits) :
     | true =>
       have hd := Nat.eq_of_beq_eq_true heq
       subst digit
-      simpa only [psMinDecimalIncrement, heq] using
+      simpa only [psMinDecimalIncrement, heq, Bool.false_eq_true, ite_true, ite_false] using
         NonzeroDigits.low 0 [1] (by decide) (NonzeroDigits.top 1 (by decide) (by decide))
     | false =>
       have ne : digit ≠ 9 := by intro equal; subst digit; contradiction
-      simpa only [psMinDecimalIncrement, heq] using
+      simpa only [psMinDecimalIncrement, heq, Bool.false_eq_true, ite_true, ite_false] using
         NonzeroDigits.top (Nat.succ digit) (by omega) (by omega)
   | low digit rest small tail ih =>
     cases heq : Nat.beq digit 9 with
     | true =>
-      simpa only [psMinDecimalIncrement, heq] using
+      simpa only [psMinDecimalIncrement, heq, Bool.false_eq_true, ite_true, ite_false] using
         NonzeroDigits.low 0 (psMinDecimalIncrement rest) (by decide) ih
     | false =>
       have ne : digit ≠ 9 := by intro equal; subst digit; contradiction
-      simpa only [psMinDecimalIncrement, heq] using
+      simpa only [psMinDecimalIncrement, heq, Bool.false_eq_true, ite_true, ite_false] using
         NonzeroDigits.low (Nat.succ digit) rest (by omega) tail
 
 theorem digits_canonical (value : Nat) : CanonicalDigits (psMinDecimalDigits value) := by
@@ -129,7 +129,7 @@ theorem decimal_symbols (digits : List Nat) : DigitBytes digits (psMinDecimalByt
   induction digits with
   | nil => exact .nil
   | cons digit rest ih =>
-    simpa only [psMinDecimalBytes, append_eq] using DigitBytes.cons digit rest (psMinDecimalBytes rest) ih
+    simpa only [psMinDecimalBytes, append_eq, Nat.add_eq] using DigitBytes.cons digit rest (psMinDecimalBytes rest) ih
 
 theorem number_wire (value : Nat) : NumberWire value (psMinCoreNumber value) :=
   ⟨psMinDecimalDigits value, digits_canonical value, decimal_value value, decimal_symbols _⟩
@@ -155,10 +155,12 @@ theorem safe_text (fuel : Nat) (bytes : List Nat) (h : psMinCoreSafeText fuel by
       repeat' split at h
       all_goals try contradiction
       apply ASCIIText.cons head tail
-      · have hn : ¬ head < 32 := by simpa only [Nat.blt_eq] using (by assumption : Nat.blt head 32 = false)
-        omega
-      · have hn : ¬ 126 < head := by simpa only [Nat.blt_eq] using (by assumption : Nat.blt 126 head = false)
-        omega
+      · have hn : ¬ head < 32 := by
+          simpa only [Nat.blt_eq] using (by assumption : ¬ Nat.blt head 32 = true)
+        exact Nat.le_of_not_lt hn
+      · have hn : ¬ 126 < head := by
+          simpa only [Nat.blt_eq] using (by assumption : ¬ Nat.blt 126 head = true)
+        exact Nat.le_of_not_lt hn
       · intro equal; subst head; contradiction
       · intro equal; subst head; contradiction
       · exact ih tail h

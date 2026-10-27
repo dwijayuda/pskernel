@@ -365,6 +365,294 @@ theorem projection_type_domain (specs : List PsMinRegSpec) (slot field : Nat) (t
         subst type
         exact ⟨psMinRegLiftTy result, rfl⟩
 
+theorem translation_preserves_semantics (specs : List PsMinRegSpec) (total visible : Nat)
+    (groups : List PsMinRegCorePlan) (names : List PsMinCoreName)
+    (source : PsMinCoreExpr) (term : PsMinRegCoreTerm)
+    (image : TermImage total visible groups names source term)
+    (globals locals : List PsMinRegTy) (G : Model (dataModel specs) globals)
+    (L : Model (dataModel specs) locals) (type : PsMinRegTy) (value : Denote (dataModel specs) type)
+    (evaluation : CheckedEval specs globals G locals L term type value) :
+    CoreEval specs total visible groups names globals G locals L source type value := by
+  induction image generalizing locals type with
+  | «variable» index =>
+    cases evaluation
+    rename_i fuel checked
+    cases fuel with
+    | zero => simp [psMinOpInfer] at checked
+    | succ remaining =>
+      cases remaining with
+      | zero => simp [psMinOpInfer, psMinRegInfer] at checked
+      | succ remaining =>
+        simpa only [actualOrdinary, OperationalProofs.inferModel, RegularProofs.inferModel] using
+          (CoreEval.variable locals L index type checked)
+  | natural value =>
+    cases evaluation
+    rename_i fuel checked
+    cases fuel with
+    | zero => simp [psMinOpInfer] at checked
+    | succ remaining =>
+      cases remaining with
+      | zero => simp [psMinOpInfer, psMinRegInfer] at checked
+      | succ remaining =>
+        have equal : PsMinRegTy.nat = type := by simpa [psMinOpInfer, psMinRegInfer] using checked
+        subst type
+        simpa only [actualOrdinary, OperationalProofs.inferModel, RegularProofs.inferModel] using
+          (CoreEval.natural locals L value)
+  | constant name index identity =>
+    cases evaluation
+    rename_i fuel checked
+    cases fuel with
+    | zero => simp [psMinOpInfer] at checked
+    | succ remaining =>
+      cases remaining with
+      | zero => simp [psMinOpInfer, psMinRegInfer] at checked
+      | succ remaining =>
+        simpa only [actualOrdinary, OperationalProofs.inferModel, RegularProofs.inferModel] using
+          (CoreEval.constant locals L name index type identity checked)
+  | primitive source atom image =>
+    exact CoreEval.primitive locals L source type value
+      (primitive_semantics _ _ _ _ _ _ _ _ _ _ _ _ image evaluation)
+  | recursor source term image =>
+    exact CoreEval.recursor locals L source type value
+      (recursor_semantics _ _ _ _ _ _ _ _ _ _ _ _ image evaluation)
+  | construct name slot index binding =>
+    cases evaluation
+    rename_i fuel checked
+    cases fuel with
+    | zero => simp [psMinOpInfer] at checked
+    | succ remaining =>
+      cases remaining with
+      | zero => simp [psMinOpInfer, psMinRegInfer] at checked
+      | succ remaining =>
+        have signature : psMinRegCtorTypeAt specs slot index = some type := checked
+        simpa only [actualOrdinary, OperationalProofs.inferModel, RegularProofs.inferModel] using
+          (CoreEval.construct locals L name slot index type binding signature)
+  | app fn arg f a hf ha ihf iha =>
+    cases evaluation
+    apply CoreEval.app
+    · exact ihf _ _ _ _ (by assumption)
+    · exact iha _ _ _ _ (by assumption)
+  | lam name binder sourceType body t b ht hb ih =>
+    cases evaluation
+    rename_i bodyEval
+    apply CoreEval.lam
+    · exact ht
+    · intro argument
+      exact ih _ _ _ _ (bodyEval argument)
+  | letE name sourceType sourceValue body t v b ht hv hb ihv ihb =>
+    cases evaluation
+    apply CoreEval.letE
+    · exact ht
+    · exact ihv _ _ _ _ (by assumption)
+    · exact ihb _ _ _ _ (by assumption)
+  | projection owner field major slot term ownerType majorImage ih =>
+    cases evaluation
+    rename_i domain argument majorEval fn headEval
+    cases headEval
+    rename_i fuel checked
+    cases fuel with
+    | zero => simp [psMinOpInfer] at checked
+    | succ remaining =>
+      obtain ⟨result, identity⟩ := projection_type_domain specs slot field (.arr domain type) checked
+      cases identity
+      simpa only [actualOrdinary, OperationalProofs.inferModel] using
+        (CoreEval.projection locals L owner field major slot type ownerType checked argument
+          (ih _ _ _ _ majorEval))
+  | conditional sourceType left right yes no t l r y n ht sort hl hr hy hn ihl ihr ihy ihn =>
+    cases evaluation
+    rename_i domain0 arg0 noEval fn0 head0
+    cases head0
+    rename_i domain1 arg1 yesEval fn1 head1
+    cases head1
+    rename_i domain2 arg2 rightEval fn2 head2
+    cases head2
+    rename_i domain3 arg3 leftEval fn3 primitiveEval
+    cases primitiveEval
+    rename_i fuel checked
+    cases fuel with
+    | zero => simp [psMinOpInfer] at checked
+    | succ remaining =>
+      have signature := OperationalFoundation.primitiveType_signature remaining (psMinRegSpecCount specs)
+        (.boolEqIte t) 1 1 0 0 0 (.arr domain3 (.arr domain2 (.arr domain1 (.arr domain0 type)))) checked
+      cases signature
+      apply CoreEval.conditional
+      · exact ht
+      · exact sort
+      · exact ihl _ _ _ _ leftEval
+      · exact ihr _ _ _ _ rightEval
+      · exact ihy _ _ _ _ yesEval
+      · exact ihn _ _ _ _ noEval
+
+theorem checked_source_semantics (specs : List PsMinRegSpec) (total visible : Nat)
+    (groups : List PsMinRegCorePlan) (names : List PsMinCoreName)
+    (translationFuel checkingFuel : Nat) (source : PsMinCoreExpr) (term : PsMinRegCoreTerm)
+    (globals locals : List PsMinRegTy) (G : Model (dataModel specs) globals)
+    (L : Model (dataModel specs) locals) (type : PsMinRegTy)
+    (translated : psMinRegCoreTranslate translationFuel total visible groups names source = some term)
+    (checked : psMinRegCoreInfer checkingFuel specs globals locals term = some type) :
+    CoreEval specs total visible groups names globals G locals L source type
+      (evaluate_checked (dataModel specs) specs (actualOrdinary specs) (actualRecursors specs)
+        checkingFuel globals locals term type G L checked).val :=
+  translation_preserves_semantics specs total visible groups names source term
+    (term_translation _ _ _ _ _ _ _ translated) globals locals G L type _
+    (evaluate_checked (dataModel specs) specs (actualOrdinary specs) (actualRecursors specs)
+      checkingFuel globals locals term type G L checked).property
+
+#print axioms translation_preserves_semantics
+#print axioms checked_source_semantics
+
+-- The source history keeps each original body in its declaration-time context.
+inductive SourceHistory (specs : List PsMinRegSpec) (total : Nat) (groups : List PsMinRegCorePlan) :
+    Nat → List PsMinCoreName → (globals : List PsMinRegTy) →
+    List PsMinRegCoreEntry → (result : List PsMinRegTy) →
+    Model (dataModel specs) globals → Model (dataModel specs) result → Prop where
+  | done (visible names globals) (model : Model (dataModel specs) globals) :
+      SourceHistory specs total groups visible names globals [] globals model model
+  | group (visible names globals) (source : PsMinRegCoreGroup) (rest result)
+      (initial : Model (dataModel specs) globals) (output : Model (dataModel specs) result)
+      (tail : SourceHistory specs total groups (Nat.succ visible) names globals rest result initial output) :
+      SourceHistory specs total groups visible names globals (.inductiveE source :: rest) result initial output
+  | definition (visible names globals) (source : PsMinCoreDeclaration) (rest result type)
+      (initial : Model (dataModel specs) globals) (output : Model (dataModel specs) result)
+      (value : Denote (dataModel specs) type)
+      (typeExact : psMinRegCoreType 256 total visible groups source.type = some type)
+      (typeMeaning : RegularIngressTranslation.TypeImage total visible groups source.type type)
+      (body : CoreEval specs total visible groups names globals initial [] (emptyModel (dataModel specs))
+        source.value type value)
+      (tail : SourceHistory specs total groups visible (source.name :: names) (type :: globals)
+        rest result (consModel (dataModel specs) value initial) output) :
+      SourceHistory specs total groups visible names globals (.definition source :: rest) result initial output
+
+theorem normalized_history_head (specs : List PsMinRegSpec) (globals result : List PsMinRegTy)
+    (type : PsMinRegTy) (term : PsMinRegCoreTerm) (rest : List PsMinRegCoreDefinition)
+    (initial : Model (dataModel specs) globals) (output : Model (dataModel specs) result)
+    (history : RegularIngressOperationalModel.DefinitionHistory (dataModel specs) specs
+      (actualOrdinary specs) (actualRecursors specs) globals (⟨type,term⟩ :: rest) result initial output) :
+    ∃ value : Denote (dataModel specs) type,
+      CheckedEval specs globals initial [] (emptyModel (dataModel specs)) term type value ∧
+      RegularIngressOperationalModel.DefinitionHistory (dataModel specs) specs
+        (actualOrdinary specs) (actualRecursors specs) (type :: globals) rest result
+        (consModel (dataModel specs) value initial) output := by
+  cases history
+  exact ⟨_, by assumption, by assumption⟩
+
+theorem history_preserves_source (specs : List PsMinRegSpec) (total visible : Nat)
+    (groups : List PsMinRegCorePlan) (names : List PsMinCoreName)
+    (source : List PsMinRegCoreEntry) (normalized : List PsMinRegCoreDefinition)
+    (image : EnvironmentImage total groups visible names source normalized)
+    (globals result : List PsMinRegTy) (initial : Model (dataModel specs) globals)
+    (output : Model (dataModel specs) result)
+    (history : RegularIngressOperationalModel.DefinitionHistory (dataModel specs) specs
+      (actualOrdinary specs) (actualRecursors specs) globals normalized result initial output) :
+    SourceHistory specs total groups visible names globals source result initial output := by
+  induction image generalizing globals result with
+  | nil visible names =>
+    cases history
+    exact .done visible names globals initial
+  | group visible names source rest normalized tail ih =>
+    exact .group visible names globals source rest result initial output (ih _ _ _ _ history)
+  | definition visible names source rest type term normalized typeExact typeMeaning body tail ih =>
+    obtain ⟨value, bodyEval, tailHistory⟩ := normalized_history_head specs globals result type term normalized initial output history
+    exact .definition visible names globals source rest result type initial output value typeExact typeMeaning
+      (translation_preserves_semantics specs total visible groups names source.value term body globals []
+        initial (emptyModel (dataModel specs)) type value bodyEval)
+      (ih _ _ _ _ tailHistory)
+
+theorem checked_entries_source_image (source : List PsMinRegCoreEntry) (checked : PsMinRegCoreChecked)
+    (h : psMinRegCoreCheckEntries source = some checked) :
+    EnvironmentImage checked.plans.count checked.plans.groups 0 [] source checked.normalized := by
+  unfold psMinRegCoreCheckEntries at h
+  cases hp : psMinRegCorePlans source with
+  | none => simp [hp] at h
+  | some state =>
+    simp only [hp] at h
+    split at h
+    next signatures =>
+      cases ht : psMinRegCoreTranslateEntries 512 state.count 0 state.groups [] source with
+      | none => simp [ht] at h
+      | some normalized =>
+        cases hc : psMinRegCoreCheckEnvironment 512 512 (psMinRegCoreSpecs state.groups) normalized with
+        | none => simp [ht, hc] at h
+        | some types =>
+          simp only [ht, hc, Option.some.injEq] at h
+          subst checked
+          exact environment_translation _ _ _ _ _ _ _ ht
+    next => contradiction
+
+theorem checked_source_model (source : List PsMinRegCoreEntry) (checked : PsMinRegCoreChecked)
+    (h : psMinRegCoreCheckEntries source = some checked) :
+    ∃ output : Model (dataModel (psMinRegCoreSpecs checked.plans.groups)) checked.types,
+      SourceHistory (psMinRegCoreSpecs checked.plans.groups) checked.plans.count checked.plans.groups
+        0 [] [] source checked.types (emptyModel (dataModel (psMinRegCoreSpecs checked.plans.groups))) output := by
+  obtain ⟨_, output, history⟩ := RegularIngressModel.checked_entries_has_normalized_model source checked h
+  exact ⟨output, history_preserves_source _ _ _ _ _ _ _ (checked_entries_source_image source checked h)
+    _ _ _ _ history⟩
+
+theorem byte_admission_source_model (bytes : List Nat) (candidate : List PsMinRegCoreEntry)
+    (accepted : PsMinRegCoreAdmission) (h : psMinRegCoreAdmit bytes candidate = some accepted) :
+    accepted.source = candidate ∧
+    RegularIngressWire.Wire (RegularIngressEncoding.packetTokens accepted.source) bytes ∧
+    ∃ output : Model (dataModel (psMinRegCoreSpecs accepted.checked.plans.groups)) accepted.checked.types,
+      SourceHistory (psMinRegCoreSpecs accepted.checked.plans.groups) accepted.checked.plans.count accepted.checked.plans.groups
+        0 [] [] accepted.source accepted.checked.types
+        (emptyModel (dataModel (psMinRegCoreSpecs accepted.checked.plans.groups))) output := by
+  unfold psMinRegCoreAdmit at h
+  cases hd : psMinRegCoreDecodeCertificate bytes candidate with
+  | none => simp [hd] at h
+  | some source =>
+    cases hc : psMinRegCoreCheckEntries source with
+    | none => simp [hd, hc] at h
+    | some checked =>
+      simp only [hd, hc, Option.some.injEq] at h
+      subst accepted
+      obtain ⟨identity, valid, grammar⟩ := RegularIngressEncoding.decode_has_wire_derivation bytes candidate source hd
+      exact ⟨identity, grammar, checked_source_model source checked hc⟩
+
+def falseSourceType : PsMinCoreExpr :=
+  .constant (.str PsMinCoreName.anonymous [95,112,115,99,49,79,114,100,101,114,70,97,108,115,101]) []
+
+theorem false_type_exact (total visible : Nat) (groups : List PsMinRegCorePlan) (type : PsMinRegTy)
+    (h : psMinRegCoreType 256 total visible groups falseSourceType = some type) : type = .empty := by
+  change some PsMinRegTy.empty = some type at h
+  exact (Option.some.inj h).symm
+
+def NoFalseDeclarations : List PsMinRegCoreEntry → Prop
+  | [] => True
+  | .inductiveE _ :: rest => NoFalseDeclarations rest
+  | .definition source :: rest => source.type ≠ falseSourceType ∧ NoFalseDeclarations rest
+
+theorem source_history_no_false (specs : List PsMinRegSpec) (total visible : Nat)
+    (groups : List PsMinRegCorePlan) (names : List PsMinCoreName) (globals result : List PsMinRegTy)
+    (source : List PsMinRegCoreEntry) (initial : Model (dataModel specs) globals)
+    (output : Model (dataModel specs) result)
+    (history : SourceHistory specs total groups visible names globals source result initial output) :
+    NoFalseDeclarations source := by
+  induction history with
+  | done => trivial
+  | group visible names globals source rest result initial output tail ih => exact ih
+  | definition visible names globals source rest result type initial output value typeExact typeMeaning body tail ih =>
+    refine ⟨?_, ih⟩
+    intro sameSourceType
+    rw [sameSourceType] at typeExact
+    have emptyType := false_type_exact total visible groups type typeExact
+    subst type
+    exact Empty.elim value
+
+theorem byte_admission_consistent (bytes : List Nat) (candidate : List PsMinRegCoreEntry)
+    (accepted : PsMinRegCoreAdmission) (h : psMinRegCoreAdmit bytes candidate = some accepted) :
+    NoFalseDeclarations accepted.source := by
+  obtain ⟨_, _, output, history⟩ := byte_admission_source_model bytes candidate accepted h
+  exact source_history_no_false _ _ _ _ _ _ _ _ _ _ history
+
+#print axioms normalized_history_head
+#print axioms history_preserves_source
+#print axioms checked_entries_source_image
+#print axioms checked_source_model
+#print axioms byte_admission_source_model
+#print axioms false_type_exact
+#print axioms source_history_no_false
+#print axioms byte_admission_consistent
+
 #print axioms primitive_semantics
 #print axioms recursor_semantics
 #print axioms projection_type_domain

@@ -164,9 +164,22 @@ noncomputable def definitions_history (data : List Type) (specs : List PsMinRegS
 termination_by declarationFuel
 decreasing_by all_goals simpa only [hFuel] using (Nat.lt_succ_self remaining)
 
+-- Canonical atomic denotations use the already proved foundation/projection
+-- models directly. The general R3 evaluator interprets the remaining terms.
 noncomputable def actualOrdinary (specs : List PsMinRegSpec) : OrdinaryModel specs (dataModel specs) :=
-  fun fuel globals locals term type G L checked =>
-    OperationalProofs.inferModel fuel specs globals locals term type G L checked
+  fun fuel globals locals term type G L checked => by
+    cases term with
+    | primitive schema level parameters indices motives minors =>
+      cases fuel with
+      | zero => simp [psMinOpInfer] at checked
+      | succ remaining =>
+        exact OperationalFoundation.primitiveModel (dataModel specs) remaining (psMinRegSpecCount specs)
+          schema level parameters indices motives minors type checked
+    | projection slot field =>
+      cases fuel with
+      | zero => simp [psMinOpInfer] at checked
+      | succ remaining => exact OperationalProjection.projectionModel specs slot field type checked
+    | _ => exact OperationalProofs.inferModel fuel specs globals locals _ type G L checked
 
 noncomputable def actualRecursors (specs : List PsMinRegSpec) : RecursorModel specs (dataModel specs) :=
   RegularIngressAmbient.recursorModel specs

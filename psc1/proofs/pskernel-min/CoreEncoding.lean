@@ -81,6 +81,7 @@ theorem increment_value (digits : List Nat) :
       subst digit
       simp only [psMinDecimalIncrement, heq, Bool.false_eq_true, ite_true, ite_false, digitValue, ih]
       simp [Nat.mul_add, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm]
+      rw [← Nat.add_assoc]
     | false =>
       simp only [psMinDecimalIncrement, heq, Bool.false_eq_true, ite_true, ite_false, digitValue]
       simp [Nat.succ_eq_add_one, Nat.add_assoc, Nat.add_comm, Nat.add_left_comm]
@@ -375,6 +376,19 @@ theorem byte_admission_consistent (bytes : List Nat) (candidate : List PsMinCore
       declaration.type ≠ Ps.MinKernel.CoreSemantics.canonicalFalseType :=
   Ps.MinKernel.CoreSemantics.canonical_no_false_declaration bytes candidate accepted h
 
+#print axioms append_eq
+#print axioms join_tail_eq
+#print axioms object_eq
+#print axioms array_eq
+#print axioms quote_eq
+#print axioms commaBytes
+#print axioms objectBytes
+#print axioms increment_value
+#print axioms increment_nonzero
+#print axioms digits_canonical
+#print axioms decimal_value
+#print axioms decimal_symbols
+#print axioms name_wire
 #print axioms number_wire
 #print axioms safe_text
 #print axioms name_wire

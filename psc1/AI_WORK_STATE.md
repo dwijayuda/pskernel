@@ -38,12 +38,17 @@ Installed40454629955 passes at783718f9, with only the CoreScope proof repair
 intervening before57964262. Exact separate identities are in the dated receipt.
 Next batch R1 uses the user-confirmed GPT-6.1 Sol/High setting.
 
-## R1 syntax-helper batch, qualification pending
+## R1 syntax-helper batch, standalone qualification passed
 
 The guideline checkpoint is295a7ec828c3db80acae8995ef47c71971f034bc. R1 adds
 experimental Profile/LowerUnusedBinder.lean and proof BinderLowering.lean over
 actual Core operations, plus34 meaningful native/generated transformation cases
-and2 out-of-range probes. Linux proof/source-portability qualification is pending.
+and2 out-of-range probes. Linux40459838298 at8b33b3a17b241d3b264600dd9616cc195933df65 passes both
+proof/native122041556260 and portability/census122041556046. All3 new theorem
+reports are[propext];21positive/13refusal transformations and2out-of-range probes
+pass native/generated execution. New broader main40459842620 and installed
+40459838431 remain in progress; requery before promotion. Next mathematical
+batch is R2 closed regular-data/type-code recognition and a proved recursor instance.
 There is no new checker acceptance, foundation admission or production mode.
 The helper has4 explicit import-closure modules; the source test input has6.
 

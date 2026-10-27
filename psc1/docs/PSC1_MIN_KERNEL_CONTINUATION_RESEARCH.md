@@ -1,5 +1,48 @@
 # Research guide: choosing the next PSC1 MinKernel architecture
 
+## R1 qualified checkpoint — continue with R2
+
+The user-confirmed GPT-6.1 Sol/High R1 batch passes standalone Linux
+[40459838298](https://github.com/dwijayuda/pskernel/actions/runs/40459838298) at
+**`8b33b3a17b241d3b264600dd9616cc195933df65`**. Proof/native job122041556260
+and portability/census job122041556046 are success. The actual helper is
+`Ps.MinKernel.Profile.LowerUnusedBinder`; the proof is `BinderLowering.lean`.
+
+`Ps.MinKernel.BinderLowering.lower_sound`, `lower_instantiate` and
+`lower_motive_body` each print exactly`[propext]`. Every successful lowering
+has an exact inverse under actual Core lifting, then the existing Core theorem
+derives actual instantiation independence. This covers arbitrary syntax/open
+references; it does not prove typing or grant canonical admission.
+
+All21 positive transformations,13 removed-binder refusals and2 out-of-range
+probes pass natively and through actual PSC1-generated JS. The exact six-module
+source/test graph is independently admitted by official Lean4.35. The helper is
+93lines/3853B, SHA256`da2b0d1911358e88b49c7e9bbed4c64f6c5a16ed1a9e73296892f6983f14f6f6`.
+Its explicit import closure has4 modules/8879B. The6-module test source has21514B;
+its full bundle is79089B TS/135332B JS, not an isolated checker payload.
+
+The original Check.lean remains93lines/3322B with its original SHA and acceptance
+boundary. The runtime ledger still selects Check only. A future connected
+canonical checker must include and remeasure this helper's dependencies; the
+12-record target cannot silently stand for the larger checker/decoder closure.
+
+**Next mathematical batch:** R2 in the runtime-profile guide. Define the closed
+regular-data/type-code profile and prove one actual recursor instance with all
+parameters, levels, minors and major checked. Use the successful lowering equation
+and R1 theorem; do not infer recursor typing, iota soundness or primitive semantics
+from motive independence alone. Then R3 foundation/projection/conversion rules and
+R4 canonical ingress. Do not repeat completed R1.
+
+**Broader regression boundary:** the preceding57964262 main and783718f9 installed
+runs are fully green. New R1 main40459842620 and installed40459838431 were still
+in progress when this result was recorded. Requery live HEAD and latest runs;
+a documentation reporting push may supersede the main run. Do not call current
+whole-branch qualification complete until its selected gates are terminal.
+The dated receipt retains exact run/job/artifact identities and failed development
+attempts. Canonical min/dual still refuse, with0/124 modules,0/37 criteria and no
+min-checked G1/G2/G3. No generated-code preservation theorem or hostile-input
+resource qualification is added by R1.
+
 ## Current checkpoint: read before the historical extension plan
 
 At `579642626daa67bd167dd1af626f5b0e0401cb00`, standalone Linux

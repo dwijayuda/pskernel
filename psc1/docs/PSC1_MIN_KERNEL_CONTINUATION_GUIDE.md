@@ -1,5 +1,48 @@
 # PSC1 MinKernel — continuation guideline for GPT-6.1 Sol / High
 
+## R1 qualified checkpoint — continue with R2
+
+The user-confirmed GPT-6.1 Sol/High R1 batch passes standalone Linux
+[40459838298](https://github.com/dwijayuda/pskernel/actions/runs/40459838298) at
+**`8b33b3a17b241d3b264600dd9616cc195933df65`**. Proof/native job122041556260
+and portability/census job122041556046 are success. The actual helper is
+`Ps.MinKernel.Profile.LowerUnusedBinder`; the proof is `BinderLowering.lean`.
+
+`Ps.MinKernel.BinderLowering.lower_sound`, `lower_instantiate` and
+`lower_motive_body` each print exactly`[propext]`. Every successful lowering
+has an exact inverse under actual Core lifting, then the existing Core theorem
+derives actual instantiation independence. This covers arbitrary syntax/open
+references; it does not prove typing or grant canonical admission.
+
+All21 positive transformations,13 removed-binder refusals and2 out-of-range
+probes pass natively and through actual PSC1-generated JS. The exact six-module
+source/test graph is independently admitted by official Lean4.35. The helper is
+93lines/3853B, SHA256`da2b0d1911358e88b49c7e9bbed4c64f6c5a16ed1a9e73296892f6983f14f6f6`.
+Its explicit import closure has4 modules/8879B. The6-module test source has21514B;
+its full bundle is79089B TS/135332B JS, not an isolated checker payload.
+
+The original Check.lean remains93lines/3322B with its original SHA and acceptance
+boundary. The runtime ledger still selects Check only. A future connected
+canonical checker must include and remeasure this helper's dependencies; the
+12-record target cannot silently stand for the larger checker/decoder closure.
+
+**Next mathematical batch:** R2 in the runtime-profile guide. Define the closed
+regular-data/type-code profile and prove one actual recursor instance with all
+parameters, levels, minors and major checked. Use the successful lowering equation
+and R1 theorem; do not infer recursor typing, iota soundness or primitive semantics
+from motive independence alone. Then R3 foundation/projection/conversion rules and
+R4 canonical ingress. Do not repeat completed R1.
+
+**Broader regression boundary:** the preceding57964262 main and783718f9 installed
+runs are fully green. New R1 main40459842620 and installed40459838431 were still
+in progress when this result was recorded. Requery live HEAD and latest runs;
+a documentation reporting push may supersede the main run. Do not call current
+whole-branch qualification complete until its selected gates are terminal.
+The dated receipt retains exact run/job/artifact identities and failed development
+attempts. Canonical min/dual still refuse, with0/124 modules,0/37 criteria and no
+min-checked G1/G2/G3. No generated-code preservation theorem or hostile-input
+resource qualification is added by R1.
+
 Updated **27 October 2026, Asia/Jakarta**. Requested continuation configuration:
 **GPT-6.1 Sol (`gpt-6.1-sol`), reasoning effort High**.
 
@@ -30,9 +73,9 @@ motive body law over **actual `Ps.Core.Subst` functions**, each with the printed
 axiom dependency `[propext]`. It does not yet prove an arbitrary-body recognizer,
 recursor typing/computation, foundation semantics or canonical translation.
 
-**Next action:** implement and prove a safe executable unused-binder lowering
-function, then a defined closed-type/regular-data profile and one actual recursor
-instance. The profile document gives R1–R4, exact theorem targets, meaningful
+**Historical next action at57964262:** R1 unused-binder lowering, now qualified
+at8b33b3a1. The current next action is R2: define/model the closed-type regular-data
+profile and check/prove one actual recursor instance. The profile document gives R1–R4, exact theorem targets, meaningful
 negative cases and promotion gates. Keep the broader A–D architecture decision
 open for the full dependent compiler. Do not repeat the completed census or
 start general dependent conversion without a measured need.
@@ -67,8 +110,8 @@ remain development history. Neither supplies qualification for the repair.
 
 **First operational action:** fetch live branch HEAD, PR#194 and current CI;
 read this guide and the current runtime-profile document. Preserve concurrent
-history with fresh single-parent non-force expected-HEAD writes. Begin R1,
-the executable unused-binder lowering helper and its exact lifting-inverse proof.
+history with fresh single-parent non-force expected-HEAD writes. R1 is now qualified at8b33b3a1. Continue with R2, the defined closed-type/
+regular-data profile and one fully checked, proved recursor instance.
 Keep the experimental Core helper separate from Check.lean and measure its
 added dependencies. Do not repeat the completed ledger or relabel official-
 checked compiler generations as min-checked self-hosting.
@@ -556,9 +599,10 @@ Ready-to-use continuation instruction:
 > and safeguards. The d6bebd23 checkpoint proves and source-qualifies only the
 > Empty/Unit/Nat/arrow checker; full min closure coverage is zero. The later
 > 57964262 checkpoint qualifies the actual runtime ledger and Core scope lemma.
-> Read PSC1_MIN_KERNEL_RUNTIME_PROFILE.md and begin R1: a proved executable
-> unused-binder lowering function over actual Core. Then build the defined closed
-> regular-data/constant-motive profile, with its exact foundation obligations.
+> R1 now passes at8b33b3a1/run40459838298, with all3 axiom reports[propext].
+> Read PSC1_MIN_KERNEL_RUNTIME_PROFILE.md and begin R2: define/model the closed
+> regular-data/constant-motive profile and prove an actual checked recursor instance,
+> using the actual lowering theorem and exact foundation obligations.
 > Keep the full dependent A–D decision open. Select and finish one complete next proof/
 > implementation batch, maintaining the actual acceptance-to-model bridge. Keep
 > all builds/tests/proofs/benchmarks on Linux GitHub Actions, all Git updates fresh,

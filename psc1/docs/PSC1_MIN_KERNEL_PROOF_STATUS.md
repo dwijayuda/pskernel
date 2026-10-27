@@ -84,3 +84,16 @@ an arbitrary constant-motive body as a lifted result is still unproved. This
 adds no runtime imports, acceptance rule or new permitted foundation.
 See the [current measured profile](PSC1_MIN_KERNEL_RUNTIME_PROFILE.md) for exact
 statements, scope pitfalls and the next executable-recognizer proof gate.
+
+## R1 executable recognizer inverse, qualified
+
+Linux40459838298 at8b33b3a17b241d3b264600dd9616cc195933df65 qualifies the
+actual Profile/LowerUnusedBinder.lean worker and BinderLowering.lean proof:
+`lower_sound` proves successful lowering has the exact Core lifting inverse;
+`lower_instantiate` derives actual Core instantiation at any depth;
+`lower_motive_body` specializes depth0. All3 print exactly[propext]. No new
+axiom declaration, sorryAx, unsafe admission or runtime proof import is added.
+The34-case native/generated corpus plus2 out-of-range probes and independent
+exact-source admission pass. The theorem covers syntax, not typing, recursor
+semantics, the actual foundation, arbitrary JSON/JS objects or compiler preservation.
+The old source fragment's consistency theorem and min/dual refusal are unchanged.

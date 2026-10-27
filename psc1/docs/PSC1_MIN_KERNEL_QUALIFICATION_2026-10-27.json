@@ -948,5 +948,459 @@
     "minQualifiedModules": 0,
     "minQualifiedPracticalCoreCriteria": 0,
     "next": "R1 executable unused-binder lowering with proved lifting inverse, then defined regular-data/closed-instance profile"
+  },
+  "binderLoweringBatch": {
+    "scope": "actual-core-unused-binder-lowering-success-inverse",
+    "implementationCommit": "8b33b3a17b241d3b264600dd9616cc195933df65",
+    "status": "standalone-qualified",
+    "runId": 40459838298,
+    "proofJobId": 122041556260,
+    "portabilityJobId": 122041556046,
+    "sourceTheorems": [
+      "Ps.MinKernel.BinderLowering.lower_sound",
+      "Ps.MinKernel.BinderLowering.lower_instantiate",
+      "Ps.MinKernel.BinderLowering.lower_motive_body"
+    ],
+    "theoremAxioms": [
+      "propext"
+    ],
+    "sorryAx": false,
+    "logicalAdmission": false,
+    "runtimeCheckSourceUnchanged": true,
+    "receipt": {
+      "schema": "psc1-min-binder-portability/1",
+      "commit": "8b33b3a17b241d3b264600dd9616cc195933df65",
+      "authoritative": false,
+      "logicalAdmission": false,
+      "sourceIdentities": [
+        {
+          "path": "packages/foundation/src/Ps/Foundation/Name.lean",
+          "sha256": "2e663eb4d3af85ef70cd3b0dec148b9303d0e994c7c3157d4f81494c9f999f15",
+          "bytes": 3987
+        },
+        {
+          "path": "packages/core/src/Ps/Core/Level.lean",
+          "sha256": "453fcd9dd535f97e27daedb6d319ac0337eee12679aa0dc9ec2ac0ec1dd35af4",
+          "bytes": 286
+        },
+        {
+          "path": "packages/core/src/Ps/Core/Expr.lean",
+          "sha256": "51bdffd893ab4148432c62e2af918a0798999fcab20cf2b3c633dddbb0d880a6",
+          "bytes": 753
+        },
+        {
+          "path": "packages/core/src/Ps/Core/Equality.lean",
+          "sha256": "6738050d09abb42607c43a70668f34b909b4ccd3153fe62fbde1a345a4b68b6f",
+          "bytes": 6529
+        },
+        {
+          "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/LowerUnusedBinder.lean",
+          "sha256": "da2b0d1911358e88b49c7e9bbed4c64f6c5a16ed1a9e73296892f6983f14f6f6",
+          "bytes": 3853
+        },
+        {
+          "path": "packages/pskernel-min/src/Ps/MinKernel/Tests/BinderVectors.lean",
+          "sha256": "5fa16937ca076f278c88f71b032566d2a33e96a1fd4cf61e5c2b9e4968c2d2f5",
+          "bytes": 6106
+        }
+      ],
+      "helperExplicitImportClosureModules": 4,
+      "completeTestClosureModules": 6,
+      "testOnlyAdditionalModule": "Ps.Core.Equality",
+      "sourceReport": {
+        "schema": "psc1-min-source-compile/2",
+        "sourceAccepted": true,
+        "targetAccepted": true,
+        "originalIrAccepted": true,
+        "providerChecked": false,
+        "moduleCount": 6,
+        "origins": [
+          {
+            "moduleName": [
+              "Ps",
+              "Foundation",
+              "Name"
+            ],
+            "coreStart": 0,
+            "batches": 11,
+            "sourceMembers": 15
+          },
+          {
+            "moduleName": [
+              "Ps",
+              "Core",
+              "Level"
+            ],
+            "coreStart": 15,
+            "batches": 2,
+            "sourceMembers": 9
+          },
+          {
+            "moduleName": [
+              "Ps",
+              "Core",
+              "Expr"
+            ],
+            "coreStart": 24,
+            "batches": 3,
+            "sourceMembers": 23
+          },
+          {
+            "moduleName": [
+              "Ps",
+              "Core",
+              "Equality"
+            ],
+            "coreStart": 47,
+            "batches": 5,
+            "sourceMembers": 5
+          },
+          {
+            "moduleName": [
+              "Ps",
+              "MinKernel",
+              "Profile",
+              "LowerUnusedBinder"
+            ],
+            "coreStart": 52,
+            "batches": 2,
+            "sourceMembers": 2
+          },
+          {
+            "moduleName": [
+              "Ps",
+              "MinKernel",
+              "Tests",
+              "BinderVectors"
+            ],
+            "coreStart": 54,
+            "batches": 4,
+            "sourceMembers": 4
+          }
+        ]
+      },
+      "canonicalAdmissionSha256": "065466b838094a9f55e9d9b2c85538ef6d470a4f0c6ffba2254e327f12473a50",
+      "officialSourceAdmission": {
+        "protocol": "pskernel-lean/1",
+        "provider": "lean4-cpp",
+        "leanVersion": "4.35.0",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "profile": "lean4.35-core",
+        "accepted": true
+      },
+      "officialCheckerSha256": "bfdbea2499837db2dd71de8425bc17f81e380990964568af98cd98ef31cce6b7",
+      "sourceCompileDriverSha256": "16a06ad98cac9d330d348dab3342d07b7c07626bc418bcdb2e152809cfa2e5f6",
+      "payloadScope": "Entire six-module test bundle; not isolated checker payload",
+      "generatedTsBytes": 79089,
+      "generatedJsBytes": 135332,
+      "generatedJsSha256": "5c8242fb1bcb466d179d62c5d4fa686fb476bb3f741423b555acd5d9c818a493",
+      "positiveTransformations": 21,
+      "refusalTransformations": 13,
+      "outOfRangeProbes": 2,
+      "observations": [
+        {
+          "index": 0,
+          "outcome": "1",
+          "id": "outer-reference",
+          "expected": "1",
+          "generated": "1"
+        },
+        {
+          "index": 1,
+          "outcome": "1",
+          "id": "inner-reference",
+          "expected": "1",
+          "generated": "1"
+        },
+        {
+          "index": 2,
+          "outcome": "1",
+          "id": "sort",
+          "expected": "1",
+          "generated": "1"
+        },
+        {
+          "index": 3,
+          "outcome": "1",
+          "id": "free-syntax-preserved",
+          "expected": "1",
+          "generated": "1"
+        },
+        {
+          "index": 4,
+          "outcome": "1",
+          "id": "meta-syntax-preserved",
+          "expected": "1",
+          "generated": "1"
+        },
+        {
+          "index": 5,
+          "outcome": "1",
+          "id": "constant-levels-preserved",
+          "expected": "1",
+          "generated": "1"
+        },
+        {
+          "index": 6,
+          "outcome": "1",
+          "id": "natural-literal",
+          "expected": "1",
+          "generated": "1"
+        },
+        {
+          "index": 7,
+          "outcome": "1",
+          "id": "string-literal",
+          "expected": "1",
+          "generated": "1"
+        },
+        {
+          "index": 8,
+          "outcome": "1",
+          "id": "application-outer-references",
+          "expected": "1",
+          "generated": "1"
+        },
+        {
+          "index": 9,
+          "outcome": "1",
+          "id": "lambda-local-binder",
+          "expected": "1",
+          "generated": "1"
+        },
+        {
+          "index": 10,
+          "outcome": "1",
+          "id": "lambda-outer-body",
+          "expected": "1",
+          "generated": "1"
+        },
+        {
+          "index": 11,
+          "outcome": "1",
+          "id": "lambda-domain-outer",
+          "expected": "1",
+          "generated": "1"
+        },
+        {
+          "index": 12,
+          "outcome": "1",
+          "id": "pi-domain-and-body-outer",
+          "expected": "1",
+          "generated": "1"
+        },
+        {
+          "index": 13,
+          "outcome": "1",
+          "id": "pi-local-binder",
+          "expected": "1",
+          "generated": "1"
+        },
+        {
+          "index": 14,
+          "outcome": "1",
+          "id": "let-three-contexts",
+          "expected": "1",
+          "generated": "1"
+        },
+        {
+          "index": 15,
+          "outcome": "1",
+          "id": "let-local-body-binder",
+          "expected": "1",
+          "generated": "1"
+        },
+        {
+          "index": 16,
+          "outcome": "1",
+          "id": "projection-receiver",
+          "expected": "1",
+          "generated": "1"
+        },
+        {
+          "index": 17,
+          "outcome": "1",
+          "id": "nested-local-binder",
+          "expected": "1",
+          "generated": "1"
+        },
+        {
+          "index": 18,
+          "outcome": "1",
+          "id": "nested-outer-reference",
+          "expected": "1",
+          "generated": "1"
+        },
+        {
+          "index": 19,
+          "outcome": "1",
+          "id": "nonzero-cutoff-outer",
+          "expected": "1",
+          "generated": "1"
+        },
+        {
+          "index": 20,
+          "outcome": "1",
+          "id": "nonzero-cutoff-inner",
+          "expected": "1",
+          "generated": "1"
+        },
+        {
+          "index": 21,
+          "outcome": "0",
+          "id": "reject-root",
+          "expected": "0",
+          "generated": "0"
+        },
+        {
+          "index": 22,
+          "outcome": "0",
+          "id": "reject-nonzero-cutoff",
+          "expected": "0",
+          "generated": "0"
+        },
+        {
+          "index": 23,
+          "outcome": "0",
+          "id": "reject-app-function",
+          "expected": "0",
+          "generated": "0"
+        },
+        {
+          "index": 24,
+          "outcome": "0",
+          "id": "reject-app-argument",
+          "expected": "0",
+          "generated": "0"
+        },
+        {
+          "index": 25,
+          "outcome": "0",
+          "id": "reject-lambda-domain",
+          "expected": "0",
+          "generated": "0"
+        },
+        {
+          "index": 26,
+          "outcome": "0",
+          "id": "reject-lambda-body",
+          "expected": "0",
+          "generated": "0"
+        },
+        {
+          "index": 27,
+          "outcome": "0",
+          "id": "reject-pi-domain",
+          "expected": "0",
+          "generated": "0"
+        },
+        {
+          "index": 28,
+          "outcome": "0",
+          "id": "reject-pi-body",
+          "expected": "0",
+          "generated": "0"
+        },
+        {
+          "index": 29,
+          "outcome": "0",
+          "id": "reject-let-type",
+          "expected": "0",
+          "generated": "0"
+        },
+        {
+          "index": 30,
+          "outcome": "0",
+          "id": "reject-let-value",
+          "expected": "0",
+          "generated": "0"
+        },
+        {
+          "index": 31,
+          "outcome": "0",
+          "id": "reject-let-body",
+          "expected": "0",
+          "generated": "0"
+        },
+        {
+          "index": 32,
+          "outcome": "0",
+          "id": "reject-projection-receiver",
+          "expected": "0",
+          "generated": "0"
+        },
+        {
+          "index": 33,
+          "outcome": "0",
+          "id": "reject-under-two-binders",
+          "expected": "0",
+          "generated": "0"
+        },
+        {
+          "index": 34,
+          "outcome": "3",
+          "id": "out-of-range-0",
+          "expected": "3",
+          "generated": "3"
+        },
+        {
+          "index": 35,
+          "outcome": "3",
+          "id": "out-of-range-1",
+          "expected": "3",
+          "generated": "3"
+        }
+      ],
+      "comparison": "finite expected alpha-shapes plus native/generated outcome equality",
+      "theoremBoundary": "Safe Lean helper success has an exact lifting inverse; generated-code preservation is not formally proved",
+      "resourceBoundary": "Structural recursion on finite Lean values; aggregate size, host stack and hostile JS objects are not qualified",
+      "canonicalMinDual": "still unsupported; this helper grants no checking authority"
+    },
+    "artifacts": [
+      {
+        "id": 12714580214,
+        "name": "psc1-minkernel-portability-closure-8b33b3a17b241d3b264600dd9616cc195933df65",
+        "bytes": 1549800,
+        "digest": "sha256:d14a7516338f65fa480a6172559b37fec9ebcfbe1a98c6d0b605251cf3ad6f92"
+      },
+      {
+        "id": 12714315273,
+        "name": "psc1-minkernel-proof-8b33b3a17b241d3b264600dd9616cc195933df65",
+        "bytes": 1657,
+        "digest": "sha256:0f10461940cc1aed142fdbc297b7f6f816fe7d378307f45cfd77e800d42b3475"
+      }
+    ],
+    "developmentAttempts": [
+      {
+        "commit": "07263605b301bbd8ac3198cd1a2ca95e661ab86c",
+        "runId": 40459347643,
+        "status": "failure",
+        "reason": "Nat simp loop; actual compiler structuralRecursionArity exposed unsupported recursive-call syntax"
+      },
+      {
+        "commit": "a8bac65da95afc8a39da9f49f1aed9f6209fb067",
+        "runId": 40459580687,
+        "status": "failure",
+        "reason": "Redundant tactic after a closed goal; source still used direct returned-function application"
+      }
+    ],
+    "broaderRegressionSnapshot": {
+      "checkedAtUtc": "2026-10-27T06:16:16Z",
+      "main": {
+        "runId": 40459842620,
+        "commit": "8b33b3a17b241d3b264600dd9616cc195933df65",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      "installed": {
+        "runId": 40459838431,
+        "commit": "8b33b3a17b241d3b264600dd9616cc195933df65",
+        "status": "in_progress",
+        "conclusion": null
+      },
+      "qualification": "not-yet-terminal; reporting commits may supersede main; no whole-branch or min self-host promotion"
+    },
+    "next": "R2 closed regular-data/type-code profile, checked recursor instance and exact foundation obligations",
+    "fullPortableReceiptInArtifact": "binder/receipt.json; complete same-compile origins in binder/vectors.source.json"
   }
 }

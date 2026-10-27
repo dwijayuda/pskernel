@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import assert from 'node:assert/strict';
 import {build} from 'esbuild';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const lsp = path.join(root, 'lsp'), vscode = path.join(root, 'vscode');
@@ -8,13 +9,22 @@ if (!fs.existsSync(path.join(lsp, 'compiler/package/dist/index.js'))) throw Erro
 fs.rmSync(path.join(lsp, 'dist'), {recursive: true, force: true});
 fs.mkdirSync(path.join(lsp, 'dist'), {recursive: true});
 fs.mkdirSync(path.join(vscode, 'dist'), {recursive: true});
-await build({entryPoints: [path.join(lsp, 'src/server.mjs')], outfile: path.join(lsp, 'dist/server.cjs'),
+const serverBundle = await build({entryPoints: [path.join(lsp, 'src/server.mjs')], outfile: path.join(lsp, 'dist/server.cjs'),
   platform: 'node', format: 'cjs', target: 'node22', bundle: true, sourcemap: false,
-  banner: {js: '#!/usr/bin/env node'}, legalComments: 'eof'});
+  banner: {js: '#!/usr/bin/env node'}, legalComments: 'eof', metafile: true});
 fs.chmodSync(path.join(lsp, 'dist/server.cjs'), 0o755);
 for (const name of ['worker.mjs', 'checked-types.mjs']) fs.copyFileSync(path.join(lsp, 'src', name), path.join(lsp, 'dist', name));
-await build({entryPoints: [path.join(vscode, 'src/extension.cjs')], outfile: path.join(vscode, 'dist/extension.cjs'),
-  platform: 'node', format: 'cjs', target: 'node22', bundle: true, sourcemap: false, external: ['vscode'], legalComments: 'eof'});
+const clientBundle = await build({entryPoints: [path.join(vscode, 'src/extension.cjs')], outfile: path.join(vscode, 'dist/extension.cjs'),
+  platform: 'node', format: 'cjs', target: 'node22', bundle: true, sourcemap: false, external: ['vscode'], legalComments: 'eof', metafile: true});
+const bundledPackages = [...new Set([...Object.keys(serverBundle.metafile.inputs), ...Object.keys(clientBundle.metafile.inputs)]
+  .map(file => file.match(/(?:^|\/)node_modules\/(@[^/]+\/[^/]+|[^/]+)/)?.[1]).filter(Boolean))].sort();
+assert.ok(!bundledPackages.some(name => name.startsWith('@azure/') || name.startsWith('@vscode/vsce')), 'Publishing/authentication tooling must not enter editor runtime bundles');
+fs.mkdirSync(path.join(root, 'dist'), {recursive: true});
+fs.writeFileSync(path.join(root, 'dist/tooling-bundle-evidence.json'), JSON.stringify({
+  schema: 'psc1-editor-runtime-dependencies/1', commit: process.env.GITHUB_SHA,
+  bundledPackages, publishingAuthenticationCodeBundled: false,
+  compiler: 'separately retained unchanged qualified package',
+}, null, 2) + '\n');
 for (const target of [lsp, vscode]) for (const name of ['LICENSE', 'NOTICE'])
   fs.copyFileSync(path.join(root, '../..', name), path.join(target, name));
 // Retain the bundled dependency licenses as well as the compiler's complete,

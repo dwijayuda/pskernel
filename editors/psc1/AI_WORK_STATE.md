@@ -12,11 +12,17 @@ Unsaved project sources, versions/generations, supersession, process-group cance
 
 ## Qualification
 
-Initial implementation is ready for the dedicated `proofscript-editor.yml` workflow. Source was assembled in cloud scratch and written through GitHub Git object/ref APIs; no local compiler, dependency installation or test execution is used. CI must verify real LSP integration, theorem/type refusal, stale jobs, imports, actual fresh offline npm install and actual installed VSIX activation. Record exact successful run, commit, dependency lock and artifacts here after qualification; do not describe this initial checkpoint as qualified.
+Source was assembled in cloud scratch and written through GitHub Git object/ref APIs; no local compiler, dependency installation or test execution is used. Draft PR [199](https://github.com/dwijayuda/pskernel/pull/199) targets the compiler baseline branch.
+
+Initial run [40584667014](https://github.com/dwijayuda/pskernel/actions/runs/40584667014) built both bundles and verified the compiler archive, then exposed an invalid `connection.onClose` call. The call was removed after inspecting the exact upstream11.0.0 lifecycle; existing shutdown/exit handlers terminate process groups. The runner-generated dependency lock was captured and committed.
+
+Run [40585014908](https://github.com/dwijayuda/pskernel/actions/runs/40585014908), commit `93aaeb3ad2d7aae18639d7acf173d3a7ffb390fa`, passes all16 integration tests, VSIX/npm packaging, and fresh offline installed-npm checking. The installed VSIX activates, checks a real source and exposes symbols, then its test incorrectly serializes VS Code MarkdownString accessors as empty objects. The test now reads the public hover `.value` and still requires the actual Nat type. Final full installed-extension qualification is pending the corrected smoke.
+
+The build dependency audit records one MSAL advisory through three dev-only publisher/authentication nodes. No authentication or publication is used and those modules are excluded from the actual bundled runtime inventory. See RESEARCH.md for the upstream range constraint and reason not to force an incompatible major override.
 
 ## Remaining before delivery
 
-Resolve any concrete CI failures, capture the generated dependency lock, rerun the focused workflow on the locked implementation, record receipt/artifact SHA-256 and open a draft PR against the compiler baseline branch. No compiler fixed-point or kernel qualification reruns are needed because their inputs are unchanged.
+Finish installed VSIX checks, record the final complete receipt/artifact SHA-256, and update the draft PR. No compiler fixed-point or kernel qualification reruns are needed because their inputs are unchanged.
 
 ## Known limits
 

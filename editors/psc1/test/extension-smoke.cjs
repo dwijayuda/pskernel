@@ -44,7 +44,12 @@ exports.run = async function run() {
   const symbols = await vscode.commands.executeCommand('vscode.executeDocumentSymbolProvider', document.uri);
   assert.ok(symbols.some(s => s.name === 'answer'));
   const hovers = await vscode.commands.executeCommand('vscode.executeHoverProvider', document.uri, new vscode.Position(0, 6));
-  assert.match(JSON.stringify(hovers), /Nat/);
+  assert.ok(Array.isArray(hovers) && hovers.length, 'The installed extension must provide hover information');
+  // VS Code exposes MarkdownString.value through an accessor. Serializing the
+  // API object loses that content, so inspect its public value directly.
+  const hoverText = hovers.flatMap(hover => hover.contents)
+    .map(content => typeof content === 'string' ? content : content.value).join('\n');
+  assert.match(hoverText, /Nat/);
   const info = await api.getInfoview(document.uri, {line: 0, character: 6});
   assert.equal(info.goalsAvailable, false);
   assert.equal(info.declaration.name, 'answer');
@@ -77,7 +82,8 @@ exports.run = async function run() {
     testedCommit: process.env.PSC1_TEST_COMMIT, vscode: vscode.version, node: process.version,
     electron: process.versions.electron, extensionId: extension.id,
     installedVsix: true, sourceDevelopmentExtensionUsed: false,
-    serverInfo, checked: {state: checked.state, elapsedMs: checked.elapsedMs},
+    serverInfo, hover: {count: hovers.length, text: hoverText},
+    checked: {state: checked.state, elapsedMs: checked.elapsedMs},
     rejected: {state: rejected.state, diagnostics: rejected.diagnostics},
     recovered: {state: recovered.state, elapsedMs: recovered.elapsedMs},
     checks: ['activation', '.ps registration', 'real compiler checking', 'document symbols',

@@ -42,3 +42,9 @@ One immutable qualified compiler package is extracted and hash-verified during p
 The bounded lexical helpers deliberately provide limited outline, name completion and same-spelling highlights. General reference navigation, rename, signature inference and semantic fixes are deferred. Verified semantic highlighting uses only current checked declaration origins.
 
 The editor's assurance is precisely the original compiler's checked pipeline. Neither a green marker nor a successful LSP test establishes formal source-to-backend preservation, a compiler fixed point, or a new kernel consistency theorem.
+
+## Packaging dependency audit
+
+The locked development dependency tree currently reports one advisory across three affected dependency nodes: [GHSA-xcx6-jx8p-x3h5](https://github.com/AzureAD/microsoft-authentication-library-for-js/security/advisories/GHSA-xcx6-jx8p-x3h5), through `@vscode/vsce@4.0.0` → `@azure/identity@4.14.0` → `@azure/msal-node@6.0.1`. The advisory concerns an authentication-code flow. This workflow invokes only offline VSIX packaging, with no Marketplace/Azure sign-in or publishing. These development dependencies are absent from the editor's runtime bundles; the build records its actual bundled package inventory and refuses Azure/publisher modules in those bundles.
+
+The upstream fix is MSAL7.1.0, while the current Identity4.14.0 dependency contract requires MSAL6. A forced major-version override was not substituted without compatibility evidence. Downgrading vsce3.9.2 alone still resolves the affected Identity through its broad dependency range. The full audit is retained with CI evidence; packaging authentication/publication remains outside this deliverable. Revisit the development dependency when upstream Identity updates its supported MSAL range. This is a scoped build-tool limitation, not a claim of a clean audit for every development dependency.

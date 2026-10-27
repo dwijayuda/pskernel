@@ -4,6 +4,7 @@ import Ps.KernelCore.API.DagGenerated
 import Ps.KernelCore.API.DagAdmission
 import Ps.KernelCore.API.DagOrdinaryAdmission
 import Ps.KernelCore.API.DagMutualAdmission
+import Ps.KernelCore.API.DagNestedAdmission
 import Ps.KernelCore.Checker.ExprV2.Terminal
 import Ps.KernelCore.Checker.ExprV2.Check
 import Ps.KernelCore.Checker.ExprV2.Whnf
@@ -405,6 +406,18 @@ def psKernelDagRunOwnedCommandWithSource
               let admit :=
                 fun (owner : PsKernelDagGeneratedState) =>
                   psKernelExprV2MutualAdmitWithFuel execution.session.resources.fuel
+                    (psKernelKernelSessionEnvironment execution.session)
+                    execution.session.resources.maxRecDepth execution.session.resources.maxNatSize
+                    input owner value;
+              psKernelDagRunOrdinaryOwnedWith admit input execution
+                levelParams safety arena built request declaration
+      | PsKernelDagDeclarationRequest.nestedInductive value =>
+          match psKernelDagDecodeDeclaration input request with
+          | Except.error error => Except.error (PsKernelError.rejectedInvalid error)
+          | Except.ok declaration =>
+              let admit :=
+                fun (owner : PsKernelDagGeneratedState) =>
+                  psKernelExprV2NestedAdmitWithFuel execution.session.resources.fuel
                     (psKernelKernelSessionEnvironment execution.session)
                     execution.session.resources.maxRecDepth execution.session.resources.maxNatSize
                     input owner value;

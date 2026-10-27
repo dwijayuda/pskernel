@@ -1,0 +1,51 @@
+name: PSC1 selective nested adoption exact source and native814 gate
+on:
+  push:
+    branches: [work/psc1-pskernel-nested-adoption-20261027]
+    paths: [psc1/**, .github/workflows/psc1-pskernel-nested-adoption.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  adoption:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install exact Lean 4.35.0
+        run: bash psc1/scripts/install-lean435-ci.sh
+      - name: Verify complete source identity and kernel-check all old807 plus seven continuation reports
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          git diff --exit-code e58ef33ad14b26dcc85231801b1322551cf34614 HEAD -- packages/pskernel-core/src lean-toolchain
+          mkdir -p "$RUNNER_TEMP/nested-adoption"
+          python3 - <<'PY'
+          import json,pathlib,subprocess,os,re,hashlib
+          m=json.loads(pathlib.Path('test/qualified-nested-814-manifest.json').read_text());out=pathlib.Path(os.environ['RUNNER_TEMP'])/'nested-adoption'
+          for module in m['modules']:
+            p='test/'+module+'.lean';data=pathlib.Path(p).read_bytes();expected=m['continuationSource'] if module=='PsKernelExprV2GeneratedContinuationProofs' else m['qualifiedNativeSource'];assert data==subprocess.check_output(['git','show',expected+':psc1/'+p])
+          subprocess.run(['lake','-f','kernel-lakefile.lean','build',*m['buildTargets']],check=True)
+          names=[];bindings={}
+          for module in m['modules']:
+            p='test/'+module+'.lean';data=pathlib.Path(p).read_bytes();log=subprocess.check_output(['lake','-f','kernel-lakefile.lean','env','lean',p],stderr=subprocess.STDOUT).decode();(out/(module+'.log')).write_text(log);print(log,flush=True)
+            assert 'error:' not in log
+            rows=re.findall(r"'([^']+)' (?:depends on axioms: \[([^\]]*)\]|does not depend on any axioms)",log)
+            for name,axioms in rows:assert {x.strip() for x in axioms.split(',') if x.strip()}<={'propext','Classical.choice','Quot.sound'},(name,axioms)
+            names.extend(name for name,_ in rows);target=out/'source'/p;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(data);bindings[p]={'bytes':len(data),'sha256':hashlib.sha256(data).hexdigest()}
+          assert len(set(names))==814 and set(names)==set(m['expectedNames'])
+          (out/'receipt.json').write_text(json.dumps({'source':os.environ['GITHUB_SHA'],'run':os.environ['GITHUB_RUN_ID'],'sameCompleteProductionSourceAsQualifiedNestedPair':True,'qualifiedNestedSource':m['qualifiedNestedSource'],'nativeReports':814,'proofModules':61,'allOld807ProofStatementsUnchanged':True,'all7ContinuationStatementsUnchanged':True,'bindings':bindings,'globalStatus':'B OPEN / C FAIL / D OPEN','globalLogicalSoundness':False,'backendPreservation':False,'compilerSelfHostQualified':False},indent=2)+'\n')
+          print('PSC1_SELECTIVE_NESTED_ADOPTION: PASS sourceExact=true reports=814 modules=61')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-selective-nested-adoption814
+          path: ${{ runner.temp }}/nested-adoption/
+          if-no-files-found: error

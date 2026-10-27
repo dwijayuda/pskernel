@@ -16,7 +16,7 @@ Do not infer installed capability or independent admission from this package's p
 
 ## npm package build
 
-This package provides transparent adapters to the existing checked proofscript API and verified source snapshots. Backend compile adapters select their declared output target; the ./compiler entry retains the full existing API. No separately compiled internal compiler implementation or new self-hosting qualification is claimed.
+This is a source package. Its default API exposes sourcePackage and readSources. The ./compiler subpath transparently re-exports the existing checked root API; shared planner internals are not exposed as invented runtime helpers.
 
 Build from this directory with npm run build, clean generated dist with npm run clean,
 and create a tarball with npm pack. Builds use the pinned qualified inputs and the

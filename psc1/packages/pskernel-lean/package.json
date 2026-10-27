@@ -28,24 +28,10 @@
     "./distribution": "./dist/index.js"
   },
   "files": [
-    "index.mjs",
-    "host/",
-    "wasm/",
-    "provider/",
-    "kernel/",
-    "source/",
-    "scripts/",
-    "patches/",
-    "LEAN_LICENSE",
-    "*.json",
+    "dist/",
     "README.md",
-    "BUILDING.md",
-    "prebuilt/",
-    "PREBUILT_MANIFEST.json",
-    "index.d.ts",
     "LICENSE",
-    "NOTICE",
-    "dist/"
+    "NOTICE"
   ],
   "proofscript": {
     "npmArchitecture": "psc1-independent-kernel-provider/1",

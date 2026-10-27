@@ -1,64 +1,53 @@
 # PSC1 AI work state
 
-Updated2026-10-27 Asia/Jakarta. Branch `feat/psc1-simple-npm-packages-20261027`, from qualified PR#196 HEAD `173ecdc9f7131366d376c80886a7843a402d363b`.
-GitHub/Linux CI only; single-parent expected-HEAD/non-force updates. No merge or
-registry publication. Previous state is preserved in [history](docs/history/AI_WORK_STATE_BEFORE_SIMPLE_NPM_2026-10-27.md).
+Updated 2026-10-27 Asia/Jakarta. Active [PR #197](https://github.com/dwijayuda/pskernel/pull/197), branch `feat/psc1-simple-npm-packages-20261027`, based on PR #196 at `173ecdc9f7131366d376c80886a7843a402d363b`.
+GitHub/Linux CI only; single-parent expected-HEAD/non-force history. No merge or npm publication.
+Previous work state is preserved exactly in [history](docs/history/AI_WORK_STATE_BEFORE_SIMPLE_NPM_2026-10-27.md), baseline blob `79a5f936f912d2916e0d59fda739100f6e47e131`.
 
-## Active mission: simple existing npm packages
+## Completed: simple existing npm package distribution
 
-The user's new assignment explicitly defers complete compiler-internal IR linking
-and modular G2/G3. Preserve existing package names, directories and canonical
-source; reuse one qualified compiler owner rather than require a new compiler.
+[Exact receipt](docs/PSC1_SIMPLE_NPM_PACKAGE_QUALIFICATION_2026-10-27.json),
+[package guide](docs/guides/npm-packages.md), [finite contract](NPM_PACKAGE_CONTRACT.json).
 
-Inventory:25 existing directories,24 existing npm names. compiler-unified has no
-npm name and remains internal source. Three existing distributions (proofscript
-and both genuine Lean providers) already work as qualified tarballs; most source
-manifests advertised absent dist exports and stale PSC0 metadata. Python/PHP also
-have qualified external provider bundles. No public low-level compiler helpers
-are exported by the frozen unified JS/TS executor; its only export is the service.
+All 25 existing directories and 24 npm names are retained. The unnamed compiler-unified directory remains internal source.
+All 24 named manifests/build contracts are repaired: one shared root, nine checked API adapters, twelve verified source interfaces and two independent providers.
+Five already-working qualified distributions are reused: proofscript, both Lean providers and optional Python/PHP emit-only bundles.
+No new compiler-internal module is individually compiled. Source-only packages do not expose private elaborator/Core functions.
 
-[40491338458](https://github.com/dwijayuda/pskernel/actions/runs/40491338458) verifies
-the complete inventory and exact frozen inputs. [Build40492532684](https://github.com/dwijayuda/pskernel/actions/runs/40492532684)
-at0bdef94ee5c5ac2b603bc41ab27f9edf61d0751b builds/packs all24 named packages.
-Final implementation9aefeeb469b4e350348d365ff3e1c149df82ac71 passes42 finite
-package cases in40497178826 and all16 source jobs in40497179005. All37 Core
-criteria remain qualified. The stdlib README is being corrected to describe the
-actual explicit source API, followed by a documentation-only tarball refresh.
-The earlier40492161864 failed because canonical Emscripten build metadata differs
-from the frozen qualified provider metadata. Keep canonical source untouched;
-qualified provider payloads now live under their own dist/implementation.
+Implementation `9aefeeb469b4e350348d365ff3e1c149df82ac71` passes all 42 finite package cases in [40497178826](https://github.com/dwijayuda/pskernel/actions/runs/40497178826).
+The stdlib README correction at `c5c15582158e251eb4b843589e2bb55b3ab0ffc4` passes the complete 42-case package contract again in [40501926898](https://github.com/dwijayuda/pskernel/actions/runs/40501926898), tested merge `6e03dde724459b5d1048480aab00a107895c36c2`.
+The 103 advertised exports, all 24 fresh offline installs/build commands, Node/Bun shared API identity, exact clean/build/pack reproduction, real local/global CLI check/build, both source grammars, all seven checked targets, optional Rust/Wasm engines, strict public declarations and negative/tamper/dependency cases pass.
+Both genuine providers pass 14 acceptance/refusal cases each. All 49 existing root execution files retain exact qualified bytes; only named package/seal metadata is regenerated.
+Node 22.23.3 covers the complete new contract; Bun 1.4.4 covers shared API/source identity. Prior .11 runtime/watch qualification is retained separately.
 
-Current cohort:proofscript/source adapters0.1.0-psc1.12; kernel npm wrappers
-4.35.0-psc1.12, retaining official Lean semantic identity4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc.
-Versioned wrapper artifacts distinguish them from existing immutable4.35.0 tars.
-Builds copy existing qualified executors/providers, not recompile or translate
-compiler sources. Only proofscript owns the shared JS/TS executable implementation;
-source packages expose verified source snapshots, compiler/CLI adapters re-export
-existing checked APIs, and backend compile adapters select existing targets.
-No private elaborator/Core API is fabricated. Python/PHP/native checking and
-Rust/Wasm execution engines remain explicit optional packages.
+Full current-source [40497179005](https://github.com/dwijayuda/pskernel/actions/runs/40497179005) passes all 16 selected jobs and 37/37 Practical Core criteria at implementation 9aefeeb, tested merge `c61e541bf593b5c279f05640a9b52814b0d07be5`.
+Subsequent edits change documentation only. This is not new modular G2/G3 or final cross-platform release qualification.
 
-Every package gets build/clean scripts, dist entry points where applicable,
-correct exports/repository/licenses/version dependencies and installable tarballs.
-Kernel canonical sources and implementations are unchanged. Their new npm entries
-load the exact previously qualified C++ native or Emscripten linear-memory Wasm
-provider. Root distribution pins are regenerated for explicit metadata/layout
-changes; existing host/compiled execution code and safety limits remain.
+## Installable artifacts and identities
 
-Next: finish the documentation-only tarball refresh, record exact delivery
-artifacts/receipts and retain the final metadata/static gate. Existing full-source
-and42-case package qualifications at9aefeeb remain exact checkpoints. Do not claim
-installation alone proves compiler soundness or new G1/G2/G3/fixed points. Preserve
-the exact old qualified source identities and existing normal regression gates.
+Default ZIP: [12732813811](https://github.com/dwijayuda/pskernel/actions/runs/40501926898/artifacts/12732813811), 5073851 bytes, 21 tarballs.
+Optional ZIP: [12732714143](https://github.com/dwijayuda/pskernel/actions/runs/40501926898/artifacts/12732714143), 198623181 bytes, nine tarballs.
+The extra six optional engine/SDK archives retain their original exact versions and hashes; there are 24 rebuilt named packages overall.
+Root `proofscript-0.1.0-psc1.12.tgz`: 3836354 bytes, SHA256 `9a66dcd0f92aaa60f600674fb91b31bc0d67b211d1e9e004146baa8e96502fcc`.
+Native kernel tarball: 6453041 bytes. Every package size/hash and exact source import inventory accompanies the artifacts.
 
-## Deferred internal-modularity work retained separately
+The default root owns the qualified JS/TS executors and bundles the genuine Lean Wasm checker. Native checking, Python/PHP, Rust/Wasm compiler engines and SDKs remain optional.
+No install hooks or compiler source builds are needed. Minimum Node policy remains >=22.23.3; exact CI tools are qualification identities.
+Owned source/adapters use Apache-2.0; qualified-input and upstream notices are retained.
+Kernel wrapper version `4.35.0-psc1.12` does not change Lean semantic identity `4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
+Canonical .lean/.ps/compiler/kernel/production host implementations are unchanged; genuine C++ native and Emscripten linear-memory Wasm payloads remain unchanged.
+Strict original/transformed IR, official independent admission, logical-body pairing, semantic fuels, 240-second compiler requests, 120-second checking and memory/stack safety limits remain unchanged.
 
-Branch feat/psc1-modular-partitions-20261027 retains the intermediate SCC/type-only
-implementation atb9461a3c6cd556a2c73abdee5cd9156e745c7f5d. It is unqualified;
-latest40489837660 failed. It is not part of this npm branch. Complete actual graph
-measurement at177e41a3 passes40488488194:125 source modules,3154 original/3950
-specialized/4520 fused values; no cross-source runtime SCC larger than one;
-111938ms/maxRSS389420KiB. All original PR#195/#196 component qualifications remain
-unchanged. No further internal compiler partition work is required for this npm
-milestone. Platform-wide release and the arranged human maintainer trial remain
-separate qualification tasks.
+Frozen G3 executors retain 122 source modules/4742 members and closure `073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9`.
+Current development source has 125 source-import modules. Do not conflate their identities or claim new fixed points.
+
+## Remaining scope and continuation
+
+This simple npm milestone is complete in the documented Linux scope. No remaining package failure in the 42-case contract.
+Before universal registry release: qualify actual non-Linux SDK/provider/publication consumers, permanently retain pinned bootstrap assets, and obtain merge/publication authorization.
+The user-arranged independent human maintainer trial remains pending.
+The dependency-ordered roadmap retains diagnostics, component String/IO and other finite release work.
+
+Full internal compiler partitioning, recursive-group packaging and modular G1/G2/G3 are deferred.
+PR #195/#196 qualified component work remains intact. Separate branch `feat/psc1-modular-partitions-20261027` retains unqualified intermediate implementation `b9461a3c6cd556a2c73abdee5cd9156e745c7f5d` (failed run 40489837660); it is not part of PR #197.
+Actual graph measurement at 177e41a3 passes 40488488194: 125 modules, 3154 original/3950 specialized/4520 fused values, no cross-source runtime SCC larger than one, 111938 ms/maxRSS 389420 KiB. This is measurement, not successful emission or self-hosting.

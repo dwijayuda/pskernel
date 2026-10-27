@@ -14,6 +14,7 @@ from immutable evidence; dated records remain preserved.
 | Question | Read |
 | --- | --- |
 | How do I use the qualified project-oriented CLI? | [CLI guide](./guides/cli.md), [workflow research](./development/typescript-workflows.md) |
+| How do the existing npm packages build, install and import? | [Simple npm package guide](./guides/npm-packages.md), [finite contract](../NPM_PACKAGE_CONTRACT.json), [exact qualification](./PSC1_SIMPLE_NPM_PACKAGE_QUALIFICATION_2026-10-27.json) |
 | How do I install/use the current slim toolchain? | [Slim package guide](./PSC1_SLIM_UNIVERSAL_PACKAGE.md) |
 | How do checked component/Python/PHP outputs work? | [Dispatch architecture](./PSC1_CHECKED_DISPATCH.md), [exact receipt](./PSC1_CHECKED_DISPATCH_QUALIFICATION_2026-10-26.json), [install](./PSC1_CHECKED_DISPATCH_INSTALL.md) |
 | How do checked targets and transactions work? | [Guide](./PSC1_CHECKED_PUBLICATION.md), [receipt](./PSC1_CHECKED_PUBLICATION_QUALIFICATION_2026-10-26.json), [install](./PSC1_CHECKED_PUBLICATION_INSTALL.md) |

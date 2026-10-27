@@ -5,12 +5,13 @@ open Ps.MinKernel.CoreIngress
 
 -- This grammar uses mathematical list concatenation and decimal place values.
 -- It is independent of the runtime append/join/decimal encoder implementation.
+def commaTail : List (List Nat) → List Nat
+  | [] => []
+  | first :: rest => [44] ++ (first ++ commaTail rest)
+
 def commaBytes : List (List Nat) → List Nat
   | [] => []
-  | first :: rest =>
-    match rest with
-    | [] => first
-    | _ :: _ => first ++ [44] ++ commaBytes rest
+  | first :: rest => first ++ commaTail rest
 
 def objectBytes (fields : List (List Nat)) : List Nat := [123] ++ commaBytes fields ++ [125]
 def arrayBytes (values : List (List Nat)) : List Nat := [91] ++ commaBytes values ++ [93]
@@ -35,31 +36,35 @@ theorem append_nil_checked (xs : List Nat) : xs ++ [] = xs := by
 theorem nil_append_checked (xs : List Nat) : [] ++ xs = xs := rfl
 
 theorem join_tail_eq (values : List (List Nat)) :
-    psMinByteJoinTail [44] values =
-      match values with | [] => [] | _ :: _ => [44] ++ commaBytes values := by
+    psMinByteJoinTail [44] values = commaTail values := by
   induction values with
   | nil => rfl
   | cons first rest ih =>
-    change psMinByteAppend [44] (psMinByteAppend first (psMinByteJoinTail [44] rest)) =
-      [44] ++ commaBytes (first :: rest)
-    rw [append_eq, append_eq, ih]
-    cases rest <;> simp only [commaBytes, nil_append_checked, append_nil_checked, append_assoc_checked]
+    change 44 :: psMinByteAppend first (psMinByteJoinTail [44] rest) =
+      44 :: (first ++ commaTail rest)
+    exact congrArg (List.cons 44) ((append_eq first _).trans (congrArg (fun bytes => first ++ bytes) ih))
 
 theorem object_eq (fields : List (List Nat)) :
     psMinByteJoin [123] [44] [125] fields = objectBytes fields := by
   cases fields with
   | nil => rfl
   | cons first rest =>
-    cases rest <;> simp only [psMinByteJoin, join_tail_eq, append_eq, objectBytes,
-      commaBytes, nil_append_checked, append_nil_checked, append_assoc_checked]
+    change 123 :: psMinByteAppend first (psMinByteAppend (psMinByteJoinTail [44] rest) [125]) =
+      123 :: ((first ++ commaTail rest) ++ [125])
+    apply congrArg (List.cons 123)
+    rw [append_eq, append_eq, join_tail_eq]
+    exact (append_assoc_checked first (commaTail rest) [125]).symm
 
 theorem array_eq (values : List (List Nat)) :
     psMinByteJoin [91] [44] [93] values = arrayBytes values := by
   cases values with
   | nil => rfl
   | cons first rest =>
-    cases rest <;> simp only [psMinByteJoin, join_tail_eq, append_eq, arrayBytes,
-      commaBytes, nil_append_checked, append_nil_checked, append_assoc_checked]
+    change 91 :: psMinByteAppend first (psMinByteAppend (psMinByteJoinTail [44] rest) [93]) =
+      91 :: ((first ++ commaTail rest) ++ [93])
+    apply congrArg (List.cons 91)
+    rw [append_eq, append_eq, join_tail_eq]
+    exact (append_assoc_checked first (commaTail rest) [93]).symm
 
 theorem quote_eq (bytes : List Nat) : psMinCoreQuote bytes = quoteBytes bytes := by
   simp only [psMinCoreQuote, append_eq, quoteBytes, append_assoc_checked]

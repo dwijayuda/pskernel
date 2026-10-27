@@ -58,9 +58,16 @@ def minKernelOriginModule (origin : PsSh1ModuleOrigin) : String :=
 
 def main (args : List String) : IO Unit := do
   let binderMode := args == ["binder"]
-  if !args.isEmpty && !binderMode then
-    throw (IO.userError "expected no arguments or binder")
-  let paths : List (List String × String) := if binderMode then [
+  let regularMode := args == ["regular"]
+  if !args.isEmpty && !binderMode && !regularMode then
+    throw (IO.userError "expected no arguments, binder or regular")
+  let paths : List (List String × String) := if regularMode then [
+      (["Ps", "Foundation", "Name"], "packages/foundation/src/Ps/Foundation/Name.lean"),
+      (["Ps", "MinKernel", "Profile", "RegularProfile"], "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularProfile.lean"),
+      (["Ps", "MinKernel", "Profile", "RegularCheck"], "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularCheck.lean"),
+      (["Ps", "MinKernel", "Profile", "RegularNames"], "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularNames.lean"),
+      (["Ps", "MinKernel", "Tests", "RegularVectors"], "packages/pskernel-min/src/Ps/MinKernel/Tests/RegularVectors.lean")]
+    else if binderMode then [
       (["Ps", "Foundation", "Name"], "packages/foundation/src/Ps/Foundation/Name.lean"),
       (["Ps", "Core", "Level"], "packages/core/src/Ps/Core/Level.lean"),
       (["Ps", "Core", "Expr"], "packages/core/src/Ps/Core/Expr.lean"),
@@ -73,7 +80,7 @@ def main (args : List String) : IO Unit := do
   let inputs ← paths.mapM fun (moduleName, path) => do
     let source ← IO.FS.readFile path
     pure (psSh1SourceInput moduleName source)
-  let stem := if binderMode then "dist/pskernel-min/binder/vectors" else "dist/pskernel-min/portable/vectors"
+  let stem := if regularMode then "dist/pskernel-min/regular/vectors" else if binderMode then "dist/pskernel-min/binder/vectors" else "dist/pskernel-min/portable/vectors"
   match psCompilerSh1TypeScriptSources psSh1DefaultSourceOptions
       psIrCheckDefaultOptions PsCompilerSourceKind.lean inputs with
   | .error error => throw (IO.userError (minKernelSourceFailure error))

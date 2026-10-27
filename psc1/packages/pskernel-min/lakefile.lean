@@ -31,3 +31,12 @@ lean_lib PsMinBinderProfile where
 lean_exe minkernel_binder_tests where
   srcDir := "test"
   root := `BinderTests
+
+lean_lib PsMinRegularProfile where
+  srcDir := "src"
+  roots := #[`Ps.MinKernel.Profile.RegularProfile, `Ps.MinKernel.Profile.RegularCheck,
+    `Ps.MinKernel.Profile.RegularNames, `Ps.MinKernel.Tests.RegularVectors]
+
+lean_exe minkernel_regular_tests where
+  srcDir := "test"
+  root := `RegularTests

@@ -294,3 +294,33 @@ The dated receipt retains exact run/job/artifact identities and failed developme
 attempts. Canonical min/dual still refuse, with0/124 modules,0/37 criteria and no
 min-checked G1/G2/G3. No generated-code preservation theorem or hostile-input
 resource qualification is added by R1.
+
+## R2 normalized regular-data profile (qualification pending)
+
+The preceding R1 reporting main40460549124 atfea85153 and installed40459838431
+at8b33b3a1 are terminal success; each retains its exact separate source/release scope.
+R2 now introduces an isolated slot-based, monomorphic first-order regular-data
+calculus: closed ground/data/arrow/List/Option type codes, ordered descriptors,
+checked constructor and fixed-result eliminator signatures, and a sequential
+source acceptance path. Self fields are direct positive occurrences; ground
+fields reference only older registry entries. Universes/parameters/indices,
+motive/minor counts, type scope and exhaustion are explicitly checked.
+Recursor result codes are relative to the selected family and older registry;
+queries for older families lift the resulting complete signature into the full
+registry. Generated quotation-name helpers use absolute ordinals, not relative
+slot identities; canonical source-name binding/rebasing remains a separate proof.
+
+The proposed proof constructs finite-branching tree carriers, constructor and
+recursor values with iota equations, and follows actual inference/admission
+success to a model and Empty-consistency theorem. A representative actual
+PsMinTy.rec source spine is compared with a compiled native proof witness, and
+its constant motive is connected to R1's actual Core substitution theorem.
+The native/generated corpus has57 meaningful cases (20positive/37refusal) plus
+2out-of-range probes. Qualification is pending Linux CI and actual axiom reports.
+
+This normalized profile is not a raw canonical decoder or completed PSC1-Core
+bridge. It does not authorize arbitrary source-name/metadata binding, model all
+115 foundational declarations, or grant min/dual production admission. Source
+occurrence witnesses are diagnostic, never fixture/hash acceptance rules.
+Check.lean and canonical min/dual refusal remain unchanged. Full min coverage
+is still0/124 compiler modules,0/37 Practical Core criteria; no min G1/G2/G3.

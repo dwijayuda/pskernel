@@ -76,6 +76,26 @@ jobs:
             assert.ok(line.includes('does not depend on any axioms') || line.includes('depends on axioms: [propext]'),line);
           }
           JS
+      - name: Check regular-profile model and exact executable theorem assumptions
+        working-directory: psc1
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const text=fs.readFileSync('proofs/pskernel-min/proof.log','utf8');
+          const theorems={"Ps.MinKernel.RegularModel":["fold_construct","signatures"],"Ps.MinKernel.RegularProofs":["typeEq_sound","regular_hasModel","regular_consistent"],"Ps.MinKernel.RegularValidation":["registryValid_sound","registry_hasModel"],"Ps.MinKernel.RegularNames":["constructor_injective","recursor_injective","generated_root_disjoint"],"Ps.MinKernel.RegularSource":["source_instance_checked","checked_source_semantics","source_iota","source_motive_instantiation"]};
+          for(const [namespace,names] of Object.entries(theorems)) for(const name of names) {
+            const line=text.split('\n').find(line=>line.includes("'"+namespace+"."+name+"'"));
+            assert.ok(line,'missing regular-profile theorem '+namespace+'.'+name);
+            assert.ok(line.includes('does not depend on any axioms') || line.includes('depends on axioms: [propext]'),line);
+          }
+          JS
+      - name: Build and run native regular-profile corpus
+        working-directory: psc1/packages/pskernel-min
+        run: |
+          set -euo pipefail
+          lake build minkernel_regular_tests
+          .lake/build/bin/minkernel_regular_tests | tee regular-tests.log
       - name: Build and run native binder transformation corpus
         working-directory: psc1/packages/pskernel-min
         run: |
@@ -96,6 +116,7 @@ jobs:
             psc1/proofs/pskernel-min/proof.log
             psc1/packages/pskernel-min/native-tests.log
             psc1/packages/pskernel-min/binder-tests.log
+            psc1/packages/pskernel-min/regular-tests.log
           retention-days: 90
 
   portability-and-closure:
@@ -153,6 +174,9 @@ jobs:
       - name: Qualify actual binder helper source and generated transformation corpus
         if: ${{ !cancelled() }}
         run: node scripts/minkernel-binder-portability.mjs
+      - name: Qualify regular-profile executable and compare the current source Core witness
+        if: ${{ !cancelled() }}
+        run: node scripts/minkernel-regular-portability.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

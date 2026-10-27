@@ -20,7 +20,16 @@ lean_lib PsMinBinderRuntime where
   srcDir := "../../packages/pskernel-min/src"
   roots := #[`Ps.MinKernel.Profile.LowerUnusedBinder]
 
+lean_lib PsMinRegularRuntime where
+  srcDir := "../../packages/pskernel-min/src"
+  roots := #[`Ps.MinKernel.Profile.RegularProfile, `Ps.MinKernel.Profile.RegularCheck,
+    `Ps.MinKernel.Profile.RegularNames, `Ps.MinKernel.Tests.RegularVectors]
+
 @[default_target]
 lean_lib MinKernelProof where
   srcDir := "."
-  roots := #[`MainTheorem, `CoreScope, `BinderLowering]
+  roots := #[`MainTheorem, `CoreScope, `BinderLowering, `RegularModel, `RegularSoundness, `RegularValidation, `RegularNames, `RegularSourceInstance]
+
+lean_exe regular_core_witness where
+  srcDir := "."
+  root := `RegularCoreWitness

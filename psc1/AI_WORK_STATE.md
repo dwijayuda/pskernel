@@ -52,6 +52,17 @@ batch is R2 closed regular-data/type-code recognition and a proved recursor inst
 There is no new checker acceptance, foundation admission or production mode.
 The helper has4 explicit import-closure modules; the source test input has6.
 
+## R2 normalized regular-data profile, qualification pending
+
+Pre-R2 remaining main40460549124 and installed40459838431 are terminal success.
+R2 adds isolated closed type codes, first-order regular descriptors, inferred
+constructor/fixed-result recursor signatures, and a source inference/admission
+path. Its proposed model is a finite-branching tree interpretation, with actual
+success-to-model/Empty-consistency proofs and a current PsMinTy.rec source witness.
+The57-case native/generated corpus and theorem axiom guards require Linux CI.
+No raw canonical-name bridge or production acceptance is claimed. Existing
+Check.lean, min/dual refusal, official Wasm default and min coverage remain intact.
+
 ## Preserved layout baseline state
 
 

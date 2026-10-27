@@ -30,7 +30,11 @@ theorem lower_worker_sound (expression : PsExpr) (depth : Nat) (result : PsExpr)
             simpa only [Nat.ble_eq] using Nat.le_of_lt_succ less
           simp [psMinLowerUnusedBinderWorker, small, equal] at success
           subst result
-          simp [psExprLiftBVarsWorker, lift, Nat.add_one]
+          change (if Nat.ble depth previous then
+            PsExpr.bvar (Nat.add previous 1) else PsExpr.bvar previous) =
+              PsExpr.bvar (Nat.succ previous)
+          rw [if_pos lift]
+          rfl
   | fvar id =>
       simp [psMinLowerUnusedBinderWorker] at success
       subst result

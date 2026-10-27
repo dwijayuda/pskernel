@@ -2,6 +2,8 @@
 
 A standalone LSP and a VS Code extension using the genuine qualified PSC1 compiler and official Lean 4.35.0 linear-memory Wasm checker. Both tools are outside compiler self-hosting, G1/G2/G3, and kernel proof development. No compiler or kernel implementation is changed.
 
+**Qualified Linux preview 0.1.0:** [download VSIX and npm package](https://github.com/dwijayuda/pskernel/actions/runs/40585721463/artifacts/12772441610), [successful CI](https://github.com/dwijayuda/pskernel/actions/runs/40585721463), [exact qualification receipt](QUALIFICATION_2026-10-28.json). The actual installed VSIX passed in VS Code 1.143.1 with embedded Node 24.21.0; standalone npm passed under Node 22.23.3. All 16 automated tests passed. Nothing is published to a package registry or Marketplace.
+
 ## Install
 
 Download the `proofscript-psc1-editor-<commit>` artifact from the [editor workflow](https://github.com/dwijayuda/pskernel/actions/workflows/proofscript-editor.yml). Check the included `SHA256SUMS` and `BUILD.json` before using its artifacts.

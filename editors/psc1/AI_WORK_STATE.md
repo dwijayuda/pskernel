@@ -14,15 +14,31 @@ Unsaved project sources, versions/generations, supersession, process-group cance
 
 Source was assembled in cloud scratch and written through GitHub Git object/ref APIs; no local compiler, dependency installation or test execution is used. Draft PR [199](https://github.com/dwijayuda/pskernel/pull/199) targets the compiler baseline branch.
 
-Initial run [40584667014](https://github.com/dwijayuda/pskernel/actions/runs/40584667014) built both bundles and verified the compiler archive, then exposed an invalid `connection.onClose` call. The call was removed after inspecting the exact upstream11.0.0 lifecycle; existing shutdown/exit handlers terminate process groups. The runner-generated dependency lock was captured and committed.
+Initial run [40584667014](https://github.com/dwijayuda/pskernel/actions/runs/40584667014) built both bundles and verified the compiler archive, then exposed an invalid `connection.onClose` call. The call was removed after inspecting the exact upstream 11.0.0 lifecycle; existing shutdown/exit handlers terminate process groups. The runner-generated dependency lock was captured and committed.
 
-Run [40585014908](https://github.com/dwijayuda/pskernel/actions/runs/40585014908), commit `93aaeb3ad2d7aae18639d7acf173d3a7ffb390fa`, passes all16 integration tests, VSIX/npm packaging, and fresh offline installed-npm checking. The installed VSIX activates, checks a real source and exposes symbols, then its test incorrectly serializes VS Code MarkdownString accessors as empty objects. The test now reads the public hover `.value` and still requires the actual Nat type. Final full installed-extension qualification is pending the corrected smoke.
+Run [40585014908](https://github.com/dwijayuda/pskernel/actions/runs/40585014908), commit `93aaeb3ad2d7aae18639d7acf173d3a7ffb390fa`, passed all 16 integration tests, VSIX/npm packaging, and fresh offline installed-npm checking. Its installed VSIX smoke exposed a test serialization mistake: VS Code MarkdownString accessors serialized as empty objects. The corrected test reads the public hover `.value` and retains the actual Nat assertion.
+
+**Complete qualification passed** in [40585721463](https://github.com/dwijayuda/pskernel/actions/runs/40585721463), job 122476455210, exact implementation `34beabcfc3fce89e4c89bcc6aa4e372e0c1bdeb1`. All 16 automated tests pass. Fresh offline npm installation (empty cache, no lifecycle scripts, SDK-free PATH) launches the installed bin and accepts the genuine Wasm-checked source. The actual installed VSIX passes activation, language registration, genuine checking, symbols, actual hover type, Infoview requests/view command, unsaved rejection, Problems diagnostics, manual restart/recovery, and save in VS Code 1.143.1 / Electron 43.7.7 / Node 24.21.0. Standalone CI uses Node 22.23.3. No source extension substitutes for the installed VSIX.
+
+See [complete machine-readable receipt](QUALIFICATION_2026-10-28.json). This final work-state/receipt/README update changes documentation only; no additional compiler or editor execution inputs change and no optional test rerun is needed.
+
+## Installable delivery
+
+Qualified [editor artifact 12772441610](https://github.com/dwijayuda/pskernel/actions/runs/40585721463/artifacts/12772441610): 7462227 bytes, ZIP SHA256 `e350b263662d2cf4d321ed8181e3e134ff10494e3deab7f9d25efa84ae471cf0`.
+
+- `proofscript-psc1-0.1.0.vsix`: 3594823 bytes, SHA256 `99cf053d2ff015d8fa9f2d8f9d31499044d1ea6a9f7a826e6b6cf16c31eb725f`.
+- `proofscript-lsp-0.1.0.tgz`: 3917035 bytes, SHA256 `29f46476552dfb33a0756b02a1a6e2797b6079195ec222fe547ce651bafae2cd`.
+- [Evidence artifact 12771637295](https://github.com/dwijayuda/pskernel/actions/runs/40585721463/artifacts/12771637295) retains actual runtime/installation receipts, audit, build identity, and exact dependency lock.
+
+The unchanged qualified compiler tarball remains `9a66dcd0f92aaa60f600674fb91b31bc0d67b211d1e9e004146baa8e96502fcc`; its actual compiler source closure is `073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9`.
+
+Observed small-fixture full-check worker times: stdio 3612 ms, fresh installed npm 3054 ms, VS Code initial 4684 ms, post-restart 4429 ms. These are CI observations, not a large-project latency guarantee. The server remains asynchronous; deeper compiler reuse/incrementality is a future performance improvement.
 
 The build dependency audit records one MSAL advisory through three dev-only publisher/authentication nodes. No authentication or publication is used and those modules are excluded from the actual bundled runtime inventory. See RESEARCH.md for the upstream range constraint and reason not to force an incompatible major override.
 
-## Remaining before delivery
+## Remaining scope
 
-Finish installed VSIX checks, record the final complete receipt/artifact SHA-256, and update the draft PR. No compiler fixed-point or kernel qualification reruns are needed because their inputs are unchanged.
+This usable Linux editor preview is delivered. Future priorities are public compiler proof-state/binding APIs, more precise diagnostics, large-project performance, non-Linux qualification, and permanent hosting before registry/Marketplace release. No compiler fixed-point or kernel qualification reruns are needed for the delivered tooling because their inputs are unchanged. PR remains draft; no merge or publication is authorized.
 
 ## Known limits
 

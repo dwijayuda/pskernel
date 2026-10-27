@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        profile: [ambient, isolated]
+        profile: [fresh]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -33,10 +33,7 @@ jobs:
         env:
           SDK_PROFILE: ${{ matrix.profile }}
         run: |
-          if [ "$SDK_PROFILE" = isolated ]; then
-            export RUSTUP_HOME="$RUNNER_TEMP/psc1-isolated-rustup"
-            export CARGO_HOME="$RUNNER_TEMP/psc1-isolated-cargo"
-          fi
+          rustup toolchain uninstall 1.90.0
           rustup toolchain install 1.90.0 --profile minimal
           export SDK_ROOT="$(rustup run 1.90.0 rustc --print sysroot)"
           rustup component list --toolchain 1.90.0 --installed
@@ -60,5 +57,22 @@ jobs:
             for(let i=0;i<remaining.length;i++)permutations([...prefix,remaining[i]],[...remaining.slice(0,i),...remaining.slice(i+1)]);
           }
           permutations([],lines);
+          assert.equal(missing.length,0);assert.equal(different.length,0);
           console.log('PSC1_SDK_IDENTITY_DIAGNOSTIC '+JSON.stringify({profile:process.env.SDK_PROFILE,root:process.env.SDK_ROOT,pinCount:pins.length,missing,different,actualComponents:text,qualifiedComponentOrder:canonical,qualification:false}));
           JS
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.0'
+      - name: Exercise actual older-Bun refusal without changing candidate bytes
+        working-directory: psc1
+        run: PSC1_TEST_RUNTIME="$(command -v bun)" PSC1_EXPECT_RUNTIME_REFUSAL=1 node test/installed/runtime-compatibility.test.mjs
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.4'
+      - name: Retry all actual watch assertions with fresh pinned SDK
+        working-directory: psc1
+        run: |
+          rustup default 1.90.0
+          export PSC1_TEST_RUST_ROOT="$(rustup run 1.90.0 rustc --print sysroot)"
+          export PSC1_TEST_BUN_RUNTIME="$(command -v bun)"
+          node test/installed/watch.test.mjs

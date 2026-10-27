@@ -36,5 +36,7 @@ jobs:
         if: always()
         with:
           name: psc1-npm-packages-${{ github.sha }}
-          path: psc1/dist/npm-packages/
+          path: |
+            psc1/dist/npm-packages/tarballs/
+            psc1/dist/npm-packages/*.json
           retention-days: 90

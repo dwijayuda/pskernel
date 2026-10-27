@@ -121,10 +121,10 @@ function build(dir){
   }
  }
  if(dir!=='proofscript'&&!dir.startsWith('pskernel-lean'))build('proofscript');
- if(dir==='proofscript')build('pskernel-lean-wasm');
+ if(dir==='proofscript'){build('pskernel-lean-wasm');build('pskernel-lean');}
  clean(dir);fs.mkdirSync(path.join(packageRoot,'dist'));
- if(dir.startsWith('pskernel-lean')||dir==='backend-python'||dir==='backend-php')
-  hydrate(packageRoot,originalPackage(meta.name));
+ if(dir==='backend-python'||dir==='backend-php')hydrate(packageRoot,originalPackage(meta.name));
+ if(dir.startsWith('pskernel-lean'))fs.cpSync(originalPackage(meta.name),path.join(packageRoot,'dist/implementation'),{recursive:true});
  if(dir==='stdlib'){
   // Preserve the existing canonical standard library; copy, never translate.
   fs.cpSync(path.join(root,'stdlib/ProofScript'),path.join(packageRoot,'src/ProofScript'),{recursive:true});
@@ -149,8 +149,8 @@ function build(dir){
     return{...pin,bytes:bytes.length,sha256:sha256(bytes)};
    })};
   }
-  d.kernels.wasm=repinMetadata(d.kernels.wasm,'pskernel-lean-wasm');
-  d.kernels.native=repinMetadata(d.kernels.native,'pskernel-lean');
+  for(const [provider,dir]of [['wasm','pskernel-lean-wasm'],['native','pskernel-lean']])
+   d.kernels[provider]={...d.kernels[provider],entry:'dist/index.js',files:inventory(packedRoots.get(dir))};
   for(const target of ['python','php'])d.dispatchPackages[target]=repinMetadata(d.dispatchPackages[target],'backend-'+target);
   put(path.join(impl,'UNIVERSAL_DISTRIBUTION.json'),json(d));
   const originalPin=fs.readFileSync(path.join(impl,'DISTRIBUTION_PIN.mjs'),'utf8');
@@ -165,7 +165,8 @@ function build(dir){
   put(path.join(packageRoot,'dist/psc.mjs'),"#!/usr/bin/env node\nimport './implementation/npm-cli/proofscript-cli.mjs';\n");
   fs.chmodSync(path.join(packageRoot,'dist/psc.mjs'),0o755);
  }else if(dir.startsWith('pskernel-lean')){
-  put(path.join(packageRoot,'dist/index.js'),"export * from '../index.mjs';\n");
+  put(path.join(packageRoot,'dist/index.js'),"export * from './implementation/index.mjs';\n");
+  put(path.join(packageRoot,'dist/index.d.ts'),fs.readFileSync(path.join(packageRoot,'dist/implementation/index.d.ts')));
  }else{
   const adapter="export * from 'proofscript';\n",types="export * from 'proofscript';\n";
   put(path.join(packageRoot,'dist/compiler.js'),adapter);

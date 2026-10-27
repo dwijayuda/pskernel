@@ -4,7 +4,7 @@
   "description": "PSC1 independent official Lean4.35.0 native C++ kernel provider",
   "type": "module",
   "private": false,
-  "main": "./index.mjs",
+  "main": "./dist/index.js",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=22.23.3"
@@ -19,11 +19,11 @@
   },
   "exports": {
     ".": {
-      "types": "./index.d.ts",
-      "import": "./index.mjs"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
-    "./node": "./host/node-provider.mjs",
-    "./metadata": "./LEAN_SOURCE_PIN.json",
+    "./node": "./dist/implementation/host/node-provider.mjs",
+    "./metadata": "./dist/implementation/LEAN_SOURCE_PIN.json",
     "./package.json": "./package.json",
     "./distribution": "./dist/index.js"
   },
@@ -65,5 +65,5 @@
     "build": "node ../../scripts/build-packages.mjs build --package pskernel-lean",
     "clean": "node ../../scripts/build-packages.mjs clean --package pskernel-lean"
   },
-  "types": "./index.d.ts"
+  "types": "./dist/index.d.ts"
 }

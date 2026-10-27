@@ -4,7 +4,7 @@
   "description": "PSC1 independent official Lean4.35.0 C++ kernel compiled with Emscripten into linear-memory WebAssembly",
   "type": "module",
   "private": false,
-  "main": "./index.mjs",
+  "main": "./dist/index.js",
   "license": "Apache-2.0",
   "engines": {
     "node": ">=22.23.3"
@@ -19,14 +19,14 @@
   },
   "exports": {
     ".": {
-      "types": "./index.d.ts",
-      "import": "./index.mjs"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
-    "./metadata/lean": "./LEAN_SOURCE_PIN.json",
-    "./metadata/emscripten": "./EMSCRIPTEN_PIN.json",
-    "./metadata/kernel-source": "./KERNEL_SOURCE_MANIFEST.json",
-    "./metadata/prebuilt": "./PREBUILT_WASM_MANIFEST.json",
-    "./metadata/proofscript-source": "./PROOFSCRIPT_SOURCE_MANIFEST.json",
+    "./metadata/lean": "./dist/implementation/LEAN_SOURCE_PIN.json",
+    "./metadata/emscripten": "./dist/implementation/EMSCRIPTEN_PIN.json",
+    "./metadata/kernel-source": "./dist/implementation/KERNEL_SOURCE_MANIFEST.json",
+    "./metadata/prebuilt": "./dist/implementation/PREBUILT_WASM_MANIFEST.json",
+    "./metadata/proofscript-source": "./dist/implementation/PROOFSCRIPT_SOURCE_MANIFEST.json",
     "./package.json": "./package.json",
     "./distribution": "./dist/index.js"
   },
@@ -69,5 +69,5 @@
     "build": "node ../../scripts/build-packages.mjs build --package pskernel-lean-wasm",
     "clean": "node ../../scripts/build-packages.mjs clean --package pskernel-lean-wasm"
   },
-  "types": "./index.d.ts"
+  "types": "./dist/index.d.ts"
 }

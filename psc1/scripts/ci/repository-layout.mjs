@@ -79,6 +79,15 @@ const literalMoves={
   "scripts/universal-candidate-runner.mjs": "host-tools/execution/unified-candidate-runner.mjs"
 };
 const read=file=>fs.readFileSync(file,'utf8');
+// Original move evidence remains reproducible at its qualified checkpoint.
+// Runtime/watch behavior has a distinct installed/runtime qualification, not an exact-move claim.
+const layoutCheckpoint='94e0c13f6a4b434f73c859cc0c716cb6fb8d1340';
+const changedOwners=new Set(['npm-cli/compiler-api.mjs','host-tools/generated-compiler-session.mjs','test/installed/cli.test.mjs']);
+function migrationRead(file){
+ if(!changedOwners.has(file))return read(file);
+ const r=spawnSync('git',['show',layoutCheckpoint+':psc1/'+file],{encoding:'utf8',timeout:10000,maxBuffer:2*1024*1024});
+ assert.equal(r.status,0,r.stderr);return r.stdout;
+}
 function historical(file){
  const r=spawnSync('git',['show',baseline+':psc1/'+file],{encoding:'utf8',timeout:10000,maxBuffer:2*1024*1024});
  assert.equal(r.status,0,r.stderr);return r.stdout;
@@ -108,8 +117,8 @@ for(const m of moves){
   for(const [before,after] of Object.entries(literalMoves))expected=expected.split(before).join(after);
  if(m.from==='npm-cli/universal.mjs')expected=expected.replace("        : d.hostFiles.find((row) => row.path === 'host-tools/execution/unified-candidate-runner.mjs').sha256,","        : d.hostFiles.find(\n            (row) => row.path === 'host-tools/execution/unified-candidate-runner.mjs',\n          ).sha256,");
  if(m.from==='scripts/cli-installed.mjs')expected=expected.replace('proofscript 0.1.0-psc1.8','proofscript 0.1.0-psc1.9');
- assert.equal(read(m.to),expected,'moved implementation bytes changed: '+m.to);
- compared.push({from:m.from,to:m.to,relation:'exact-bytes-except-enumerated-paths-or-package-version'});
+ assert.equal(migrationRead(m.to),expected,'moved implementation bytes changed: '+m.to);
+ compared.push({from:m.from,to:m.to,relation:'exact-bytes-except-enumerated-paths-or-package-version',checkpoint:changedOwners.has(m.to)?layoutCheckpoint:'current'});
 }
 for(const file of ['host-tools/source-refactoring.mjs','host-tools/generated-target-tools.mjs','host-tools/generated-compiler-session.mjs']){
  let expected=historical(file);
@@ -117,7 +126,7 @@ for(const file of ['host-tools/source-refactoring.mjs','host-tools/generated-tar
  if(file==='host-tools/generated-target-tools.mjs')expected=expected
   .replace("import {pathToFileURL} from 'node:url';","import {fileURLToPath,pathToFileURL} from 'node:url';")
   .replace("path.resolve('host-tools/process/bounded-process.py')","fileURLToPath(new URL('./process/bounded-process.py',import.meta.url))");
- assert.equal(read(file),expected,'host relocation changed non-path bytes: '+file);
+ assert.equal(migrationRead(file),expected,'host relocation changed non-path bytes: '+file);
  compared.push({from:file,to:file,relation:file==='host-tools/generated-target-tools.mjs'?'enumerated-paths-and-module-relative-supervisor-resolution':'only-enumerated-runtime-path-literals'});
 }
 for(const name of ['STATUS','NPM_PACKAGE_WORK_STATE'])
@@ -202,7 +211,7 @@ for(const match of runtime.matchAll(/^def (psTs(?:Stack|Utf8)RuntimeSupport) : S
 }
 assert.equal(runtimeViews.length,2,'both runtime views must be derived from source');
 const result={schema:'psc1-repository-layout/1',testedCommit:process.env.GITHUB_SHA,baseline,status:'passed',nodes,edges,compared,checkedLinks,runtimeViews,
- historicalRecords:'byte-identical',humanQualified:false,semanticPreservation:'not-claimed',frozenPayloadPromotion:'not-claimed'};
+ layoutCheckpoint,historicalRecords:'byte-identical',humanQualified:false,semanticPreservation:'not-claimed',frozenPayloadPromotion:'not-claimed'};
 fs.writeFileSync(path.join(out,'repository-map.json'),JSON.stringify(result,null,2)+'\n');
 const rows=nodes.filter(n=>n.module).map(n=>'| '+n.module+' | ['+n.path+'](../../'+n.path+') | '+n.category+' |').join('\n');
 const receipts=nodes.filter(n=>n.category==='dated-evidence').map(n=>'- '+n.path).join('\n');

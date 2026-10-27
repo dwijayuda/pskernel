@@ -1,7 +1,8 @@
 # ProofScript CLI
 
-This guide covers the layout candidate `proofscript@0.1.0-psc1.9` and its unchanged
-CLI behavior. [The layout receipt](../PSC1_LAYOUT_QUALIFICATION_2026-10-26.json)
+This guide covers the runtime/watch candidate `proofscript@0.1.0-psc1.10`.
+Its new runtime/watch qualification is pending; the previous .9 layout evidence
+below does not qualify the .10 package. [The layout receipt](../PSC1_LAYOUT_QUALIFICATION_2026-10-26.json)
 records actual CI status, exact source/package identities and artifact information.
 Use its root and matching optional tarballs only after its installed gate passes.
 The preceding .8 qualification remains in the
@@ -13,12 +14,12 @@ from different receipts. Nothing is published to the npm registry.
 
 ## Start a project
 
-With Node 22.23.3, copy the root tarball into your project directory. Initialize
+With Node >=22.0.0, copy the root tarball into your project directory. Initialize
 package.json if needed, then install and run:
 
 ```sh
 npm init -y
-npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1.9.tgz
+npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1.10.tgz
 npm exec -- psc init
 npm exec -- psc --showConfig
 npm exec -- psc check
@@ -72,7 +73,7 @@ Add imports in the program and list every dependency explicitly, in the
 compiler's expected dependency order. Module names may be dotted. Paths are
 relative to this project file; they use forward slashes. The CLI snapshots
 exact bytes before creating the existing checked compiler session. A file
-change is seen by the next invocation. There is no implicit source discovery,
+change is seen by the next invocation or watch rebuild. There is no implicit source discovery,
 glob expansion, npm source loading, JavaScript project configuration or plugin
 execution. Existing inline {entryModule,sources,assurance} projects still work.
 
@@ -88,6 +89,73 @@ psc build -p examples/project -o dist/example
 psc build Main.ps --target ts --out dist/ts
 psc --help
 ```
+
+## Live source changes
+
+Use the same checked build with --watch (aliases -w and -watch):
+
+```sh
+npm exec -- psc build --out dist/app --publication-protocol portable-file --watch
+npm exec -- psc build Main.ps --target ts --out dist/ts --watch
+npm exec -- psc build Main.lean --target rust --out dist/rust -w
+npm exec -- psc build -p . --target wasm-core --out dist/wasm -watch
+npm exec -- psc check --watch
+```
+
+TS/Rust output still needs the exact optional consumers/SDKs described below.
+Use the immutable artifact/runtimeArtifact paths in each success receipt: TS
+includes target.ts, target.mjs and target.d.ts; Rust includes target.rs and a
+checked rlib; Wasm includes target.wasm and its typed JS transport. JS target
+uses target.mjs. File extensions .js/.ts/.rs are output representations, not
+different source grammars. The compiler never executes an application on save.
+
+Only declared inputs and the selected project JSON are observed. A 500ms
+metadata poll detects dependencies, atomic editor replacements, deletions,
+recreation and project file-list edits. It avoids recursive watcher platform/
+inode differences and output-triggered loops. Saves debounce; attempts run
+serially. Every attempt performs a full bounded source recapture, genuine
+independent admission and the existing target consumer checks. This first
+version has no incremental semantic cache or claim of TypeScript watch speed.
+
+Edits during checking mark the next attempt dirty. A private worker verifies
+the captured identity before execution and again immediately before publication;
+a superseded result refuses publication. A save after that last guard is
+processed by the next queued attempt. Failed/invalid/missing sources retain
+the last committed generation and resume after repair. No automatic SDK
+installation, source globs or plugin execution occurs. Existing publisher
+lock/orphan recovery and retained generation policies remain; watch does not
+silently remove output history.
+
+Each success is one unchanged JSON receipt line on stdout. Progress and errors
+go to stderr; --diagnostics=json uses proofscript-watch-event/1 for progress and
+the existing diagnostic schema for errors. No terminal clearing or fabricated
+compiler spans. Ctrl+C exits130; SIGTERM exits143. Linux termination targets
+the attempt's process group with a2s kill escalation. --showConfig and --watch
+are deliberately incompatible.
+
+## Runtime compatibility
+
+Node's user requirement is >=22.0.0, not one exact patch. CI records exact
+tested runtime versions and executable hashes separately. The new Node/Bun
+matrix must pass before claiming this candidate qualified; later untested
+versions are a compatibility policy, not automatically new CI evidence.
+
+Bun >=1.4.0 is the additional runtime under qualification. After the npm tarball
+installation above, run the locally installed CLI explicitly under Bun:
+
+```sh
+bun --no-install --no-env-file run --bun psc check
+bun --no-install --no-env-file run --bun psc build --out dist/app --watch
+```
+
+The --bun flag matters: Bun otherwise respects a CLI's Node shebang. Installed
+Bun runtime tests use actual Bun processes; npm remains the tested installer.
+The child pipeline disables automatic installs, macros and implicit env files.
+Bun's --check has different behavior from Node's parse-only check, so the host
+uses an explicit Bun JS parser and still runs the mandatory separate export/API
+consumer. Default independent checking stays the genuine official Lean Wasm
+kernel. Deno/other runtimes, additional platforms, Bun package-manager offline
+installation and performance qualification remain unqualified.
 
 ## Engine, target and independent checker
 
@@ -194,7 +262,7 @@ G3 payloads. It does not qualify a new G2/G3 chain.
 The preceding CLI behavior passed its recorded Linux run, including all existing
 application/kernel/dispatch/publication/type regressions and the new CLI tasks.
 Portable Node implementation does not establish actual Windows/macOS
-publication. A public arbitrary extension SDK, watch/incremental compilation,
+publication. A public arbitrary extension SDK, incremental semantic caching,
 richer compiler-origin structured diagnostics and final registry publication
 remain separate work. The independent human maintainer trial remains pending
 its arranged participant; CLI automation is not human usability evidence.
@@ -207,6 +275,8 @@ The developer adapter is deliberately separate from checking authority:
 | --- | --- |
 | Help, diagnostics, child transport and signals | [proofscript-cli.mjs](https://github.com/dwijayuda/pskernel/blob/7c27d754550ed92cd8ab19a51f8c768a919963b0/psc1/npm-cli/proofscript-cli.mjs#L66) |
 | Finite options and source-only project capture | [cli-project.mjs](https://github.com/dwijayuda/pskernel/blob/7c27d754550ed92cd8ab19a51f8c768a919963b0/psc1/npm-cli/cli-project.mjs#L62) |
+| Watch supervision / guarded attempt | [cli-watch.mjs](../../npm-cli/cli-watch.mjs), [cli-watch-worker.mjs](../../npm-cli/cli-watch-worker.mjs) |
+| Runtime requirements / syntax consumer | [runtime-policy.mjs](../../host-tools/runtime-policy.mjs) |
 | Bounded exact-byte file snapshots | [readInput](https://github.com/dwijayuda/pskernel/blob/7c27d754550ed92cd8ab19a51f8c768a919963b0/psc1/npm-cli/cli-project.mjs#L19) |
 | Exclusive initialization | [initializeProject](https://github.com/dwijayuda/pskernel/blob/7c27d754550ed92cd8ab19a51f8c768a919963b0/psc1/npm-cli/cli-project.mjs#L205) |
 | Existing checked command and API, unchanged | [universal-cli.mjs](https://github.com/dwijayuda/pskernel/blob/7c27d754550ed92cd8ab19a51f8c768a919963b0/psc1/npm-cli/universal-cli.mjs), [universal.mjs](https://github.com/dwijayuda/pskernel/blob/7c27d754550ed92cd8ab19a51f8c768a919963b0/psc1/npm-cli/universal.mjs) |

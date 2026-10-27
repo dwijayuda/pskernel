@@ -1,6 +1,6 @@
 # PSC1 development roadmap
 
-Updated 2026-10-26 Asia/Jakarta. This is the authoritative remaining-work queue.
+Updated 2026-10-27 Asia/Jakarta. This is the authoritative remaining-work queue.
 Practical Core v1 remains frozen at14 feature families and 37 finite criteria.
 Completed detail is preserved in [the previous roadmap](history/ROADMAP_BEFORE_LAYOUT_2026-10-26.md)
 and [dated evidence](evidence/README.md).
@@ -29,7 +29,7 @@ own exact prior scope, identities and limitations.
 | 1 | Repository organization | Qualified: [receipt](PSC1_LAYOUT_QUALIFICATION_2026-10-26.json). Source 40344469855 passes 37/37; installed40344458391 and current-source WasmG1/40344458240 pass. Canonical owners/compatibility paths, exact move/path checks, generated navigation and unchanged frozen payloads. Human understanding is separate. |
 | 2 | Independent maintainer trial | Pending human participation; the user can arrange a maintainer. Record commit, navigation mistakes, elapsed time, assistance and a real small change. No AI/CI comprehension claim. |
 | 3 | Compiler-origin structured diagnostics/editor integration | Pending: actual spans/provenance, both grammars, machine/human consumers and malformed-input refusals. |
-| 4 | Qualified watch/incremental behavior | Pending: dependency changes, cancellation, stale results, resource bounds and publication preservation. No second semantic compiler. |
+| 4 | Runtime compatibility and checked watch | Implemented in PR#193; Linux qualification pending. Minimum Node>=22/Bun>=1.4 policy, actual runtime matrix, bounded dependency/config polling, source-identity publication veto, signals and both grammars' JS/TS/Rust/Wasm output. [Decision/acceptance](development/runtime-and-watch.md). Incremental semantic caching remains deferred. |
 | 5 | Component String/IO and export selection | Pending: reuse shared/native ABI; both grammars/four engines, actual validation/execution, exact exports and refusals. Public component ABI currently Bool only. |
 | 6 | Full Python/PHP practical applications | Pending: real CLI/JSON/file/multi-module observations against checked reference; retain corpus/Unicode/integer/loop/IO tests. Providers remain optional. |
 | 7 | Automatic source-package capture | Pending: bounded deterministic order, exact identities, cycle/missing/stale refusals, real multi-package applications. Metadata never executes code or grants authority. |

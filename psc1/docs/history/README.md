@@ -12,3 +12,7 @@ when following historical links:
 [Current navigation](../README.md), [current roadmap](../PSC1_DEVELOPMENT_ROADMAP.md)
 and [exact evidence](../PSC1_LAYOUT_QUALIFICATION_2026-10-26.json) distinguish current
 scope from historical identities. Never relabel a frozen qualification for new code.
+
+The runtime/watch change preserves its previous work state verbatim in
+AI_WORK_STATE_BEFORE_RUNTIME_WATCH_2026-10-27.md. Its original links resolve in
+[the PR#192 checkpoint](https://github.com/dwijayuda/pskernel/blob/94e0c13f6a4b434f73c859cc0c716cb6fb8d1340/psc1/AI_WORK_STATE.md).

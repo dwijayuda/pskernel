@@ -6,7 +6,7 @@ feat/psc1-watch-runtime-20261027. Fetch live HEAD/CI before updates; preserve
 single-parent expected-HEAD non-force history. Connected GitHub/Linux Actions only.
 No merge or npm publication authorized.
 
-## Current implementation; Apache-2.0 .11 qualification pending
+## Current implementation and qualification
 
 The .9 package refuses any Node version except22.23.3 before checking.
 This host change replaces both installed/session exact-version refusals with
@@ -37,8 +37,9 @@ unchanged. Rust transport shares the runtime policy and original Linux lifetime
 guard; Wasm transport is unchanged. Manifest/index pins are explicitly refreshed. Source/installed policy,
 real dependency/config/atomic-save/recovery/watch/refusal/target/signal tests,
 all prior regressions and actual Node/Bun runtime matrices are required.
-Current code is implemented, not yet qualified. CI/results and new ZIP identities
-will replace this pending section only after terminal success.
+Full source run40442150370 at dfb9507ad8700a24a503a4e52bda00f963af279d
+passed all selected source gates, scoped seven-backend execution and37/37 finite
+Practical Core criteria. Installed artifact qualification is tracked separately.
 
 ## Preserved evidence and boundaries
 
@@ -80,11 +81,29 @@ native Rust/Wasm execution efficient, with organized source/debug output. The
 module-graph pilot and its own self-host/fixed-point qualification are pending;
 no textual split or package-name-only completion claim.
 
-Pre-license implementation91c5d898adea8e8d184b7927adf2ed988af8c2d8 has actual
-Bun1.4.4/four-engine/both-grammar compile/watch/refusal success. Run40437783359
-also passed full installed watch, typed TS/Rust/Wasm targets, superseded-input
-veto and actual Node/Bun native-child reaping, then the frozen application gate.
-Remaining installed gates were still running when this licensing layer began.
-Source40437789669 passed static/native/focused/closures/G1/lossless/trace/integration;
-full release job121975136632 was still running. These are exact pre-license
-partial results, not qualification of .11. Final receipts must use live terminal CI.
+## Actual current evidence
+
+Full source [run40442150370](https://github.com/dwijayuda/pskernel/actions/runs/40442150370)
+is terminal success at dfb9507ad8700a24a503a4e52bda00f963af279d. The source
+qualification records37 qualified finite criteria, zero blocked and scoped actual
+execution across all seven targets; this does not promote different frozen executors.
+
+Installed [run40446238737](https://github.com/dwijayuda/pskernel/actions/runs/40446238737)
+tests f35fc543e18aaef45404470627b9631ac50181b6. It has passed source preflight,
+actual nine-owned/two-vendor tarball license assertions,55 local/global CLI requests,
+Bun1.4.4 four-engine/both-grammar compilation/refusals and all11 full watch cases.
+Existing application/publication gates and runtime matrix remain pending.
+
+Earlier main run40442145356 attempts at dfb9507 timed out waiting for the first
+non-JS target watch receipt. Their test passed an early empty stderr string and
+hid live failure details. f35fc543 adds per-case and dynamic failure diagnostics
+without relaxing assertions/timeouts. Exact candidate root
+1f0a6d28aaa01fc52a810ded365b3c16ab5e1db8053542c575e79551b0afffaf
+also passed target probe40443670655 and full-watch probes40444312302 and40445125239.
+The latter includes all11 cases after55 CLI requests and real Bun compilation,
+with actual native-child reaping under Node/Bun. Diagnostic branch results are
+not substituted for main qualification. Earlier intermittent timeout remains
+unexplained; retain its evidence rather than claiming a diagnosed product fix.
+
+[Runtime/watch receipt](docs/PSC1_RUNTIME_WATCH_QUALIFICATION_2026-10-27.json)
+owns exact attempts, package hashes and remaining evidence boundaries.

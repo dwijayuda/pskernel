@@ -1,7 +1,7 @@
 {
   "schema": "psc1-runtime-watch-qualification/1",
   "updated": "2026-10-27",
-  "status": "pending-apache2-package-qualification",
+  "status": "source-qualified-installed-retry-pending",
   "pullRequest": 193,
   "baseCommit": "94e0c13f6a4b434f73c859cc0c716cb6fb8d1340",
   "firstImplementationCommit": "91bcbd107f375eea5cf5f87f15a9be9fe561b7c4",
@@ -92,6 +92,15 @@
       "run": 40441416370,
       "job": 121982781750,
       "reason": "Nine actual owned-tarball SPDX/license and two retained SDK assertions completed, then the receipt writer lacked dist/cli in a fresh installed job. Each new evidence producer now creates its own output directory."
+    },
+    {
+      "commit": "dfb9507ad8700a24a503a4e52bda00f963af279d",
+      "run": 40442145356,
+      "jobs": [
+        121984952923,
+        121993470995
+      ],
+      "reason": "Installed full-watch initial non-JS target receipt timed out; original test captured stderr before waiting and hid the actual child diagnostic. No candidate qualification. Added live per-case/failure diagnostics at f35fc543e18aaef45404470627b9631ac50181b6; no timeout or admission relaxation."
     }
   ],
   "finalRelease": false,
@@ -99,7 +108,7 @@
   "humanTrial": "pending independent participant",
   "mergeOrPublish": "not-authorized",
   "executionBundlePolicy": {
-    "version": "0.1.0-psc1.10",
+    "version": "0.1.0-psc1.11",
     "compilerPayloads": "byte-identical",
     "rustTransport": "shared runtime floor and explicit runtime arguments; original Linux lifetime guard unchanged",
     "wasmTransport": "unchanged",
@@ -134,5 +143,70 @@
     "archiveSha256": "946117f4416110aef3b1c0433f508f8bd37af169bba686847fdecc7139f8cd0e",
     "archiveIndependentCompilation": false,
     "oldExecutors": "retained references; no new modular fixed-point claim"
+  },
+  "sourceQualification": {
+    "run": 40442150370,
+    "commit": "dfb9507ad8700a24a503a4e52bda00f963af279d",
+    "status": "success",
+    "finiteCriteria": {
+      "qualified": 37,
+      "blocked": 0
+    },
+    "sevenBackendExecution": "passed-scoped-execution",
+    "compilerSourceCommit": "0c28eb59b8e33451501ae50f42897235768a1f9d",
+    "scope": "dependency-selected gates plus full source qualification; distinct frozen compiler closure retained",
+    "gateJob": 121996287127,
+    "fullJob": 121988203998,
+    "jobs": {
+      "success": 15,
+      "skippedBenchmark": 1
+    }
+  },
+  "diagnosticEvidence": {
+    "qualification": false,
+    "branch": "diagnostic/psc1-cli-targets-20261027",
+    "exactCandidateRootSha256": "1f0a6d28aaa01fc52a810ded365b3c16ab5e1db8053542c575e79551b0afffaf",
+    "runs": [
+      {
+        "id": 40443670655,
+        "status": "success",
+        "scope": "both grammars TS/Rust/Wasm one-shot plus initial TS watch"
+      },
+      {
+        "id": 40444042001,
+        "status": "failure",
+        "scope": "diagnostic failed on expected project refusals; diagnostic assertion corrected"
+      },
+      {
+        "id": 40444312302,
+        "status": "success",
+        "scope": "nine full watch cases Node; live diagnostic observer"
+      },
+      {
+        "id": 40445125239,
+        "status": "success",
+        "scope": "55 CLI requests, Bun actual compatibility, all11 full watch cases including native Node/Bun reap"
+      }
+    ],
+    "unresolved": "Earlier full-watch receipt timeout not reproduced after live diagnostics; root cause remains open. Successful probes are not qualification."
+  },
+  "installedQualification": {
+    "run": 40446238737,
+    "commit": "f35fc543e18aaef45404470627b9631ac50181b6",
+    "status": "pending",
+    "passed": [
+      "source preflight",
+      "nine owned tarballs and two preserved vendor SDK archives",
+      "55 offline local/global CLI requests",
+      "actual Bun1.4.4 four engines/both grammars and watch",
+      "all11 full watch cases",
+      "frozen practical applications"
+    ],
+    "pending": [
+      "existing dispatch/publication regressions",
+      "remaining target-consumer gates",
+      "six-entry runtime matrix",
+      "seven-row installable root seal"
+    ]
   }
 }

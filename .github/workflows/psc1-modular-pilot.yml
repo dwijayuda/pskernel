@@ -65,6 +65,9 @@ jobs:
       - name: Independently checked offline modular packages and negative tests
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: node test/modular/packages.test.mjs
+      - name: Execute admitted extended compiler packages and consumers
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: node test/modular/extended-packages.test.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

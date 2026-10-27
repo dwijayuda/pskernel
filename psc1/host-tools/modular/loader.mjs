@@ -41,8 +41,14 @@ export function createPilotLoader(rootUrl,expectedDigest){
     const bytes=file(root,'cohort.json');
     if(hash(bytes)!==expectedDigest)fail('COHORT_IDENTITY');
     const d=JSON.parse(bytes);
-    if(d.schema!=='psc1-modular-installed-cohort/1'||d.packages.length!==3||
-      d.version!=='0.1.0-psc1-modular-pilot.0'||d.logicalAdmission!=='accepted'||
+    const legacy=d.schema==='psc1-modular-installed-cohort/1';
+    const names=legacy?['@proofscript/modular-pilot-runtime','@proofscript/modular-pilot-names','@proofscript/modular-pilot-consumer']:d.packageNames;
+    if((!legacy&&d.schema!=='psc1-modular-installed-cohort/2')||!Array.isArray(names)||
+      names.length<3||names.length>(legacy?3:9)||new Set(names).size!==names.length||
+      names[0]!=='@proofscript/modular-pilot-runtime'||
+      names.some(name=>!/^@proofscript\/modular-pilot-[a-z0-9-]{1,114}$/.test(name))||
+      d.packages.length!==names.length||d.protocol!==(legacy?'psc1-modular-pilot/1':'psc1-modular-pilot/2')||
+      d.version!==(legacy?'0.1.0-psc1-modular-pilot.0':'0.1.0-psc1-modular-pilot.1')||d.logicalAdmission!=='accepted'||
       d.checkerCommit!=='eb6cafb7290e8bd5f2937522d8d804f58f02bafc')fail('COHORT_POLICY');
     if(inventory(root).join(',')!==['LICENSE','NOTICE','cohort.json','index.d.mts','index.mjs','loader.mjs','package.json'].sort().join(','))
       fail('ROOT_INVENTORY');
@@ -50,7 +56,7 @@ export function createPilotLoader(rootUrl,expectedDigest){
     const scope=path.dirname(root);let total=bytes.length;
     const selected=[];
     for(const [index,pkg]of d.packages.entries()){
-      const name=['@proofscript/modular-pilot-runtime','@proofscript/modular-pilot-names','@proofscript/modular-pilot-consumer'][index];
+      const name=names[index];
       if(pkg.name!==name||pkg.version!==d.version)fail('PACKAGE_COHORT');
       const target=path.join(scope,name.split('/')[1]);
       if(fs.realpathSync(target)!==target||!fs.lstatSync(target).isDirectory())fail('PACKAGE_ROOT');
@@ -66,7 +72,7 @@ export function createPilotLoader(rootUrl,expectedDigest){
         if(!pkg.files.some(pin=>pin.path===targetName))fail('PACKAGE_ENTRY');
       selected.push(target);
     }
-    return{descriptor:d,roots:selected};
+    return{descriptor:d,roots:selected,names};
   }
   return Object.freeze({
     verify:()=>verify().descriptor,
@@ -75,9 +81,10 @@ export function createPilotLoader(rootUrl,expectedDigest){
       const checked=verify(),modules=[];
       for(const dir of checked.roots)modules.push(await import(pathToFileURL(path.join(dir,'dist',variant,'index.mjs')).href));
       verify();
-      const expected='psc1-modular-pilot/1:'+variant+':'+checked.descriptor.sourceClosureDigest;
+      const expected=checked.descriptor.protocol+':'+variant+':'+checked.descriptor.sourceClosureDigest;
       if(modules[0].__ps$cohort!==expected)fail('RUNTIME_COHORT');
-      return Object.freeze({runtime:modules[0],names:modules[1],consumer:modules[2],
+      return Object.freeze({runtime:modules[0],names:modules[checked.names.indexOf('@proofscript/modular-pilot-names')],consumer:modules.at(-1),
+        modules:Object.freeze(Object.fromEntries(checked.names.map((name,index)=>[name,modules[index]]))),
         sourceClosureDigest:checked.descriptor.sourceClosureDigest,variant});
     }
   });

@@ -98,7 +98,7 @@ export function buildPilot({sources,out,producer,checker,sourceVariants,requestI
           files:[path.join(pkg.root,'dist/js/index.mjs')]},path.join(temporary,'infer.json'));
         put(pkg.root,'dist/js/index.d.mts',fs.readFileSync(path.join(infer,'index.d.mts'),'utf8')+candidate.js[index].declarations);
       }else put(pkg.root,'dist/js/index.d.mts',candidate.js[index].declarations);
-      compileTs(typescript,{compilerOptions:{strict:true,noEmitOnError:true,target:'ES2022',module:'NodeNext',
+      compileTs(typescript,{compilerOptions:{strict:true,verbatimModuleSyntax:true,noEmitOnError:true,target:'ES2022',module:'NodeNext',
         moduleResolution:'NodeNext',declaration:true,declarationMap:true,sourceMap:true,inlineSources:true,
         types:[],lib:['ES2022','DOM'],rootDir:path.join(pkg.root,'src/ts'),outDir:path.join(pkg.root,'dist/ts'),paths},
         files:[path.join(pkg.root,'src/ts/index.mts')]},path.join(temporary,'unit-'+index+'.json'));

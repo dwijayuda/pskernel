@@ -124,6 +124,7 @@ def packetTokens (entries : List PsMinRegCoreEntry) : List Token :=
 
 theorem quotedNumber_recognizes (expected : Nat) :
     Recognizes (quotedNumberTokens expected) (psMinRegByteQuotedNumber expected) := by
+  change Recognizes _ (fun bytes => psMinRegByteQuotedNumber _ bytes)
   unfold quotedNumberTokens psMinRegByteQuotedNumber
   repeat' first
       | apply recognizes_then
@@ -133,6 +134,7 @@ theorem quotedNumber_recognizes (expected : Nat) :
 
 theorem text_recognizes (text : List Nat) :
     Recognizes (textTokens text) (psMinRegByteText text) := by
+  change Recognizes _ (fun bytes => psMinRegByteText _ bytes)
   unfold textTokens psMinRegByteText
   repeat' first
       | apply recognizes_then
@@ -145,6 +147,7 @@ theorem name_recognizes (name : PsMinCoreName) :
     Recognizes (nameTokens name) (psMinRegByteName name) := by
   induction name with
   | anonymous =>
+    change Recognizes _ (fun bytes => psMinRegByteName _ bytes)
     unfold nameTokens psMinRegByteName
     repeat' first
       | apply recognizes_then
@@ -154,6 +157,7 @@ theorem name_recognizes (name : PsMinCoreName) :
       | exact quotedNumber_recognizes _
       | exact text_recognizes _
   | str parent text ih =>
+    change Recognizes _ (fun bytes => psMinRegByteName _ bytes)
     unfold nameTokens psMinRegByteName
     repeat' first
       | apply recognizes_then
@@ -164,6 +168,7 @@ theorem name_recognizes (name : PsMinCoreName) :
       | exact text_recognizes _
       | exact ih
   | num parent value ih =>
+    change Recognizes _ (fun bytes => psMinRegByteName _ bytes)
     unfold nameTokens psMinRegByteName
     repeat' first
       | apply recognizes_then
@@ -178,6 +183,7 @@ theorem level_recognizes (level : Nat) :
     Recognizes (levelTokens level) (psMinRegByteLevel level) := by
   induction level with
   | zero =>
+    change Recognizes _ (fun bytes => psMinRegByteLevel _ bytes)
     unfold levelTokens psMinRegByteLevel
     repeat' first
       | apply recognizes_then
@@ -188,6 +194,7 @@ theorem level_recognizes (level : Nat) :
       | exact text_recognizes _
       | exact name_recognizes _
   | succ rest ih =>
+    change Recognizes _ (fun bytes => psMinRegByteLevel _ bytes)
     unfold levelTokens psMinRegByteLevel
     repeat' first
       | apply recognizes_then
@@ -203,6 +210,7 @@ theorem levelsTail_recognizes (levels : List Nat) :
     Recognizes (levelsTailTokens levels) (psMinRegByteLevelsTail levels) := by
   induction levels with
   | nil =>
+    change Recognizes _ (fun bytes => psMinRegByteLevelsTail _ bytes)
     unfold levelsTailTokens psMinRegByteLevelsTail
     repeat' first
       | apply recognizes_then
@@ -214,6 +222,7 @@ theorem levelsTail_recognizes (levels : List Nat) :
       | exact name_recognizes _
       | exact level_recognizes _
   | cons head rest ih =>
+    change Recognizes _ (fun bytes => psMinRegByteLevelsTail _ bytes)
     unfold levelsTailTokens psMinRegByteLevelsTail
     repeat' first
       | apply recognizes_then
@@ -262,7 +271,9 @@ theorem expr_recognizes (fuel : Nat) (expr : PsMinCoreExpr) :
     intro bytes rest checked
     simp [psMinRegByteExpr] at checked
   | succ fuel ih =>
-    cases expr <;> unfold exprTokens psMinRegByteExpr
+    cases expr
+    all_goals change Recognizes _ (fun bytes => psMinRegByteExpr _ _ bytes)
+    all_goals unfold exprTokens psMinRegByteExpr
     all_goals
       repeat' first
         | apply recognizes_then
@@ -278,6 +289,7 @@ theorem expr_recognizes (fuel : Nat) (expr : PsMinCoreExpr) :
 
 theorem definition_recognizes (decl : PsMinCoreDeclaration) :
     Recognizes (definitionTokens decl) (psMinRegByteDefinition decl) := by
+  change Recognizes _ (fun bytes => psMinRegByteDefinition _ bytes)
   unfold definitionTokens psMinRegByteDefinition
   repeat' first
       | apply recognizes_then
@@ -295,6 +307,7 @@ theorem definition_recognizes (decl : PsMinCoreDeclaration) :
 
 theorem constructor_recognizes (ctor : PsMinRegCoreConstructor) :
     Recognizes (constructorTokens ctor) (psMinRegByteConstructor ctor) := by
+  change Recognizes _ (fun bytes => psMinRegByteConstructor _ bytes)
   unfold constructorTokens psMinRegByteConstructor
   repeat' first
       | apply recognizes_then
@@ -315,6 +328,7 @@ theorem constructorsTail_recognizes (constructors : List PsMinRegCoreConstructor
     Recognizes (constructorsTailTokens constructors) (psMinRegByteConstructorsTail constructors) := by
   induction constructors with
   | nil =>
+    change Recognizes _ (fun bytes => psMinRegByteConstructorsTail _ bytes)
     unfold constructorsTailTokens psMinRegByteConstructorsTail
     repeat' first
       | apply recognizes_then
@@ -332,6 +346,7 @@ theorem constructorsTail_recognizes (constructors : List PsMinRegCoreConstructor
       | exact constructor_recognizes _
       | exact expr_recognizes _ _
   | cons head rest ih =>
+    change Recognizes _ (fun bytes => psMinRegByteConstructorsTail _ bytes)
     unfold constructorsTailTokens psMinRegByteConstructorsTail
     repeat' first
       | apply recognizes_then
@@ -373,6 +388,7 @@ theorem constructors_recognizes (constructors : List PsMinRegCoreConstructor) :
 
 theorem group_recognizes (group : PsMinRegCoreGroup) :
     Recognizes (groupTokens group) (psMinRegByteGroup group) := by
+  change Recognizes _ (fun bytes => psMinRegByteGroup _ bytes)
   unfold groupTokens psMinRegByteGroup
   repeat' first
       | apply recognizes_then
@@ -419,6 +435,7 @@ theorem entriesTail_recognizes (entries : List PsMinRegCoreEntry) :
     Recognizes (entriesTailTokens entries) (psMinRegByteEntriesTail entries) := by
   induction entries with
   | nil =>
+    change Recognizes _ (fun bytes => psMinRegByteEntriesTail _ bytes)
     unfold entriesTailTokens psMinRegByteEntriesTail
     repeat' first
       | apply recognizes_then
@@ -440,6 +457,7 @@ theorem entriesTail_recognizes (entries : List PsMinRegCoreEntry) :
       | exact entry_recognizes _
       | exact expr_recognizes _ _
   | cons head rest ih =>
+    change Recognizes _ (fun bytes => psMinRegByteEntriesTail _ bytes)
     unfold entriesTailTokens psMinRegByteEntriesTail
     repeat' first
       | apply recognizes_then
@@ -489,6 +507,7 @@ theorem entries_recognizes (entries : List PsMinRegCoreEntry) :
 
 theorem packet_recognizes (entries : List PsMinRegCoreEntry) :
     Recognizes (packetTokens entries) (psMinRegBytePacket entries) := by
+  change Recognizes _ (fun bytes => psMinRegBytePacket _ bytes)
   unfold packetTokens psMinRegBytePacket
   repeat' first
       | apply recognizes_then

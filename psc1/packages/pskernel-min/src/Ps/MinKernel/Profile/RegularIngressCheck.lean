@@ -57,6 +57,32 @@ def psMinRegCoreTypedPrimitive (total visible : Nat) (groups : List PsMinRegCore
     | _ => Option.none
   | _ => Option.none
 
+-- A user recursor's result code belongs to its own family/older prefix.
+-- Lowering is partial: references to newer families cannot be represented by R2.
+def psMinRegCoreLowerType (fuel amount : Nat) (type : PsMinRegTy) : Option PsMinRegTy :=
+  match fuel with
+  | Nat.zero => Option.none
+  | Nat.succ remaining =>
+    match type with
+    | .empty => Option.some PsMinRegTy.empty
+    | .unit => Option.some PsMinRegTy.unit
+    | .nat => Option.some PsMinRegTy.nat
+    | .boolean => Option.some PsMinRegTy.boolean
+    | .data index => if Nat.blt index amount then Option.none else
+        Option.some (PsMinRegTy.data (Nat.sub index amount))
+    | .arr domain result =>
+      match psMinRegCoreLowerType remaining amount domain with
+      | Option.none => Option.none
+      | Option.some a => match psMinRegCoreLowerType remaining amount result with
+        | Option.none => Option.none
+        | Option.some b => Option.some (PsMinRegTy.arr a b)
+    | .list element => match psMinRegCoreLowerType remaining amount element with
+      | Option.none => Option.none
+      | Option.some a => Option.some (PsMinRegTy.list a)
+    | .option element => match psMinRegCoreLowerType remaining amount element with
+      | Option.none => Option.none
+      | Option.some a => Option.some (PsMinRegTy.option a)
+
 def psMinRegCoreRecursor (total visible : Nat) (groups : List PsMinRegCorePlan)
     (expr : PsMinCoreExpr) : Option PsMinOpTerm :=
   match expr with
@@ -74,8 +100,11 @@ def psMinRegCoreRecursor (total visible : Nat) (groups : List PsMinRegCorePlan)
           | Option.some binding =>
             match psMinRegCoreMotiveType total visible groups (PsMinCoreExpr.constant binding.owner List.nil) motive with
             | Option.none => Option.none
-            | Option.some result => Option.some (PsMinOpTerm.base
-                (PsMinRegTerm.recursor binding.slot 1 0 0 1 binding.minors result))
+            | Option.some result =>
+              match psMinRegCoreLowerType 256 binding.slot result with
+              | Option.none => Option.none
+              | Option.some localResult => Option.some (PsMinOpTerm.base
+                  (PsMinRegTerm.recursor binding.slot 1 0 0 1 binding.minors localResult))
       else Option.none
     | .app base element =>
       match base with

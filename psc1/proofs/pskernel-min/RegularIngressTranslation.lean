@@ -181,6 +181,74 @@ theorem constructor_fields_translation (fuel older : Nat) (groups : List PsMinRe
             (field_translation _ _ _ _ _ hd) (ih _ _ hb)
     | _ => simp [psMinRegCoreConstructorFields] at h
 
+
+-- A mathematical ambient-code lift, independent of the partial lowering code.
+def liftCode (amount : Nat) : PsMinRegTy → PsMinRegTy
+  | .empty => .empty
+  | .unit => .unit
+  | .nat => .nat
+  | .boolean => .boolean
+  | .data index => .data (index + amount)
+  | .arr domain result => .arr (liftCode amount domain) (liftCode amount result)
+  | .list element => .list (liftCode amount element)
+  | .option element => .option (liftCode amount element)
+
+theorem liftCode_zero (type : PsMinRegTy) : liftCode 0 type = type := by
+  induction type <;> simp_all [liftCode]
+
+theorem liftCode_one (type : PsMinRegTy) : liftCode 1 type = psMinRegLiftTy type := by
+  induction type <;> simp_all [liftCode, psMinRegLiftTy]
+
+theorem liftCode_add (a b : Nat) (type : PsMinRegTy) :
+    liftCode (a + b) type = liftCode b (liftCode a type) := by
+  induction type <;> simp_all [liftCode, Nat.add_assoc]
+
+theorem lower_type_restores (fuel amount : Nat) (type lowered : PsMinRegTy)
+    (h : psMinRegCoreLowerType fuel amount type = some lowered) :
+    liftCode amount lowered = type := by
+  induction fuel generalizing type lowered with
+  | zero => simp [psMinRegCoreLowerType] at h
+  | succ fuel ih =>
+    cases type with
+    | data index =>
+      simp only [psMinRegCoreLowerType] at h
+      split at h
+      next => contradiction
+      next bounded =>
+        cases h
+        have bound : amount ≤ index := Nat.le_of_not_gt (by simpa only [Nat.blt_eq] using bounded)
+        exact congrArg PsMinRegTy.data (Nat.sub_add_cancel bound)
+    | arr domain result =>
+      cases hd : psMinRegCoreLowerType fuel amount domain with
+      | none => simp [psMinRegCoreLowerType, hd] at h
+      | some a =>
+        cases hr : psMinRegCoreLowerType fuel amount result with
+        | none => simp [psMinRegCoreLowerType, hd, hr] at h
+        | some b =>
+          simp only [psMinRegCoreLowerType, hd, hr, Option.some.injEq] at h
+          subst lowered
+          exact congr_binary PsMinRegTy.arr (ih _ _ hd) (ih _ _ hr)
+    | list element =>
+      cases ht : psMinRegCoreLowerType fuel amount element with
+      | none => simp [psMinRegCoreLowerType, ht] at h
+      | some a =>
+        simp only [psMinRegCoreLowerType, ht, Option.some.injEq] at h
+        subst lowered
+        exact congrArg PsMinRegTy.list (ih _ _ ht)
+    | option element =>
+      cases ht : psMinRegCoreLowerType fuel amount element with
+      | none => simp [psMinRegCoreLowerType, ht] at h
+      | some a =>
+        simp only [psMinRegCoreLowerType, ht, Option.some.injEq] at h
+        subst lowered
+        exact congrArg PsMinRegTy.option (ih _ _ ht)
+    | _ => simp_all [psMinRegCoreLowerType, liftCode]
+
+#print axioms liftCode_zero
+#print axioms liftCode_one
+#print axioms liftCode_add
+#print axioms lower_type_restores
+
 #print axioms type_translation
 #print axioms type_closed
 #print axioms ground_field_translation

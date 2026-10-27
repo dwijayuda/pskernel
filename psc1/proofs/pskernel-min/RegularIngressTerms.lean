@@ -38,6 +38,14 @@ inductive ConstructorBinding (total visible : Nat) (groups : List PsMinRegCorePl
       (seen : plan.ordinal < visible) (bounded : plan.ordinal < total) :
       ConstructorBinding total visible groups ctor.name (total - (plan.ordinal + 1)) index
 
+theorem constructor_binding_cons (total visible : Nat) (groups : List PsMinRegCorePlan)
+    (head : PsMinRegCorePlan) (name : PsMinCoreName) (slot index : Nat)
+    (h : ConstructorBinding total visible groups name slot index) :
+    ConstructorBinding total visible (head :: groups) name slot index := by
+  cases h with
+  | bound plan ctor index member position seen bounded =>
+    exact .bound plan ctor index (List.mem_cons_of_mem head member) position seen bounded
+
 theorem constructor_binding (total visible : Nat) (groups : List PsMinRegCorePlan)
     (name : PsMinCoreName) (binding : PsMinRegCoreConstructorBinding)
     (h : psMinRegCoreFindConstructor total visible groups name = some binding) :
@@ -60,20 +68,12 @@ theorem constructor_binding (total visible : Nat) (groups : List PsMinRegCorePla
             (by simpa only [Nat.blt_eq] using seen)
             (by simpa only [Nat.blt_eq] using bounded)
         | none =>
-          have rest := ih (by simpa only [hc] using h)
-          cases rest with
-          | bound found ctor index member position visible bound =>
-            exact .bound found ctor index (List.mem_cons_of_mem plan member) position visible bound
+          exact constructor_binding_cons total visible tail plan name binding.slot binding.index
+            (ih (by simpa only [hc] using h))
       next =>
-        have rest := ih h
-        cases rest with
-        | bound found ctor index member position visible bound =>
-          exact .bound found ctor index (List.mem_cons_of_mem plan member) position visible bound
+        exact constructor_binding_cons total visible tail plan name binding.slot binding.index (ih h)
     next =>
-      have rest := ih h
-      cases rest with
-      | bound found ctor index member position visible bound =>
-        exact .bound found ctor index (List.mem_cons_of_mem plan member) position visible bound
+      exact constructor_binding_cons total visible tail plan name binding.slot binding.index (ih h)
 
 inductive RecursorBinding (total visible : Nat) (groups : List PsMinRegCorePlan) :
     PsMinCoreName → PsMinCoreName → Nat → Nat → Prop where
@@ -81,6 +81,14 @@ inductive RecursorBinding (total visible : Nat) (groups : List PsMinRegCorePlan)
       (seen : plan.ordinal < visible) (bounded : plan.ordinal < total) :
       RecursorBinding total visible groups (psMinRegCoreRecName plan.source.name)
         plan.source.name (total - (plan.ordinal + 1)) plan.spec.minors
+
+theorem recursor_binding_cons (total visible : Nat) (groups : List PsMinRegCorePlan)
+    (head : PsMinRegCorePlan) (name owner : PsMinCoreName) (slot minors : Nat)
+    (h : RecursorBinding total visible groups name owner slot minors) :
+    RecursorBinding total visible (head :: groups) name owner slot minors := by
+  cases h with
+  | bound plan member seen bounded =>
+    exact .bound plan (List.mem_cons_of_mem head member) seen bounded
 
 theorem recursor_binding (total visible : Nat) (groups : List PsMinRegCorePlan)
     (name : PsMinCoreName) (binding : PsMinRegCoreRecursorBinding)
@@ -103,10 +111,7 @@ theorem recursor_binding (total visible : Nat) (groups : List PsMinRegCorePlan)
         next => contradiction
       next => contradiction
     next =>
-      have rest := ih h
-      cases rest with
-      | bound found member seen bounded =>
-        exact .bound found (List.mem_cons_of_mem plan member) seen bounded
+      exact recursor_binding_cons total visible tail plan name binding.owner binding.slot binding.minors (ih h)
 
 inductive MotiveImage (total visible : Nat) (groups : List PsMinRegCorePlan)
     (domain : PsMinCoreExpr) : PsMinCoreExpr → PsMinRegTy → Prop where

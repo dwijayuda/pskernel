@@ -110,6 +110,9 @@ def main : IO Unit := do
         functions := functions ++ ["() => (" ++ text ++ ")"]
         expected := expected ++ [psJsonObject [("operation", psJsonQuote "bool"),
           ("type", psJsonQuote "boolean"), ("value", psJsonQuote (toString result))]]
+  let unitText ← r5Emit (.literal .unit)
+  let falseText ← r5Emit (r5Bool false)
+  let trueText ← r5Emit (r5Bool true)
   let first := (PsVerifiedIrParameter.mk "capturedA" r5NatType, r5Nat 5)
   let second := (PsVerifiedIrParameter.mk "capturedB" r5NatType,
     r5Binary .natAdd (.var "capturedA") (r5Nat 2))
@@ -215,6 +218,7 @@ def main : IO Unit := do
   IO.FS.writeFile (dir ++ "/direct.ts")
     ("export const probes = [" ++ String.intercalate ",\n" functions ++ "];\n" ++
       "export const traced = [" ++ String.intercalate ",\n" traced ++ "];\n" ++
+      "export const literalProbes = [() => (" ++ unitText ++ "), () => (" ++ falseText ++ "), () => (" ++ trueText ++ ")];\n" ++
       "export const captureProbe = () => (" ++ capture ++ ");\n" ++
       "export const combinedProbe = (" ++ combined ++ ");\n" ++
       "export const curryProbe = (" ++ curry ++ ");\n" ++

@@ -50,7 +50,7 @@ operand instrumentation records single evaluation and left/right order for the
 eight Nat operators, and the expected Boolean short-circuit behavior separately.
 This finite observation does not establish effectful-IR preservation.
 
-Actual capture ordering, currying and shadowing expressions execute in Node.
+Actual capture ordering, the composed capture/currying expression, currying and shadowing execute in Node. Three standalone generated Unit/Bool literal probes complete the declared literal ABI observations.
 A separate registered test-only source fixture passes the actual atomic SH/1 source API,
 original IR check and target check, then independent official admission and the
 existing generated R4B exact-byte API. The exact original IR, structured origins and emitted artifacts are retained from that same computation. Its generated functions exercise computed

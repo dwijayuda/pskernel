@@ -46,6 +46,8 @@ for(let i=0;i<oracle.probes.length;i++){
  assert.equal(String(got),want.value,'native/generated '+i);
 }
 assert.equal(direct.captureProbe(),2n);
+assert.equal(direct.literalProbes.length,3);
+assert.deepEqual(direct.literalProbes.map(f=>f()),[undefined,false,true]);
 assert.equal(direct.combinedProbe(11n),18n);
 const large=(1n<<256n)+12345n;
 assert.equal(direct.curryProbe(large)(5n)(true),large+5n);
@@ -86,13 +88,14 @@ const files=paths.map(file=>{const bytes=fs.readFileSync(path.join(dir,file));re
 assert.equal(sha(fs.readFileSync('packages/pskernel-min/src/Ps/MinKernel/Tests/CompilerScalar.lean')),
  sha(fs.readFileSync(path.join(dir,'source.lean'))),'exact same physical source');
 const sources=['packages/pskernel-min/src/Ps/MinKernel/Tests/CompilerScalar.lean','proofs/pskernel-min/CompilerPreservation.lean','scripts/MinKernelCompilerPreservation.lean',
- 'scripts/minkernel-compiler-preservation.mjs',
+ 'scripts/minkernel-compiler-preservation.mjs','scripts/minkernel-compiler-preservation-guard.mjs',
+ 'proofs/pskernel-min/CompilerPreservationTrust.lean',
  'packages/erasure/src/Ps/Erasure/Expr.lean','packages/backend-ts/src/Ps/BackendTs/Expr.lean',
  'packages/backend-ts/src/Ps/BackendTs/Type.lean','packages/backend-ts/src/Ps/BackendTs/RuntimeSupport.lean'];
 const sourceFiles=sources.map(file=>{const bytes=fs.readFileSync(file);return {file,bytes:bytes.length,sha256:sha(bytes)}});
 const receipt={schema:'psc1-r5-compiler-preservation-execution/1',head:process.env.GITHUB_SHA,
  platform:process.platform,node:process.version,scalarProbes:400,wholeSourceCalls:wholeCalls,
- captureProbe:true,combinedCaptureCurryProbe:true,curryProbes:3,operandTraceProbes:traces.length,arityRefusals:oracle.arityRefusals,
+ literalAbiProbes:3,captureProbe:true,combinedCaptureCurryProbe:true,curryProbes:3,operandTraceProbes:traces.length,arityRefusals:oracle.arityRefusals,
  strictIrRefusals:oracle.strictIrRefusals,binaryStageRefusals:oracle.binaryStageRefusals,
  recognizerRefusals:oracle.recognizerRefusals,recognizerCases:oracle.recognizerCases,official:{accepted:official.accepted,version:official.leanVersion,commit:official.leanCommit},
  ownedNewSourcePacket:{accepted:owned.accepted,delegated:owned.delegated,bytes:admissions.length,sha256:sha(admissions)},

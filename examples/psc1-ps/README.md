@@ -11,7 +11,7 @@ This collection targets `proofscript@0.1.0-psc1.12` and the PSC1 VS Code extensi
 3. Run **ProofScript: Show Infoview**. Move the cursor into a declaration to inspect its type and current verification status.
 4. Follow [INDEX.md](INDEX.md) to choose another example. Keep each example's files together.
 
-Use the updated [PSC1 editor 0.1.1 package](https://github.com/dwijayuda/pskernel/actions/runs/40591485183/artifacts/12773214308). Install `proofscript-psc1-0.1.1.vsix` from that archive and reload VS Code. The extension supplies its compiler; these examples require no extra source libraries.
+Use VS Code 1.143.1 or newer and the updated [PSC1 editor 0.1.1 package](https://github.com/dwijayuda/pskernel/actions/runs/40591485183/artifacts/12773214308). Install `proofscript-psc1-0.1.1.vsix` from that archive and reload VS Code. The extension supplies its compiler; these examples require no extra source libraries.
 
 There is no umbrella `proofscript.json`: each example is a separate project. This lets small examples reuse readable names such as `result`, `Main`, and `Support`. The editor finds the nearest project file when a source is opened.
 
@@ -71,7 +71,7 @@ The compiler package itself is not included in this ZIP. The full CLI target/bui
 ## Try small changes
 
 - Change an input and predict the new exported value before checking.
-- Hover a parameter, a helper declaration, and the final result to compare their types.
+- Hover helper declarations and final result declarations to inspect their types.
 - Add an enum constructor, then update every matching branch.
 - Extend one record and adjust its constructor call.
 - Change the order of function composition and explain the different result.

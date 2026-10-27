@@ -1,0 +1,49 @@
+name: PSC1 exact-candidate checked-target diagnostic
+on:
+  push:
+    branches: ['diagnostic/psc1-cli-targets-20261027']
+    paths: ['.github/workflows/psc1-cli-target-diagnostic.yml']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  diagnostic:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          repository: dwijayuda/pskernel
+          run-id: 40442145356
+          name: psc1-cli-runtime-inputs-dfb9507ad8700a24a503a4e52bda00f963af279d
+          path: psc1/dist/slim-universal
+      - name: Probe actual target consumers and preserve complete refusal diagnostics
+        working-directory: psc1
+        run: |
+          rustup toolchain install 1.90.0 --profile minimal
+          export PSC1_TEST_RUST_ROOT="$(rustup run 1.90.0 rustc --print sysroot)"
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';import {spawn} from 'node:child_process';
+          import {fixture} from './test/installed/cli-fixture.mjs';
+          const f=fixture({consumers:true});
+          assert.equal(f.assembly.sha256,'1f0a6d28aaa01fc52a810ded365b3c16ab5e1db8053542c575e79551b0afffaf');
+          for(const kind of ['ps','lean'])for(const target of ['ts','rust','wasm-core']){
+            const file=path.join(f.directory,'Main.'+kind);fs.writeFileSync(file,'def answer : Nat := 42\n');
+            const args=['compile',file,'--target',target,'--diagnostics=json'];
+            if(target==='rust')args.push('--rust-toolchain-root',process.env.PSC1_TEST_RUST_ROOT);
+            const result=f.call(args);
+            console.log(JSON.stringify({kind,target,status:result.status,stderr:result.stderr,stdout:result.stdout.slice(0,1600)}));
+          }
+          const file=path.join(f.directory,'Main.ps'),out=path.join(f.directory,'watch-store');
+          fs.writeFileSync(file,'def answer : Nat := 42\n');
+          const child=spawn(f.runtime,[f.cli,'build',file,'--target','ts','--out',out,'--watch','--diagnostics=json'],{cwd:f.directory,env:f.env,stdio:['ignore','pipe','pipe']});
+          child.stdout.on('data',b=>process.stdout.write(b));child.stderr.on('data',b=>process.stderr.write(b));
+          const stop=setTimeout(()=>child.kill('SIGTERM'),15000);
+          await new Promise(resolve=>child.on('close',()=>resolve()));clearTimeout(stop);
+          console.log('PSC1_DIAGNOSTIC_ONLY_NOT_QUALIFICATION');
+          JS

@@ -138,3 +138,17 @@ Sources: [layout receipt](PSC1_LAYOUT_QUALIFICATION_2026-10-26.json),
 [architecture](../ARCHITECTURE.md),
 [canonical codec](../packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean),
 [official prelude replay](../packages/pskernel-lean/provider/PsKernelLean/Prelude.lean).
+
+## Runtime-only frontier, qualified diagnostic
+
+Linux40455022116/portability-job122026221740 at579642626daa67bd167dd1af626f5b0e0401cb00
+passes the origin-bound ledger:12 records (3inductive groups/9definitions),
+54Pi nodes/0 syntactically dependent,17 maximal recursor applications with major
+arguments and no major reference in their motives,3 projections,3lets, and a
+23-entry syntactic foundation frontier containing5 declared axioms. The actual
+source origins select the runtime module; fixtures are not removed by name.
+The [runtime profile](PSC1_MIN_KERNEL_RUNTIME_PROFILE.md) retains exact identities,
+recursor families and limitations. This is not independent closure admission or
+a foundation-pruning theorem. All115 foundation entries still enter official
+replay. The full compiler's earlier34/62 axiom/frontier counts describe a different
+workload. Min/dual refusal and0/124 modules,0/37 criteria remain unchanged.

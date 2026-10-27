@@ -64,3 +64,23 @@ unsafe operations or proof modules in the executable import graph.
 Accordingly, the full PSC1 compiler and its Practical Core are **not** claimed
 consistency-proven by this fragment. Canonical min/dual mode refuses rather than
 grant admission using an unproved bridge. Official Lean checking remains intact.
+
+## Actual Core scope theorem, qualified separately
+
+At579642626daa67bd167dd1af626f5b0e0401cb00, Linux40455022116/proof-job122026221969
+also checks `proofs/pskernel-min/CoreScope.lean`. Its three printed dependency
+reports are exactly `[propext]`:
+
+- `Ps.MinKernel.CoreScope.instantiate_lift`: instantiating a freshly inserted
+  binder in the actual lifted expression returns the original expression.
+- `constant_motive_body`: the actual instantiation step on a lifted result is
+  independent of the supplied major, including open outer references.
+- `constant_motive_argument_irrelevant`: two such instantiations agree.
+
+The proof imports the existing `Ps.Core.Subst` implementation and covers every
+`PsExpr` constructor. It is a syntactic inverse law, not a typing, conversion,
+recursor, raw-input or compiler-preservation theorem. Successful recognition of
+an arbitrary constant-motive body as a lifted result is still unproved. This
+adds no runtime imports, acceptance rule or new permitted foundation.
+See the [current measured profile](PSC1_MIN_KERNEL_RUNTIME_PROFILE.md) for exact
+statements, scope pitfalls and the next executable-recognizer proof gate.

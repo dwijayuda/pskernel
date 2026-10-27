@@ -8,7 +8,72 @@ a new branch, authorize a merge or npm publication, or qualify the full PSC1
 minimal kernel. The first proved and PSC1-portable fragment is complete; the
 dependent kernel, canonical bridge and minimal-checker self-hosting remain open.
 
-## 1. Start here: immutable checkpoint and live state
+
+## Current continuation checkpoint — scope proof and ledger complete
+
+The next research batch has now passed standalone Linux CI at
+**`579642626daa67bd167dd1af626f5b0e0401cb00`**, run
+[40455022116](https://github.com/dwijayuda/pskernel/actions/runs/40455022116).
+Both proof/native job122026221969 and portability/census/ledger job122026221740
+are success. The runtime source, generated checker and acceptance rules are
+unchanged from the initial d6bebd23 fragment.
+
+Read [Measured runtime profile and next proof batch](PSC1_MIN_KERNEL_RUNTIME_PROFILE.md)
+first. It supersedes the earlier instruction to begin by producing a runtime-only
+ledger. CI now attributes the actual 12 records through same-compile source
+origins, measures54 nondependent Pi nodes and17 no-major-reference recursor
+motives, and derives a23-entry syntactic foundation frontier with5 declared
+axioms. This is diagnostic evidence; it is not a pruning theorem or admission.
+
+The new `CoreScope.lean` proves inverse lifting/instantiation and the constant-
+motive body law over **actual `Ps.Core.Subst` functions**, each with the printed
+axiom dependency `[propext]`. It does not yet prove an arbitrary-body recognizer,
+recursor typing/computation, foundation semantics or canonical translation.
+
+**Next action:** implement and prove a safe executable unused-binder lowering
+function, then a defined closed-type/regular-data profile and one actual recursor
+instance. The profile document gives R1–R4, exact theorem targets, meaningful
+negative cases and promotion gates. Keep the broader A–D architecture decision
+open for the full dependent compiler. Do not repeat the completed census or
+start general dependent conversion without a measured need.
+
+Broader current-regression and installed runs now pass at their own exact
+commits, as recorded below and in the dated receipt; requery before new writes.
+The initial checkpoint table below retains its original immutable evidence.
+Full min coverage remains0/124 complete modules and0/37 Practical Core criteria;
+canonical min/dual refuse and min-checked G1/G2/G3 remains unqualified.
+
+### Qualified regression checkpoint and operational handoff
+
+The remaining runs are terminal **success**, verified27 October2026 at06:05UTC:
+
+- [Main40455025111](https://github.com/dwijayuda/pskernel/actions/runs/40455025111)
+  at579642626daa67bd167dd1af626f5b0e0401cb00: full-job122030229165 and
+  gate122038991205 pass; every selected dependency passes. Existing finite
+  Practical Core readiness is37/37 qualified, zero blocked. The benchmark was
+  intentionally unselected. Tested merge49b399f725875822043df2a2afbebb1e30f659eb
+  has exactly the implementation tree3a0aa6e8352433fec02dc8fd5a02a64adc091103.
+- [Installed40454629955](https://github.com/dwijayuda/pskernel/actions/runs/40454629955)
+  at783718f9ba1818e47cd5bb0db160c750e03f7926: preflight122024971095 and
+  installed122025194617 pass. The intervening57964262 change is proof-only.
+  Its unpublished.9 package is3,823,981B, SHA-256
+  `8031a8b5ae54753ed3f265d814bef29e378be7c2bb73179db9a9371403c31993`.
+  Frozen compiler payloads/source identities retain their own122-module scope.
+
+This documentation checkpoint records those outcomes without replacing the
+initial d6bebd23 evidence or the57964262 proof/ledger identity with a later
+reporting SHA. The earlier cancelled main40454634094 and failed proof40454629943
+remain development history. Neither supplies qualification for the repair.
+
+**First operational action:** fetch live branch HEAD, PR#194 and current CI;
+read this guide and the current runtime-profile document. Preserve concurrent
+history with fresh single-parent non-force expected-HEAD writes. Begin R1,
+the executable unused-binder lowering helper and its exact lifting-inverse proof.
+Keep the experimental Core helper separate from Check.lean and measure its
+added dependencies. Do not repeat the completed ledger or relabel official-
+checked compiler generations as min-checked self-hosting.
+
+## 1. Initial immutable checkpoint and live state
 
 | Required report field | Verified checkpoint |
 | --- | --- |
@@ -192,9 +257,9 @@ closure. Frozen G3 executors retain their distinct 122-module source identity.
 
 ### The 93-line checker does not check its own Core
 
-The retained checker/vector graph has 16 records. Excluding the four vector
-helpers yields a **derived runtime-owned view of 12 records: 3 inductive groups
-and 9 definitions**. It contains 105 lambdas, 396 constant occurrences,
+The retained checker/vector graph has 16 records. The new same-compile origin
+ledger selects a **runtime-owned view of 12 records: 3 inductive groups and
+9 definitions**, without filtering test helpers by name. It contains 105 lambdas, 396 constant occurrences,
 277 applications, 75 bound variables, 54 Pis, 3 lets, 3 projections and 3 sorts.
 It references Nat/List/Option recursors, its own datatype recursors, `Bool.decEq`,
 `Eq` and `ite`. Four definitions are generated `$psc0SH` normalization workers.
@@ -207,13 +272,14 @@ Thus distinguish three different gates:
 3. It admits the full compiler and is used in genuine compiler G1/G2/G3 —
    **not achieved**.
 
-The 12-record view is a diagnostic subset of an existing artifact, not a newly
-qualified closed environment. Use exact structured identities/source origins and
+The 12-record view is a CI-qualified diagnostic subset of the current artifact,
+not a newly qualified closed environment. Use exact structured identities/source origins and
 include all transitive dependencies before making a self-check claim.
 
 ### Foundation analysis is not a pruning proof
 
-The graph directly references 34 of the 60 axioms. A read-only diagnostic fixed
+The **complete compiler graph**, rather than the runtime-only graph above,
+directly references 34 of the 60 axioms. A read-only diagnostic fixed
 point following serialized type/value/metadata constant references reaches 62
 prelude declarations and still 34 axioms. Constructor/recursor registration,
 generated reduction rules, hidden metadata and complete environment validity are
@@ -283,9 +349,10 @@ Do not call a native-only wrapper a standalone self-hosted minimal kernel.
 
 ## 7. Recommended next coherent batches
 
-### Batch 1 — runtime-only frontier and closed foundation ledger
+### Batch 1 — runtime-only frontier and closed foundation ledger (completed)
 
-Reproduce the derived 12-record view in a Linux Actions diagnostic. Produce a
+Completed at57964262/run40455022116; see the new runtime-profile document.
+The original exit specification was: reproduce the 12-record view in Linux and produce a
 manifest of exact structured names, source origins, universes, constructor fields,
 indices, recursor application spines, projections, and primitive dependencies.
 Distinguish syntactically dependent Pis from genuinely nondependent cases.
@@ -295,7 +362,11 @@ head names. Start with the kernel's own implementation before the whole compiler
 Exit gate: an exact target workload and a counterexample/frontier ledger. No new
 logical acceptance authority is added by this diagnostic.
 
-### Batch 2 — choose a full-checking route using falsifiable probes
+### Batch 2 — choose a full-checking route using falsifiable probes (partly complete)
+
+The representative Core scope lemma now passes, and a restricted direct-model
+profile is recommended for the own-runtime workload. The full dependent route
+is still undecided. The new profile's R1–R4 takes precedence for the next batch.
 
 Probe the entire **actual foundation** against an unmodified pinned con-leche
 verified entry in Linux CI, outside production admission. Record unsupported
@@ -483,9 +554,12 @@ Ready-to-use continuation instruction:
 > Use GPT-6.1 Sol with High reasoning as requested. Read this guideline, fetch live
 > HEAD/CI, inspect the exact runtime and proof, and preserve the original mission
 > and safeguards. The d6bebd23 checkpoint proves and source-qualifies only the
-> Empty/Unit/Nat/arrow checker; full min closure coverage is zero. Begin with the
-> runtime-only elaborated frontier and complete foundation ledger, then carry out
-> the bounded A–D decision experiments. Select and finish one complete next proof/
+> Empty/Unit/Nat/arrow checker; full min closure coverage is zero. The later
+> 57964262 checkpoint qualifies the actual runtime ledger and Core scope lemma.
+> Read PSC1_MIN_KERNEL_RUNTIME_PROFILE.md and begin R1: a proved executable
+> unused-binder lowering function over actual Core. Then build the defined closed
+> regular-data/constant-motive profile, with its exact foundation obligations.
+> Keep the full dependent A–D decision open. Select and finish one complete next proof/
 > implementation batch, maintaining the actual acceptance-to-model bridge. Keep
 > all builds/tests/proofs/benchmarks on Linux GitHub Actions, all Git updates fresh,
 > non-force and confined to the research branch, and official Wasm as default.

@@ -24,9 +24,19 @@ Wasm remains production default and official/native packages are unchanged.
 No new minimal-checker G1/G2/G3, full-compiler consistency or release is claimed.
 No local builds/tests, merge, npm publication or parent-branch writes.
 
-Current research batch: runtime-only Core/source-origin frontier plus exact
-Core substitution/lifting law. Qualification is pending. It changes no
-MinKernel acceptance rule, official provider or production checker mode.
+Runtime-only Core/source-origin frontier and exact Core scope laws pass both
+standalone jobs in Linux40455022116 at579642626daa67bd167dd1af626f5b0e0401cb00.
+The3new theorem dependency reports are[propext]. Ledger:12records,54nondependent
+Pis,17no-major-reference motives,23syntactically reached prelude entries/5axioms.
+See [measured runtime profile and next proof batch](docs/PSC1_MIN_KERNEL_RUNTIME_PROFILE.md).
+Next: proved executable binder lowering, then a defined regular-data/closed-type
+profile with exact primitive semantics. No runtime acceptance or production mode
+changes; no foundation pruning, recursor soundness or min self-check is claimed.
+Broader main40455025111 is terminal success at57964262 (full122030229165,
+gate122038991205;37/37 existing finite Practical Core criteria, zero blocked).
+Installed40454629955 passes at783718f9, with only the CoreScope proof repair
+intervening before57964262. Exact separate identities are in the dated receipt.
+Next batch R1 uses the user-confirmed GPT-6.1 Sol/High setting.
 
 ## Preserved layout baseline state
 

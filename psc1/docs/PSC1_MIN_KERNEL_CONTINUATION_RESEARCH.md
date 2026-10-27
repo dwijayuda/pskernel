@@ -1,5 +1,22 @@
 # Research guide: choosing the next PSC1 MinKernel architecture
 
+## Current checkpoint: read before the historical extension plan
+
+At `579642626daa67bd167dd1af626f5b0e0401cb00`, standalone Linux
+[40455022116](https://github.com/dwijayuda/pskernel/actions/runs/40455022116)
+passes both jobs. The source-origin runtime ledger and actual Core inverse-
+lifting/constant-motive scope lemmas are complete. The executable STLC checker
+and its existing consistency boundary are unchanged.
+
+[Measured runtime profile and next proof batch](PSC1_MIN_KERNEL_RUNTIME_PROFILE.md)
+is the current next-action authority. It records exact artifacts, all17 recursor
+spines, the23-entry syntactic foundation frontier, theorem limits, and sequential
+R1–R4 gates. Start with a proved executable unused-binder lowering function;
+then define and model the regular-data/closed-type profile. Do not repeat the
+runtime-ledger task described as future work in the historical sections below.
+Those sections remain useful for later dependent/canonical/whole-compiler work.
+The new theorem does not prove the recognizer or authorize logical admission.
+
 Prepared 2026-10-27 for continuation with GPT-6.1 Sol High. This is a decision and experiment guide grounded in inspected source. It does not claim that any of the proposed experiments has already passed. Run all builds, tests, proof checks and benchmarks in Linux GitHub Actions. Do not use local builds or Desktop Commander.
 
 ## 1. Preserve the qualified starting point

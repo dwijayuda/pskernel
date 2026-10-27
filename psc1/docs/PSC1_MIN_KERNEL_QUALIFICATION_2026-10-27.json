@@ -702,5 +702,251 @@
     "ioCandidatesExecuted": 24,
     "ioCandidatesRefused": 8,
     "qualificationBoundary": "Existing frozen source/executables, host and package paths; no minimal-kernel or new G2/G3 promotion."
+  },
+  "scopeAndFrontierBatch": {
+    "scope": "actual-core-scope-law-and-runtime-source-origin-ledger",
+    "implementationCommit": "579642626daa67bd167dd1af626f5b0e0401cb00",
+    "standaloneStatus": "success",
+    "runId": 40455022116,
+    "proofJobId": 122026221969,
+    "portabilityJobId": 122026221740,
+    "runtimeAcceptanceChanged": false,
+    "runtimeSourceIdentityUnchanged": true,
+    "theoremModule": "proofs/pskernel-min/CoreScope.lean",
+    "theorems": [
+      "Ps.MinKernel.CoreScope.instantiate_lift",
+      "Ps.MinKernel.CoreScope.constant_motive_body",
+      "Ps.MinKernel.CoreScope.constant_motive_argument_irrelevant"
+    ],
+    "theoremAxioms": [
+      "propext"
+    ],
+    "sorryAx": false,
+    "proofBoundary": "Inverse law of actual Core lifting/instantiation; no arbitrary-body recognizer, recursor soundness, foundation model, canonical admission or generated-code refinement theorem",
+    "report": {
+      "schema": "psc1-min-runtime-frontier/1",
+      "path": "runtime-frontier.json",
+      "sha256": "ed48ea377d952b086cf803c51e5cc356e903814c015095c08cc1302faa4f353e",
+      "authoritative": false,
+      "admissionAuthority": "none",
+      "summary": {
+        "canonicalRecords": 12,
+        "inductiveGroups": 3,
+        "definitions": 9,
+        "expressions": {
+          "sort": 3,
+          "const": 396,
+          "forall": 54,
+          "lam": 105,
+          "app": 277,
+          "b": 75,
+          "let": 3,
+          "proj": 3
+        },
+        "piNodes": 54,
+        "dependentPiNodes": 0,
+        "maximalRecursorSpines": 17,
+        "recursorsWithMajor": 17,
+        "noMajorReferenceMotives": 17,
+        "dependentMotives": 0,
+        "otherMotives": 0,
+        "reachedPreludeEntries": 23,
+        "reachedAxioms": 5
+      },
+      "inputs": [
+        {
+          "file": "dist/pskernel-min/portable/vectors.admissions.json",
+          "bytes": 88614,
+          "sha256": "177db8f3b7c06b0ffb2b8b55af86f0f93a698abf4786f2084700f4912d58fc7c"
+        },
+        {
+          "file": "dist/pskernel-min/portable/vectors.source.json",
+          "bytes": 4237,
+          "sha256": "51a71b6ae0ba7151ee54fc5398dc8e3208e7fbc1e92fcc1ffbe874cab83945bb"
+        },
+        {
+          "file": "dist/pskernel-min/portable/receipt.json",
+          "bytes": 4168,
+          "sha256": "f4c9f27f87c4b5fe6ce91809c1f472f7dff38ae04e0a40a85b6bc52e30b2cd21"
+        },
+        {
+          "file": "dist/pskernel-min/closure/prelude.json",
+          "bytes": 104799,
+          "sha256": "215dec328de51fc09872b3af41f4c00bee26938227bd2af4f063c4c3edae50af"
+        }
+      ]
+    },
+    "artifacts": [
+      {
+        "id": 12712415505,
+        "name": "psc1-minkernel-portability-closure-579642626daa67bd167dd1af626f5b0e0401cb00",
+        "bytes": 1521660,
+        "sha256": "25e9b4b3e833267696d817a7afcfe07c7d29b5a9639c0bdce51eef87dc94d868"
+      },
+      {
+        "id": 12711948810,
+        "name": "psc1-minkernel-proof-579642626daa67bd167dd1af626f5b0e0401cb00",
+        "bytes": 1165,
+        "sha256": "9faa7f68fe2fcc8e39413cf4563af8afdfbdb7659819d5cc8f6c39ed8b70fc7d"
+      }
+    ],
+    "earlierFailure": {
+      "commit": "783718f9ba1818e47cd5bb0db160c750e03f7926",
+      "runId": 40454629943,
+      "scope": "new Core scope proof failed; ledger passed"
+    },
+    "broaderRegressionSnapshot": {
+      "checkedAtUtc": "2026-10-27T06:05:44Z",
+      "main": {
+        "runId": 40455025111,
+        "commit": "579642626daa67bd167dd1af626f5b0e0401cb00",
+        "status": "completed",
+        "conclusion": "success",
+        "testedMergeCommit": "49b399f725875822043df2a2afbebb1e30f659eb",
+        "sameImplementationTree": "3a0aa6e8352433fec02dc8fd5a02a64adc091103",
+        "fullJobId": 122030229165,
+        "gateJobId": 122038991205,
+        "jobs": [
+          {
+            "id": 122026715697,
+            "name": "static",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122026930592,
+            "name": "focused / focused (applications)",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122026930621,
+            "name": "focused / php-application",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122026930625,
+            "name": "source-bindings / trace",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122026930636,
+            "name": "lossless / lossless",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122026930659,
+            "name": "native / native",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122026930668,
+            "name": "focused / focused (core)",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122026931593,
+            "name": "benchmark",
+            "status": "completed",
+            "conclusion": "skipped"
+          },
+          {
+            "id": 122027952298,
+            "name": "source-bindings / integration",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122028936292,
+            "name": "g1 / host-session-boundary",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122028936318,
+            "name": "closures / selected-closure (rust-compiler, ordinary-checked)",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122028936386,
+            "name": "closures / selected-closure (directjs-compiler, ordinary-checked)",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122028936396,
+            "name": "g1 / generated-js",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122028936474,
+            "name": "closures / selected-closure (semantic-compiler, checked)",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122030229165,
+            "name": "full / linux-scoped",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122038991205,
+            "name": "gate",
+            "status": "completed",
+            "conclusion": "success"
+          }
+        ],
+        "existingPracticalCore": {
+          "qualified": 37,
+          "blocked": 0,
+          "minQualified": 0
+        },
+        "benchmark": "intentionally-unselected"
+      },
+      "installed": {
+        "runId": 40454629955,
+        "commit": "783718f9ba1818e47cd5bb0db160c750e03f7926",
+        "status": "completed",
+        "conclusion": "success",
+        "preflightJobId": 122024971095,
+        "installedJobId": 122025194617,
+        "interveningDelta": "57964262 changes only CoreScope proof",
+        "package": {
+          "commit": "783718f9ba1818e47cd5bb0db160c750e03f7926",
+          "sha256": "8031a8b5ae54753ed3f265d814bef29e378be7c2bb73179db9a9371403c31993",
+          "bytes": 3823981,
+          "version": "0.1.0-psc1.9"
+        },
+        "artifactMetadata": [
+          {
+            "id": 12713746316,
+            "name": "psc1-cli-toolchain-783718f9ba1818e47cd5bb0db160c750e03f7926",
+            "bytes": 206726634,
+            "digest": "sha256:f464895ba509447740bf70ca77612099ae8647915d74d82a0b227a1e318f3134",
+            "expired": false
+          },
+          {
+            "id": 12711582655,
+            "name": "psc1-cli-source-783718f9ba1818e47cd5bb0db160c750e03f7926",
+            "bytes": 45150,
+            "digest": "sha256:6b02b0d4303966dd5c712d5e41fd0fba8fa1dd7ea0c7b8eba9377e530658dc16",
+            "expired": false
+          }
+        ],
+        "scope": "Existing frozen 122-module source/compiler payloads, unpublished .9 assembly; no min G1/G2/G3"
+      }
+    },
+    "selfCheck": false,
+    "minQualifiedModules": 0,
+    "minQualifiedPracticalCoreCriteria": 0,
+    "next": "R1 executable unused-binder lowering with proved lifting inverse, then defined regular-data/closed-instance profile"
   }
 }

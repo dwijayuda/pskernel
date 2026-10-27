@@ -110,3 +110,15 @@ G1/G2/G3 under the new kernel is gated on complete generated-checker admission o
 the current compiler closure. It is not meaningful to run an official-checked
 generation and relabel it minimal-checked. Existing frozen release fixed points
 remain attached to their original sources.
+
+## Restricted next target after the runtime ledger
+
+The exact-source ledger and actual Core scope theorem pass Linux40455022116
+at579642626daa67bd167dd1af626f5b0e0401cb00. Based on17 syntactically constant
+recursor motives and3 regular owned data groups, the next bounded target is a
+direct model of a closed-type/regular-data profile. This selects a research
+sequence, not a completed dependent architecture or a new acceptance mode.
+[Current profile and R1–R4](PSC1_MIN_KERNEL_RUNTIME_PROFILE.md) owns that sequence:
+proved executable binder lowering, modeled datatype/recursor instances, exact
+foundation and projection rules, then bounded canonical ingress and self-check.
+No metadata/hash/fixture-based admission or silent proof erasure is permitted.

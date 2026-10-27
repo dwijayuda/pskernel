@@ -40,3 +40,9 @@ See [architecture](../../docs/PSC1_MIN_KERNEL_ARCHITECTURE.md),
 [coverage](../../docs/PSC1_MIN_KERNEL_COVERAGE.md),
 [research](../../docs/PSC1_MIN_KERNEL_RESEARCH.md), and
 [continuation state](../../docs/PSC1_MIN_KERNEL_WORK_STATE.md).
+
+The [measured runtime profile](../../docs/PSC1_MIN_KERNEL_RUNTIME_PROFILE.md)
+records the qualified scope-proof/source-origin-ledger milestone at57964262,
+Linux40455022116, and gives the next R1–R4 proof batches. Its diagnostic frontier
+adds no canonical acceptance authority. The actual Core scope proof remains
+outside the runtime import graph.

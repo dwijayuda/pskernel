@@ -169,16 +169,18 @@ they do not replace older dated receipts or requalify historical G2/G3.
 is the next-session entry point. It links detailed proof, repository and upstream
 decision-experiment appendices. Additional read-only inspection of existing CI
 JSON establishes the checker's own12-record Core workload (3inductives/9defs)
-and diagnoses34 direct foundation axioms/62 syntactically reached declarations.
+and, separately, diagnoses34 direct foundation axioms/62 syntactically reached
+declarations for the complete compiler graph.
 That scan is not a foundation-pruning theorem or new checker execution.
 
-The guideline's immediate batch is runtime-only dependency/frontier measurement,
-then a bounded A-D architecture decision and one complete proof/implementation
-extension. New findings include con-leche's arbitrary-axiom refusal, static
+The original guideline's immediate batch was runtime-only dependency/frontier
+measurement, then a bounded A-D decision and one complete proof/implementation
+extension. The ledger and representative scope lemma are now qualified below;
+the new runtime-profile document owns the next R1-R4 sequence. New findings include con-leche's arbitrary-axiom refusal, static
 metaprogramming/pin-asset closure and monomorphic-List/String-literal mismatch.
 No new upstream experiment or theorem is claimed passed by the guideline alone.
 
-## Runtime frontier and Core-scope batch (qualification pending)
+## Runtime frontier and Core-scope batch (standalone qualification passed)
 
 The next batch adds a source-origin-bound runtime ledger and a proof-only
 CoreScope module over the exact existing Ps.Core.Subst implementation.
@@ -193,4 +195,36 @@ classifies Pi dependencies and maximal recursor application spines, and
 follows explicit foundation family/constructor metadata. Its output is not
 a closed-environment qualification or a foundation-pruning proof.
 No runtime checker acceptance rule or production mode changes in this batch.
-Linux CI must establish the new theorem/diagnostic outcome before promotion.
+Linux40455022116 at579642626daa67bd167dd1af626f5b0e0401cb00 passes both
+proof/native job122026221969 and portability/census/ledger job122026221740.
+All3 new CoreScope dependency reports are exactly[propext]. The ledger measures
+12records,54nondependent Pis,17no-major-reference recursor motives,3projections,
+3lets and23syntactically reached foundation entries including5declared axioms.
+All115 original prelude declarations still enter official replay; no pruning or
+recursor soundness follows. The runtime/source/JS identities are unchanged.
+
+The [measured runtime profile and next batch](PSC1_MIN_KERNEL_RUNTIME_PROFILE.md)
+records exact inputs/artifacts and selects a bounded direct-model regular-data
+profile for further research. Begin R1 with an executable unused-binder lowering
+function and prove its lifting inverse over the real Core. Then prove actual
+recursor instances/foundation/profile rules before canonical ingress or self-check.
+The full dependent route remains open; min coverage and min/dual refusal persist.
+The first scope proof attempt at783718f9/run40454629943 failed; it is not evidence
+for the repaired theorem. Broader regressions retain separate run/commit scopes.
+
+## Completed regression checkpoint before R1
+
+Verified2026-10-27 06:05UTC: main40455025111 is terminal success at57964262;
+full122030229165 and gate122038991205 pass, as does every selected dependency.
+Existing finite Practical Core readiness is37/37 qualified, zero blocked.
+Tested merge49b399f725875822043df2a2afbebb1e30f659eb has the exact implementation
+tree3a0aa6e8352433fec02dc8fd5a02a64adc091103. Benchmark intentionally unselected.
+Installed40454629955 passes at783718f9 (preflight122024971095, installed122025194617).
+Only the CoreScope proof repair intervenes before57964262. Fresh unpublished.9
+root:3823981B, SHA2568031a8b5ae54753ed3f265d814bef29e378be7c2bb73179db9a9371403c31993.
+This preserves the frozen122-module release boundary and qualifies no min generation.
+
+The guideline/appendices now distinguish the completed ledger/scope theorem from
+R1 executable binder lowering and the later regular-data/foundation/profile/
+canonical obligations. GPT-6.1 Sol/High was confirmed selected by the user.
+No runtime acceptance, official provider, compiler payload or default change.

@@ -1,5 +1,22 @@
 # PSC1 MinKernel proof-first continuation guide
 
+## Current checkpoint: read before the historical extension plan
+
+At `579642626daa67bd167dd1af626f5b0e0401cb00`, standalone Linux
+[40455022116](https://github.com/dwijayuda/pskernel/actions/runs/40455022116)
+passes both jobs. The source-origin runtime ledger and actual Core inverse-
+lifting/constant-motive scope lemmas are complete. The executable STLC checker
+and its existing consistency boundary are unchanged.
+
+[Measured runtime profile and next proof batch](PSC1_MIN_KERNEL_RUNTIME_PROFILE.md)
+is the current next-action authority. It records exact artifacts, all17 recursor
+spines, the23-entry syntactic foundation frontier, theorem limits, and sequential
+R1–R4 gates. Start with a proved executable unused-binder lowering function;
+then define and model the regular-data/closed-type profile. Do not repeat the
+runtime-ledger task described as future work in the historical sections below.
+Those sections remain useful for later dependent/canonical/whole-compiler work.
+The new theorem does not prove the recognizer or authorize logical admission.
+
 This is an execution guide for a future agent, including GPT-6.1 Sol High. It is
 not a request to replace the official Lean verifier, a claim that full compiler
 self-hosting has been achieved, or permission to merge or publish packages.
@@ -51,7 +68,7 @@ ref again; create the new tree/commit from that live parent, then update with
 `force=false` and `expected_sha` equal to the freshly read parent. On a mismatch,
 inspect the concurrent changes and reapply the intended delta. Do not force.
 
-### The next autonomous batch, in order
+### Historical next-batch plan (use current R1–R4 first)
 
 Do not begin by adding a large AST or copying another checker. Complete these
 concrete outputs first:
@@ -181,14 +198,14 @@ recursors, its own datatype recursors, Bool decision/equality machinery, and
 `ite`. This alone refutes the inference that the source's simple type-checking
 algorithm produces an STLC-only checking problem.
 
-Artifact analysis reports 34 direct foundation references. Following syntactic
-type/value/metadata references reaches 62 prelude declarations, including 34
-axioms. That result is **not yet a proved complete foundation closure**: constructor
+The **complete compiler** artifact, rather than this runtime view, reports
+34 directly referenced foundation axioms and a62-entry syntactic frontier.
+The later runtime-only ledger instead reaches23 entries, including5axioms. That result is **not yet a proved complete foundation closure**: constructor
 and recursor generation, reduction rules, and implicit checking dependencies
 still require analysis. Do not substitute these counts for a model.
 
-Reproduce this analysis from the retained exact artifact before editing runtime
-features. Preserve the original 16-record byte stream and identify the four
+The source-origin-bound reproduction now passes at57964262/run40455022116.
+Use the current runtime-profile document before editing runtime features. Preserve the original 16-record byte stream and identify the four
 test declarations structurally/by exact source origin. Keep their removal as a
 derived analysis view; never rewrite the qualified receipt or mistake a filtered
 report for a new admitted environment. Produce a 12-record target manifest with
@@ -241,7 +258,11 @@ milestone is **the complete kernel runtime checking itself**, followed by a
 measured compiler dependency frontier. It is still separate from compiler
 G1/G2/G3 qualification.
 
-## 4. Next complete fragment: let, products, and sums
+## 4. Optional complete fragment: let, products, and sums
+
+This historical decomposition is optional. The current runtime-profile document's
+R1–R4 sequence takes precedence. Add a type former only when the measured target
+needs it; the new ledger does not require a general products/sums detour.
 
 This is the smallest convenient complete extension if the runtime-only profile
 experiment establishes that it is a useful part of the selected data calculus.
@@ -295,7 +316,7 @@ Exit only with a complete theorem and terminal passing evidence for the added
 fragment. Label compiler-closure coverage separately; adding pairs does not
 qualify PSC1's whole tuples/patterns family or general `.proj` semantics.
 
-## 5. Then add explicit nondependent Nat/List recursion
+## 5. Explicit nondependent Nat/List recursion after the profile proof
 
 The next useful complete fragment adds type code `list A`, literal/list
 constructors, and typed recursors whose result type is fixed. This directly
@@ -415,7 +436,7 @@ signature and reconstruct sound constructor/recursor declarations. It cannot
 assume the omitted recursor checks were performed elsewhere, or ignore the group
 while accepting later uses of its generated recursor.
 
-## 7. Regular datatype declarations: a complete later fragment
+## 7. Regular datatype declarations: use current R2 for the measured target
 
 After the fixed List/product/sum rules and bridge are proved, consider a regular
 first-order datatype signature profile. This is narrower and more achievable

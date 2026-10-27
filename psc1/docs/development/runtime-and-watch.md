@@ -97,3 +97,18 @@ now Bun1.4.4, the measured passing release; no claim is made about the first
 upstream fix. Versions1.4.1–1.4.3 remain unqualified and refused. Bun1.4.0 is an
 actual negative matrix entry; the installed Bun1.4.4 gate qualifies the minimum.
 The official C++ Lean checker still uses Emscripten linear memory.
+
+## Exact Rust SDK provisioning
+
+The e4476046 main job refused lib/rustlib/components: an ambient Rust1.90.0
+install listed the same cargo/std/rustc components in a different byte order.
+[Diagnostic40452300522](https://github.com/dwijayuda/pskernel/actions/runs/40452300522)
+found all other60 resources identical; a fresh isolated minimal installation
+matched all61 existing pins. No consumer/resource guard is changed.
+[Fresh-install replay40452569506](https://github.com/dwijayuda/pskernel/actions/runs/40452569506)
+then passed all11 unmodified watch cases and actual Bun1.4.0 refusal against the
+exact e447 candidate. Canonical CI now installs Rust1.90.0 minimal afresh on its
+disposable runner and verifies all61 resources before expensive tests. The user
+recipe provisions a separate SDK and passes --rust-toolchain-root explicitly.
+Earlier opaque timeout logs did not identify their target/error; this observed
+reproduction explains one concrete failure class, not every historical attempt.

@@ -1,7 +1,7 @@
 {
   "schema": "psc1-runtime-watch-qualification/1",
   "updated": "2026-10-27",
-  "status": "source-and-installed-qualified-bun-minimum-correction-pending",
+  "status": "corrected-bun-floor-and-exact-sdk-provisioning-qualification-pending",
   "pullRequest": 193,
   "baseCommit": "94e0c13f6a4b434f73c859cc0c716cb6fb8d1340",
   "firstImplementationCommit": "91bcbd107f375eea5cf5f87f15a9be9fe561b7c4",
@@ -107,6 +107,12 @@
       "run": 40446238737,
       "job": 122013012001,
       "reason": "Actual Bun1.4.0 fails WebAssembly.Module.exports on the genuine generated Wasm GC compiler. Bun1.4.4 passes the same workload. Preserve export checks; support Bun>=1.4.4, add actual Bun1.4.0 refusal. Node22.23.3/24/26 and Node20/22.0 refusal rows passed. No artifact promotion."
+    },
+    {
+      "commit": "e44760463bbca7d2372c3402e58f8731ffa9bb69",
+      "run": 40451321025,
+      "job": 122014622874,
+      "reason": "Live diagnostics identify Rust target SDK refusal: lib/rustlib/components differs only in line order. Ambient version identity is insufficient. Fresh minimal provisioning matches all61 original pins; no verifier change."
     }
   ],
   "finalRelease": false,
@@ -208,7 +214,8 @@
     "applicationCases": 264,
     "globalApplicationCases": 8,
     "checkedPublicationCases": 32,
-    "checkedPublicationRefusals": 143
+    "checkedPublicationRefusals": 143,
+    "latestFailedRun": 40451321025
   },
   "selectedSourceQualification": {
     "run": 40446244175,
@@ -220,5 +227,30 @@
     "run": 40450336220,
     "commit": "3927e69f7e8c62b9965fb943d11deca1097e4ace",
     "status": "success"
+  },
+  "rustSdkProvisioning": {
+    "resourcePins": 61,
+    "guards": "unchanged",
+    "ambientDiagnostic": {
+      "run": 40452300522,
+      "isolatedJob": 122017589605,
+      "ambientJob": 122017589896,
+      "otherResourcesIdentical": 60,
+      "expectedComponentsSha256": "a13769c18a7a74ea492ab633b644d6c238ae81e536d30d3f168eddb57e86000e",
+      "ambientComponentsSha256": "53013fc4e912aa16d12cbecb75de95b40feb390d28eea44316279ba0f7f58c46"
+    },
+    "freshReplay": {
+      "run": 40452569506,
+      "job": 122018454290,
+      "commit": "8b1c018c80202bc13fec93ab003156737218ef05",
+      "candidateCommit": "e44760463bbca7d2372c3402e58f8731ffa9bb69",
+      "candidateRootSha256": "f62554265c54f5506eeaa9ba73407e1651a10b4b74e41cd7adddfa0ef425ac8e",
+      "all61Pins": true,
+      "fullWatchCases": 11,
+      "actualBun140Refused": true,
+      "qualification": false
+    },
+    "ci": "fresh minimal1.90.0 on disposable runner; exact production verifyFile preflight",
+    "user": "explicit separate fresh SDK via --rust-toolchain-root"
   }
 }

@@ -182,6 +182,17 @@ Optional Rust/Wasm engines and non-JS output consumers/providers keep their
 exact package and platform requirements. Missing optional dependencies refuse
 with their existing pinned package diagnostic. The CLI does not install them
 or download an SDK. --rust-toolchain-root remains an explicit host-owned path.
+Rust output requires the exact qualified 1.90.0 SDK resource hashes, including
+rustup bookkeeping; an ambient installation's version number alone is insufficient.
+With the matching optional Rust consumer installed, use a fresh isolated SDK on
+qualified Linux x64 rather than modifying your existing toolchain:
+
+```sh
+RUSTUP_HOME="$PWD/.proofscript-sdk/rustup" rustup toolchain install 1.90.0 --profile minimal
+npm exec -- psc build Main.ps --target rust --out dist/rust --rust-toolchain-root "$PWD/.proofscript-sdk/rustup/toolchains/1.90.0-x86_64-unknown-linux-gnu" --watch
+```
+
+The CLI checks every resource and never rewrites a mismatching SDK.
 See the existing checked-dispatch installation guide for those dependencies;
 use this candidate's root and optional tarballs from its package receipt.
 Rust/Wasm engines use .11 host/metadata repacks with exactly retained G3 native/

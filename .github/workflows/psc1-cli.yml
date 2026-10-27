@@ -105,8 +105,25 @@ jobs:
       - name: Prepare unchanged external consumers for existing full regression gates
         run: |
           npm ci --prefix .. --ignore-scripts --include=optional
+          # Ephemeral runner SDKs can have the same components in a different
+          # bookkeeping order. Install the exact minimal SDK afresh; retain every pin.
+          rustup toolchain uninstall 1.90.0
           rustup toolchain install 1.90.0 --profile minimal
           rustup default 1.90.0
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';import {spawnSync} from 'node:child_process';import {pathToFileURL} from 'node:url';
+          const root=path.resolve('dist/slim-universal/package');
+          const d=JSON.parse(fs.readFileSync(path.join(root,'UNIVERSAL_DISTRIBUTION.json')));
+          const {verifyFile}=await import(pathToFileURL(path.join(root,'host-tools/installed-engine-resolver.mjs')).href);
+          const result=spawnSync('rustup',['run','1.90.0','rustc','--print','sysroot'],{encoding:'utf8',timeout:10000});
+          assert.equal(result.error,undefined);assert.equal(result.status,0,result.stderr);
+          const sdk=result.stdout.trim(),pins=d.targetConsumers.rust.toolchain.files;
+          assert.ok(path.isAbsolute(sdk));assert.equal(pins.length,61);
+          for(const pin of pins)verifyFile(sdk,pin,512*1024*1024);
+          const receipt={schema:'psc1-cli-rust-sdk/1',testedCommit:process.env.GITHUB_SHA,status:'passed',sdk,resourcePins:pins};
+          fs.mkdirSync('dist/cli',{recursive:true});fs.writeFileSync('dist/cli/rust-sdk.json',JSON.stringify(receipt,null,2)+'\\n');
+          console.log('PSC1_CLI_RUST_SDK '+JSON.stringify({status:'passed',resources:pins.length,components:pins.find(p=>p.path==='lib/rustlib/components')}));
+          JS
           mkdir -p "$RUNNER_TEMP/wasmtime"
           curl --fail --location --retry 3 'https://github.com/bytecodealliance/wasmtime/releases/download/v49.0.4/wasmtime-v49.0.4-x86_64-linux.tar.xz' -o "$RUNNER_TEMP/wasmtime.tar.xz"
           echo "6561abd54bdf941b6519cce883e0857cc9bce94d92c65287ed838d895a27f5a9  $RUNNER_TEMP/wasmtime.tar.xz" | sha256sum -c -

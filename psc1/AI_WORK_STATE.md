@@ -121,3 +121,18 @@ Support Bun>=1.4.4 and test Bun1.4.0 refusal, preserving export/ABI validation.
 A new cohort run must finish before qualifying its changed root hashes.
 The six existing dispatch/publication commands now have separate CI steps for
 visibility; all commands, assertions and resource limits remain.
+
+## Reproduced external SDK drift
+
+Main run40451321025 at e4476046 passed licensing,55CLI requests and actual
+Bun1.4.4, then refused Rust target lib/rustlib/components. The new live watch
+diagnostics exposed a resource mismatch rather than an opaque receipt timeout.
+Diagnostic40452300522 measured identical cargo/std/rustc components with different
+bookkeeping order in the ambient SDK; all other60 resource pins matched. A fresh
+minimal SDK matched all61 pins. Diagnostic40452569506 then passed all11 original
+watch cases and the actual older-Bun refusal against exact e447 root
+f62554265c54f5506eeaa9ba73407e1651a10b4b74e41cd7adddfa0ef425ac8e.
+Canonical Linux CI now reprovisions that disposable SDK and verifies all61 pins
+before expensive regression gates. No consumer, hash, kernel or resource policy
+is weakened. User instructions use a separate explicit SDK; the CLI never repairs
+or rewrites user SDK resources. Corrected-cohort full qualification remains pending.

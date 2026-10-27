@@ -34,8 +34,8 @@ def originalOwners (semantic : Semantic) (rows : Array Lean.Json) :
   let names := psErasureDeclarationNames
     (psErasureRuntimeDeclarations psSelfHostRuntimePreludeDeclarationsWithProd semantic.source)
   semantic.raw.declarations.mapM fun declaration => do
-    let matches := names.filter (fun item => item.2 == declaration.name)
-    let [entry] := matches | throw ("PSC1_MODULE_ERASURE_OWNER:" ++ declaration.name)
+    let matchingNames := names.filter (fun item => item.2 == declaration.name)
+    let [entry] := matchingNames | throw ("PSC1_MODULE_ERASURE_OWNER:" ++ declaration.name)
     let tagged := Lean.toJson (psOwnershipName entry.1)
     let sources := authored.filter (fun item => item.1.compress == tagged.compress)
     let unit ← match sources with

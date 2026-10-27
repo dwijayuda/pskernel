@@ -24,8 +24,10 @@ for (const file of build.files) {
 }
 const tarball = build.files.find(file => /^proofscript-lsp-.*\.tgz$/.test(file.file));
 assert.ok(tarball);
-const unpack = spawnSync('tar', ['-xzf', path.join(out, tarball.file), '--strip-components=1', '-C', path.join(root, 'lsp')],
-  {encoding: 'utf8', windowsHide: true});
+// Relative archive paths avoid GNU tar interpreting a Windows drive colon as a
+// remote-host separator. Forward slashes work in both native and Git Bash tar.
+const unpack = spawnSync('tar', ['-xzf', `dist/${tarball.file}`, '--strip-components=1', '-C', 'lsp'],
+  {cwd: root, encoding: 'utf8', windowsHide: true});
 assert.equal(unpack.status, 0, unpack.stderr || unpack.error?.message);
 fs.writeFileSync(path.join(out, 'delivered-build-receipt.json'), JSON.stringify(build, null, 2) + '\n');
 console.log('Native runtime will execute the SHA-256 verified Linux-built npm server and VSIX.');

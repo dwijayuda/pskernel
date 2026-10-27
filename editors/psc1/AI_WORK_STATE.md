@@ -8,6 +8,12 @@ User reported slow checking and a screenshot of `PSC1_SERVICE_PUBLICATION_PLATFO
 
 Version 0.1.1 is under qualification. The updated workflow compares the previous immutable 0.1.0 npm package with this candidate on the same Linux runner, then installs the exact new artifacts on Windows and macOS. No local compiler execution, tests or dependency installation have been run. The historical sections below describe 0.1.0 and are not new-version qualification claims.
 
+### First follow-up run
+
+Implementation `5188e44f95abaa9ca71a0e3583b075a97111d4ad`, run [40590223438](https://github.com/dwijayuda/pskernel/actions/runs/40590223438), passed all 23 tests, Linux installed npm/VSIX smoke and the same delivered artifacts on native macOS. The same-runner small-source comparison measured old/new distinct-edit medians 1956.08/667.95 ms (65.85% lower), with identical admissions/source digests for every sample; default benchmark debounce was 50 ms. Unchanged save required no new check (0.41 ms LSP round-trip); returning to an identical snapshot used the cache (52.32 ms including debounce). Actual installed VS Code with default 350 ms debounce reached initial checked status in 1210 ms.
+
+The Windows job failed before tests because GNU tar interpreted an absolute `D:` archive path as a remote host. The native-artifact unpack helper now uses relative paths. This follow-up changes only the test harness/workflow and documentation, not the installed editor payload. Native Windows qualification is still pending the corrected run.
+
 ## Architecture and completed source
 
 Independent `editors/psc1` tooling contains a stdio LSP, bounded project-data adapter, isolated public-API compiler worker, original VS Code extension, and Lean-inspired Infoview. Both distributables bundle the unchanged qualified `.12` compiler and official Lean4.35.0 linear-memory Wasm checker. Compiler source, existing npm package layout, provider internals, self-hosting inputs and core CI are unchanged.

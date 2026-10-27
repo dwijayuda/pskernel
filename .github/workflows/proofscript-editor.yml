@@ -52,7 +52,7 @@ jobs:
         run: node scripts/prepare-baseline.mjs
       - name: Compare actual edit latency on the same runner
         run: |
-          PSC1_LSP_ENTRY="$PWD/dist/baseline/package/dist/server.cjs" PSC1_PERF_BASELINE=1 PSC1_PERF_LABEL=baseline-0.1.0 PSC1_PERF_OUTPUT=dist/performance-baseline-receipt.json node test/performance.mjs
+          PSC1_LSP_ENTRY="$PWD/dist/baseline/package/dist/server.cjs" PSC1_PERF_BASELINE=1 PSC1_PERF_SERVER_COMMIT=34beabcfc3fce89e4c89bcc6aa4e372e0c1bdeb1 PSC1_PERF_LABEL=baseline-0.1.0 PSC1_PERF_OUTPUT=dist/performance-baseline-receipt.json node test/performance.mjs
           PSC1_PERF_LABEL=candidate-0.1.1 npm run test:performance
       - name: Package standalone npm and self-contained VSIX
         run: npm run package

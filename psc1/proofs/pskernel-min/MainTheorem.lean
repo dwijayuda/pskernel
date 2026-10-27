@@ -48,7 +48,9 @@ theorem tyEq_sound (fuel : Nat) (left right : Ty)
         | true =>
           have hbd : tyEq remaining b d = true := by
             simpa [tyEq, hac] using h
-          exact congrArg₂ Ty.arr (ih a c hac) (ih b d hbd)
+          cases ih a c hac
+          cases ih b d hbd
+          rfl
 
 /- This function interprets the *actual executable inference success*.
    Its recursion follows inference fuel, including all failure branches. -/
@@ -95,13 +97,13 @@ def inferModel (fuel : Nat) (globals locals : List Ty) (expression : Expr)
               have ht : result = type := by simpa [infer, hf, ha, heq] using h
               have harg : domain = argumentType := tyEq_sound remaining _ _ heq
               cases harg
-              cases ht
-              exact (inferModel remaining globals locals fn (Ty.arr domain result)
+              have output : Denote result :=
+                (inferModel remaining globals locals fn (Ty.arr domain result)
                 globalModel localModel hf)
                 (inferModel remaining globals locals argument domain
                   globalModel localModel ha)
-termination_by fuel
-decreasing_by all_goals exact Nat.lt_succ_self _
+              exact ht ▸ output
+termination_by structural fuel
 
 /- Successful sequential admission extends a model with the interpreted body.
    There is no assumption that an arbitrary supplied environment has a model. -/
@@ -134,14 +136,19 @@ def checkDeclarationsModel (termFuel declarationFuel : Nat)
               initialModel emptyModel hb
           exact checkDeclarationsModel termFuel remaining
             (declaration.type :: globals) rest result (consModel value initialModel) hs
-termination_by declarationFuel
-decreasing_by all_goals exact Nat.lt_succ_self _
+termination_by structural declarationFuel
 
 def environmentModel (termFuel declarationFuel : Nat)
     (declarations : List Declaration) (types : List Ty)
     (h : checkEnvironment termFuel declarationFuel declarations = some types) :
     Model types :=
   checkDeclarationsModel termFuel declarationFuel [] declarations types emptyModel h
+
+theorem minKernel_hasModel (termFuel declarationFuel : Nat)
+    (declarations : List Declaration) (types : List Ty)
+    (h : checkEnvironment termFuel declarationFuel declarations = some types) :
+    Nonempty (Model types) :=
+  ⟨environmentModel termFuel declarationFuel declarations types h⟩
 
 theorem minKernel_consistent (termFuel declarationFuel queryFuel : Nat)
     (declarations : List Declaration) (types : List Ty)
@@ -156,6 +163,7 @@ theorem minKernel_consistent (termFuel declarationFuel queryFuel : Nat)
 #print axioms tyEq_sound
 #print axioms inferModel
 #print axioms checkDeclarationsModel
+#print axioms minKernel_hasModel
 #print axioms minKernel_consistent
 
 end Ps.MinKernel.Proofs

@@ -1,0 +1,131 @@
+# PSC1 minimal-kernel coverage
+
+The research checker starts with a complete simply typed fragment. Its consistency
+claim is restricted to the exact executable acceptance function and theorem named
+in the proof-status document. It does not cover the complete PSC1 compiler, its
+foundation, or Practical Core v1. Official Lean remains the independent checker
+for those declarations. A source feature, a Core form, an IR operation and a
+trusted kernel rule are different units of coverage.
+
+## Current-source measurement
+
+The selected qualified base is `refactor/psc1-layout-20261026` at
+`94e0c13f6a4b434f73c859cc0c716cb6fb8d1340`. Its receipt records **124 current
+source modules / 4742 Core members**, Lean-source closure
+`9d6dd14bffa5e358d86d7b73776d9348fcaeda3e3fb8630803622f8728347099`.
+These are source-inventory counts, not a minimal-checker qualification. The frozen
+G3 executors retain their separate 122-module closure
+`073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9`.
+No new minimal-checker G1/G2/G3 result follows from either historical count.
+
+Linux CI runs `scripts/minkernel-closure-audit.mjs` against the **current commit**.
+It captures the complete dependency-ordered `Ps.CompilerUnified.Service` closure,
+invokes the production owned frontend with `ordinary-checked` assurance, retains
+its exact canonical admission bytes and strictly validated original IR, and
+separately exports the actual implicit prelude. Its report is
+`dist/pskernel-min/closure/report.json`, schema
+`psc1-min-kernel-current-closure-audit/1`. The artifact binds exact source, binary,
+admission, IR and prelude hashes. Source changes during measurement refuse.
+
+The report counts actual expression tags, level tags, universe argument/parameter
+arities, constants, projection owners, admission kinds, inductive groups and
+constructors. Its source records retain imports and actual source-origin members.
+Foundation declarations and used foundation axioms are counted separately.
+The audit never treats an enum member or a source grep as measured logical usage.
+Run-specific numerical results belong to that exact-commit artifact; this document
+does not manufacture unobserved counts.
+
+The probe's wall time includes parsing, elaboration, independent native checking
+and IR construction. It is not isolated minimal-checker performance. Syntax counts
+also do not establish how frequently WHNF, DefEq or individual reduction rules
+execute; those measurements remain explicit profiling obligations. The audit's
+single Lean grammar lane does not establish grammar parity or generated execution.
+
+## Logical/Core boundary
+
+| Feature | Actual PSC1 representation and foundation | Initial minimal profile |
+| --- | --- | --- |
+| Sorts/universes | `PsLevel.zero/succ/max/imax/param`; parameters occur in prelude recursors and `ite` | No general universes or dependent sorts |
+| Variables | Core has bound/free/meta forms; canonical encoder rejects free variables and metas | Bound variables only, scope checked |
+| Constants | Structured names and explicit universe arguments; dependency-ordered canonical declarations | Only declarations in the restricted accepted environment |
+| Pi/function types | `PsExpr.forallE`, including dependent telescopes | Simple arrows only; dependent Pi unsupported |
+| Lambdas/applications | Typed binders and arbitrary Core applications | Only the proved simply typed rules |
+| Let | `PsExpr.letE` | Only if explicitly implemented and covered by the initial theorem; otherwise refuse |
+| Beta reduction | Logical function computation | No general Lean conversion claim |
+| Delta reduction | Definitions plus regular reducibility heights | No arbitrary unfolding or recursive definition claim |
+| Zeta reduction | Core let substitution | No claim beyond the theorem's declared fragment |
+| Iota reduction | Generated recursors from admitted inductives | Unsupported |
+| Definitional equality | Types may require reduction, universe normalization and proof irrelevance | Structural equality in the restricted type grammar only |
+| Inductive declarations | Canonical groups contain type/constructor types; official Lean generates checked recursors | Unsupported |
+| Structural recursion | Frontend elaborates to recursor applications | Unsupported |
+| Primitive projections | `PsExpr.proj`, with actual owner counts in the audit | Unsupported |
+| Nat | Prelude has an inductive, constructors and recursor; arithmetic constants have pinned types | Unsupported foundation |
+| Int | Pinned primitive type/function declarations | Unsupported foundation |
+| Bool | Pinned type/constants/decisions; logical admission and target representation differ | Unsupported foundation |
+| String/Char | Literals plus pinned primitive operations | Unsupported foundation |
+| Array | Pinned type constructor/operations and target intrinsics | Unsupported foundation |
+| List/Option/Except/Prod | Prelude contains explicit inductive/constructor/recursor declarations | Unsupported foundation |
+| Quotients | No quotient rule follows from an enum or absence in compiler syntax; audit reports actual named uses | Unsupported, including arbitrary imported quotient declarations |
+| Standard axioms | Current provider reconstructs a host-owned prelude containing data/function axioms | No arbitrary axiom admission; no model for the full foundation yet |
+| Imported environments | Exact compiler source imports and separately reconstructed implicit foundation | No unchecked environment import |
+| Partial definitions | `ordinary-checked` pairs constructive opaque witnesses and separately typed retained executable bodies | No replacement of source/body identity or pairing checks |
+| Resources/malformed input | Existing canonical codecs, source bounds and host process limits apply | Explicit rejection/exhaustion; no fallback or arbitrary acceptance |
+
+The canonical source declaration encoder rejects user axioms and raw partial
+declarations. This does not make the implicit prelude axiom-free. The official
+provider constructs a trust-level-0 empty environment, replays the pinned prelude,
+then submits converted semantic declarations to `Lean.Environment.addDeclCore`.
+Every permitted foundational axiom needs an explicit interpretation in a future
+full consistency argument; merely restricting user declarations is insufficient.
+
+## Practical Core v1
+
+The existing finite contract has 14 families and 37 criteria, qualified by its
+own official-checker Linux evidence. **Zero of these 37 family criteria is
+qualified with the initial minimal checker.** Some generated arrow expressions
+may lie in the fragment; that does not qualify a complete surface feature family.
+
+| Contract family | Criteria | Initial minimal qualification |
+| --- | ---: | --- |
+| `operators` | 3 | Unsupported family |
+| `local-inference` | 2 | Unsupported family |
+| `typed-do` | 3 | Unsupported family |
+| `for-loops` | 3 | Unsupported family |
+| `while-loops` | 2 | Unsupported family |
+| `mutation` | 3 | Unsupported family |
+| `early-return` | 3 | Unsupported family |
+| `partial-definitions` | 2 | Unsupported family |
+| `tuples-patterns` | 2 | Unsupported family |
+| `arrays-indexing` | 3 | Unsupported family |
+| `typed-errors` | 4 | Unsupported family |
+| `call-inference` | 2 | Unsupported family |
+| `namespaces` | 2 | Unsupported family |
+| `typed-io` | 3 | Unsupported family |
+| **Total** | **37** | **0 qualified with minimal checker** |
+
+This boundary applies equally to the supported `.ps` grammar and the supported
+`.lean` subset. Retaining the original Lean native/Wasm verifier preserves kernel
+checking compatibility, while frontend support remains the finite PSC1 subset.
+Compiler-Wasm retains GC; official Lean kernel-Wasm retains C++/Emscripten linear
+memory. No proof module belongs in the executable minimal-kernel import closure.
+
+## Required next evidence
+
+1. Extend the fragment only after the exact-commit audit identifies required
+   dependency groups. Distinguish syntax occurrence from actual inference/reduction.
+2. Prove each added rule and permitted foundation interpretation for the executable
+   acceptance path, including parsing/translation obligations if those grant admission.
+3. Check the complete current compiler graph using the generated minimal executable
+   with official-checker fallback disabled, retaining exact source/admission identities.
+4. Only then run genuine G1/G2/G3 qualification with the minimal checker actually
+   used for every required graph; retain existing exact fixed-point criteria.
+
+Until those gates pass, full compiler minimal-checker coverage is **unqualified
+(0 complete modules qualified)** and minimal-checker G1/G2/G3 is **not qualified**.
+
+Sources: [layout receipt](PSC1_LAYOUT_QUALIFICATION_2026-10-26.json),
+[finite contract](PSC1_PRACTICAL_CORE_V1_CONTRACT.json),
+[current capabilities](PSC1_CAPABILITIES.md),
+[architecture](../ARCHITECTURE.md),
+[canonical codec](../packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean),
+[official prelude replay](../packages/pskernel-lean/provider/PsKernelLean/Prelude.lean).

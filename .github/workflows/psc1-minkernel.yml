@@ -53,6 +53,16 @@ jobs:
             assert.ok(line.includes('does not depend on any axioms') || line.includes('depends on axioms: [propext]'),line);
           }
           JS
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const text=fs.readFileSync('proofs/pskernel-min/proof.log','utf8');
+          for(const name of ['instantiate_lift','constant_motive_body','constant_motive_argument_irrelevant']) {
+            const line=text.split('\n').find(line=>line.includes("'Ps.MinKernel.CoreScope."+name+"'"));
+            assert.ok(line,'missing Core scope theorem '+name);
+            assert.ok(line.includes('does not depend on any axioms') || line.includes('depends on axioms: [propext]'),line);
+          }
+          JS
       - name: Build and run native semantic refusal corpus
         working-directory: psc1/packages/pskernel-min
         run: |
@@ -111,10 +121,15 @@ jobs:
           path: psc1/.lake
           key: ${{ steps.native_cache.outputs.cache-primary-key }}
       - name: Compile and execute checker source through PSC1 and check exact source admissions
+        id: portable
         run: node scripts/minkernel-portability.mjs
       - name: Measure complete current compiler admission graph and foundation
+        id: closure_audit
         if: ${{ !cancelled() }}
         run: node scripts/minkernel-closure-audit.mjs
+      - name: Attribute the runtime Core graph and classify recursor motives
+        if: ${{ !cancelled() && steps.portable.outcome == 'success' && steps.closure_audit.outcome == 'success' }}
+        run: node scripts/minkernel-runtime-frontier.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -7,7 +7,16 @@ lean_lib PsMinKernelRuntime where
   srcDir := "../../packages/pskernel-min/src"
   roots := #[`Ps.MinKernel.Check]
 
+-- Exact existing Core implementation used by the scope law, proof-only here.
+lean_lib PsMinCoreFoundation where
+  srcDir := "../../packages/foundation/src"
+  roots := #[`Ps.Foundation.Name]
+
+lean_lib PsMinCoreSyntax where
+  srcDir := "../../packages/core/src"
+  roots := #[`Ps.Core.Level, `Ps.Core.Expr, `Ps.Core.Subst]
+
 @[default_target]
 lean_lib MinKernelProof where
   srcDir := "."
-  roots := #[`MainTheorem]
+  roots := #[`MainTheorem, `CoreScope]

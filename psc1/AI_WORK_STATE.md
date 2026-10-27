@@ -24,6 +24,10 @@ Wasm remains production default and official/native packages are unchanged.
 No new minimal-checker G1/G2/G3, full-compiler consistency or release is claimed.
 No local builds/tests, merge, npm publication or parent-branch writes.
 
+Current research batch: runtime-only Core/source-origin frontier plus exact
+Core substitution/lifting law. Qualification is pending. It changes no
+MinKernel acceptance rule, official provider or production checker mode.
+
 ## Preserved layout baseline state
 
 

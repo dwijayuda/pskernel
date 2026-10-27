@@ -30,6 +30,32 @@ def minKernelSourceFailure (error : PsSh1EmitError) : String :=
   | .checkedEmit _ => "strict IR or emitter refused"
   | .target finding => finding.code ++ ": " ++ finding.detail
 
+
+def minKernelOriginRole (role : PsElabOriginRole) : String :=
+  match role with
+  | .sourceDeclaration => "sourceDeclaration"
+  | .inductiveType => "inductiveType"
+  | .structureType => "structureType"
+  | .constructor => "constructor"
+  | .recursor => "recursor"
+  | .normalizedWorker => "normalizedWorker"
+  | .publicWrapper => "publicWrapper"
+
+def minKernelOriginMember (member : PsElabMemberOrigin) : String :=
+  psJsonObject [("index", toString member.index),
+    ("nameWire", psEncodeCodecName member.name),
+    ("role", psJsonQuote (minKernelOriginRole member.role))]
+
+def minKernelOriginBatch (batch : PsElabBatchOrigin) : String :=
+  psJsonObject [("sourceIndex", toString batch.sourceIndex),
+    ("sourceName", psJsonArray (batch.sourceName.segments.map psJsonQuote)),
+    ("members", psJsonArray (batch.members.map minKernelOriginMember))]
+
+def minKernelOriginModule (origin : PsSh1ModuleOrigin) : String :=
+  psJsonObject [("moduleName", psJsonArray (origin.moduleName.map psJsonQuote)),
+    ("coreStart", toString origin.coreStart),
+    ("batches", psJsonArray (origin.batches.map minKernelOriginBatch))]
+
 def main : IO Unit := do
   let checker ← IO.FS.readFile "packages/pskernel-min/src/Ps/MinKernel/Check.lean"
   let vectors ← IO.FS.readFile "packages/pskernel-min/src/Ps/MinKernel/Tests/Vectors.lean"
@@ -45,8 +71,9 @@ def main : IO Unit := do
     IO.FS.writeFile "dist/pskernel-min/portable/vectors.ts" result.typeScript
     IO.FS.writeFile "dist/pskernel-min/portable/vectors.admissions.json" result.admissions
     IO.FS.writeFile "dist/pskernel-min/portable/vectors.source.json"
-      (psJsonObject [("schema", psJsonQuote "psc1-min-source-compile/1"),
+      (psJsonObject [("schema", psJsonQuote "psc1-min-source-compile/2"),
         ("sourceAccepted", "true"), ("targetAccepted", "true"),
         ("originalIrAccepted", "true"), ("providerChecked", "false"),
-        ("moduleCount", toString result.sourcePolicy.moduleCount)] ++ "\n")
+        ("moduleCount", toString result.sourcePolicy.moduleCount),
+        ("origins", psJsonArray (result.origins.map minKernelOriginModule))] ++ "\n")
     IO.println "PSC1_MIN_SOURCE_COMPILE_PASS: candidate only; independent admission still required"

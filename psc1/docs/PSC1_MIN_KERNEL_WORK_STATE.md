@@ -177,3 +177,20 @@ then a bounded A-D architecture decision and one complete proof/implementation
 extension. New findings include con-leche's arbitrary-axiom refusal, static
 metaprogramming/pin-asset closure and monomorphic-List/String-literal mismatch.
 No new upstream experiment or theorem is claimed passed by the guideline alone.
+
+## Runtime frontier and Core-scope batch (qualification pending)
+
+The next batch adds a source-origin-bound runtime ledger and a proof-only
+CoreScope module over the exact existing Ps.Core.Subst implementation.
+The intended law removes a freshly inserted binder without capturing outer
+de Bruijn references, and specializes the actual instantiation step of a
+constant recursor motive. This does not prove typing or semantic correctness
+of an admitted recursor, the foundation or a canonical parser.
+
+The diagnostic keys full tagged structured names, retains actual raw record
+byte ranges/hashes, attributes records through compiler-retained origins,
+classifies Pi dependencies and maximal recursor application spines, and
+follows explicit foundation family/constructor metadata. Its output is not
+a closed-environment qualification or a foundation-pruning proof.
+No runtime checker acceptance rule or production mode changes in this batch.
+Linux CI must establish the new theorem/diagnostic outcome before promotion.

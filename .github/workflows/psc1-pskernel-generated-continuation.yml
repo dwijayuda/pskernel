@@ -1,0 +1,56 @@
+name: PSC1 real generated continuation semantic bridge
+on:
+  push:
+    branches: [work/psc1-pskernel-generated-continuation-20261027]
+    paths:
+      - psc1/test/PsKernelExprV2GeneratedContinuationProofs.lean
+      - psc1/kernel-lakefile.lean
+      - .github/workflows/psc1-pskernel-generated-continuation.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Install pinned Lean 4.35.0
+        run: bash psc1/scripts/install-lean435-ci.sh
+      - name: Build and kernel-check real generated continuation bridge
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          mkdir -p "$RUNNER_TEMP/generated-continuation"
+          git diff --exit-code d732dcb63dbdc5c468ff7d0ad49089a2e300d2f1 HEAD -- packages/pskernel-core/src test/PsKernelExprV2ArenaModelBridgeProofs.lean test/PsKernelExprV2DecodedBridgeProofs.lean test/PsKernelExprV2SemanticPrefixProofs.lean
+          lake -f kernel-lakefile.lean build PsKernelGeneratedContinuationNativeProofs 2>&1 | tee "$RUNNER_TEMP/generated-continuation/build.log"
+          lake -f kernel-lakefile.lean env lean test/PsKernelExprV2GeneratedContinuationProofs.lean 2>&1 | tee "$RUNNER_TEMP/generated-continuation/proofs.log"
+          python3 - <<'PY'
+          import pathlib,re,json,hashlib,os
+          source=pathlib.Path('test/PsKernelExprV2GeneratedContinuationProofs.lean').read_text()
+          expected=re.findall(r'^#print axioms (\S+)',source,re.M)
+          log=(pathlib.Path(os.environ['RUNNER_TEMP'])/'generated-continuation/proofs.log').read_text()
+          rows=re.findall(r"'([^']+)' (?:depends on axioms: \[([^\]]*)\]|does not depend on any axioms)",log)
+          assert len(expected)==len(set(expected))==len(rows)==7 and set(expected)=={name for name,_ in rows}
+          assert 'error:' not in log
+          for name,axioms in rows:assert {x.strip() for x in axioms.split(',') if x.strip()}<={'propext','Classical.choice','Quot.sound'},(name,axioms)
+          out=pathlib.Path(os.environ['RUNNER_TEMP'])/'generated-continuation'
+          paths=['test/PsKernelExprV2GeneratedContinuationProofs.lean','test/PsKernelExprV2ArenaModelBridgeProofs.lean','test/PsKernelExprV2DecodedBridgeProofs.lean','test/PsKernelExprV2SemanticPrefixProofs.lean','kernel-lakefile.lean']
+          bindings={}
+          for path in paths:
+            b=pathlib.Path(path).read_bytes();target=out/'source'/path;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(b);bindings[path]={'bytes':len(b),'sha256':hashlib.sha256(b).hexdigest()}
+          (out/'receipt.json').write_text(json.dumps({'source':os.environ['GITHUB_SHA'],'run':os.environ['GITHUB_RUN_ID'],'exactProofNames':expected,'proofs':7,'bindings':bindings,'logicalCheckingSoundness':False,'checkerTransitionPreservation':False,'scope':'Actual generated decoded-prefix completion and synchronization, established public entry semantics, exact arena/declaration carriers and preserved original lookups; checker and declaration/cache soundness remain open.'},indent=2)+'\n')
+          print('PSC1_GENERATED_CONTINUATION_PROOFS: PASS reports=7')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-generated-continuation-proof7
+          path: ${{ runner.temp }}/generated-continuation/
+          if-no-files-found: error

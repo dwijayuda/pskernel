@@ -34,7 +34,7 @@ profile with exact primitive semantics. No runtime acceptance or production mode
 changes; no foundation pruning, recursor soundness or min self-check is claimed.
 Broader main 40455025111 is terminal success at57964262 (full122030229165,
 gate122038991205;37/37 existing finite Practical Core criteria, zero blocked).
-Installed40454629955 passes at783718f9, with only the CoreScope proof repair
+Installed 40454629955 passes at783718f9, with only the CoreScope proof repair
 intervening before57964262. Exact separate identities are in the dated receipt.
 Next batch R1 uses the user-confirmed GPT-6.1 Sol/High setting.
 
@@ -88,10 +88,17 @@ for all 115 canonical foundation declarations. Internal quotation names do not
 authorize arbitrary canonical source-name binding.
 
 Previous R1 main 40460549124 and installed 40459838431 are terminal success.
-**Historical broader-regression snapshot at 07:55 UTC / 14:55 Asia/Jakarta:** R2
-main 40469652253 and installed 40468550390 were in progress. Reporting commits may
-supersede main; query the live PR checks rather than infer current status from
-this snapshot. The dated receipt preserves each exact commit/run/artifact scope.
+**R2 terminal regressions:** [main 40470311636](https://github.com/dwijayuda/pskernel/actions/runs/40470311636)
+passes at reporting commit `48810244a9d6d449f71bc0d10dcbdbb45f4e2e63`,
+full-job 122080382138 and gate-job 122087862294. Every selected dependency passes;
+the benchmark is deliberately unselected. The tested merge and reporting head
+have the same tree `44291047885b84101167ffa404d3bad059b2fb8a`.
+[Installed 40468550390](https://github.com/dwijayuda/pskernel/actions/runs/40468550390)
+passes preflight 122070225396 and installed 122070428136 at d0810a57. Only three
+proof files and documentation changed afterward; runtime/test/driver bytes match
+the qualified R2 runtime. The dated receipt preserves these separate exact scopes.
+Verified 2026-10-27 08:32:58 UTC. Later documentation-only reports retain these source
+identities; requery live HEAD and checks before starting the next proof batch.
 
 **Next batch is R3:** measured lets, declaration projections and exact pinned
 foundation instance semantics, keeping the real acceptance-to-model bridge.

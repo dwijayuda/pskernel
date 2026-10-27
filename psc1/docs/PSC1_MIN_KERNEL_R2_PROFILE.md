@@ -138,3 +138,36 @@ The complete fresh compiler census still has 124 modules/4747 logical members,
 3465 admissions,115 prelude declarations and 60 foundation axioms. R2 does not
 admit that compiler under min. Historical diagnostic counts and the current
 unqualified frontier are preserved in the dated receipt.
+
+## Extended runtime target for R3
+
+Read-only inspection of the verified Linux artifact's same-compile source origins
+selects the RegularProfile and RegularCheck modules: 63 origin members represented
+by 37 source admission records (5 inductive groups and 32 constant records), out of
+66 records in the full test bundle. The selected record indices are 11–47. This
+is a derived diagnostic view; the original 66-record stream is preserved. It is
+not a new admitted environment, a min self-check or a complete foundation closure.
+
+The selected syntax contains 21 let occurrences and 14 projection occurrences.
+Projection owners/fields are PsMinRegSpec fields 0–5 and PsMinRegDeclaration
+fields 0–1. Field 5 of PsMinRegSpec occurs 5 times; the declaration's type field 0
+occurs 3 times. These counts include generated accessors and direct uses.
+The original Check-only 12-record ledger does not describe this extended checker.
+R3/R4 must remeasure the complete connected R1/R2/naming/ingress implementation
+and its foundation before claiming runtime self-check.
+
+This inspection only parses retained JSON data; it does not execute project code,
+proofs or tests locally. Exact inputs: regular/vectors.source.json SHA256
+`a55185814caa88f9477b7f787d9db013555e6190d5a6d8de849bbf926b4c8443`
+and regular/vectors.admissions.json SHA256
+`522025f72d80205e3c1004145b65a40535df46e7840869719b0c646bb73ded8d`.
+Select origin members by exact structured names, then their constant records or
+owning inductive groups; do not use pretty-name suffixes or alter the input graph.
+
+A concrete later boundary is Foundation.Name: its PsName.str constructor carries
+String, and its equality implementation uses String.Internal and Char.toNat.
+R2's type codes have no String/Char primitive interpretation. The five-module
+source bundle is admitted by the official checker, but its Name module is not
+thereby modeled by R2. Before claiming the connected checker checks itself,
+add the required closed primitive semantics or prove an exact representation
+translation. Inspect the [pinned actual Name source](https://github.com/dwijayuda/pskernel/blob/028dcd98fabcb0bf196c0d6f27a80bad3b666745/psc1/packages/foundation/src/Ps/Foundation/Name.lean).

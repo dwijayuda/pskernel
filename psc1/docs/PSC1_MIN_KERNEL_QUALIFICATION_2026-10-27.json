@@ -3949,20 +3949,305 @@
       "reportSha256": "892a24f53016f21783a0d4371f4e6a7cf827d1ebdd67e52179587fa76f38b90c"
     },
     "broaderRegressionSnapshot": {
-      "checkedAtUtc": "2026-10-27 07:55:44 UTC",
+      "checkedAtUtc": "2026-10-27 08:32:58 UTC",
       "main": {
-        "runId": 40469652253,
-        "commit": "028dcd98fabcb0bf196c0d6f27a80bad3b666745",
-        "status": "in_progress",
-        "conclusion": null
+        "runId": 40470311636,
+        "commit": "48810244a9d6d449f71bc0d10dcbdbb45f4e2e63",
+        "testedMerge": "c1a755b107a128260dddca40ac7cdd87e39a79dd",
+        "tree": "44291047885b84101167ffa404d3bad059b2fb8a",
+        "status": "completed",
+        "conclusion": "success",
+        "fullJob": 122080382138,
+        "gateJob": 122087862294,
+        "selection": {
+          "schema": "psc1-ci-selection/1",
+          "testedCommit": "c1a755b107a128260dddca40ac7cdd87e39a79dd",
+          "headCommit": "48810244a9d6d449f71bc0d10dcbdbb45f4e2e63",
+          "beforeCommit": "fea85153fe48cc9a3fb8ae809ca6cbf55a40740b",
+          "eventBeforeCommit": "028dcd98fabcb0bf196c0d6f27a80bad3b666745",
+          "baselineRunId": 40460549124,
+          "baselineError": null,
+          "static": true,
+          "focused": true,
+          "integration": true,
+          "release": true,
+          "benchmark": false,
+          "paths": [
+            ".github/workflows/psc1-minkernel.yml",
+            "psc1/AI_WORK_STATE.md",
+            "psc1/docs/PSC1_MIN_KERNEL_ARCHITECTURE.md",
+            "psc1/docs/PSC1_MIN_KERNEL_CONTINUATION_GUIDE.md",
+            "psc1/docs/PSC1_MIN_KERNEL_CONTINUATION_PROOFS.md",
+            "psc1/docs/PSC1_MIN_KERNEL_CONTINUATION_REPO.md",
+            "psc1/docs/PSC1_MIN_KERNEL_CONTINUATION_RESEARCH.md",
+            "psc1/docs/PSC1_MIN_KERNEL_COVERAGE.md",
+            "psc1/docs/PSC1_MIN_KERNEL_PROOF_STATUS.md",
+            "psc1/docs/PSC1_MIN_KERNEL_QUALIFICATION_2026-10-27.json",
+            "psc1/docs/PSC1_MIN_KERNEL_R2_PROFILE.md",
+            "psc1/docs/PSC1_MIN_KERNEL_RUNTIME_PROFILE.md",
+            "psc1/docs/PSC1_MIN_KERNEL_WORK_STATE.md",
+            "psc1/packages/pskernel-min/README.md",
+            "psc1/packages/pskernel-min/lakefile.lean",
+            "psc1/packages/pskernel-min/src/Ps/MinKernel/Profile/RegularCheck.lean",
+            "psc1/packages/pskernel-min/src/Ps/MinKernel/Profile/RegularNames.lean",
+            "psc1/packages/pskernel-min/src/Ps/MinKernel/Profile/RegularProfile.lean",
+            "psc1/packages/pskernel-min/src/Ps/MinKernel/Tests/RegularVectors.lean",
+            "psc1/packages/pskernel-min/test/RegularTests.lean",
+            "psc1/proofs/pskernel-min/RegularCoreWitness.lean",
+            "psc1/proofs/pskernel-min/RegularModel.lean",
+            "psc1/proofs/pskernel-min/RegularNames.lean",
+            "psc1/proofs/pskernel-min/RegularSoundness.lean",
+            "psc1/proofs/pskernel-min/RegularSourceInstance.lean",
+            "psc1/proofs/pskernel-min/RegularValidation.lean",
+            "psc1/proofs/pskernel-min/lakefile.lean",
+            "psc1/scripts/MinKernelSourceCompile.lean",
+            "psc1/scripts/minkernel-regular-portability.mjs"
+          ],
+          "reasons": [
+            "build-or-ci-policy:.github/workflows/psc1-minkernel.yml",
+            "compiler-source-or-library:psc1/packages/pskernel-min/lakefile.lean",
+            "compiler-source-or-library:psc1/packages/pskernel-min/src/Ps/MinKernel/Profile/RegularCheck.lean",
+            "compiler-source-or-library:psc1/packages/pskernel-min/src/Ps/MinKernel/Profile/RegularNames.lean",
+            "compiler-source-or-library:psc1/packages/pskernel-min/src/Ps/MinKernel/Profile/RegularProfile.lean",
+            "compiler-source-or-library:psc1/packages/pskernel-min/src/Ps/MinKernel/Tests/RegularVectors.lean",
+            "compiler-source-or-library:psc1/packages/pskernel-min/test/RegularTests.lean",
+            "unknown-compiler-dependency:psc1/proofs/pskernel-min/RegularCoreWitness.lean",
+            "unknown-compiler-dependency:psc1/proofs/pskernel-min/RegularModel.lean",
+            "unknown-compiler-dependency:psc1/proofs/pskernel-min/RegularNames.lean",
+            "unknown-compiler-dependency:psc1/proofs/pskernel-min/RegularSoundness.lean",
+            "unknown-compiler-dependency:psc1/proofs/pskernel-min/RegularSourceInstance.lean",
+            "unknown-compiler-dependency:psc1/proofs/pskernel-min/RegularValidation.lean",
+            "unknown-compiler-dependency:psc1/proofs/pskernel-min/lakefile.lean",
+            "test-or-qualification-controller:psc1/scripts/MinKernelSourceCompile.lean",
+            "test-controller:psc1/scripts/MinKernelSourceCompile.lean",
+            "test-or-qualification-controller:psc1/scripts/minkernel-regular-portability.mjs",
+            "test-controller:psc1/scripts/minkernel-regular-portability.mjs"
+          ]
+        },
+        "jobs": [
+          {
+            "id": 122075887899,
+            "name": "static",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122076147182,
+            "name": "source-bindings / trace",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122076147281,
+            "name": "native / native",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122076147337,
+            "name": "focused / php-application",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122076147341,
+            "name": "focused / focused (core)",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122076147344,
+            "name": "focused / focused (applications)",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122076147474,
+            "name": "lossless / lossless",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122076148475,
+            "name": "benchmark",
+            "status": "completed",
+            "conclusion": "skipped"
+          },
+          {
+            "id": 122077342585,
+            "name": "source-bindings / integration",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122078820008,
+            "name": "g1 / generated-js",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122078820047,
+            "name": "closures / selected-closure (semantic-compiler, checked)",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122078820083,
+            "name": "closures / selected-closure (directjs-compiler, ordinary-checked)",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122078820129,
+            "name": "g1 / host-session-boundary",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122078820216,
+            "name": "closures / selected-closure (rust-compiler, ordinary-checked)",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122080382138,
+            "name": "full / linux-scoped",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "id": 122087862294,
+            "name": "gate",
+            "status": "completed",
+            "conclusion": "success"
+          }
+        ],
+        "existingOfficialPracticalCore": {
+          "counts": {
+            "implemented": 0,
+            "tested": 0,
+            "qualified": 37,
+            "blocked": 0
+          },
+          "releaseReady": true
+        },
+        "artifacts": [
+          {
+            "id": 12720031635,
+            "name": "psc1-scoped-correctness-c1a755b107a128260dddca40ac7cdd87e39a79dd",
+            "bytes": 121480586,
+            "digest": "sha256:ddc3043b4d0a914a6d8c847945779314f69755b8fc611e035c10847d388631f8"
+          },
+          {
+            "id": 12719550235,
+            "name": "psc1-lossless-c1a755b107a128260dddca40ac7cdd87e39a79dd",
+            "bytes": 35664,
+            "digest": "sha256:e4190468de334c9b2bf6f6f993aa37e43ba02b7ba1343ddb07aed01fc9c19cce"
+          },
+          {
+            "id": 12719460555,
+            "name": "psc1-source-binding-integration-c1a755b107a128260dddca40ac7cdd87e39a79dd",
+            "bytes": 25574,
+            "digest": "sha256:16dc2fe84dcdd0c4389958022181fe8642a710acaf7b69beed4907a4874dec1a"
+          },
+          {
+            "id": 12719400457,
+            "name": "psc1-generated-compiler-c1a755b107a128260dddca40ac7cdd87e39a79dd",
+            "bytes": 5651142,
+            "digest": "sha256:4d1a8f0d04a88d0fcd8aa2acd347c084c146af6ceae2f73f4e34869eaedff78d"
+          },
+          {
+            "id": 12719175821,
+            "name": "psc1-generated-session-boundary-c1a755b107a128260dddca40ac7cdd87e39a79dd",
+            "bytes": 239834,
+            "digest": "sha256:899dfc73d5e7d7c027f7334e58dafc5b35bfe2e0299186da5cc4cacceb6fbfa2"
+          },
+          {
+            "id": 12719145397,
+            "name": "psc1-compiler-closure-rust-compiler-ordinary-checked-c1a755b107a128260dddca40ac7cdd87e39a79dd",
+            "bytes": 2499814,
+            "digest": "sha256:96cff3e8d49bdd9e49150cdd3bd16c4eeea1f67b437800f8003048a214d94c02"
+          },
+          {
+            "id": 12718965369,
+            "name": "psc1-practical-compiler-m-applications-c1a755b107a128260dddca40ac7cdd87e39a79dd-attempt-1",
+            "bytes": 1750257,
+            "digest": "sha256:1a25f936c6c85e6a9d9f9c6e058df296ee1b4dc0653132f28fcc539cdb571308"
+          },
+          {
+            "id": 12718895100,
+            "name": "psc1-practical-compiler-m-core-c1a755b107a128260dddca40ac7cdd87e39a79dd-attempt-1",
+            "bytes": 3019656,
+            "digest": "sha256:7012ab6f85236962d81939670bd02d14795bbfc505b86ddfe176c1822f26d5a7"
+          },
+          {
+            "id": 12718746259,
+            "name": "psc1-compiler-closure-directjs-compiler-ordinary-checked-c1a755b107a128260dddca40ac7cdd87e39a79dd",
+            "bytes": 2792692,
+            "digest": "sha256:e6005c6c16805d14631f302c28a8d5d0219d5cbf8f6f47c856f7daabe1a74f4d"
+          },
+          {
+            "id": 12718651134,
+            "name": "psc1-source-trace-c1a755b107a128260dddca40ac7cdd87e39a79dd",
+            "bytes": 302426,
+            "digest": "sha256:5d404784eb6eec7d8c526f49b62126b7ace9884f95dc7e1d43cb02d9e21b615b"
+          },
+          {
+            "id": 12718501913,
+            "name": "psc1-php-applications-c1a755b107a128260dddca40ac7cdd87e39a79dd-attempt-1",
+            "bytes": 360269,
+            "digest": "sha256:8cd92df03fe00e583d94bb7bda59518807ce7a42f78248030b2f82f727f471c1"
+          },
+          {
+            "id": 12718359816,
+            "name": "psc1-compiler-closure-semantic-compiler-checked-c1a755b107a128260dddca40ac7cdd87e39a79dd",
+            "bytes": 2013559,
+            "digest": "sha256:a94e3f80d91dcf5baa0029640a9c5dba3f9d33ccf9eae7a6b59899ea6f40a208"
+          },
+          {
+            "id": 12718098408,
+            "name": "psc1-development-c1a755b107a128260dddca40ac7cdd87e39a79dd",
+            "bytes": 47030,
+            "digest": "sha256:1d9d78986db806444ade8c2f9800be7193ec4ee5854bc1233412e94b39214330"
+          },
+          {
+            "id": 12717883984,
+            "name": "psc1-architecture-native-c1a755b107a128260dddca40ac7cdd87e39a79dd",
+            "bytes": 322685,
+            "digest": "sha256:5f4db784bbcc324b9f3812d63e93822418e35197e8138209072450f48659fa9a"
+          }
+        ]
       },
       "installed": {
         "runId": 40468550390,
         "commit": "d0810a57aa1eb424fc5b82968684b972b332a758",
-        "status": "in_progress",
-        "conclusion": null
+        "status": "completed",
+        "conclusion": "success",
+        "preflightJob": 122070225396,
+        "installedJob": 122070428136,
+        "package": {
+          "commit": "d0810a57aa1eb424fc5b82968684b972b332a758",
+          "sha256": "9887704bb35ccec9f4a9a0549fc83438b5780bfd1e92a504fe13fb75ca1661a2",
+          "bytes": 3823979,
+          "version": "0.1.0-psc1.9"
+        },
+        "artifacts": [
+          {
+            "id": 12720060646,
+            "name": "psc1-cli-toolchain-d0810a57aa1eb424fc5b82968684b972b332a758",
+            "bytes": 206725493,
+            "digest": "sha256:866680657fb1624f99ee5d6bbb34d5d548d32a50fe9efae53351232b0c2e4edf"
+          },
+          {
+            "id": 12717631860,
+            "name": "psc1-cli-source-d0810a57aa1eb424fc5b82968684b972b332a758",
+            "bytes": 45610,
+            "digest": "sha256:d8a3938628a1dba3847b6af68575a97bbfe6132d494aaec9cca8afdef4577369"
+          }
+        ],
+        "subsequentDelta": "Only RegularNames/RegularSoundness/RegularSourceInstance proof files and Markdown/JSON changed; runtime/test/driver/workflow bytes match installed qualification."
       },
-      "policy": "Historical snapshot; reporting pushes can supersede main. Query live PR checks. No claim of terminal R2 broad gates in this snapshot."
+      "qualification": "All selected branch regressions terminal success in their stated source/release scopes. Benchmark deliberately unselected. Not minimal-checker full-compiler consistency or self-hosting."
     },
     "developmentAttempts": [
       {
@@ -4030,12 +4315,106 @@
       }
     ],
     "remaining": [
+      "R3/R4 remeasure the complete connected R1/R2/naming/ingress runtime; original Check-only12-record ledger is insufficient. R2 source-derived runtime view has37 records,21 lets,14 projections; Name String/Char semantics remain outside R2.",
       "R3 lets, declaration projections and selected pinned foundation instance semantics",
       "R3 definition-body/evaluation invariant for any delta conversion",
       "R4 general exact source-name-to-slot binding, canonical decoding and typing/semantic preservation",
       "R4 generated execution/hostile-input resource boundary and complete runtime self-check",
       "Full compiler min checking and genuine min G1/G2/G3; coverage remains 0/124 and 0/37"
     ],
-    "next": "R3: preserve the qualified R2 grammar/model and add the measured let/projection/foundation rules with actual acceptance-to-model proofs; do not implement unproved canonical acceptance"
+    "next": "R3: preserve the qualified R2 grammar/model and add the measured let/projection/foundation rules with actual acceptance-to-model proofs; do not implement unproved canonical acceptance",
+    "runtimeSourceOriginDiagnostic": {
+      "authoritative": false,
+      "scope": "Read-only diagnostic derived from exact retained same-compile source origins; not min admission or a complete foundation model",
+      "archiveSha256": "a8d4ef18d424aa0a595f80b1a901ebcc6f8e3b5e1dcac911b0e7f2de8b50fb85",
+      "sourceSha256": "a55185814caa88f9477b7f787d9db013555e6190d5a6d8de849bbf926b4c8443",
+      "admissionsSha256": "522025f72d80205e3c1004145b65a40535df46e7840869719b0c646bb73ded8d",
+      "runtimeModules": [
+        [
+          "Ps",
+          "MinKernel",
+          "Profile",
+          "RegularProfile"
+        ],
+        [
+          "Ps",
+          "MinKernel",
+          "Profile",
+          "RegularCheck"
+        ]
+      ],
+      "sourceOriginMembers": 63,
+      "totalTestBundleRecords": 66,
+      "runtimeRecordIndices": [
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45,
+        46,
+        47
+      ],
+      "runtimeRecords": 37,
+      "runtimeKinds": {
+        "inductive": 5,
+        "constant": 32
+      },
+      "expressionOccurrences": {
+        "lam": 363,
+        "const": 1327,
+        "app": 972,
+        "let": 21,
+        "b": 279,
+        "forall": 159,
+        "proj": 14,
+        "sort": 5,
+        "nat": 15
+      },
+      "projectionOccurrences": 14,
+      "projectionsByOwnerField": {
+        "[[\"s\",\"PsMinRegDeclaration\"]] field 0": 3,
+        "[[\"s\",\"PsMinRegDeclaration\"]] field 1": 1,
+        "[[\"s\",\"PsMinRegSpec\"]] field 5": 5,
+        "[[\"s\",\"PsMinRegSpec\"]] field 0": 1,
+        "[[\"s\",\"PsMinRegSpec\"]] field 1": 1,
+        "[[\"s\",\"PsMinRegSpec\"]] field 2": 1,
+        "[[\"s\",\"PsMinRegSpec\"]] field 3": 1,
+        "[[\"s\",\"PsMinRegSpec\"]] field 4": 1
+      },
+      "qualification": false,
+      "methodology": "Read-only parsing of verified retained archive; exact structured origin-member names select constant records or owning inductive groups; no original stream rewritten and no project build/test executed locally",
+      "foundationBoundary": "Counts exclude foundation reconstruction/implicit generated-type obligations. R3/R4 must measure the full connected checker plus R1/naming/ingress dependencies before self-check.",
+      "archiveDownloadVerified": true
+    }
   }
 }

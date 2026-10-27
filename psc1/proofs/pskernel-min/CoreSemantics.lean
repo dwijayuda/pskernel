@@ -55,7 +55,7 @@ theorem infer_evaluates (fuel : Nat)
       simpa -implicitDefEqProofs only [OperationalProofs.inferModel, Nat.recAux, OperationalFoundation.primitiveModel] using!
         (OpEval.primitive (globals := globals) (G := G) locals L schema level parameters indices motives minors)
     | lam domain body =>
-      cases hv : psMinRegTyValid remaining (0) domain with
+      cases hv : psMinRegTyValid remaining (psMinRegSpecCount []) domain with
       | false => simp [psMinOpInfer, hv] at h
       | true =>
         cases hb : psMinOpInfer remaining [] globals (domain :: locals) body with
@@ -90,7 +90,7 @@ theorem infer_evaluates (fuel : Nat)
                   (ih locals fn (.arr domain result) L hf) (ih locals argument domain L ha)
         | _ => simp [psMinOpInfer, hf] at h
     | letE annotation value body =>
-      cases hv : psMinRegTyValid remaining (0) annotation with
+      cases hv : psMinRegTyValid remaining (psMinRegSpecCount []) annotation with
       | false => simp [psMinOpInfer, hv] at h
       | true =>
         cases hb : psMinOpInfer remaining [] globals locals value with
@@ -281,13 +281,13 @@ theorem translation_preserves_semantics (names : List PsMinCoreName)
     · exact ihb _ _ _ _ (by assumption)
   | conditional sourceType left right yes no t l r y n ht hl hr hy hn ihl ihr ihy ihn =>
     cases evaluation
-    rename_i domain0 fn0 arg0 head0 noEval
+    rename_i domain0 arg0 noEval fn0 head0
     cases head0
-    rename_i domain1 fn1 arg1 head1 yesEval
+    rename_i domain1 arg1 yesEval fn1 head1
     cases head1
-    rename_i domain2 fn2 arg2 head2 rightEval
+    rename_i domain2 arg2 rightEval fn2 head2
     cases head2
-    rename_i domain3 fn3 arg3 primitiveEval leftEval
+    rename_i domain3 arg3 leftEval fn3 primitiveEval
     cases primitiveEval
     apply CoreEval.conditional
     · exact ht

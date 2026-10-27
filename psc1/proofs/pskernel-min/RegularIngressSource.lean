@@ -178,6 +178,54 @@ theorem term_translation (fuel total visible : Nat) (groups : List PsMinRegCoreP
           | _ => simp [psMinRegCoreTranslate, hv, hp, hrec] at h
 
 
+inductive EnvironmentImage (total : Nat) (groups : List PsMinRegCorePlan) :
+    Nat → List PsMinCoreName → List PsMinRegCoreEntry → List PsMinRegCoreDefinition → Prop where
+  | nil (visible names) : EnvironmentImage total groups visible names [] []
+  | group (visible names) (source : PsMinRegCoreGroup) (rest normalized)
+      (tail : EnvironmentImage total groups (Nat.succ visible) names rest normalized) :
+      EnvironmentImage total groups visible names (.inductiveE source :: rest) normalized
+  | definition (visible names) (source : PsMinCoreDeclaration) (rest type value normalized)
+      (typeExact : psMinRegCoreType 256 total visible groups source.type = some type)
+      (typeMeaning : RegularIngressTranslation.TypeImage total visible groups source.type type)
+      (body : TermImage total visible groups names source.value value)
+      (tail : EnvironmentImage total groups visible (source.name :: names) rest normalized) :
+      EnvironmentImage total groups visible names (.definition source :: rest) (⟨type,value⟩ :: normalized)
+
+theorem environment_translation (fuel total visible : Nat) (groups : List PsMinRegCorePlan)
+    (names : List PsMinCoreName) (source : List PsMinRegCoreEntry) (normalized : List PsMinRegCoreDefinition)
+    (h : psMinRegCoreTranslateEntries fuel total visible groups names source = some normalized) :
+    EnvironmentImage total groups visible names source normalized := by
+  induction fuel generalizing visible names source normalized with
+  | zero =>
+    cases source with
+    | nil => cases h; exact .nil visible names
+    | cons entry rest => simp [psMinRegCoreTranslateEntries] at h
+  | succ fuel ih =>
+    cases source with
+    | nil => cases h; exact .nil visible names
+    | cons entry rest =>
+      cases entry with
+      | inductiveE group =>
+        apply EnvironmentImage.group visible names group rest normalized
+        exact ih (Nat.succ visible) names rest normalized h
+      | definition declaration =>
+        cases ht : psMinRegCoreType 256 total visible groups declaration.type with
+        | none => simp [psMinRegCoreTranslateEntries, ht] at h
+        | some type =>
+          cases hv : psMinRegCoreTranslate 256 total visible groups names declaration.value with
+          | none => simp [psMinRegCoreTranslateEntries, ht, hv] at h
+          | some value =>
+            cases hn : psMinRegCoreTranslateEntries fuel total visible groups (declaration.name :: names) rest with
+            | none => simp [psMinRegCoreTranslateEntries, ht, hv, hn] at h
+            | some tail =>
+              simp only [psMinRegCoreTranslateEntries, ht, hv, hn, Option.some.injEq] at h
+              subst normalized
+              exact .definition visible names declaration rest type value tail ht
+                (RegularIngressTranslation.type_translation _ _ _ _ _ _ ht)
+                (term_translation _ _ _ _ _ _ _ hv) (ih visible (declaration.name :: names) rest tail hn)
+
+#print axioms environment_translation
+
 #print axioms projection_owner_image
 #print axioms term_translation
 end Ps.MinKernel.RegularIngressSource

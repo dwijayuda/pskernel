@@ -61,7 +61,7 @@ theorem head_signature (fields : List PsMinRegField) (index : Nat) (type : PsMin
   | some result =>
     have ht : PsMinRegTy.arr (.data 0) result = type := by
       simpa [headLookup, psMinOpProjectionType, singleSpec, hf] using h
-    exact ⟨result, hf, ht.symm⟩
+    exact ⟨result, rfl, ht.symm⟩
 
 theorem head_arrow_signature (fields : List PsMinRegField) (index : Nat)
     (domain result : PsMinRegTy) (h : headLookup fields index = some (.arr domain result)) :

@@ -134,8 +134,12 @@ try {
   // Cancel a second real request while work is active; keep the committed pointer.
   const pointer=fs.readFileSync(path.join(out,'current.json'));
   const prior=state.events.filter(e=>e.event==='checking').length;
+  const previousStages=new Set(fs.readdirSync(path.join(out,'generations')));
   fs.writeFileSync(file,'def answer : Nat := 44\n');
   await until(()=>state.events.filter(e=>e.event==='checking').length>prior,'active checking');
+  await until(()=>fs.readdirSync(path.join(out,'generations')).some(name=>
+    !previousStages.has(name)&&name.startsWith('.stage-')&&fs.existsSync(path.join(out,'generations',name,'request.json'))),
+    'cancellation must interrupt a real staged compiler request');
   const elapsed=await stop(state,'SIGTERM');
   assert.deepEqual(fs.readFileSync(path.join(out,'current.json')),pointer);
   cases.push({supersededRealRequest:true,oldDigest,latest,activeSignalExit:143,stopMs:elapsed,

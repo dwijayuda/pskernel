@@ -10,7 +10,7 @@ function stamp(files) {
   return files.map(file => {
     try {
       const s = fs.lstatSync(file, {bigint: true});
-      return [file, s.dev, s.ino, s.mode, s.size, s.mtimeNs, s.ctimeNs].join(':');
+      return [file, s.dev, s.ino, s.mode, s.size, s.mtimeNs ?? s.mtimeMs, s.ctimeNs ?? s.ctimeMs].join(':');
     } catch (error) { return file + ':' + error.code; }
   }).join('\n');
 }

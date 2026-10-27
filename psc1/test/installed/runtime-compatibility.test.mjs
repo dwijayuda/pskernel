@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
+import {spawn} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {fixture} from './cli-fixture.mjs';
 const f = fixture(), cases = [];
@@ -50,9 +51,45 @@ fs.writeFileSync(invalid, 'this is not canonical admission');
 const rejected = f.call(['kernel', 'check', invalid]);
 assert.notEqual(rejected.status, 0, rejected.stdout);
 assert.doesNotMatch(rejected.stdout, /"accepted":true/);
+const watchCases = [];
+for (const kind of ['ps','lean']) {
+  const dir=path.join(f.directory,'watch-'+kind);fs.mkdirSync(dir);
+  const source=path.join(dir,'Main.'+kind),out=path.join(dir,'out');
+  fs.writeFileSync(source,'def answer : Nat := 42\n');
+  const child=spawn(f.runtime,[...f.flags,f.cli,'build',source,'--out',out,
+    '--publication-protocol','portable-file','--watch','--diagnostics=json'],
+    {cwd:dir,env:f.env,stdio:['ignore','pipe','pipe']});
+  let stdout='',stderr='',closed=false,exit;const receipts=[];
+  child.stdout.on('data',chunk=>{
+    stdout+=chunk;assert.ok(stdout.length<32*1024*1024);
+    for(;;){const n=stdout.indexOf('\n');if(n<0)break;const line=stdout.slice(0,n);
+      stdout=stdout.slice(n+1);if(line)receipts.push(JSON.parse(line));}
+  });
+  child.stderr.on('data',chunk=>{stderr+=chunk;assert.ok(stderr.length<32*1024*1024);});
+  child.on('close',code=>{closed=true;exit=code;});
+  async function wait(predicate,limit=240000){
+    const start=Date.now();while(!predicate()){
+      assert.equal(closed,false,stderr);
+      if(Date.now()-start>limit)throw Error('RUNTIME_WATCH_TIMEOUT '+stderr);
+      await new Promise(resolve=>setTimeout(resolve,20));
+    }
+  }
+  try{
+    await wait(()=>receipts.length>=1);assert.equal(f.observe(receipts[0]),'42');
+    fs.writeFileSync(source,'def answer : Nat := 43\n');
+    await wait(()=>receipts.length>=2);assert.equal(f.observe(receipts[1]),'43');
+    const pointer=fs.readFileSync(path.join(out,'current.json'));
+    fs.writeFileSync(source,'def answer : Nat := true\n');
+    await wait(()=>stderr.includes('failed; waiting for changes'));
+    assert.deepEqual(fs.readFileSync(path.join(out,'current.json')),pointer);
+    child.kill('SIGINT');
+    await wait(()=>closed,6000);assert.equal(exit,130,stderr);
+    watchCases.push({kind,initial:42,edited:43,illTypedPreservesPointer:true,signalExit:exit});
+  }finally{if(!closed)child.kill('SIGTERM');}
+}
 const result = {schema: 'psc1-runtime-compatibility/1', status: 'passed', testedCommit: process.env.GITHUB_SHA,
   executable: f.runtime, executableSha256: crypto.createHash('sha256').update(fs.readFileSync(f.runtime)).digest('hex'), versions: actual, engines: ['js','ts','rust','wasm-core'], cases,
-  bothGrammars: true, independentWasmKernel: true, malformedAdmissionRefused: true,
+  watchCases, bothGrammars: true, independentWasmKernel: true, malformedAdmissionRefused: true,
   failedBuildPreservesPointer: true, performanceQualification: 'not-requested'};
 fs.mkdirSync('dist/cli/runtime', {recursive:true});
 fs.writeFileSync('dist/cli/runtime/' + (actual.bun ? 'bun-' + actual.bun : 'node-' + actual.node) + '.json',

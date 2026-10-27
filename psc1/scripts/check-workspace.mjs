@@ -12,7 +12,7 @@ for(const p of contract.packages){
  assert.equal(meta.type,'module');assert.ok(meta.scripts.build&&meta.scripts.clean);
  assert.equal(meta.repository.directory,'psc1/packages/'+p.directory);
  for(const forbidden of ['preinstall','install','postinstall','prepare'])assert.ok(!meta.scripts[forbidden]);
- assert.equal(meta.version,p.kind==='independent-kernel'?'4.35.0':contract.version);
+ assert.equal(meta.version,p.kind==='independent-kernel'?'4.35.0-psc1.12':contract.version);
  names.set(meta.name,meta);
  const targets=value=>typeof value==='string'?[value]:Object.values(value).flatMap(targets);
  for(const file of targets(meta.exports)){

@@ -29,7 +29,7 @@
     "NOTICE"
   ],
   "dependencies": {
-    "@proofscript/pskernel-lean-wasm": "4.35.0"
+    "@proofscript/pskernel-lean-wasm": "4.35.0-psc1.12"
   },
   "bundledDependencies": [
     "@proofscript/pskernel-lean-wasm"
@@ -74,7 +74,7 @@
     "./metadata": "./dist/implementation/UNIVERSAL_DISTRIBUTION.json"
   },
   "peerDependencies": {
-    "@proofscript/pskernel-lean": "4.35.0",
+    "@proofscript/pskernel-lean": "4.35.0-psc1.12",
     "@proofscript/compiler-rust-linux-x64": "0.1.0-psc1.11",
     "@proofscript/compiler-wasm": "0.1.0-psc1.11",
     "@proofscript/backend-python": "0.1.0-psc1.12",

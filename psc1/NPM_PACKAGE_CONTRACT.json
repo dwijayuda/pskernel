@@ -287,5 +287,6 @@
     "source-and-executable-identity-preservation",
     "repeat-build-tarball-identity",
     "missing-incompatible-and-tampered-refusals"
-  ]
+  ],
+  "kernelPackageVersion": "4.35.0-psc1.12"
 }

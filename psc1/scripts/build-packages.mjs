@@ -150,7 +150,7 @@ function build(dir){
    })};
   }
   for(const [provider,dir]of [['wasm','pskernel-lean-wasm'],['native','pskernel-lean']])
-   d.kernels[provider]={...d.kernels[provider],entry:'dist/index.js',files:inventory(packedRoots.get(dir))};
+   d.kernels[provider]={...d.kernels[provider],version:read(path.join(packedRoots.get(dir),'package.json')).version,entry:'dist/index.js',files:inventory(packedRoots.get(dir))};
   for(const target of ['python','php'])d.dispatchPackages[target]=repinMetadata(d.dispatchPackages[target],'backend-'+target);
   put(path.join(impl,'UNIVERSAL_DISTRIBUTION.json'),json(d));
   const originalPin=fs.readFileSync(path.join(impl,'DISTRIBUTION_PIN.mjs'),'utf8');

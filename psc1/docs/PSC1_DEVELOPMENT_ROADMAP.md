@@ -26,6 +26,17 @@ retain122 modules/4742 members and closure
 Current source qualification and frozen executor qualification remain distinct.
 Repository organization remains qualified at PR#192 /94e0c13f6a4b434f73c859cc0c716cb6fb8d1340.
 
+## Immediate priority: simple existing npm distribution
+
+The latest user assignment supersedes further internal compiler partition work.
+Complete conventional builds/installable interfaces for the24 existing named
+packages first; retain the unnamed compiler-unified source directory. Reuse one
+qualified proofscript implementation and transparent adapters. Source-only APIs
+must be labeled. Full IR splitting, recursive-group packaging and modular
+G2/G3/fixed points are deferred, with PR#195/#196 qualifications retained.
+[Package guide](guides/npm-packages.md), [finite contract](../NPM_PACKAGE_CONTRACT.json).
+Current builds pass40492532684; installation/consumer qualification remains pending.
+
 ## Dependency-ordered remaining queue
 
 | Order | Work | Status and finite acceptance |

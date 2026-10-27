@@ -127,6 +127,7 @@ def psSh1HasModule (modules : List (List String)) (name : List String) : Bool :=
 def psSh1PackageSectionAllowed (sectionName : String) : Bool :=
   if psStringEq sectionName "Bootstrap" then true
   else if psStringEq sectionName "Foundation" then true
+  else if psStringEq sectionName "MinKernel" then true
   else if psStringEq sectionName "Syntax" then true
   else if psStringEq sectionName "Core" then true
   else if psStringEq sectionName "Environment" then true

@@ -1,6 +1,7 @@
 export const packageBySection = new Map([
   ["Bootstrap", "bootstrap"],
   ["Foundation", "foundation"],
+  ["MinKernel", "pskernel-min"],
   ["Syntax", "syntax"],
   ["Core", "core"],
   ["Kernel", "pskernel-core"],

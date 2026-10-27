@@ -105,7 +105,7 @@ def inferModel (fuel : Nat) (globals locals : List Ty) (expression : Expr)
                   globalModel localModel ha)
               exact ht ▸ output
 termination_by fuel
-decreasing_by all_goals simp_all
+decreasing_by all_goals simpa only [hFuel] using (Nat.lt_succ_self remaining)
 
 /- Successful sequential admission extends a model with the interpreted body.
    There is no assumption that an arbitrary supplied environment has a model. -/
@@ -140,7 +140,7 @@ def checkDeclarationsModel (termFuel declarationFuel : Nat)
           exact checkDeclarationsModel termFuel remaining
             (declaration.type :: globals) rest result (consModel value initialModel) hs
 termination_by declarationFuel
-decreasing_by all_goals simp_all
+decreasing_by all_goals simpa only [hFuel] using (Nat.lt_succ_self remaining)
 
 def environmentModel (termFuel declarationFuel : Nat)
     (declarations : List Declaration) (types : List Ty)

@@ -142,8 +142,7 @@ def inferModel (fuel : Nat) (specs : List PsMinRegSpec) (data : List Type)
                 (inferModel remaining specs data globals locals argument domain
                   signatureModel globalModel localModel ha)
               exact ht ▸ output
-termination_by fuel
-decreasing_by all_goals simpa only [hFuel] using (Nat.lt_succ_self remaining)
+termination_by structural fuel
 
 def declarationsModel (termFuel declarationFuel : Nat) (specs : List PsMinRegSpec) (data : List Type)
     (globals : List PsMinRegTy) (declarations : List PsMinRegDeclaration) (result : List PsMinRegTy)

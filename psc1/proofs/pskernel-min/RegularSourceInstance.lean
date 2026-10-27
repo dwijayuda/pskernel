@@ -65,7 +65,7 @@ noncomputable def actualRecursorValue (major : PsMinTy) : Bool :=
   PsMinTy.rec (motive := fun _ => Bool) false false true (fun _ _ _ _ => false) major
 
 theorem checked_source_semantics (major : PsMinTy) : checkedValue major = actualRecursorValue major := by
-  cases major <;> simp only [checkedValue, inferModel, sourceSignature] <;> rfl
+  cases major <;> rfl
 
 theorem source_iota (major : PsMinTy) : actualRecursorValue major =
     (match major with | .nat => true | _ => false) := by

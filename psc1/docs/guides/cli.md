@@ -1,6 +1,6 @@
 # ProofScript CLI
 
-This guide covers the runtime/watch candidate `proofscript@0.1.0-psc1.10`.
+This guide covers the runtime/watch candidate `proofscript@0.1.0-psc1.11`.
 Its [runtime/watch receipt](../PSC1_RUNTIME_WATCH_QUALIFICATION_2026-10-27.json)
 records qualification separately; the previous .9 layout evidence below does not
 qualify the .10 package. Install only the matching candidate whose receipt passed. [The layout receipt](../PSC1_LAYOUT_QUALIFICATION_2026-10-26.json)
@@ -20,7 +20,7 @@ package.json if needed, then install and run:
 
 ```sh
 npm init -y
-npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1.10.tgz
+npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1.11.tgz
 npm exec -- psc init
 npm exec -- psc --showConfig
 npm exec -- psc check
@@ -184,10 +184,10 @@ with their existing pinned package diagnostic. The CLI does not install them
 or download an SDK. --rust-toolchain-root remains an explicit host-owned path.
 See the existing checked-dispatch installation guide for those dependencies;
 use this candidate's root and optional tarballs from its package receipt.
-Rust/Wasm engines use .10 host/metadata repacks with exactly retained G3 native/
+Rust/Wasm engines use .11 host/metadata repacks with exactly retained G3 native/
 Wasm compiler payloads. The Rust transport uses the shared minimum runtime policy;
 both optional packages' npm engines accept newer Node versions. Their manifests
-and resource pins are refreshed explicitly. Component/Python/PHP tools are .10
+and resource pins are refreshed explicitly. Component/Python/PHP tools are .11
 metadata-only repacks with identical workers/runtimes and no reverse root peer
 that could make npm prune the installed compiler.
 
@@ -290,3 +290,10 @@ The source snapshot is passed as private source data to the existing command.
 It cannot nominate a checker, SDK or service executable. Follow the existing
 compilation walkthrough/pass contracts for the inner independent admission,
 strict IR, target validation and publication boundaries.
+
+## License
+
+ProofScript-owned components use Apache-2.0. The installable ZIP and owned npm
+tarballs include LICENSE and NOTICE. Upstream dependency/runtime notices retain
+their original terms. [Licensing policy](../reference/licensing.md).
+The compiler's license does not determine a user's application license.

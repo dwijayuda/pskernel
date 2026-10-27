@@ -1,12 +1,12 @@
 {
   "schema": "psc1-runtime-watch-qualification/1",
   "updated": "2026-10-27",
-  "status": "pending-ci",
+  "status": "pending-apache2-package-qualification",
   "pullRequest": 193,
   "baseCommit": "94e0c13f6a4b434f73c859cc0c716cb6fb8d1340",
   "firstImplementationCommit": "91bcbd107f375eea5cf5f87f15a9be9fe561b7c4",
   "package": "proofscript",
-  "version": "0.1.0-psc1.10",
+  "version": "0.1.0-psc1.11",
   "runtimePolicy": {
     "node": ">=22.23.3",
     "bun": ">=1.4.0",
@@ -100,5 +100,33 @@
     "metadata": "minimum Node range; manifest/index pins updated",
     "newFixedPointClaim": false,
     "rustGuardian": "detached independent process group; original parent-start-time/deadline/stream/hash and native-group reaping logic unchanged; actual Node/Bun native-cancellation test required"
+  },
+  "projectLicense": {
+    "spdx": "Apache-2.0",
+    "ownedSourceManifests": 50,
+    "requiredOwnedTarballs": 9,
+    "thirdPartySdkTarballsPreserved": 2,
+    "policy": "owned source/artifacts licensed; third-party notices and immutable prior archives retained"
+  },
+  "preLicenseCheckpoint": {
+    "commit": "91c5d898adea8e8d184b7927adf2ed988af8c2d8",
+    "installedRun": 40437783359,
+    "installedJob": 121971041365,
+    "actualBunCurrent": true,
+    "fourEnginesBothGrammars": true,
+    "fullInstalledWatch": true,
+    "typedTargets": true,
+    "nativeNodeBunReaping": true,
+    "frozenApplicationGate": true,
+    "overallStatus": "still-running-at-licensing-layer-start",
+    "sourceRun": 40437789669,
+    "sourceFullJob": 121975136632
+  },
+  "modularDistribution": {
+    "status": "decided-pending-real-module-graph-pilot",
+    "decision": "docs/architecture/modular-compiler-distribution.md",
+    "archiveSha256": "946117f4416110aef3b1c0433f508f8bd37af169bba686847fdecc7139f8cd0e",
+    "archiveIndependentCompilation": false,
+    "oldExecutors": "retained references; no new modular fixed-point claim"
   }
 }

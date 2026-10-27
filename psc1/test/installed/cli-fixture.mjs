@@ -35,6 +35,8 @@ export function fixture({consumers = false} = {}) {
   const manifest = JSON.parse(fs.readFileSync(path.join(root, 'UNIVERSAL_DISTRIBUTION.json')));
   const meta = JSON.parse(fs.readFileSync(path.join(root, 'package.json')));
   assert.equal(meta.engines.node, '>=22.23.3');
+  assert.equal(meta.license, 'Apache-2.0');
+  assert.ok(fs.existsSync(path.join(root, 'LICENSE')));
   const engines = assembly.input.packages;
   const extras = ['rust', 'wasm-core'].map(k => engines[k].tarball);
   if (consumers) {

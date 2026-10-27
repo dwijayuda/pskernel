@@ -6,7 +6,7 @@ feat/psc1-watch-runtime-20261027. Fetch live HEAD/CI before updates; preserve
 single-parent expected-HEAD non-force history. Connected GitHub/Linux Actions only.
 No merge or npm publication authorized.
 
-## Current implementation; qualification pending
+## Current implementation; Apache-2.0 .11 qualification pending
 
 The .9 package refuses any Node version except22.23.3 before checking.
 This host change replaces both installed/session exact-version refusals with
@@ -28,10 +28,10 @@ Edits after that final guard are handled by the next queued rebuild.
 Success receipts remain JSON lines on stdout; progress/diagnostics stay on stderr.
 Linux process groups receive interruption with bounded kill escalation.
 
-Candidate proofscript@0.1.0-psc1.10 is a finite host overlay on exact .7 inputs.
+Candidate proofscript@0.1.0-psc1.11 is a finite host overlay on exact .7 inputs.
 Frozen compiler/kernel/provider payloads are unchanged. Actual Bun testing exposed
 an additional exact pin in the optional Rust transport. A23-module production
-host audit found this remaining pin. Both optional engine packages are .10 host/
+host audit found this remaining pin. Both optional engine packages are .11 host/
 metadata repacks; every payload byte, fixed point and source identity is compared
 unchanged. Rust transport shares the runtime policy and original Linux lifetime
 guard; Wasm transport is unchanged. Manifest/index pins are explicitly refreshed. Source/installed policy,
@@ -60,3 +60,31 @@ Python/PHP remain optional. No final cross-platform/public registry qualificatio
 [Roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md) remains the single queue.
 The independent unassisted maintainer trial is still pending its arranged
 participant; no AI/CI human-understanding claim.
+
+## Latest owner steering: modular execution and Apache-2.0
+
+The owner selected Apache-2.0 for all project-owned code. Root/PSC1 licenses and
+notices plus50 active owned package manifests are updated; third-party licenses
+and historical qualified archives remain intact. Nine owned installable tarballs
+receive a finite license/notice/metadata overlay; original executable bytes are
+compared unchanged and integrity descriptors refreshed. Two vendor SDK tarballs
+are retained byte-for-byte. Real tarball licensing and engine-strict installation
+are required; no merge/publication authorization is implied.
+
+[Modular distribution decision](docs/architecture/modular-compiler-distribution.md)
+inspects the supplied PSC0 archive without executing it. Its core/elab/erasure
+entries re-export compiler and declare independent package compilation false;
+those facades are not actual separated execution. Adopt genuine source-owned
+JS/TS module graphs and cohesive exact-cohort packages for final release. Keep
+native Rust/Wasm execution efficient, with organized source/debug output. The
+module-graph pilot and its own self-host/fixed-point qualification are pending;
+no textual split or package-name-only completion claim.
+
+Pre-license implementation91c5d898adea8e8d184b7927adf2ed988af8c2d8 has actual
+Bun1.4.4/four-engine/both-grammar compile/watch/refusal success. Run40437783359
+also passed full installed watch, typed TS/Rust/Wasm targets, superseded-input
+veto and actual Node/Bun native-child reaping, then the frozen application gate.
+Remaining installed gates were still running when this licensing layer began.
+Source40437789669 passed static/native/focused/closures/G1/lossless/trace/integration;
+full release job121975136632 was still running. These are exact pre-license
+partial results, not qualification of .11. Final receipts must use live terminal CI.

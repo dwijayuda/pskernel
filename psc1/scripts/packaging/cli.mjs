@@ -1,3 +1,4 @@
+import {finalizeProjectLicenses} from './finalize-licenses.mjs';
 // Host-only .10 runtime/watch assembly from exact .7 artifacts that passed the installed replay.
 // Do not rebuild or relabel any compiler/kernel/provider payload or G3 evidence.
 import fs from 'node:fs';
@@ -67,7 +68,7 @@ for (const pin of d.hostFiles.filter(p => /^(host-tools|npm-cli|scripts)\//.test
     assert.equal(sha256(fs.readFileSync(pin.path)), pin.sha256, 'current production changed: ' + pin.path);
   assert.equal(sha256(fs.readFileSync(path.join(stage, pin.path))), pin.sha256);
 }
-const version = '0.1.0-psc1.10';
+const version = '0.1.0-psc1.11';
 const added = ["host-tools/runtime-policy.mjs","npm-cli/cli-watch.mjs","npm-cli/cli-watch-worker.mjs","npm-cli/proofscript-cli.mjs","npm-cli/cli-project.mjs","npm-cli/compiler-api.mjs","npm-cli/checked-command-cli.mjs","host-tools/contracts/compiler-closure.mjs","host-tools/execution/generated-service-runner.mjs","host-tools/execution/unified-candidate-runner.mjs"];
 for (const file of [...relocatedHosts, ...added]) {
   fs.mkdirSync(path.dirname(path.join(stage,file)),{recursive:true});
@@ -191,3 +192,5 @@ const receipt = {...original, dispatchPackages: d.dispatchPackages, repackagedTo
 fs.writeFileSync(path.join(out, 'package-receipt.json'), JSON.stringify(receipt, null, 2) + '\n');
 console.log('PSC1_CLI_PACKAGE: ' + JSON.stringify({version, tarball: receipt.tarball,
   sha256: receipt.sha256, bytes: receipt.bytes, preservedPayloadFiles: receipt.preservedPayloadFiles}));
+
+finalizeProjectLicenses(out);

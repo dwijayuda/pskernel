@@ -14,5 +14,6 @@
   "dependencies": {
     "@proofscript/compiler-ir": "0.1.0-psc0.1"
   },
-  "type": "module"
+  "type": "module",
+  "license": "Apache-2.0"
 }

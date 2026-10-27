@@ -1,3 +1,4 @@
+import {applyProjectLicense} from './packaging/license.mjs';
 // Promote only exact, independently qualified generated compiler assets.
 // Kernel packages and the frozen distribution retain their separate identities.
 import assert from 'node:assert/strict';
@@ -167,13 +168,14 @@ function optionalBundle(engine, compiler, assetsRoot, directory, tarballs, versi
     "export function compileCandidate(request:string):string;\nexport function psCompilerJsServiceCandidate(request:string):string;\n");
   write(path.join(directory, 'README.md'), '# ' + name + '\n\nUnpublished, exactly qualified G3 execution payload from the shared PSC1 compiler. No SDK or install-time build. This package returns candidates only; the root toolchain must independently admit exact graph bytes and validate output. Compiler Wasm retains GC; the separate official C++/Emscripten kernel retains linear memory. Rust execution is Linux x64/glibc only. Other-platform publication and the 240-second selfcompile target have separate qualification.\n');
   write(path.join(directory, 'package.json'), JSON.stringify({
-    name, version, type: 'module', private: true, license: 'UNLICENSED', engines: { node: '>=22.23.3' },
+    name, version, type: 'module', private: true, license: 'Apache-2.0', engines: { node: '>=22.23.3' },
     main: './index.mjs', types: './index.d.ts',
     exports: { '.': { types: './index.d.ts', import: './index.mjs' },
       './metadata': './BUNDLE_MANIFEST.json', './package.json': './package.json' },
     files: ['index.mjs', 'index.d.ts', 'BUNDLE_MANIFEST.json', 'payload/', 'runtime/', 'README.md'],
     ...(engine === 'rust' ? { os: ['linux'], cpu: ['x64'], libc: ['glibc'] } : {}),
   }, null, 2) + '\n');
+  applyProjectLicense(directory);
   const tarball = pack(directory, tarballs);
   return { package: name, version, tarball: path.basename(tarball),
     sha256: sha(fs.readFileSync(tarball)), file: tarball, directory };

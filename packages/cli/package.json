@@ -34,5 +34,6 @@
     "trust": "untrusted-support",
     "futureName": "@proofscript/cli",
     "sourceLanguage": "typescript"
-  }
+  },
+  "license": "Apache-2.0"
 }

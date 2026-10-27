@@ -14,5 +14,6 @@
     ],
     "outDir": "dist",
     "role": "lean-bootstrap-host"
-  }
+  },
+  "license": "Apache-2.0"
 }

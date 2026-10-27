@@ -4,7 +4,7 @@
   "description": "Optional ProofScript PSC0 standard-library source modules",
   "type": "module",
   "private": false,
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "main": "./dist/index.mjs",
   "exports": {
     ".": "./dist/index.mjs",
@@ -14,7 +14,9 @@
     "dist/",
     "src/",
     "README.md",
-    "SOURCE_CONVERSION.json"
+    "SOURCE_CONVERSION.json",
+    "LICENSE",
+    "NOTICE"
   ],
   "engines": {
     "node": ">=22.23.3"

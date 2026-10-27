@@ -6,7 +6,7 @@
   "private": false,
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "license": "UNLICENSED",
+  "license": "Apache-2.0",
   "engines": {
     "node": ">=22.23.3"
   },
@@ -25,7 +25,9 @@
   "files": [
     "dist/",
     "src/",
-    "README.md"
+    "README.md",
+    "LICENSE",
+    "NOTICE"
   ],
   "dependencies": {
     "@proofscript/foundation": "0.1.0-psc0.1",

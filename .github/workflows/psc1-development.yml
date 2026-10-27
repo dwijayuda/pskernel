@@ -49,6 +49,7 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/ci/repository-layout.mjs
+          node test/host/license.test.mjs
           node test/host/process-location.test.mjs
           node scripts/maintainer-docs.mjs
           node scripts/unified-selfhost-request-tests.mjs

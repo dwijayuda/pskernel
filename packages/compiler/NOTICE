@@ -1,0 +1,9 @@
+ProofScript and PSKernel
+Copyright 2026 ProofScript contributors
+
+ProofScript-owned source code, documentation and generated compiler components
+are licensed under the Apache License, Version 2.0.
+
+Bundled third-party components retain their own copyrights, licenses and notices.
+Preserve their LICENSE, LEAN_LICENSE, NOTICE and equivalent attribution files.
+The compiler's license does not determine the license of programs compiled with it.

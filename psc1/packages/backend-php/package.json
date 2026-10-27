@@ -6,7 +6,9 @@
   "files": [
     "src",
     "runtime",
-    "README.md"
+    "README.md",
+    "LICENSE",
+    "NOTICE"
   ],
   "proofscript": {
     "kind": "builtin-backend-source",
@@ -15,5 +17,6 @@
     "runtimeVersion": "psc1-php-runtime/1",
     "qualification": "scoped-linux-execution",
     "qualificationReceipt": "../../docs/PSC1_SEVEN_BACKENDS_QUALIFICATION_2026-10-20.json"
-  }
+  },
+  "license": "Apache-2.0"
 }

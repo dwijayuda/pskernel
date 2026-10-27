@@ -6,12 +6,20 @@
   "description": "PSC1 portable standard-library source workspace, distinct from the staged @proofscript/stdlib package",
   "proofscript": {
     "bootstrap": false,
-    "sourceRoots": ["."],
-    "testRoots": ["test"],
+    "sourceRoots": [
+      "."
+    ],
+    "testRoots": [
+      "test"
+    ],
     "outDir": "dist",
     "role": "portable-stdlib",
     "portable": true,
     "npmStagedAs": "psc1/packages/stdlib",
-    "sourceVariants": ["ps", "lean"]
-  }
+    "sourceVariants": [
+      "ps",
+      "lean"
+    ]
+  },
+  "license": "Apache-2.0"
 }

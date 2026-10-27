@@ -90,7 +90,7 @@ lean_lib PsCompilerIr where
 
 lean_lib PsBackendCommon where
   srcDir := "packages/backend-common/src"
-  roots := #[`Ps.BackendCommon.Plan, `Ps.BackendCommon.StateExcept, `Ps.BackendCommon.Source, `Ps.BackendCommon.DirectCalls, `Ps.BackendCommon.Modules]
+  roots := #[`Ps.BackendCommon.Plan, `Ps.BackendCommon.StateExcept, `Ps.BackendCommon.Source, `Ps.BackendCommon.DirectCalls, `Ps.BackendCommon.Modules, `Ps.BackendCommon.Partition]
 
 lean_lib PsErasure where
   srcDir := "packages/erasure/src"

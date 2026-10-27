@@ -15,7 +15,7 @@ export const umbrellaName='@proofscript/modular-compiler-pilot';
 export function moduleProfile(profile,sources){
   if(profile==='legacy')return{profile,version:packageVersion,packageNames:[...packageNames],
     protocol:'psc1-modular-pilot/1',candidateProtocol:'psc1-modular-pilot-candidate/1',schema:'psc1-modular-installed-cohort/1',maxSources:2};
-  if(profile!=='extended')fail('PROFILE');
+  if(!['extended','partitioned'].includes(profile))fail('PROFILE');
   const names=['@proofscript/modular-pilot-runtime',...sources.map(source=>{
     if(source.module==='Ps.Foundation.Name')return '@proofscript/modular-pilot-names';
     if(source.module==='Pilot.Consumer')return '@proofscript/modular-pilot-consumer';
@@ -23,8 +23,9 @@ export function moduleProfile(profile,sources){
   })];
   if(names.some(name=>!/^@proofscript\/modular-pilot-[a-z0-9-]{1,114}$/.test(name))||
      new Set(names).size!==names.length)fail('PACKAGE_IDENTITY');
-  return{profile,version:'0.1.0-psc1-modular-pilot.1',packageNames:names,
-    protocol:'psc1-modular-pilot/2',candidateProtocol:'psc1-modular-pilot-candidate/2',schema:'psc1-modular-installed-cohort/2',maxSources:8};
+  const n=profile==='partitioned'?3:2;
+  return{profile,version:'0.1.0-psc1-modular-pilot.'+(n-1),packageNames:names,
+    protocol:'psc1-modular-pilot/'+n,candidateProtocol:'psc1-modular-pilot-candidate/'+n,schema:'psc1-modular-installed-cohort/'+n,maxSources:8};
 }
 const workspace=fileURLToPath(new URL('../../',import.meta.url));
 const fail=code=>{throw Error('PSC1_MODULAR_'+code);};
@@ -35,13 +36,13 @@ export function run(executable,args,options={}){
 }
 export function compileSources({sources,profile='legacy',producer=path.join(workspace,'.lake/build/bin/psc1_modular_pilot'),
   checker=path.join(workspace,'.lake/build/bin/psc1_independent_checker'),requestId='modular-pilot'}){
-  if(!Array.isArray(sources)||sources.length<2||sources.length>(profile==='extended'?8:2)||sources.some(s=>!s||
+  if(!Array.isArray(sources)||sources.length<2||sources.length>(profile==='legacy'?2:8)||sources.some(s=>!s||
     Object.keys(s).sort().join(',')!=='kind,module,text'||!['lean','ps'].includes(s.kind)||
     !/^[A-Za-z][A-Za-z0-9_.]{0,127}$/.test(s.module)||typeof s.text!=='string'||
     Buffer.from(s.text,'utf8').toString('utf8')!==s.text||s.text.startsWith('\uFEFF'))||
-    sources[0].kind!==sources[1].kind)fail('SOURCE_SCOPE');
+    sources.some(s=>s.kind!==sources[0].kind))fail('SOURCE_SCOPE');
   sources=JSON.parse(JSON.stringify(sources));
-  const settings=moduleProfile(profile,sources);
+  let settings=moduleProfile(profile,sources);
   const digest=compilerSourceClosureDigest(sources),grammar=sources[0].kind;
   const request=[settings.protocol,requestId,digest,grammar,'checked',sources.at(-1).module,sources.map(s=>[s.module,s.text])];
   const bytes=Buffer.from(JSON.stringify(request));if(bytes.length>1024*1024)fail('INPUT_BOUND');
@@ -68,6 +69,23 @@ export function compileSources({sources,profile='legacy',producer=path.join(work
       sourceClosureDigest:digest,grammar,admission:'not-run',candidateOnly:true,
       leanVersion:'4.35.0',leanCommit:'eb6cafb7290e8bd5f2937522d8d804f58f02bafc',behaviorallyVerified:false}))
       assert.equal(candidate[key],value,'PSC1_MODULAR_CANDIDATE_'+key);
+    if(profile==='partitioned'){
+      const p=candidate.partition,names=candidate.packages;
+      if(!p||!Array.isArray(names)||names.length<1||names.length>9||
+        names[0]!=='@proofscript/modular-pilot-runtime'||new Set(names).size!==names.length||
+        names.some(name=>!/^@proofscript\/modular-pilot-[a-z0-9-]{1,114}$/.test(name))||
+        !Array.isArray(p.groups)||p.groups.length!==names.length||
+        !Array.isArray(p.sourceToUnit)||p.sourceToUnit.length!==sources.length+1||
+        p.sourceToUnit[0]!==0)fail('PARTITION_LAYOUT');
+      assert.deepEqual(p.logicalPackages,settings.packageNames,'PSC1_MODULAR_LOGICAL_PACKAGES');
+      const coverage=p.groups.flat();
+      if(coverage.length!==sources.length+1||new Set(coverage).size!==coverage.length||
+         coverage.some(n=>!Number.isSafeInteger(n)||n<0||n>sources.length)||
+         p.groups.some((g,i)=>!Array.isArray(g)||g.length===0||g.some(n=>p.sourceToUnit[n]!==i))||
+         p.sourceToUnit.some(n=>!Number.isSafeInteger(n)||n<0||n>=names.length))fail('PARTITION_COVERAGE');
+      settings={...settings,packageNames:names,sourceToUnit:p.sourceToUnit,groups:p.groups,
+        sourceModules:sources.map(s=>s.module)};
+    }
     for(const target of ['js','ts']){
       if(!Array.isArray(candidate[target])||candidate[target].length!==settings.packageNames.length)fail('UNIT_COVERAGE');
       candidate[target].forEach((unit,index)=>{
@@ -75,7 +93,7 @@ export function compileSources({sources,profile='legacy',producer=path.join(work
           !Array.isArray(unit.imports)||!Array.isArray(unit.exports))fail('UNIT_SHAPE');
       });
     }
-    if(profile==='extended'){
+    if(profile!=='legacy'){
       assert.deepEqual(candidate.packages,settings.packageNames,'PSC1_MODULAR_PACKAGE_LAYOUT');
       assert.deepEqual(candidate.sourceModules,sources.map(s=>s.module),'PSC1_MODULAR_SOURCE_LAYOUT');
       if(!candidate.transformOrigins||!Array.isArray(candidate.specializedIr))fail('PROVENANCE');

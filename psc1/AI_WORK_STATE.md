@@ -1,5 +1,64 @@
 # PSC1 AI work state
 
+Updated2026-10-27 Asia/Jakarta. Active branch `feat/psc1-modular-partitions-20261027`,
+from PR#196 HEAD `173ecdc9f7131366d376c80886a7843a402d363b`.
+GitHub/Linux CI only; single-parent expected-HEAD/non-force history. No merge or
+registry publication. Previous work state is preserved byte-for-byte in
+[history](docs/history/AI_WORK_STATE_BEFORE_MODULE_PARTITION_2026-10-27.md).
+
+## Transformed graph measurement passed; v3 partition implementation under test
+
+Read-only native production-transform measurement at177e41a3e3a9cb5504dd5db9a9e8dcb038e1d834
+passes [40488488194](https://github.com/dwijayuda/pskernel/actions/runs/40488488194),
+job122136170361, with genuine independent official Lean4.35.0 admission.
+It captures the complete125-module unified source closure once, strict-checks
+original IR, specializes with explicit origins, composes owners, fuses workers
+with explicit origins, composes again and records resolved lexical value edges.
+
+| Stage | Values | Structures | Inductives |
+| --- | --- | --- | --- |
+| Original |3154|221|96|
+| Specialized |3950|316|604|
+| Fused |4520|316|604|
+
+There are1472 specialization origins and570 worker origins. This snapshot has no
+cross-source runtime SCC larger than one. Zero surviving-value sources:
+Ps.Foundation.Source, Ps.Core.Expr, Ps.Core.Declaration, Ps.BackendJs.Model.
+The final largest owner is Foundation.List with846 values. Time111938ms,
+maxRSS389420KiB;240-second/4GiB/8MiB bounds retained. Assurance is the existing
+ordinary-checked compiler-source protocol; exact Core admission is separate from
+backend preservation or self-hosting. Source-import navigation is not substituted
+for these actual transformed value edges. All nominal types retain runtime owner0.
+
+The new explicit v3 profile computes mutual reachability SCCs on at most eight
+source owners, preserves runtime initialization independence, topologically
+orders the condensation deterministically and coalesces zero surviving-value
+sources into shared runtime/type unit0. Partitioning changes ownership/imports,
+not IR bodies. Existing v1/v2 ordered-DAG contracts and refusals remain.
+Eager initializers, unknown/duplicate owners, unsafe packages and exhausted
+budgets refuse. Full compiler emission is still outside the unchanged256-value/
+64-type bounds; measurement is not emission qualification.
+
+The native coordinator and common assembler/loader now accept the v3 profile,
+store complete source-to-unit/group metadata, retain all source snapshots under
+collision-free full module names, and derive aliases through the partition.
+The next real graph adds compiler Foundation.Source and Foundation.StringSet
+to the prior List/Name/Text/Json/consumer graph. Its eight-package qualification,
+12 partition invariants/11 refusals and strict IR cyclic-group runtime fixture
+are pending Linux CI. Existing package cases, immutable PR195 baseline comparison,
+strict IR, external checker, byte/time/fuel/memory/stack limits remain required.
+No completed modular compiler, portable partitioner self-hosting, G2/G3/fixed
+point or platform-comprehension claim.
+
+Next: diagnose CI failures, qualify all three profiles and full source gates,
+record exact artifacts/source identities, then define the finite next compiler
+partition profile from measured scale without silently relaxing existing caps.
+Frozen qualified compilers/kernels/providers remain unchanged.
+
+## Preserved PR#196 qualification
+
+# PSC1 AI work state
+
 Updated 2026-10-27 Asia/Jakarta. Active branch `feat/psc1-modular-origins-20261027`,
 from PR#195 HEAD `cc13ebfabf6763703ee1ec75a663002a9134bc74`.
 Use connected GitHub/Linux CI only. Single-parent expected-HEAD/non-force updates;

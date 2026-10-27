@@ -296,14 +296,18 @@ export function createGeneratedJsCompilerSession({
       env.PSC1_BACKEND_REQUEST_SHA256 = digestEnv.PSC1_BACKEND_REQUEST_SHA256;
     } else delete env.PSC1_BACKEND_REQUEST_SHA256;
     if (componentTools || optionalProvider) verifyTools();
-    const result = spawnSync(executable, executable === process.execPath ? runtimeArguments(args) : args, {
-      encoding: 'utf8',
-      env,
-      timeout: 240000,
-      maxBuffer: 32 * 1024 * 1024,
-      killSignal: 'SIGKILL',
-      windowsHide: true,
-    });
+    const result = spawnSync(
+      executable,
+      executable === process.execPath ? runtimeArguments(args) : args,
+      {
+        encoding: 'utf8',
+        env,
+        timeout: 240000,
+        maxBuffer: 32 * 1024 * 1024,
+        killSignal: 'SIGKILL',
+        windowsHide: true,
+      },
+    );
     if (componentTools || optionalProvider) verifyTools();
     events.push({
       role,

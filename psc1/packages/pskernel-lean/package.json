@@ -24,7 +24,8 @@
     },
     "./node": "./host/node-provider.mjs",
     "./metadata": "./LEAN_SOURCE_PIN.json",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./distribution": "./dist/index.js"
   },
   "files": [
     "index.mjs",
@@ -43,7 +44,8 @@
     "PREBUILT_MANIFEST.json",
     "index.d.ts",
     "LICENSE",
-    "NOTICE"
+    "NOTICE",
+    "dist/"
   ],
   "proofscript": {
     "npmArchitecture": "psc1-independent-kernel-provider/1",
@@ -55,10 +57,13 @@
     "nonPortableProviderSources": true,
     "leanSemanticVersion": "4.35.0",
     "canonicalAdmissionsVersion": 2,
-    "kernelMemoryModel": "native"
+    "kernelMemoryModel": "native",
+    "packageBuild": "qualified-prebuilt-reuse; no kernel source compilation"
   },
   "scripts": {
-    "build:kernel": "node scripts/build-native-slim.mjs"
+    "build:kernel": "node scripts/build-native-slim.mjs",
+    "build": "node ../../scripts/build-packages.mjs build --package pskernel-lean",
+    "clean": "node ../../scripts/build-packages.mjs clean --package pskernel-lean"
   },
   "types": "./index.d.ts"
 }

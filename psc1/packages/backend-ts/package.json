@@ -1,7 +1,7 @@
 {
   "name": "@proofscript/backend-ts",
-  "version": "0.1.0-psc0.1",
-  "description": "ProofScript PSC0 backend-ts source and JavaScript runtime package",
+  "version": "0.1.0-psc1.12",
+  "description": "ProofScript PSC1 backend-ts: source package and shared compiler API adapter",
   "type": "module",
   "private": false,
   "main": "./dist/index.js",
@@ -13,14 +13,22 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dwijayuda/pskernel.git",
-    "directory": "psc0/packages/backend-ts"
+    "directory": "psc1/packages/backend-ts"
   },
   "publishConfig": {
     "access": "public"
   },
   "exports": {
-    ".": "./dist/index.js",
-    "./package.json": "./package.json"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json",
+    "./sources": "./dist/source-manifest.json",
+    "./compiler": {
+      "types": "./dist/compiler.d.ts",
+      "import": "./dist/compiler.js"
+    }
   },
   "files": [
     "dist/",
@@ -30,16 +38,22 @@
     "NOTICE"
   ],
   "dependencies": {
-    "@proofscript/compiler": "0.1.0-psc0.1",
-    "@proofscript/compiler-ir": "0.1.0-psc0.1",
-    "@proofscript/bridge": "0.1.0-psc0.1"
+    "proofscript": "0.1.0-psc1.12"
   },
   "proofscript": {
-    "npmArchitecture": "psc0-monolithic-runtime-with-scoped-source-packages/1",
+    "npmArchitecture": "psc1-existing-packages-shared-root/1",
+    "implementationOwner": "proofscript",
+    "internalCompilerModules": false,
+    "packageKind": "shared-backend-adapter",
+    "canonicalSources": "src",
     "sourceVariants": [
-      "ps",
-      "lean"
+      "lean",
+      "ps"
     ],
-    "publishingRequiresBuild": true
+    "publishingRequiresQualification": true
+  },
+  "scripts": {
+    "build": "node ../../scripts/build-packages.mjs build --package backend-ts",
+    "clean": "node ../../scripts/build-packages.mjs clean --package backend-ts"
   }
 }

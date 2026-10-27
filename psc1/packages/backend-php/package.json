@@ -1,22 +1,65 @@
 {
   "name": "@proofscript/backend-php",
-  "version": "0.1.0",
-  "private": true,
-  "description": "Lean-native DirectPhp backend with selected target runtime source",
-  "files": [
-    "src",
-    "runtime",
-    "README.md",
-    "LICENSE",
-    "NOTICE"
-  ],
+  "version": "0.1.0-psc1.12",
+  "private": false,
+  "description": "ProofScript PSC1 backend-php: source package and shared compiler API adapter",
   "proofscript": {
-    "kind": "builtin-backend-source",
+    "npmArchitecture": "psc1-existing-packages-shared-root/1",
+    "implementationOwner": "proofscript",
+    "internalCompilerModules": false,
+    "packageKind": "shared-backend-adapter",
+    "canonicalSources": "src",
+    "sourceVariants": [
+      "lean",
+      "ps"
+    ],
+    "publishingRequiresQualification": true,
+    "schema": "psc1-checked-dispatch-package/1",
     "target": "php",
-    "minimumRuntime": "8.5",
-    "runtimeVersion": "psc1-php-runtime/1",
-    "qualification": "scoped-linux-execution",
-    "qualificationReceipt": "../../docs/PSC1_SEVEN_BACKENDS_QUALIFICATION_2026-10-20.json"
+    "sourceCommit": "7e63615b0d0713db8b252f194d5740bbb5c5893f",
+    "authority": "candidate-only",
+    "compilerFrontend": false,
+    "admissionAuthority": false,
+    "publicationAuthority": false
   },
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.23.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dwijayuda/pskernel.git",
+    "directory": "psc1/packages/backend-php"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "node ../../scripts/build-packages.mjs build --package backend-php",
+    "clean": "node ../../scripts/build-packages.mjs clean --package backend-php"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json",
+    "./sources": "./dist/source-manifest.json",
+    "./compiler": {
+      "types": "./dist/compiler.d.ts",
+      "import": "./dist/compiler.js"
+    }
+  },
+  "dependencies": {
+    "proofscript": "0.1.0-psc1.12"
+  },
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "x64"
+  ]
 }

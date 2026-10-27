@@ -1,0 +1,291 @@
+{
+  "schema": "psc1-existing-npm-packages/1",
+  "baselineCommit": "173ecdc9f7131366d376c80886a7843a402d363b",
+  "version": "0.1.0-psc1.12",
+  "implementationOwner": "proofscript",
+  "packages": [
+    {
+      "directory": "backend-common",
+      "name": "@proofscript/backend-common",
+      "kind": "shared-backend-adapter",
+      "beforeVersion": "0.1.0-psc1.1",
+      "beforeExports": null,
+      "beforeDistFiles": 0
+    },
+    {
+      "directory": "backend-js",
+      "name": "@proofscript/backend-js",
+      "kind": "shared-backend-adapter",
+      "beforeVersion": "0.1.0-psc0.1",
+      "beforeExports": {
+        ".": "./dist/index.js",
+        "./package.json": "./package.json"
+      },
+      "beforeDistFiles": 0
+    },
+    {
+      "directory": "backend-php",
+      "name": "@proofscript/backend-php",
+      "kind": "shared-backend-adapter",
+      "beforeVersion": "0.1.0",
+      "beforeExports": null,
+      "beforeDistFiles": 0
+    },
+    {
+      "directory": "backend-python",
+      "name": "@proofscript/backend-python",
+      "kind": "shared-backend-adapter",
+      "beforeVersion": "0.1.0",
+      "beforeExports": null,
+      "beforeDistFiles": 0
+    },
+    {
+      "directory": "backend-rust",
+      "name": "@proofscript/backend-rust",
+      "kind": "shared-backend-adapter",
+      "beforeVersion": "0.1.0-psc0.1",
+      "beforeExports": {
+        ".": "./dist/index.js",
+        "./package.json": "./package.json"
+      },
+      "beforeDistFiles": 0
+    },
+    {
+      "directory": "backend-ts",
+      "name": "@proofscript/backend-ts",
+      "kind": "shared-backend-adapter",
+      "beforeVersion": "0.1.0-psc0.1",
+      "beforeExports": {
+        ".": "./dist/index.js",
+        "./package.json": "./package.json"
+      },
+      "beforeDistFiles": 0
+    },
+    {
+      "directory": "backend-wasm",
+      "name": "@proofscript/backend-wasm",
+      "kind": "shared-backend-adapter",
+      "beforeVersion": "0.1.0-psc0.1",
+      "beforeExports": {
+        ".": "./dist/index.js",
+        "./package.json": "./package.json"
+      },
+      "beforeDistFiles": 0
+    },
+    {
+      "directory": "bootstrap",
+      "name": "@proofscript/bootstrap",
+      "kind": "shared-compiler-adapter",
+      "beforeVersion": "0.1.0-psc0.1",
+      "beforeExports": {
+        ".": "./dist/index.js",
+        "./package.json": "./package.json"
+      },
+      "beforeDistFiles": 0
+    },
+    {
+      "directory": "bridge",
+      "name": "@proofscript/bridge",
+      "kind": "source-only",
+      "beforeVersion": "0.1.0-psc0.1",
+      "beforeExports": {
+        ".": "./dist/index.js",
+        "./package.json": "./package.json"
+      },
+      "beforeDistFiles": 0
+    },
+    {
+      "directory": "cli",
+      "name": "@proofscript/cli",
+      "kind": "shared-compiler-adapter",
+      "beforeVersion": "0.1.0-psc0.1",
+      "beforeExports": {
+        ".": "./dist/index.js",
+        "./package.json": "./package.json"
+      },
+      "beforeDistFiles": 0
+    },
+    {
+      "directory": "compiler-ir",
+      "name": "@proofscript/compiler-ir",
+      "kind": "source-only",
+      "beforeVersion": "0.1.0-psc0.1",
+      "beforeExports": {
+        ".": "./dist/index.js",
+        "./package.json": "./package.json"
+      },
+      "beforeDistFiles": 0
+    },
+    {
+      "directory": "compiler",
+      "name": "@proofscript/compiler",
+      "kind": "shared-compiler-adapter",
+      "beforeVersion": "0.1.0-psc0.1",
+      "beforeExports": {
+        ".": "./dist/index.js",
+        "./package.json": "./package.json"
+      },
+      "beforeDistFiles": 0
+    },
+    {
+      "directory": "core",
+      "name": "@proofscript/core",
+      "kind": "source-only",
+      "beforeVersion": "0.1.0-psc0.1",
+      "beforeExports": {
+        ".": "./dist/index.js",
+        "./package.json": "./package.json"
+      },
+      "beforeDistFiles": 0
+    },
+    {
+      "directory": "elab",
+      "name": "@proofscript/elab",
+      "kind": "source-only",
+      "beforeVersion": "0.1.0-psc0.1",
+      "beforeExports": {
+        ".": "./dist/index.js",
+        "./package.json": "./package.json"
+      },
+      "beforeDistFiles": 0
+    },
+    {
+      "directory": "environment",
+      "name": "@proofscript/environment",
+      "kind": "source-only",
+      "beforeVersion": "0.1.0-psc0.1",
+      "beforeExports": {
+        ".": "./dist/index.js",
+        "./package.json": "./package.json"
+      },
+      "beforeDistFiles": 0
+    },
+    {
+      "directory": "erasure",
+      "name": "@proofscript/erasure",
+      "kind": "source-only",
+      "beforeVersion": "0.1.0-psc0.1",
+      "beforeExports": {
+        ".": "./dist/index.js",
+        "./package.json": "./package.json"
+      },
+      "beforeDistFiles": 0
+    },
+    {
+      "directory": "foundation",
+      "name": "@proofscript/foundation",
+      "kind": "source-only",
+      "beforeVersion": "0.1.0-psc0.1",
+      "beforeExports": {
+        ".": "./dist/index.js",
+        "./package.json": "./package.json"
+      },
+      "beforeDistFiles": 0
+    },
+    {
+      "directory": "meta",
+      "name": "@proofscript/meta",
+      "kind": "source-only",
+      "beforeVersion": "0.1.0-psc0.1",
+      "beforeExports": {
+        ".": "./dist/index.js",
+        "./package.json": "./package.json"
+      },
+      "beforeDistFiles": 0
+    },
+    {
+      "directory": "proofscript",
+      "name": "proofscript",
+      "kind": "qualified-shared-compiler",
+      "beforeVersion": "0.1.0-psc0.1",
+      "beforeExports": null,
+      "beforeDistFiles": 0
+    },
+    {
+      "directory": "pskernel-core",
+      "name": "@proofscript/pskernel-core",
+      "kind": "source-only",
+      "beforeVersion": "0.1.0-psc0.1",
+      "beforeExports": {
+        ".": "./dist/index.js",
+        "./package.json": "./package.json"
+      },
+      "beforeDistFiles": 0
+    },
+    {
+      "directory": "pskernel-lean-wasm",
+      "name": "@proofscript/pskernel-lean-wasm",
+      "kind": "independent-kernel",
+      "beforeVersion": "4.35.0",
+      "beforeExports": {
+        ".": {
+          "types": "./index.d.ts",
+          "import": "./index.mjs"
+        },
+        "./metadata/lean": "./LEAN_SOURCE_PIN.json",
+        "./metadata/emscripten": "./EMSCRIPTEN_PIN.json",
+        "./metadata/kernel-source": "./KERNEL_SOURCE_MANIFEST.json",
+        "./metadata/prebuilt": "./PREBUILT_WASM_MANIFEST.json",
+        "./metadata/proofscript-source": "./PROOFSCRIPT_SOURCE_MANIFEST.json",
+        "./package.json": "./package.json"
+      },
+      "beforeDistFiles": 0
+    },
+    {
+      "directory": "pskernel-lean",
+      "name": "@proofscript/pskernel-lean",
+      "kind": "independent-kernel",
+      "beforeVersion": "4.35.0",
+      "beforeExports": {
+        ".": {
+          "types": "./index.d.ts",
+          "import": "./index.mjs"
+        },
+        "./node": "./host/node-provider.mjs",
+        "./metadata": "./LEAN_SOURCE_PIN.json",
+        "./package.json": "./package.json"
+      },
+      "beforeDistFiles": 0
+    },
+    {
+      "directory": "stdlib",
+      "name": "@proofscript/stdlib",
+      "kind": "source-only",
+      "beforeVersion": "0.1.0-psc0.1",
+      "beforeExports": {
+        ".": "./dist/index.mjs",
+        "./package.json": "./package.json"
+      },
+      "beforeDistFiles": 0
+    },
+    {
+      "directory": "syntax",
+      "name": "@proofscript/syntax",
+      "kind": "source-only",
+      "beforeVersion": "0.1.0-psc0.1",
+      "beforeExports": {
+        ".": "./dist/index.js",
+        "./package.json": "./package.json"
+      },
+      "beforeDistFiles": 0
+    }
+  ],
+  "sourceOnlyWithoutNpmName": [
+    "compiler-unified"
+  ],
+  "internalCompilerModularity": "deferred",
+  "newIndividuallyCompiledCompilerModules": 0,
+  "independentLeanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+  "required": [
+    "existing-names-and-directories",
+    "all-advertised-exports",
+    "fresh-offline-install",
+    "one-qualified-shared-root-implementation",
+    "both-source-grammars",
+    "independent-kernel-accept-and-reject",
+    "strict-original-and-transformed-IR",
+    "source-and-executable-identity-preservation",
+    "repeat-build-tarball-identity",
+    "missing-incompatible-and-tampered-refusals"
+  ]
+}

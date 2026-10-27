@@ -1,12 +1,14 @@
 {
   "name": "proofscript",
-  "version": "0.1.0-psc0.1",
-  "description": "ProofScript PSC0 CLI, qualified self-host compiler closure and JS checker",
+  "version": "0.1.0-psc1.12",
+  "description": "ProofScript PSC1 checked CLI and qualified shared compiler",
   "private": false,
   "type": "module",
   "license": "Apache-2.0",
   "bin": {
-    "psc": "./bin/psc.js"
+    "psc": "./dist/psc.mjs",
+    "psc1": "./dist/psc.mjs",
+    "proofscript": "./dist/psc.mjs"
   },
   "engines": {
     "node": ">=22.23.3"
@@ -14,83 +16,97 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dwijayuda/pskernel.git",
-    "directory": "psc0/packages/proofscript"
+    "directory": "psc1/packages/proofscript"
   },
   "publishConfig": {
     "access": "public"
   },
   "files": [
-    "bin/",
+    "dist/",
+    "src/",
     "README.md",
-    "MANIFEST.json",
     "LICENSE",
     "NOTICE"
   ],
   "dependencies": {
-    "@proofscript/foundation": "0.1.0-psc0.1",
-    "@proofscript/syntax": "0.1.0-psc0.1",
-    "@proofscript/core": "0.1.0-psc0.1",
-    "@proofscript/environment": "0.1.0-psc0.1",
-    "@proofscript/meta": "0.1.0-psc0.1",
-    "@proofscript/elab": "0.1.0-psc0.1",
-    "@proofscript/bridge": "0.1.0-psc0.1",
-    "@proofscript/compiler-ir": "0.1.0-psc0.1",
-    "@proofscript/erasure": "0.1.0-psc0.1",
-    "@proofscript/compiler": "0.1.0-psc0.1",
-    "@proofscript/backend-ts": "0.1.0-psc0.1",
-    "@proofscript/bootstrap": "0.1.0-psc0.1",
-    "@proofscript/pskernel-core": "0.1.0-psc0.1",
-    "typescript": "7.0.2"
+    "@proofscript/pskernel-lean-wasm": "4.35.0"
   },
   "bundledDependencies": [
-    "@proofscript/foundation",
-    "@proofscript/syntax",
-    "@proofscript/core",
-    "@proofscript/environment",
-    "@proofscript/meta",
-    "@proofscript/elab",
-    "@proofscript/bridge",
-    "@proofscript/compiler-ir",
-    "@proofscript/erasure",
-    "@proofscript/compiler",
-    "@proofscript/backend-ts",
-    "@proofscript/bootstrap",
-    "@proofscript/pskernel-core"
+    "@proofscript/pskernel-lean-wasm"
   ],
   "proofscript": {
-    "distribution": "psc0/minimal-compiler/2",
-    "corePackages": [
-      "@proofscript/foundation",
-      "@proofscript/syntax",
-      "@proofscript/core",
-      "@proofscript/environment",
-      "@proofscript/meta",
-      "@proofscript/elab",
-      "@proofscript/bridge",
-      "@proofscript/compiler-ir",
-      "@proofscript/erasure",
-      "@proofscript/compiler",
-      "@proofscript/backend-ts",
-      "@proofscript/bootstrap",
-      "@proofscript/pskernel-core"
-    ],
-    "optionalPackages": [
-      "@proofscript/backend-js",
-      "@proofscript/backend-rust",
-      "@proofscript/backend-wasm",
-      "@proofscript/cli",
-      "@proofscript/pskernel-lean",
-      "@proofscript/pskernel-lean-wasm",
-      "@proofscript/stdlib"
-    ],
-    "checkerProvider": "@proofscript/pskernel-core/check",
-    "checkerExecution": "generated-js",
+    "npmArchitecture": "psc1-existing-packages-shared-root/1",
+    "implementationOwner": "proofscript",
+    "internalCompilerModules": false,
+    "packageKind": "qualified-shared-compiler",
+    "canonicalSources": "src",
     "sourceVariants": [
-      "ps",
-      "lean"
+      "lean",
+      "ps"
     ],
-    "typescriptInstaller": "platform-specific npm optional dependency",
-    "kernelAssurance": "finite comparison; not formal proof",
-    "publishingRequiresQualification": true
+    "publishingRequiresQualification": true,
+    "defaultKernel": "wasm",
+    "defaultEngine": "js",
+    "compilerSourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+    "finalCrossPlatformRelease": false
+  },
+  "scripts": {
+    "build": "node ../../scripts/build-packages.mjs build --package proofscript",
+    "clean": "node ../../scripts/build-packages.mjs clean --package proofscript"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json",
+    "./sources": "./dist/source-manifest.json",
+    "./io": {
+      "types": "./dist/implementation/host-tools/typed-io.d.ts",
+      "import": "./dist/implementation/host-tools/typed-io.mjs"
+    },
+    "./kernel": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./metadata": "./dist/implementation/UNIVERSAL_DISTRIBUTION.json"
+  },
+  "peerDependencies": {
+    "@proofscript/pskernel-lean": "4.35.0",
+    "@proofscript/compiler-rust-linux-x64": "0.1.0-psc1.11",
+    "@proofscript/compiler-wasm": "0.1.0-psc1.11",
+    "@proofscript/backend-python": "0.1.0-psc1.12",
+    "@proofscript/backend-php": "0.1.0-psc1.12",
+    "@proofscript/wasm-component-tools-linux-x64": "0.1.0-psc1.11",
+    "typescript": "7.0.2",
+    "@proofscript/rust-target-consumer-linux-x64": "0.1.0-psc1.6"
+  },
+  "peerDependenciesMeta": {
+    "@proofscript/pskernel-lean": {
+      "optional": true
+    },
+    "@proofscript/compiler-rust-linux-x64": {
+      "optional": true
+    },
+    "@proofscript/compiler-wasm": {
+      "optional": true
+    },
+    "@proofscript/backend-python": {
+      "optional": true
+    },
+    "@proofscript/backend-php": {
+      "optional": true
+    },
+    "@proofscript/wasm-component-tools-linux-x64": {
+      "optional": true
+    },
+    "typescript": {
+      "optional": true
+    },
+    "@proofscript/rust-target-consumer-linux-x64": {
+      "optional": true
+    }
   }
 }

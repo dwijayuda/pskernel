@@ -27,7 +27,8 @@
     "./metadata/kernel-source": "./KERNEL_SOURCE_MANIFEST.json",
     "./metadata/prebuilt": "./PREBUILT_WASM_MANIFEST.json",
     "./metadata/proofscript-source": "./PROOFSCRIPT_SOURCE_MANIFEST.json",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./distribution": "./dist/index.js"
   },
   "files": [
     "index.mjs",
@@ -46,7 +47,8 @@
     "PREBUILT_MANIFEST.json",
     "index.d.ts",
     "LICENSE",
-    "NOTICE"
+    "NOTICE",
+    "dist/"
   ],
   "proofscript": {
     "npmArchitecture": "psc1-independent-kernel-provider/1",
@@ -58,11 +60,14 @@
     "nonPortableProviderSources": true,
     "leanSemanticVersion": "4.35.0",
     "canonicalAdmissionsVersion": 2,
-    "kernelMemoryModel": "linear"
+    "kernelMemoryModel": "linear",
+    "packageBuild": "qualified-prebuilt-reuse; no kernel source compilation"
   },
   "scripts": {
     "build:kernel": "bash scripts/build-wasm.sh && node scripts/write-prebuilt-manifest.mjs",
-    "verify:prebuilt": "node host/verify-prebuilt.mjs"
+    "verify:prebuilt": "node host/verify-prebuilt.mjs",
+    "build": "node ../../scripts/build-packages.mjs build --package pskernel-lean-wasm",
+    "clean": "node ../../scripts/build-packages.mjs clean --package pskernel-lean-wasm"
   },
   "types": "./index.d.ts"
 }

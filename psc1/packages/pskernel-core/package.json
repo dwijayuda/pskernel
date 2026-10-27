@@ -1,7 +1,7 @@
 {
   "name": "@proofscript/pskernel-core",
-  "version": "0.1.0-psc0.1",
-  "description": "ProofScript PSC0 pskernel-core source and JavaScript runtime package",
+  "version": "0.1.0-psc1.12",
+  "description": "ProofScript PSC1 pskernel-core: source package",
   "type": "module",
   "private": false,
   "main": "./dist/index.js",
@@ -19,8 +19,16 @@
     "access": "public"
   },
   "exports": {
-    ".": "./dist/index.js",
-    "./package.json": "./package.json"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json",
+    "./sources": "./dist/source-manifest.json",
+    "./compiler": {
+      "types": "./dist/compiler.d.ts",
+      "import": "./dist/compiler.js"
+    }
   },
   "files": [
     "dist/",
@@ -30,18 +38,22 @@
     "NOTICE"
   ],
   "proofscript": {
-    "npmArchitecture": "psc0-monolithic-runtime-with-scoped-source-packages/1",
+    "npmArchitecture": "psc1-existing-packages-shared-root/1",
+    "implementationOwner": "proofscript",
+    "internalCompilerModules": false,
+    "packageKind": "source-only",
+    "canonicalSources": "src",
     "sourceVariants": [
-      "ps",
-      "lean"
+      "lean",
+      "ps"
     ],
-    "publishingRequiresBuild": true,
-    "runtimeTrust": "qualified bounded JavaScript admission candidate; formal soundness not proven",
-    "kernelQualification": "release-gated JS checker; not a formal soundness proof",
-    "portable": true,
-    "bootstrap": false,
-    "sourceRoots": [
-      "src"
-    ]
+    "publishingRequiresQualification": true
+  },
+  "scripts": {
+    "build": "node ../../scripts/build-packages.mjs build --package pskernel-core",
+    "clean": "node ../../scripts/build-packages.mjs clean --package pskernel-core"
+  },
+  "dependencies": {
+    "proofscript": "0.1.0-psc1.12"
   }
 }

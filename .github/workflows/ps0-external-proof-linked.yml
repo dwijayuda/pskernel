@@ -3,9 +3,9 @@ name: PS0 external proof-linked qualification
 on:
   push:
     branches: [ci/ps0-proof-linked-runner-20261029]
-    paths: [.github/workflows/ps0-external-proof-linked.yml]
+    paths: [.github/workflows/ps0-external-proof-linked.yml, ci/ps0-source.json]
   pull_request:
-    paths: [.github/workflows/ps0-external-proof-linked.yml]
+    paths: [.github/workflows/ps0-external-proof-linked.yml, ci/ps0-source.json]
   workflow_dispatch:
 
 permissions:
@@ -15,14 +15,25 @@ concurrency:
   group: ps0-external-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  PS0_SOURCE_SHA: 86c1c3f8c8c2b14603a0e20b8e4d58b2a48904d5
-
 jobs:
   host-contract:
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          persist-credentials: false
+      - name: Read exact source pin
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          pin=json.load(open('ci/ps0-source.json'))
+          assert pin['repository']=='dwijayuda/lean4'
+          assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('PS0_SOURCE_SHA='+pin['commit']+'\n')
+          PY
       - uses: actions/checkout@v4
         with:
           repository: dwijayuda/lean4
@@ -43,6 +54,21 @@ jobs:
       run:
         working-directory: experiments/ps0
     steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          persist-credentials: false
+      - name: Read exact source pin
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          pin=json.load(open('ci/ps0-source.json'))
+          assert pin['repository']=='dwijayuda/lean4'
+          assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('PS0_SOURCE_SHA='+pin['commit']+'\n')
+          PY
       - uses: actions/checkout@v4
         with:
           repository: dwijayuda/lean4

@@ -34,7 +34,7 @@ record('unsafe input declined by strict file profile',unsafe.outcome==='declined
 const partial=await run(definition(true).replace('"safety":"safe"','"safety":"partial"'));
 record('partial input declined by strict file profile',partial.outcome==='declinedUnsupported'&&!partial.checking.coreInvoked);
 
-function axiomStream(label,schema,{includePrelude=true,shadowEquality=false}={}){
+function axiomStream(label,schema,{includePrelude=true,shadowEquality=false,extraAxioms=[]}={}){
   const rows=[],names=new Map([['["anonymous"]',0]]);let nn=1,nl=1,ne=0;
   function name(n){const key=JSON.stringify(n);if(names.has(key))return names.get(key);const pre=name(n[1]),id=nn++;names.set(key,id);
     rows.push(n[0]==='str'?{in:id,str:{pre,str:n[2]}}:{in:id,num:{pre,i:Number(n[2])}});return id;}
@@ -66,7 +66,10 @@ function axiomStream(label,schema,{includePrelude=true,shadowEquality=false}={})
     }
     for(const [label,kind]of [['Quot','type'],['Quot.mk','ctor'],['Quot.lift','lift'],['Quot.ind','ind']])rows.push({quot:{...base(label,pins.primitives[label]),kind}});
   }
-  params=parameters(schema);const n=name(label),type=expr(schema.type);rows.push({axiom:{name:n,levelParams:params,type,isUnsafe:false}});return stream(rows);
+  for(const [n,s]of [[label,schema],...extraAxioms]){
+    params=parameters(s);const id=name(n),type=expr(s.type);rows.push({axiom:{name:id,levelParams:params,type,isUnsafe:false}});
+  }
+  return stream(rows);
 }
 for(const [label,schema]of Object.entries(pins.schemas)){
   const name=label.split('.').reduce((p,s)=>['str',p,s],['anonymous']),text=axiomStream(name,schema);
@@ -82,6 +85,12 @@ const missingPrelude=await run(axiomStream(['str',['anonymous'],'propext'],pins.
 record('standard schema never grants missing prelude authority',missingPrelude.outcome==='declinedUnsupported'&&!missingPrelude.checking.coreInvoked);
 const shadowed=await run(axiomStream(['str',['anonymous'],'propext'],pins.schemas.propext,{shadowEquality:true}));
 record('standard schema with shadowed equality primitive declined',shadowed.outcome==='declinedUnsupported'&&!shadowed.checking.coreInvoked);
+const standardName=label=>label.split('.').reduce((p,s)=>['str',p,s],['anonymous']);
+const together=[['Classical.choice',pins.schemas['Classical.choice']],['Quot.sound',pins.schemas['Quot.sound']]].map(([n,s])=>[standardName(n),s]);
+const allStandard=await run(axiomStream(standardName('propext'),pins.schemas.propext,{extraAxioms:together}));
+record('all three standard assumptions admitted with complete inventory',allStandard.outcome==='accepted'&&allStandard.assumptions.length===3&&allStandard.assumptions.every(a=>a.standardSchema));
+const fourth=await run(axiomStream(standardName('propext'),pins.schemas.propext,{extraAxioms:[...together,[standardName('ExtraAssumption'),{universeParameters:'0',type:['sort',['zero']]}]]}));
+record('fourth unknown assumption preserves full declined inventory',fourth.outcome==='declinedUnsupported'&&fourth.assumptions.length===4&&!fourth.assumptionPolicy.validated&&!fourth.checking.coreInvoked);
 const unknown=await run(axiomStream(['str',['anonymous'],'AssumeAnything'],{universeParameters:'0',type:['sort',['zero']]}));
 record('unknown input axiom is unsupported',unknown.outcome==='declinedUnsupported'&&unknown.assumptions[0].standardSchema===false&&!unknown.checking.coreInvoked);
 const spoof=await run(axiomStream(['str',['anonymous'],'Classical.choice'],pins.schemas['Classical.choice']));
@@ -146,10 +155,21 @@ for(const [mode,outcome,cause]of [['heap','resourceExhausted','host-heap'],['int
 for(const [outcome,code]of [['accepted',0],['rejectedInvalid',1],['declinedUnsupported',2],['resourceExhausted',3],['internalError',4]])record(outcome+' exit code',exitCodeFor(outcome)===code);
 const filename=path.join(root,'valid-example.ndjson');await writeFile(filename,definition(true));await writeFile(path.join(root,'invalid-example.ndjson'),definition(false));
 const exec=promisify(execFile),cli=path.join(root,'check-export.mjs');
+const invalidUTF8=await supervise({inputBytes:Buffer.from([255]),kernelPath:path.join(root,'kernel.js'),workerPath:path.join(root,'pskernel-preview-worker.mjs'),pinsPath:path.join(root,'pskernel-preview-axioms.json')});
+record('invalid UTF8 is transport nonacceptance',invalidUTF8.outcome==='rejectedInvalid'&&invalidUTF8.stage==='transport'&&!invalidUTF8.checking.coreInvoked);
+const oversized=await supervise({inputBytes:Buffer.alloc(67108865),kernelPath:path.join(root,'kernel.js'),pinsPath:path.join(root,'pskernel-preview-axioms.json')});
+record('input byte limit is supervised resource exhaustion',oversized.outcome==='resourceExhausted'&&oversized.host.cause==='input-size'&&!oversized.host.workerReaped);
+const missingFile=await supervise({inputPath:path.join(root,'absent.ndjson'),kernelPath:path.join(root,'kernel.js'),pinsPath:path.join(root,'pskernel-preview-axioms.json')});
+record('input IO failure cannot start checking',missingFile.outcome==='internalError'&&!missingFile.host.workerReaped&&!missingFile.checking.coreInvoked);
+const fifo=path.join(scratch,'input.fifo');await exec('/usr/bin/mkfifo',[fifo]);
+const nonregular=await supervise({inputPath:fifo,kernelPath:path.join(root,'kernel.js'),pinsPath:path.join(root,'pskernel-preview-axioms.json')});
+record('FIFO input is declined without blocking open',nonregular.outcome==='internalError'&&nonregular.host.cause==='input-kind'&&!nonregular.host.workerReaped);
 const actual=await exec(process.execPath,[cli,'--progress',filename],{env:{PATH:''},timeout:10000});
 const receipt=JSON.parse(actual.stdout);record('documented CLI actual positive and separate progress',receipt.outcome==='accepted'&&actual.stdout.trim().split('\n').length===1&&actual.stderr.includes('PSKERNEL_PREVIEW_PROGRESS'));
 let rejected;try{await exec(process.execPath,[cli,path.join(root,'invalid-example.ndjson')],{env:{PATH:''},timeout:10000});}catch(e){rejected=e;}
 record('documented CLI actual negative has exit one',rejected?.code===1&&JSON.parse(rejected.stdout).outcome==='rejectedInvalid');
+let badArgs;try{await exec(process.execPath,[cli,'--worker','arbitrary.mjs',filename],{env:{PATH:''},timeout:10000});}catch(e){badArgs=e;}
+record('CLI exposes no alternate worker option',badArgs?.code===4&&JSON.parse(badArgs.stdout).stage==='arguments');
 await writeFile(path.join(root,'preview-controls.json'),JSON.stringify({format:'pskernel-preview-controls-v1',labels:checked,controls:checked.length,
   positive,negative,policyPins:pins,emptyPATH:true,oldSpaceMiB:2048,qualificationHost:'GitHub Linux Actions Node22',
   faultFixturesAreTrustedTestInputs:true,globalSoundnessProved:false},null,2)+'\n');

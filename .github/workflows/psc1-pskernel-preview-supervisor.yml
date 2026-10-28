@@ -4,7 +4,12 @@ on:
     branches: [work/psc1-pskernel-preview-supervisor-20261029]
     paths:
       - .github/workflows/psc1-pskernel-preview-supervisor.yml
-      - psc1/scripts/pskernel-preview-*
+      - psc1/scripts/pskernel-preview-policy.mjs
+      - psc1/scripts/pskernel-preview-supervisor.mjs
+      - psc1/scripts/pskernel-preview-worker.mjs
+      - psc1/scripts/pskernel-preview-controls.mjs
+      - psc1/scripts/pskernel-preview-qualification.py
+      - psc1/scripts/pskernel-preview-axioms.json
       - psc1/scripts/pskernel-check-export.mjs
       - psc1/test/PsKernelPreviewAxiomSchemas.lean
   workflow_dispatch:

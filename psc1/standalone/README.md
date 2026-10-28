@@ -6,11 +6,14 @@ ProofScript compiler project is included. No separate Node, Bun, Lean, Lake,
 TypeScript, Rust or C/C++ compiler installation belongs to the ordinary
 compiler rebuild cycle.
 
-**Qualified:** complete baseline and changed-source compiler rebuilds pass
+**Initial standalone qualification:** complete baseline and changed-source
+compiler rebuilds pass
 [40618697529](https://github.com/dwijayuda/pskernel/actions/runs/40618697529) at
 `5484a04df34de1bbcfa46a248b6a93ce510035d6`.
-See the [exact receipt](../docs/PSC1_INDEPENDENT_DEVELOPMENT_QUALIFICATION_2026-10-28.json)
-and [AI work state](../AI_WORK_STATE.md) for finite scope and measurements.
+The [initial receipt](../docs/PSC1_INDEPENDENT_DEVELOPMENT_QUALIFICATION_2026-10-28.json)
+binds that distribution. A subsequent measured source optimization passes
+[40634776830](https://github.com/dwijayuda/pskernel/actions/runs/40634776830), with
+[separate profile and O2 evidence](../docs/PSC1_INDEPENDENT_DEVELOPMENT.md#measured-rebuild-profile-and-type-key-improvement).
 
 Download the [qualified Linux x64 artifact](https://github.com/dwijayuda/pskernel/actions/runs/40618697529/artifacts/12788978661).
 It contains `psc1-independent-linux-x64.tar.gz`, the completed evidence summary
@@ -109,9 +112,41 @@ declarations using official Lean kernel rules. The kernel, host and runtime are
 prebuilt components. Rebuilding those components themselves can require their
 bootstrap toolchains.
 
-The repository retains its existing bootstrap `.lean` source ownership.
-The delivered `.ps` project is authoritative for edits in that standalone
-workspace. A repository-wide switch of source owners is a separate migration.
+The repository now has one canonical editable `.ps` owner for each portable
+compiler/library module, with explicit paired bootstrap references. The
+[ownership guide](../docs/CANONICAL_SOURCE_OWNERSHIP.md) explains how repository
+edits are checked. The installed `.ps` project remains authoritative for edits
+in its standalone workspace.
+
+## Measured rebuild improvement
+
+The [TypeKey qualification](../docs/PSC1_TYPE_KEY_LATENCY_QUALIFICATION_2026-10-28.json)
+compares original B2 and optimized O2 on the same immutable 125-module project,
+in one sequential pair on the same runner.
+
+| Observation | B2 control | Optimized O2 | Observed reduction |
+| --- | ---: | ---: | ---: |
+| Compiler worker | 1,710.047 s | 1,485.908 s | 13.107% |
+| Complete host invocation | 1,720.972 s | 1,496.718 s | 13.031% |
+
+The measured source change delays recursive-function construction in
+`psIrSpecializeTypeKeyWithFuel` until a type is inspected, preserving fuel, keys
+and refusal conditions. O1 and self-rebuilt O2 have identical compiler, candidate,
+admission, original/transformed IR and source payloads. Both benchmark builds
+reproduce every original candidate byte. All four builds perform fresh independent
+admission and strict IR checks.
+
+O2 is retained in
+[artifact 12796523762](https://github.com/dwijayuda/pskernel/actions/runs/40634776830/artifacts/12796523762),
+with compiler SHA-256
+`49d851d26008abf116b9f4c680c0833311e835b90d6c58e369ca426f33ecd2e6`.
+The download above identifies the initial qualified distribution. Expanded
+installation/publication qualification for the refreshed O2 distribution is pending.
+
+The result is one observed pair; it does not establish a statistical guarantee.
+The optimized full rebuild still exceeds the 240-second target and uses the
+explicit 3,600-second correctness profile. Exact provenance and interpretation are
+in the [development account](../docs/PSC1_INDEPENDENT_DEVELOPMENT.md#measured-rebuild-profile-and-type-key-improvement).
 
 ## Resource and evidence policy
 

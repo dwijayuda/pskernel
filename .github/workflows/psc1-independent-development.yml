@@ -9,6 +9,8 @@ on:
 permissions:
   contents: read
   actions: read
+env:
+  PSC1_QUALIFICATION_ENVIRONMENT: ubuntu-24.04-x64
 concurrency:
   group: psc1-independent-development-${{ github.ref }}
   cancel-in-progress: true

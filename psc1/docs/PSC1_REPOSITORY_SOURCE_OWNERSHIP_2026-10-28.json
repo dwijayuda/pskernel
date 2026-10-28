@@ -1,0 +1,30 @@
+{
+  "schema": "psc1-repository-source-ownership-record/1",
+  "status": "passed",
+  "testedCommit": "109e404586504cfe5f20352d1804d0cf0ac83310",
+  "run": 40646320157,
+  "job": 122675859502,
+  "artifact": {
+    "id": 12797776011,
+    "bytes": 25704,
+    "zipSha256": "68721abdc3bc69b060e2dfbfb8b97e47ce52eb89080e00537ae15a1d7c2ab782"
+  },
+  "result": {
+    "status": "passed",
+    "trackedProofScriptFiles": 275,
+    "counts": {
+      "authored-language-and-policy-fixture": 53,
+      "retained-bootstrap-correspondence-fixture": 1,
+      "retained-generated-kernel-artifact": 6,
+      "authored-test-fixture": 3,
+      "canonical-editable-proofscript": 164,
+      "authored-test-and-reference-oracles": 26,
+      "editable-project-source": 10,
+      "vendored-study-reference": 12
+    },
+    "registrySha256": "4acd2c04571ca35b83ea57a05d2fa63251a5461d645f9a912abc08c9a96935ce",
+    "psc1ManifestSha256": "941c23fc7bd63b6168f4baea54ccdf26252761cdfa43e3a1a84eb157884c049f"
+  },
+  "scope": "Every tracked .ps file has exactly one explicit owner or retained/generated origin; full file identities are retained in the artifact inventory.",
+  "receiptGrantsAdmissionAuthority": false
+}

@@ -41,16 +41,56 @@ also passes all 16 selected jobs and 37 finite Core criteria.
 
 Ordinary standalone development needs no separately installed external language
 tools; the runtime and independent checker are explicit prebuilt components.
-The delivered `.ps` workspace is authoritative for its edits; repository Lean
-bootstrap ownership is retained. The long correctness profile remains separate
+That milestone made the delivered `.ps` workspace authoritative for its edits
+while retaining repository Lean bootstrap ownership. The long correctness profile remains separate
 from the unqualified 240-second full-compiler performance goal.
 
-Next address measured rebuild latency, repository-wide canonical `.ps` source
-ownership, broader real compiler edits and additional platform qualification.
+The measured TypeKey improvement completes the first latency experiment.
+Canonical sources are promoted; checked O2 reference integration, broader real
+compiler edits and the full additional-environment matrix remain active work.
 [Architecture/dependency audit](PSC1_INDEPENDENT_DEVELOPMENT.md) and
 [work state](../AI_WORK_STATE.md) record scope and remaining obligations.
 Kernel research, a new runtime/backend and full modular partitioning are separate
 streams, not prerequisites retroactively attached to this completed milestone.
+
+## Qualified measured rebuild improvement
+
+The [measured profile](PSC1_REBUILD_PROFILE_2026-10-28.json) identified eager
+recursive-function construction in `psIrSpecializeTypeKeyWithFuel` on the full
+125-module workload. A one-module source change delays construction until a type
+is inspected. [TypeKey qualification](PSC1_TYPE_KEY_LATENCY_QUALIFICATION_2026-10-28.json)
+passes [40634776830](https://github.com/dwijayuda/pskernel/actions/runs/40634776830)
+at `bc983a806a2995bed7851512a175652cbf4b5226`.
+
+In one sequential matched pair on the same runner, compiler-worker elapsed time
+fell from 1,710.047 to 1,485.908 seconds, an observed 13.107% reduction.
+Complete host invocation time fell from 1,720.972 to 1,496.718 seconds, or 13.031%.
+Worker peak RSS fell by 179.5 MiB. These are measured observations from one pair;
+cross-platform performance and statistical repeatability need separate evidence.
+
+The frozen seed produced O1; O1 produced byte-identical O2 payloads. All four
+builds performed fresh independent admission and strict original/transformed IR
+checks. Both benchmark builds reproduced every original candidate byte.
+The qualified O2 seed, exact source change and archive identities are recorded in
+[the development account](PSC1_INDEPENDENT_DEVELOPMENT.md#measured-rebuild-profile-and-type-key-improvement)
+and the TypeKey receipt.
+
+The optimized full rebuild still exceeds the original 240-second target and
+uses the separate 3,600-second correctness profile. Expanded O2 installation
+and publication qualification remains pending. The existing
+[ABI receipt](PSC1_ADDITIONAL_PLATFORM_ABI_QUALIFICATION_2026-10-28.json) qualifies
+runtime/checker preflight on Ubuntu 24.04 x64, Ubuntu 22.04 x64 and Ubuntu 24.04
+ARM64. Full compiler and publication qualification require the completed matrix.
+
+## Canonical editable sources
+
+[Preparation 40644035690](https://github.com/dwijayuda/pskernel/actions/runs/40644035690)
+freshly qualifies 151 compiler and 13 standard-library PS owners, with original
+checked native references retained. The repository inventory classifies all
+275 tracked `.ps` files, preserving separate project and kernel authorities.
+The [ownership guide](CANONICAL_SOURCE_OWNERSHIP.md) and
+[preparation receipt](PSC1_CANONICAL_SOURCE_PREPARATION_2026-10-28.json) define
+the exact boundary and checked canonical-to-reference maintenance workflow.
 
 ## Preserved qualification: automatic core package installation
 
@@ -87,9 +127,9 @@ PR #197 implementation 9aefeeb and documentation refresh c5c15582 pass all 42 pa
 | 7 | Full Python/PHP practical applications | Pending: real CLI/JSON/file/multi-module observations against checked reference; retain corpus/Unicode/integer/loop/IO tests. Providers remain optional. |
 | 8 | Automatic source-package capture | Pending: bounded deterministic order, exact identities, cycle/missing/stale refusals, real multi-package applications. Metadata never executes code or grants authority. |
 | 9 | Native publication committed-outcome parity | Pending: retain transaction and explicitly report post-commit uncertainty. No false rollback guarantee. |
-| 10 | Additional platform consumers/publication | Blocked on actual permitted platform execution. Linux does not qualify macOS/Windows durability or SDK/provider consumers. |
+| 10 | Additional platform consumers/publication | Runtime/checker ABI preflight passes on Ubuntu 24.04 x64, Ubuntu 22.04 x64 and Ubuntu 24.04 ARM64: [receipt](PSC1_ADDITIONAL_PLATFORM_ABI_QUALIFICATION_2026-10-28.json). Full O2 installation, compiler-generation and publication qualification remains pending. macOS/Windows durability and SDK/provider consumers require their own native evidence. |
 | 11 | Clean reproduction/final universal release | Pending: exact final source/package/platform identities and required generations; authorization before merge/publication. |
-| 12 | Original240-second self-compilation target | Unqualified: optimize measured compiler workloads; retain separate correctness profiles and safety policies. |
+| 12 | Original 240-second self-compilation target | Target unmet: the optimized compiler worker takes 1,485.908 seconds in the [controlled TypeKey comparison](PSC1_TYPE_KEY_LATENCY_QUALIFICATION_2026-10-28.json). Continue measured optimization and repeatability work while preserving fresh admission, strict IR and the separate correctness profiles. |
 | 13 | Broader features/extensions and R4 transformations | Deferred beyond frozen v1 or explicit semantic obligations. Preserve working features; packages cannot acquire checker/host/FFI/publication authority. |
 
 ## Fixed policies

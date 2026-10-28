@@ -1,0 +1,155 @@
+{
+  "schema": "psc1-canonical-source-qualification-record/1",
+  "status": "passed-initial-promotion",
+  "initial": {
+    "testedCommit": "109e404586504cfe5f20352d1804d0cf0ac83310",
+    "run": 40646319995,
+    "job": 122675859569,
+    "artifact": {
+      "id": 12797628175,
+      "bytes": 78375,
+      "zipSha256": "199d976848a4c4f493879f06df8cb54fe2fb6956bedf65717a59ad89203f42c9"
+    },
+    "result": {
+      "schema": "psc1-canonical-source-correspondence/1",
+      "status": "passed",
+      "testedCommit": "109e404586504cfe5f20352d1804d0cf0ac83310",
+      "manifestSha256": "941c23fc7bd63b6168f4baea54ccdf26252761cdfa43e3a1a84eb157884c049f",
+      "projectSha256": "36bedf25da22e5b65b3318ea972efe2a069160ba826fbb001e27cbfb9775b58e",
+      "owners": 164,
+      "compilerOwners": 151,
+      "libraryOwners": 13,
+      "sourceDomains": {
+        "native-host-implementation": 18,
+        "native-build-configuration": 3,
+        "historical-reference-material": 103,
+        "immutable-checked-bootstrap-reference": 164,
+        "canonical-editable-proofscript": 164,
+        "native-compatibility-default-adapter": 2,
+        "native-process-entry": 3,
+        "native-byte-carrier-adapter": 5,
+        "retained-unselected-adapter": 5,
+        "independent-kernel-projects": 118,
+        "bootstrap-validation-and-release-tools": 16,
+        "native-bootstrap-qualification-observers": 2,
+        "validation-composition": 3,
+        "authored-test-and-reference-oracles": 179
+      },
+      "unifiedModules": 125,
+      "sourceClosureDigest": "9d0f097e79eb2b1e14d10362c6db9b4bc2370c26627658017bf6b2681b46fabf",
+      "authoredOwner": "repository-proofscript",
+      "bootstrapAuthority": "immutable-checked-reference",
+      "receiptGrantsAdmissionAuthority": false,
+      "helperHashes": {
+        "psc1_lossless_source": "886ba6d1743e4e5b13ef7297b1edb5dae002e8a0b508b3307e9b08402d2c2603",
+        "psc1_source_ownership": "02ea07e8e89f8afed7e3ed830be3eba9c403933c002b349b94216d1c991f1dd4",
+        "psc1_independent_checker": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1"
+      },
+      "groups": [
+        {
+          "label": "compiler",
+          "status": "passed",
+          "modules": 151,
+          "elapsedMs": 449367,
+          "admissionsSha256": "58bd1a000dcb37b0d90e0357f13080593fdf1ac376fdaff225e1fb26d55e577a",
+          "originalIrSha256": "ddac1b930c79868bc6fe923137b12fbf1a458cfeefe4f558a67ca45730b30dce",
+          "bootstrapSourceClosureDigest": "490c31876756fad344d61d5966cafd804c3f224ccfa6f23c4f8631e4b8cfac4a",
+          "canonicalSourceClosureDigest": "bbce950f16c6a4f1fe7ca96ecd492f121531e0de53d5bf33985a50c21a0d66cd",
+          "bootstrapChecker": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.35.0",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "profile": "lean4.35-core",
+            "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+            "accepted": true
+          },
+          "canonicalChecker": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.35.0",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "profile": "lean4.35-core",
+            "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+            "accepted": true
+          },
+          "bootstrapMetrics": {
+            "elapsedMs": 82780,
+            "maxRssKiB": 383852,
+            "peakTreeRssKiB": 383724,
+            "timeoutMs": 240000,
+            "graphFilesProfile": "canonical-repository-40m",
+            "graphFilesBytesLimit": 41943040,
+            "admissionsBytes": 34431244,
+            "originalIrBytes": 10029216
+          },
+          "canonicalMetrics": {
+            "elapsedMs": 83948,
+            "maxRssKiB": 394008,
+            "peakTreeRssKiB": 394008,
+            "timeoutMs": 240000,
+            "graphFilesProfile": "canonical-repository-40m",
+            "graphFilesBytesLimit": 41943040,
+            "admissionsBytes": 34431244,
+            "originalIrBytes": 10029216
+          }
+        },
+        {
+          "label": "library",
+          "status": "passed",
+          "modules": 13,
+          "elapsedMs": 30519,
+          "admissionsSha256": "3d731ffb8d828657b37bcc1e19a28852ff17be401429d1e43ef8622129e1bf81",
+          "originalIrSha256": "c44535e3bf9d596a7f593536193a0ba3b94fbbde73ad4ffc0dec59729e9ef2be",
+          "bootstrapSourceClosureDigest": "d464ca3b187004c2b1b97400b850543537a4d3ce9a9e22c3796d69d40ca50099",
+          "canonicalSourceClosureDigest": "22af16cf564281964ce4f134798bad98966ca85240f20926038f30dac503fe39",
+          "bootstrapChecker": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.35.0",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "profile": "lean4.35-core",
+            "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+            "accepted": true
+          },
+          "canonicalChecker": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.35.0",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "profile": "lean4.35-core",
+            "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+            "accepted": true
+          },
+          "bootstrapMetrics": {
+            "elapsedMs": 199,
+            "maxRssKiB": 101820,
+            "peakTreeRssKiB": 97724,
+            "timeoutMs": 240000
+          },
+          "canonicalMetrics": {
+            "elapsedMs": 195,
+            "maxRssKiB": 101936,
+            "peakTreeRssKiB": 97840,
+            "timeoutMs": 240000
+          }
+        }
+      ],
+      "actualIndependentAdmissions": 4,
+      "projectedGroups": [],
+      "transition": {
+        "schema": "psc1-canonical-source-transition/1",
+        "status": "passed",
+        "baselineCommit": null,
+        "baselineManifestSha256": "941c23fc7bd63b6168f4baea54ccdf26252761cdfa43e3a1a84eb157884c049f",
+        "initialManifestGitBlobSha": "0edcf5c1e2ce5da05f0dfc4a17e11f72b901402a",
+        "changedOwners": [],
+        "unchangedOwnerReferencesPreserved": true,
+        "receiptGrantsAdmissionAuthority": false
+      },
+      "originalStrictIrCorrespondence": true,
+      "formalSourcePreservationProof": false
+    }
+  },
+  "receiptGrantsAdmissionAuthority": false
+}

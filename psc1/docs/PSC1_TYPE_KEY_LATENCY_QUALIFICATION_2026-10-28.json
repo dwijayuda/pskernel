@@ -218,5 +218,23 @@
     "ordinaryRunnerUnchanged": true
   },
   "interpretation": "One sequential matched compiler-worker pair on the same runner; no statistical or 240-second qualification claim.",
-  "receiptGrantsAdmissionAuthority": false
+  "receiptGrantsAdmissionAuthority": false,
+  "hostProcessObservations": {
+    "source": {
+      "run": 40634776830,
+      "job": 122639100927,
+      "event": "PSC1_TYPE_KEY_BUILD",
+      "phase": "passed"
+    },
+    "measurements": {
+      "O1": 1699097,
+      "O2": 1489381,
+      "control": 1720972,
+      "optimized-baseline": 1496718
+    },
+    "unit": "ms",
+    "savedMs": 224254,
+    "observedReduction": 0.130306594180498,
+    "interpretation": "Complete host subprocess duration measured by the outer qualification harness, distinct from execution.hostElapsedMs."
+  }
 }

@@ -1,6 +1,7 @@
 # Independent PSC1 compiler development
 
-Status: qualified first Linux x64 independent-development milestone, 2026-10-28 UTC.
+Status: first Linux x64 independent-development milestone and measured TypeKey
+improvement qualified, 2026-10-28 UTC; expanded O2 installation qualification pending.
 Implementation `5484a04df34de1bbcfa46a248b6a93ce510035d6` passes
 [40618697529](https://github.com/dwijayuda/pskernel/actions/runs/40618697529).
 The [dated receipt](PSC1_INDEPENDENT_DEVELOPMENT_QUALIFICATION_2026-10-28.json)
@@ -85,28 +86,28 @@ These describe runtime packaging capabilities, not PSC1 qualification.
 
 ## Source ownership and one-time bootstrap
 
-Repository source in `packages/*/src/**/*.lean` remains the maintained bootstrap
-reference. The standalone distribution includes a complete editable `.ps`
-compiler project in dependency order, derived from the selected current source.
+The repository now uses the canonical `.ps` owners listed in
+[`CANONICAL_SOURCES.json`](../CANONICAL_SOURCES.json): 151 portable compiler
+modules and 13 ordinary standard-library modules. Their paired `.lean` files
+are explicit, pinned bootstrap references. The
+[ownership guide](CANONICAL_SOURCE_OWNERSHIP.md) describes the sole editable
+authority, native adapter boundaries, package views and checked refresh process.
 
-The conversion reuses the existing lossless capture, source ownership and
-checked converter. It requires exact canonical admissions and original IR
-correspondence, preserved ordinary logical/body pairing and partial names,
-ordered member ownership and actual independent admission of both endpoints.
-The owner-notes comment policy preserves comment bytes and order while placing
-body comments before their owner declaration. It is not an exact layout copy.
+The initial standalone milestone converted selected native sources into the
+editable project and freshly checked both grammar endpoints. The canonical
+promotion retained those exact 125 PS source bytes. The measured TypeKey change
+then edits that canonical project and uses the checked reference workflow.
+Refreshed standalone assembly copies current canonical PS bytes directly and
+checks their correspondence with the pinned native references.
 
-After conversion, standalone builds read the `.ps` files in the project.
-They do not regenerate them from Lean source or invoke the translator.
+Ordinary installed builds capture their editable `.ps` files again. They do
+not regenerate working sources from a bootstrap reference or call a translator.
 An edit changes the compiler request source digest and the new compiler output.
-The editable project is authoritative for that development workspace. Promoting
-these files over every repository bootstrap reference is a separate migration,
-not a claim attached to this first distribution.
+Native tools are required only for repository bootstrap/reference maintenance in CI.
 
-Existing import/package names are retained. A small explicit project lists
-source paths and modules; it supplies source data only. It cannot choose a
-runtime, checker, command, output executor, network location or publication
-policy. No package-manager service or install hook is needed.
+Existing import/package names remain. The explicit project lists ordered module
+paths and source data. It cannot select runtime/checker policy, commands, network
+locations or publication policy. No package-manager service or install hook is needed.
 
 ## Admission and executable boundaries
 
@@ -263,15 +264,134 @@ mode. The correction removed only flushing of unaccepted temporary responses;
 host verification and durable accepted-output publication remain. Qualification
 was repeated from bootstrap through both chains and the final gate.
 
+## Measured rebuild profile and type key improvement
+
+The initial correctness timings above motivated a separate measured experiment.
+The [profile receipt](PSC1_REBUILD_PROFILE_2026-10-28.json) records
+[run 40631714254](https://github.com/dwijayuda/pskernel/actions/runs/40631714254),
+which executes the qualified B2 compiler on the exact 125-module project:
+2,382,708 UTF-8 source bytes and source closure
+`9d0f097e79eb2b1e14d10362c6db9b4bc2370c26627658017bf6b2681b46fabf`.
+The compiler worker took 1,236.092 seconds under observation. The result matched
+the complete qualified candidate bytes and passed fresh independent admission.
+
+The CI observer uses V8 statistical ticks at a 5 ms interval, with a small
+logging-and-processing preflight before the full workload. It retains permission
+mode, the 4,096 MiB old-space setting and bounded execution. Ordinary host and
+runner code remain unchanged. Raw and preprocessed profiles, observation-tool
+identities and the acceptance evidence are retained in
+[artifact 12792955597](https://github.com/dwijayuda/pskernel/actions/runs/40631714254/artifacts/12792955597).
+`nm` and `objdump` are CI observation dependencies.
+
+Of 243,356 ticks, nearest generated-frame attribution assigned 18.721% to
+`psIrSpecializeTypeKeyWithFuel`; sampled GC accounted for 19.617% overall.
+These are statistical tick shares, not exact wall-clock phase times, and physical
+generator stacks differ from logical ProofScript call stacks. The source showed
+that the successor-fuel case constructed the remaining recursive-function chain
+before receiving a type.
+
+The selected source change moves the type lambda before the `smaller` binding
+in `Ps.CompilerIr.Specialize`. It prepares the recursive function when a type is
+inspected while preserving fuel, branches, type keys and refusal conditions.
+The change is confined to one `.ps` module; its before and after files are both
+60,198 bytes. The runtime, serialization, cache policy, independent checker and
+strict IR rules are unchanged. Exact definitions and anchors are retained in
+[the TypeKey receipt](PSC1_TYPE_KEY_LATENCY_QUALIFICATION_2026-10-28.json).
+
+### Controlled qualification
+
+[Run 40634776830](https://github.com/dwijayuda/pskernel/actions/runs/40634776830),
+job `122639100927`, passes at
+`bc983a806a2995bed7851512a175652cbf4b5226` using the
+[qualification harness](../standalone/qualify-type-key-latency.mjs).
+It verifies immutable distribution artifact `12788978661` and B2 artifact
+`12787934687`, then performs four ordinary builds:
+
+1. The frozen qualified seed compiles the changed source to O1.
+2. O1 compiles that same source to O2.
+3. Original B2 compiles the immutable original source as the control.
+4. O2 compiles that identical original source as the optimized comparison.
+
+All four builds perform fresh independent admission and strict original and
+transformed IR checks. O1 and O2 have identical `compiler.mjs`, `candidate.json`,
+`admissions.json`, `original-ir.json`, `specialized-ir.json` and `sources.json`.
+Each publication also retains its timing-bearing `build.json` and verified
+`files.json` completion marker.
+
+Both benchmark builds reproduce every byte of the original 73,800,724-byte
+candidate, SHA-256
+`532081726b246297e30fd0a0975f95a6198510e295338a2bcfbe74ed602c4978`.
+The original compiler, admission, original/transformed IR and source payloads
+also match exactly. The controlled pair uses the same machine, private Node
+22.23.3 runtime and ordinary runtime flags.
+
+| Observation | Original B2 control | Optimized O2 | Observed reduction |
+| --- | ---: | ---: | ---: |
+| Compiler worker | 1,710.047 s | 1,485.908 s | 224.139 s / 13.107% |
+| Complete host invocation, measured by the harness | 1,720.972 s | 1,496.718 s | 224.254 s / 13.031% |
+| Compiler-worker peak RSS | 3,619,020 KiB | 3,435,212 KiB | 183,808 KiB / 5.079% |
+
+The RSS decrease is 179.5 MiB. RSS describes the compiler worker. Fresh independent
+checking took 2.848 seconds for the control and 2.843 seconds for the optimized
+invocation; it remains part of ordinary build and publication.
+
+This is one sequential matched pair on one hosted runner. It establishes the
+observed reduction for this workload; other machines and projects need their own
+measurements. The separate profiled run is not the denominator for these percentages.
+No post-change GC-time reduction was measured.
+
+### O2 seed provenance and installation boundary
+
+The qualified seed input is `O2/` in
+[artifact 12796523762](https://github.com/dwijayuda/pskernel/actions/runs/40634776830/artifacts/12796523762).
+The archive is 24,777,348 bytes, SHA-256
+`c17a4d364810714e4dd7ed775fb9ff3547de87ebf89501e402d75fc9a7fb7af1`.
+Its ancestry starts with the qualified frozen seed
+`e7d9c7b6eb9ea22aaaecad2bbf21adcf9856a0518dba0079eb63e8db0d03a0aa`;
+O1 and O2 both emit the compiler identity below.
+
+| O2 identity | SHA-256 |
+| --- | --- |
+| Compiler | `49d851d26008abf116b9f4c680c0833311e835b90d6c58e369ca426f33ecd2e6` |
+| Publication `files.json` | `aa1ca6b19585a7be8b21d78b9ab4cbb024abd633466f41a7bfc292380696f80c` |
+| Complete changed 125-module source closure | `424c15ce2cf5bb87a293dd2aad1705fa801c07067c972578aa76111627d590d7` |
+| Changed `Ps.CompilerIr.Specialize` source | `74fb1bb1c8f9beef611300e06fff3010121ed2589e828b7102f539217a09ad93` |
+
+The artifact retains `summary.json`, `source-change.json`, complete before and
+after source files, O1/O2 publications and both benchmark publications.
+Its `optimized-baseline/` output intentionally recreates historical B2.
+The optimized seed is selected from `O2/`.
+
+The initial standalone download remains separately pinned by its original receipt.
+Refreshed assembly binds the O2 archive and all seven publication files, requires
+exact current `.ps` source correspondence, and freshly establishes native
+source/admission/IR correspondence before selecting O2. The expanded installation
+and publication matrix for that refreshed distribution is pending.
+
+[Runtime/checker ABI preflight](PSC1_ADDITIONAL_PLATFORM_ABI_QUALIFICATION_2026-10-28.json)
+passes on Ubuntu 24.04 x64, Ubuntu 22.04 x64 and Ubuntu 24.04 ARM64 in
+[run 40633426535](https://github.com/dwijayuda/pskernel/actions/runs/40633426535).
+That receipt retains runtime, native-checker, system-library and shell identities;
+it records `fullCompilerQualified: false` and `publicationQualified: false`.
+Full compiler chains, installed behavior and publication boundaries require their
+own completed environment evidence.
+
+The optimized worker still takes 1,485.908 seconds on this workload. The original
+240-second full-compiler target remains unmet; the successful run uses the
+explicit 3,600-second correctness profile. Ordinary 240-second requests,
+120-second independent checking, semantic fuel and strict acceptance conditions
+retain their existing policies.
+
 ## Next engineering priorities
 
-Profile the measured full compiler path before selecting a latency optimization.
-Persistent checked modules, incremental frontend state and reduced serialization
-are candidates, not demonstrated bottleneck fixes. No optimization may replace
-fresh checks with unjustified acceptance. The current profile recompiles the
-whole ordered project and selects successors explicitly with `--compiler`.
+Use qualified O2 as the next full-workload measurement baseline. Repeat controlled
+pairs and profile the optimized compiler before selecting the next change to
+persistent checked modules, frontend state or serialization. The 240-second
+full-compiler target remains open. Every optimization must retain fresh
+independent admission, strict original/transformed IR checks, semantic fuel and
+refusal conditions.
 
-Plan the repository-wide canonical `.ps` source-owner migration separately from
-this already working editable workspace, then extend actual compiler-change and
-platform coverage. The first milestone required no new backend, runtime, package
-manager or core-language extension.
+Complete current-source/native correspondence and O2 assembly, then qualify the
+broader changed-compiler chains and installation matrix. Each supported environment
+needs exact runtime, native checker, system-library, generation and publication
+evidence. Full environment qualification remains pending actual execution.

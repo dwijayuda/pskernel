@@ -79,15 +79,18 @@ portable canonical implementations.
 
 ## Active integration and remaining qualification
 
-Apply the exact passed type-key source edit to canonical `Specialize.ps`, then
-run the checked reference refresh against the immutable initial manifest. That workflow
+The exact passed type-key source edit is committed as canonical `Specialize.ps`
+at `0575b1a39a09c4253fd5691eec9fbc270fac6f5b`. The checked reference refresh is running
+in [40646380001](https://github.com/dwijayuda/pskernel/actions/runs/40646380001)
+against initial manifest commit `109e404586504cfe5f20352d1804d0cf0ac83310`. That workflow
 freshly checks both grammars, preserves untouched references, natively builds changed
 references and repeats correspondence with rebuilt helpers before preparing Git objects.
 The host-only native projection adapter uses parser-owned constructor-pattern spans
 and independently verified literal-dot insertions. It grants no admission authority.
 
-After integrating the checked refresh, activate the staged O2 bootstrap, broader
-frontend/compiler/protocol regression chain and three-environment matrix. The intended
+The O2 bootstrap, broader frontend/compiler/protocol regression chain, environment
+verifiers and reusable environment workflow are committed for review. The matrix
+trigger remains staged until the checked source/reference refresh is integrated. The intended
 matrix is Ubuntu 24.04 x64, Ubuntu 22.04 x64 and Ubuntu 24.04 ARM64. ABI probes already
 passed in [40633426535](https://github.com/dwijayuda/pskernel/actions/runs/40633426535),
 with exact private Node 22.23.3, official Lean 4.35 checker and eight linked system

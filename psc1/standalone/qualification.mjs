@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
@@ -58,6 +59,41 @@ function boundedFile(file, limit = 128 * 1024 * 1024) {
   const stat = fs.lstatSync(file);
   assert.ok(stat.isFile() && !stat.isSymbolicLink() && stat.size > 0 && stat.size <= limit, 'invalid file ' + file);
   return fs.readFileSync(file);
+}
+const shaEnvironment = sha;
+function environmentFacts(directory) {
+  const limited = (value, maximum = 512) =>
+    typeof value === 'string' ? value.slice(0, maximum) : null;
+  const releasePath = '/etc/os-release';
+  const releaseFd = fs.openSync(releasePath, 'r');
+  let releaseBytes;
+  try {
+    const releaseStat = fs.fstatSync(releaseFd);
+    assert.ok(releaseStat.isFile() && releaseStat.size > 0 && releaseStat.size <= 16384,
+      'bounded regular OS release metadata required');
+    const buffer = Buffer.alloc(16385);
+    const length = fs.readSync(releaseFd, buffer, 0, buffer.length, 0);
+    assert.ok(length <= 16384 && length === releaseStat.size, 'OS release metadata changed');
+    releaseBytes = buffer.subarray(0, length);
+  } finally { fs.closeSync(releaseFd); }
+  const header = process.report.getReport().header;
+  const filesystem = fs.statfsSync(directory, { bigint: true });
+  const versions = Object.fromEntries(Object.entries(process.versions)
+    .filter(([name, value]) => /^[A-Za-z0-9_-]{1,64}$/.test(name) && typeof value === 'string')
+    .slice(0, 64).map(([name, value]) => [name, limited(value, 128)]));
+  return {
+    schema: 'psc1-independent-environment/1',
+    platform: process.platform, arch: process.arch,
+    kernel: { release: limited(os.release()), version: limited(os.version(), 1024) },
+    runtime: { version: process.version, versions,
+      glibcVersionRuntime: limited(header.glibcVersionRuntime, 128),
+      glibcVersionCompiler: limited(header.glibcVersionCompiler, 128) },
+    osRelease: { bytes: releaseBytes.length, sha256: shaEnvironment(releaseBytes),
+      text: new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(releaseBytes) },
+    filesystem: Object.fromEntries(['type', 'bsize', 'blocks', 'bfree', 'bavail', 'files', 'ffree']
+      .map(name => [name, String(filesystem[name])])),
+    user: { uid: process.getuid(), gid: process.getgid() }
+  };
 }
 function confined(root, relative) {
   assert.equal(typeof relative, 'string');
@@ -116,6 +152,7 @@ for (const directory of searchDirectories) for (const tool of forbidden) {
 assert.deepEqual(foundForbidden, [], 'external language toolchain found');
 report.environment = {
   platform: process.platform, arch: process.arch, runtimeVersion: process.version,
+  details: environmentFacts(output),
   runtimePath: process.execPath, path: process.env.PATH ?? '',
   forbiddenNames: forbidden, searchedDirectories: searchDirectories,
   externalToolchainsAbsent: true,
@@ -329,7 +366,7 @@ function copyWritable(source, destination) {
 function smoke() {
   const initialDiagnostic = diagnostic('seed-diagnostic');
   assert.equal(initialDiagnostic.code, 'request-arity');
-  const project = writeProject(path.join(output, 'smoke-source'), 'def answer : Nat := 42\n');
+  const project = writeProject(path.join(output, 'smoke-source'), 'const answer : Nat := 42\n');
   const generatedDirectory = path.join(output, 'smoke-build');
   const compiled = build('small-checked-build', project, generatedDirectory, undefined, false);
   assert.ok(compiled.publicNames.includes('answer'), 'small source body was not emitted');
@@ -347,7 +384,7 @@ function smoke() {
   results.push({ type: 'independent-checker-positive-and-negative', positive, negative });
   save();
 
-  const invalidProject = writeProject(path.join(output, 'invalid-source'), 'def broken : Nat := true\n');
+  const invalidProject = writeProject(path.join(output, 'invalid-source'), 'const broken : Nat := true\n');
   const rejectedDirectory = path.join(output, 'invalid-build');
   const sourceRefusal = psc('invalid-source-refused', ['build', invalidProject, '--out', rejectedDirectory], { expectedFailure: true });
   assert.match(sourceRefusal.stderr, /PSC1_INDEPENDENT_COMPILER_REFUSED/);
@@ -359,6 +396,27 @@ function smoke() {
   const acceptedFilesAfter = readBuild(generatedDirectory, sourceSnapshot(project));
   assert.deepEqual(acceptedFilesAfter, acceptedFilesBefore, 'refused overwrite changed an accepted generation');
 
+  const readOnlyParent = path.join(output, 'read-only-output-parent');
+  const readOnlyOutput = path.join(readOnlyParent, 'unpublished');
+  fs.mkdirSync(readOnlyParent, { mode: 0o755 });
+  fs.chmodSync(readOnlyParent, 0o555);
+  try {
+    assert.notEqual(process.getuid(), 0, 'read-only-parent refusal requires an ordinary user');
+    const readOnlyRefusal = psc('read-only-parent-refused', ['build', project, '--out', readOnlyOutput], { expectedFailure: true });
+    assert.match(readOnlyRefusal.stderr, /\b(?:EACCES|EPERM)\b/, 'expected an operating-system permission refusal');
+    notPublished(readOnlyOutput);
+    assert.deepEqual(readBuild(generatedDirectory, sourceSnapshot(project)), acceptedFilesBefore,
+      'read-only-parent refusal changed an accepted generation');
+    results.push({
+      type: 'publication-read-only-parent', status: 'passed',
+      output: readOnlyOutput, processLog: readOnlyRefusal.record.id,
+      acceptedBuildReceiptSha256: acceptedFilesBefore.buildReceiptSha256,
+      acceptedPayloadsSha256: sha(JSON.stringify(acceptedFilesBefore.files))
+    });
+    save();
+  } finally { fs.chmodSync(readOnlyParent, 0o755); }
+
+
   const incomplete = path.join(output, 'incomplete-generation');
   fs.mkdirSync(incomplete);
   fs.copyFileSync(path.join(distributionRoot, 'engine/compiler.mjs'), path.join(incomplete, 'compiler.mjs'));
@@ -367,11 +425,28 @@ function smoke() {
   assert.match(incompleteRefusal.stderr, /PSC1_INDEPENDENT_ARTIFACT_(FILE|CHANGED)/);
   notPublished(incompleteOutput);
 
-  const copyRoot = path.join(output, 'tampered-toolchain');
+  const copyRoot = path.join(output, 'relocated toolchain with spaces');
   copyWritable(distributionRoot, copyRoot);
   const copyCli = path.join(copyRoot, 'bin/psc');
   const copiedDiagnostic = parseStdout(run('relocated-toolchain-diagnostic', copyCli, ['diagnostic']));
   assert.equal(copiedDiagnostic.code, initialDiagnostic.code, 'relocated copy must work before tamper tests');
+  const relocatedDirectory = path.join(output, 'relocated checked output');
+  const relocatedProcess = run('relocated-small-checked-build', copyCli,
+    ['build', project, '--out', relocatedDirectory]);
+  const relocated = readBuild(relocatedDirectory, sourceSnapshot(project));
+  relocated.processElapsedMs = relocatedProcess.record.elapsedMs;
+  relocated.processLog = relocatedProcess.record.id;
+  results.push({ type: 'independently-checked-build', label: 'relocated-small-checked-build', ...relocated });
+  const relocatedExecution = observeApplication('relocated-application-execute', relocatedDirectory);
+  results.push({
+    type: 'relocated-checked-publication', status: 'passed',
+    buildLabel: 'relocated-small-checked-build',
+    buildReceiptSha256: relocated.buildReceiptSha256,
+    completionManifestSha256: sha(boundedFile(path.join(relocatedDirectory, 'files.json'))),
+    ...relocatedExecution
+  });
+  save();
+
   const copiedEngine = path.join(copyRoot, 'engine/compiler.mjs');
   fs.chmodSync(copiedEngine, 0o644);
   const engineBytes = boundedFile(copiedEngine);
@@ -392,7 +467,7 @@ function smoke() {
   fs.rmSync(copyRoot, { recursive: true });
   results.push({
     type: 'host-refusals', status: 'passed',
-    cases: ['invalid-source', 'existing-generation', 'incomplete-generation', 'tampered-engine', 'tampered-checker'],
+    cases: ['invalid-source', 'existing-generation', 'read-only-parent', 'incomplete-generation', 'tampered-engine', 'tampered-checker'],
     refusedOutputsUnpublished: true
   });
   save();
@@ -403,7 +478,7 @@ function baseline() {
   const first = build('baseline-generation-one', defaultProject, path.join(output, 'B1'));
   const converted = JSON.parse(utf8(boundedFile(path.join(distributionRoot, 'metadata/SOURCE_MANIFEST.json'))));
   assert.equal(first.identities.admissionsSha256, converted.admissionsSha256,
-    'generated compiler admissions must match the independently checked source conversion');
+    'generated compiler admissions must match the independently checked current canonical source analysis');
   results.push({ type: 'bootstrap-admission-correspondence', status: 'passed',
     admissionsSha256: first.identities.admissionsSha256,
     nativeOriginalIrSha256: converted.originalIrSha256,
@@ -417,35 +492,142 @@ function baseline() {
   assert.equal(secondDiagnostic.code, initialDiagnostic.code);
   fixedPoint('unmodified-compiler', first, second);
 }
+function applicationObservationProgram(directory) {
+  return [
+    "import {pathToFileURL} from 'node:url';",
+    'const module = await import(pathToFileURL(' + JSON.stringify(path.join(directory, 'compiler.mjs')) + ').href);',
+    "const answer = typeof module.answer === 'function' ? module.answer() : module.answer;",
+    "if (String(answer) !== '42') throw new Error('compiled application returned the wrong result');",
+    "console.log(JSON.stringify({answer:String(answer)}));"
+  ].join('\n');
+}
+function observeApplication(label, directory) {
+  const executed = run(label, runtime, ['--input-type=module', '--eval', applicationObservationProgram(directory)]);
+  const observation = parseStdout(executed);
+  assert.deepEqual(observation, { answer: '42' });
+  return { observation, processLog: executed.record.id };
+}
+function compilerSourcePatch(projectFile, moduleName, replacements) {
+  const project = JSON.parse(utf8(boundedFile(projectFile)));
+  const matches = project.sources.filter(item => item.module === moduleName);
+  assert.equal(matches.length, 1, 'exactly one owned source required: ' + moduleName);
+  const entry = matches[0], sourceFile = confined(path.dirname(projectFile), entry.path);
+  const beforeBytes = boundedFile(sourceFile);
+  let text = utf8(beforeBytes);
+  for (const { previous, replacement } of replacements) {
+    assert.equal(text.split(previous).length - 1, 1, 'mutation anchor must occur once in ' + moduleName + ': ' + previous);
+    text = text.replace(previous, replacement);
+  }
+  fs.chmodSync(sourceFile, 0o644);
+  fs.writeFileSync(sourceFile, text);
+  return {
+    module: moduleName, path: entry.path,
+    beforeSourceSha256: sha(beforeBytes), afterSourceSha256: sha(boundedFile(sourceFile)),
+    edits: replacements
+  };
+}
+function regressionRefusal(label, sourceText, compilerDirectory, expectedPhase, expectedCode) {
+  const project = writeProject(path.join(output, 'regression-fixtures', label), sourceText);
+  const directory = path.join(output, 'regression-builds', label);
+  const commandArgs = ['build', project, '--out', directory];
+  if (compilerDirectory) commandArgs.push('--compiler', compilerDirectory);
+  const rejected = psc(label, commandArgs, { expectedFailure: true });
+  const marker = 'PSC1_INDEPENDENT_COMPILER_REFUSED:';
+  const offset = rejected.stderr.indexOf(marker);
+  assert.ok(offset >= 0, 'expected structured compiler refusal: ' + label);
+  const response = JSON.parse(rejected.stderr.slice(offset + marker.length).split('\n')[0]);
+  const snapshot = sourceSnapshot(project);
+  for (const [key, value] of Object.entries({
+    status: 'refused', phase: expectedPhase, code: expectedCode, module: 'Main',
+    target: 'js', admission: 'not-run', candidateOnly: true,
+    sourceClosureDigest: snapshot.sourceClosureDigest,
+    requestId: 'psc1-independent-' + snapshot.sourceClosureDigest.slice(0, 24)
+  })) assert.equal(response[key], value, 'refusal field ' + key + ': ' + label);
+  notPublished(directory);
+  return { label, outcome: 'refused', sourceClosureDigest: snapshot.sourceClosureDigest,
+    response, processLog: rejected.record.id };
+}
+function regressionApplication(label, sourceText, compilerDirectory) {
+  const project = writeProject(path.join(output, 'regression-fixtures', label), sourceText);
+  const directory = path.join(output, 'regression-builds', label);
+  const compiled = build(label, project, directory, compilerDirectory, false);
+  assert.ok(compiled.publicNames.includes('answer'), 'application export missing: ' + label);
+  const executed = observeApplication(label + '-execute', directory);
+  return {
+    label, buildLabel: label, outcome: 'accepted-and-executed', ...executed,
+    sourceClosureDigest: compiled.identities.sourceClosureDigest,
+    admissionsSha256: compiled.identities.admissionsSha256,
+    compilerSha256: compiled.identities.sourceSha256,
+    buildReceiptSha256: compiled.buildReceiptSha256, checker: compiled.checker
+  };
+}
+function frontendCompilerRegressions(generation, compilerDirectory, aliasSupported) {
+  const prefix = generation.toLowerCase() + '-';
+  const parseCode = aliasSupported ? 'parse-source-refused' : 'source-refused';
+  const observations = [];
+  const accepted = (name, sourceText) =>
+    observations.push({ case: name, ...regressionApplication(prefix + name, sourceText, compilerDirectory) });
+  const refused = (name, sourceText, expectedPhase = 'parse', expectedCode = parseCode) =>
+    observations.push({ case: name, ...regressionRefusal(prefix + name, sourceText, compilerDirectory, expectedPhase, expectedCode) });
+  accepted('existing-const', 'const answer : Nat := 42\n');
+  const addition = 'function inc(value : Nat) : Nat := Nat.add(value, 1)\n' +
+    'defconst answer : Nat := inc(41)\n';
+  if (aliasSupported) accepted('new-declaration', addition);
+  else refused('new-declaration', addition);
+  refused('existing-malformed', 'const broken : Nat :=\n');
+  refused('new-missing-type', 'defconst broken := 42\n');
+  refused('new-parameters-forbidden', 'defconst broken(value : Nat) : Nat := value\n');
+  refused('new-illtyped', 'defconst broken : Nat := true\n',
+    aliasSupported ? 'elaboration' : 'parse', aliasSupported ? 'source-refused' : parseCode);
+  assert.equal(observations.length, 6);
+  results.push({
+    type: 'frontend-compiler-regressions', generation, aliasSupported,
+    grammarExperiment: 'test-only defconst alias in copied compiler sources; installed grammar is unchanged',
+    observations
+  });
+  save();
+}
 function changed() {
   const original = sourceSnapshot(defaultProject);
   const seedDiagnostic = diagnostic('seed-before-change');
   assert.equal(seedDiagnostic.code, 'request-arity');
+  frontendCompilerRegressions('seed', undefined, false);
   const changedRoot = path.join(output, 'changed-compiler-source');
   copyWritable(path.dirname(defaultProject), changedRoot);
   const projectFile = path.join(changedRoot, 'project.json');
-  const changedProject = JSON.parse(utf8(boundedFile(projectFile)));
-  const entry = changedProject.sources.find(item => item.module === 'Ps.CompilerUnified.Service');
-  assert.ok(entry, 'owned unified compiler service source missing');
-  const sourceFile = confined(changedRoot, entry.path);
-  const beforeBytes = boundedFile(sourceFile), beforeText = utf8(beforeBytes);
-  const previous = '"request-arity"', replacement = '"request-arity:expected-three-fields"';
-  assert.equal(beforeText.split(previous).length - 1, 1, 'mutation must select exactly one diagnostic literal');
-  fs.chmodSync(sourceFile, 0o644);
-  fs.writeFileSync(sourceFile, beforeText.replace(previous, replacement));
+  const changes = [
+    compilerSourcePatch(projectFile, 'Ps.CompilerUnified.Service', [
+      { previous: '"request-arity"', replacement: '"request-arity:expected-three-fields"' }
+    ]),
+    compilerSourcePatch(projectFile, 'Ps.Syntax.ParseProofScript', [
+      { previous: 'psStringEq(keyword.text, "const")',
+        replacement: 'psProofScriptBoolOr(psStringEq(keyword.text, "const"), psStringEq(keyword.text, "defconst"))' },
+      { previous: 'psStringEq(text, "const")',
+        replacement: 'psProofScriptBoolOr(psStringEq(text, "const"), psStringEq(text, "defconst"))' }
+    ]),
+    compilerSourcePatch(projectFile, 'Ps.Compiler.Service', [
+      { previous: '"parse", "source-refused"', replacement: '"parse", "parse-source-refused"' }
+    ])
+  ];
   const modified = sourceSnapshot(projectFile);
   assert.equal(modified.rows.length, original.rows.length, 'compiler closure size changed');
-  const changedRows = modified.rows.filter((row, index) => row.sha256 !== original.rows[index].sha256);
-  assert.equal(changedRows.length, 1, 'exactly one maintained source file must change');
-  assert.equal(changedRows[0].module, 'Ps.CompilerUnified.Service');
+  const changedRows = modified.rows.filter((row, index) => {
+    assert.equal(row.module, original.rows[index].module, 'source module order changed');
+    assert.equal(row.path, original.rows[index].path, 'source ownership path changed');
+    return row.sha256 !== original.rows[index].sha256;
+  });
+  assert.deepEqual(changedRows.map(row => row.module).sort(), [
+    'Ps.Compiler.Service', 'Ps.CompilerUnified.Service', 'Ps.Syntax.ParseProofScript'
+  ]);
   assert.notEqual(modified.sourceClosureDigest, original.sourceClosureDigest);
+  const wireChange = changes[0];
   const mutation = {
-    type: 'real-compiler-source-modification', module: entry.module, path: entry.path,
+    type: 'real-compiler-source-modification', module: wireChange.module, path: wireChange.path,
     previous: 'request-arity', replacement: 'request-arity:expected-three-fields',
-    beforeSourceSha256: sha(beforeBytes), afterSourceSha256: sha(boundedFile(sourceFile)),
+    beforeSourceSha256: wireChange.beforeSourceSha256, afterSourceSha256: wireChange.afterSourceSha256,
     originalSourceClosureDigest: original.sourceClosureDigest,
     changedSourceClosureDigest: modified.sourceClosureDigest,
-    changedFileCount: 1, retainedModuleCount: modified.rows.length
+    changedFileCount: changes.length, retainedModuleCount: modified.rows.length, changes
   };
   results.push(mutation);
   report.changedSource = summarizedSources(modified);
@@ -456,14 +638,17 @@ function changed() {
   assert.notEqual(firstDiagnostic.code, seedDiagnostic.code);
   results.push({ type: 'changed-behavior', generation: 'C1', seed: seedDiagnostic, actual: firstDiagnostic });
   save();
+  frontendCompilerRegressions('C1', first.directory, true);
   const second = build('changed-generation-two', projectFile, path.join(output, 'C2'), first.directory);
   const secondDiagnostic = diagnostic('changed-two-diagnostic', second.directory);
   assert.equal(secondDiagnostic.code, mutation.replacement, 'self-rebuilt compiler lost its change');
   fixedPoint('modified-compiler', first, second);
   results.push({ type: 'changed-behavior', generation: 'C2', actual: secondDiagnostic });
+  frontendCompilerRegressions('C2', second.directory, true);
   assert.deepEqual(summarizedSources(sourceSnapshot(defaultProject)), summarizedSources(original), 'installed source changed');
   save();
 }
+
 try {
   save();
   report.identity = parseStdout(psc('identity', ['identity']));

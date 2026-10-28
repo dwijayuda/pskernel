@@ -1,5 +1,7 @@
 # Transform provenance and the extended modular graph
 
+> **2026-10-28 decision:** Further pilot development/expansion is deferred. This page retains historical scope and evidence; it is not the current production migration plan. See [the fully modular executable compiler plan](executable-package-modularity.md). Existing qualified regressions and history are preserved.
+
 The v2 pilot adds actual compiler collections, names, text building and JSON code
 to the modular distribution. It keeps the original v1 package/negative tests.
 The bundled proofscript compiler remains the release reference.

@@ -1,0 +1,71 @@
+name: PSC1 canonical source preparation
+on:
+  push:
+    branches: [feat/psc1-canonical-latency-20261028]
+    paths:
+      - psc1/scripts/prepare-canonical-sources.mjs
+      - .github/workflows/psc1-canonical-source-preparation.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: psc1-canonical-source-preparation-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 110
+    permissions:
+      contents: write
+      actions: read
+    defaults:
+      run:
+        working-directory: psc1
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Parse the initial promotion observer
+        run: node --check scripts/prepare-canonical-sources.mjs
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-canonical-elan-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        id: source-tools-cache
+        with:
+          path: psc1/.lake/build
+          key: psc1-canonical-source-tools-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc1/packages/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
+          restore-keys: |
+            psc1-independent-source-tools-v1-Linux-${{ hashFiles('psc1/packages/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
+      - name: Install the pinned native bootstrap compiler
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build the existing checked ownership helpers
+        run: lake build psc1_lossless_source psc1_source_ownership psc1_independent_checker
+      - uses: actions/cache/save@v4
+        if: steps.source-tools-cache.outputs.cache-hit != 'true'
+        with:
+          path: psc1/.lake/build
+          key: ${{ steps.source-tools-cache.outputs.cache-primary-key }}
+      - name: Check canonical owners and prepare content-addressed Git objects without changing any ref
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PSC1_CREATE_SOURCE_TREE: '1'
+        run: node --max-old-space-size=4096 scripts/prepare-canonical-sources.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-canonical-source-preparation-${{ github.sha }}
+          path: |
+            psc1/dist/canonical-source-preparation/*.json
+            psc1/dist/canonical-source-preparation/*.log
+            psc1/dist/canonical-source-preparation/owners/
+          if-no-files-found: warn
+          retention-days: 90

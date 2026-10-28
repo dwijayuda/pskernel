@@ -33,10 +33,42 @@ def r6CheckInputs (path : String) : IO (List PsSh1SourceInput) := do
       | .ok value => pure value
     pure (psSh1SourceInput name.toList source)
 
+def r6CompilerFailure (error : PsCompilerError) : String :=
+  match error with
+  | .elaboration failure => psHostElabErrorText failure
+  | .leanFrontend failure =>
+    match failure with
+    | .lex error => psHostLexErrorText error
+    | .parse error => psHostParseErrorText error
+  | .proofScriptFrontend failure =>
+    match failure with
+    | .lex error => psHostLexErrorText error
+    | .parse error => psHostParseErrorText error
+  | .translation _ => "translation refused"
+  | .admission _ => "canonical admission encoding refused"
+  | .erasure _ => "erasure refused"
+
+-- Linux CI transport only. The source-owned compiler performs all frontend,
+-- canonical preparation and strict original/transformed IR checks.
+def r6SourceFailure (error : PsSh1EmitError) : String :=
+  match error with
+  | .source sourceError =>
+    match sourceError with
+    | .policy finding => finding.code ++ ": " ++ finding.detail
+    | .origin moduleName failure =>
+      moduleName ++ ": " ++ psHostElabErrorText failure.error
+    | .compiler moduleName failure => moduleName ++ ": " ++ r6CompilerFailure failure
+  | .compiler failure => r6CompilerFailure failure
+  | .checkedEmit _ => "strict IR or emitter refused"
+  | .target finding => finding.code ++ ": " ++ finding.detail
+
+
+
+
 def r6Compile (inputs : List PsSh1SourceInput) (stem : String) : IO Unit := do
   match psCompilerSh1TypeScriptSources psSh1DefaultSourceOptions psIrCheckDefaultOptions
       PsCompilerSourceKind.lean inputs with
-  | .error _ => throw (IO.userError ("R6_SOURCE_REFUSED: " ++ stem))
+  | .error error => throw (IO.userError ("R6_SOURCE_REFUSED: " ++ stem ++ ": " ++ r6SourceFailure error))
   | .ok result =>
     if !result.sourcePolicy.accepted || !result.targetPolicy.accepted ||
         !result.checkReport.accepted || !result.checkReport.traversalComplete then

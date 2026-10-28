@@ -1,0 +1,84 @@
+name: PSC1 modular public ABI diagnostics
+on:
+  push:
+    branches: [build/psc1-modular-public-abi-20261028]
+    paths:
+      - .github/workflows/diagnostic-psc1-modular-public-abi.yml
+      - .github/scripts/psc1-modular-public-abi.mjs
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: psc1-modular-public-abi-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  abi:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime: [node,bun]
+    env:
+      PSC1_CONTROLLER_COMMIT: 308f2fd988428d30be7c5fd9cfe0c8ace9242447
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: oven-sh/setup-bun@v2
+        if: matrix.runtime == 'bun'
+        with:
+          bun-version: '1.4.4'
+      - name: Validate actual CI controller syntax
+        run: |
+          node --check ../.github/scripts/psc1-modular-public-abi.mjs
+          node scripts/modular-checked-preflight.mjs
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        with:
+          path: psc1/.lake
+          key: psc1-modular-corpus-v1-${{ runner.os }}-${{ hashFiles('psc1/**/*.lean','psc1/lakefile.lean','psc1/lean-toolchain') }}
+      - name: Prepare cached repository-pinned Lean launcher
+        timeout-minutes: 7
+        uses: ./.github/actions/psc1-lean-launcher
+      - name: Build only native reference transport and independent checker
+        run: |
+          node packages/pskernel-lean/host/check-pin.mjs
+          lake build psc1_output_abi_probe psc1_independent_checker
+      - name: Independently check all native public ABI references
+        run: node ../.github/scripts/psc1-modular-public-abi.mjs prepare
+      - name: Install exact official Rust target SDK
+        run: |
+          rustup toolchain uninstall 1.90.0
+          rustup toolchain install 1.90.0 --profile minimal
+      - name: Resolve pinned graph and target-only resources, disable all old compilers
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/modular-corpus-resources.mjs all
+      - name: Execute both modular engines and actual public ABI consumers
+        run: ${{ matrix.runtime }} ../.github/scripts/psc1-modular-public-abi.mjs execute
+      - name: Preserve exact reference and execution evidence
+        if: always()
+        run: |
+          if [ -d dist/modular-corpus ]; then
+            tar --exclude='modular-corpus/graph-input' --exclude='modular-corpus/target-input' --exclude='modular-corpus/target-resources' --exclude='modular-corpus/disabled-reference-executors' --exclude='modular-corpus/empty-npm-cache' -czf dist/modular-public-abi.tar.gz -C dist modular-corpus
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-modular-public-abi-${{ matrix.runtime }}-${{ github.sha }}
+          path: |
+            psc1/dist/modular-public-abi.tar.gz
+            psc1/dist/modular-corpus/public-abi-*/qualification.json
+          retention-days: 90

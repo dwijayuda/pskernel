@@ -1,30 +1,83 @@
 # PSC1 AI work state
 
-Updated 2026-10-28 Asia/Jakarta. Active continuation branch
+Updated 2026-10-28 Asia/Jakarta. Active PR #207 branch
 feat/psc1-modular-semantic-corpus-20261028 from verified PR #206 HEAD 7da52af9.
- Production modularity implementation PR #205,
+Production modularity implementation PR #205,
 stacked on plan PR #204 / b400552324956d9c3a684c9231f60f70066e1629.
 GitHub/Linux CI only; expected-HEAD, single-parent/non-force history.
 No merge or registry publication.
 
-## Active M3 extension: retained semantic and seven-target corpus
+## M3 semantic/backend milestone: qualified focused matrices
 
-PR #206 HEAD 7da52af9 and documentation gate 40687774639 pass. Its modular
-application run 40679842606, full source 40681840579 and retained CLI 40679842769
-remain the qualified reference scopes below.
+PR #207 continues from PR #206 / `7da52af9c21e5676e50ed06199ee614b9c69d03c`.
+Implementation/test-controller commit `308f2fd988428d30be7c5fd9cfe0c8ace9242447`
+passes [Linux 40695323668](https://github.com/dwijayuda/pskernel/actions/runs/40695323668):
+**448 checked builds, 552 refusals and 6,944 published function calls**, including
+6,048 individual authored case/flag observations over 54 existing case IDs.
+Both complete modular JS/TS engines compile all eight retained semantic families,
+both .lean/.ps grammars, and all seven checked targets on Node 22.23.3/Bun 1.4.4.
 
-The new opt-in retained-input export preserves the existing native conformance
-commands/oracles and sealed pre-admission source snapshots. Preparation covers all
-eight retained semantic families. Only captured libraries are converted to PS
-using the existing independently checked converter; authored Lean/PS fixtures stay
-unchanged. Their original native admission bytes must still match.
+Actual checked output is published and executed: JS, strict TS, Rust rlibs,
+Wasm-core transport, Wasmtime-executed components and optional Python/PHP.
+The public component ABI remains Bool; unsupported Nat exports refuse. Missing
+SDKs/providers, unsupported assurance and every retained source negative refuse
+while preserving the prior portable generation.
 
-The dedicated Linux workflow tests both complete modular engines, both grammars,
-and all seven checked target adapters on Node/Bun. Target SDKs/providers come from
-the exact qualified CLI resource artifact; reference compiler executors and native
-frontends are disabled before execution. No default distribution promotion,
-modular G2/G3 claim, resource relaxation, merge or registry publication.
-Qualification is pending; this is implementation, not a passing-result claim.
+Native preparation reuses existing conformance commands/oracles and sealed
+pre-admission snapshots. Only captured library sources are checked-converted to
+PS; authored PS fixture bodies remain intact. All 16 homogeneous fixtures and
+64 native target references independently check, preserving the original native
+admission bytes. Before modular execution, all native frontends and frozen
+reference compiler executors are moved aside. The retained .11 archive supplies
+only pinned SDKs/providers. Compiler source and generated graph identities do not
+change, and no alternate handwritten frontend is introduced.
+
+Additional public-value [Linux 40700728090](https://github.com/dwijayuda/pskernel/actions/runs/40700728090)
+passes at CI-only `85f61b4b41546070f5605df884f0c63bfc1a9306`, with the exact
+compiler/controllers from `308f2fd9`: **120 builds and 20 refusals**, both engines,
+Node/Bun, JS/TS/Rust/Wasm-core/Python/PHP. Actual Nat, large negative Int, Unicode
+String, list-result, handler and ordinary-loop observations match. That isolated
+branch prevented cancelling the long regressions; its two test/workflow files are
+adopted byte-identically in this evidence checkpoint.
+
+[Semantic receipt](docs/PSC1_MODULAR_SEMANTIC_QUALIFICATION_2026-10-28.json) records
+exact jobs, artifact digests, per-batch counts, canonical identities, resource
+policies and remaining work. [Execution walkthrough](docs/architecture/modular-checked-execution.md)
+links the real reference/preparation, resource, checking, publication and consumer
+paths. Candidate comparisons normalize parsed JSON; admission/decoded source bytes
+and serialized IR match. This is finite behavior evidence, not a preservation or
+totality proof.
+
+Measured semantic compiler-child time includes graph verification/import:
+Node 1,685–178,608 ms; Bun 2,083–17,614 ms across 224 requests per host.
+Public-value compiler children take Node 1,155–3,153 ms and Bun 698–2,223 ms.
+These are concurrent CI workload observations, not a universal speed comparison.
+All existing 240-second compiler/tool and 120-second checker limits remain.
+Compiled Rust rlib digests vary between execution directories; generated source,
+admission, IR and behavior match. Native artifact reproduction remains unqualified.
+
+Attempts remain in history: `754d97b1` /40693502551 lacked historical Git objects
+for the unchanged layout guard; full checkout fixes it. `c122a46c` /40693811688
+passes native preparation but reads the wrong archive hash field for SDK/provider
+receipts. `308f2fd9` uses their existing tarballSha256 fields while retaining exact
+archive verification. No compiler, checker, IR or resource policy was relaxed.
+
+Retained source [40698796765](https://github.com/dwijayuda/pskernel/actions/runs/40698796765)
+passes all 16 selected jobs (benchmark intentionally skipped) at branch
+`308f2fd988428d30be7c5fd9cfe0c8ace9242447`, tested merge
+`5a48846d97cbeb30c5167ed22d2c9529873d4035`: 37/37 Practical Core criteria, zero blockers
+and 14 scoped seven-target execution bundles. Retained installed CLI/runtime
+[40695323349](https://github.com/dwijayuda/pskernel/actions/runs/40695323349) passes
+all nine jobs at the same branch commit, including watch, actual IO applications,
+32 publications/143 refusals and supported/older runtime boundaries. Its frozen
+.11 test cohort remains separate from the modular graph and the qualified .13
+umbrella reference. These are passing terminal results, not pending claims.
+
+The .13 default, official linear-memory C++/Emscripten Wasm kernel, qualified
+Rust/Wasm executors, optional Python/PHP, deferred pilot and all prior evidence
+remain preserved. M4 checked umbrella/thin CLI/watch integration, actual non-JS
+host-IO application qualification and M5 portable module reproduction/new modular
+G1/G2/G3/fixed points remain incomplete. No merge or registry publication.
 
 ## M3 application milestone: qualified checked modular execution
 
@@ -97,10 +150,10 @@ removed filesystem import was restored and covered by the new fast preflight.
 The first application qualification, 40677391651 at `8dac01c7`, also passed all
 528 cases before the four additional boundary cases were added per runtime.
 
-Remaining M3: full retained semantic/library and seven-backend corpus through the
-modular engines, including genuine Wasm/component and optional-provider dispatch.
+The retained M3 application/semantic/seven-target scopes are now qualified above.
 M4 checked umbrella/thin CLI/watch integration and default independent Wasm-kernel
-qualification remain unpromoted. M5 modular generation/fixed points are unqualified.
+qualification for that new graph remain unpromoted. M5 modular generation/fixed
+points and compiled native artifact reproduction are unqualified.
 Qualified .13, default linear-memory C++/Emscripten kernel, existing Rust/Wasm
 executors, optional Python/PHP and deferred pilot remain preserved.
 
@@ -173,11 +226,10 @@ Apache-2.0 and upstream notices, semantic fuel,240s ordinary compiler/tool reque
 
 ## Dependency-ordered continuation
 
-1. Finish M3: run the full retained semantic/library and seven-backend corpus
-   through these modular JS/TS engines, including genuine Wasm/component and
-   optional-provider execution/refusals. The real CLI/JSON/compiler-like application
-   lane on Node/Bun with JS/strict TS output is qualified separately above.
-2. M4: version the direct low-level API transition and integrate verified graph
+1. Preserve the now-qualified M3 application/semantic/public-value matrices as
+   dependency-selected graph regression gates. Keep richer component ABI and
+   actual non-JS host-IO application acceptance explicit rather than infer them.
+2. Next implementation, M4: version the direct low-level API transition and integrate verified graph
    loading/coherent transactional publication with checked @proofscript/compiler,
    thin @proofscript/cli, root-only local/global proofscript install and watch.
    Python/PHP remain optional. Do not silently turn checked APIs into emitters.
@@ -189,7 +241,8 @@ Apache-2.0 and upstream notices, semantic fuel,240s ordinary compiler/tool reque
    merge, publish npm packages or claim modular self-hosting before those gates.
 
 Experimental pilot expansion and stopped prototype PR #203 remain deferred.
-This candidate milestone implements M1/M2 and part of M3, not completion of M4/M5.
+This candidate milestone implements M1/M2 and the finite M3 scopes above; M4/M5
+remain incomplete and the checked .13 distribution is not replaced.
 
 ## Diagnosed attempts preserved
 

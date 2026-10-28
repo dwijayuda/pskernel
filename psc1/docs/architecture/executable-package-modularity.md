@@ -1,9 +1,13 @@
 # Fully modular executable compiler plan
 
 Decision date: 2026-10-28 (Asia/Jakarta).
-Status: **M1/M2 candidate milestone qualified in PR #205; M3 partial, M4/M5 incomplete**.
+Status: **M1/M2 candidate graph and finite M3 application/semantic/backend milestones qualified in PR #205–#207; M4/M5 incomplete**.
 See the [dated qualification receipt](../PSC1_EXECUTABLE_PACKAGES_QUALIFICATION_2026-10-28.json)
-and [production build walkthrough](executable-package-build.md). Production promotion remains unqualified.
+and [production build walkthrough](executable-package-build.md). The
+[M3 semantic receipt](../PSC1_MODULAR_SEMANTIC_QUALIFICATION_2026-10-28.json) and
+[checked execution walkthrough](modular-checked-execution.md) record 448 seven-target
+semantic builds plus 120 public-value builds on Node/Bun, with independent admission
+and explicit finite scope. Production promotion remains unqualified.
 The [machine-readable contract](../../EXECUTABLE_PACKAGE_CONTRACT.json) and
 [work state](../../AI_WORK_STATE.md) record exact implemented/tested/pending scope.
 

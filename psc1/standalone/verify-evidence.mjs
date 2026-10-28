@@ -20,6 +20,9 @@ const phases = {};
 for (const phase of ['smoke', 'baseline', 'changed']) {
   const directory = path.join(root, phase);
   const isolation = read(path.join(directory, 'isolation.json'));
+  const input = read(path.join(directory, 'isolation-input.json'));
+  assert.equal(input.schema, 'psc1-independent-isolation-input/1');
+  assert.equal(input.distributionSha256, bootstrap.toolchainSha256);
   const qualification = read(path.join(directory, phase, 'qualification.json'));
   assert.equal(isolation.schema, 'psc1-independent-isolation-result/1');
   assert.equal(isolation.status, 'passed');
@@ -42,7 +45,7 @@ for (const phase of ['smoke', 'baseline', 'changed']) {
   assert.equal(qualification.authoritativeSource.sourceClosureDigest, bootstrap.sourceClosureDigest);
   const checks = isolation.executions.filter(file => file === '/toolchain/kernel/checker').length;
   assert.ok(checks >= (phase === 'smoke' ? 3 : 2), 'actual checker process count: ' + phase);
-  phases[phase] = { directory, isolation, qualification, checks };
+  phases[phase] = { directory, isolation, input, qualification, checks };
 }
 const original = phases.baseline.qualification.authoritativeSource;
 assert.deepEqual(phases.changed.qualification.authoritativeSource, original);
@@ -79,6 +82,10 @@ assert.deepEqual(B1.files, B2.files);
 assert.deepEqual(C1.identities, C2.identities);
 assert.deepEqual(C1.files, C2.files);
 assert.equal(B1.identities.sourceClosureDigest, original.sourceClosureDigest);
+assert.equal(B1.identities.admissionsSha256, bootstrap.sourceAdmissionsSha256);
+const bootstrapAgreement = phases.baseline.qualification.results.find(row => row.type === 'bootstrap-admission-correspondence');
+assert.equal(bootstrapAgreement?.status, 'passed');
+assert.equal(bootstrapAgreement.admissionsSha256, bootstrap.sourceAdmissionsSha256);
 assert.notEqual(C1.identities.sourceClosureDigest, B1.identities.sourceClosureDigest);
 assert.notEqual(C1.identities.sourceSha256, B1.identities.sourceSha256);
 const changed = phases.changed.qualification;
@@ -121,6 +128,7 @@ const summary = {
   authoritativeSource: original,
   changedSource: changed.changedSource,
   sourceDifferences: differences,
+  bootstrapAgreement,
   generations: [B1, B2, C1, C2].map(row => ({
     label: row.label, identities: row.identities,
     compilerElapsedMs: row.execution.elapsedMs,
@@ -134,6 +142,7 @@ const summary = {
   phases: Object.fromEntries(Object.entries(phases).map(([name, item]) => [name, {
     status: item.qualification.status, elapsedMs: item.qualification.elapsedMs,
     checkerExecutions: item.checks, traceSha256: item.isolation.traceSha256,
+    systemLibraries: item.input.systemLibraries, shell: item.input.shell,
     qualificationSha256: sha(fs.readFileSync(path.join(item.directory, name, 'qualification.json'))),
   }])),
   independence: {

@@ -87,7 +87,9 @@ async function execute(jobFile, jobSha256) {
   if (input) {
     same(job.request, job.requestSha256);
     const fd = fs.openSync(job.output, 'wx', 0o600);
-    try { fs.writeFileSync(fd, output); fs.fsyncSync(fd); } finally { fs.closeSync(fd); }
+    // Permission mode disables fsync. This is an unaccepted temporary response;
+    // the host verifies it and fsyncs every accepted publication file itself.
+    try { fs.writeFileSync(fd, output); } finally { fs.closeSync(fd); }
   }
   process.stdout.write(JSON.stringify({
     protocol: 'psc1-independent-worker/1', operation: job.operation,

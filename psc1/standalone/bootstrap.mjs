@@ -279,7 +279,10 @@ async function assemble() {
     sourceCommit, toolchainSha256: sha256(fs.readFileSync(path.join(destination, 'toolchain.json'))),
     tarball: path.basename(tarball), bytes: archive.length, sha256: sha256(archive),
     sourceModules: rows.length, sourceClosureDigest: after.sourceClosureDigest,
-    sourceConversionElapsedMs: sourceManifest.elapsedMs, privateRuntimeSha256: toolchain.runtime.sha256,
+    sourceConversionElapsedMs: sourceManifest.elapsedMs,
+    sourceAdmissionsSha256: sourceManifest.admissionsSha256,
+    sourceOriginalIrSha256: sourceManifest.originalIrSha256,
+    privateRuntimeSha256: toolchain.runtime.sha256,
     checkerSha256: toolchain.checker.sha256, compilerSha256: toolchain.compiler.sha256 };
   put(path.join(outputRoot, 'bootstrap.json'), encoded(summary));
   console.log('PSC1_INDEPENDENT_BOOTSTRAP ' + JSON.stringify(summary));

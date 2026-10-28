@@ -34,7 +34,8 @@ jobs:
         with:
           path: ~/.elan
           key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
-      - uses: actions/cache@v4
+      - uses: actions/cache/restore@v4
+        id: source-tools-cache
         with:
           path: psc1/.lake/build
           key: psc1-independent-source-tools-v1-${{ runner.os }}-${{ hashFiles('psc1/packages/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
@@ -45,6 +46,11 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: Build only the existing checked source-conversion helpers
         run: lake build psc1_lossless_source psc1_source_ownership psc1_independent_checker
+      - uses: actions/cache/save@v4
+        if: steps.source-tools-cache.outputs.cache-hit != 'true'
+        with:
+          path: psc1/.lake/build
+          key: ${{ steps.source-tools-cache.outputs.cache-primary-key }}
       - name: Assemble qualified seed and kernel with an editable checked .ps compiler
         env:
           GH_TOKEN: ${{ github.token }}

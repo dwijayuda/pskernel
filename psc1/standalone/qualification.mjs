@@ -401,6 +401,15 @@ function baseline() {
   const initialDiagnostic = diagnostic('seed-diagnostic');
   assert.equal(initialDiagnostic.code, 'request-arity');
   const first = build('baseline-generation-one', defaultProject, path.join(output, 'B1'));
+  const converted = JSON.parse(utf8(boundedFile(path.join(distributionRoot, 'metadata/SOURCE_MANIFEST.json'))));
+  assert.equal(first.identities.admissionsSha256, converted.admissionsSha256,
+    'generated compiler admissions must match the independently checked source conversion');
+  results.push({ type: 'bootstrap-admission-correspondence', status: 'passed',
+    admissionsSha256: first.identities.admissionsSha256,
+    nativeOriginalIrSha256: converted.originalIrSha256,
+    generatedOriginalIrSha256: first.identities.originalIrSha256,
+    originalIrBytesEqual: first.identities.originalIrSha256 === converted.originalIrSha256 });
+  save();
   const second = build('baseline-generation-two', defaultProject, path.join(output, 'B2'), first.directory);
   const firstDiagnostic = diagnostic('baseline-one-diagnostic', first.directory);
   const secondDiagnostic = diagnostic('baseline-two-diagnostic', second.directory);

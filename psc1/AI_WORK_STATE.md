@@ -69,6 +69,20 @@ frozen G3 executors for 122 modules / 4,742 members, closure
 The maintained source records 125 import modules. Historical fixed points do not
 qualify the newer source or its `.ps` conversion automatically.
 
+## Current CI observation
+
+Implementation commit `77ff614c0aeeccd2d3813d941a51ebb87918527b`,
+[draft PR #201](https://github.com/dwijayuda/pskernel/pull/201).
+Run [40617744580](https://github.com/dwijayuda/pskernel/actions/runs/40617744580)
+completed checked conversion of all 125 modules in 337,870 ms. The resulting
+`.ps` closure is `9d0f097e79eb2b1e14d10362c6db9b4bc2370c26627658017bf6b2681b46fabf`.
+Its first isolated diagnostic exposed Node permission mode's prohibition on
+`fsync`. The correction removes flushing only from the unaccepted temporary
+worker response; the host still verifies responses and fsyncs accepted output.
+The next run must repeat smoke and both full chains. Bootstrap admission
+correspondence is now checked against the first generated current-source build.
+No independent-development pass is claimed from the failed smoke run.
+
 ## Next action
 
 Inspect the dedicated workflow, correct any actual failures, and retain exact

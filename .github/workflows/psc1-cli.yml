@@ -5,6 +5,7 @@ on:
     branches: ['**']
     paths:
       - .github/workflows/psc1-cli.yml
+      - psc1/lakefile.lean
       - psc1/npm-cli/**
       - psc1/host-tools/**
       - psc1/scripts/**/*.mjs

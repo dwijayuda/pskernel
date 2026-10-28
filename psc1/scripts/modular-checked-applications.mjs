@@ -3,12 +3,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
-import {fileURLToPath} from 'node:url';
-import {createExecutableCompilerSession} from './session.mjs';
-import {readManifestBytes, verify} from './verify.mjs';
-import {files, sha256 as sha} from './tools.mjs';
-import {requireSupportedRuntime} from '../runtime-policy.mjs';
-import {executeApplication} from '../../scripts/output-abi-applications.mjs';
+import {createExecutableCompilerSession} from '../host-tools/executable/session.mjs';
+import {readManifestBytes, verify} from '../host-tools/executable/verify.mjs';
+import {files, sha256 as sha} from '../host-tools/executable/tools.mjs';
+import {requireSupportedRuntime} from '../host-tools/runtime-policy.mjs';
+import {executeApplication} from './output-abi-applications.mjs';
 
 const out = path.resolve('dist/modular-checked');
 const prepared = JSON.parse(fs.readFileSync(path.join(out, 'prepared.json')));

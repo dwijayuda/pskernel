@@ -3,11 +3,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
-import {readQualifiedArtifact, sha256 as sha} from '../../scripts/kernel435-qualified-artifact.mjs';
-import {boundedRun} from '../generated-target-tools.mjs';
-import {readOwnedCompilerSources} from '../compiler-source-inputs.mjs';
-import {compilerSourceClosureDigest, runIndependentChecker} from '../compiler-host-protocol.mjs';
-import {readManifestBytes, verify} from './verify.mjs';
+import {readQualifiedArtifact, sha256 as sha} from './kernel435-qualified-artifact.mjs';
+import {boundedRun} from '../host-tools/generated-target-tools.mjs';
+import {readOwnedCompilerSources} from '../host-tools/compiler-source-inputs.mjs';
+import {compilerSourceClosureDigest, runIndependentChecker} from '../host-tools/compiler-host-protocol.mjs';
+import {readManifestBytes, verify} from '../host-tools/executable/verify.mjs';
 
 const out = path.resolve('dist/modular-checked');
 fs.mkdirSync(out, {recursive: true});

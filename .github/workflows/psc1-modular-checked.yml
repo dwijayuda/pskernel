@@ -39,7 +39,7 @@ jobs:
       - name: Fast syntax and repository checks
         run: |
           node scripts/ci/repository-layout.mjs
-          for file in host-tools/executable/*.mjs; do node --check "$file"; done
+          for file in host-tools/executable/*.mjs scripts/modular-checked-*.mjs; do node --check "$file"; done
       - name: Locked host and TypeScript resources
         timeout-minutes: 5
         run: |
@@ -52,7 +52,7 @@ jobs:
           import assert from 'node:assert/strict';
           const require=createRequire(path.resolve('host-tools/package.json')),prettier=require('prettier');
           assert.equal(require('prettier/package.json').version,'3.6.2');
-          for(const file of ['loader','session','verify','prepare-applications','applications'].map(n=>'host-tools/executable/'+n+'.mjs')){
+          for(const file of [...['loader','session','verify'].map(n=>'host-tools/executable/'+n+'.mjs'),'scripts/modular-checked-prepare.mjs','scripts/modular-checked-applications.mjs']){
             const formatted=await prettier.format(fs.readFileSync(file,'utf8'),{parser:'babel',singleQuote:true,printWidth:100});
             console.log('PSC1_MODULAR_HOST_FORMAT '+JSON.stringify({file,formatted}));
           }
@@ -97,9 +97,9 @@ jobs:
       - name: Verify exact qualified graph input and prepare target references
         env:
           GH_TOKEN: ${{ github.token }}
-        run: node host-tools/executable/prepare-applications.mjs
+        run: node scripts/modular-checked-prepare.mjs
       - name: Execute retained application cases through checked modular engines
-        run: ${{ matrix.runtime }} host-tools/executable/applications.mjs
+        run: ${{ matrix.runtime }} scripts/modular-checked-applications.mjs
       - name: Archive arbitrary valid fixture paths and complete evidence
         if: always()
         run: |

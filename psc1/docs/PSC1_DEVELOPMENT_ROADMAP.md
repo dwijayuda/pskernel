@@ -99,22 +99,33 @@ graph/package reproduction, then genuine new modular G1/G2/G3/fixed points.
 The qualified .13 distribution stays the default reference. Pilot expansion
 remains deferred; the stopped PR #203 and prototype history are preserved.
 
-## M5: active portable generation and reproduction
+## M5: portable G1/source qualified; new generations pending
 
-Continues from PR #208/d53b43c2. Native whole-compiler run40746744949 at
-efdb1385 passes133/133 modules in both grammars,4903 independently admitted
-logical declarations, strict original/transformed IR,134 genuine units/15 owners,
-complete immutable renderer-byte comparisons and strict TS/graph negatives.
-The graph is103941524 bytes within the unchanged128MiB bound.
+PR #209 continues from PR #208/d53b43c2. At canonical source17ce1991
+and tested controller77961851, the133-module closure is
+1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb.
+Native/pure G1 runs40748275409/40749484426 independently admit4905 logical
+members and reproduce134 actual units/15 packages, exact original/transformed IR,
+ownership and all immutable renderer bytes. The1131-file graph is103951941 bytes.
+Native G1 takes112.798s/1210604KiB RSS (repeat123.453s/1207588KiB), under240s.
 
-G1 exposed duplicate escaping at the existing128MiB wire boundary;17ce1991
-implements raw JSON candidate rows and requires exact native JSON byte round trips.
-Portable G1 passes40748275409 at17ce1991:134 units/15 packages,
-103951941 graph bytes;112.798s/maxRSS1210604KiB under240s.
-Independent JS/TS G2/G3/fixed points are now under qualification. Candidate npm version.2 and its receipts stay separate from
-the qualified M4.1 umbrella and .13 reference. See the
-[portable architecture](architecture/portable-modular-generation.md).
-No new release/fixed-point claim follows from native-only evidence.
+Full source40749527957 passes all16 selected jobs,37/37 finite criteria,
+zero blocked and14 scoped target bundles at77961851 (merge3c78e1c1).
+Ownership/policy40755976488 passes all11 historical/current identity cases and
+the unchanged ordinary/1800s/3600s profile rules. Existing.13 npm qualification
+40749527892 passes separately. These results do not establish new fixed points.
+
+Initial generated G2 run40749484847 fails after1557–1566s at the introduced
+1800 CPU-second guard, before the defined1800s wall deadline. Actual CPU
+diagnostics40754131717 retain the exact whole-compiler source workload.
+The user authorizes a sensible increase: diagnostic336ab495 launches
+40755246954 with3600s G2/G3 wall-clock requests and160-minute Linux jobs,
+restoring the original Node wall policy.1800s correctness and240s performance
+remain separate; G1/corpus240s, checker120s and all memory/stack/fuel/byte bounds
+remain. G2/G3/fixed points are pending. Candidate version.2 does not promote
+the qualified M4.1 umbrella or replace.13.
+[Exact partial receipt](PSC1_PORTABLE_MODULAR_QUALIFICATION_2026-10-29.json),
+[architecture](architecture/portable-modular-generation.md).
 
 ## M4: qualified installed Linux preview
 

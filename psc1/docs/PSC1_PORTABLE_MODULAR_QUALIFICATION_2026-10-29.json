@@ -1,0 +1,322 @@
+{
+  "schema": "psc1-portable-modular-qualification/1",
+  "status": "G1-and-source-qualified-G2-G3-retry-running",
+  "branch": "feat/psc1-portable-modules-20261029",
+  "pullRequest": 209,
+  "baseCommit": "d53b43c271c65635b07a6ffa78fb6b08a5fa55de",
+  "sourceCommit": "17ce19919175b60be06050188e2a546a8a72e689",
+  "testedImplementationCommit": "336ab495df5479a959a071166b7c2c6b24823b26",
+  "sourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+  "nativeG0": {
+    "schema": "psc1-executable-production-build/1",
+    "testedCommit": "77961851d54adb344a87fb32b4472c11b2024519",
+    "sourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+    "sourceModules": 133,
+    "compilerAssurance": "ordinary-checked",
+    "partialNames": [
+      "psBackendPublicTypeSupported",
+      "psJsNeedsUtf8Runtime",
+      "psTsNeedsUtf8Runtime",
+      "Ps.Internal.RustRuntimePlan.typeRequirements",
+      "Ps.Internal.RustRuntimePlan.exprRequirements"
+    ],
+    "logicalDeclarations": 4905,
+    "counts": [
+      3252,
+      4289,
+      4944
+    ],
+    "generatedUnits": 134,
+    "packages": [
+      "@proofscript/foundation",
+      "@proofscript/core",
+      "@proofscript/environment",
+      "@proofscript/bridge",
+      "@proofscript/compiler-ir",
+      "@proofscript/backend-common",
+      "@proofscript/syntax",
+      "@proofscript/meta",
+      "@proofscript/elab",
+      "@proofscript/erasure",
+      "@proofscript/backend-ts",
+      "@proofscript/backend-js",
+      "@proofscript/backend-rust",
+      "@proofscript/backend-wasm",
+      "@proofscript/compiler"
+    ],
+    "computedInitializers": 356,
+    "manifestSha256": "3916ab68264615497f2299d6807ca5ce09a97f598fb799a773dc83a71ca8a7b5",
+    "logicalAdmission": {
+      "protocol": "psc1-compiler-host/1",
+      "requestId": "production-executable-compiler-build",
+      "target": "js",
+      "sourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+      "admissionsDigest": "cff6304aef7b3e7c69ac7c4941d275a685b945af2fdc79bf9dfee7ebfd1513f4",
+      "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "accepted": true,
+      "behaviorallyVerified": false
+    },
+    "originalIrSha256": "de54e25567c055915052af238ed691282db7107fe80285a361ad1a4029b5d415",
+    "transformedIrSha256": "02792449a3df5a909292caa8541d3299bfc25ecaf62b814a206629603a9a317e",
+    "capture": {
+      "status": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 128856,
+      "stdoutBytes": 195,
+      "stderrBytes": 0,
+      "timeoutMs": 240000,
+      "timeoutPolicy": "standard-240s",
+      "maxBuffer": 33554432,
+      "maxRssKiB": 326824,
+      "sampledCpuSeconds": 128.82,
+      "peakTreeRssKiB": 326824,
+      "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+      "processGroup": 2700
+    },
+    "emission": {
+      "status": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 22146,
+      "stdoutBytes": 279,
+      "stderrBytes": 0,
+      "timeoutMs": 240000,
+      "timeoutPolicy": "standard-240s",
+      "maxBuffer": 33554432,
+      "maxRssKiB": 312644,
+      "sampledCpuSeconds": 22.13,
+      "peakTreeRssKiB": 312644,
+      "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+      "processGroup": 2729
+    },
+    "negativeCases": [
+      "altered-module",
+      "missing-module",
+      "extra-module",
+      "symlink-module",
+      "wrong-manifest-cohort",
+      "duplicate-owner",
+      "unsafe-path",
+      "wrong-runtime-owner",
+      "wrong-checker"
+    ],
+    "candidateFiles": 1131,
+    "candidateBytes": 103951941,
+    "typescriptResourcesSha256": "3d83f0b4ff6821d858736d463178d9f92baaeaa5ff59046cd762750d54b17e0c",
+    "claims": {
+      "wholeCompilerCapture": true,
+      "actualSourceOwnedBodies": true,
+      "strictOriginalAndTransformedIR": true,
+      "independentCanonicalCoreAdmission": true,
+      "strictTypeScript": true,
+      "compilerExecution": false,
+      "fullModularSelfHosting": false,
+      "rootUmbrellaPromotion": false,
+      "defaultDistributionChanged": false
+    }
+  },
+  "portableG1Seed": {
+    "schema": "psc1-portable-modular-G1/1",
+    "status": "passed-native-reference-and-portable-generation",
+    "sourceCommit": "17ce19919175b60be06050188e2a546a8a72e689",
+    "sourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+    "sourceModules": 133,
+    "units": 134,
+    "packages": 15,
+    "manifestSha256": "74e14f5650931ccc3de2a4a7ed6829f54197bb8100466bcb2eb0ad90d7b14a85",
+    "files": 1131,
+    "bytes": 103951941,
+    "execution": {
+      "status": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 112798,
+      "stdoutBytes": 107,
+      "stderrBytes": 0,
+      "timeoutMs": 240000,
+      "timeoutPolicy": "standard-240s",
+      "maxBuffer": 33554432,
+      "maxRssKiB": 1210604,
+      "sampledCpuSeconds": 112.77,
+      "peakTreeRssKiB": 1210604,
+      "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+      "processGroup": 3035
+    },
+    "nativeSeedSha256": "c826725ef22dd0a3c2d67d7158d60edd258ecd52b3a5b76d0f8bd93e5f2492ad",
+    "nativeOracleScope": "comparison-only; never imported by a generation producer",
+    "independentAdmission": {
+      "protocol": "psc1-compiler-host/1",
+      "requestId": "production-executable-compiler-build",
+      "target": "js",
+      "sourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+      "admissionsDigest": "cff6304aef7b3e7c69ac7c4941d275a685b945af2fdc79bf9dfee7ebfd1513f4",
+      "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "accepted": true,
+      "behaviorallyVerified": false,
+      "elapsedMs": 3047
+    },
+    "originalAndTransformedIrMatch": true,
+    "exactRenderedReferenceBytes": true,
+    "compilerSeconds": 240,
+    "checkerSeconds": 120,
+    "fullModularSelfHosting": false
+  },
+  "portableG1Current": {
+    "schema": "psc1-portable-modular-G1/1",
+    "status": "passed-native-reference-and-portable-generation",
+    "sourceCommit": "77961851d54adb344a87fb32b4472c11b2024519",
+    "sourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+    "sourceModules": 133,
+    "units": 134,
+    "packages": 15,
+    "manifestSha256": "463383f026c8b10f0b5bd6a284d257ec6cd31010b0cb4c04e24098b1ab659008",
+    "files": 1131,
+    "bytes": 103951941,
+    "execution": {
+      "status": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 123453,
+      "stdoutBytes": 107,
+      "stderrBytes": 0,
+      "timeoutMs": 240000,
+      "timeoutPolicy": "standard-240s",
+      "maxBuffer": 33554432,
+      "maxRssKiB": 1207588,
+      "sampledCpuSeconds": 123.4,
+      "peakTreeRssKiB": 1207588,
+      "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+      "processGroup": 3038
+    },
+    "nativeSeedSha256": "c826725ef22dd0a3c2d67d7158d60edd258ecd52b3a5b76d0f8bd93e5f2492ad",
+    "nativeOracleScope": "comparison-only; never imported by a generation producer",
+    "independentAdmission": {
+      "protocol": "psc1-compiler-host/1",
+      "requestId": "production-executable-compiler-build",
+      "target": "js",
+      "sourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+      "admissionsDigest": "cff6304aef7b3e7c69ac7c4941d275a685b945af2fdc79bf9dfee7ebfd1513f4",
+      "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "accepted": true,
+      "behaviorallyVerified": false,
+      "elapsedMs": 3296
+    },
+    "originalAndTransformedIrMatch": true,
+    "exactRenderedReferenceBytes": true,
+    "compilerSeconds": 240,
+    "checkerSeconds": 120,
+    "fullModularSelfHosting": false
+  },
+  "pinnedArtifact": {
+    "run": 40748275409,
+    "id": 12842054234,
+    "bytes": 51913188,
+    "archiveSha256": "8d98483df656c5d490e2648c2f00da04a6b13f00a60f93bb7c3acfa8e2b6e834"
+  },
+  "generationRun": 40755246954,
+  "generations": {
+    "js": {
+      "status": "running"
+    },
+    "ts": {
+      "status": "running"
+    }
+  },
+  "preservation": {
+    "leanVersion": "4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "compilerSeconds": 240,
+    "checkerSeconds": 120,
+    "g2G3CorrectnessSeconds": 3600,
+    "separatePerformanceSeconds": 240,
+    "heapMiB": 4096,
+    "stackMiB": 8,
+    "nativeAddressSpaceGiB": 4,
+    "fileBytes": 33554432,
+    "stageAndGraphAndWireBytes": 134217728,
+    "streamBytes": 33554432,
+    "valuesAndGraphFiles": 8192,
+    "units": 257,
+    "referenceFuel": 4096,
+    "initializerEdges": 131072,
+    "ordinaryCheckedSourceBodyPairing": true,
+    "strictOriginalAndTransformedIr": true,
+    "negativeTestsPreserved": true,
+    "pilotExpansionDeferred": true,
+    "separateCorrectnessSeconds": 1800
+  },
+  "scope": "finite Linux generated JS/TS modular reproduction and independent official admission; not a compiler semantic preservation or totality theorem",
+  "notQualified": [
+    "other-platform consumers/durability",
+    "new root umbrella promotion",
+    "new Rust/Wasm executor source cohort",
+    "standalone checked-host installation",
+    "full universal production release",
+    "Bun execution of the new M5 source cohort"
+  ],
+  "noMerge": true,
+  "noRegistryPublication": true,
+  "sourceGate": {
+    "run": 40749527957,
+    "head": "77961851d54adb344a87fb32b4472c11b2024519",
+    "testedMerge": "3c78e1c16e184948821550cff8fc3b13609e86f3",
+    "selectedPassed": 16,
+    "benchmark": "skipped",
+    "qualifiedFiniteCoreCriteria": 37,
+    "blocked": 0,
+    "targetBundles": 14
+  },
+  "ownershipAudit": {
+    "run": 40755976488,
+    "commit": "707bd40390d0b673c69961f25151cf5ccd66a457",
+    "cases": 11,
+    "artifact": 12845617588,
+    "sha256": "7a1bfd57790226f2d3b4e2c45b165447591d306c548a5ae69340c2722ddc23dd"
+  },
+  "priorAttempts": {
+    "run": 40749484847,
+    "commit": "77961851d54adb344a87fb32b4472c11b2024519",
+    "status": "failed-before-G2",
+    "cause": "introduced CPU=wall cap; canonical profiles are wall-clock",
+    "ts": {
+      "elapsedMs": 1565790,
+      "maxRssKiB": 3130492,
+      "sampledCpuSeconds": 1800.61
+    },
+    "js": {
+      "elapsedMs": 1557142,
+      "maxRssKiB": 3265200,
+      "sampledCpuSeconds": 1804.32
+    }
+  },
+  "cpuDiagnostics": {
+    "run": 40754131717,
+    "commit": "a206c7eee8c64ce74b6d9f2808b1b9002305d5c3",
+    "requestSha256": "4b836f62f49d18d962557e6d28bfe99653d29b6b02dd974928f59a918a62d57d",
+    "seconds": 240,
+    "G2Qualification": false
+  },
+  "requiredRuns": [
+    {
+      "id": 40748275409,
+      "commit": "17ce19919175b60be06050188e2a546a8a72e689"
+    },
+    {
+      "id": 40749484426,
+      "commit": "77961851d54adb344a87fb32b4472c11b2024519"
+    },
+    {
+      "id": 40749527957,
+      "commit": "77961851d54adb344a87fb32b4472c11b2024519"
+    },
+    {
+      "id": 40749527892,
+      "commit": "77961851d54adb344a87fb32b4472c11b2024519"
+    },
+    {
+      "id": 40755976488,
+      "commit": "707bd40390d0b673c69961f25151cf5ccd66a457"
+    }
+  ]
+}

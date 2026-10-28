@@ -1,6 +1,6 @@
 import Ps.BackendCommon.ServiceError
 import Ps.BackendCommon.Plan
-Ps.BackendRust.Module
+import Ps.BackendRust.Module
 
 -- Pure target emission only. Checked orchestration stays in the compiler driver.
 namespace Ps.Internal.RustCompilerService

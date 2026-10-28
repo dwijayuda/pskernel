@@ -28,6 +28,8 @@ for(const [dir,ns]of [['js','Js'],['ts','Ts'],['rust','Rust'],['wasm','Wasm']]){
  const first=source.indexOf(marker),finish=source.indexOf(last)+last.length,body=source.slice(first,finish);
  const emitted=read('.','packages/backend-'+dir+'/src/Ps/Backend'+ns+'/Emit.lean');
  assert.ok(emitted.includes(body),'exact '+ns+' emitter body');
+ for(const line of source.split('\n').filter(line=>line.startsWith('import ')&&line!=='import Ps.Compiler.Service'))
+  assert.ok(emitted.split('\n').includes(line),'preserved backend import:'+line);
  assert.equal(read('.',file),'import Ps.Compiler.Service\nimport Ps.Backend'+ns+'.Emit\n'+source.slice(finish));
  bodies.push({backend:dir,sha256:hash(body),bytes:Buffer.byteLength(body)});
 }

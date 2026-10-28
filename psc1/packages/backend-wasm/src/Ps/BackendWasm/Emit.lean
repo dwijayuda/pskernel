@@ -1,9 +1,9 @@
 import Ps.BackendCommon.ServiceError
 import Ps.BackendCommon.Plan
-Ps.BackendWasm.Lower
-Ps.BackendWasm.BinaryBytes
-Ps.BackendWasm.ValidateIr
-Ps.BackendWasm.ServiceAbi
+import Ps.BackendWasm.Lower
+import Ps.BackendWasm.BinaryBytes
+import Ps.BackendWasm.ValidateIr
+import Ps.BackendWasm.ServiceAbi
 
 -- Pure target emission only. Checked orchestration stays in the compiler driver.
 namespace Ps.Internal.WasmCompilerService

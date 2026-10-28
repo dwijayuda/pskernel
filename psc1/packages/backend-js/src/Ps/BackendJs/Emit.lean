@@ -1,6 +1,6 @@
 import Ps.BackendCommon.ServiceError
 import Ps.BackendCommon.Plan
-Ps.BackendJs.Print
+import Ps.BackendJs.Print
 
 -- Pure target emission only. Checked orchestration stays in the compiler driver.
 namespace Ps.Internal.JsCompilerService

@@ -1,12 +1,29 @@
 # PSC1 AI work state
 
-Updated 2026-10-29 Asia/Jakarta. Active M4 branch
-feat/psc1-modular-toolchain-20261028 from verified PR #207 HEAD
+Updated 2026-10-29 Asia/Jakarta. Active M5 branch
+feat/psc1-portable-modules-20261029 from verified PR #207 HEAD
 415dbba4b5c1627185fc0ee8cdf29a83b15b6f08.
 Production modularity implementation PR #205,
 stacked on plan PR #204 / b400552324956d9c3a684c9231f60f70066e1629.
 GitHub/Linux CI only; expected-HEAD, single-parent/non-force history.
 No merge or registry publication.
+
+## Active M5: portable module generation and reproducible packages
+
+Continues from PR #208 / d53b43c271c65635b07a6ffa78fb6b08a5fa55de,
+whose final static/evidence runs 40735281270/40735269495 are verified green.
+The native M4 source/graph/executors and exact installed tarball remain preserved.
+
+First implementation ports the bounded production planner into backend-common,
+using an exact-key persistent compiler lookup instead of host Std containers.
+Native reference ordering/refusals are compared before generation. Subsequent work
+must carry actual elaborator member ownership, reuse the existing structured JS/TS
+renderers, independently admit every generation, compare original/transformed IR,
+then reproduce complete module graphs and npm bytes. G2/G3 correctness profiles
+remain separate from the original 240-second performance target. No M5 success,
+new source qualification or fixed point is claimed before actual Linux CI.
+The 128 MiB graph/stage, 32 MiB/file, 8,192 values/files, 257 units, 4,096
+reference depth and 131,072 initializer-edge bounds remain unchanged.
 
 ## M4 milestone: qualified installed modular Linux preview
 

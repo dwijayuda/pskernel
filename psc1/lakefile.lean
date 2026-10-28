@@ -9,6 +9,7 @@ lean_lib PsFoundation where
     `Ps.Foundation.List,
     `Ps.Foundation.Name,
     `Ps.Foundation.StringSet,
+    `Ps.Foundation.StringMap,
     `Ps.Foundation.Source,
     `Ps.Foundation.Diagnostic,
     `Ps.Foundation.Text
@@ -90,7 +91,7 @@ lean_lib PsCompilerIr where
 
 lean_lib PsBackendCommon where
   srcDir := "packages/backend-common/src"
-  roots := #[`Ps.BackendCommon.ServiceError, `Ps.BackendCommon.Plan, `Ps.BackendCommon.StateExcept, `Ps.BackendCommon.Source, `Ps.BackendCommon.DirectCalls, `Ps.BackendCommon.ModuleModel, `Ps.BackendCommon.Modules]
+  roots := #[`Ps.BackendCommon.ServiceError, `Ps.BackendCommon.Plan, `Ps.BackendCommon.StateExcept, `Ps.BackendCommon.Source, `Ps.BackendCommon.DirectCalls, `Ps.BackendCommon.ModuleModel, `Ps.BackendCommon.ExecutablePlan, `Ps.BackendCommon.Modules]
 
 lean_lib PsErasure where
   srcDir := "packages/erasure/src"
@@ -698,3 +699,7 @@ lean_exe psc1_executable_plan_tests where
 lean_exe psc1_executable_packages where
   srcDir := "scripts"
   root := `ExecutablePackagesMain
+
+lean_exe psc1_portable_plan_tests where
+  srcDir := "test"
+  root := `PortablePlanTests

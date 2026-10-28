@@ -1,0 +1,65 @@
+name: PSC1 portable production modules
+on:
+  push:
+    branches: [feat/psc1-portable-modules-20261029]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: psc1-portable-modules-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  portable:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        id: native
+        with:
+          path: psc1/.lake
+          key: psc1-portable-modules-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain','psc1/lakefile.lean','psc1/**/*.lean') }}
+          restore-keys: |
+            psc1-executable-v1-${{ runner.os }}-
+            psc1-lake-v2-${{ runner.os }}-native-
+            psc1-modular-native-v1-${{ runner.os }}-
+      - name: Prepare bounded pinned Lean launcher
+        timeout-minutes: 3
+        run: |
+          if [ ! -x "$HOME/.elan/bin/lake" ]; then
+            curl --fail --location --retry 2 --connect-timeout 20 --max-time 90 https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o "$RUNNER_TEMP/psc1-elan-init.sh"
+            sh "$RUNNER_TEMP/psc1-elan-init.sh" -y
+          fi
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build portable planner, immutable reference and source census
+        run: lake build psc1_portable_plan_tests psc1_executable_plan_tests psc1_source_census_probe
+      - uses: actions/cache/save@v4
+        if: steps.native.outputs.cache-hit != 'true'
+        with:
+          path: psc1/.lake
+          key: ${{ steps.native.outputs.cache-primary-key }}
+      - name: Compare native and portable plans, ordering and refusal classes
+        run: |
+          .lake/build/bin/psc1_executable_plan_tests
+          .lake/build/bin/psc1_portable_plan_tests
+      - name: Census actual enlarged compiler source in both grammars
+        run: node scripts/generated-target-source-audit.mjs js unified
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-portable-modules-${{ github.sha }}
+          path: psc1/dist/generated-unified-js-compiler/source-audit/
+          retention-days: 90

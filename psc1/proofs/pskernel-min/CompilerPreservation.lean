@@ -253,8 +253,8 @@ def binaryTokens : Binary → String → String → List String
   | .and, left, right => ["(", left, " && ", right, ")"]
   | .or, left, right => ["(", left, " || ", right, ")"]
 
--- This is exact token composition under the existing opaque join operation.
--- No character-level String.Internal law is asserted.
+-- Exact token composition under the actual join operation.
+-- R6 TextComposition connects its constructive join to UTF-8 bytes.
 theorem emit_binary_template (op : Binary) (left right : String) :
     psTsEmitIntrinsicFromPrinted (irOperation op) [left, right] =
       .ok (psTsJoin "" (binaryTokens op left right)) := by

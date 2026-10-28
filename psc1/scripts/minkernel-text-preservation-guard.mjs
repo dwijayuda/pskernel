@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import assert from 'node:assert/strict';
 assert.equal(process.platform,'linux');assert.equal(process.env.GITHUB_ACTIONS,'true');
 const text=fs.readFileSync('dist/pskernel-min/text-preservation/proof.log','utf8');
-const names=['append_utf8','empty_utf8'];
+const names=["append_utf8","empty_utf8","join_utf8","join_empty_utf8","join_pair_utf8","join_concat_empty_utf8","emit_binary_utf8","emit_add_bytes","emit_and_bytes","emit_sub_bytes"];
 const reports=names.map(name=>{
  const full='Ps.MinKernel.TextComposition.'+name;
  const rows=text.split('\n').filter(line=>line.includes("'"+full+"'"));

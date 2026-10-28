@@ -86,9 +86,28 @@ def main : IO Unit := do
       joinRows := joinRows ++ [r6Json [
         ("separator", r6String separator), ("fragments", Lean.toJson fragments),
         ("bytes", Lean.toJson expected)]]
+  let emitPairs := [("", ""), ("a", "b"), ("λ", "🙂"), ("é", nul),
+    ("\n", "\"\\"), (nul, "λ"), ("🙂", "é"), ("a", ""), ("", "b"),
+    (String.ofList (List.replicate 4096 'x'), "🙂")]
+  let emitters : List (String × (String → String → String) × List String × List String × List String) :=
+    [("psR6EmitAdd", psR6EmitAdd, ["("], [" + "], [")"]),
+     ("psR6EmitAnd", psR6EmitAnd, ["("], [" && "], [")"]),
+     ("psR6EmitSub", psR6EmitSub,
+       ["((__ps_a: bigint, __ps_b: bigint) => ",
+        "(__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))("], [", "], [")"])]
+  let mut emitterRows : List Lean.Json := []
+  for (name, emit, prefix, middle, suffix) in emitters do
+    for (left, right) in emitPairs do
+      let expected := r6Oracle [] ((prefix ++ [left] ++ middle ++ [right] ++ suffix).map r6Bytes)
+      unless r6Bytes (emit left right) == expected do
+        throw (IO.userError "R6_NATIVE_ACTUAL_EMITTER_BYTES_MISMATCH")
+      emitterRows := emitterRows ++ [r6Json [
+        ("name", r6String name), ("left", r6String left), ("right", r6String right),
+        ("bytes", Lean.toJson expected)]]
   IO.FS.writeFile (dir ++ "/native.json")
     (r6Json [("schema",r6String "psc1-r6-text-native/1"),
-      ("append",Lean.toJson appendRows),("join",Lean.toJson joinRows)]).compress
+      ("append",Lean.toJson appendRows),("join",Lean.toJson joinRows),
+      ("emitter",Lean.toJson emitterRows)]).compress
   let actual ← r6CheckInputs (dir ++ "/actual.inputs.json")
   let fixture ← r6CheckInputs (dir ++ "/fixture.inputs.json")
   r6Compile actual (dir ++ "/actual")

@@ -34,10 +34,14 @@ lean_lib PsMinOperationalSourceEnvironment where
   roots := #[`Ps.Environment.Basic, `Ps.Environment.Prelude, `Ps.Environment.SelfHostPrelude,
     `Ps.Environment.Control, `Ps.Environment.Order]
 
+lean_lib PsMinRankOneRuntime where
+  srcDir := "../../packages/pskernel-min/src"
+  roots := #[`Ps.MinKernel.Profile.RankOneTypes]
+
 @[default_target]
 lean_lib MinKernelProof where
   srcDir := "."
-  roots := #[`MainTheorem, `CoreScope, `BinderLowering, `RegularModel, `RegularSoundness, `RegularValidation, `RegularNames, `RegularSourceInstance, `OperationalProjection, `OperationalFoundation, `OperationalSoundness, `OperationalSource, `CoreIngress, `CoreTranslation, `CoreSemantics, `CoreEncoding, `RegularIngressModel, `RegularIngressTranslation, `RegularIngressWire, `RegularIngressTerms, `RegularIngressEncoding, `RegularIngressAmbient, `RegularIngressOperationalModel, `RegularIngressSource, `RegularIngressSemantics, `RegularIngressNames]
+  roots := #[`MainTheorem, `CoreScope, `BinderLowering, `RegularModel, `RegularSoundness, `RegularValidation, `RegularNames, `RegularSourceInstance, `OperationalProjection, `OperationalFoundation, `OperationalSoundness, `OperationalSource, `CoreIngress, `CoreTranslation, `CoreSemantics, `CoreEncoding, `RegularIngressModel, `RegularIngressTranslation, `RegularIngressWire, `RegularIngressTerms, `RegularIngressEncoding, `RegularIngressAmbient, `RegularIngressOperationalModel, `RegularIngressSource, `RegularIngressSemantics, `RegularIngressNames, `RankOneTypes, `RankOneTypesTrust]
 
 lean_exe regular_core_witness where
   srcDir := "."

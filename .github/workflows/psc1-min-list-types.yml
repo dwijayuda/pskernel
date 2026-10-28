@@ -1,0 +1,57 @@
+name: PSC1 actual List rank-one type layer
+on:
+  push:
+    branches: [research/psc1-min-list-type-model-20261028]
+    paths:
+      - psc1/packages/pskernel-min/src/Ps/MinKernel/Profile/RankOneTypes.lean
+      - psc1/proofs/pskernel-min/**
+      - psc1/lakefile.lean
+      - psc1/scripts/MinKernelListTypes.lean
+      - .github/workflows/psc1-min-list-types.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: psc1-min-list-types-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  type-model:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - name: Install pinned Lean with unchanged budgets
+        run: bash "$GITHUB_WORKSPACE/psc1/scripts/ci/install-pinned-lean.sh"
+      - name: Prove the type layer and retain all existing consistency roots
+        working-directory: psc1/proofs/pskernel-min
+        run: |
+          set -euo pipefail
+          lake build 2>&1 | tee rank-one-proof.log
+          ! grep -E 'sorryAx|declaration uses.*sorry' rank-one-proof.log
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Verify exact theorem trust reports
+        working-directory: psc1/proofs/pskernel-min
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import assert from 'node:assert/strict';
+          const lines=fs.readFileSync('rank-one-proof.log','utf8').split('\n');
+          const names=["denote_rename","denote_substitute","wf_rename","wf_substitute","lookup_sound","base_translation","unary_translation","binary_translation","type_translation","scheme_translation","signature_wellformed","universal_variable_empty","identity_scheme_inhabited"];
+          for(const name of names){
+            const matches=lines.filter(line=>line.includes("'Ps.MinKernel.RankOneTypes."+name+"'"));
+            assert.ok(matches.length>0,name);
+            for(const line of matches)assert.ok(line.includes('does not depend on any axioms')||line.includes('depends on axioms: [propext]'),line);
+          }
+          console.log('PSC1_LIST_TYPE_MODEL_TRUST_PASS '+names.length);
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-list-type-model-${{ github.sha }}
+          path: psc1/proofs/pskernel-min/rank-one-proof.log
+          retention-days: 90

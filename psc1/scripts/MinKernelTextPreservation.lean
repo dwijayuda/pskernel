@@ -96,9 +96,9 @@ def main : IO Unit := do
        ["((__ps_a: bigint, __ps_b: bigint) => ",
         "(__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))("], [", "], [")"])]
   let mut emitterRows : List Lean.Json := []
-  for (name, emit, prefix, middle, suffix) in emitters do
+  for (name, emit, piecesBefore, middle, suffix) in emitters do
     for (left, right) in emitPairs do
-      let expected := r6Oracle [] ((prefix ++ [left] ++ middle ++ [right] ++ suffix).map r6Bytes)
+      let expected := r6Oracle [] ((piecesBefore ++ [left] ++ middle ++ [right] ++ suffix).map r6Bytes)
       unless r6Bytes (emit left right) == expected do
         throw (IO.userError "R6_NATIVE_ACTUAL_EMITTER_BYTES_MISMATCH")
       emitterRows := emitterRows ++ [r6Json [

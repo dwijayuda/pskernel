@@ -52,8 +52,7 @@ def run : IO Unit := do
     [[1, 2], [3, 4]]) "separate-cycles-stay-separate"
   require (Ps.Internal.ModulePartition.components [1, 2] [(1, 1)] == [[1], [2]]) "self-cycle-and-isolate"
   let onlyTypes : PsVerifiedIrModule := { psVerifiedIrModuleEmpty with
-    structures := [{ name := "PartitionPosition", typeParameters := [],
-      fields := [{ name := "column", type := nat }] }] }
+    structures := [{ name := "PartitionPosition", typeParameters := [], fields := [{ name := "column", type := nat }] }] }
   let types ← liftResult (psPartitionModules onlyTypes [] packages)
   require (types.plan.units.length == 1 && types.sourceToUnit.all (fun unit => unit == 0))
     "all-type-only-runtime-owner"

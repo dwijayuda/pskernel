@@ -77,11 +77,8 @@ def plan (raw : PsVerifiedIrModule) (owners : List PsModuleOwner)
       if !seen.contains ref.name then
         seen := seen.insert ref.name
         imports := { ref with unit := assigned } :: imports
-    return ({ index := unit, declarations := buckets[source]!.reverse,
-      imports := imports.reverse } : PsModuleUnit)
-  return ({ raw, owners := remapped, units,
-    packages := ordered.map (fun source => specifiers[source]!),
-    protocol := "psc1-modular-compiler/1" }, mapped.toList)
+    return PsModuleUnit.mk unit buckets[source]!.reverse imports.reverse
+  return (PsModulePlan.mk raw remapped units (ordered.map (fun source => specifiers[source]!)) "psc1-modular-compiler/1", mapped.toList)
 
 def boundedRead (file : String) : IO Lean.Json := do
   let text ← IO.FS.readFile file

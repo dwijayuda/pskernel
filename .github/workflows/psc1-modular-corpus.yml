@@ -107,7 +107,7 @@ jobs:
       fail-fast: false
       matrix:
         runtime: [node,bun]
-        group: [core,optional]
+        batch: [effects,data,control,io]
     defaults:
       run:
         shell: bash
@@ -136,12 +136,10 @@ jobs:
         uses: ./.github/actions/psc1-lean-launcher
       - run: lake build psc1_independent_checker
       - name: Install the exact official Rust SDK
-        if: matrix.group == 'core'
         run: |
           rustup toolchain uninstall 1.90.0
           rustup toolchain install 1.90.0 --profile minimal
       - name: Install SHA-256-pinned component execution runtime
-        if: matrix.group == 'optional'
         run: |
           mkdir -p "$RUNNER_TEMP/psc1-wasmtime" "$RUNNER_TEMP/psc1-bin"
           curl --fail --location --retry 3 --connect-timeout 20 --max-time 120 https://github.com/bytecodealliance/wasmtime/releases/download/v49.0.4/wasmtime-v49.0.4-x86_64-linux.tar.xz -o "$RUNNER_TEMP/psc1-wasmtime.tar.xz"
@@ -156,9 +154,9 @@ jobs:
       - name: Resolve exact graph and target-only SDK/provider resources
         env:
           GH_TOKEN: ${{ github.token }}
-        run: node scripts/modular-corpus-resources.mjs ${{ matrix.group }}
+        run: node scripts/modular-corpus-resources.mjs all
       - name: Run genuine modular compilation, admission, publication and consumers
-        run: ${{ matrix.runtime }} scripts/modular-corpus-execute.mjs
+        run: ${{ matrix.runtime }} scripts/modular-corpus-execute.mjs ${{ matrix.batch }}
       - name: Preserve all execution evidence without copying qualified inputs
         if: always()
         run: |
@@ -166,7 +164,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: psc1-modular-corpus-${{ matrix.runtime }}-${{ matrix.group }}-${{ github.sha }}
+          name: psc1-modular-corpus-${{ matrix.runtime }}-${{ matrix.batch }}-${{ github.sha }}
           path: |
             psc1/dist/modular-corpus-execution.tar.gz
             psc1/dist/modular-corpus/execution-*/qualification.json

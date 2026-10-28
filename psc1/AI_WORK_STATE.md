@@ -1,115 +1,76 @@
 # PSC1 AI work state
 
-Updated 2026-10-28 UTC. Active branch
-`feat/psc1-independent-development-20261028`, based on qualified PR #198 HEAD
-`ee9220e20e6b9fa202693c8226815a780cc5bbc0`.
-GitHub-connected tools and Linux GitHub Actions only; single-parent expected-HEAD,
-non-force history. Draft [PR #201](https://github.com/dwijayuda/pskernel/pull/201)
-targets that umbrella branch. No merge or registry publication.
-The previous state is preserved byte-for-byte in
-[history](docs/history/AI_WORK_STATE_BEFORE_INDEPENDENT_DEVELOPMENT_2026-10-28.md).
+Updated 2026-10-28 Asia/Jakarta. Active follow-up branch
+`feat/psc1-canonical-latency-20261028`, from qualified PR #201 final head
+`29c82adc77cbd1bf271acab75b6f8d51ef0a9ee6`.
+GitHub-connected tools and GitHub Actions/Linux CI only. Non-force expected-head,
+single-parent commits; no merge or registry publication.
+[Previous work state](docs/history/AI_WORK_STATE_BEFORE_CANONICAL_LATENCY_2026-10-28.md)
+preserves the independent-development milestone.
 
-## Qualified independent-development milestone
+## Authorized next work
 
-Implementation `5484a04df34de1bbcfa46a248b6a93ce510035d6` passes
-[40618697529](https://github.com/dwijayuda/pskernel/actions/runs/40618697529):
-bootstrap, isolated smoke, complete baseline B1/B2, real changed-source C1/C2,
-and the same-run evidence gate. The
-[dated receipt](docs/PSC1_INDEPENDENT_DEVELOPMENT_QUALIFICATION_2026-10-28.json)
-records exact source inventories, generation identities, elapsed time, worker
-RSS, independent-checker observations, process traces and delivery artifacts.
+The user requests measured compiler rebuild-latency improvement, repository-wide
+canonical `.ps` ownership, broader real changed-compiler regression coverage,
+and additional installation environments/platforms. Fresh official kernel
+admission and strict original/transformed IR checks must remain.
 
-The package includes the qualified generated JS seed, private pinned Node/V8
-22.23.3 runtime, genuine precompiled official Lean 4.35.0 native checker and a
-complete editable 125-module `.ps` compiler project. PSC1 directly emits the next
-compiler; no external emitted-source compiler is used. Both baseline generations
-and both changed-source generations receive fresh independent admission.
+The first measurement reuses exact qualified sources and the current B2 compiler
+from run [40618697529](https://github.com/dwijayuda/pskernel/actions/runs/40618697529).
+The CI-only profile harness adds Node CPU sampling at 5,000 microseconds while
+retaining the private runtime, unchanged worker implementation, exact-file
+permission restrictions, 4,096 MiB old-space setting and 3,600-second limit.
+It first performs a small permission/profile compatibility probe, then compiles
+all 125 modules, requires exact candidate/JS/admission/IR correspondence with B2,
+and invokes the genuine independent checker freshly. Profiling artifacts are
+observations, not selectable compiler generations.
 
-The changed chain edits one literal in actual `Ps.CompilerUnified.Service`
-ProofScript source. C1 and its self-rebuilt C2 both return
-`request-arity:expected-three-fields` where the seed returns `request-arity`.
-No generated JavaScript edit substitutes for the source change.
-B1/B2 and C1/C2 each match exactly on `compiler.mjs`, `admissions.json`,
-`original-ir.json`, `specialized-ir.json` and `sources.json`.
-B1's canonical admissions also match the independently checked bootstrap
-conversion. Its original IR bytes match the checked native bootstrap result as well.
+No optimization or latency reduction is claimed before that profile passes.
+Generated JS uses a generator trampoline, so weighted sampled self-time and
+generated declaration locations are the initial views; JavaScript stack ancestry
+is not the logical ProofScript call stack. Existing UTF-8 caches and balanced
+text builders must not be duplicated based on speculation.
 
-| Generation | Compiler worker seconds | Worker maxRSS KiB | Worker maxRSS GiB | Independent checker seconds |
-| --- | ---: | ---: | ---: | ---: |
-| B1 (seed → baseline) | 1500.364 | 3,665,376 | 3.496 | 2.993 |
-| B2 (B1 → baseline) | 1435.076 | 3,533,560 | 3.370 | 3.002 |
-| C1 (seed → changed) | 2040.425 | 3,485,900 | 3.324 | 3.306 |
-| C2 (C1 → changed) | 2029.305 | 3,515,936 | 3.353 | 3.290 |
+## Parallel implementation investigations
 
-These are observed correctness runs, not controlled performance benchmarks.
-RSS describes the compiler worker, not the complete process tree. The 4,096 MiB
-V8 old-space option is not a total RSS limit. Baseline and changed qualification
-phases took 49.54 and 68.52 minutes respectively, including their
-two builds and observations. The separate source conversion took
-279.028 seconds during bootstrap.
+The ownership audit enumerates every non-kernel package source. The 125-module
+unified compiler is already representable in checked `.ps`; additional portable
+modules and explicit native/bootstrap-only exceptions are being classified.
+Canonical source promotion must retain one authored owner, explicit immutable
+bootstrap references and fresh paired admission/IR correspondence. Reverse
+conversion already exists, but official Lean compatibility of generated
+projections needs an actual CI probe before replacing native bootstrap material.
 
-## Source ownership and dependencies
+Broader regressions will modify real frontend and compiler behavior in an
+isolated source workspace, execute positive and negative observations, and require
+the changed compiler to rebuild itself. Additional Linux environments under
+investigation are Ubuntu 22.04 x64 and Ubuntu 24.04 ARM64, using qualified native
+Lean 4.35 checker payloads and matching private runtimes. Platform/library and
+publication claims remain pending actual execution.
 
-Repository `packages/*/src/**/*.lean` remains the maintained bootstrap source.
-The delivered `compiler/project.json` and its `.ps` files are authoritative for
-ordinary development in that standalone workspace. Builds do not regenerate
-those files from Lean. Repository-wide canonical source-owner migration remains
-separate work.
+## Inherited qualified baseline
 
-Ordinary development requires the distributed PSC1 directory, Linux x64 shared
-libraries, POSIX `/bin/sh` and Linux `/proc`. It needs no separately installed
-Lean/Lake, Node/npm/Bun, TypeScript, Rust/Cargo, C/C++ compiler or Python.
-Node/V8 is bundled and required; no runtime-free implementation is claimed.
-The private host, runtime and native checker are prebuilt components.
+Implementation `5484a04df34de1bbcfa46a248b6a93ce510035d6` passes dedicated
+40618697529 and broader source gate40618701864 (16 selected jobs, 37 finite
+Practical Core criteria). Documentation-only29c82adc passes40627266058 and has
+exactly the tested tree. Full baseline B1/B2 and changed C1/C2 fixed points pass,
+with actual changed wire diagnostic in both changed generations.
 
-Initial assembly/source conversion still uses pinned Lean/Lake and native build
-tools, Node, Python 3, Git, curl and tar. CI's ldd, privilege, namespace and
-strace tools assemble and observe the isolated test outside the developer root.
-The exact system-library inventory is retained in the receipt. Rebuilding
-the runtime/checker, and optional external target consumers, retain their own
-explicit toolchain requirements.
+The complete editable unified source contains125 modules /2,382,708 UTF-8 bytes,
+closure `9d0f097e79eb2b1e14d10362c6db9b4bc2370c26627658017bf6b2681b46fabf`.
+B1/B2 emitted compiler SHA-256 is
+`858c188024f0a7da221e0c26053437b3fac3fc0ab1cc9d14092df19b39d1465d`.
+Measured workers took1,435,076–2,040,425 ms and about3.32–3.50 GiB RSS; independent
+checking took about3 seconds. These are correctness observations, not a controlled
+performance benchmark. The original240-second full-compiler target is unqualified.
 
-## Preserved boundaries and supporting gates
+## Preserved boundaries
 
-Official Lean4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc, genuine independent
-admission, ordinary logical/body pairing, strict original/transformed IR,
-semantic fuel and established acceptance policies remain.
-Portable compiler bodies, kernel internals, PSKernel-Core, MinKernel and the
-production npm host are unchanged by this standalone host/distribution work.
+Official Lean4.35.0/eb6cafb7290e8bd5f2937522d8d804f58f02bafc, independent admission,
+ordinary logical/body pairing, explicit assumptions, strict original/transformed
+IR, semantic fuel and established acceptance policies remain. Kernel internals,
+PSKernel-Core and MinKernel are separate. Private runtime/checker components
+remain explicit; no runtime-free or formal compiler-preservation claim.
 
-The broader [source gate 40618701864](https://github.com/dwijayuda/pskernel/actions/runs/40618701864)
-passes all 16 selected jobs and 37/37 finite Practical Core criteria; benchmark
-skipped. Its tested PR merge `58a80323b55a4a2fe0daa7c490a6451d8df1e1f1` has tree
-`d39843e7db03ecc9b942b65494ecd7298dc9549f`, exactly the implementation tree.
-Later documentation-only commits do not change that tested runtime.
-
-The first standalone attempt
-[40617744580](https://github.com/dwijayuda/pskernel/actions/runs/40617744580)
-completed checked 125-module conversion but failed smoke because Node permission
-mode prohibits worker `fsync`. The correction removes flushing only from the
-unaccepted temporary response. Host verification and durable accepted-output
-publication remain. The successful run repeated the full required qualification.
-
-## Limits and next priorities
-
-Ordinary compiler requests retain 240 seconds and independent checking 120
-seconds. Full compiler rebuilds use the explicitly named 3,600-second correctness
-profile. This qualifies a finite Linux x64 development cycle, not 240-second
-performance, other platforms, arbitrary language changes, compiler semantic
-preservation, diverse double compilation, or self-rebuilding runtime/kernel.
-The existing npm product's broader targets retain their own qualification scope.
-
-1. Profile the measured full compiler path and improve developer latency while
-   retaining exact source identities, fresh admission and strict IR checks.
-2. Design the repository-wide `.ps` source-owner migration with one canonical
-   editable owner and explicit bootstrap references; do not create drifting
-   parallel sources.
-3. Extend actual changed-source regression coverage beyond the diagnostic case,
-   then qualify installation and system-library behavior on additional platforms.
-4. Continue the independent existing roadmap streams without treating this
-   milestone as complete modular linking, incremental compilation or universal
-   release qualification.
-
-See the [standalone usage guide](standalone/README.md),
-[architecture/dependency audit](docs/PSC1_INDEPENDENT_DEVELOPMENT.md) and
-[remaining roadmap](docs/PSC1_DEVELOPMENT_ROADMAP.md).
+See the [independent-development receipt](docs/PSC1_INDEPENDENT_DEVELOPMENT_QUALIFICATION_2026-10-28.json)
+for exact baseline artifacts, measurements, dependency limits and failure history.

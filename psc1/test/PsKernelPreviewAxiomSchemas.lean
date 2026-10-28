@@ -42,6 +42,7 @@ private partial def expressionSchema (params : List Name) : Expr → Except Stri
 def main : IO Unit := do
   let env ← importModules #[{ module := `Lean }] {}
   let mut schemas : Array (String × Json) := #[]
+  let mut primitives : Array (String × Json) := #[]
   for n in [`propext, `Classical.choice, `Quot.sound] do
     let some info := env.find? n | throw (IO.userError "missing pinned standard axiom")
     unless (match info with | .axiomInfo _ => true | _ => false) do
@@ -52,8 +53,27 @@ def main : IO Unit := do
     schemas := schemas.push (n.toString, Json.mkObj [
       ("universeParameters", text (toString info.levelParams.length)),
       ("type", schema)])
+  for n in [`Eq, `Eq.refl, `Iff, `Iff.intro, `Nonempty, `Nonempty.intro,
+      `Quot, `Quot.mk, `Quot.lift, `Quot.ind] do
+    let some info := env.find? n | throw (IO.userError "missing standard axiom dependency")
+    let schema ← match expressionSchema info.levelParams info.type with
+      | .ok v => pure v
+      | .error e => throw (IO.userError e)
+    let extra ← match info with
+      | .inductInfo v => pure [
+          ("kind", text "inductiveType"), ("numParams", text (toString v.numParams)),
+          ("numIndices", text (toString v.numIndices)), ("numNested", text (toString v.numNested)),
+          ("isRec", Json.bool v.isRec), ("isReflexive", Json.bool v.isReflexive), ("isUnsafe", Json.bool v.isUnsafe),
+          ("all", Json.arr (v.all.toArray.map nameSchema)), ("ctors", Json.arr (v.ctors.toArray.map nameSchema))]
+      | .ctorInfo v => pure [
+          ("kind", text "constructor"), ("induct", nameSchema v.induct), ("cidx", text (toString v.cidx)),
+          ("numParams", text (toString v.numParams)), ("numFields", text (toString v.numFields)), ("isUnsafe", Json.bool v.isUnsafe)]
+      | .quotInfo _ => pure [("kind", text "quotient")]
+      | _ => throw (IO.userError "unexpected dependency kind")
+    primitives := primitives.push (n.toString, Json.mkObj
+      ([("universeParameters", text (toString info.levelParams.length)), ("type", schema)] ++ extra))
   IO.println (Json.mkObj [
     ("format", text "pskernel-preview-axioms-v1"),
     ("leanVersion", text "4.35.0"),
     ("leanCommit", text "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"),
-    ("schemas", Json.mkObj schemas.toList)]).compress
+    ("schemas", Json.mkObj schemas.toList), ("primitives", Json.mkObj primitives.toList)]).compress

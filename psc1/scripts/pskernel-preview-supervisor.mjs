@@ -1,5 +1,6 @@
 import {spawn} from 'node:child_process';
 import {open,readFile} from 'node:fs/promises';
+import {constants} from 'node:fs';
 import {createHash,randomUUID} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
@@ -44,7 +45,7 @@ export function validateWorkerResult(value,identity){
 }
 
 async function boundedInput(inputPath){
-  const handle=await open(inputPath,'r');
+  const handle=await open(inputPath,constants.O_RDONLY|constants.O_NONBLOCK);
   try{
     if(!(await handle.stat()).isFile())throw Object.assign(Error('input must be a regular file'),{previewCause:'input-kind'});
     let bytes=0;const chunks=[];

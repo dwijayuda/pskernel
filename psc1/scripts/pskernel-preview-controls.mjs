@@ -34,11 +34,12 @@ record('unsafe input declined by strict file profile',unsafe.outcome==='declined
 const partial=await run(definition(true).replace('"safety":"safe"','"safety":"partial"'));
 record('partial input declined by strict file profile',partial.outcome==='declinedUnsupported'&&!partial.checking.coreInvoked);
 
-function axiomStream(label,schema){
+function axiomStream(label,schema,{includePrelude=true,shadowEquality=false}={}){
   const rows=[],names=new Map([['["anonymous"]',0]]);let nn=1,nl=1,ne=0;
   function name(n){const key=JSON.stringify(n);if(names.has(key))return names.get(key);const pre=name(n[1]),id=nn++;names.set(key,id);
     rows.push(n[0]==='str'?{in:id,str:{pre,str:n[2]}}:{in:id,num:{pre,i:Number(n[2])}});return id;}
-  const params=Array.from({length:Number(schema.universeParameters)},(_,i)=>name(['str',['anonymous'],'renamed-u'+i]));
+  let params=[];
+  const parameters=s=>Array.from({length:Number(s.universeParameters)},(_,i)=>name(['str',['anonymous'],'renamed-u'+i]));
   function level(l){if(l[0]==='zero')return 0;let row;
     if(l[0]==='param')row={param:params[Number(l[1])]};
     else if(l[0]==='succ')row={succ:level(l[1])};else row={[l[0]]:[level(l[1]),level(l[2])]};
@@ -49,16 +50,35 @@ function axiomStream(label,schema){
     else if(e[0]==='app')row={app:{fn:expr(e[1]),arg:expr(e[2])}};
     else if(e[0]==='forallE')row={forallE:{name:0,type:expr(e[1]),body:expr(e[2]),binderInfo:e[3]}};
     else throw Error('unsupported control schema');const id=ne++;rows.push({ie:id,...row});return id;}
-  const n=name(label),type=expr(schema.type);rows.push({axiom:{name:n,levelParams:params,type,isUnsafe:false}});return stream(rows);
+  function base(label,s){params=parameters(s);const n=name(label.split('.').reduce((p,c)=>['str',p,c],['anonymous'])),type=expr(s.type);return {name:n,levelParams:params,type};}
+  if(includePrelude){
+    for(const label of ['Eq','Iff','Nonempty']){
+      const p=pins.primitives[label],type={...base(label,p),numParams:Number(p.numParams),numIndices:Number(p.numIndices),
+        numNested:Number(p.numNested),isRec:p.isRec,isReflexive:p.isReflexive,isUnsafe:p.isUnsafe,
+        all:p.all.map(name),ctors:p.ctors.map(name)};
+      const ctors=p.ctors.map(n=>{
+        const label=n[2]==='refl'?'Eq.refl':n[2]==='intro'&&n[1][2]==='Iff'?'Iff.intro':'Nonempty.intro',c=pins.primitives[label];
+        return {...base(label,c),induct:name(c.induct),cidx:Number(c.cidx),numParams:Number(c.numParams),numFields:Number(c.numFields),isUnsafe:c.isUnsafe};
+      });
+      if(shadowEquality&&label==='Eq')rows.push({def:{name:type.name,levelParams:type.levelParams,type:type.type,value:0,hints:'abbrev',safety:'safe',all:[type.name]}});
+      else rows.push({inductive:{types:[type],ctors,recs:[]}});
+    }
+    for(const [label,kind]of [['Quot','type'],['Quot.mk','ctor'],['Quot.lift','lift'],['Quot.ind','ind']])rows.push({quot:{...base(label,pins.primitives[label]),kind}});
+  }
+  params=parameters(schema);const n=name(label),type=expr(schema.type);rows.push({axiom:{name:n,levelParams:params,type,isUnsafe:false}});return stream(rows);
 }
 for(const [label,schema]of Object.entries(pins.schemas)){
   const name=label.split('.').reduce((p,s)=>['str',p,s],['anonymous']),text=axiomStream(name,schema);
   const r=scanAssumptions(text,pins);record('pinned '+label+' schema accepts alpha-renamed universe parameters',r.validated&&r.assumptions[0].standardSchema);
   await writeFile(path.join(scratch,'schema-'+label+'.ndjson'),text);
-  const actual=await run(text);record(label+' policy grants no unchecked prelude',actual.outcome==='rejectedInvalid'&&actual.checking.coreInvoked&&!actual.checking.metadataValidated);
+  const actual=await run(text);record(label+' with actual standard prelude is independently admitted',actual.outcome==='accepted'&&actual.checking.coreInvoked&&actual.checking.metadataValidated);
   const changed=axiomStream(name,{...schema,type:['sort',['zero']]});const mismatch=await run(changed);
   record('changed '+label+' type is unsupported',mismatch.outcome==='declinedUnsupported'&&!mismatch.checking.coreInvoked);
 }
+const missingPrelude=await run(axiomStream(['str',['anonymous'],'propext'],pins.schemas.propext,{includePrelude:false}));
+record('standard schema never grants missing prelude authority',missingPrelude.outcome==='declinedUnsupported'&&!missingPrelude.checking.coreInvoked);
+const shadowed=await run(axiomStream(['str',['anonymous'],'propext'],pins.schemas.propext,{shadowEquality:true}));
+record('standard schema with shadowed equality primitive declined',shadowed.outcome==='declinedUnsupported'&&!shadowed.checking.coreInvoked);
 const unknown=await run(axiomStream(['str',['anonymous'],'AssumeAnything'],{universeParameters:'0',type:['sort',['zero']]}));
 record('unknown input axiom is unsupported',unknown.outcome==='declinedUnsupported'&&unknown.assumptions[0].standardSchema===false&&!unknown.checking.coreInvoked);
 const spoof=await run(axiomStream(['str',['anonymous'],'Classical.choice'],pins.schemas['Classical.choice']));

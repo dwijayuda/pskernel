@@ -3,6 +3,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
+import {spawnSync} from 'node:child_process';
+import {pathToFileURL} from 'node:url';
 import {createCompilerHostSession,compilerSourceClosureDigest} from '../compiler-host-protocol.mjs';
 import {verify} from './verify.mjs';
 import {put,sha256,json,bounded,run,files,output} from './tools.mjs';
@@ -13,6 +15,20 @@ const nodeFlags=['--max-old-space-size=4096','--stack-size=8192'];
 const consumer=path.resolve('host-tools/executable/consume.mjs');
 const reference=path.join(output,'reference-consumer.mjs');
 put(reference,"import fs from 'node:fs';\nimport {psCompilerServiceCandidate} from './reference.mjs';\nprocess.stdout.write(psCompilerServiceCandidate(fs.readFileSync(process.argv[2],'utf8')));\n");
+const rustDescriptor=JSON.parse(fs.readFileSync('dist/rust-target-consumer/descriptor.json'));
+assert.equal(rustDescriptor.locked,true);assert.equal(rustDescriptor.toolchain.version,'1.90.0');
+const rustPackage=path.resolve('dist/rust-target-consumer/package');
+const rustSysroot=run('rustup',['run','1.90.0','rustc','--print','sysroot']).trim();
+const rustc=path.join(rustSysroot,'bin/rustc'),rustPins=[...rustDescriptor.files.map(row=>({...row,file:path.join(rustPackage,row.path)})),
+ ...rustDescriptor.toolchain.files.map(row=>({...row,file:path.join(rustSysroot,row.path)}))];
+const verifyRust=()=>{for(const row of rustPins)assert.equal(sha256(fs.readFileSync(row.file)),row.sha256);};
+verifyRust();
+const externs=['num_bigint','num_traits'].flatMap(name=>{
+ const matches=rustDescriptor.files.filter(row=>row.path.startsWith('deps/lib'+name+'-')&&row.path.endsWith('.rlib'));
+ assert.equal(matches.length,1);
+ return ['--extern',name+'='+path.join(rustPackage,matches[0].path)];
+});
+
 const observations=[],requests=[];
 for(const grammar of ['lean','ps']){
  const sources=[{module:'Lib',kind:grammar,text:'def increment(x : Nat) : Nat := Nat.add x 1\n'},
@@ -76,9 +92,13 @@ for(const item of requests){
     const result=bounded('application-'+variant+'-'+item.name,[process.execPath,...nodeFlags,observe],{addressSpace:false});
     assert.equal(result.stdout.trim(),'42n');
    }else if(item.target==='rust'){
-    const file=path.join(dir,'result.rs');put(file,candidate.source);
-    bounded('application-rust-'+variant+'-'+item.name,['rustc','--edition=2021','--crate-type=lib',
-     '--crate-name','psc1_modular_application',file,'-o',path.join(dir,'result.rlib')]);
+    const file=path.join(dir,'result.rs');put(file,candidate.source+'\nfn main(){assert_eq!(answer().to_string(), "42"); println!("42n");}\n');
+    verifyRust();
+    bounded('application-rust-'+variant+'-'+item.name,[rustc,'--edition=2021',...externs,
+     '-L','dependency='+path.join(rustPackage,'deps'),'--crate-name','psc1_modular_application',file,'-o',path.join(dir,'result')]);
+    verifyRust();
+    const result=bounded('application-rust-run-'+variant+'-'+item.name,[path.join(dir,'result')]);
+    assert.equal(result.stdout.trim(),'42n');
    }else{
     const prefix='psc1-wasm-hex/1:';assert.ok(candidate.source.startsWith(prefix));
     const wasm=Buffer.from(candidate.source.slice(prefix.length),'hex');
@@ -91,6 +111,27 @@ for(const item of requests){
  }
 }
 verify(root,bytes,hash);
+// Exercise the generated cohort guard itself in a fresh process, separately
+// from the stronger pre-import inventory checks. Only a known guard literal is
+// changed for this negative, then the exact tested bytes are restored.
+const runtimeGuards=[];
+for(const variant of ['js','ts']){
+ const unit=manifest.graphEvidence[variant].find(row=>row.specifier.endsWith('/Ps.Foundation.Name'));
+ assert.ok(unit);
+ const module=unit.specifier.split('/')[3],owner=unit.specifier.split('/').slice(0,2).join('/');
+ const file=path.join(root,'node_modules',owner,'dist',variant,'generated',module+'.mjs');
+ const original=fs.readFileSync(file,'utf8');
+ const guard=manifest.protocol+':'+variant+':'+manifest.sourceClosureDigest;
+ assert.ok(original.includes(guard));
+ fs.writeFileSync(file,original.replace(guard,manifest.protocol+':'+variant+':'+'0'.repeat(64)));
+ const probe=spawnSync(process.execPath,[...nodeFlags,'--input-type=module','-e',
+  'await import('+JSON.stringify(pathToFileURL(file).href)+')'],{encoding:'utf8',timeout:240000,maxBuffer:33554432});
+ fs.writeFileSync(file,original);
+ assert.notEqual(probe.status,0);assert.match(probe.stderr,/PSC1_MODULE_RUNTIME_COHORT/);
+ runtimeGuards.push(variant);
+}
+verify(root,bytes,hash);
+
 const tarballs=path.join(output,'tarballs');fs.mkdirSync(tarballs);
 const records=[];
 for(const pkg of manifest.packages){
@@ -118,8 +159,9 @@ for(const variant of ['js','ts']){
 }
 const receipt={schema:'psc1-executable-compiler-execution/1',testedCommit:process.env.GITHUB_SHA,
  manifestSha256:hash,compilerSourceClosureDigest:manifest.sourceClosureDigest,
- observations,installedPackages:records.map(({file,...rest})=>({...rest,tarball:path.basename(file)})),
+ observations,runtimeCohortRefusals:runtimeGuards,installedPackages:records.map(({file,...rest})=>({...rest,tarball:path.basename(file)})),
  exactPackagedBytes:true,offlineMultiPackageInstallation:true,
+ rustConsumer:{version:'1.90.0',locked:true,descriptorSha256:sha256(fs.readFileSync('dist/rust-target-consumer/descriptor.json'))},
  scope:'complete modular JS/TS compiler candidates, two source grammars, four core targets, exact same-IR reference and independent application admission',
  remaining:['M4 checked root-only umbrella/CLI/watch','retained application and seven-backend qualification corpus',
   'portable modular graph emission by generated compiler','new modular G1/G2/G3 and fixed points','platform/publication qualification'],

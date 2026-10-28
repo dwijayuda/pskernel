@@ -74,3 +74,19 @@ that existing profile and records assurance/partial names explicitly. It still u
 psCompilerPrepareOrdinary and psCompilerOrdinaryIr, including canonical logical
 admission and exact runtime-body binding; there is no fallback, erased guard or
 weakened checker. Application fixtures continue to require checked preparation.
+
+## First complete production graph evidence
+
+Run40662258347 / bf1a0940 produces the full graph:126 source modules,127 generated
+units,15 existing package owners,4516 transformed values (3150 original/3946
+specialized),356 computed initializers,1075 candidate files/119711529 bytes.
+Source closure41eb40437e0df1722128c09c9b9da7cad0ccb1ad61371f23eb6bc2db4e9a1106.
+Independent canonical admission97041042ece09003a253c1f4a038921ff89517a702a96da48bb631de930d1107
+passes official Lean4.35.0. All15 strict TypeScript package checks and8 pre-import
+integrity negatives pass. Capture39390ms/428104KiB maxRSS; emission7078ms/373948KiB.
+Both modular engines match the reference exactly for Lean→JS/TS and execute42n.
+The next Rust fixture consumer fails at unresolved num_bigint because plainrustc
+was used. Reuse the existing pinned1.90.0 locked target-consumer SDK/rlibs, verify
+its resource bytes, and execute the emitted Rust fixture. Do not change the backend.
+New runtime-cohort and symlink negatives are also added before qualification retry.
+This is intermediate M2 evidence, not final workflow success or M4/M5 promotion.

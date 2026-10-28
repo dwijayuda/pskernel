@@ -93,6 +93,7 @@ def capture (input directory : String) : IO Unit := do
     ("leanVersion", .str Lean.versionString), ("leanCommit", .str Lean.githash),
     ("sourceModules", Lean.toJson (request.sources.map (fun s => s.moduleName))),
     ("owners", Lean.toJson (fusedOwners.map ownerJson)),
+    ("logicalDeclarations", Lean.toJson semantic.logicalCount),
     ("counts", Lean.toJson ([original.raw.declarations.length,
       specialized.raw.declarations.length, fused.raw.declarations.length] : List Nat)),
     ("specializationOriginCount", Lean.toJson specialized.origins.length),

@@ -45,6 +45,10 @@ jobs:
           npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
           git worktree add --detach "$RUNNER_TEMP/psc1-executable-baseline" b400552324956d9c3a684c9231f60f70066e1629
           echo "PSC1_EXECUTABLE_BASELINE=$RUNNER_TEMP/psc1-executable-baseline/psc1" >> "$GITHUB_ENV"
+      - name: Prepare the existing pinned and locked Rust application consumer
+        run: |
+          rustup toolchain install 1.90.0 --profile minimal
+          node scripts/prepare-rust-target-consumer.mjs
       - name: Audit real source ownership and preserved bodies
         run: node scripts/executable-package-ownership.mjs
       - name: Build pure production emitters and retained unified entry

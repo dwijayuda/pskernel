@@ -70,6 +70,8 @@ rejected('missing-module',()=>verify(packaged.root,packaged.manifestBytes,packag
 fs.renameSync(sampleFile+'.missing',sampleFile);
 const extra=path.join(packaged.root,'extra.mjs');fs.writeFileSync(extra,'export {};');
 rejected('extra-module',()=>verify(packaged.root,packaged.manifestBytes,packaged.manifestHash));fs.unlinkSync(extra);
+const symlink=path.join(packaged.root,'linked.mjs');fs.symlinkSync(sampleFile,symlink);
+rejected('symlink-module',()=>verify(packaged.root,packaged.manifestBytes,packaged.manifestHash));fs.unlinkSync(symlink);
 rejected('wrong-manifest-cohort',()=>verify(packaged.root,packaged.manifestBytes,'0'.repeat(64)));
 for(const [name,change]of [
  ['duplicate-owner',m=>m.owners.push(m.owners[0])],
@@ -82,7 +84,7 @@ for(const [name,change]of [
 }
 verify(packaged.root,packaged.manifestBytes,packaged.manifestHash);pinCheck();
 const summary={schema:'psc1-executable-production-build/1',testedCommit:process.env.GITHUB_SHA,
- sourceClosureDigest:digest,sourceModules:sources.length,compilerAssurance:captured.assurance,partialNames:captured.partialNames,counts:captured.counts,
+ sourceClosureDigest:digest,sourceModules:sources.length,compilerAssurance:captured.assurance,partialNames:captured.partialNames,logicalDeclarations:captured.logicalDeclarations,counts:captured.counts,
  generatedUnits:emission.units.length,packages:packaged.manifest.packages.map(p=>p.name),
  computedInitializers:emission.units.flatMap(u=>u.computedInitializers).length,
  manifestSha256:packaged.manifestHash,logicalAdmission:receipt,

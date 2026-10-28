@@ -51,7 +51,7 @@ this adapter nor a passing application corpus supplies a preservation proof.
 
 ## Reproduce the focused Linux application lane
 
-The [workflow](../../../.github/workflows/psc1-modular-checked.yml) installs locked
+The [workflow](https://github.com/dwijayuda/pskernel/blob/0489dc6832daf1e4991322c01fb65cbafab8ae2a/.github/workflows/psc1-modular-checked.yml) installs locked
 resources, checks syntax/layout, builds the real reference compiler and independent
 checker, then runs:
 

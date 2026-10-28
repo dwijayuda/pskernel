@@ -16,6 +16,7 @@ on:
       - psc1/lean-toolchain
       - psc1/*.json
       - psc1/docs/*CONTRACT.json
+      - psc1/docs/architecture/modular-checked-execution.md
   workflow_dispatch:
 permissions:
   contents: read

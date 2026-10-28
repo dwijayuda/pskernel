@@ -71,7 +71,8 @@ ledger={'format':'pskernel-preview-candidate-limitations-v1','source':os.environ
  'fullPreviewQualified':False,'previewGateP5':'BLOCKED','previewGateP6':'OPEN: String deadline variability unresolved',
  'supervisorQualified':True,'program':PROGRAM,'nodeQualification':'22.23.4','stringSamples':strings,
  'confirmedStringAssertions':{'generated':7000,'canonical':8400},'plannedStringAssertionsPerRoute':8400,
- 'censoredObservations':[{'route':'generated','sample':5,'deadlineSeconds':1500,'complete1400':False,'executedAssertions':None}],
+ 'censoredObservations':[{'route':'generated','sample':5,'deadlineSeconds':1500,'complete1400':False,'executedAssertions':None,
+  'forcedKillMemoryMeasurementIsNotNodePeakRSS':True}],
  'arenaTotal':193,'arenaStrictPasses':174,'arenaTimeouts':17,'safetyContractDifferences':2,'strictArenaQualified':False,
  'byteIdenticalCompletedArenaEnvelopes':176,'all193ArenaClassificationsUnchanged':True,
  'globalStatus':'B OPEN / C FAIL / D OPEN','globalSoundnessProved':False,'compilerSelfHostQualified':False,'backendPreservationProved':False}
@@ -90,7 +91,7 @@ for route in ['generated','canonical']:
  for p in qualification['sources']:
   snapshot=dest/'preview-source'/p;snapshot.parent.mkdir(parents=True,exist_ok=True);snapshot.write_bytes(supervisor.read(prefix+'sources/'+p))
  readme=(ROOT/'packages/pskernel-core/docs/PREVIEW_RUNTIME_2026-10-29.md').read_text()
- (dest/'README.md').write_text('# Supervised PSKernel development candidate\n\nThis is a runnable development candidate, not completed Preview 1. The interface passes 67 supervision/ingress controls per route on Linux/Node 22.23.4. P5 remains BLOCKED: the fresh generated String sample 5 hit its unchanged 1500-second deadline; only 7000 generated assertions and all 8400 canonical assertions have complete fresh receipts. All original cases and this censored observation are retained in limitations.json. Strict Arena remains FAIL at 174/193, 17 timeouts and two safety differences.\n\n'+readme,encoding='utf-8')
+ (dest/'README.md').write_text('# Supervised PSKernel development candidate\n\nThis is a runnable development candidate, not completed Preview 1. The interface passes 67 supervision/ingress controls per route on Linux/Node 22.23.4. P5 remains BLOCKED: the fresh generated String sample 5 hit its unchanged 1500-second deadline; only 7000 generated assertions and all 8400 canonical assertions have complete fresh receipts. All original cases and this censored observation are retained in limitations.json. Strict Arena remains FAIL at 174/193, 17 timeouts and two safety differences.\n\nUse files.json as this candidate package manifest. baseline-files.json and provenance.json describe the earlier original runtime artifact; they are retained historical input evidence, not a manifest or qualification of this modified package. candidate-provenance.json and limitations.json describe this candidate. The tiny memory value from the killed timeout wrapper is not Node peak RSS.\n\n'+readme,encoding='utf-8')
  (dest/'SOURCE_BUILD.md').write_bytes((ROOT/'packages/pskernel-core/docs/QUALIFIED_RUNTIME_2026-10-27.md').read_bytes())
  (dest/'package.json').write_text(json.dumps({'name':'@pskernel/core-supervised-candidate','version':'0.0.0-candidate.20261029','private':True,'type':'module','engines':{'node':'22.x'},'os':['linux'],
   'exports':{'.':{'types':'./kernel.d.ts','default':'./kernel.js'}}},indent=2)+'\n')

@@ -45,6 +45,8 @@ theorem saturated_eq_reference (fuel : Nat) :
         rfl
       cases type <;> simp only [psIrSpecializeTypeKeyWithFuel, referenceTypeKeyWithFuel, same]
       all_goals rw [eta]
+      all_goals split <;> simp_all
+      all_goals split <;> simp_all
 
 def nested : Nat → PsVerifiedIrType
   | 0 => PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat

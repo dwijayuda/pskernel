@@ -7,7 +7,7 @@ open Ps.MinKernel.CoreIngress
 -- Monotypes live in Type; a leading universal scheme lives in Type 1.
 -- No code for schemes occurs inside Ty, so this does not collapse universes.
 def Denote (env : Nat → Type) : PsMinRankTy → Type
-  | .variable index => env index
+  | .tvar index => env index
   | .natural => Nat
   | .boolean => Bool
   | .unit => Unit
@@ -29,19 +29,19 @@ def parameterAt : List Type → Nat → Type
 def SchemeDenote (scheme : PsMinRankScheme) : Type 1 :=
   Quantify scheme.arity (fun parameters => Denote (parameterAt parameters) scheme.body)
 
-def Rename (renaming : Nat → Nat) : PsMinRankTy → PsMinRankTy
-  | .variable i => .variable (renaming i)
+def Rename (mapping : Nat → Nat) : PsMinRankTy → PsMinRankTy
+  | .tvar i => .tvar (mapping i)
   | .natural => .natural
   | .boolean => .boolean
   | .unit => .unit
-  | .arr a b => .arr (Rename renaming a) (Rename renaming b)
-  | .list a => .list (Rename renaming a)
-  | .option a => .option (Rename renaming a)
-  | .except a b => .except (Rename renaming a) (Rename renaming b)
-  | .prod a b => .prod (Rename renaming a) (Rename renaming b)
+  | .arr a b => .arr (Rename mapping a) (Rename mapping b)
+  | .list a => .list (Rename mapping a)
+  | .option a => .option (Rename mapping a)
+  | .except a b => .except (Rename mapping a) (Rename mapping b)
+  | .prod a b => .prod (Rename mapping a) (Rename mapping b)
 
 def Substitute (substitution : Nat → PsMinRankTy) : PsMinRankTy → PsMinRankTy
-  | .variable i => substitution i
+  | .tvar i => substitution i
   | .natural => .natural
   | .boolean => .boolean
   | .unit => .unit
@@ -52,7 +52,7 @@ def Substitute (substitution : Nat → PsMinRankTy) : PsMinRankTy → PsMinRankT
   | .prod a b => .prod (Substitute substitution a) (Substitute substitution b)
 
 def WellFormed (n : Nat) : PsMinRankTy → Prop
-  | .variable i => i < n
+  | .tvar i => i < n
   | .natural | .boolean | .unit => True
   | .arr a b | .except a b | .prod a b => WellFormed n a ∧ WellFormed n b
   | .list a | .option a => WellFormed n a
@@ -153,7 +153,7 @@ theorem binary_translation (h : psMinRankBinary name left right = some type) :
 
 -- Independent rank-one type grammar. No executable parser call appears here.
 inductive TypeImage : List (Option Nat) → PsMinCoreExpr → PsMinRankTy → Prop where
-  | variable (h : Lookup context index slot) : TypeImage context (.bvar index) (.variable slot)
+  | tvar (h : Lookup context index slot) : TypeImage context (.bvar index) (.tvar slot)
   | base (h : BaseImage name type) : TypeImage context (.constant name []) type
   | arr (a : TypeImage context domain left) (b : TypeImage (none :: context) body right) :
       TypeImage context (.forallE name binder domain body) (.arr left right)
@@ -175,7 +175,7 @@ theorem type_translation (fuel : Nat) (source : PsMinCoreExpr) (context : List (
       | some slot =>
         simp only [psMinRankMono, hl, Option.some.injEq] at h
         subst type
-        exact .variable (lookup_sound _ _ _ hl)
+        exact .tvar (lookup_sound _ _ _ hl)
     | constant name levels =>
       simp only [psMinRankMono] at h
       split at h
@@ -231,13 +231,16 @@ theorem type_translation (fuel : Nat) (source : PsMinCoreExpr) (context : List (
 
 theorem type_wf (h : TypeImage context source type) (valid : ContextWF n context) :
     WellFormed n type := by
+  revert valid
   induction h with
-  | variable lookup => exact lookup_bound lookup valid
-  | base base => cases base <;> trivial
-  | arr _ _ ihA ihB => exact ⟨ihA valid, ihB (.term valid)⟩
+  | tvar lookup => intro valid; exact lookup_bound lookup valid
+  | base base => intro valid; cases base <;> trivial
+  | arr _ _ ihA ihB => intro valid; exact ⟨ihA valid, ihB (.term valid)⟩
   | unary _ head ih =>
+    intro valid
     cases head <;> exact ih valid
   | binary _ _ head ihA ihB =>
+    intro valid
     cases head <;> exact ⟨ihA valid, ihB valid⟩
 
 inductive SchemeImage : Nat → List (Option Nat) → PsMinCoreExpr → PsMinRankScheme → Prop where
@@ -271,26 +274,28 @@ theorem scheme_translation (fuel : Nat) (source : PsMinCoreExpr)
           have same := Nat.eq_of_beq_eq_true one
           subst level
           exact .parameter (ih _ h)
-        next => exact finish_translation h
-      | _ => exact finish_translation h
-    | _ => exact finish_translation h
+        next => exact finish_translation (fuel := Nat.succ fuel) h
+      | _ => exact finish_translation (fuel := Nat.succ fuel) h
+    | _ => exact finish_translation (fuel := Nat.succ fuel) h
 
 theorem scheme_wf (h : SchemeImage count context source scheme) (valid : ContextWF count context) :
     WellFormed scheme.arity scheme.body := by
+  revert valid
   induction h with
-  | mono image => exact type_wf image valid
+  | mono image => intro valid; exact type_wf image valid
   | parameter _ ih =>
+    intro valid
     exact ih (.type (Nat.lt_succ_self _) (context_mono valid (Nat.le_succ _)))
 
 theorem signature_wellformed (h : psMinRankSignature fuel source = some scheme) :
     WellFormed scheme.arity scheme.body :=
   scheme_wf (scheme_translation _ _ h) .nil
 
-theorem universal_variable_empty : SchemeDenote ⟨1, .variable 0⟩ → False := by
+theorem universal_variable_empty : SchemeDenote ⟨1, .tvar 0⟩ → False := by
   intro value
   exact Empty.elim ((value Empty).down)
 
-theorem identity_scheme_inhabited : Nonempty (SchemeDenote ⟨1, .arr (.variable 0) (.variable 0)⟩) :=
+theorem identity_scheme_inhabited : Nonempty (SchemeDenote ⟨1, .arr (.tvar 0) (.tvar 0)⟩) :=
   ⟨fun _ => ⟨fun x => x⟩⟩
 
 end Ps.MinKernel.RankOneTypes

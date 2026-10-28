@@ -2,7 +2,7 @@
 import Ps.MinKernel.Profile.CoreBytes
 
 inductive PsMinRankTy where
-  | variable (index : Nat)
+  | tvar (index : Nat)
   | natural
   | boolean
   | unit
@@ -43,7 +43,7 @@ def psMinRankMono (fuel : Nat) (context : List (Option Nat)) (source : PsMinCore
   | Nat.succ rest => match source with
     | .bvar index => match psMinRankLookup context index with
       | Option.none => Option.none
-      | Option.some slot => Option.some (.variable slot)
+      | Option.some slot => Option.some (.tvar slot)
     | .constant name levels => if psMinByteEq levels List.nil then psMinRankBase name else Option.none
     | .forallE _ _ domain body =>
       match psMinRankMono rest context domain with

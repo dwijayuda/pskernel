@@ -1,0 +1,16 @@
+{
+  "schema": "psc1-canonical-source-baseline/1",
+  "preparedCommit": "b996356bfcc59c34abf7224080895eb0a250d324",
+  "preparedRunId": "40644035690",
+  "manifestGitBlobSha": "0edcf5c1e2ce5da05f0dfc4a17e11f72b901402a",
+  "manifestSha256": "941c23fc7bd63b6168f4baea54ccdf26252761cdfa43e3a1a84eb157884c049f",
+  "manifestBytes": 141612,
+  "preparation": {
+    "run": 40644035690,
+    "job": 122668580602,
+    "artifact": 12797990582,
+    "zipSha256": "bbf1a5f549de93fb94dee5d84b039323e89bc89521afdc8b02404b1ab4c91dc6"
+  },
+  "policy": "This record and its initial manifest remain immutable; later authored PS edits use ancestral checked reference refreshes.",
+  "receiptGrantsAdmissionAuthority": false
+}

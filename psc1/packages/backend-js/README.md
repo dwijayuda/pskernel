@@ -1,6 +1,6 @@
 # backend-js
 
-JavaScript representation, lowering and emission. Start at [src/Ps/BackendJs/CompilerService.lean](src/Ps/BackendJs/CompilerService.lean).
+JavaScript representation, lowering and emission. Start at [src/Ps/BackendJs/CompilerService.lean](src/Ps/BackendJs/CompilerService.ps).
 
 - Representation: Checked IR/target plan → JavaScript candidate.
 - Boundary: Target helpers stay here; no admission/publication authority.

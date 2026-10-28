@@ -1,0 +1,457 @@
+import Ps.Foundation.List
+import Ps.CompilerIr.Model
+import Ps.Core.Builtin
+import Ps.Core.Subst
+import Ps.Environment.Basic
+import Ps.Environment.LocalContext
+import Ps.Meta.Context
+import Ps.Meta.Infer
+import Ps.Meta.Reduce
+
+-- Persistent collision buckets accelerate lookup without changing name equality
+-- or first-entry precedence. They contain compiler data, never admission authority.
+inductive PsErasureNameIndex(Value : Type) where {
+  | empty
+  | bucket(entries : List((Prod(PsName, Value))))
+  | branch(left : PsErasureNameIndex(Value), right : PsErasureNameIndex(Value))
+}
+
+def psErasureIndexBucket(Value : Type, fuel : Nat) : (_ : PsErasureNameIndex(Value)) -> (_ : Nat) -> List((Prod(PsName, Value))) := match fuel with {
+  | Nat.zero => fun (index : PsErasureNameIndex(Value)) (_hash : Nat) => match index with {
+  | PsErasureNameIndex.bucket entries => entries
+  | _ => List.nil
+}
+  | Nat.succ remaining => fun (index : PsErasureNameIndex(Value)) (hash : Nat) => let smaller : (_ : PsErasureNameIndex(Value)) -> (_ : Nat) -> List((Prod(PsName, Value))) := (psErasureIndexBucket(Value, remaining))
+match index with {
+  | PsErasureNameIndex.branch left right => if (Nat.beq((Nat.mod(hash, 2)), 0)) { smaller(left, (Nat.div(hash, 2))) } else { smaller(right, (Nat.div(hash, 2))) }
+  | _ => List.nil
+}
+}
+
+def psErasureIndexSet(Value : Type, fuel : Nat) : (_ : PsErasureNameIndex(Value)) -> (_ : Nat) -> (_ : List((Prod(PsName, Value)))) -> PsErasureNameIndex(Value) := match fuel with {
+  | Nat.zero => fun (_index : PsErasureNameIndex(Value)) (_hash : Nat) (entries : List((Prod(PsName, Value)))) => PsErasureNameIndex.bucket(entries)
+  | Nat.succ remaining => fun (index : PsErasureNameIndex(Value)) (hash : Nat) (entries : List((Prod(PsName, Value)))) => let smaller : (_ : PsErasureNameIndex(Value)) -> (_ : Nat) -> (_ : List((Prod(PsName, Value)))) -> PsErasureNameIndex(Value) := (psErasureIndexSet(Value, remaining))
+let left : PsErasureNameIndex(Value) := (match index with {
+  | PsErasureNameIndex.branch value _ => value
+  | _ => PsErasureNameIndex.empty
+})
+let right : PsErasureNameIndex(Value) := (match index with {
+  | PsErasureNameIndex.branch _ value => value
+  | _ => PsErasureNameIndex.empty
+})
+if (Nat.beq((Nat.mod(hash, 2)), 0)) { PsErasureNameIndex.branch((smaller(left, (Nat.div(hash, 2)), entries)), right) } else { PsErasureNameIndex.branch(left, (smaller(right, (Nat.div(hash, 2)), entries))) }
+}
+
+def psErasureIndexFindInBucketWorker(Value : Type, entries : List((Prod(PsName, Value))), target : PsName) : Option(Value) := match entries with {
+  | List.nil => Option.none
+  | List.cons entry rest => match entry with {
+  | Prod.mk key value => if (psNameEq(key, target)) { Option.some(value) } else { psErasureIndexFindInBucketWorker(Value, rest, target) }
+}
+}
+
+def psErasureIndexFindInBucket(Value : Type, entries : List((Prod(PsName, Value)))) : (_ : PsName) -> Option(Value) := fun (target : PsName) => psErasureIndexFindInBucketWorker(Value, entries, target)
+
+def psErasureIndexFind(Value : Type, index : PsErasureNameIndex(Value), name : PsName) : Option(Value) := psErasureIndexFindInBucket(Value, (psErasureIndexBucket(Value, 16, index, (psEnvironmentNameHash(name)))), name)
+
+def psErasureIndexInsert(Value : Type, index : PsErasureNameIndex(Value), name : PsName, value : Value) : PsErasureNameIndex(Value) := let hash := (psEnvironmentNameHash(name))
+psErasureIndexSet(Value, 16, index, hash, (List.cons((Prod.mk(name, value)), (psErasureIndexBucket(Value, 16, index, hash)))))
+
+-- Right folds over large declaration spines use an explicit reversed work list.
+-- The complete state preserves original insertion order and refusal precedence.
+def psErasureFoldReverseWorker {Input : Type} {State : Type}(step : (_ : Input) -> (_ : State) -> State, values : List(Input), state : State) : State := match values with {
+  | List.nil => state
+  | List.cons value rest => psErasureFoldReverseWorker(step, rest, (step(value, state)))
+}
+
+def psErasureFoldRight {Input : Type} {State : Type}(step : (_ : Input) -> (_ : State) -> State, values : List(Input), state : State) : State := psErasureFoldReverseWorker(step, (psListReverse(values)), state)
+
+def psErasureIndexPrependStep(Value : Type, entry : Prod(PsName, Value), tail : PsErasureNameIndex(Value)) : PsErasureNameIndex(Value) := match entry with {
+  | Prod.mk name value => psErasureIndexInsert(Value, tail, name, value)
+}
+
+def psErasureIndexPrepend(Value : Type, entries : List((Prod(PsName, Value)))) : (_ : PsErasureNameIndex(Value)) -> PsErasureNameIndex(Value) := fun (tail : PsErasureNameIndex(Value)) => psErasureFoldRight((psErasureIndexPrependStep(Value)), entries, tail)
+
+inductive PsErasedBinderKind where {
+  | type
+  | proof
+  | runtime
+}
+
+-- Flat declaration entries are distinct from canonical unary function values.
+-- These slots describe the checked declaration before call-site substitution.
+structure PsErasureEntryInfo where {
+  binders : List(PsErasedBinderKind)
+  runtimeArity : Nat
+  typeArity : Nat
+}
+
+structure PsErasureDeclarationNames where {
+  byCore : PsErasureNameIndex(String)
+  byOutput : PsErasureNameIndex(Bool)
+  count : Nat
+  entries : PsErasureNameIndex(PsErasureEntryInfo)
+}
+
+def psErasureDeclarationNameStep(entry : Prod(PsName, String), tail : PsErasureDeclarationNames) : PsErasureDeclarationNames := match entry with {
+  | Prod.mk name value => PsErasureDeclarationNames.mk((psErasureIndexInsert(String, tail.byCore, name, value)), (psErasureIndexInsert(Bool, tail.byOutput, (PsName.str(PsName.anonymous, value)), true)), (Nat.succ(tail.count)), tail.entries)
+}
+
+def psErasureDeclarationNameIndex(entries : List((Prod(PsName, String)))) : PsErasureDeclarationNames := psErasureFoldRight(psErasureDeclarationNameStep, entries, (PsErasureDeclarationNames.mk(PsErasureNameIndex.empty, PsErasureNameIndex.empty, 0, PsErasureNameIndex.empty)))
+
+inductive PsErasureError where {
+  | fuelExhausted
+  | binderMismatch
+  | looseBoundVariable
+  | unresolvedMetavariable
+  | unknownLocal(id : Nat)
+  | erasedLocalUsed(id : Nat)
+  | unsupportedRuntimeTerm
+  | unsupportedApplication
+  | unknownConstant(name : PsName)
+}
+
+structure PsRuntimeStructureField where {
+  sourceIndex : Nat
+  projectionIndex : Nat
+  name : String
+  type : PsVerifiedIrType
+}
+
+structure PsRuntimeStructureInfo where {
+  name : String
+  coreName : PsName
+  constructorName : PsName
+  numParams : Nat
+  typeParameters : List(PsVerifiedIrTypeParameter)
+  fields : List(PsRuntimeStructureField)
+}
+
+structure PsRuntimeConstructorField where {
+  sourceIndex : Nat
+  name : String
+  type : PsVerifiedIrType
+  recursive : Bool
+}
+
+structure PsRuntimeConstructorInfo where {
+  inductiveName : String
+  name : String
+  coreName : PsName
+  numParams : Nat
+  fields : List(PsRuntimeConstructorField)
+}
+
+structure PsRuntimeInductiveInfo where {
+  name : String
+  coreName : PsName
+  recursorName : PsName
+  numParams : Nat
+  typeParameters : List(PsVerifiedIrTypeParameter)
+  constructors : List(PsRuntimeConstructorInfo)
+}
+
+-- Only declaration binders contribute; restore their order at recursive calls.
+structure PsErasureCurrentDefinition where {
+  name : String
+  typeArgumentsRev : List(PsVerifiedIrType)
+  runtimeParameters : List(String)
+}
+
+structure PsErasureScope where {
+  localContext : PsLocalContext
+  runtimeLocals : List((_root_.Prod(Nat, String)))
+  typeLocals : List((_root_.Prod(Nat, String)))
+  erasedLocals : List(Nat)
+  declarationNames : PsErasureDeclarationNames
+  runtimeConstructors : PsErasureNameIndex(PsRuntimeConstructorInfo)
+  runtimeRecursors : PsErasureNameIndex(PsRuntimeInductiveInfo)
+  runtimeStructures : PsErasureNameIndex(PsRuntimeStructureInfo)
+  runtimeStructureConstructors : PsErasureNameIndex(PsRuntimeStructureInfo)
+  runtimeExpressions : List((_root_.Prod(Nat, PsVerifiedIrExpr)))
+  currentDefinition : Option(PsErasureCurrentDefinition)
+}
+
+def psErasureNatRecursor : PsRuntimeInductiveInfo := PsRuntimeInductiveInfo.mk("Nat", psNatName, psNatRecName, 0, List.nil, (List.cons((PsRuntimeConstructorInfo.mk("Nat", "zero", psNatZeroName, 0, List.nil)), (List.cons((PsRuntimeConstructorInfo.mk("Nat", "succ", psNatSuccName, 0, (List.cons((PsRuntimeConstructorField.mk(0, "predecessor", (PsVerifiedIrType.primitive(PsVerifiedIrPrimitiveType.nat)), true)), List.nil)))), List.nil)))))
+
+def psErasureScopeEmpty(declarationNames : List((_root_.Prod(PsName, String)))) : PsErasureScope := { localContext := psLocalEmpty, runtimeLocals := _root_.List.nil, typeLocals := _root_.List.nil, erasedLocals := _root_.List.nil, declarationNames := psErasureDeclarationNameIndex(declarationNames), runtimeConstructors := PsErasureNameIndex.empty, runtimeRecursors := psErasureIndexInsert(PsRuntimeInductiveInfo, PsErasureNameIndex.empty, psNatRecName, psErasureNatRecursor), runtimeStructures := PsErasureNameIndex.empty, runtimeStructureConstructors := PsErasureNameIndex.empty, runtimeExpressions := _root_.List.nil, currentDefinition := Option.none }
+
+def psErasureLookupRuntimeExpressionWorker(entries : List((Prod(Nat, PsVerifiedIrExpr))), target : Nat) : Option(PsVerifiedIrExpr) := match entries with {
+  | List.nil => Option.none
+  | List.cons entry rest => match entry with {
+  | Prod.mk key value => if (Nat.beq(key, target)) { Option.some(value) } else { psErasureLookupRuntimeExpressionWorker(rest, target) }
+}
+}
+
+def psErasureLookupRuntimeExpression(entries : List((Prod(Nat, PsVerifiedIrExpr)))) : (_ : Nat) -> Option(PsVerifiedIrExpr) := fun (target : Nat) => psErasureLookupRuntimeExpressionWorker(entries, target)
+
+def psErasureLookupNatWorker(entries : List((Prod(Nat, String))), target : Nat) : Option(String) := match entries with {
+  | List.nil => Option.none
+  | List.cons entry rest => match entry with {
+  | Prod.mk key value => if (Nat.beq(key, target)) { Option.some(value) } else { psErasureLookupNatWorker(rest, target) }
+}
+}
+
+def psErasureLookupNat(entries : List((Prod(Nat, String)))) : (_ : Nat) -> Option(String) := fun (target : Nat) => psErasureLookupNatWorker(entries, target)
+
+def psErasureLookupName(entries : PsErasureDeclarationNames, name : PsName) : Option(String) := psErasureIndexFind(String, entries.byCore, name)
+
+def psErasureLookupEntry(entries : PsErasureDeclarationNames, name : PsName) : Option(PsErasureEntryInfo) := psErasureIndexFind(PsErasureEntryInfo, entries.entries, name)
+
+def psErasureLookupStructure(entries : PsErasureNameIndex(PsRuntimeStructureInfo), name : PsName) : Option(PsRuntimeStructureInfo) := psErasureIndexFind(PsRuntimeStructureInfo, entries, name)
+
+def psErasureLookupConstructor(entries : PsErasureNameIndex(PsRuntimeConstructorInfo), name : PsName) : Option(PsRuntimeConstructorInfo) := psErasureIndexFind(PsRuntimeConstructorInfo, entries, name)
+
+def psErasureLookupRecursor(entries : PsErasureNameIndex(PsRuntimeInductiveInfo), name : PsName) : Option(PsRuntimeInductiveInfo) := psErasureIndexFind(PsRuntimeInductiveInfo, entries, name)
+
+def psErasureNatInListWorker(values : List(Nat), target : Nat) : Bool := match values with {
+  | List.nil => false
+  | List.cons value rest => if (Nat.beq(value, target)) { true } else { psErasureNatInListWorker(rest, target) }
+}
+
+def psErasureNatInList(values : List(Nat)) : (_ : Nat) -> Bool := fun (target : Nat) => psErasureNatInListWorker(values, target)
+
+def psLevelNormalizesToZero(level : PsLevel) : Bool := match level with {
+  | PsLevel.zero => true
+  | PsLevel.succ _ => false
+  | PsLevel.max left right => if (psLevelNormalizesToZero(left)) { psLevelNormalizesToZero(right) } else { false }
+  | PsLevel.imax _ right => psLevelNormalizesToZero(right)
+  | PsLevel.param _ => false
+  | PsLevel.mvar _ => false
+}
+
+def psErasureNatNotEqual(left : Nat, right : Nat) : Bool := if (Nat.beq(left, right)) { false } else { true }
+
+def psErasureIsProp(environment : PsEnvironment, localContext : PsLocalContext, expr : PsExpr) : Bool := match (psInferType(environment, psMetaEmpty, localContext, expr)) with {
+  | Except.error _ => false
+  | Except.ok inferred => match (psWhnf(environment, psMetaEmpty, localContext, inferred)) with {
+  | sortE level => psLevelNormalizesToZero(level)
+  | _ => false
+}
+}
+
+-- Type/proposition-valued constants are checked declarations without a
+-- runtime value. Keep them in the environment for definitional equality.
+-- A checked type-valued declaration stays in the Core environment but has no
+-- executable value, including aliases with type/runtime parameters. Open the
+-- full telescope before classifying its result; runtime polymorphic values still
+-- end in a data type and retain their executable declarations.
+def psErasureTypeValuedWithFuelWorker(environment : PsEnvironment, fuel : Nat, locals : PsLocalContext, type : PsExpr) : Bool := match fuel with {
+  | Nat.zero => false
+  | Nat.succ remaining => match (psWhnf(environment, psMetaEmpty, locals, type)) with {
+  | PsExpr.sortE _ => true
+  | PsExpr.forallE name domain body binder => let pushed := (psLocalPushBinding(locals, name, domain, binder))
+psErasureTypeValuedWithFuelWorker(environment, remaining, pushed.context, (psExprInstantiate1(body, (PsExpr.fvar(pushed.id)))))
+  | _ => false
+}
+}
+
+def psErasureTypeValuedWithFuel(environment : PsEnvironment, fuel : Nat) : (_ : PsLocalContext) -> (_ : PsExpr) -> Bool := fun (locals : PsLocalContext) (type : PsExpr) => psErasureTypeValuedWithFuelWorker(environment, fuel, locals, type)
+
+def psErasureDefinitionIsErased(environment : PsEnvironment, type : PsExpr) : Bool := if (psErasureTypeValuedWithFuel(environment, 4096, psLocalEmpty, type)) { true } else { psErasureIsProp(environment, psLocalEmpty, type) }
+
+def psErasureClassifyBinder(environment : PsEnvironment, localContext : PsLocalContext, type : PsExpr) : PsErasedBinderKind := match (psWhnf(environment, psMetaEmpty, localContext, type)) with {
+  | sortE level => if (psLevelNormalizesToZero(level)) { PsErasedBinderKind.proof } else { PsErasedBinderKind.type }
+  | _ => if (psErasureIsProp(environment, localContext, type)) { PsErasedBinderKind.proof } else { PsErasedBinderKind.runtime }
+}
+
+-- Mirror psEraseOpenDefinition's aligned raw forall/lambda prefix. In particular,
+-- do not weak-head normalize the value or turn an instantiated result arrow into
+-- another declaration parameter. Structure-recursor lowering preserves this prefix.
+-- Construct the smaller worker only when this prefix step is used.
+-- Only the value's lambda spine is inspected. Replacing bound
+-- variables by fresh free variables cannot create or remove a lambda,
+-- so do not traverse the entire value body again for metadata.
+def psErasureEntryInfoWithFuel(environment : PsEnvironment, fuel : Nat) : (_ : PsLocalContext) -> (_ : PsExpr) -> (_ : PsExpr) -> Except(PsErasureError, PsErasureEntryInfo) := match fuel with {
+  | Nat.zero => fun (_context : PsLocalContext) (_type : PsExpr) (_value : PsExpr) => Except.error(PsErasureError.fuelExhausted)
+  | Nat.succ remaining => fun (context : PsLocalContext) (type : PsExpr) (value : PsExpr) => match type with {
+  | PsExpr.forallE name domain typeBody binder => match value with {
+  | PsExpr.lam _ _ valueBody _ => let smaller : (_ : PsLocalContext) -> (_ : PsExpr) -> (_ : PsExpr) -> Except(PsErasureError, PsErasureEntryInfo) := (psErasureEntryInfoWithFuel(environment, remaining))
+let kind := (psErasureClassifyBinder(environment, context, domain))
+let pushed := (psLocalPushBinding(context, name, domain, binder))
+let openedParameter := (PsExpr.fvar(pushed.id))
+match (smaller(pushed.context, (psExprInstantiate1(typeBody, openedParameter)), valueBody)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok tail => let runtimeArity : Nat := (match kind with {
+  | PsErasedBinderKind.runtime => Nat.succ(tail.runtimeArity)
+  | _ => tail.runtimeArity
+})
+let typeArity : Nat := (match kind with {
+  | PsErasedBinderKind.type => Nat.succ(tail.typeArity)
+  | _ => tail.typeArity
+})
+Except.ok((PsErasureEntryInfo.mk((List.cons(kind, tail.binders)), runtimeArity, typeArity)))
+}
+  | _ => Except.ok((PsErasureEntryInfo.mk(List.nil, 0, 0)))
+}
+  | _ => Except.ok((PsErasureEntryInfo.mk(List.nil, 0, 0)))
+}
+}
+
+-- The emitted declaration loop drops these definitions before opening binders.
+def psErasureAddDeclarationEntry(environment : PsEnvironment, name : PsName, type : PsExpr, value : PsExpr, entries : PsErasureNameIndex(PsErasureEntryInfo)) : Except(PsErasureError, (PsErasureNameIndex(PsErasureEntryInfo))) := if (psErasureDefinitionIsErased(environment, type)) { Except.ok(entries) } else { match (psErasureEntryInfoWithFuel(environment, 4096, psLocalEmpty, type, value)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok info => Except.ok((psErasureIndexInsert(PsErasureEntryInfo, entries, name, info)))
+} }
+
+def psErasureDeclarationEntryStep(environment : PsEnvironment, declaration : PsDeclaration, state : Except(PsErasureError, (PsErasureNameIndex(PsErasureEntryInfo)))) : Except(PsErasureError, (PsErasureNameIndex(PsErasureEntryInfo))) := match state with {
+  | Except.error error => Except.error(error)
+  | Except.ok tail => match declaration with {
+  | PsDeclaration.definitionDecl name _ type value => psErasureAddDeclarationEntry(environment, name, type, value, tail)
+  | PsDeclaration.partialDecl name _ type value => psErasureAddDeclarationEntry(environment, name, type, value, tail)
+  | _ => Except.ok(tail)
+}
+}
+
+def psErasureDeclarationEntryIndex(environment : PsEnvironment, declarations : List(PsDeclaration)) : Except(PsErasureError, (PsErasureNameIndex(PsErasureEntryInfo))) := psErasureFoldRight((psErasureDeclarationEntryStep(environment)), declarations, (Except.ok(PsErasureNameIndex.empty)))
+
+def psErasurePrepareDeclarationEntries(environment : PsEnvironment, declarations : List(PsDeclaration), scope : PsErasureScope) : Except(PsErasureError, PsErasureScope) := match (psErasureDeclarationEntryIndex(environment, declarations)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok entries => let names := (PsErasureDeclarationNames.mk(scope.declarationNames.byCore, scope.declarationNames.byOutput, scope.declarationNames.count, entries))
+Except.ok((PsErasureScope.mk(scope.localContext, scope.runtimeLocals, scope.typeLocals, scope.erasedLocals, names, scope.runtimeConstructors, scope.runtimeRecursors, scope.runtimeStructures, scope.runtimeStructureConstructors, scope.runtimeExpressions, scope.currentDefinition)))
+}
+
+def psErasureNatBetween(lower : Nat, value : Nat, upper : Nat) : Bool := if (Nat.ble(lower, value)) { Nat.ble(value, upper) } else { false }
+
+def psErasureAsciiAlpha(char : Char) : Bool := let value := (Char.toNat(char))
+if (psErasureNatBetween(65, value, 90)) { true } else { psErasureNatBetween(97, value, 122) }
+
+def psErasureSafeChar(char : Char) : Char := if (psErasureAsciiAlpha(char)) { char } else { if (psErasureNatBetween(48, (Char.toNat(char)), 57)) { char } else { if (Nat.beq((Char.toNat(char)), (Char.toNat('_')))) { char } else { if (Nat.beq((Char.toNat(char)), (Char.toNat('$')))) { char } else { '_' } } } }
+
+def psErasureSafeChars(chars : List(Char)) : List(Char) := match chars with {
+  | List.nil => List.nil
+  | List.cons char rest => List.cons((psErasureSafeChar(char)), (psErasureSafeChars(rest)))
+}
+
+def psErasureSafeStringFromWithFuel(fuel : Nat) : (_ : String) -> (_ : Nat) -> (_ : String) -> String := match fuel with {
+  | Nat.zero => fun (_raw : String) (_position : Nat) (mapped : String) => mapped
+  | Nat.succ remaining => fun (raw : String) (position : Nat) (mapped : String) => let smaller : (_ : String) -> (_ : Nat) -> (_ : String) -> String := (psErasureSafeStringFromWithFuel(remaining))
+if (String.Internal.atEnd(raw, (String.Pos.Raw.mk(position)))) { mapped } else { let char := (String.Internal.get(raw, (String.Pos.Raw.mk(position))))
+let next := (String.Pos.Raw.byteIdx((String.Internal.next(raw, (String.Pos.Raw.mk(position))))))
+smaller(raw, next, (String.push(mapped, (psErasureSafeChar(char))))) }
+}
+
+def psErasureSafeStringFrom(raw : String, position : Nat, mapped : String) : String := psErasureSafeStringFromWithFuel((Nat.succ((String.utf8ByteSize(raw)))), raw, position, mapped)
+
+def psErasureSafeIdentifier(raw : String, fallback : String) : String := let mapped := (psErasureSafeStringFrom(raw, 0, ""))
+let base := (if (Nat.beq((String.Internal.length(mapped)), 0)) { fallback } else { mapped })
+if (String.Internal.atEnd(base, (String.Pos.Raw.mk(0)))) { fallback } else { let first := (String.Internal.get(base, (String.Pos.Raw.mk(0))))
+if (psErasureAsciiAlpha(first)) { base } else { if (Nat.beq((Char.toNat(first)), (Char.toNat('_')))) { base } else { if (Nat.beq((Char.toNat(first)), (Char.toNat('$')))) { base } else { String.Internal.append("_", base) } } } }
+
+-- Source/Core identity and property labels are not executable binding names.
+-- Escape strict ECMAScript bindings and TypeScript type/declaration keywords
+-- before the existing global/local collision allocators choose their exact names.
+-- Keeping this policy in shared erasure gives JS and TS the same typed IR.
+def psErasureBindingReserved(value : String) : Bool := psListAny((fun (keyword : String) => psStringEq(value, keyword)), (_root_.List.cons("BigInt", (_root_.List.cons("Number", (_root_.List.cons("String", (_root_.List.cons("Array", (_root_.List.cons("Math", (_root_.List.cons("Error", (_root_.List.cons("Map", (_root_.List.cons("WeakMap", (_root_.List.cons("Reflect", (_root_.List.cons("Symbol", (_root_.List.cons("Uint32Array", (_root_.List.cons("Function", (_root_.List.cons("Generator", (_root_.List.cons("arguments", (_root_.List.cons("await", (_root_.List.cons("break", (_root_.List.cons("case", (_root_.List.cons("catch", (_root_.List.cons("class", (_root_.List.cons("const", (_root_.List.cons("continue", (_root_.List.cons("debugger", (_root_.List.cons("default", (_root_.List.cons("delete", (_root_.List.cons("do", (_root_.List.cons("else", (_root_.List.cons("enum", (_root_.List.cons("eval", (_root_.List.cons("export", (_root_.List.cons("extends", (_root_.List.cons("false", (_root_.List.cons("finally", (_root_.List.cons("for", (_root_.List.cons("function", (_root_.List.cons("if", (_root_.List.cons("implements", (_root_.List.cons("import", (_root_.List.cons("in", (_root_.List.cons("instanceof", (_root_.List.cons("interface", (_root_.List.cons("let", (_root_.List.cons("new", (_root_.List.cons("null", (_root_.List.cons("package", (_root_.List.cons("private", (_root_.List.cons("protected", (_root_.List.cons("public", (_root_.List.cons("return", (_root_.List.cons("static", (_root_.List.cons("super", (_root_.List.cons("switch", (_root_.List.cons("this", (_root_.List.cons("throw", (_root_.List.cons("true", (_root_.List.cons("try", (_root_.List.cons("typeof", (_root_.List.cons("var", (_root_.List.cons("void", (_root_.List.cons("while", (_root_.List.cons("with", (_root_.List.cons("yield", (_root_.List.cons("abstract", (_root_.List.cons("any", (_root_.List.cons("as", (_root_.List.cons("asserts", (_root_.List.cons("bigint", (_root_.List.cons("boolean", (_root_.List.cons("declare", (_root_.List.cons("infer", (_root_.List.cons("is", (_root_.List.cons("keyof", (_root_.List.cons("module", (_root_.List.cons("namespace", (_root_.List.cons("never", (_root_.List.cons("number", (_root_.List.cons("object", (_root_.List.cons("readonly", (_root_.List.cons("require", (_root_.List.cons("string", (_root_.List.cons("symbol", (_root_.List.cons("type", (_root_.List.cons("undefined", (_root_.List.cons("unique", (_root_.List.cons("unknown", (_root_.List.cons("__ps$utf8", (_root_.List.cons("__ps$utf8Cache", _root_.List.nil)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
+
+def psErasureBindingIdentifier(raw : String, fallback : String) : String := let sanitized := (psErasureSafeIdentifier(raw, fallback))
+if (psErasureBindingReserved(sanitized)) { String.Internal.append("_", sanitized) } else { sanitized }
+
+def psErasureLocalNameUsed(scope : PsErasureScope, candidate : String) : Bool := let localUses : (_ : _root_.Prod(Nat, String)) -> Bool := (fun (entry : _root_.Prod(Nat, String)) => match entry with {
+  | Prod.mk _ value => psStringEq(value, candidate)
+})
+if (psListAny(localUses, scope.runtimeLocals)) { true } else { match (psErasureIndexFind(Bool, scope.declarationNames.byOutput, (PsName.str(PsName.anonymous, candidate)))) with {
+  | Option.some _ => true
+  | Option.none => false
+} }
+
+def psErasureLocalNameWithFuel(scope : PsErasureScope, base : String, fuel : Nat, index : Nat) : String := match fuel with {
+  | Nat.zero => String.Internal.append(base, (String.Internal.append("$", (psNatToString(index)))))
+  | Nat.succ remaining => let candidate := (String.Internal.append(base, (String.Internal.append("$", (psNatToString(index))))))
+if (psErasureLocalNameUsed(scope, candidate)) { psErasureLocalNameWithFuel(scope, base, remaining, (Nat.succ(index))) } else { candidate }
+}
+
+def psErasureLocalName(scope : PsErasureScope, raw : String, fallback : String, id : Nat) : String := let base := (psErasureBindingIdentifier(raw, fallback))
+let fuel := (Nat.succ((Nat.add((psListLength(scope.runtimeLocals)), scope.declarationNames.count))))
+if (psStringEq(base, "_")) { psErasureLocalNameWithFuel(scope, fallback, fuel, id) } else { if (psErasureLocalNameUsed(scope, base)) { psErasureLocalNameWithFuel(scope, base, fuel, id) } else { base } }
+
+structure PsErasureAppView where {
+  head : PsExpr
+  args : List(PsExpr)
+}
+
+def psErasureAppViewAcc(expr : PsExpr) : (_ : List(PsExpr)) -> PsErasureAppView := match expr with {
+  | PsExpr.app fn arg => let smaller : (_ : List(PsExpr)) -> PsErasureAppView := (psErasureAppViewAcc(fn))
+fun (args : List(PsExpr)) => smaller((List.cons(arg, args)))
+  | _ => fun (args : List(PsExpr)) => PsErasureAppView.mk(expr, args)
+}
+
+def psErasureAppView(expr : PsExpr) : PsErasureAppView := psErasureAppViewAcc(expr, _root_.List.nil)
+
+def psErasureExprListAtWorker(index : Nat) : (_ : List(PsExpr)) -> Option(PsExpr) := match index with {
+  | _root_.Nat.zero => fun (values : List(PsExpr)) => match values with {
+  | _root_.List.nil => Option.none
+  | _root_.List.cons value _listTail => Option.some(value)
+}
+  | _root_.Nat.succ nextIndex => fun (values : List(PsExpr)) => let smaller : (_ : List(PsExpr)) -> Option(PsExpr) := (psErasureExprListAtWorker(nextIndex))
+match values with {
+  | _root_.List.nil => Option.none
+  | _root_.List.cons _listHead rest => smaller(rest)
+}
+}
+
+def psErasureExprListAt(values : List(PsExpr), index : Nat) : Option(PsExpr) := psErasureExprListAtWorker(index, values)
+
+def psErasurePrimitiveType(name : PsName) : Option(PsVerifiedIrType) := if (psNameEq(name, psNatName)) { Option.some((PsVerifiedIrType.primitive(PsVerifiedIrPrimitiveType.nat))) } else { if (psNameEq(name, psIntName)) { Option.some((PsVerifiedIrType.primitive(PsVerifiedIrPrimitiveType.int))) } else { if (psNameEq(name, psUInt8Name)) { Option.some((PsVerifiedIrType.primitive(PsVerifiedIrPrimitiveType.uint8))) } else { if (psNameEq(name, psUInt16Name)) { Option.some((PsVerifiedIrType.primitive(PsVerifiedIrPrimitiveType.uint16))) } else { if (psNameEq(name, psUInt32Name)) { Option.some((PsVerifiedIrType.primitive(PsVerifiedIrPrimitiveType.uint32))) } else { if (psNameEq(name, psUInt64Name)) { Option.some((PsVerifiedIrType.primitive(PsVerifiedIrPrimitiveType.uint64))) } else { if (psNameEq(name, psUSizeName)) { Option.some((PsVerifiedIrType.primitive(PsVerifiedIrPrimitiveType.usize))) } else { if (psNameEq(name, psInt8Name)) { Option.some((PsVerifiedIrType.primitive(PsVerifiedIrPrimitiveType.int8))) } else { if (psNameEq(name, psInt16Name)) { Option.some((PsVerifiedIrType.primitive(PsVerifiedIrPrimitiveType.int16))) } else { if (psNameEq(name, psInt32Name)) { Option.some((PsVerifiedIrType.primitive(PsVerifiedIrPrimitiveType.int32))) } else { if (psNameEq(name, psInt64Name)) { Option.some((PsVerifiedIrType.primitive(PsVerifiedIrPrimitiveType.int64))) } else { if (psNameEq(name, psISizeName)) { Option.some((PsVerifiedIrType.primitive(PsVerifiedIrPrimitiveType.isize))) } else { if (psNameEq(name, psFloatName)) { Option.some((PsVerifiedIrType.primitive(PsVerifiedIrPrimitiveType.float))) } else { if (psNameEq(name, psFloat32Name)) { Option.some((PsVerifiedIrType.primitive(PsVerifiedIrPrimitiveType.float32))) } else { if (psNameEq(name, psBoolName)) { Option.some((PsVerifiedIrType.primitive(PsVerifiedIrPrimitiveType.bool))) } else { if (psNameEq(name, psCharName)) { Option.some((PsVerifiedIrType.primitive(PsVerifiedIrPrimitiveType.char))) } else { if (psNameEq(name, psStringName)) { Option.some((PsVerifiedIrType.primitive(PsVerifiedIrPrimitiveType.string))) } else { if (psNameEq(name, psUnitName)) { Option.some((PsVerifiedIrType.primitive(PsVerifiedIrPrimitiveType.unit))) } else { if (psStringEq((psNameToString(name)), "String.Pos.Raw")) { Option.some((PsVerifiedIrType.primitive(PsVerifiedIrPrimitiveType.nat))) } else { Option.none } } } } } } } } } } } } } } } } } } }
+
+def psErasureMapRuntimeTypes(erase : (_ : PsExpr) -> Except(PsErasureError, PsVerifiedIrType), values : List(PsExpr)) : Except(PsErasureError, (List(PsVerifiedIrType))) := match values with {
+  | List.nil => Except.ok(List.nil)
+  | List.cons value rest => match (erase(value)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok result => match (psErasureMapRuntimeTypes(erase, rest)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok results => Except.ok((List.cons(result, results)))
+}
+}
+}
+
+-- Function values use unary groups, including beneath named
+-- type arguments. This shape commutes with type substitution.
+def psEraseRuntimeTypeWithFuelWorker(environment : PsEnvironment, fuel : Nat) : (_ : PsErasureScope) -> (_ : PsExpr) -> Except(PsErasureError, PsVerifiedIrType) := match fuel with {
+  | Nat.zero => fun (_scope : PsErasureScope) (_type : PsExpr) => Except.error(PsErasureError.fuelExhausted)
+  | Nat.succ remaining => fun (scope : PsErasureScope) (type : PsExpr) => let smaller : (_ : PsErasureScope) -> (_ : PsExpr) -> Except(PsErasureError, PsVerifiedIrType) := (psEraseRuntimeTypeWithFuelWorker(environment, remaining))
+let value := (psWhnf(environment, psMetaEmpty, scope.localContext, type))
+match value with {
+  | fvar id => match (psErasureLookupNat(scope.typeLocals, id)) with {
+  | Option.some name => Except.ok((PsVerifiedIrType.typeParameter(name)))
+  | Option.none => Except.ok(PsVerifiedIrType.unknown)
+}
+  | constE name _ => match (psErasurePrimitiveType(name)) with {
+  | Option.some primitive => Except.ok(primitive)
+  | Option.none => let outputName : String := (match (psErasureLookupName(scope.declarationNames, name)) with {
+  | Option.some known => known
+  | Option.none => psErasureSafeIdentifier((psNameToString(name)), "Type")
+})
+Except.ok((PsVerifiedIrType.named(outputName, _root_.List.nil)))
+}
+  | app _ _ => let view := (psErasureAppView(value))
+match view.head with {
+  | constE name _ => let outputName : String := (match (psErasureLookupName(scope.declarationNames, name)) with {
+  | Option.some known => known
+  | Option.none => psErasureSafeIdentifier((psNameToString(name)), "Type")
+})
+match (psErasureMapRuntimeTypes((smaller(scope)), view.args)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok arguments => Except.ok((PsVerifiedIrType.named(outputName, arguments)))
+}
+  | _ => Except.ok(PsVerifiedIrType.unknown)
+}
+  | forallE name domain body binder => match (psErasureClassifyBinder(environment, scope.localContext, domain)) with {
+  | runtime => let pushed := (psLocalPushBinding(scope.localContext, name, domain, binder))
+let runtimeName := (psErasureSafeIdentifier((psNameToString(name)), "_arg"))
+let nextScope : PsErasureScope := ({ localContext := pushed.context, runtimeLocals := List.cons((Prod.mk(pushed.id, runtimeName)), scope.runtimeLocals), typeLocals := scope.typeLocals, erasedLocals := scope.erasedLocals, declarationNames := scope.declarationNames, runtimeConstructors := scope.runtimeConstructors, runtimeRecursors := scope.runtimeRecursors, runtimeStructures := scope.runtimeStructures, runtimeStructureConstructors := scope.runtimeStructureConstructors, runtimeExpressions := _root_.List.nil, currentDefinition := Option.none })
+match (smaller(scope, domain)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok parameter => match (smaller(nextScope, (psExprInstantiate1(body, (PsExpr.fvar(pushed.id)))))) with {
+  | Except.error error => Except.error(error)
+  | Except.ok result => Except.ok((PsVerifiedIrType.function((_root_.List.cons(parameter, _root_.List.nil)), result)))
+}
+}
+  | _ => Except.ok(PsVerifiedIrType.unknown)
+}
+  | _ => Except.ok(PsVerifiedIrType.unknown)
+}
+}
+
+def psEraseRuntimeTypeWithFuel(environment : PsEnvironment, scope : PsErasureScope, fuel : Nat, type : PsExpr) : Except(PsErasureError, PsVerifiedIrType) := psEraseRuntimeTypeWithFuelWorker(environment, fuel, scope, type)
+
+def psEraseRuntimeType(environment : PsEnvironment, scope : PsErasureScope, type : PsExpr) : Except(PsErasureError, PsVerifiedIrType) := psEraseRuntimeTypeWithFuel(environment, scope, 4096, type)

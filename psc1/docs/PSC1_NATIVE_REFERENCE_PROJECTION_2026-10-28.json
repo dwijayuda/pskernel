@@ -1,0 +1,87 @@
+{
+  "schema": "psc1-native-reference-projection-record/1",
+  "status": "passed",
+  "testedCommit": "0484c750e053e0212a03d31ab8563e2b39cb301f",
+  "run": 40645976121,
+  "job": 122674759830,
+  "artifact": {
+    "id": 12797865945,
+    "name": "psc1-native-reference-projection-0484c750e053e0212a03d31ab8563e2b39cb301f",
+    "bytes": 7777,
+    "zipSha256": "287af5a231c0cdb070550cbf77ad5880c29fc12d57535d43ffbb614b61bec49f"
+  },
+  "result": {
+    "schema": "psc1-native-reference-projection-regression/1",
+    "status": "passed",
+    "projected": {
+      "schema": "psc1-native-reference-projection/1",
+      "status": "candidate-only",
+      "script": "scripts/NativeReferenceProjection.lean",
+      "scriptSha256": "4862465c9d605748f912338c362d0c214a49a4e7d6cbe3a8ce0941c87412caf8",
+      "requestSha256": "7ffb5a77db86c73bbb547108eb97a7f6c7ff57805b6efb6d64a9f782ad241a1d",
+      "responseSha256": "0fff2e5c1d8d2ee1547bb25fa774515d561a2ae6883d9309f3c2f5aaf6d1c473",
+      "elapsedMs": 1027,
+      "modules": [
+        {
+          "module": "ProjectionFixture",
+          "inputBytes": 799,
+          "inputSha256": "977a18a68633e462b4347d9e3e9fb646dfc80e4f493849dda556b68562676091",
+          "outputBytes": 801,
+          "outputSha256": "937f6ab71044211d47999dd44ad4e921b0ea9338ffd13525609dfbccfe510595",
+          "constructorDots": [
+            {
+              "byteOffset": 238,
+              "name": "empty",
+              "nameStopByteOffset": 243
+            },
+            {
+              "byteOffset": 253,
+              "name": "item",
+              "nameStopByteOffset": 257
+            }
+          ],
+          "reparsed": true,
+          "idempotent": true,
+          "allOriginalBytesPreserved": true
+        }
+      ],
+      "admissionAuthority": false,
+      "sourceFilesWritten": false,
+      "formalSourcePreservationProof": false
+    },
+    "idempotent": {
+      "schema": "psc1-native-reference-projection/1",
+      "status": "candidate-only",
+      "script": "scripts/NativeReferenceProjection.lean",
+      "scriptSha256": "4862465c9d605748f912338c362d0c214a49a4e7d6cbe3a8ce0941c87412caf8",
+      "requestSha256": "95711b47936a3960468d611721504c8a803c6348953bdaeb64e46b725946ad3c",
+      "responseSha256": "2f0eed1ef5c0c95c092ac3563cbdd560fab3c697af658d6e143fb2ea9aa7afaa",
+      "elapsedMs": 1020,
+      "modules": [
+        {
+          "module": "ProjectionFixture",
+          "inputBytes": 801,
+          "inputSha256": "937f6ab71044211d47999dd44ad4e921b0ea9338ffd13525609dfbccfe510595",
+          "outputBytes": 801,
+          "outputSha256": "937f6ab71044211d47999dd44ad4e921b0ea9338ffd13525609dfbccfe510595",
+          "constructorDots": [],
+          "reparsed": true,
+          "idempotent": true,
+          "allOriginalBytesPreserved": true
+        }
+      ],
+      "admissionAuthority": false,
+      "sourceFilesWritten": false,
+      "formalSourcePreservationProof": false
+    },
+    "nativeOriginalRefused": true,
+    "nativeProjectedCompiled": true,
+    "nativeDefinitionalEqualities": 9,
+    "malformedReportsRefused": 2,
+    "actualPatternInsertions": 2,
+    "allOtherSourceBytesPreserved": true,
+    "admissionAuthority": false
+  },
+  "interpretation": "Finite host-adapter regression. A projected source remains a candidate and requires fresh graph correspondence and native build before reference replacement.",
+  "receiptGrantsAdmissionAuthority": false
+}

@@ -1,0 +1,483 @@
+import Ps.Foundation.Text
+
+def psJsonConcat2(left : String, right : String) : String := String.Internal.append(left, right)
+
+def psJsonConcat3(first : String, second : String, third : String) : String := psJsonConcat2(first, (psJsonConcat2(second, third)))
+
+def psJsonCharCode(char : Char) : Nat := Char.toNat(char)
+
+def psJsonCharEq(left : Char, right : Char) : Bool := Nat.beq((psJsonCharCode(left)), (psJsonCharCode(right)))
+
+def psJsonStringAtEnd(value : String, position : Nat) : Bool := String.Internal.atEnd(value, (String.Pos.Raw.mk(position)))
+
+def psJsonStringGet(value : String, position : Nat) : Char := String.Internal.get(value, (String.Pos.Raw.mk(position)))
+
+def psJsonStringNext(value : String, position : Nat) : Nat := String.Pos.Raw.byteIdx((String.Internal.next(value, (String.Pos.Raw.mk(position)))))
+
+def psJsonReverseCharsAcc(values : List(Char)) : (_ : List(Char)) -> List(Char) := match values with {
+  | List.nil => fun (acc : List(Char)) => acc
+  | List.cons head tail => fun (acc : List(Char)) => let smaller : (_ : List(Char)) -> List(Char) := (psJsonReverseCharsAcc(tail))
+smaller((List.cons(head, acc)))
+}
+
+def psJsonReverseChars(values : List(Char)) : List(Char) := psJsonReverseCharsAcc(values, List.nil)
+
+def psJsonStringCharsAccWithFuel(fuel : Nat) : (_ : String) -> (_ : Nat) -> (_ : List(Char)) -> List(Char) := match fuel with {
+  | Nat.zero => fun (_value : String) (_position : Nat) (charsRev : List(Char)) => psJsonReverseChars(charsRev)
+  | Nat.succ remaining => fun (value : String) (position : Nat) (charsRev : List(Char)) => let smaller : (_ : String) -> (_ : Nat) -> (_ : List(Char)) -> List(Char) := (psJsonStringCharsAccWithFuel(remaining))
+if (psJsonStringAtEnd(value, position)) { psJsonReverseChars(charsRev) } else { smaller(value, (psJsonStringNext(value, position)), (List.cons((psJsonStringGet(value, position)), charsRev))) }
+}
+
+def psJsonStringCharsWithFuel(fuel : Nat, value : String, position : Nat) : List(Char) := psJsonStringCharsAccWithFuel(fuel, value, position, List.nil)
+
+def psJsonStringToChars(value : String) : List(Char) := psJsonStringCharsWithFuel((Nat.succ((String.utf8ByteSize(value)))), value, 0)
+
+def psJsonStringOfCharsAcc(chars : List(Char)) : (_ : String) -> String := match chars with {
+  | List.nil => fun (acc : String) => acc
+  | List.cons head tail => fun (acc : String) => let smaller : (_ : String) -> String := (psJsonStringOfCharsAcc(tail))
+smaller((String.push(acc, head)))
+}
+
+def psJsonStringOfChars(chars : List(Char)) : String := psJsonStringOfCharsAcc(chars, "")
+
+def psJsonCharListEq(left : List(Char)) : (_ : List(Char)) -> Bool := match left with {
+  | List.nil => fun (right : List(Char)) => match right with {
+  | List.nil => true
+  | List.cons _ _ => false
+}
+  | List.cons leftHead leftTail => fun (right : List(Char)) => let smaller : (_ : List(Char)) -> Bool := (psJsonCharListEq(leftTail))
+match right with {
+  | List.nil => false
+  | List.cons rightHead rightTail => if (psJsonCharEq(leftHead, rightHead)) { smaller(rightTail) } else { false }
+}
+}
+
+def psJsonStringEq(left : String, right : String) : Bool := psJsonCharListEq((psJsonStringToChars(left)), (psJsonStringToChars(right)))
+
+def psJsonNatInRange(value : Nat, lower : Nat, upper : Nat) : Bool := if (Nat.ble(lower, value)) { Nat.ble(value, upper) } else { false }
+
+def psJsonHexDigit(value : Nat) : String := if (Nat.beq(value, 0)) { "0" } else { if (Nat.beq(value, 1)) { "1" } else { if (Nat.beq(value, 2)) { "2" } else { if (Nat.beq(value, 3)) { "3" } else { if (Nat.beq(value, 4)) { "4" } else { if (Nat.beq(value, 5)) { "5" } else { if (Nat.beq(value, 6)) { "6" } else { if (Nat.beq(value, 7)) { "7" } else { if (Nat.beq(value, 8)) { "8" } else { if (Nat.beq(value, 9)) { "9" } else { if (Nat.beq(value, 10)) { "a" } else { if (Nat.beq(value, 11)) { "b" } else { if (Nat.beq(value, 12)) { "c" } else { if (Nat.beq(value, 13)) { "d" } else { if (Nat.beq(value, 14)) { "e" } else { "f" } } } } } } } } } } } } } } }
+
+def psJsonEscapeControl(value : Nat) : String := psJsonConcat3("\\u00", (psJsonHexDigit((Nat.div(value, 16)))), (psJsonHexDigit((Nat.mod(value, 16)))))
+
+def psJsonEscapeChar(char : Char) : String := let value : Nat := (Char.toNat(char))
+if (Nat.beq(value, 8)) { "\\b" } else { if (Nat.beq(value, 9)) { "\\t" } else { if (Nat.beq(value, 10)) { "\\n" } else { if (Nat.beq(value, 12)) { "\\f" } else { if (Nat.beq(value, 13)) { "\\r" } else { if (Nat.beq(value, 34)) { "\\\"" } else { if (Nat.beq(value, 92)) { "\\\\" } else { if (Nat.blt(value, 32)) { psJsonEscapeControl(value) } else { psJsonStringOfChars((List.cons(char, List.nil))) } } } } } } } }
+
+-- Balanced immutable chunks preserve exact quoting bytes without copying the
+-- complete suffix once per character. This helper retains the list API.
+def psJsonEscapeCharsWorker(chars : List(Char)) : (_ : PsTextBuilder) -> String := match chars with {
+  | List.nil => fun (builder : PsTextBuilder) => psTextBuilderFinish(builder)
+  | List.cons char rest => fun (builder : PsTextBuilder) => let smaller : (_ : PsTextBuilder) -> String := (psJsonEscapeCharsWorker(rest))
+smaller((psTextBuilderAppend(builder, (psJsonEscapeChar(char)))))
+}
+
+def psJsonEscapeChars(chars : List(Char)) : String := psJsonEscapeCharsWorker(chars, psTextBuilderEmpty)
+
+def psJsonCharNeedsEscape(char : Char) : Bool := let code : Nat := (Char.toNat(char))
+if (Nat.blt(code, 32)) { true } else { if (Nat.beq(code, 34)) { true } else { Nat.beq(code, 92) } }
+
+-- Copy unchanged UTF-8 spans in one chunk. Positions come only from the owned
+-- string cursor. The input-derived byte bound is the same as StringToChars;
+-- it is traversal capacity, not generated execution fuel.
+def psJsonEscapeStringWithFuel(fuel : Nat) : (_ : String) -> (_ : Nat) -> (_ : Nat) -> (_ : PsTextBuilder) -> String := match fuel with {
+  | Nat.zero => fun (value : String) (position : Nat) (runStart : Nat) (builder : PsTextBuilder) => psTextBuilderFinish((psTextBuilderAppend(builder, (String.Internal.extract(value, (String.Pos.Raw.mk(runStart)), (String.Pos.Raw.mk(position)))))))
+  | Nat.succ remaining => fun (value : String) (position : Nat) (runStart : Nat) (builder : PsTextBuilder) => let smaller : (_ : String) -> (_ : Nat) -> (_ : Nat) -> (_ : PsTextBuilder) -> String := (psJsonEscapeStringWithFuel(remaining))
+if (psJsonStringAtEnd(value, position)) { psTextBuilderFinish((psTextBuilderAppend(builder, (String.Internal.extract(value, (String.Pos.Raw.mk(runStart)), (String.Pos.Raw.mk(position))))))) } else { let char : Char := (psJsonStringGet(value, position))
+let next : Nat := (psJsonStringNext(value, position))
+if (psJsonCharNeedsEscape(char)) { let runText : String := (String.Internal.extract(value, (String.Pos.Raw.mk(runStart)), (String.Pos.Raw.mk(position))))
+let flushed : PsTextBuilder := (psTextBuilderAppend(builder, runText))
+smaller(value, next, next, (psTextBuilderAppend(flushed, (psJsonEscapeChar(char))))) } else { smaller(value, next, runStart, builder) } }
+}
+
+def psJsonQuote(value : String) : String := psJsonConcat3("\"", (psJsonEscapeStringWithFuel((Nat.succ((String.utf8ByteSize(value)))), value, 0, 0, psTextBuilderEmpty)), "\"")
+
+def psJsonJoin(separator : String, values : List(String)) : String := match values with {
+  | List.nil => ""
+  | List.cons value rest => match rest with {
+  | List.nil => value
+  | List.cons _ _ => psJsonConcat3(value, separator, (psJsonJoin(separator, rest)))
+}
+}
+
+def psJsonArray(values : List(String)) : String := psJsonConcat3("[", (psJsonJoin(",", values)), "]")
+
+def psJsonField(key : String, value : String) : String := psJsonConcat3((psJsonQuote(key)), ":", value)
+
+def psJsonMapObjectFields(fields : List((_root_.Prod(String, String)))) : List(String) := match fields with {
+  | List.nil => List.nil
+  | List.cons field rest => List.cons((psJsonField((Prod.fst(field)), (Prod.snd(field)))), (psJsonMapObjectFields(rest)))
+}
+
+def psJsonObject(sortedFields : List((_root_.Prod(String, String)))) : String := psJsonConcat3("{", (psJsonJoin(",", (psJsonMapObjectFields(sortedFields)))), "}")
+
+inductive PsJsonValue where {
+  | nullE
+  | bool(value : Bool)
+  | number(text : String)
+  | string(value : String)
+  | array(values : List(PsJsonValue))
+  | object(fields : List((_root_.Prod(String, PsJsonValue))))
+}
+
+inductive PsJsonParseError where {
+  | fuelExhausted
+  | unexpectedEnd
+  | expected(text : String)
+  | invalidEscape
+  | invalidUnicodeEscape
+  | invalidNumber
+  | invalidLiteral
+  | trailingInput
+}
+
+structure PsJsonParseResult where {
+  value : PsJsonValue
+  rest : List(Char)
+}
+
+def psJsonWhitespace(char : Char) : Bool := if (psJsonCharEq(char, ' ')) { true } else { if (psJsonCharEq(char, '\n')) { true } else { if (psJsonCharEq(char, '\r')) { true } else { psJsonCharEq(char, '\t') } } }
+
+def psJsonSkipWhitespace(chars : List(Char)) : List(Char) := match chars with {
+  | List.nil => List.nil
+  | List.cons char rest => if (psJsonWhitespace(char)) { psJsonSkipWhitespace(rest) } else { List.cons(char, rest) }
+}
+
+def psJsonHexValue(char : Char) : Option(Nat) := let value : Nat := (psJsonCharCode(char))
+if (psJsonNatInRange(value, 48, 57)) { Option.some((Nat.sub(value, 48))) } else { if (psJsonNatInRange(value, 65, 70)) { Option.some((Nat.sub(value, 55))) } else { if (psJsonNatInRange(value, 97, 102)) { Option.some((Nat.sub(value, 87))) } else { Option.none } } }
+
+def psJsonDecodeUnicode4(chars : List(Char)) : Except(PsJsonParseError, (_root_.Prod(Char, (List(Char))))) := match chars with {
+  | List.nil => Except.error(PsJsonParseError.unexpectedEnd)
+  | List.cons a rest1 => match rest1 with {
+  | List.nil => Except.error(PsJsonParseError.unexpectedEnd)
+  | List.cons b rest2 => match rest2 with {
+  | List.nil => Except.error(PsJsonParseError.unexpectedEnd)
+  | List.cons c rest3 => match rest3 with {
+  | List.nil => Except.error(PsJsonParseError.unexpectedEnd)
+  | List.cons d rest => match (psJsonHexValue(a)) with {
+  | Option.none => Except.error(PsJsonParseError.invalidUnicodeEscape)
+  | Option.some av => match (psJsonHexValue(b)) with {
+  | Option.none => Except.error(PsJsonParseError.invalidUnicodeEscape)
+  | Option.some bv => match (psJsonHexValue(c)) with {
+  | Option.none => Except.error(PsJsonParseError.invalidUnicodeEscape)
+  | Option.some cv => match (psJsonHexValue(d)) with {
+  | Option.none => Except.error(PsJsonParseError.invalidUnicodeEscape)
+  | Option.some dv => let value : Nat := (Nat.add((Nat.add((Nat.mul(av, 4096)), (Nat.mul(bv, 256)))), (Nat.add((Nat.mul(cv, 16)), dv))))
+if (psJsonNatInRange(value, 55296, 57343)) { Except.error(PsJsonParseError.invalidUnicodeEscape) } else { Except.ok((Prod.mk((Char.ofNat(value)), rest))) }
+}
+}
+}
+}
+}
+}
+}
+}
+
+def psJsonParseStringChars(fuel : Nat) : (_ : List(Char)) -> (_ : List(Char)) -> Except(PsJsonParseError, (_root_.Prod(String, (List(Char))))) := match fuel with {
+  | Nat.zero => fun (_chars : List(Char)) (_charsRev : List(Char)) => Except.error(PsJsonParseError.fuelExhausted)
+  | Nat.succ remaining => fun (chars : List(Char)) (charsRev : List(Char)) => let smaller : (_ : List(Char)) -> (_ : List(Char)) -> Except(PsJsonParseError, (_root_.Prod(String, (List(Char))))) := (psJsonParseStringChars(remaining))
+match chars with {
+  | List.nil => Except.error(PsJsonParseError.unexpectedEnd)
+  | List.cons char rest => if (psJsonCharEq(char, '"')) { Except.ok((Prod.mk((psJsonStringOfChars((psJsonReverseChars(charsRev)))), rest))) } else { if (psJsonCharEq(char, '\\')) { match rest with {
+  | List.nil => Except.error(PsJsonParseError.unexpectedEnd)
+  | List.cons escaped tail => if (psJsonCharEq(escaped, '"')) { smaller(tail, (List.cons('"', charsRev))) } else { if (psJsonCharEq(escaped, '\\')) { smaller(tail, (List.cons('\\', charsRev))) } else { if (psJsonCharEq(escaped, '/')) { smaller(tail, (List.cons('/', charsRev))) } else { if (psJsonCharEq(escaped, 'b')) { smaller(tail, (List.cons((Char.ofNat(8)), charsRev))) } else { if (psJsonCharEq(escaped, 'f')) { smaller(tail, (List.cons((Char.ofNat(12)), charsRev))) } else { if (psJsonCharEq(escaped, 'n')) { smaller(tail, (List.cons('\n', charsRev))) } else { if (psJsonCharEq(escaped, 'r')) { smaller(tail, (List.cons('\r', charsRev))) } else { if (psJsonCharEq(escaped, 't')) { smaller(tail, (List.cons('\t', charsRev))) } else { if (psJsonCharEq(escaped, 'u')) { match (psJsonDecodeUnicode4(tail)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok decodedResult => let decoded := (Prod.fst(decodedResult))
+let afterUnicode := (Prod.snd(decodedResult))
+smaller(afterUnicode, (List.cons(decoded, charsRev)))
+} } else { Except.error(PsJsonParseError.invalidEscape) } } } } } } } } }
+} } else { if (Nat.blt((psJsonCharCode(char)), 32)) { Except.error(PsJsonParseError.invalidEscape) } else { smaller(rest, (List.cons(char, charsRev))) } } }
+}
+}
+
+def psJsonDigit(char : Char) : Bool := let value : Nat := (psJsonCharCode(char))
+psJsonNatInRange(value, 48, 57)
+
+def psJsonTakeDigits(chars : List(Char)) : (_ : List(Char)) -> _root_.Prod((List(Char)), (List(Char))) := match chars with {
+  | List.nil => fun (digitsRev : List(Char)) => Prod.mk((psJsonReverseChars(digitsRev)), List.nil)
+  | List.cons char rest => fun (digitsRev : List(Char)) => let smaller : (_ : List(Char)) -> _root_.Prod((List(Char)), (List(Char))) := (psJsonTakeDigits(rest))
+if (psJsonDigit(char)) { smaller((List.cons(char, digitsRev))) } else { Prod.mk((psJsonReverseChars(digitsRev)), (List.cons(char, rest))) }
+}
+
+def psJsonParseNumber(chars : List(Char)) : Except(PsJsonParseError, PsJsonParseResult) := let parseUnsigned : (_ : Bool) -> (_ : List(Char)) -> Except(PsJsonParseError, PsJsonParseResult) := (fun (negative : Bool) (rest : List(Char)) => let taken := (psJsonTakeDigits(rest, List.nil))
+let digits := (Prod.fst(taken))
+let afterDigits := (Prod.snd(taken))
+match digits with {
+  | List.nil => Except.error(PsJsonParseError.invalidNumber)
+  | List.cons first more => let hasMore : Bool := (match more with {
+  | List.nil => false
+  | List.cons _ _ => true
+})
+if (psJsonCharEq(first, '0')) { if (hasMore) { Except.error(PsJsonParseError.invalidNumber) } else { let body := (psJsonStringOfChars((List.cons(first, more))))
+let text := (if (negative) { psJsonConcat2("-", body) } else { body })
+Except.ok(({ value := PsJsonValue.number(text), rest := afterDigits })) } } else { let body := (psJsonStringOfChars((List.cons(first, more))))
+let text := (if (negative) { psJsonConcat2("-", body) } else { body })
+Except.ok(({ value := PsJsonValue.number(text), rest := afterDigits })) }
+})
+match chars with {
+  | List.nil => parseUnsigned(false, chars)
+  | List.cons first rest => if (psJsonCharEq(first, '-')) { parseUnsigned(true, rest) } else { parseUnsigned(false, chars) }
+}
+
+def psJsonConsumeLiteral(expected : List(Char)) : (_ : List(Char)) -> Option((List(Char))) := match expected with {
+  | List.nil => fun (chars : List(Char)) => Option.some(chars)
+  | List.cons expectedChar expectedRest => fun (chars : List(Char)) => let smaller : (_ : List(Char)) -> Option((List(Char))) := (psJsonConsumeLiteral(expectedRest))
+match chars with {
+  | List.nil => Option.none
+  | List.cons char rest => if (psJsonCharEq(expectedChar, char)) { smaller(rest) } else { Option.none }
+}
+}
+
+def psJsonReverseValuesAcc(values : List(PsJsonValue)) : (_ : List(PsJsonValue)) -> List(PsJsonValue) := match values with {
+  | List.nil => fun (acc : List(PsJsonValue)) => acc
+  | List.cons head tail => fun (acc : List(PsJsonValue)) => let smaller : (_ : List(PsJsonValue)) -> List(PsJsonValue) := (psJsonReverseValuesAcc(tail))
+smaller((List.cons(head, acc)))
+}
+
+def psJsonReverseValues(values : List(PsJsonValue)) : List(PsJsonValue) := psJsonReverseValuesAcc(values, List.nil)
+
+def psJsonParseArrayWith(parseValue : (_ : Nat) -> (_ : List(Char)) -> Except(PsJsonParseError, PsJsonParseResult), fuel : Nat) : (_ : List(Char)) -> (_ : List(PsJsonValue)) -> Except(PsJsonParseError, PsJsonParseResult) := match fuel with {
+  | Nat.zero => fun (_input : List(Char)) (_valuesRev : List(PsJsonValue)) => Except.error(PsJsonParseError.fuelExhausted)
+  | Nat.succ remaining => fun (input : List(Char)) (valuesRev : List(PsJsonValue)) => let smaller : (_ : List(Char)) -> (_ : List(PsJsonValue)) -> Except(PsJsonParseError, PsJsonParseResult) := (psJsonParseArrayWith(parseValue, remaining))
+let chars := (psJsonSkipWhitespace(input))
+match chars with {
+  | List.nil => match (parseValue(remaining, chars)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok parsed => let afterValue := (psJsonSkipWhitespace(parsed.rest))
+match afterValue with {
+  | List.nil => Except.error((PsJsonParseError.expected(", or ]")))
+  | List.cons separator rest => if (psJsonCharEq(separator, ',')) { smaller(rest, (List.cons(parsed.value, valuesRev))) } else { if (psJsonCharEq(separator, ']')) { Except.ok(({ value := PsJsonValue.array((psJsonReverseValues((List.cons(parsed.value, valuesRev))))), rest := rest })) } else { Except.error((PsJsonParseError.expected(", or ]"))) } }
+}
+}
+  | List.cons first rest => if (psJsonCharEq(first, ']')) { Except.ok(({ value := PsJsonValue.array((psJsonReverseValues(valuesRev))), rest := rest })) } else { match (parseValue(remaining, chars)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok parsed => let afterValue := (psJsonSkipWhitespace(parsed.rest))
+match afterValue with {
+  | List.nil => Except.error((PsJsonParseError.expected(", or ]")))
+  | List.cons separator afterSeparator => if (psJsonCharEq(separator, ',')) { smaller(afterSeparator, (List.cons(parsed.value, valuesRev))) } else { if (psJsonCharEq(separator, ']')) { Except.ok(({ value := PsJsonValue.array((psJsonReverseValues((List.cons(parsed.value, valuesRev))))), rest := afterSeparator })) } else { Except.error((PsJsonParseError.expected(", or ]"))) } }
+}
+} }
+}
+}
+
+def psJsonReverseFieldsAcc(fields : List((_root_.Prod(String, PsJsonValue)))) : (_ : List((_root_.Prod(String, PsJsonValue)))) -> List((_root_.Prod(String, PsJsonValue))) := match fields with {
+  | List.nil => fun (acc : List((_root_.Prod(String, PsJsonValue)))) => acc
+  | List.cons head tail => fun (acc : List((_root_.Prod(String, PsJsonValue)))) => let smaller : (_ : List((_root_.Prod(String, PsJsonValue)))) -> List((_root_.Prod(String, PsJsonValue))) := (psJsonReverseFieldsAcc(tail))
+smaller((List.cons(head, acc)))
+}
+
+def psJsonReverseFields(fields : List((_root_.Prod(String, PsJsonValue)))) : List((_root_.Prod(String, PsJsonValue))) := psJsonReverseFieldsAcc(fields, List.nil)
+
+def psJsonParseObjectWith(parseValue : (_ : Nat) -> (_ : List(Char)) -> Except(PsJsonParseError, PsJsonParseResult), fuel : Nat) : (_ : List(Char)) -> (_ : List((_root_.Prod(String, PsJsonValue)))) -> Except(PsJsonParseError, PsJsonParseResult) := match fuel with {
+  | Nat.zero => fun (_input : List(Char)) (_fieldsRev : List((_root_.Prod(String, PsJsonValue)))) => Except.error(PsJsonParseError.fuelExhausted)
+  | Nat.succ remaining => fun (input : List(Char)) (fieldsRev : List((_root_.Prod(String, PsJsonValue)))) => let smaller : (_ : List(Char)) -> (_ : List((_root_.Prod(String, PsJsonValue)))) -> Except(PsJsonParseError, PsJsonParseResult) := (psJsonParseObjectWith(parseValue, remaining))
+let chars := (psJsonSkipWhitespace(input))
+match chars with {
+  | List.nil => Except.error((PsJsonParseError.expected("object key")))
+  | List.cons first rest => if (psJsonCharEq(first, '}')) { Except.ok(({ value := PsJsonValue.object((psJsonReverseFields(fieldsRev))), rest := rest })) } else { if (psJsonCharEq(first, '"')) { match (psJsonParseStringChars(remaining, rest, List.nil)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok keyResult => let key := (Prod.fst(keyResult))
+let afterKey := (Prod.snd(keyResult))
+match (psJsonSkipWhitespace(afterKey)) with {
+  | List.nil => Except.error((PsJsonParseError.expected(":")))
+  | List.cons colon afterColon => if (psJsonCharEq(colon, ':')) { match (parseValue(remaining, afterColon)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok parsed => let afterValue := (psJsonSkipWhitespace(parsed.rest))
+match afterValue with {
+  | List.nil => Except.error((PsJsonParseError.expected(", or }")))
+  | List.cons separator tail => if (psJsonCharEq(separator, ',')) { smaller(tail, (List.cons((Prod.mk(key, parsed.value)), fieldsRev))) } else { if (psJsonCharEq(separator, '}')) { Except.ok(({ value := PsJsonValue.object((psJsonReverseFields((List.cons((Prod.mk(key, parsed.value)), fieldsRev))))), rest := tail })) } else { Except.error((PsJsonParseError.expected(", or }"))) } }
+}
+} } else { Except.error((PsJsonParseError.expected(":"))) }
+}
+} } else { Except.error((PsJsonParseError.expected("object key"))) } }
+}
+}
+
+def psJsonParseValueWithFuelWorker(fallback : Except(PsJsonParseError, PsJsonParseResult), fuel : Nat) : (_ : Nat) -> (_ : List(Char)) -> Except(PsJsonParseError, PsJsonParseResult) := match fuel with {
+  | Nat.zero => fun (_requested : Nat) (_input : List(Char)) => Except.error(PsJsonParseError.fuelExhausted)
+  | Nat.succ remaining => fun (requested : Nat) (input : List(Char)) => let smaller : (_ : Nat) -> (_ : List(Char)) -> Except(PsJsonParseError, PsJsonParseResult) := (psJsonParseValueWithFuelWorker(fallback, remaining))
+if (Nat.blt(requested, (Nat.succ(remaining)))) { smaller(requested, input) } else { let chars := (psJsonSkipWhitespace(input))
+match chars with {
+  | List.nil => Except.error(PsJsonParseError.unexpectedEnd)
+  | List.cons first rest => if (psJsonCharEq(first, '"')) { match (psJsonParseStringChars(remaining, rest, List.nil)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok stringResult => let value := (Prod.fst(stringResult))
+let afterString := (Prod.snd(stringResult))
+Except.ok(({ value := PsJsonValue.string(value), rest := afterString }))
+} } else { if (psJsonCharEq(first, '[')) { psJsonParseArrayWith(smaller, remaining, rest, List.nil) } else { if (psJsonCharEq(first, '{')) { psJsonParseObjectWith(smaller, remaining, rest, List.nil) } else { if (psJsonCharEq(first, 't')) { match (psJsonConsumeLiteral((_root_.List.cons('t', (_root_.List.cons('r', (_root_.List.cons('u', (_root_.List.cons('e', _root_.List.nil)))))))), chars)) with {
+  | Option.none => Except.error(PsJsonParseError.invalidLiteral)
+  | Option.some afterLiteral => Except.ok(({ value := PsJsonValue.bool(true), rest := afterLiteral }))
+} } else { if (psJsonCharEq(first, 'f')) { match (psJsonConsumeLiteral((_root_.List.cons('f', (_root_.List.cons('a', (_root_.List.cons('l', (_root_.List.cons('s', (_root_.List.cons('e', _root_.List.nil)))))))))), chars)) with {
+  | Option.none => Except.error(PsJsonParseError.invalidLiteral)
+  | Option.some afterLiteral => Except.ok(({ value := PsJsonValue.bool(false), rest := afterLiteral }))
+} } else { if (psJsonCharEq(first, 'n')) { match (psJsonConsumeLiteral((_root_.List.cons('n', (_root_.List.cons('u', (_root_.List.cons('l', (_root_.List.cons('l', _root_.List.nil)))))))), chars)) with {
+  | Option.none => Except.error(PsJsonParseError.invalidLiteral)
+  | Option.some afterLiteral => Except.ok(({ value := PsJsonValue.nullE, rest := afterLiteral }))
+} } else { if (psJsonCharEq(first, '-')) { psJsonParseNumber(chars) } else { if (psJsonDigit(first)) { psJsonParseNumber(chars) } else { Except.error((PsJsonParseError.expected("JSON value"))) } } } } } } } }
+} }
+}
+
+def psJsonParseValueWithFuel(fallback : Except(PsJsonParseError, PsJsonParseResult), fuel : Nat, input : List(Char)) : Except(PsJsonParseError, PsJsonParseResult) := psJsonParseValueWithFuelWorker(fallback, fuel, fuel, input)
+
+def psJsonCharListLengthAcc(chars : List(Char)) : (_ : Nat) -> Nat := match chars with {
+  | List.nil => fun (count : Nat) => count
+  | List.cons _ rest => fun (count : Nat) => let smaller : (_ : Nat) -> Nat := (psJsonCharListLengthAcc(rest))
+smaller((Nat.succ(count)))
+}
+
+def psJsonCharListLength(chars : List(Char)) : Nat := psJsonCharListLengthAcc(chars, 0)
+
+def psJsonParse(source : String) : Except(PsJsonParseError, PsJsonValue) := let chars := (psJsonStringToChars(source))
+match (psJsonParseValueWithFuel((Except.error(PsJsonParseError.fuelExhausted)), (Nat.add((Nat.mul((psJsonCharListLength(chars)), 4)), 32)), chars)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok parsed => match (psJsonSkipWhitespace(parsed.rest)) with {
+  | List.nil => Except.ok(parsed.value)
+  | List.cons _ _ => Except.error(PsJsonParseError.trailingInput)
+}
+}
+
+def psJsonObjectFind(fields : List((_root_.Prod(String, PsJsonValue)))) : (_ : String) -> Option(PsJsonValue) := match fields with {
+  | List.nil => fun (_key : String) => Option.none
+  | List.cons field rest => fun (key : String) => let smaller : (_ : String) -> Option(PsJsonValue) := (psJsonObjectFind(rest))
+if (psJsonStringEq((Prod.fst(field)), key)) { Option.some((Prod.snd(field))) } else { smaller(key) }
+}
+
+def psJsonGetField(value : PsJsonValue, key : String) : Option(PsJsonValue) := match value with {
+  | object fields => psJsonObjectFind(fields, key)
+  | _ => Option.none
+}
+
+def psJsonAsString : (_ : PsJsonValue) -> Option(String) := fun (_eq0 : PsJsonValue) => match _eq0 with {
+  | string value => Option.some(value)
+  | _ => Option.none
+}
+
+def psJsonAsBool : (_ : PsJsonValue) -> Option(Bool) := fun (_eq0 : PsJsonValue) => match _eq0 with {
+  | bool value => Option.some(value)
+  | _ => Option.none
+}
+
+def psJsonAsNumberText : (_ : PsJsonValue) -> Option(String) := fun (_eq0 : PsJsonValue) => match _eq0 with {
+  | number text => Option.some(text)
+  | _ => Option.none
+}
+
+def psJsonAsArray : (_ : PsJsonValue) -> Option((List(PsJsonValue))) := fun (_eq0 : PsJsonValue) => match _eq0 with {
+  | array values => Option.some(values)
+  | _ => Option.none
+}
+
+def psJsonAsObject : (_ : PsJsonValue) -> Option((List((_root_.Prod(String, PsJsonValue))))) := fun (_eq0 : PsJsonValue) => match _eq0 with {
+  | object fields => Option.some(fields)
+  | _ => Option.none
+}
+
+inductive PsJsonEncodeError where {
+  | fuelExhausted
+  | invalidNumber(text : String)
+  | duplicateObjectKey(key : String)
+}
+
+inductive PsJsonKeyOrder where {
+  | lt
+  | eq
+  | gt
+}
+
+def psJsonCompareCharLists(leftChars : List(Char)) : (_ : List(Char)) -> PsJsonKeyOrder := match leftChars with {
+  | List.nil => fun (rightChars : List(Char)) => match rightChars with {
+  | List.nil => PsJsonKeyOrder.eq
+  | List.cons _ _ => PsJsonKeyOrder.lt
+}
+  | List.cons left leftRest => fun (rightChars : List(Char)) => let smaller : (_ : List(Char)) -> PsJsonKeyOrder := (psJsonCompareCharLists(leftRest))
+match rightChars with {
+  | List.nil => PsJsonKeyOrder.gt
+  | List.cons right rightRest => let leftValue : Nat := (psJsonCharCode(left))
+let rightValue : Nat := (psJsonCharCode(right))
+if (Nat.blt(leftValue, rightValue)) { PsJsonKeyOrder.lt } else { if (Nat.blt(rightValue, leftValue)) { PsJsonKeyOrder.gt } else { smaller(rightRest) } }
+}
+}
+
+def psJsonCompareKeys(left : String, right : String) : PsJsonKeyOrder := psJsonCompareCharLists((psJsonStringToChars(left)), (psJsonStringToChars(right)))
+
+def psJsonInsertObjectFieldInto(fields : List((_root_.Prod(String, PsJsonValue)))) : (_ : _root_.Prod(String, PsJsonValue)) -> Except(PsJsonEncodeError, (List((_root_.Prod(String, PsJsonValue))))) := match fields with {
+  | List.nil => fun (field : _root_.Prod(String, PsJsonValue)) => Except.ok((List.cons(field, List.nil)))
+  | List.cons current rest => fun (field : _root_.Prod(String, PsJsonValue)) => let smaller : (_ : _root_.Prod(String, PsJsonValue)) -> Except(PsJsonEncodeError, (List((_root_.Prod(String, PsJsonValue))))) := (psJsonInsertObjectFieldInto(rest))
+match (psJsonCompareKeys((Prod.fst(field)), (Prod.fst(current)))) with {
+  | PsJsonKeyOrder.lt => Except.ok((List.cons(field, (List.cons(current, rest)))))
+  | PsJsonKeyOrder.eq => Except.error((PsJsonEncodeError.duplicateObjectKey((Prod.fst(field)))))
+  | PsJsonKeyOrder.gt => match (smaller(field)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok sortedRest => Except.ok((List.cons(current, sortedRest)))
+}
+}
+}
+
+def psJsonInsertObjectField(field : _root_.Prod(String, PsJsonValue), fields : List((_root_.Prod(String, PsJsonValue)))) : Except(PsJsonEncodeError, (List((_root_.Prod(String, PsJsonValue))))) := psJsonInsertObjectFieldInto(fields, field)
+
+def psJsonSortObjectFields(fields : List((_root_.Prod(String, PsJsonValue)))) : Except(PsJsonEncodeError, (List((_root_.Prod(String, PsJsonValue))))) := match fields with {
+  | List.nil => Except.ok(List.nil)
+  | List.cons field rest => let smaller : Except(PsJsonEncodeError, (List((_root_.Prod(String, PsJsonValue))))) := (psJsonSortObjectFields(rest))
+match smaller with {
+  | Except.error error => Except.error(error)
+  | Except.ok sortedRest => psJsonInsertObjectField(field, sortedRest)
+}
+}
+
+def psJsonValidateCanonicalNumber(text : String) : Bool := match (psJsonParseNumber((psJsonStringToChars(text)))) with {
+  | Except.error _ => false
+  | Except.ok parsed => match parsed.rest with {
+  | List.nil => true
+  | List.cons _ _ => false
+}
+}
+
+def psJsonEncodeValueList(encodeValue : (_ : PsJsonValue) -> Except(PsJsonEncodeError, String), values : List(PsJsonValue)) : Except(PsJsonEncodeError, (List(String))) := match values with {
+  | List.nil => Except.ok(List.nil)
+  | List.cons value rest => match (encodeValue(value)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedHead => match (psJsonEncodeValueList(encodeValue, rest)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedTail => Except.ok((List.cons(encodedHead, encodedTail)))
+}
+}
+}
+
+def psJsonEncodeFieldList(encodeValue : (_ : PsJsonValue) -> Except(PsJsonEncodeError, String), fields : List((_root_.Prod(String, PsJsonValue)))) : Except(PsJsonEncodeError, (List((_root_.Prod(String, String))))) := match fields with {
+  | List.nil => Except.ok(List.nil)
+  | List.cons field rest => match (encodeValue((Prod.snd(field)))) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedHead => match (psJsonEncodeFieldList(encodeValue, rest)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedTail => Except.ok((List.cons((Prod.mk((Prod.fst(field)), encodedHead)), encodedTail)))
+}
+}
+}
+
+def psJsonEncodeCanonicalWithFuel(fuel : Nat) : (_ : PsJsonValue) -> Except(PsJsonEncodeError, String) := match fuel with {
+  | Nat.zero => fun (_value : PsJsonValue) => Except.error(PsJsonEncodeError.fuelExhausted)
+  | Nat.succ remaining => fun (value : PsJsonValue) => let smaller : (_ : PsJsonValue) -> Except(PsJsonEncodeError, String) := (psJsonEncodeCanonicalWithFuel(remaining))
+match value with {
+  | PsJsonValue.nullE => Except.ok("null")
+  | PsJsonValue.bool boolValue => if (boolValue) { Except.ok("true") } else { Except.ok("false") }
+  | PsJsonValue.number text => if (psJsonValidateCanonicalNumber(text)) { Except.ok(text) } else { Except.error((PsJsonEncodeError.invalidNumber(text))) }
+  | PsJsonValue.string text => Except.ok((psJsonQuote(text)))
+  | PsJsonValue.array values => match (psJsonEncodeValueList(smaller, values)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encoded => Except.ok((psJsonArray(encoded)))
+}
+  | PsJsonValue.object fields => match (psJsonSortObjectFields(fields)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok sorted => match (psJsonEncodeFieldList(smaller, sorted)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedFields => Except.ok((psJsonObject(encodedFields)))
+}
+}
+}
+}
+
+def psJsonEncodeCanonical(value : PsJsonValue) : Except(PsJsonEncodeError, String) := psJsonEncodeCanonicalWithFuel(4096, value)
+
+def psJsonEncodeCanonicalText(value : PsJsonValue) : Except(PsJsonEncodeError, String) := match (psJsonEncodeCanonical(value)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encoded => Except.ok((psJsonConcat2(encoded, "\n")))
+}

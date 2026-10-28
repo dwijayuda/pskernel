@@ -1,6 +1,6 @@
 # bridge
 
-Canonical admission and host protocol encoding. Start at [src/Ps/Bridge/CheckedAdmissions.lean](src/Ps/Bridge/CheckedAdmissions.lean).
+Canonical admission and host protocol encoding. Start at [src/Ps/Bridge/CheckedAdmissions.lean](src/Ps/Bridge/CheckedAdmissions.ps).
 
 - Representation: Exact Core graph → canonical admission bytes.
 - Boundary: Encoding is not actual checker acceptance.

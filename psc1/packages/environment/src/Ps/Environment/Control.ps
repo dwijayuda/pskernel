@@ -1,0 +1,128 @@
+import Ps.Environment.SelfHostPrelude
+import Ps.Core.Abstract
+import Ps.Core.Subst
+
+-- These are ordinary total Core definitions, independently replayed by the
+-- official Lean provider. Numeric name components cannot be authored by source.
+-- Keeping the recursor major as a declaration parameter lets checked erasure
+-- map each induction hypothesis to the correct helper call.
+def psControlListFoldName : PsName := PsName.num((psRootName("_psc1ForList")), 0)
+
+def psControlNatFoldName : PsName := PsName.num((psRootName("_psc1ForNat")), 0)
+
+structure PsControlBinder where {
+  id : Nat
+  name : PsName
+  type : PsExpr
+}
+
+def psControlApplyArguments(arguments : List(PsExpr)) : (_ : PsExpr) -> PsExpr := match arguments with {
+  | List.nil => fun (fn : PsExpr) => fn
+  | List.cons argument rest => fun (fn : PsExpr) => let smaller : (_ : PsExpr) -> PsExpr := (psControlApplyArguments(rest))
+smaller((PsExpr.app(fn, argument)))
+}
+
+def psControlApply(fn : PsExpr, arguments : List(PsExpr)) : PsExpr := psControlApplyArguments(arguments, fn)
+
+def psControlClose(lambda : Bool, binders : List(PsControlBinder), body : PsExpr) : PsExpr := match binders with {
+  | List.nil => body
+  | List.cons binder rest => let inner := (psControlClose(lambda, rest, body))
+let closed := (psExprAbstractFVar(binder.id, inner))
+if (lambda) { PsExpr.lam(binder.name, binder.type, closed, PsBinderInfo.explicit) } else { PsExpr.forallE(binder.name, binder.type, closed, PsBinderInfo.explicit) }
+}
+
+def psControlListFoldDeclaration : PsDeclaration := let typeType := (PsExpr.sortE((PsLevel.succ(PsLevel.zero))))
+let alpha := (PsExpr.fvar(0))
+let result := (PsExpr.fvar(1))
+let base := (PsExpr.fvar(2))
+let step := (PsExpr.fvar(3))
+let major := (PsExpr.fvar(4))
+let listType := (psSelfHostListOf(alpha))
+let stepType := (psControlClose(false, (_root_.List.cons((PsControlBinder.mk(8, (psRootName("element")), alpha)), (_root_.List.cons((PsControlBinder.mk(9, (psRootName("rest")), result)), _root_.List.nil)))), result))
+let binders := (_root_.List.cons((PsControlBinder.mk(0, (psRootName("Element")), typeType)), (_root_.List.cons((PsControlBinder.mk(1, (psRootName("Result")), typeType)), (_root_.List.cons((PsControlBinder.mk(2, (psRootName("base")), result)), (_root_.List.cons((PsControlBinder.mk(3, (psRootName("step")), stepType)), (_root_.List.cons((PsControlBinder.mk(4, (psRootName("values")), listType)), _root_.List.nil))))))))))
+let motive := (psControlClose(true, (_root_.List.cons((PsControlBinder.mk(10, (psRootName("_major")), listType)), _root_.List.nil)), result))
+let minor := (psControlClose(true, (_root_.List.cons((PsControlBinder.mk(5, (psRootName("element")), alpha)), (_root_.List.cons((PsControlBinder.mk(6, (psRootName("tail")), listType)), (_root_.List.cons((PsControlBinder.mk(7, (psRootName("rest")), result)), _root_.List.nil)))))), (psControlApply(step, (_root_.List.cons((PsExpr.fvar(5)), (_root_.List.cons((PsExpr.fvar(7)), _root_.List.nil))))))))
+let value := (psControlApply((PsExpr.constE(psSelfHostListRecName, (_root_.List.cons((PsLevel.succ(PsLevel.zero)), _root_.List.nil)))), (_root_.List.cons(alpha, (_root_.List.cons(motive, (_root_.List.cons(base, (_root_.List.cons(minor, (_root_.List.cons(major, _root_.List.nil))))))))))))
+PsDeclaration.definitionDecl(psControlListFoldName, _root_.List.nil, (psControlClose(false, binders, result)), (psControlClose(true, binders, value)))
+
+def psControlNatFoldDeclaration : PsDeclaration := let typeType := (PsExpr.sortE((PsLevel.succ(PsLevel.zero))))
+let natType := (PsExpr.constE(psNatName, _root_.List.nil))
+let result := (PsExpr.fvar(0))
+let base := (PsExpr.fvar(1))
+let step := (PsExpr.fvar(2))
+let major := (PsExpr.fvar(3))
+let stepType := (psControlClose(false, (_root_.List.cons((PsControlBinder.mk(8, (psRootName("index")), natType)), (_root_.List.cons((PsControlBinder.mk(9, (psRootName("rest")), result)), _root_.List.nil)))), result))
+let binders := (_root_.List.cons((PsControlBinder.mk(0, (psRootName("Result")), typeType)), (_root_.List.cons((PsControlBinder.mk(1, (psRootName("base")), result)), (_root_.List.cons((PsControlBinder.mk(2, (psRootName("step")), stepType)), (_root_.List.cons((PsControlBinder.mk(3, (psRootName("count")), natType)), _root_.List.nil))))))))
+let motive := (psControlClose(true, (_root_.List.cons((PsControlBinder.mk(10, (psRootName("_major")), natType)), _root_.List.nil)), result))
+let minor := (psControlClose(true, (_root_.List.cons((PsControlBinder.mk(4, (psRootName("index")), natType)), (_root_.List.cons((PsControlBinder.mk(5, (psRootName("rest")), result)), _root_.List.nil)))), (psControlApply(step, (_root_.List.cons((PsExpr.fvar(4)), (_root_.List.cons((PsExpr.fvar(5)), _root_.List.nil))))))))
+let value := (psControlApply((PsExpr.constE(psNatRecName, (_root_.List.cons((PsLevel.succ(PsLevel.zero)), _root_.List.nil)))), (_root_.List.cons(motive, (_root_.List.cons(base, (_root_.List.cons(minor, (_root_.List.cons(major, _root_.List.nil))))))))))
+PsDeclaration.definitionDecl(psControlNatFoldName, _root_.List.nil, (psControlClose(false, binders, result)), (psControlClose(true, binders, value)))
+
+-- Deferred IHs keep iterator continuations behind explicit Unit thunks.
+-- These are total recursor definitions, not partial loops or runtime axioms.
+def psControlLazyListFoldName : PsName := PsName.num((psRootName("_psc1ForListDeferred")), 0)
+
+def psControlLazyNatFoldName : PsName := PsName.num((psRootName("_psc1ForNatDeferred")), 0)
+
+def psControlListReverseName : PsName := PsName.num((psRootName("_psc1ForArrayReverse")), 0)
+
+def psControlArrayToListName : PsName := PsName.num((psRootName("_psc1ForArrayItems")), 0)
+
+def psControlDeferredType(result : PsExpr) : PsExpr := PsExpr.forallE((psRootName("_unit")), (PsExpr.constE(psUnitName, _root_.List.nil)), (psExprLiftBVars(1, 0, result)), PsBinderInfo.explicit)
+
+def psControlLazyListFoldDeclaration : PsDeclaration := let typeType := (PsExpr.sortE((PsLevel.succ(PsLevel.zero))))
+let alpha := (PsExpr.fvar(0))
+let result := (PsExpr.fvar(1))
+let listType := (psSelfHostListOf(alpha))
+let stepType := (psControlClose(false, (_root_.List.cons((PsControlBinder.mk(8, (psRootName("element")), alpha)), (_root_.List.cons((PsControlBinder.mk(9, (psRootName("rest")), (psControlDeferredType(result)))), _root_.List.nil)))), result))
+let binders := (_root_.List.cons((PsControlBinder.mk(0, (psRootName("Element")), typeType)), (_root_.List.cons((PsControlBinder.mk(1, (psRootName("Result")), typeType)), (_root_.List.cons((PsControlBinder.mk(2, (psRootName("base")), result)), (_root_.List.cons((PsControlBinder.mk(3, (psRootName("step")), stepType)), (_root_.List.cons((PsControlBinder.mk(4, (psRootName("values")), listType)), _root_.List.nil))))))))))
+let motive := (psControlClose(true, (_root_.List.cons((PsControlBinder.mk(10, (psRootName("_major")), listType)), _root_.List.nil)), result))
+let deferred := (psControlClose(true, (_root_.List.cons((PsControlBinder.mk(8, (psRootName("_unit")), (PsExpr.constE(psUnitName, _root_.List.nil)))), _root_.List.nil)), (PsExpr.fvar(7))))
+let minor := (psControlClose(true, (_root_.List.cons((PsControlBinder.mk(5, (psRootName("element")), alpha)), (_root_.List.cons((PsControlBinder.mk(6, (psRootName("tail")), listType)), (_root_.List.cons((PsControlBinder.mk(7, (psRootName("rest")), result)), _root_.List.nil)))))), (psControlApply((PsExpr.fvar(3)), (_root_.List.cons((PsExpr.fvar(5)), (_root_.List.cons(deferred, _root_.List.nil))))))))
+let value := (psControlApply((PsExpr.constE(psSelfHostListRecName, (_root_.List.cons((PsLevel.succ(PsLevel.zero)), _root_.List.nil)))), (_root_.List.cons(alpha, (_root_.List.cons(motive, (_root_.List.cons((PsExpr.fvar(2)), (_root_.List.cons(minor, (_root_.List.cons((PsExpr.fvar(4)), _root_.List.nil))))))))))))
+PsDeclaration.definitionDecl(psControlLazyListFoldName, _root_.List.nil, (psControlClose(false, binders, result)), (psControlClose(true, binders, value)))
+
+def psControlLazyNatFoldDeclaration : PsDeclaration := let typeType := (PsExpr.sortE((PsLevel.succ(PsLevel.zero))))
+let natType := (PsExpr.constE(psNatName, _root_.List.nil))
+let result := (PsExpr.fvar(0))
+let stepType := (psControlClose(false, (_root_.List.cons((PsControlBinder.mk(8, (psRootName("index")), natType)), (_root_.List.cons((PsControlBinder.mk(9, (psRootName("rest")), (psControlDeferredType(result)))), _root_.List.nil)))), result))
+let binders := (_root_.List.cons((PsControlBinder.mk(0, (psRootName("Result")), typeType)), (_root_.List.cons((PsControlBinder.mk(1, (psRootName("base")), result)), (_root_.List.cons((PsControlBinder.mk(2, (psRootName("step")), stepType)), (_root_.List.cons((PsControlBinder.mk(3, (psRootName("count")), natType)), _root_.List.nil))))))))
+let motive := (psControlClose(true, (_root_.List.cons((PsControlBinder.mk(10, (psRootName("_major")), natType)), _root_.List.nil)), result))
+let deferred := (psControlClose(true, (_root_.List.cons((PsControlBinder.mk(6, (psRootName("_unit")), (PsExpr.constE(psUnitName, _root_.List.nil)))), _root_.List.nil)), (PsExpr.fvar(5))))
+let minor := (psControlClose(true, (_root_.List.cons((PsControlBinder.mk(4, (psRootName("index")), natType)), (_root_.List.cons((PsControlBinder.mk(5, (psRootName("rest")), result)), _root_.List.nil)))), (psControlApply((PsExpr.fvar(2)), (_root_.List.cons((PsExpr.fvar(4)), (_root_.List.cons(deferred, _root_.List.nil))))))))
+let value := (psControlApply((PsExpr.constE(psNatRecName, (_root_.List.cons((PsLevel.succ(PsLevel.zero)), _root_.List.nil)))), (_root_.List.cons(motive, (_root_.List.cons((PsExpr.fvar(1)), (_root_.List.cons(minor, (_root_.List.cons((PsExpr.fvar(3)), _root_.List.nil))))))))))
+PsDeclaration.definitionDecl(psControlLazyNatFoldName, _root_.List.nil, (psControlClose(false, binders, result)), (psControlClose(true, binders, value)))
+
+-- Reversal returns its accumulator function before consuming the tail.
+-- The array view is linear data, never a materialized chain of user actions.
+def psControlListReverseDeclaration : PsDeclaration := let alpha := (PsExpr.fvar(0))
+let listType := (psSelfHostListOf(alpha))
+let resultType := (psControlClose(false, (_root_.List.cons((PsControlBinder.mk(9, (psRootName("accumulator")), listType)), _root_.List.nil)), listType))
+let binders := (_root_.List.cons((PsControlBinder.mk(0, (psRootName("Element")), psPreludeTypeType)), (_root_.List.cons((PsControlBinder.mk(1, (psRootName("values")), listType)), _root_.List.nil))))
+let motive := (psControlClose(true, (_root_.List.cons((PsControlBinder.mk(2, (psRootName("_major")), listType)), _root_.List.nil)), resultType))
+let base := (psControlClose(true, (_root_.List.cons((PsControlBinder.mk(2, (psRootName("accumulator")), listType)), _root_.List.nil)), (PsExpr.fvar(2))))
+let next := (psSelfHostListConsOf(alpha, (PsExpr.fvar(3)), (PsExpr.fvar(6))))
+let minor := (psControlClose(true, (_root_.List.cons((PsControlBinder.mk(3, (psRootName("element")), alpha)), (_root_.List.cons((PsControlBinder.mk(4, (psRootName("tail")), listType)), (_root_.List.cons((PsControlBinder.mk(5, (psRootName("rest")), resultType)), (_root_.List.cons((PsControlBinder.mk(6, (psRootName("accumulator")), listType)), _root_.List.nil)))))))), (PsExpr.app((PsExpr.fvar(5)), next))))
+let value := (psControlApply((PsExpr.constE(psSelfHostListRecName, (_root_.List.cons((PsLevel.succ(PsLevel.zero)), _root_.List.nil)))), (_root_.List.cons(alpha, (_root_.List.cons(motive, (_root_.List.cons(base, (_root_.List.cons(minor, (_root_.List.cons((PsExpr.fvar(1)), _root_.List.nil))))))))))))
+PsDeclaration.definitionDecl(psControlListReverseName, _root_.List.nil, (psControlClose(false, binders, resultType)), (psControlClose(true, binders, value)))
+
+def psControlArrayToListDeclaration : PsDeclaration := let alpha := (PsExpr.fvar(0))
+let listType := (psSelfHostListOf(alpha))
+let arrayType := (PsExpr.app((PsExpr.constE(psArrayName, _root_.List.nil)), alpha))
+let binders := (_root_.List.cons((PsControlBinder.mk(0, (psRootName("Element")), psPreludeTypeType)), (_root_.List.cons((PsControlBinder.mk(1, (psRootName("values")), arrayType)), _root_.List.nil))))
+let step := (psControlClose(true, (_root_.List.cons((PsControlBinder.mk(2, (psRootName("accumulator")), listType)), (_root_.List.cons((PsControlBinder.mk(3, (psRootName("element")), alpha)), _root_.List.nil)))), (psSelfHostListConsOf(alpha, (PsExpr.fvar(3)), (PsExpr.fvar(2))))))
+let empty := (psSelfHostListNilOf(alpha))
+let size := (psControlApply((PsExpr.constE(psArraySizeName, _root_.List.nil)), (_root_.List.cons(alpha, (_root_.List.cons((PsExpr.fvar(1)), _root_.List.nil))))))
+let reversed := (psControlApply((PsExpr.constE(psArrayFoldlName, _root_.List.nil)), (_root_.List.cons(alpha, (_root_.List.cons(listType, (_root_.List.cons(step, (_root_.List.cons(empty, (_root_.List.cons((PsExpr.fvar(1)), (_root_.List.cons((PsExpr.lit((PsLiteral.natural(0)))), (_root_.List.cons(size, _root_.List.nil))))))))))))))))
+let value := (psControlApply((PsExpr.constE(psControlListReverseName, _root_.List.nil)), (_root_.List.cons(alpha, (_root_.List.cons(reversed, (_root_.List.cons(empty, _root_.List.nil))))))))
+PsDeclaration.definitionDecl(psControlArrayToListName, _root_.List.nil, (psControlClose(false, binders, listType)), (psControlClose(true, binders, value)))
+
+def psControlLoopDeclarations : List(PsDeclaration) := _root_.List.cons(psControlListFoldDeclaration, (_root_.List.cons(psControlNatFoldDeclaration, (_root_.List.cons(psControlLazyListFoldDeclaration, (_root_.List.cons(psControlLazyNatFoldDeclaration, (_root_.List.cons(psControlListReverseDeclaration, (_root_.List.cons(psControlArrayToListDeclaration, _root_.List.nil)))))))))))
+
+def psControlAddLoopDeclarations(declarations : List(PsDeclaration)) : (_ : PsEnvironment) -> PsEnvironment := match declarations with {
+  | List.nil => fun (environment : PsEnvironment) => environment
+  | List.cons declaration rest => let smaller := (psControlAddLoopDeclarations(rest))
+fun (environment : PsEnvironment) => smaller((psPreludeAdd(environment, declaration)))
+}
+
+def psControlPreludeEnvironment(environment : PsEnvironment) : PsEnvironment := psControlAddLoopDeclarations(psControlLoopDeclarations, environment)

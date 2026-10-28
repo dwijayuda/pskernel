@@ -1,0 +1,675 @@
+import Ps.BackendWasm.Model
+import Ps.BackendWasm.IntUtil
+import Ps.Foundation.Name
+import Ps.Foundation.List
+
+-- Ordered, fail-closed concatenation for encoded instruction lists.
+inductive PsWasmEncodeError where {
+  | unsupportedValueType
+  | unsupportedInstruction
+  | negativeIntegerConstant
+  | unknownFunction(name : String)
+  | unknownFunctionType(name : String)
+  | unknownStructure(name : String)
+}
+
+namespace Ps.Internal.WasmBinaryBytes
+-- Portable owned bytes use the already-qualified Nat carrier; every new byte
+-- is normalized modulo 256. Native UInt8 conversion is a separate boundary.
+def psListFlatMapExceptAcc {α : Type} {β : Type} {ε : Type}(convert : (_ : α) -> Except(ε, (List(β))), values : List(α), reversed : List(β)) : Except(ε, (List(β))) := match values with {
+  | List.nil => Except.ok((psListReverse(reversed)))
+  | List.cons value rest => match (convert(value)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok first => psListFlatMapExceptAcc(convert, rest, (psListReverseAcc(first, reversed)))
+}
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psListFlatMapExcept {α : Type} {β : Type} {ε : Type}(convert : (_ : α) -> Except(ε, (List(β))), values : List(α)) : Except(ε, (List(β))) := psListFlatMapExceptAcc(convert, values, List.nil)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeByteChunksAcc(chunks : List((List(Nat))), reversed : List(Nat)) : List(Nat) := match chunks with {
+  | List.nil => psListReverse(reversed)
+  | List.cons chunk rest => psWasmEncodeByteChunksAcc(rest, (psListReverseAcc(chunk, reversed)))
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeByteChunks(chunks : List((List(Nat)))) : List(Nat) := psWasmEncodeByteChunksAcc(chunks, List.nil)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmByte(value : Nat) : Nat := Nat.mod(value, 256)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeUlebWithFuel(remainingFuel : Nat) : (_ : Nat) -> List(Nat) := match remainingFuel with {
+  | _root_.Nat.zero => fun (_value : Nat) => List.nil
+  | _root_.Nat.succ fuel => fun (value : Nat) => let smaller : (_ : Nat) -> List(Nat) := (psWasmEncodeUlebWithFuel(fuel))
+let low := (Nat.mod(value, 128))
+let rest := (Nat.div(value, 128))
+if (Nat.beq(rest, 0)) { _root_.List.cons((psWasmByte(low)), _root_.List.nil) } else { List.cons((psWasmByte((Nat.add(low, 128)))), (smaller(rest))) }
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeUleb(value : Nat) : List(Nat) := psWasmEncodeUlebWithFuel(16, value)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeSlebWithFuel(remainingFuel : Nat) : (_ : Int) -> List(Nat) := match remainingFuel with {
+  | _root_.Nat.zero => fun (_value : Int) => List.nil
+  | _root_.Nat.succ fuel => fun (value : Int) => let smaller : (_ : Int) -> List(Nat) := (psWasmEncodeSlebWithFuel(fuel))
+let lowInt := (psWasmIntEModNat(value, 128))
+let low := (psWasmIntToNat(lowInt))
+let rest := (psWasmIntEDivNat(value, 128))
+let signSet := (Nat.ble(64, low))
+let donePositive := (if (psWasmIntIsZero(rest)) { if (signSet) { false } else { true } } else { false })
+let doneNegative := (if (psWasmIntIsNegativeOne(rest)) { signSet } else { false })
+if (donePositive) { _root_.List.cons((psWasmByte(low)), _root_.List.nil) } else { if (doneNegative) { _root_.List.cons((psWasmByte(low)), _root_.List.nil) } else { List.cons((psWasmByte((Nat.add(low, 128)))), (smaller(rest))) } }
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeSleb(value : Int) : List(Nat) := psWasmEncodeSlebWithFuel(16, value)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmNormalizeI32Immediate(value : Int) : Int := let reduced := (psWasmIntEModNat(value, 4294967296))
+if (Nat.ble(2147483648, (psWasmIntToNat(reduced)))) { Int.sub(reduced, (Int.ofNat(4294967296))) } else { reduced }
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmNormalizeI64Immediate(value : Int) : Int := let reduced := (psWasmIntEModNat(value, 18446744073709551616))
+if (Nat.ble(9223372036854775808, (psWasmIntToNat(reduced)))) { Int.sub(reduced, (Int.ofNat(18446744073709551616))) } else { reduced }
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeI32Constant(value : Int) : List(Nat) := psWasmEncodeSleb((psWasmNormalizeI32Immediate(value)))
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeI64Constant(value : Int) : List(Nat) := psWasmEncodeSleb((psWasmNormalizeI64Immediate(value)))
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmStringToListFromWithFuel(remainingFuel : Nat) : (_ : String) -> (_ : Nat) -> List(Char) := match remainingFuel with {
+  | Nat.zero => fun (_source : String) => fun (_position : Nat) => List.nil
+  | Nat.succ fuel => fun (source : String) => fun (position : Nat) => let smaller : (_ : String) -> (_ : Nat) -> List(Char) := (psWasmStringToListFromWithFuel(fuel))
+if (String.Internal.atEnd(source, (String.Pos.Raw.mk(position)))) { List.nil } else { let char : Char := (String.Internal.get(source, (String.Pos.Raw.mk(position))))
+let nextPosition : Nat := (String.Pos.Raw.byteIdx((String.Internal.next(source, (String.Pos.Raw.mk(position))))))
+List.cons(char, (smaller(source, nextPosition))) }
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmStringToListFrom(source : String, position : Nat) : List(Char) := psWasmStringToListFromWithFuel((Nat.succ((String.utf8ByteSize(source)))), source, position)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmStringToList(source : String) : List(Char) := psWasmStringToListFrom(source, 0)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeUtf8Char(char : Char) : List(Nat) := let value := (Char.toNat(char))
+if (Nat.ble(value, 127)) { _root_.List.cons((psWasmByte(value)), _root_.List.nil) } else { if (Nat.ble(value, 2047)) { _root_.List.cons((psWasmByte((Nat.add(192, (Nat.div(value, 64)))))), (_root_.List.cons((psWasmByte((Nat.add(128, (Nat.mod(value, 64)))))), _root_.List.nil))) } else { if (Nat.ble(value, 65535)) { _root_.List.cons((psWasmByte((Nat.add(224, (Nat.div(value, 4096)))))), (_root_.List.cons((psWasmByte((Nat.add(128, (Nat.mod((Nat.div(value, 64)), 64)))))), (_root_.List.cons((psWasmByte((Nat.add(128, (Nat.mod(value, 64)))))), _root_.List.nil))))) } else { _root_.List.cons((psWasmByte((Nat.add(240, (Nat.div(value, 262144)))))), (_root_.List.cons((psWasmByte((Nat.add(128, (Nat.mod((Nat.div(value, 4096)), 64)))))), (_root_.List.cons((psWasmByte((Nat.add(128, (Nat.mod((Nat.div(value, 64)), 64)))))), (_root_.List.cons((psWasmByte((Nat.add(128, (Nat.mod(value, 64)))))), _root_.List.nil))))))) } } }
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeUtf8CharsAcc(chars : List(Char), reversed : List(Nat)) : List(Nat) := match chars with {
+  | List.nil => psListReverse(reversed)
+  | List.cons char rest => psWasmEncodeUtf8CharsAcc(rest, (psListReverseAcc((psWasmEncodeUtf8Char(char)), reversed)))
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeUtf8Chars(chars : List(Char)) : List(Nat) := psWasmEncodeUtf8CharsAcc(chars, List.nil)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeName(name : String) : List(Nat) := let bytes := (psWasmEncodeUtf8Chars((psWasmStringToList(name))))
+psListAppend((psWasmEncodeUleb((psListLength(bytes)))), bytes)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmFindStructureIndexWorker(name : String, structures : List(PsWasmStructType)) : (_ : Nat) -> Option(Nat) := match structures with {
+  | List.nil => fun (_index : Nat) => Option.none
+  | List.cons structType rest => fun (index : Nat) => let smaller : (_ : Nat) -> Option(Nat) := (psWasmFindStructureIndexWorker(name, rest))
+if (psStringEq(structType.name, name)) { Option.some(index) } else { smaller((Nat.add(index, 1))) }
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmFindStructureIndexLoop(name : String, index : Nat, structures : List(PsWasmStructType)) : Option(Nat) := psWasmFindStructureIndexWorker(name, structures, index)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmFindStructureIndex(structures : List(PsWasmStructType), name : String) : Option(Nat) := psWasmFindStructureIndexLoop(name, 0, structures)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmFindArrayIndexWorker(name : String, arrays : List(PsWasmArrayType)) : (_ : Nat) -> Option(Nat) := match arrays with {
+  | List.nil => fun (_index : Nat) => Option.none
+  | List.cons arrayType rest => fun (index : Nat) => let smaller : (_ : Nat) -> Option(Nat) := (psWasmFindArrayIndexWorker(name, rest))
+if (psStringEq(arrayType.name, name)) { Option.some(index) } else { smaller((Nat.add(index, 1))) }
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmFindArrayIndexLoop(name : String, index : Nat, arrays : List(PsWasmArrayType)) : Option(Nat) := psWasmFindArrayIndexWorker(name, arrays, index)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmFindArrayIndex(arrays : List(PsWasmArrayType), name : String) : Option(Nat) := psWasmFindArrayIndexLoop(name, 0, arrays)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmFindHeapTypeIndex(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), name : String) : Option(Nat) := match (psWasmFindStructureIndex(structures, name)) with {
+  | Option.some index => Option.some(index)
+  | Option.none => match (psWasmFindArrayIndex(arrays, name)) with {
+  | Option.none => Option.none
+  | Option.some index => Option.some((Nat.add((psListLength(structures)), index)))
+}
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeValueType(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), type : PsWasmValueType) : Except(PsWasmEncodeError, (List(Nat))) := match type with {
+  | i32 => Except.ok((_root_.List.cons((psWasmByte(127)), _root_.List.nil)))
+  | i64 => Except.ok((_root_.List.cons((psWasmByte(126)), _root_.List.nil)))
+  | f32 => Except.ok((_root_.List.cons((psWasmByte(125)), _root_.List.nil)))
+  | f64 => Except.ok((_root_.List.cons((psWasmByte(124)), _root_.List.nil)))
+  | refT name => match (psWasmFindHeapTypeIndex(structures, arrays, name)) with {
+  | Option.none => Except.error((PsWasmEncodeError.unknownStructure(name)))
+  | Option.some index => Except.ok((psListAppend((_root_.List.cons((psWasmByte(100)), _root_.List.nil)), (psWasmEncodeSleb((Int.ofNat(index)))))))
+}
+  | funcRef => Except.ok((_root_.List.cons((psWasmByte(112)), _root_.List.nil)))
+  | noValue => Except.error(PsWasmEncodeError.unsupportedValueType)
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeValueTypes(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), types : List(PsWasmValueType)) : Except(PsWasmEncodeError, (List(Nat))) := psListFlatMapExcept((psWasmEncodeValueType(structures, arrays)), types)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeVector(bytes : List(Nat), count : Nat) : List(Nat) := psListAppend((psWasmEncodeUleb(count)), bytes)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmFindFunctionTypeIndexWorker(name : String, functionTypes : List(PsWasmFunctionType)) : (_ : Nat) -> Option(Nat) := match functionTypes with {
+  | List.nil => fun (_index : Nat) => Option.none
+  | List.cons functionType rest => fun (index : Nat) => let smaller : (_ : Nat) -> Option(Nat) := (psWasmFindFunctionTypeIndexWorker(name, rest))
+if (psStringEq(functionType.name, name)) { Option.some(index) } else { smaller((Nat.add(index, 1))) }
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmFindFunctionTypeIndexLoop(name : String, index : Nat, functionTypes : List(PsWasmFunctionType)) : Option(Nat) := psWasmFindFunctionTypeIndexWorker(name, functionTypes, index)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmFindFunctionTypeIndex(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), functionTypes : List(PsWasmFunctionType), name : String) : Option(Nat) := match (psWasmFindFunctionTypeIndexLoop(name, 0, functionTypes)) with {
+  | Option.none => Option.none
+  | Option.some index => Option.some((Nat.add((Nat.add((psListLength(structures)), (psListLength(arrays)))), index)))
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeNamedFunctionType(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), functionType : PsWasmFunctionType) : Except(PsWasmEncodeError, (List(Nat))) := match (psWasmEncodeValueTypes(structures, arrays, functionType.parameters)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok parameters => match (psWasmEncodeValueTypes(structures, arrays, functionType.results)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok results => Except.ok((psListAppend((_root_.List.cons((psWasmByte(96)), _root_.List.nil)), (psListAppend((psWasmEncodeVector(parameters, (psListLength(functionType.parameters)))), (psWasmEncodeVector(results, (psListLength(functionType.results)))))))))
+}
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeNamedFunctionTypes(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), functionTypesToEncode : List(PsWasmFunctionType)) : Except(PsWasmEncodeError, (List(Nat))) := psListFlatMapExcept((psWasmEncodeNamedFunctionType(structures, arrays)), functionTypesToEncode)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeFunctionType(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), function : PsWasmFunction) : Except(PsWasmEncodeError, (List(Nat))) := match (psWasmEncodeValueTypes(structures, arrays, function.parameters)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok parameters => match (psWasmEncodeValueTypes(structures, arrays, function.results)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok results => Except.ok((psListAppend((_root_.List.cons((psWasmByte(96)), _root_.List.nil)), (psListAppend((psWasmEncodeVector(parameters, (psListLength(function.parameters)))), (psWasmEncodeVector(results, (psListLength(function.results)))))))))
+}
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeFunctionTypes(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), functionsToEncode : List(PsWasmFunction)) : Except(PsWasmEncodeError, (List(Nat))) := psListFlatMapExcept((psWasmEncodeFunctionType(structures, arrays)), functionsToEncode)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmFindFunctionIndexWorker(name : String, functions : List(PsWasmFunction)) : (_ : Nat) -> Option(Nat) := match functions with {
+  | List.nil => fun (_index : Nat) => Option.none
+  | List.cons function rest => fun (index : Nat) => let smaller : (_ : Nat) -> Option(Nat) := (psWasmFindFunctionIndexWorker(name, rest))
+if (psStringEq(function.name, name)) { Option.some(index) } else { smaller((Nat.add(index, 1))) }
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmFindFunctionIndexLoop(name : String, index : Nat, functions : List(PsWasmFunction)) : Option(Nat) := psWasmFindFunctionIndexWorker(name, functions, index)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmFindFunctionIndex(functions : List(PsWasmFunction), name : String) : Option(Nat) := psWasmFindFunctionIndexLoop(name, 0, functions)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeInstruction(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), functionTypes : List(PsWasmFunctionType), functions : List(PsWasmFunction), instruction : PsWasmInstruction) : Except(PsWasmEncodeError, (List(Nat))) := match instruction with {
+  | i32Load offset => Except.ok((psListAppend((_root_.List.cons((psWasmByte(40)), (_root_.List.cons((psWasmByte(2)), _root_.List.nil)))), (psWasmEncodeUleb(offset)))))
+  | i32Store offset => Except.ok((psListAppend((_root_.List.cons((psWasmByte(54)), (_root_.List.cons((psWasmByte(2)), _root_.List.nil)))), (psWasmEncodeUleb(offset)))))
+  | i32Load8U => Except.ok((_root_.List.cons((psWasmByte(45)), (_root_.List.cons((psWasmByte(0)), (_root_.List.cons((psWasmByte(0)), _root_.List.nil)))))))
+  | i32Store8 => Except.ok((_root_.List.cons((psWasmByte(58)), (_root_.List.cons((psWasmByte(0)), (_root_.List.cons((psWasmByte(0)), _root_.List.nil)))))))
+  | abiHeapGet => Except.ok((_root_.List.cons((psWasmByte(35)), (_root_.List.cons((psWasmByte(0)), _root_.List.nil)))))
+  | abiHeapSet => Except.ok((_root_.List.cons((psWasmByte(36)), (_root_.List.cons((psWasmByte(0)), _root_.List.nil)))))
+  | abiBusyGet => Except.ok((_root_.List.cons((psWasmByte(35)), (_root_.List.cons((psWasmByte(1)), _root_.List.nil)))))
+  | abiBusySet => Except.ok((_root_.List.cons((psWasmByte(36)), (_root_.List.cons((psWasmByte(1)), _root_.List.nil)))))
+  | localGet index => Except.ok((List.cons((psWasmByte(32)), (psWasmEncodeUleb(index)))))
+  | localSet index => Except.ok((List.cons((psWasmByte(33)), (psWasmEncodeUleb(index)))))
+  | drop => Except.ok((_root_.List.cons((psWasmByte(26)), _root_.List.nil)))
+  | unreachable => Except.ok((_root_.List.cons((psWasmByte(0)), _root_.List.nil)))
+  | call name => match (psWasmFindFunctionIndex(functions, name)) with {
+  | Option.none => Except.error((PsWasmEncodeError.unknownFunction(name)))
+  | Option.some index => Except.ok((List.cons((psWasmByte(16)), (psWasmEncodeUleb(index)))))
+}
+  | returnCall name => match (psWasmFindFunctionIndex(functions, name)) with {
+  | Option.none => Except.error((PsWasmEncodeError.unknownFunction(name)))
+  | Option.some index => Except.ok((List.cons((psWasmByte(18)), (psWasmEncodeUleb(index)))))
+}
+  | return_ => Except.ok((_root_.List.cons((psWasmByte(15)), _root_.List.nil)))
+  | ifStart result => match result with {
+  | Option.none => Except.ok((_root_.List.cons((psWasmByte(4)), (_root_.List.cons((psWasmByte(64)), _root_.List.nil)))))
+  | Option.some valueType => match (psWasmEncodeValueType(structures, arrays, valueType)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedType => Except.ok((psListAppend((_root_.List.cons((psWasmByte(4)), _root_.List.nil)), encodedType)))
+}
+}
+  | else_ => Except.ok((_root_.List.cons((psWasmByte(5)), _root_.List.nil)))
+  | end_ => Except.ok((_root_.List.cons((psWasmByte(11)), _root_.List.nil)))
+  | i32Const value => Except.ok((List.cons((psWasmByte(65)), (psWasmEncodeI32Constant(value)))))
+  | i64Const value => Except.ok((List.cons((psWasmByte(66)), (psWasmEncodeI64Constant(value)))))
+  | i32Add => Except.ok((_root_.List.cons((psWasmByte(106)), _root_.List.nil)))
+  | i32Sub => Except.ok((_root_.List.cons((psWasmByte(107)), _root_.List.nil)))
+  | i32Mul => Except.ok((_root_.List.cons((psWasmByte(108)), _root_.List.nil)))
+  | i32And => Except.ok((_root_.List.cons((psWasmByte(113)), _root_.List.nil)))
+  | i32Or => Except.ok((_root_.List.cons((psWasmByte(114)), _root_.List.nil)))
+  | i32Xor => Except.ok((_root_.List.cons((psWasmByte(115)), _root_.List.nil)))
+  | i32ShrU => Except.ok((_root_.List.cons((psWasmByte(118)), _root_.List.nil)))
+  | i32Extend8S => Except.ok((_root_.List.cons((psWasmByte(192)), _root_.List.nil)))
+  | i32Extend16S => Except.ok((_root_.List.cons((psWasmByte(193)), _root_.List.nil)))
+  | i32Eq => Except.ok((_root_.List.cons((psWasmByte(70)), _root_.List.nil)))
+  | i32Ne => Except.ok((_root_.List.cons((psWasmByte(71)), _root_.List.nil)))
+  | i32LtS => Except.ok((_root_.List.cons((psWasmByte(72)), _root_.List.nil)))
+  | i32LtU => Except.ok((_root_.List.cons((psWasmByte(73)), _root_.List.nil)))
+  | i32GtS => Except.ok((_root_.List.cons((psWasmByte(74)), _root_.List.nil)))
+  | i32GtU => Except.ok((_root_.List.cons((psWasmByte(75)), _root_.List.nil)))
+  | i32LeS => Except.ok((_root_.List.cons((psWasmByte(76)), _root_.List.nil)))
+  | i32LeU => Except.ok((_root_.List.cons((psWasmByte(77)), _root_.List.nil)))
+  | i32GeS => Except.ok((_root_.List.cons((psWasmByte(78)), _root_.List.nil)))
+  | i32GeU => Except.ok((_root_.List.cons((psWasmByte(79)), _root_.List.nil)))
+  | i64Add => Except.ok((_root_.List.cons((psWasmByte(124)), _root_.List.nil)))
+  | i64Sub => Except.ok((_root_.List.cons((psWasmByte(125)), _root_.List.nil)))
+  | i64Mul => Except.ok((_root_.List.cons((psWasmByte(126)), _root_.List.nil)))
+  | i64And => Except.ok((_root_.List.cons((psWasmByte(131)), _root_.List.nil)))
+  | i64Or => Except.ok((_root_.List.cons((psWasmByte(132)), _root_.List.nil)))
+  | i64Xor => Except.ok((_root_.List.cons((psWasmByte(133)), _root_.List.nil)))
+  | i64Eq => Except.ok((_root_.List.cons((psWasmByte(81)), _root_.List.nil)))
+  | i64Ne => Except.ok((_root_.List.cons((psWasmByte(82)), _root_.List.nil)))
+  | i64LtS => Except.ok((_root_.List.cons((psWasmByte(83)), _root_.List.nil)))
+  | i64LtU => Except.ok((_root_.List.cons((psWasmByte(84)), _root_.List.nil)))
+  | i64GtS => Except.ok((_root_.List.cons((psWasmByte(85)), _root_.List.nil)))
+  | i64GtU => Except.ok((_root_.List.cons((psWasmByte(86)), _root_.List.nil)))
+  | i64LeS => Except.ok((_root_.List.cons((psWasmByte(87)), _root_.List.nil)))
+  | i64LeU => Except.ok((_root_.List.cons((psWasmByte(88)), _root_.List.nil)))
+  | i64GeS => Except.ok((_root_.List.cons((psWasmByte(89)), _root_.List.nil)))
+  | i64GeU => Except.ok((_root_.List.cons((psWasmByte(90)), _root_.List.nil)))
+  | f32Eq => Except.ok((_root_.List.cons((psWasmByte(91)), _root_.List.nil)))
+  | f32Ne => Except.ok((_root_.List.cons((psWasmByte(92)), _root_.List.nil)))
+  | f32Lt => Except.ok((_root_.List.cons((psWasmByte(93)), _root_.List.nil)))
+  | f32Gt => Except.ok((_root_.List.cons((psWasmByte(94)), _root_.List.nil)))
+  | f32Le => Except.ok((_root_.List.cons((psWasmByte(95)), _root_.List.nil)))
+  | f32Ge => Except.ok((_root_.List.cons((psWasmByte(96)), _root_.List.nil)))
+  | f64Eq => Except.ok((_root_.List.cons((psWasmByte(97)), _root_.List.nil)))
+  | f64Ne => Except.ok((_root_.List.cons((psWasmByte(98)), _root_.List.nil)))
+  | f64Lt => Except.ok((_root_.List.cons((psWasmByte(99)), _root_.List.nil)))
+  | f64Gt => Except.ok((_root_.List.cons((psWasmByte(100)), _root_.List.nil)))
+  | f64Le => Except.ok((_root_.List.cons((psWasmByte(101)), _root_.List.nil)))
+  | f64Ge => Except.ok((_root_.List.cons((psWasmByte(102)), _root_.List.nil)))
+  | f32Add => Except.ok((_root_.List.cons((psWasmByte(146)), _root_.List.nil)))
+  | f32Sub => Except.ok((_root_.List.cons((psWasmByte(147)), _root_.List.nil)))
+  | f32Mul => Except.ok((_root_.List.cons((psWasmByte(148)), _root_.List.nil)))
+  | f32Div => Except.ok((_root_.List.cons((psWasmByte(149)), _root_.List.nil)))
+  | f64Add => Except.ok((_root_.List.cons((psWasmByte(160)), _root_.List.nil)))
+  | f64Sub => Except.ok((_root_.List.cons((psWasmByte(161)), _root_.List.nil)))
+  | f64Mul => Except.ok((_root_.List.cons((psWasmByte(162)), _root_.List.nil)))
+  | f64Div => Except.ok((_root_.List.cons((psWasmByte(163)), _root_.List.nil)))
+  | structNew typeName => match (psWasmFindStructureIndex(structures, typeName)) with {
+  | Option.none => Except.error((PsWasmEncodeError.unknownStructure(typeName)))
+  | Option.some typeIndex => Except.ok((psListAppend((_root_.List.cons((psWasmByte(251)), _root_.List.nil)), (psListAppend((psWasmEncodeUleb(0)), (psWasmEncodeUleb(typeIndex)))))))
+}
+  | structGet typeName fieldIndex => match (psWasmFindStructureIndex(structures, typeName)) with {
+  | Option.none => Except.error((PsWasmEncodeError.unknownStructure(typeName)))
+  | Option.some typeIndex => Except.ok((psListAppend((_root_.List.cons((psWasmByte(251)), _root_.List.nil)), (psListAppend((psWasmEncodeUleb(2)), (psListAppend((psWasmEncodeUleb(typeIndex)), (psWasmEncodeUleb(fieldIndex)))))))))
+}
+  | structGetS typeName fieldIndex => match (psWasmFindStructureIndex(structures, typeName)) with {
+  | Option.none => Except.error((PsWasmEncodeError.unknownStructure(typeName)))
+  | Option.some typeIndex => Except.ok((psListAppend((_root_.List.cons((psWasmByte(251)), _root_.List.nil)), (psListAppend((psWasmEncodeUleb(3)), (psListAppend((psWasmEncodeUleb(typeIndex)), (psWasmEncodeUleb(fieldIndex)))))))))
+}
+  | structGetU typeName fieldIndex => match (psWasmFindStructureIndex(structures, typeName)) with {
+  | Option.none => Except.error((PsWasmEncodeError.unknownStructure(typeName)))
+  | Option.some typeIndex => Except.ok((psListAppend((_root_.List.cons((psWasmByte(251)), _root_.List.nil)), (psListAppend((psWasmEncodeUleb(4)), (psListAppend((psWasmEncodeUleb(typeIndex)), (psWasmEncodeUleb(fieldIndex)))))))))
+}
+  | arrayNew typeName => match (psWasmFindHeapTypeIndex(structures, arrays, typeName)) with {
+  | Option.none => Except.error((PsWasmEncodeError.unknownStructure(typeName)))
+  | Option.some typeIndex => Except.ok((psListAppend((_root_.List.cons((psWasmByte(251)), _root_.List.nil)), (psListAppend((psWasmEncodeUleb(6)), (psWasmEncodeUleb(typeIndex)))))))
+}
+  | arrayNewDefault typeName => match (psWasmFindHeapTypeIndex(structures, arrays, typeName)) with {
+  | Option.none => Except.error((PsWasmEncodeError.unknownStructure(typeName)))
+  | Option.some typeIndex => Except.ok((psListAppend((_root_.List.cons((psWasmByte(251)), _root_.List.nil)), (psListAppend((psWasmEncodeUleb(7)), (psWasmEncodeUleb(typeIndex)))))))
+}
+  | arrayNewFixed typeName length => match (psWasmFindHeapTypeIndex(structures, arrays, typeName)) with {
+  | Option.none => Except.error((PsWasmEncodeError.unknownStructure(typeName)))
+  | Option.some typeIndex => Except.ok((psListAppend((_root_.List.cons((psWasmByte(251)), _root_.List.nil)), (psListAppend((psWasmEncodeUleb(8)), (psListAppend((psWasmEncodeUleb(typeIndex)), (psWasmEncodeUleb(length)))))))))
+}
+  | arrayGet typeName => match (psWasmFindHeapTypeIndex(structures, arrays, typeName)) with {
+  | Option.none => Except.error((PsWasmEncodeError.unknownStructure(typeName)))
+  | Option.some typeIndex => Except.ok((psListAppend((_root_.List.cons((psWasmByte(251)), _root_.List.nil)), (psListAppend((psWasmEncodeUleb(11)), (psWasmEncodeUleb(typeIndex)))))))
+}
+  | arrayGetS typeName => match (psWasmFindHeapTypeIndex(structures, arrays, typeName)) with {
+  | Option.none => Except.error((PsWasmEncodeError.unknownStructure(typeName)))
+  | Option.some typeIndex => Except.ok((psListAppend((_root_.List.cons((psWasmByte(251)), _root_.List.nil)), (psListAppend((psWasmEncodeUleb(12)), (psWasmEncodeUleb(typeIndex)))))))
+}
+  | arrayGetU typeName => match (psWasmFindHeapTypeIndex(structures, arrays, typeName)) with {
+  | Option.none => Except.error((PsWasmEncodeError.unknownStructure(typeName)))
+  | Option.some typeIndex => Except.ok((psListAppend((_root_.List.cons((psWasmByte(251)), _root_.List.nil)), (psListAppend((psWasmEncodeUleb(13)), (psWasmEncodeUleb(typeIndex)))))))
+}
+  | arraySet typeName => match (psWasmFindHeapTypeIndex(structures, arrays, typeName)) with {
+  | Option.none => Except.error((PsWasmEncodeError.unknownStructure(typeName)))
+  | Option.some typeIndex => Except.ok((psListAppend((_root_.List.cons((psWasmByte(251)), _root_.List.nil)), (psListAppend((psWasmEncodeUleb(14)), (psWasmEncodeUleb(typeIndex)))))))
+}
+  | arrayLen => Except.ok((psListAppend((_root_.List.cons((psWasmByte(251)), _root_.List.nil)), (psWasmEncodeUleb(15)))))
+  | arrayCopy destinationType sourceType => match (psWasmFindHeapTypeIndex(structures, arrays, destinationType)) with {
+  | Option.none => Except.error((PsWasmEncodeError.unknownStructure(destinationType)))
+  | Option.some destinationIndex => match (psWasmFindHeapTypeIndex(structures, arrays, sourceType)) with {
+  | Option.none => Except.error((PsWasmEncodeError.unknownStructure(sourceType)))
+  | Option.some sourceIndex => Except.ok((psListAppend((_root_.List.cons((psWasmByte(251)), _root_.List.nil)), (psListAppend((psWasmEncodeUleb(17)), (psListAppend((psWasmEncodeUleb(destinationIndex)), (psWasmEncodeUleb(sourceIndex)))))))))
+}
+}
+  | refTest typeName => match (psWasmFindStructureIndex(structures, typeName)) with {
+  | Option.none => Except.error((PsWasmEncodeError.unknownStructure(typeName)))
+  | Option.some typeIndex => Except.ok((psListAppend((_root_.List.cons((psWasmByte(251)), _root_.List.nil)), (psListAppend((psWasmEncodeUleb(20)), (psWasmEncodeSleb((Int.ofNat(typeIndex)))))))))
+}
+  | refCast typeName => match (psWasmFindStructureIndex(structures, typeName)) with {
+  | Option.none => Except.error((PsWasmEncodeError.unknownStructure(typeName)))
+  | Option.some typeIndex => Except.ok((psListAppend((_root_.List.cons((psWasmByte(251)), _root_.List.nil)), (psListAppend((psWasmEncodeUleb(22)), (psWasmEncodeSleb((Int.ofNat(typeIndex)))))))))
+}
+  | refFunc functionName => match (psWasmFindFunctionIndex(functions, functionName)) with {
+  | Option.none => Except.error((PsWasmEncodeError.unknownFunction(functionName)))
+  | Option.some functionIndex => Except.ok((psListAppend((_root_.List.cons((psWasmByte(210)), _root_.List.nil)), (psWasmEncodeUleb(functionIndex)))))
+}
+  | refCastFunction typeName => match (psWasmFindFunctionTypeIndex(structures, arrays, functionTypes, typeName)) with {
+  | Option.none => Except.error((PsWasmEncodeError.unknownFunctionType(typeName)))
+  | Option.some typeIndex => Except.ok((psListAppend((_root_.List.cons((psWasmByte(251)), _root_.List.nil)), (psListAppend((psWasmEncodeUleb(22)), (psWasmEncodeSleb((Int.ofNat(typeIndex)))))))))
+}
+  | callRef typeName => match (psWasmFindFunctionTypeIndex(structures, arrays, functionTypes, typeName)) with {
+  | Option.none => Except.error((PsWasmEncodeError.unknownFunctionType(typeName)))
+  | Option.some typeIndex => Except.ok((psListAppend((_root_.List.cons((psWasmByte(20)), _root_.List.nil)), (psWasmEncodeUleb(typeIndex)))))
+}
+  | returnCallRef typeName => match (psWasmFindFunctionTypeIndex(structures, arrays, functionTypes, typeName)) with {
+  | Option.none => Except.error((PsWasmEncodeError.unknownFunctionType(typeName)))
+  | Option.some typeIndex => Except.ok((psListAppend((_root_.List.cons((psWasmByte(21)), _root_.List.nil)), (psWasmEncodeUleb(typeIndex)))))
+}
+  | f32ConstBits _ => Except.error(PsWasmEncodeError.unsupportedInstruction)
+  | f64ConstBits _ => Except.error(PsWasmEncodeError.unsupportedInstruction)
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeInstructions(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), functionTypes : List(PsWasmFunctionType), functions : List(PsWasmFunction), instructions : List(PsWasmInstruction)) : Except(PsWasmEncodeError, (List(Nat))) := psListFlatMapExcept((psWasmEncodeInstruction(structures, arrays, functionTypes, functions)), instructions)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeLocalDeclaration(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), type : PsWasmValueType) : Except(PsWasmEncodeError, (List(Nat))) := match (psWasmEncodeValueType(structures, arrays, type)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encoded => Except.ok((List.cons((psWasmByte(1)), encoded)))
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeLocalDeclarations(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), types : List(PsWasmValueType)) : Except(PsWasmEncodeError, (List(Nat))) := psListFlatMapExcept((psWasmEncodeLocalDeclaration(structures, arrays)), types)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeFunctionBody(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), functionTypes : List(PsWasmFunctionType), functions : List(PsWasmFunction), function : PsWasmFunction) : Except(PsWasmEncodeError, (List(Nat))) := match (psWasmEncodeLocalDeclarations(structures, arrays, function.locals)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedLocals => match (psWasmEncodeInstructions(structures, arrays, functionTypes, functions, function.body)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok instructions => let body := (psListAppend((psWasmEncodeUleb((psListLength(function.locals)))), (psListAppend(encodedLocals, (psListAppend(instructions, (_root_.List.cons((psWasmByte(11)), _root_.List.nil))))))))
+Except.ok((psListAppend((psWasmEncodeUleb((psListLength(body)))), body)))
+}
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeFunctionBodies(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), functionTypes : List(PsWasmFunctionType), functions : List(PsWasmFunction), functionsToEncode : List(PsWasmFunction)) : Except(PsWasmEncodeError, (List(Nat))) := psListFlatMapExcept((psWasmEncodeFunctionBody(structures, arrays, functionTypes, functions)), functionsToEncode)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeStorageType(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), type : PsWasmStorageType) : Except(PsWasmEncodeError, (List(Nat))) := match type with {
+  | packedI8 => Except.ok((_root_.List.cons((psWasmByte(120)), _root_.List.nil)))
+  | packedI16 => Except.ok((_root_.List.cons((psWasmByte(119)), _root_.List.nil)))
+  | value valueType => psWasmEncodeValueType(structures, arrays, valueType)
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeStructField(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), field : PsWasmStructField) : Except(PsWasmEncodeError, (List(Nat))) := match (psWasmEncodeStorageType(structures, arrays, field.storageType)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok storage => Except.ok((psListAppend(storage, (_root_.List.cons((psWasmByte(0)), _root_.List.nil)))))
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeStructFields(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), fields : List(PsWasmStructField)) : Except(PsWasmEncodeError, (List(Nat))) := psListFlatMapExcept((psWasmEncodeStructField(structures, arrays)), fields)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeStructCompositeType(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), structType : PsWasmStructType) : Except(PsWasmEncodeError, (List(Nat))) := match (psWasmEncodeStructFields(structures, arrays, structType.fields)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok fields => Except.ok((psListAppend((_root_.List.cons((psWasmByte(95)), _root_.List.nil)), (psListAppend((psWasmEncodeUleb((psListLength(structType.fields)))), fields)))))
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeStructType(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), structType : PsWasmStructType) : Except(PsWasmEncodeError, (List(Nat))) := match (psWasmEncodeStructCompositeType(structures, arrays, structType)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok composite => match structType.superType with {
+  | Option.none => if (structType.isFinal) { Except.ok(composite) } else { Except.ok((psListAppend((_root_.List.cons((psWasmByte(80)), _root_.List.nil)), (psListAppend((psWasmEncodeUleb(0)), composite))))) }
+  | Option.some superName => match (psWasmFindStructureIndex(structures, superName)) with {
+  | Option.none => Except.error((PsWasmEncodeError.unknownStructure(superName)))
+  | Option.some superIndex => let subtypeTag := (if (structType.isFinal) { psWasmByte(79) } else { psWasmByte(80) })
+Except.ok((psListAppend((_root_.List.cons(subtypeTag, _root_.List.nil)), (psListAppend((psWasmEncodeUleb(1)), (psListAppend((psWasmEncodeUleb(superIndex)), composite)))))))
+}
+}
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeStructTypes(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), structTypes : List(PsWasmStructType)) : Except(PsWasmEncodeError, (List(Nat))) := psListFlatMapExcept((psWasmEncodeStructType(structures, arrays)), structTypes)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeArrayType(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), arrayType : PsWasmArrayType) : Except(PsWasmEncodeError, (List(Nat))) := match (psWasmEncodeStorageType(structures, arrays, arrayType.elementType)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok elementType => let mutability := (if (arrayType.mutable) { psWasmByte(1) } else { psWasmByte(0) })
+Except.ok((psListAppend((_root_.List.cons((psWasmByte(94)), _root_.List.nil)), (psListAppend(elementType, (_root_.List.cons(mutability, _root_.List.nil)))))))
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeArrayTypes(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), arrayTypes : List(PsWasmArrayType)) : Except(PsWasmEncodeError, (List(Nat))) := psListFlatMapExcept((psWasmEncodeArrayType(structures, arrays)), arrayTypes)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmFunctionTypeIndex(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), functionTypes : List(PsWasmFunctionType), functionIndex : Nat, function : PsWasmFunction) : Except(PsWasmEncodeError, Nat) := match function.typeName with {
+  | Option.none => Except.ok((Nat.add((Nat.add((Nat.add((psListLength(structures)), (psListLength(arrays)))), (psListLength(functionTypes)))), functionIndex)))
+  | Option.some typeName => match (psWasmFindFunctionTypeIndex(structures, arrays, functionTypes, typeName)) with {
+  | Option.none => Except.error((PsWasmEncodeError.unknownFunctionType(typeName)))
+  | Option.some typeIndex => Except.ok(typeIndex)
+}
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeFunctionTypeIndicesAcc(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), functionTypes : List(PsWasmFunctionType), functions : List(PsWasmFunction)) : (_ : Nat) -> (_ : List(Nat)) -> Except(PsWasmEncodeError, (List(Nat))) := match functions with {
+  | List.nil => fun (_functionIndex : Nat) => fun (reversed : List(Nat)) => Except.ok((psListReverse(reversed)))
+  | List.cons function rest => fun (functionIndex : Nat) => fun (reversed : List(Nat)) => let smaller : (_ : Nat) -> (_ : List(Nat)) -> Except(PsWasmEncodeError, (List(Nat))) := (psWasmEncodeFunctionTypeIndicesAcc(structures, arrays, functionTypes, rest))
+match (psWasmFunctionTypeIndex(structures, arrays, functionTypes, functionIndex, function)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok typeIndex => smaller((Nat.add(functionIndex, 1)), (psListReverseAcc((psWasmEncodeUleb(typeIndex)), reversed)))
+}
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeFunctionTypeIndicesWorker(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), functionTypes : List(PsWasmFunctionType), functions : List(PsWasmFunction)) : (_ : Nat) -> Except(PsWasmEncodeError, (List(Nat))) := fun (functionIndex : Nat) => psWasmEncodeFunctionTypeIndicesAcc(structures, arrays, functionTypes, functions, functionIndex, List.nil)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeFunctionTypeIndicesLoop(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), functionTypes : List(PsWasmFunctionType), functionIndex : Nat, functions : List(PsWasmFunction)) : Except(PsWasmEncodeError, (List(Nat))) := psWasmEncodeFunctionTypeIndicesWorker(structures, arrays, functionTypes, functions, functionIndex)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeFunctionTypeIndices(structures : List(PsWasmStructType), arrays : List(PsWasmArrayType), functionTypes : List(PsWasmFunctionType), functions : List(PsWasmFunction)) : Except(PsWasmEncodeError, (List(Nat))) := psWasmEncodeFunctionTypeIndicesLoop(structures, arrays, functionTypes, 0, functions)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeFunctionRefIndex(functions : List(PsWasmFunction), name : String) : Except(PsWasmEncodeError, (List(Nat))) := match (psWasmFindFunctionIndex(functions, name)) with {
+  | Option.none => Except.error((PsWasmEncodeError.unknownFunction(name)))
+  | Option.some index => Except.ok((psWasmEncodeUleb(index)))
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeFunctionRefIndices(functions : List(PsWasmFunction), names : List(String)) : Except(PsWasmEncodeError, (List(Nat))) := psListFlatMapExcept((psWasmEncodeFunctionRefIndex(functions)), names)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeDeclarativeFunctionRefs(functions : List(PsWasmFunction), functionRefs : List(String)) : Except(PsWasmEncodeError, (List(Nat))) := match functionRefs with {
+  | _root_.List.nil => Except.ok(_root_.List.nil)
+  | _ => match (psWasmEncodeFunctionRefIndices(functions, functionRefs)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok indices => let segment := (psListAppend((psWasmEncodeUleb(3)), (psListAppend((_root_.List.cons((psWasmByte(0)), _root_.List.nil)), (psWasmEncodeVector(indices, (psListLength(functionRefs))))))))
+Except.ok((psWasmEncodeVector(segment, 1)))
+}
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeExport(functions : List(PsWasmFunction), exportItem : Prod(String, String)) : Except(PsWasmEncodeError, (List(Nat))) := match (psWasmFindFunctionIndex(functions, (Prod.snd(exportItem)))) with {
+  | Option.none => Except.error((PsWasmEncodeError.unknownFunction((Prod.snd(exportItem)))))
+  | Option.some index => Except.ok((psListAppend((psWasmEncodeName((Prod.fst(exportItem)))), (List.cons((psWasmByte(0)), (psWasmEncodeUleb(index)))))))
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeExports(functions : List(PsWasmFunction), exports : List((_root_.Prod(String, String)))) : Except(PsWasmEncodeError, (List(Nat))) := psListFlatMapExcept((psWasmEncodeExport(functions)), exports)
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeSection(sectionId : Nat, payload : List(Nat)) : List(Nat) := psListAppend((_root_.List.cons((psWasmByte(sectionId)), _root_.List.nil)), (psListAppend((psWasmEncodeUleb((psListLength(payload)))), payload)))
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeTypeSectionPayload(encodedTypes : List(Nat), typeCount : Nat) : List(Nat) := if (Nat.beq(typeCount, 0)) { psWasmEncodeVector(List.nil, 0) } else { let recursiveGroup : List(Nat) := (psListAppend((_root_.List.cons((psWasmByte(78)), _root_.List.nil)), (psWasmEncodeVector(encodedTypes, typeCount))))
+psWasmEncodeVector(recursiveGroup, 1) }
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+-- Indexed value/storage references resolve only into structures ++ arrays.
+-- Keep that prefix mutually recursive. Function composites refer backward to
+-- the heap prefix, never to later function types, so each can be a singleton
+-- group. Flattened type indices stay unchanged; scalar ABI signatures no
+-- longer inherit unrelated heap types' recursive-group identity.
+def psWasmEncodeGroupedTypeSectionPayload(encodedHeapTypes : List(Nat), heapTypeCount : Nat, encodedFunctionTypes : List(Nat), functionTypeCount : Nat) : List(Nat) := if (Nat.beq(heapTypeCount, 0)) { psWasmEncodeVector(encodedFunctionTypes, functionTypeCount) } else { let recursiveGroup : List(Nat) := (psListAppend((List.cons((psWasmByte(78)), List.nil)), (psWasmEncodeVector(encodedHeapTypes, heapTypeCount))))
+psWasmEncodeVector((psListAppend(recursiveGroup, encodedFunctionTypes)), (Nat.succ(functionTypeCount))) }
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeAbiImport(module : PsWasmModule, index : Nat, value : PsWasmFunctionImport) : Except(PsWasmEncodeError, (List(Nat))) := match (psWasmFunctionTypeIndex(module.structures, module.arrays, module.functionTypes, index, value.function)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok typeIndex => Except.ok((psWasmEncodeByteChunks((_root_.List.cons((psWasmEncodeName(value.moduleName)), (_root_.List.cons((psWasmEncodeName(value.importName)), (_root_.List.cons((_root_.List.cons((psWasmByte(0)), _root_.List.nil)), (_root_.List.cons((psWasmEncodeUleb(typeIndex)), _root_.List.nil)))))))))))
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+-- Ordered, fully applied traversal preserves imported function type indices.
+def psWasmEncodeAbiImportsWorker(module : PsWasmModule, index : Nat, imports : List(PsWasmFunctionImport)) : Except(PsWasmEncodeError, (List(Nat))) := match imports with {
+  | List.nil => Except.ok(_root_.List.nil)
+  | List.cons value rest => match (psWasmEncodeAbiImport(module, index, value)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok first => match (psWasmEncodeAbiImportsWorker(module, (Nat.add(index, 1)), rest)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok other => Except.ok((psListAppend(first, other)))
+}
+}
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeAbiImports(module : PsWasmModule) : Except(PsWasmEncodeError, (List(Nat))) := match (psWasmEncodeAbiImportsWorker(module, 0, module.functionImports)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encoded => let memoryImports := (if (module.abiMemoryImports) { psWasmEncodeByteChunks((_root_.List.cons((psWasmEncodeName("psc1:abi")), (_root_.List.cons((psWasmEncodeName("memory")), (_root_.List.cons((_root_.List.cons((psWasmByte(2)), (_root_.List.cons((psWasmByte(1)), _root_.List.nil)))), (_root_.List.cons((psWasmEncodeUleb(256)), (_root_.List.cons((psWasmEncodeUleb(256)), (_root_.List.cons((psWasmEncodeName("psc1:abi")), (_root_.List.cons((psWasmEncodeName("heap")), (_root_.List.cons((_root_.List.cons((psWasmByte(3)), (_root_.List.cons((psWasmByte(127)), (_root_.List.cons((psWasmByte(1)), _root_.List.nil)))))), (_root_.List.cons((psWasmEncodeName("psc1:abi")), (_root_.List.cons((psWasmEncodeName("busy")), (_root_.List.cons((_root_.List.cons((psWasmByte(3)), (_root_.List.cons((psWasmByte(127)), (_root_.List.cons((psWasmByte(1)), _root_.List.nil)))))), _root_.List.nil))))))))))))))))))))))) } else { _root_.List.nil })
+Except.ok((psWasmEncodeVector((psListAppend(encoded, memoryImports)), ((psListLength(module.functionImports) + (if (module.abiMemoryImports) { 3 } else { 0 }))))))
+}
+end Ps.Internal.WasmBinaryBytes
+
+namespace Ps.Internal.WasmBinaryBytes
+def psWasmEncodeModule(module : PsWasmModule) : Except(PsWasmEncodeError, (List(Nat))) := match (psWasmEncodeAbiImports(module)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedImports => let allFunctions := (psWasmAllFunctions(module))
+match (psWasmEncodeStructTypes(module.structures, module.arrays, module.structures)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedStructTypes => match (psWasmEncodeArrayTypes(module.structures, module.arrays, module.arrays)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedArrayTypes => match (psWasmEncodeNamedFunctionTypes(module.structures, module.arrays, module.functionTypes)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedNamedFunctionTypes => match (psWasmEncodeFunctionTypes(module.structures, module.arrays, allFunctions)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedFunctionTypes => match (psWasmEncodeFunctionTypeIndicesLoop(module.structures, module.arrays, module.functionTypes, (psListLength(module.functionImports)), module.functions)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedFunctionTypeIndices => match (psWasmEncodeExports(allFunctions, module.exports)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedExports => match (psWasmEncodeDeclarativeFunctionRefs(allFunctions, module.functionRefs)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedFunctionRefs => match (psWasmEncodeFunctionBodies(module.structures, module.arrays, module.functionTypes, allFunctions, module.functions)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedBodies => let typePayload : List(Nat) := (psWasmEncodeGroupedTypeSectionPayload((psListAppend(encodedStructTypes, encodedArrayTypes)), (Nat.add((psListLength(module.structures)), (psListLength(module.arrays)))), (psListAppend(encodedNamedFunctionTypes, encodedFunctionTypes)), (Nat.add((psListLength(module.functionTypes)), (psListLength(allFunctions))))))
+let functionPayload := (psWasmEncodeVector(encodedFunctionTypeIndices, (psListLength(module.functions))))
+let exportPayload := (psWasmEncodeVector((psWasmEncodeByteChunks((_root_.List.cons(encodedExports, (_root_.List.cons((if (module.abiMemory) { psListAppend((psWasmEncodeName("memory")), (_root_.List.cons((psWasmByte(2)), (_root_.List.cons((psWasmByte(0)), _root_.List.nil))))) } else { _root_.List.nil }), (_root_.List.cons((if (module.abiGlobalsExport) { psWasmEncodeByteChunks((_root_.List.cons((psWasmEncodeName("heap")), (_root_.List.cons((_root_.List.cons((psWasmByte(3)), (_root_.List.cons((psWasmByte(0)), _root_.List.nil)))), (_root_.List.cons((psWasmEncodeName("busy")), (_root_.List.cons((_root_.List.cons((psWasmByte(3)), (_root_.List.cons((psWasmByte(1)), _root_.List.nil)))), _root_.List.nil))))))))) } else { _root_.List.nil }), _root_.List.nil)))))))), (((psListLength(module.exports) + (if (module.abiMemory) { 1 } else { 0 })) + (if (module.abiGlobalsExport) { 2 } else { 0 })))))
+let elementSection : List(Nat) := (match module.functionRefs with {
+  | _root_.List.nil => _root_.List.nil
+  | _ => psWasmEncodeSection(9, encodedFunctionRefs)
+})
+let codePayload := (psWasmEncodeVector(encodedBodies, (psListLength(module.functions))))
+let importSection := (if ((psListIsEmpty(module.functionImports) && (!module.abiMemoryImports))) { _root_.List.nil } else { psWasmEncodeSection(2, encodedImports) })
+let memorySection := (if ((module.abiMemory && (!module.abiMemoryImports))) { psWasmEncodeSection(5, (psWasmEncodeByteChunks((_root_.List.cons((_root_.List.cons((psWasmByte(1)), (_root_.List.cons((psWasmByte(1)), _root_.List.nil)))), (_root_.List.cons((psWasmEncodeUleb(256)), (_root_.List.cons((psWasmEncodeUleb(256)), _root_.List.nil))))))))) } else { _root_.List.nil })
+let globalSection := (if ((module.abiMemory && (!module.abiMemoryImports))) { psWasmEncodeSection(6, (_root_.List.cons((psWasmByte(2)), (_root_.List.cons((psWasmByte(127)), (_root_.List.cons((psWasmByte(1)), (_root_.List.cons((psWasmByte(65)), (_root_.List.cons((psWasmByte(192)), (_root_.List.cons((psWasmByte(0)), (_root_.List.cons((psWasmByte(11)), (_root_.List.cons((psWasmByte(127)), (_root_.List.cons((psWasmByte(1)), (_root_.List.cons((psWasmByte(65)), (_root_.List.cons((psWasmByte(0)), (_root_.List.cons((psWasmByte(11)), _root_.List.nil))))))))))))))))))))))))) } else { _root_.List.nil })
+Except.ok((psWasmEncodeByteChunks((_root_.List.cons((_root_.List.cons((psWasmByte(0)), (_root_.List.cons((psWasmByte(97)), (_root_.List.cons((psWasmByte(115)), (_root_.List.cons((psWasmByte(109)), (_root_.List.cons((psWasmByte(1)), (_root_.List.cons((psWasmByte(0)), (_root_.List.cons((psWasmByte(0)), (_root_.List.cons((psWasmByte(0)), _root_.List.nil)))))))))))))))), (_root_.List.cons((psWasmEncodeSection(1, typePayload)), (_root_.List.cons(importSection, (_root_.List.cons((psWasmEncodeSection(3, functionPayload)), (_root_.List.cons(memorySection, (_root_.List.cons(globalSection, (_root_.List.cons((psWasmEncodeSection(7, exportPayload)), (_root_.List.cons(elementSection, (_root_.List.cons((psWasmEncodeSection(10, codePayload)), _root_.List.nil)))))))))))))))))))))
+}
+}
+}
+}
+}
+}
+}
+}
+}
+end Ps.Internal.WasmBinaryBytes

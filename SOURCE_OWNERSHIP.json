@@ -1,0 +1,167 @@
+{
+  "schema": "pskernel-proofscript-ownership/1",
+  "purpose": "Exhaustive ownership index for tracked .ps files; each compiler project keeps its own language, admission, and bootstrap authority.",
+  "defaultAction": "refuse-unclassified-proofscript",
+  "psc1": {
+    "prefix": "psc1/",
+    "manifest": "psc1/CANONICAL_SOURCES.json",
+    "policy": "psc1/bootstrap/CANONICAL_REFERENCES.md",
+    "canonicalOwner": "manifest.owners[].path",
+    "bootstrapReference": "manifest.owners[].bootstrap.path",
+    "generatedViews": "manifest.generatedViews",
+    "freshAdmissionRequired": true
+  },
+  "rules": [
+    {
+      "id": "root-standard-library",
+      "prefix": "stdlib/src/",
+      "role": "editable-project-source",
+      "sourceOfTruth": "self",
+      "project": "root-typescript-kernel",
+      "policy": "stdlib/README.md"
+    },
+    {
+      "id": "root-library-fixtures",
+      "prefix": "stdlib/test/",
+      "role": "authored-test-fixture",
+      "sourceOfTruth": "self",
+      "project": "root-typescript-kernel",
+      "policy": "stdlib/README.md"
+    },
+    {
+      "id": "root-bootstrap-correspondence",
+      "path": "packages/compiler/src/ProofScript/Compiler/Data.ps",
+      "role": "retained-bootstrap-correspondence-fixture",
+      "sourceOfTruth": "self",
+      "pairedReference": "packages/compiler/src/ProofScript/Compiler/Data.lean",
+      "project": "root-typescript-kernel",
+      "policy": "packages/README.md"
+    },
+    {
+      "id": "psc0-fixtures",
+      "prefix": "psc0/test/fixtures/",
+      "role": "authored-test-fixture",
+      "sourceOfTruth": "self",
+      "project": "psc0",
+      "policy": "psc0/README.md"
+    },
+    {
+      "id": "pscv-language-fixtures",
+      "prefix": "PSCVL/examples/",
+      "role": "authored-language-and-policy-fixture",
+      "sourceOfTruth": "self",
+      "project": "PSCVL",
+      "policy": "PSCVL/README.md"
+    },
+    {
+      "id": "psc1-test-fixtures",
+      "prefix": "psc1/test/",
+      "role": "authored-test-and-reference-oracles",
+      "sourceOfTruth": "self",
+      "project": "psc1",
+      "policy": "psc1/README.md"
+    },
+    {
+      "id": "vendored-study-material",
+      "prefix": "study/",
+      "role": "vendored-study-reference",
+      "sourceOfTruth": "retained-reference-bytes",
+      "project": "study",
+      "policy": "README.md"
+    }
+  ],
+  "retainedGenerated": [
+    {
+      "path": "psc1/legacy/packages/pskernel-core/dist/foundation.ps",
+      "role": "retained-generated-kernel-artifact",
+      "project": "psc1-legacy",
+      "sourceRegistry": "psc1/legacy/packages/pskernel-core/manifests/SOURCE.json",
+      "buildRegistry": "psc1/legacy/packages/pskernel-core/manifests/BUILD.json",
+      "policy": "psc1/legacy/packages/pskernel-core/README.md"
+    },
+    {
+      "path": "psc0/legacy/packages/pskernel-core/dist/foundation.ps",
+      "role": "retained-generated-kernel-artifact",
+      "project": "psc0",
+      "sourceRegistry": "psc0/legacy/packages/pskernel-core/manifests/SOURCE.json",
+      "buildRegistry": "psc0/legacy/packages/pskernel-core/manifests/BUILD.json",
+      "policy": "psc0/legacy/packages/pskernel-core/README.md"
+    },
+    {
+      "path": "psc15backup/packages/pskernel-core.old2/dist/foundation.ps",
+      "role": "retained-generated-kernel-artifact",
+      "project": "psc15backup",
+      "sourceRegistry": "psc15backup/packages/pskernel-core.old2/manifests/SOURCE.json",
+      "buildRegistry": "psc15backup/packages/pskernel-core.old2/manifests/BUILD.json",
+      "policy": "psc15backup/packages/pskernel-core.old2/README.md"
+    },
+    {
+      "path": "psc15backup/packages/pskernel-core.old3/dist/foundation.ps",
+      "role": "retained-generated-kernel-artifact",
+      "project": "psc15backup",
+      "sourceRegistry": "psc15backup/packages/pskernel-core.old3/manifests/SOURCE.json",
+      "buildRegistry": "psc15backup/packages/pskernel-core.old3/manifests/BUILD.json",
+      "policy": "psc15backup/packages/pskernel-core.old3/README.md"
+    },
+    {
+      "path": "pscv0/legacy/packages/pskernel-core.old2/dist/foundation.ps",
+      "role": "retained-generated-kernel-artifact",
+      "project": "pscv0",
+      "sourceRegistry": "pscv0/legacy/packages/pskernel-core.old2/manifests/SOURCE.json",
+      "buildRegistry": "pscv0/legacy/packages/pskernel-core.old2/manifests/BUILD.json",
+      "policy": "pscv0/legacy/packages/pskernel-core.old2/README.md"
+    },
+    {
+      "path": "pscv0/packages/pskernel-core.old3/dist/foundation.ps",
+      "role": "retained-generated-kernel-artifact",
+      "project": "pscv0",
+      "sourceRegistry": "pscv0/packages/pskernel-core.old3/manifests/SOURCE.json",
+      "buildRegistry": "pscv0/packages/pskernel-core.old3/manifests/BUILD.json",
+      "policy": "pscv0/packages/pskernel-core.old3/README.md"
+    }
+  ],
+  "independentProjects": [
+    {
+      "prefix": "psc0/",
+      "authority": "psc0/README.md"
+    },
+    {
+      "prefix": "pscv0/",
+      "authority": "pscv0/README.md"
+    },
+    {
+      "prefix": "PSCVL/",
+      "authority": "PSCVL/README.md"
+    },
+    {
+      "prefix": "psc15backup/",
+      "authority": "retained project snapshot and its per-package manifests"
+    },
+    {
+      "prefix": "psc15selfhost/",
+      "authority": "project-local native sources and build definitions"
+    },
+    {
+      "prefix": "psc2selfhost/",
+      "authority": "project-local native sources and build definitions"
+    },
+    {
+      "prefix": "selfhost/",
+      "authority": "root project native bootstrap sources"
+    },
+    {
+      "prefix": "psleankernel/",
+      "authority": "independent kernel project"
+    },
+    {
+      "prefix": "psc1-kernel/",
+      "authority": "independent kernel project"
+    }
+  ],
+  "authorityLimits": [
+    "An ownership label identifies the editable source or retained origin; it is not a compiler, kernel, or platform qualification.",
+    "PSC1 canonical source promotion does not convert or select a seed for independent projects.",
+    "Retained generated kernel artifacts are never editable PSC1 compiler sources.",
+    "Changing a paired bootstrap reference requires the checked source refresh workflow; editing both variants independently is forbidden."
+  ]
+}

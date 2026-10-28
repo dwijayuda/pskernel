@@ -1,0 +1,67 @@
+import Ps.BackendRust.ValueRefs
+
+def psRustListFoldl {alpha : Type} {beta : Type}(step : (_ : beta) -> (_ : alpha) -> beta, values : List(alpha)) : (_ : beta) -> beta := match values with {
+  | List.nil => fun (state : beta) => state
+  | List.cons value rest => let smaller : (_ : beta) -> beta := (psRustListFoldl(step, rest))
+fun (state : beta) => smaller((step(state, value)))
+}
+
+def psRustAppendCaptureForName(outerNames : List(String), boundNames : List(String), captures : List(String), name : String) : List(String) := if (psRustStringListContains(boundNames, name)) { captures } else { if (psRustStringListContains(captures, name)) { captures } else { if (psRustStringListContains(outerNames, name)) { psListAppend(captures, (List.cons(name, List.nil))) } else { captures } } }
+
+def psRustParameterNames(parameters : List(PsVerifiedIrParameter)) : List(String) := psRustAddParameterNames(parameters, List.nil)
+
+def psRustMatchBindingNames(bindings : List(PsVerifiedIrMatchBinding)) : List(String) := psRustAddBindingNames(bindings, List.nil)
+
+/- Fuel exhaustion conservatively captures all outer locals. Expression emission
+   separately fails closed at the same depth, so no missing capture is accepted. -/
+def psRustCollectCapturesWorker(outerNames : List(String), remainingFuel : Nat) : (_ : List(String)) -> (_ : PsVerifiedIrExpr) -> (_ : List(String)) -> List(String) := match remainingFuel with {
+  | _root_.Nat.zero => fun (_boundNames : List(String)) => fun (_expr : PsVerifiedIrExpr) => fun (captures : List(String)) => outerNames
+  | _root_.Nat.succ fuel => let smaller : (_ : List(String)) -> (_ : PsVerifiedIrExpr) -> (_ : List(String)) -> List(String) := (psRustCollectCapturesWorker(outerNames, fuel))
+fun (boundNames : List(String)) => fun (expr : PsVerifiedIrExpr) => fun (captures : List(String)) => let collect : (_ : PsVerifiedIrExpr) -> (_ : List(String)) -> List(String) := (fun (nested : PsVerifiedIrExpr) (state : List(String)) => smaller(boundNames, nested, state))
+let collectArgument : (_ : List(String)) -> (_ : PsVerifiedIrExpr) -> List(String) := (fun (state : List(String)) (argument : PsVerifiedIrExpr) => collect(argument, state))
+let collectField : (_ : List(String)) -> (_ : _root_.Prod(String, PsVerifiedIrExpr)) -> List(String) := (fun (state : List(String)) (field : _root_.Prod(String, PsVerifiedIrExpr)) => collect((Prod.snd(field)), state))
+match expr with {
+  | literal _ => captures
+  | var name => psRustAppendCaptureForName(outerNames, boundNames, captures, name)
+  | intrinsic _ _ arguments => psRustListFoldl(collectArgument, arguments, captures)
+  | lambda parameters _ body => smaller((psListAppend((psRustParameterNames(parameters)), boundNames)), body, captures)
+  | call fn _ arguments => let withFn := (collect(fn, captures))
+psRustListFoldl(collectArgument, arguments, withFn)
+  | letE name _ value body => let withValue := (collect(value, captures))
+smaller((List.cons(name, boundNames)), body, withValue)
+  | ifE condition thenBranch elseBranch => let withCondition := (collect(condition, captures))
+let withThen := (collect(thenBranch, withCondition))
+collect(elseBranch, withThen)
+  | record _ _ fields => psRustListFoldl(collectField, fields, captures)
+  | projection _ _ target _ => collect(target, captures)
+  | constructor _ _ _ fields => psRustListFoldl(collectField, fields, captures)
+  | matchE _ _ scrutinee alternatives => let withScrutinee := (collect(scrutinee, captures))
+let collectAlternative : (_ : List(String)) -> (_ : _root_.Prod(String, (_root_.Prod((List(PsVerifiedIrMatchBinding)), PsVerifiedIrExpr)))) -> List(String) := (fun (state : List(String)) (alternative : _root_.Prod(String, (_root_.Prod((List(PsVerifiedIrMatchBinding)), PsVerifiedIrExpr)))) => let matchBindings := (Prod.fst((Prod.snd(alternative))))
+let body := (Prod.snd((Prod.snd(alternative))))
+smaller((psListAppend((psRustMatchBindingNames(matchBindings)), boundNames)), body, state))
+psRustListFoldl(collectAlternative, alternatives, withScrutinee)
+}
+}
+
+def psRustEmitCaptureClones(names : List(String)) : String := match names with {
+  | List.nil => ""
+  | List.cons name rest => psRustConcat4("let ", (psRustIdentifier(name)), " = ", (psRustConcat3((psRustClonePrinted((psRustIdentifier(name)))), "; ", (psRustEmitCaptureClones(rest)))))
+}
+
+def psRustFindFunctionArity(declarations : List(PsVerifiedIrDeclaration), name : String) : Option(Nat) := match declarations with {
+  | List.nil => Option.none
+  | List.cons declaration rest => if (psStringEq(declaration.name, name)) { match declaration.parameters with {
+  | List.nil => Option.none
+  | List.cons _ _ => Option.some((psListLength(declaration.parameters)))
+} } else { psRustFindFunctionArity(rest, name) }
+}
+
+def psRustInferredParameterTypes(arity : Nat) : List(String) := match arity with {
+  | Nat.zero => List.nil
+  | Nat.succ remaining => List.cons("_", (psRustInferredParameterTypes(remaining)))
+}
+
+def psRustEmitGlobalFunctionValue(name : String, arity : Nat) : String := psRustConcat4("(std::rc::Rc::new(", (psRustIdentifier(name)), ") as std::rc::Rc<dyn Fn(", (psRustConcat3((psRustJoin(", ", (psRustInferredParameterTypes(arity)))), ") -> _>", ")")))
+
+-- Use the same owned global adapter in fields as in arguments and locals.
+def psRustEmitStoredExprWith(_declarations : List(PsVerifiedIrDeclaration), _locals : List(String), emitExpr : (_ : PsVerifiedIrExpr) -> Except(PsRustEmitError, String), expr : PsVerifiedIrExpr) : Except(PsRustEmitError, String) := emitExpr(expr)

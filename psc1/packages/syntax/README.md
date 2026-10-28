@@ -1,6 +1,6 @@
 # syntax
 
-Shared AST and both source grammars. Start at [src/Ps/Syntax/Ast.lean](src/Ps/Syntax/Ast.lean).
+Shared AST and both source grammars. Start at [src/Ps/Syntax/Ast.lean](src/Ps/Syntax/Ast.ps).
 
 - Representation: Exact source text → shared syntax/tokens; printers and lossless capture.
 - Boundary: Foundation only; no backend or host publication.

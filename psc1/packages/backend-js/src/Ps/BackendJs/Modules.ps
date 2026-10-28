@@ -1,0 +1,140 @@
+import Ps.BackendCommon.Modules
+import Ps.BackendJs.Print
+import Ps.BackendTs.Type
+
+namespace Ps.Internal.ModularJs
+/-! Genuine JS units are rendered from structured JsIR declarations. The TS type
+renderer is reused solely for .d.mts syntax; JS nominal data keeps its existing
+structural $ps$tag ABI rather than borrowing the TS Symbol ABI. -/
+def helpers : List(String) := _root_.List.cons("__ps$implementations", (_root_.List.cons("__ps$run", (_root_.List.cons("__ps$wrap", (_root_.List.cons("__ps$invoke", (_root_.List.cons("__ps$tailInvoke", (_root_.List.cons("__ps$utf8Width", (_root_.List.cons("__ps$utf8", (_root_.List.cons("__ps$stringGet", (_root_.List.cons("__ps$stringNext", (_root_.List.cons("__ps$utf8Known", (_root_.List.cons("__ps$stringGetView", (_root_.List.cons("__ps$stringNextView", (_root_.List.cons("__ps$stringUtf8Size", (_root_.List.cons("__ps$stringExtract", (_root_.List.cons("__ps$cohort", _root_.List.nil)))))))))))))))))))))))))))))
+end Ps.Internal.ModularJs
+
+namespace Ps.Internal.ModularJs
+def importText(item : PsModuleImport) : String := psTextJoin("", (_root_.List.cons("import ", (_root_.List.cons((if (item.typeOnly) { "type " } else { "" }), (_root_.List.cons("{ ", (_root_.List.cons((psTextJoin(", ", item.names)), (_root_.List.cons(" } from ", (_root_.List.cons((psJsonQuote(item.source)), (_root_.List.cons(";\n", _root_.List.nil)))))))))))))))
+end Ps.Internal.ModularJs
+
+namespace Ps.Internal.ModularJs
+def typeFields(fields : List((_root_.Prod(String, PsVerifiedIrType)))) : Except(String, String) := let printField : (_ : Prod(String, PsVerifiedIrType)) -> Except(String, String) := (fun (field : Prod(String, PsVerifiedIrType)) => match (psTsEmitType(field.snd)) with {
+  | Except.error _ => Except.error("PSC1_MODULE_JS_DECLARATION_TYPE")
+  | Except.ok type => Except.ok((psTextJoin("", (_root_.List.cons("readonly ", (_root_.List.cons((psJsonQuote(field.fst)), (_root_.List.cons(": ", (_root_.List.cons(type, (_root_.List.cons(";", _root_.List.nil)))))))))))))
+})
+match (psListMapExcept(printField, fields)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printed => Except.ok((psTextJoin(" ", printed)))
+}
+end Ps.Internal.ModularJs
+
+namespace Ps.Internal.ModularJs
+def structureType(info : PsVerifiedIrStructure) : Except(String, String) := if (psListIsEmpty(info.typeParameters)) { let fields := (psListMap((fun (field : PsVerifiedIrStructureField) => Prod.mk(field.name, field.type)), info.fields))
+match (typeFields(fields)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printed => Except.ok((psTextJoin("", (_root_.List.cons("export interface ", (_root_.List.cons(info.name, (_root_.List.cons(" { ", (_root_.List.cons(printed, (_root_.List.cons(" }\n", _root_.List.nil)))))))))))))
+} } else { Except.error("PSC1_MODULE_OPEN_TYPE_UNQUALIFIED") }
+end Ps.Internal.ModularJs
+
+namespace Ps.Internal.ModularJs
+def constructorType(ctor : PsVerifiedIrConstructor) : Except(String, String) := let fields := (psListMap((fun (field : PsVerifiedIrConstructorField) => Prod.mk(field.name, field.type)), ctor.fields))
+match (typeFields(fields)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printed => Except.ok((psTextJoin("", (_root_.List.cons("{ readonly \"$ps$tag\": ", (_root_.List.cons((psJsonQuote(ctor.name)), (_root_.List.cons("; ", (_root_.List.cons(printed, (_root_.List.cons(" }", _root_.List.nil)))))))))))))
+}
+end Ps.Internal.ModularJs
+
+namespace Ps.Internal.ModularJs
+def inductiveType(info : PsVerifiedIrInductive) : Except(String, String) := if (psListIsEmpty(info.typeParameters)) { match (psListMapExcept(constructorType, info.constructors)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok variants => Except.ok((psTextJoin("", (_root_.List.cons("export type ", (_root_.List.cons(info.name, (_root_.List.cons(" = ", (_root_.List.cons((if (psListIsEmpty(variants)) { "never" } else { psTextJoin(" | ", variants) }), (_root_.List.cons(";\n", _root_.List.nil)))))))))))))
+} } else { Except.error("PSC1_MODULE_OPEN_TYPE_UNQUALIFIED") }
+end Ps.Internal.ModularJs
+
+namespace Ps.Internal.ModularJs
+def nominalTypes(raw : PsVerifiedIrModule) : Except(String, String) := match (psListMapExcept(structureType, raw.structures)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok structures => match (psListMapExcept(inductiveType, raw.inductives)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok inductives => Except.ok((psTextJoin("", (_root_.List.cons((psTextJoin("", structures)), (_root_.List.cons((psTextJoin("", inductives)), _root_.List.nil)))))))
+}
+}
+end Ps.Internal.ModularJs
+
+namespace Ps.Internal.ModularJs
+def parameterType(parameter : PsVerifiedIrParameter) : Except(String, String) := match (psTsEmitType(parameter.type)) with {
+  | Except.error _ => Except.error("PSC1_MODULE_JS_DECLARATION_TYPE")
+  | Except.ok type => Except.ok((psTextJoin("", (_root_.List.cons(parameter.name, (_root_.List.cons(": ", (_root_.List.cons(type, _root_.List.nil)))))))))
+}
+end Ps.Internal.ModularJs
+
+namespace Ps.Internal.ModularJs
+def declarationType(declaration : PsVerifiedIrDeclaration) : Except(String, String) := match (psTsEmitType(declaration.resultType)) with {
+  | Except.error _ => Except.error("PSC1_MODULE_JS_DECLARATION_TYPE")
+  | Except.ok result => if (psListIsEmpty(declaration.parameters)) { Except.ok((psTextJoin("", (_root_.List.cons("export declare const ", (_root_.List.cons(declaration.name, (_root_.List.cons(": ", (_root_.List.cons(result, (_root_.List.cons(";\n", _root_.List.nil))))))))))))) } else { match (psListMapExcept(parameterType, declaration.parameters)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok parameters => Except.ok((psTextJoin("", (_root_.List.cons("export declare function ", (_root_.List.cons(declaration.name, (_root_.List.cons("(", (_root_.List.cons((psTextJoin(", ", parameters)), (_root_.List.cons("): ", (_root_.List.cons(result, (_root_.List.cons(";\n", _root_.List.nil)))))))))))))))))
+} }
+}
+end Ps.Internal.ModularJs
+
+namespace Ps.Internal.ModularJs
+def importedNames(imports : List(PsModuleOwner), index : Nat) : List(String) := psListMap((fun (item : PsModuleOwner) => item.name), (Ps.Internal.ModuleGraph.filter((fun (item : PsModuleOwner) => Nat.beq(item.unit, index)), imports)))
+end Ps.Internal.ModularJs
+
+namespace Ps.Internal.ModularJs
+def unitImports(plan : PsModulePlan, unit : PsModuleUnit) : List(PsModuleImport) := if (Nat.beq(unit.index, 0)) { _root_.List.nil } else { let runtimeValues := (psListAppend(helpers, (importedNames(unit.imports, 0))))
+let values : List(PsModuleImport) := (_root_.List.cons((PsModuleImport.mk((psModuleSpecifierFor(plan, 0, false)), runtimeValues, false)), _root_.List.nil))
+let sourceImport : (_ : Nat) -> Option(PsModuleImport) := (fun (index : Nat) => let names := (importedNames(unit.imports, index))
+if (psListIsEmpty(names)) { Option.none } else { Option.some((PsModuleImport.mk((psModuleSpecifierFor(plan, index, false)), names, false))) })
+psListAppend(values, (Ps.Internal.ModuleGraph.filterMap(sourceImport, (psModuleSourceIndices(plan))))) }
+end Ps.Internal.ModularJs
+
+namespace Ps.Internal.ModularJs
+def selectedDeclarations(owners : List(PsModuleOwner), index : Nat, declarations : List(PsJsIrDeclaration)) : Except(String, (List(PsJsIrDeclaration))) := match declarations with {
+  | List.nil => Except.ok(_root_.List.nil)
+  | List.cons declaration rest => match (Ps.Internal.ModuleGraph.owner(owners, declaration.name)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok assigned => match (selectedDeclarations(owners, index, rest)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok others => Except.ok((if (Nat.beq(assigned.unit, index)) { List.cons(declaration, others) } else { others }))
+}
+}
+}
+end Ps.Internal.ModularJs
+
+namespace Ps.Internal.ModularJs
+def printedDeclaration(declaration : PsJsIrDeclaration) : Except(String, String) := match (psJsPrintDeclarationStackSafeWithVisibility(true, declaration)) with {
+  | Except.error _ => Except.error((String.Internal.append("PSC1_MODULE_JS_PRINT:", declaration.name)))
+  | Except.ok printed => Except.ok(printed)
+}
+end Ps.Internal.ModularJs
+
+namespace Ps.Internal.ModularJs
+def renderUnit(plan : PsModulePlan, lowered : PsJsIrModule, digest : String, unit : PsModuleUnit) : Except(String, PsModuleArtifact) := match (selectedDeclarations(plan.owners, unit.index, lowered.declarations)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok selected => match (psListMapExcept(printedDeclaration, selected)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printed => let imports := (unitImports(plan, unit))
+let ordinaryHelpers := (Ps.Internal.ModuleGraph.filter((fun (name : String) => if (psStringEq(name, "__ps$cohort")) { false } else { true }), helpers))
+let header := (if (Nat.beq(unit.index, 0)) { psTextJoin("", (_root_.List.cons(psJsStringRuntimeSupport, (_root_.List.cons(psJsStackRuntimeSupport, (_root_.List.cons("export const __ps$cohort = ", (_root_.List.cons((psJsonQuote((psModuleCohortFor(plan, digest, false)))), (_root_.List.cons(";\n", (_root_.List.cons("export { ", (_root_.List.cons((psTextJoin(", ", ordinaryHelpers)), (_root_.List.cons(" };\n", _root_.List.nil))))))))))))))))) } else { psTextJoin("", (_root_.List.cons((psTextJoin("", (psListMap(importText, imports)))), (_root_.List.cons("if (__ps$cohort !== ", (_root_.List.cons((psJsonQuote((psModuleCohortFor(plan, digest, false)))), (_root_.List.cons(") throw new Error(\"PSC1_MODULE_RUNTIME_COHORT\");\n", _root_.List.nil))))))))) })
+let types := (psModuleTypeNames(plan.raw))
+let typeHeader := (if (Nat.beq(unit.index, 0)) { "" } else { if (psListIsEmpty(types)) { "" } else { psTextJoin("", (_root_.List.cons("import type { ", (_root_.List.cons((psTextJoin(", ", types)), (_root_.List.cons(" } from ", (_root_.List.cons((psJsonQuote((psModuleSpecifierFor(plan, 0, false)))), (_root_.List.cons(";\nexport type { ", (_root_.List.cons((psTextJoin(", ", types)), (_root_.List.cons(" } from ", (_root_.List.cons((psJsonQuote((psModuleSpecifierFor(plan, 0, false)))), (_root_.List.cons(";\n", _root_.List.nil))))))))))))))))))) } })
+match (psListMapExcept(declarationType, unit.declarations)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok declarations => let nominal : Except(String, String) := (if (Nat.beq(unit.index, 0)) { nominalTypes(plan.raw) } else { Except.ok("") })
+match nominal with {
+  | Except.error error => Except.error(error)
+  | Except.ok types => Except.ok((PsModuleArtifact.mk(unit.index, (psTextJoin("", (_root_.List.cons(header, (_root_.List.cons((psTextJoin("", printed)), _root_.List.nil)))))), (psTextJoin("", (_root_.List.cons(typeHeader, (_root_.List.cons(types, (_root_.List.cons((psTextJoin("", declarations)), _root_.List.nil)))))))), imports, (psListAppend((if (Nat.beq(unit.index, 0)) { helpers } else { _root_.List.nil }), (psListMap((fun (declaration : PsJsIrDeclaration) => declaration.name), selected)))))))
+}
+}
+}
+}
+end Ps.Internal.ModularJs
+
+def psEmitJsModules(plan : PsModulePlan, digest : String) : Except(String, (List(PsModuleArtifact))) := match (psPlanModulesWithPackages(plan.raw, plan.owners, plan.packages, plan.protocol)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok rechecked => match (psJsLowerSpecializedModule(rechecked.raw)) with {
+  | Except.error _ => Except.error("PSC1_MODULE_JS_LOWER")
+  | Except.ok lowered => match (psJsValidateModule(lowered)) with {
+  | Except.error _ => Except.error("PSC1_MODULE_JS_VALIDATE")
+  | Except.ok _ => psListMapExcept((Ps.Internal.ModularJs.renderUnit(rechecked, lowered, digest)), rechecked.units)
+}
+}
+}

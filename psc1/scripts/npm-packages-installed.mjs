@@ -142,6 +142,8 @@ record('all-advertised-exports-import',{exports:exports.count});
    "assert.equal(root.compile,compiler.compile);assert.equal(root.compile,syntax.compile);",
    "assert.equal(root.getCompilerMetadata,compiler.getCompilerMetadata);",
    "const sources=foundation.readSources();assert.ok(sources.length>=5);assert.ok(sources.some(s=>s.module==='Ps.Foundation.Name'));",
+   "assert.equal(foundation.sourcePackage.canonicalGrammar,'ps');assert.ok(sources.every(s=>s.kind==='ps'&&s.role==='canonical-editable-proofscript'));",
+   "assert.ok(foundation.readSources({kind:'lean'}).every(s=>s.role==='immutable-checked-bootstrap-reference'));",
    "assert.equal(foundation.sourcePackage.internalRuntimeApi,false);",
    "assert.equal('psNameAppendStr' in foundation,false);",
    "console.log(JSON.stringify({sourceModules:sources.length,version:root.getCompilerMetadata().version}));"
@@ -276,7 +278,7 @@ record('all-advertised-exports-import',{exports:exports.count});
   assert.equal(script(cwd,'refuse.mjs',code,[JSON.stringify(options)]).trim(),'refused');record('semantic-refusal-'+fixture.id);
  }
  // Source integrity is data integrity; it does not confer proof-admission authority.
- const source=path.join(nodes,'@proofscript/foundation/src/Ps/Foundation/Name.lean'),before=fs.readFileSync(source);
+ const source=path.join(nodes,'@proofscript/foundation/src/Ps/Foundation/Name.ps'),before=fs.readFileSync(source);
  try{fs.appendFileSync(source,'\n-- changed\n');
   const r=call(process.execPath,['--input-type=module','--eval',"import{readSources}from '@proofscript/foundation';readSources();"],cwd);
   assert.notEqual(r.status,0);assert.match(r.stderr,/PSC1_PACKAGE_SOURCE_IDENTITY/);

@@ -1,0 +1,1757 @@
+{
+  "schema": "psc1-canonical-source-preparation-record/1",
+  "status": "passed",
+  "testedCommit": "b996356bfcc59c34abf7224080895eb0a250d324",
+  "qualificationRun": 40644035690,
+  "qualificationJob": 122668580602,
+  "artifact": {
+    "id": 12797990582,
+    "name": "psc1-canonical-source-preparation-b996356bfcc59c34abf7224080895eb0a250d324",
+    "size_in_bytes": 1728902,
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12797990582",
+    "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12797990582/zip",
+    "expired": false,
+    "created_at": "2026-10-28T06:47:33Z",
+    "expires_at": "2027-01-26T06:28:12Z",
+    "updated_at": "2026-10-28T06:47:33Z",
+    "digest": "sha256:bbf1a5f549de93fb94dee5d84b039323e89bc89521afdc8b02404b1ab4c91dc6",
+    "workflow_run": {
+      "id": 40644035690,
+      "repository_id": 1381609925,
+      "head_repository_id": 1381609925,
+      "head_branch": "feat/psc1-canonical-latency-20261028",
+      "head_sha": "b996356bfcc59c34abf7224080895eb0a250d324"
+    }
+  },
+  "initialManifest": {
+    "schema": "psc1-canonical-source-baseline/1",
+    "preparedCommit": "b996356bfcc59c34abf7224080895eb0a250d324",
+    "preparedRunId": "40644035690",
+    "manifestGitBlobSha": "0edcf5c1e2ce5da05f0dfc4a17e11f72b901402a",
+    "manifestSha256": "941c23fc7bd63b6168f4baea54ccdf26252761cdfa43e3a1a84eb157884c049f",
+    "manifestBytes": 141612,
+    "preparation": {
+      "run": 40644035690,
+      "job": 122668580602,
+      "artifact": 12797990582,
+      "zipSha256": "bbf1a5f549de93fb94dee5d84b039323e89bc89521afdc8b02404b1ab4c91dc6"
+    },
+    "policy": "This record and its initial manifest remain immutable; later authored PS edits use ancestral checked reference refreshes.",
+    "receiptGrantsAdmissionAuthority": false
+  },
+  "result": {
+    "schema": "psc1-canonical-source-preparation/1",
+    "status": "prepared-checked-canonical-owners",
+    "preparedCommit": "b996356bfcc59c34abf7224080895eb0a250d324",
+    "baseTree": "5c664c1d2970366c26d3a6ed664c442c174db423",
+    "treeSha": "2560f9ec83cca4c7b114c3bab77e8168cf2a9154",
+    "canonicalOwners": 164,
+    "compilerOwners": 151,
+    "libraryOwners": 13,
+    "classifiedRemainder": 18,
+    "unifiedModules": 125,
+    "sourceClosureDigest": "9d0f097e79eb2b1e14d10362c6db9b4bc2370c26627658017bf6b2681b46fabf",
+    "admissionsSha256": "58bd1a000dcb37b0d90e0357f13080593fdf1ac376fdaff225e1fb26d55e577a",
+    "originalIrSha256": "ddac1b930c79868bc6fe923137b12fbf1a458cfeefe4f558a67ca45730b30dce",
+    "libraryCorrespondence": {
+      "status": "passed",
+      "modules": 13,
+      "bootstrapSourceClosureDigest": "d464ca3b187004c2b1b97400b850543537a4d3ce9a9e22c3796d69d40ca50099",
+      "canonicalSourceClosureDigest": "22af16cf564281964ce4f134798bad98966ca85240f20926038f30dac503fe39",
+      "admissionsSha256": "3d731ffb8d828657b37bcc1e19a28852ff17be401429d1e43ef8622129e1bf81",
+      "originalIrSha256": "c44535e3bf9d596a7f593536193a0ba3b94fbbde73ad4ffc0dec59729e9ef2be",
+      "bootstrapChecker": {
+        "protocol": "pskernel-lean/1",
+        "provider": "lean4-cpp",
+        "leanVersion": "4.35.0",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "profile": "lean4.35-core",
+        "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+        "accepted": true
+      },
+      "canonicalChecker": {
+        "protocol": "pskernel-lean/1",
+        "provider": "lean4-cpp",
+        "leanVersion": "4.35.0",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "profile": "lean4.35-core",
+        "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+        "accepted": true
+      },
+      "initialPsVariant": {
+        "path": "stdlib/ProofScript/System/IO.ps",
+        "bytes": 5820,
+        "sha256": "54dde9210eaece347e5ff96396eb7168255ff999961be16664132b7bdfc7b601",
+        "retainedCanonicalBytes": true,
+        "sameAdmissionsAndOriginalIr": true
+      },
+      "commentPolicy": "existing IO.ps byte-for-byte; newly promoted PS preserves original Lean reference raw comments",
+      "reverseProjection": {
+        "admissionsSha256": "3d731ffb8d828657b37bcc1e19a28852ff17be401429d1e43ef8622129e1bf81",
+        "originalIrSha256": "c44535e3bf9d596a7f593536193a0ba3b94fbbde73ad4ffc0dec59729e9ef2be"
+      },
+      "auditRoot": {
+        "module": "ProofScript.Canonical.Library",
+        "imports": [
+          "ProofScript.Data.Prod",
+          "ProofScript.Data.Option",
+          "ProofScript.Data.Result",
+          "ProofScript.Compiler.Effect",
+          "ProofScript.Data.Ordering",
+          "ProofScript.Data.Json",
+          "ProofScript.Compiler.KernelProtocol",
+          "ProofScript.Data.Array",
+          "ProofScript.Data.Except",
+          "ProofScript.Data.List",
+          "ProofScript.Data.Map",
+          "ProofScript.Data.Set",
+          "ProofScript.System.IO"
+        ],
+        "authored": false
+      },
+      "formalSourcePreservationProof": false
+    },
+    "nativeProjectionProbe": {
+      "status": "failed",
+      "message": "native projection build failed; see native-projection-build.log\n\n1 !== 0\n",
+      "referenceFilesReplaced": false,
+      "consequence": "Reverse-rendered Lean is not qualified as a replacement; original immutable checked bootstrap references are retained."
+    },
+    "commitsCreated": false,
+    "refsChanged": false,
+    "objectUploadStatus": "complete",
+    "entries": [
+      {
+        "path": "psc1/packages/foundation/src/Ps/Foundation/Source.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "460475ac9d243d6214ad4ec97bc2e3e91023f53b",
+        "bytes": 156,
+        "sha256": "190c8c4e3dfc27ce344d5c6aea7fabdbc11f780cdf43771d15a7d0e2dc06ddd8"
+      },
+      {
+        "path": "psc1/packages/foundation/src/Ps/Foundation/List.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "29451d1f3f943b2ee5decd9636e3bf0e5c1b75ae",
+        "bytes": 3281,
+        "sha256": "9f25f6d12b13de41723df9e5dbeae3aa644e2f917cb6aebc23db50c12b794e95"
+      },
+      {
+        "path": "psc1/packages/syntax/src/Ps/Syntax/Cursor.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "f9412d0e1373745879d6347cc8ad07214e9edd5e",
+        "bytes": 3025,
+        "sha256": "2e2f021f2d056b7f68752da0a293b53123664ee7b3420546dd171bb8bfb1c56d"
+      },
+      {
+        "path": "psc1/packages/syntax/src/Ps/Syntax/Token.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "bf0a5560b7f796290c1e8173f3bb2f525de771fd",
+        "bytes": 899,
+        "sha256": "ed8ce1e58371b2e831bfd0b9ae6bdf0be4a0ff45cb4f6a9e8b0dea18b05f1f13"
+      },
+      {
+        "path": "psc1/packages/syntax/src/Ps/Syntax/Lexer.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "ffd7c55c2bbae751a230893848acbf0186bd2a28",
+        "bytes": 27739,
+        "sha256": "8ea636b2b1dd8b59f2472ecbc21fe1a6d43239144b8056146a54cd7c75a799cd"
+      },
+      {
+        "path": "psc1/packages/foundation/src/Ps/Foundation/Name.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "90eeaad5cec8658c4c7359e09b13f903858947f5",
+        "bytes": 3579,
+        "sha256": "594312f307a7f553d8a92ffe00e73e8429887069171617b969c4f5da670bcecd"
+      },
+      {
+        "path": "psc1/packages/syntax/src/Ps/Syntax/Ast.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "54820a198bca00149836312510d3d10e404c9e4b",
+        "bytes": 10612,
+        "sha256": "99882b18ea1c18ce068af0619f36883f7f6eacbf68f9516f07648f575ac89331"
+      },
+      {
+        "path": "psc1/packages/syntax/src/Ps/Syntax/ParserState.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "f1b8433ebcaabe7581bf656d417de7d63254642a",
+        "bytes": 2891,
+        "sha256": "dfc4a8d4337ff30df2e79cf2d0c189477b4a0e37b5575d6d7ea1a264f555589d"
+      },
+      {
+        "path": "psc1/packages/syntax/src/Ps/Syntax/ParseCommon.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "08c3c208ee4e7314c7e5fad2f1dc5c9bcde03e9d",
+        "bytes": 27154,
+        "sha256": "00e6ef7fb0a6f15c11b2be0383033e1af5257a3d1a39340ca131a162579878da"
+      },
+      {
+        "path": "psc1/packages/syntax/src/Ps/Syntax/ParseBinding.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "258e0a87b2d085a718bd17d5489a4f64f73687d9",
+        "bytes": 7062,
+        "sha256": "79f8fa74f8d19190a6078362e34cb0f7921cf47b4a70fea41af8a9ea59640247"
+      },
+      {
+        "path": "psc1/packages/syntax/src/Ps/Syntax/ParseDo.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "d98038a15ca664618c2741663e20c8fdea69c9fa",
+        "bytes": 40797,
+        "sha256": "de2eec16edd81071cc76823eb419d400377f281fedd0471275d07ca2f27cd750"
+      },
+      {
+        "path": "psc1/packages/syntax/src/Ps/Syntax/ParseData.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "f863b69732aa80ea38c9410e3f8fc1f9dc08723f",
+        "bytes": 9199,
+        "sha256": "28ab760ad1ff26db1d3522b788f6abef607d6088bbe2ba1d88c2bda9efc70f87"
+      },
+      {
+        "path": "psc1/packages/syntax/src/Ps/Syntax/Operators.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "2a6ad06af4b0a5f21ed4dab3d95ef9e703c48907",
+        "bytes": 4996,
+        "sha256": "cada90a8e563ab5d1f6cef86a4a06dc1688e593addaf30dc285ee314bb9ca447"
+      },
+      {
+        "path": "psc1/packages/syntax/src/Ps/Syntax/ParseLean.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "6f20253c506098a0793887f34ec617ed0132c48a",
+        "bytes": 73654,
+        "sha256": "d623ff5ff60c5b03ae8e373c9dbdea189055935d7eb240ab189d50085bb4e4b4"
+      },
+      {
+        "path": "psc1/packages/syntax/src/Ps/Syntax/ParseProofScript.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "4ce620c82b6d90fba6d2f76be367da55fe6c0d9d",
+        "bytes": 61005,
+        "sha256": "1520c624d24c4f287b99775da0aabd479becece2b06bddae5470527f06c1bf93"
+      },
+      {
+        "path": "psc1/packages/syntax/src/Ps/Syntax/PrintCommon.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "4535e79ad3be98aa92c004049a3ac732e970c1f2",
+        "bytes": 16782,
+        "sha256": "1226625626a2c3f2b13a3355a0af6f8eb138c96d3941608d1c499437531dd71d"
+      },
+      {
+        "path": "psc1/packages/syntax/src/Ps/Syntax/PrintLean.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "190b9d0f3c8ca6a978b5d5adfd8c158d95d220cb",
+        "bytes": 26262,
+        "sha256": "6bf32d051166a34af6ed1e0feb26478255550078975166f5ddaba6afa964a821"
+      },
+      {
+        "path": "psc1/packages/syntax/src/Ps/Syntax/PrintProofScript.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "82b777d18ba7833412c11a34795a0d9e833825f5",
+        "bytes": 27888,
+        "sha256": "6b9c6edc04ad5e40199ea60cdbe9250399db090c70a8be00f129de1531b05621"
+      },
+      {
+        "path": "psc1/packages/syntax/src/Ps/Syntax/Translate.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "5022cff74e16b2372972d68b0fea96a5cee328fa",
+        "bytes": 1939,
+        "sha256": "0ec2e714edc02a69045114124d25e014d155c30f8d7644e1c30129355573120d"
+      },
+      {
+        "path": "psc1/packages/foundation/src/Ps/Foundation/Text.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "3697324deb57e4f4b91edf4e15a3801d0d16e035",
+        "bytes": 2127,
+        "sha256": "39751af9f50465b0f464a29436e1f3fd8294d475664bde514eb91c4ed2f41df1"
+      },
+      {
+        "path": "psc1/packages/bridge/src/Ps/Bridge/Json.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "2167785e217dfe92b22d63e26cc858cd5620de9c",
+        "bytes": 31843,
+        "sha256": "253dd89fb9f2abd42cede99aa72cfeb47e1b1698a6b11cde54d6fca24e8c1425"
+      },
+      {
+        "path": "psc1/packages/core/src/Ps/Core/Level.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "33e6b1fb6095eaa69cc7ee325588615776bc64cb",
+        "bytes": 281,
+        "sha256": "da652d658d9e2560b9b2a297508ff4169129c04cfa88b5aa0393b31c935470fe"
+      },
+      {
+        "path": "psc1/packages/core/src/Ps/Core/Expr.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "cac85ff7ea4efddd336d42e24e051e4d6e8e0a69",
+        "bytes": 740,
+        "sha256": "636e9cd00ef2c3ca1aa5e2dae49ba5576fd4b8a6f15d66439649cd6670aa7783"
+      },
+      {
+        "path": "psc1/packages/core/src/Ps/Core/Declaration.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "4b119cf4df0a5238e8f3161eecbbcaf4e48a006d",
+        "bytes": 1222,
+        "sha256": "336d770fcc3adaa486964c5fa652ced8073ff9ef7422521daf83a18dc81b0216"
+      },
+      {
+        "path": "psc1/packages/core/src/Ps/Core/Abstract.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "1d9b1ce820f7a2f37004cd66f5b4101b934ae9b9",
+        "bytes": 2304,
+        "sha256": "2dadb01b12bdc9c1ceb1949cfedfa0cdffa9b65e2013f96e3666f122bea0d5b9"
+      },
+      {
+        "path": "psc1/packages/core/src/Ps/Core/Subst.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "4d65f85cd0a29a17ece7650c69604fe235bf6b19",
+        "bytes": 4666,
+        "sha256": "64fd6b12fed98bf4e3d755cd395dcb4be8ff04af2febce62834e2922a848d05a"
+      },
+      {
+        "path": "psc1/packages/core/src/Ps/Core/Equality.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "2cd7ac9b8f19fa9a8f89bdf070c09a253fac94ed",
+        "bytes": 5361,
+        "sha256": "5edd70ca0a340a73a39e296ea24f053532cb5faa0c478462fd661b8f5d4e56be"
+      },
+      {
+        "path": "psc1/packages/environment/src/Ps/Environment/Basic.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "034ff4d83106966519308bb371a56ab8b550fffe",
+        "bytes": 9233,
+        "sha256": "791633a0e314288fb5bb95ae0cb535d96d2520c9e625e37fe2a8a196563b19d9"
+      },
+      {
+        "path": "psc1/packages/bridge/src/Ps/Bridge/CheckedAdmissions.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "0dac002469a75fff513f430d4526a3a80ff9fbd2",
+        "bytes": 56965,
+        "sha256": "bbc4d8cc27990a024feabea58747b879c839faa2d687dc0b05ad8a69e9b54d32"
+      },
+      {
+        "path": "psc1/packages/core/src/Ps/Core/Builtin.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "280c6dbdbb1d31c975324c45560d20c25b59eccc",
+        "bytes": 6369,
+        "sha256": "11fd7bbb687a20c2f889920a14c94915c75fc2564de048c743b66297c7c0a64b"
+      },
+      {
+        "path": "psc1/packages/environment/src/Ps/Environment/Prelude.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "95f6add230efad55cf6c794f43b86de1e99b97bd",
+        "bytes": 23722,
+        "sha256": "9130f0d543a174059d45b2a2ad6a0b6769187a8395cccefda4b22d41421f56e7"
+      },
+      {
+        "path": "psc1/packages/environment/src/Ps/Environment/SelfHostPrelude.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "bdba567b4d87ae08e5d3c54f6e9fc98b19e28e30",
+        "bytes": 14608,
+        "sha256": "9579d8548d134c3ef10a97a49195039a21b9dc786b7538689783f32d4949eece"
+      },
+      {
+        "path": "psc1/packages/environment/src/Ps/Environment/Control.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "873fca204cabd759b4589b7e6d37ab11b875152a",
+        "bytes": 14152,
+        "sha256": "0e8c80607df8524bc30ec53b1a9c4cdd26909d08df0cb7d1edbce46820dfefed"
+      },
+      {
+        "path": "psc1/packages/environment/src/Ps/Environment/Order.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "99efbd51c032ca50625c1455759e2a9be4ec2922",
+        "bytes": 40043,
+        "sha256": "5efacfa352bf7a7e3815d3705fdf457bef435d360b9576815821e1673e58fbf8"
+      },
+      {
+        "path": "psc1/packages/environment/src/Ps/Environment/SelfHostProd.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "02991449f7568f416cdbf1409df1922d00c214ef",
+        "bytes": 3854,
+        "sha256": "017c9838c5b2e217a00a3c8c4676daf2d006cbc52ceddfb5f819c3a86d1cfb21"
+      },
+      {
+        "path": "psc1/packages/environment/src/Ps/Environment/LocalContext.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "8b0a7596db3c46c6e469d1d392f38664802e2747",
+        "bytes": 2746,
+        "sha256": "6bcbdb43698907b9bdf414071a09f57e108c1a6197f4a236ebe529c55ba4086b"
+      },
+      {
+        "path": "psc1/packages/environment/src/Ps/Environment/Resolve.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "6781980f2e8c20ea29a675472c6be87344d98b9e",
+        "bytes": 5004,
+        "sha256": "4a77fb1380d7f55e6b2e2d801b1bde6b9e92ccd155c941a68d4d3ba1b3d0ea91"
+      },
+      {
+        "path": "psc1/packages/core/src/Ps/Core/LevelSubst.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "99d5c851ed686e192e6ae3260b866289baa2e1eb",
+        "bytes": 3356,
+        "sha256": "01bdc60ac450b54f86eba0f9520057c7e4cd6219734b8c148288b18da7212b97"
+      },
+      {
+        "path": "psc1/packages/meta/src/Ps/Meta/LevelContext.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "799fff9d177d003bab3aa1f2c12c01e805474fef",
+        "bytes": 8049,
+        "sha256": "96bd6a16bc256896c95d14cbf4c9e9be8f0234befe9bb38c10a24babbc298b18"
+      },
+      {
+        "path": "psc1/packages/meta/src/Ps/Meta/Context.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "c27575faf5ed3f77395dae9fc92319e3b5a6e832",
+        "bytes": 8699,
+        "sha256": "fbaad34aba192f70a095460c9079b4735bba1186888207c366dd00ca2a1fd0c0"
+      },
+      {
+        "path": "psc1/packages/meta/src/Ps/Meta/Reduce.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "b26c5b381516844590ee29fb2fbecf6a40f119b8",
+        "bytes": 5185,
+        "sha256": "93308a83711fa18281ce2c0bedd8ee4f89c6a982e1c19b7faa5c397b2911ab89"
+      },
+      {
+        "path": "psc1/packages/meta/src/Ps/Meta/Infer.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "7e1598a54733f2571b3270b85563cfbda4b36578",
+        "bytes": 15545,
+        "sha256": "48af790c129208d37abd58670b5b96fe5b9be419487c4b21b1f04deec1b0ea87"
+      },
+      {
+        "path": "psc1/packages/environment/src/Ps/Environment/Instances.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "3696fc8105c9bc1d48ebf0c972f23337ded78648",
+        "bytes": 1569,
+        "sha256": "b51036e807a34ed664dad80472ba6990c3e64974289901540cb7060031020de8"
+      },
+      {
+        "path": "psc1/packages/meta/src/Ps/Meta/Unify.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "8cd8c47330596518f02883c9e7d76ecc9657a55d",
+        "bytes": 8106,
+        "sha256": "0cbc4e40e0a8b846554843fec54ee426a63416b4c2b7de6f44425d477662ead6"
+      },
+      {
+        "path": "psc1/packages/meta/src/Ps/Meta/SynthInstance.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "60544928829b72d3cd8d443f2d45caef75f4aff7",
+        "bytes": 10104,
+        "sha256": "9ff823489a2f63215c2148ce0a1ab9daecf94ba665c8912c6618f1d1637ef3ad"
+      },
+      {
+        "path": "psc1/packages/elab/src/Ps/Elab/SourceTrace.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "395df87fdc88152798055b617fae4457ecc7bdec",
+        "bytes": 5746,
+        "sha256": "e274ffebd72b8eab65f959ed7d613d41cb7123b9128ddb0c66dc407e37364840"
+      },
+      {
+        "path": "psc1/packages/elab/src/Ps/Elab/Context.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "3321f5b6979c2165f21a75384a3fe7293d88c09a",
+        "bytes": 6689,
+        "sha256": "6addc5b0f17f24ca4308bf78921731965b7a295931e0a7459428f66112208887"
+      },
+      {
+        "path": "psc1/packages/elab/src/Ps/Elab/Literal.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "bff06bd4475b538b0604fe7d269dbbdefa3f1d96",
+        "bytes": 8835,
+        "sha256": "7aa94a1b01ac24638548c4bd35f599e2e9d3f544035c58261fd426e6b752d71d"
+      },
+      {
+        "path": "psc1/packages/elab/src/Ps/Elab/Basic.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "f9b6cd118e853290a4b9092e71a8d12b1845c9b6",
+        "bytes": 7506,
+        "sha256": "654b3f7c3bb801b6467f3188508cafddb26490161fc5168afe2616dcfaac51a8"
+      },
+      {
+        "path": "psc1/packages/elab/src/Ps/Elab/DoBase.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "5aa0d73ec373867c8c0b05ace93393eca3a646aa",
+        "bytes": 24193,
+        "sha256": "9430ff410ce85f46ee2df7bbe7cfdd4724bb470b8dc5d955a8fc5c2ae698dde7"
+      },
+      {
+        "path": "psc1/packages/elab/src/Ps/Elab/DoFor.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "56cf2536d28cde1591c996ca02b63a88dd891594",
+        "bytes": 13514,
+        "sha256": "25701750efd209ea354984d331d8355370a7dc52b9982c773493f1270a0ba83c"
+      },
+      {
+        "path": "psc1/packages/elab/src/Ps/Elab/DoLoop.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "381a28a206dde401dd2b4e2bbe1132c9a4ec2058",
+        "bytes": 3591,
+        "sha256": "0510eeb0338edd9a776b0d1c78c5d562c2bf72006b11c26ba025e8361513f12f"
+      },
+      {
+        "path": "psc1/packages/elab/src/Ps/Elab/DoWhile.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "d0b2562acd87ea97957d82ef7d9515193bf4ae40",
+        "bytes": 10140,
+        "sha256": "453e425c59f30cfa743f76b96e9aafba2f1ab8f3c3269c07f72d0a78bce8e56d"
+      },
+      {
+        "path": "psc1/packages/elab/src/Ps/Elab/DoTry.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "09678835f8347ddcf72f911b4e8549087b57604e",
+        "bytes": 10505,
+        "sha256": "228bc2accc6e1fb69981e4015c90e22eba554943b5d57a30ebeecdcf9c803f7f"
+      },
+      {
+        "path": "psc1/packages/elab/src/Ps/Elab/Data.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "7be3b4f2a0909c6b2901ab54bcbf1911da5779cd",
+        "bytes": 14173,
+        "sha256": "39921cc481e42e64db308fdc58a0f097fa918db72646236184a2dc6ab3851891"
+      },
+      {
+        "path": "psc1/packages/elab/src/Ps/Elab/Do.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "618aa291a0258f5e6787c1ca08726e0112e91420",
+        "bytes": 10731,
+        "sha256": "c8709c65cc3672ddd73a7527acb48dda4ef2d64c564e029810387ca938e69003"
+      },
+      {
+        "path": "psc1/packages/elab/src/Ps/Elab/Operators.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "af2a72b67ed8b069355b8d035cfeebd7066753ca",
+        "bytes": 15628,
+        "sha256": "ee2035dc84f46a0cb6288f7cd2d64a58abeb7867a46dec6a915a3015b8d4b8a9"
+      },
+      {
+        "path": "psc1/packages/elab/src/Ps/Elab/Term.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "2a8e8d72daf853a754294b0af40a31932e93efa9",
+        "bytes": 90046,
+        "sha256": "0291cc64b8920314754fac8b3ec7c86ef2a2e97c86b07b20a4d8489269c3a2e9"
+      },
+      {
+        "path": "psc1/packages/elab/src/Ps/Elab/Recursion.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "456f146f7a9fc082d462104d0e79b511e10cec7e",
+        "bytes": 42168,
+        "sha256": "1313fcb76249a939a689c9ad761fc400fdb4f53a1d0898f9208cfed1671272f3"
+      },
+      {
+        "path": "psc1/packages/elab/src/Ps/Elab/DoLoopLift.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "8f4b64179bdedb6ba043b2161c8810b02dc81307",
+        "bytes": 22712,
+        "sha256": "fd254e4823bdcd058e6c3cadb7566213bf1c1198735e593ecb1316a853fd35c1"
+      },
+      {
+        "path": "psc1/packages/elab/src/Ps/Elab/DoForLift.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "cf25cb4f83e1799c048b6a2f6bbe68d27a781451",
+        "bytes": 15513,
+        "sha256": "2289ae4ec9280d37904a96e4866702e39e59cb79ebfb2043af89a0694a21fe4a"
+      },
+      {
+        "path": "psc1/packages/elab/src/Ps/Elab/Declaration.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "2a8bf757ab443beb4a108e72d02c87faacd3f654",
+        "bytes": 55844,
+        "sha256": "f29689a9f892734b7d7aae133fc5b9ca0c04a22910ccd6c25b3d59c6932e317a"
+      },
+      {
+        "path": "psc1/packages/compiler-ir/src/Ps/CompilerIr/Model.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "bc59f8da6b35e461675f5f6b7bf720521051ceda",
+        "bytes": 5736,
+        "sha256": "e4dc7c8b2b282d4d0078655b1ee458a56c920f692368f8f33a0937f792fa3dec"
+      },
+      {
+        "path": "psc1/packages/erasure/src/Ps/Erasure/Basic.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "3c80c303ee197ba1976b90b8172ec0dccdb4a403",
+        "bytes": 33129,
+        "sha256": "8716aa7e22a460690ca142407d1ef2c7762fad4e39d3ce2922e35bd171784aa0"
+      },
+      {
+        "path": "psc1/packages/erasure/src/Ps/Erasure/Expr.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "31f69224c57ce8b027fa57389828f55c38db7fe2",
+        "bytes": 116773,
+        "sha256": "867662dfdb932a546be6f7f0fa71a237590588b7fff05ba1a5ba3e390849da9d"
+      },
+      {
+        "path": "psc1/packages/erasure/src/Ps/Erasure/Inductive.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "d4cd89f1fc7c58fc9864aaba50f65bc0dff55d3f",
+        "bytes": 13610,
+        "sha256": "05bd5077e9981ae8b80add335570e59501833cb2f2890ae5f07473cd276adab5"
+      },
+      {
+        "path": "psc1/packages/erasure/src/Ps/Erasure/Structure.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "e86c6443598752c6ef4bc31ca1061a2ff9e0214b",
+        "bytes": 4347,
+        "sha256": "549616a642cbf9fc2834739478e8e83fbc4070c28460bb0ce80a955b6ea6a4c6"
+      },
+      {
+        "path": "psc1/packages/erasure/src/Ps/Erasure/StructureRecursor.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "f8820cae1faf9f9c9d0ab35ce99d571ad950400d",
+        "bytes": 6516,
+        "sha256": "452f325fdcf5ff869ff673220cc3b0159c1d8e46d89c13d5ac1f5b532c6170f2"
+      },
+      {
+        "path": "psc1/packages/erasure/src/Ps/Erasure/Definition.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "39ee48b128e7574cfdb7ba1515bd82455a836d6d",
+        "bytes": 21054,
+        "sha256": "3db671beef4b3b9d6ffe497ba1c87d29eddff452bd8cc0d98f63a36f195f2801"
+      },
+      {
+        "path": "psc1/packages/compiler/src/Ps/Compiler/Api.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "ed7152a9e76a7a7f7cdaa681f3a6991b2e4ae485",
+        "bytes": 11930,
+        "sha256": "136e81f3d8fbf306cb73aa70f2f40a88c02a3a34cd409bba16ef8a77d0f49a36"
+      },
+      {
+        "path": "psc1/packages/compiler/src/Ps/Compiler/Ordinary.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "7c559bf36a7f225fb96946eb2617c1099ccf7581",
+        "bytes": 16821,
+        "sha256": "41f502e47ec362570dbeddae3429028eef7f69167fc1f95abe63d0fb1074f84f"
+      },
+      {
+        "path": "psc1/packages/compiler-ir/src/Ps/CompilerIr/Encode.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "3c21e0dd91043584f28f0d627fc5fcde0606bdf0",
+        "bytes": 25687,
+        "sha256": "bed955e16f553e7aedcc1947543d48fd34b1d1edbddaecf883abf1c98b3a3ca7"
+      },
+      {
+        "path": "psc1/packages/bridge/src/Ps/Bridge/CompilerHost.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "c384df2a07bbc98ae089446657059595a93c516c",
+        "bytes": 1574,
+        "sha256": "1626f914bc6512cb13e32e6225c8f9fe460c7d724d51b2debd2409f8db0d5bc1"
+      },
+      {
+        "path": "psc1/packages/compiler-ir/src/Ps/CompilerIr/CheckTypes.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "09d61fb85815daf407c693f10c863b0be8736170",
+        "bytes": 24090,
+        "sha256": "fdac7634e0acc5559bf56f0bce9cda50d00fb677135525efbc713f41768f5c13"
+      },
+      {
+        "path": "psc1/packages/compiler-ir/src/Ps/CompilerIr/CheckSize.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "a2dbea2147f4e20c921349fed1dc115d07f6974f",
+        "bytes": 15748,
+        "sha256": "175aa1acee48211ce824704dbfffe3d16f7ad065be420a05e8471f04cff8c3ab"
+      },
+      {
+        "path": "psc1/packages/compiler-ir/src/Ps/CompilerIr/Check.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "0ece2a849ffead61f478bfd11e1eccd4b16b4ec9",
+        "bytes": 47006,
+        "sha256": "2446e515b7e30806c5bfb099b81d6702079a812d291aeb517f487335d28feeee"
+      },
+      {
+        "path": "psc1/packages/compiler-ir/src/Ps/CompilerIr/Provenance.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "f83410ac51175c7dc45e171f14adc78762718630",
+        "bytes": 1319,
+        "sha256": "cfbebd0b61fc1d157c8d23e912c45068c835040007a79ad5b56452c097247f2f"
+      },
+      {
+        "path": "psc1/packages/foundation/src/Ps/Foundation/StringSet.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "b02e3a4451963c51a0f81bfd6175ca73eba6f003",
+        "bytes": 4642,
+        "sha256": "dca7da4b20eb88f9b8052731f21ab1f615a0c45bcc47cd3145c404aa625617a3"
+      },
+      {
+        "path": "psc1/packages/compiler-ir/src/Ps/CompilerIr/Specialize.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "1aff05a62e98ce5db83335c644811bde3340f63f",
+        "bytes": 60198,
+        "sha256": "feeaf5c7a44f54be247492ff30ee27df628fa6ea32be7a8506224064bcc025b2"
+      },
+      {
+        "path": "psc1/packages/compiler-ir/src/Ps/CompilerIr/Validate.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "56612e96f8feb1c15e765edd16457781ccf2dfc7",
+        "bytes": 1275,
+        "sha256": "6c14bf597b2c23c14b0c9ab6fa8ca14e5d615c34c753d1c1c6cbe3ace84ac720"
+      },
+      {
+        "path": "psc1/packages/compiler-ir/src/Ps/CompilerIr/WorkerFusion.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "e857978d2930e17a4d9e8ed4e49fd89a3db09301",
+        "bytes": 35534,
+        "sha256": "b2b183bc35db3fd9023a1fe4e4dcf7e942fbd382491a00f9b25a5ed2f711d07e"
+      },
+      {
+        "path": "psc1/packages/backend-common/src/Ps/BackendCommon/Plan.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "ae03b05b256f9aeb5e08715614c272c90905a251",
+        "bytes": 11362,
+        "sha256": "ab215bcb08fd433b966133d157c5c467b80269ff777b0b0eb800713fc5537300"
+      },
+      {
+        "path": "psc1/packages/compiler/src/Ps/Compiler/Service.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "7a2a09b55d90b0e91c3d3060d721ab18cd2fc1cb",
+        "bytes": 25234,
+        "sha256": "5d5a0ca580ecf66297bf2560404bc08c6d91e593eaa6f15de55f4c3d9649dc31"
+      },
+      {
+        "path": "psc1/packages/backend-js/src/Ps/BackendJs/Model.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "3909aec618eb163ace236ca511d7313cd34dc2e6",
+        "bytes": 3146,
+        "sha256": "64cdba7a526f85b8b814b348e2bead18104abec74bed2526a7bf8511c625306c"
+      },
+      {
+        "path": "psc1/packages/backend-js/src/Ps/BackendJs/Lower.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "66d5819ea63aa104208e00f0fb25c3215040980a",
+        "bytes": 50308,
+        "sha256": "dadcb4756b86689deda6f9cfc5b5c78ad4f79cab71456d7e36cc7455d992ec15"
+      },
+      {
+        "path": "psc1/packages/backend-js/src/Ps/BackendJs/Validate.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "c6b393d4a2da145d9b32b9e2960462636bb5f4b1",
+        "bytes": 13969,
+        "sha256": "7258e1614747f20280c852ef98ce3310473eda9d3a582d1cb5e49fdb79e8e18f"
+      },
+      {
+        "path": "psc1/packages/backend-js/src/Ps/BackendJs/TailAlias.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "70df7674ad8235da7534345575a2783c37a836c5",
+        "bytes": 9769,
+        "sha256": "85b402091696332a77a7fe2039b0cbe3854c0e856ed74b0c7e50a03a4aabf271"
+      },
+      {
+        "path": "psc1/packages/backend-js/src/Ps/BackendJs/Print.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "d7d47b142d9d98a1576b452161188cc9bab42adb",
+        "bytes": 91555,
+        "sha256": "3be490a75016b9f0293a65fecc86d27785d468c0f55653c10ce75805475ec766"
+      },
+      {
+        "path": "psc1/packages/backend-js/src/Ps/BackendJs/CompilerService.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "ac4ca80a6b5d16899b9a0698e599f6c8962d120c",
+        "bytes": 1526,
+        "sha256": "b48fca262918566a03f0e911dc86dfc8cbceb258cbced377a94bb2b47859bbf2"
+      },
+      {
+        "path": "psc1/packages/backend-ts/src/Ps/BackendTs/Type.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "c853a9e58c7a99c4a6f4cba1b32d931aeee1e548",
+        "bytes": 4245,
+        "sha256": "91628c36302c3d9be2d6f25d0e8b550614252d2e2a60cb0b3a5a2f98dd90faa9"
+      },
+      {
+        "path": "psc1/packages/backend-ts/src/Ps/BackendTs/RuntimeSupport.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "08f6d4bfa47931efdda09db559ecde2a36dee426",
+        "bytes": 6072,
+        "sha256": "4689263a634231a909ce01426dc56cbfe78318573126fc3304e09a990b7e5bc5"
+      },
+      {
+        "path": "psc1/packages/backend-ts/src/Ps/BackendTs/Expr.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "a77455828162d86e57efd0f9f93d1c034b53fbce",
+        "bytes": 49607,
+        "sha256": "0462018cd9f6d059cf431c750dcb0d9fcf27a631b66386345adcd38feb38600a"
+      },
+      {
+        "path": "psc1/packages/backend-ts/src/Ps/BackendTs/Module.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "ccccb60d21520eba8b18efa5a9c871ddff388606",
+        "bytes": 71444,
+        "sha256": "787b930ecaaad3a311db7e9def47a926dd679595e610bd6db862361a8d2095e0"
+      },
+      {
+        "path": "psc1/packages/backend-ts/src/Ps/BackendTs/CompilerService.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "ae3c79a8fa1bc9c470c1cd6168816050c892944a",
+        "bytes": 2046,
+        "sha256": "5d21dfd3fad9d2121eb0ab41dba90ed754ac33a0f52819ba9482e1caf9b4cde7"
+      },
+      {
+        "path": "psc1/packages/backend-rust/src/Ps/BackendRust/RuntimePlan.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "a95b7d7e42634654a5937896dbff71d31fcc3b02",
+        "bytes": 21815,
+        "sha256": "3cefff1ca92b3c52ccc060fc64056176dd1d78f9347b9a46e579d48918662ed2"
+      },
+      {
+        "path": "psc1/packages/backend-rust/src/Ps/BackendRust/Identifier.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "a8f69ffc416d590202db7e95ad29c4edaa607457",
+        "bytes": 5450,
+        "sha256": "5ca0133e17e28fab4af915de0397f8842690196c992e1ed7dd09e44329c673ef"
+      },
+      {
+        "path": "psc1/packages/backend-rust/src/Ps/BackendRust/Type.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "e9e4fd2e7f74e44f5822e00ef49154c15309d395",
+        "bytes": 10115,
+        "sha256": "64f0f2be9efe4935ce15b6590a1a0acb5461fd6210e998468cb71618718c3da6"
+      },
+      {
+        "path": "psc1/packages/backend-rust/src/Ps/BackendRust/ValueRefs.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "38f2417757dd32eb49cc39245cea7d4812aa1467",
+        "bytes": 7950,
+        "sha256": "03b8b365f9d1c8a327d375baf20835fc3ed19f10d9ed2a3a120697016eceaa0b"
+      },
+      {
+        "path": "psc1/packages/backend-rust/src/Ps/BackendRust/Captures.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "18680fccf43582ede14eff3aeea52f17dc9f4468",
+        "bytes": 5497,
+        "sha256": "1df95ce14c9f9807c1bacc1b537a8006aef23eba9de0ae8c5c9f9231694a5bfc"
+      },
+      {
+        "path": "psc1/packages/backend-rust/src/Ps/BackendRust/Expr.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "7618615b18702b7db109cfea42173c4f11c97b40",
+        "bytes": 40758,
+        "sha256": "30de5252dfe53bfe195a9331d1a8316f386f4a4bf8eb13abbf6216cda5297380"
+      },
+      {
+        "path": "psc1/packages/backend-rust/src/Ps/BackendRust/TailAlias.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "6f6a8f18f2d370dadebf58099c8b400792c541ff",
+        "bytes": 7615,
+        "sha256": "3970fb5fdff246c3d91f3472401293c9cf4bf747222a22f99aec61ca1518bd20"
+      },
+      {
+        "path": "psc1/packages/backend-rust/src/Ps/BackendRust/Tail.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "29ad9dcf5ec5d3bbca8a726063fdab84afa7c02f",
+        "bytes": 13561,
+        "sha256": "c62e56192453842d64910590d50f963d79a6e1b2c547ae59efbbfbd2c0e70200"
+      },
+      {
+        "path": "psc1/packages/backend-rust/src/Ps/BackendRust/Runtime.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "552814392e6352b06f2cdb9b97c19d57bf57bbf2",
+        "bytes": 6216,
+        "sha256": "629fc826121e552fc95123ab1b79889f8c34307f1c2c3a0b5417edf2c7d726c9"
+      },
+      {
+        "path": "psc1/packages/backend-rust/src/Ps/BackendRust/Module.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "99ae89f49ff11935aea890157f121f003a2b64df",
+        "bytes": 47445,
+        "sha256": "c0b759896b1e5c5f73ce3f93a940b41c5580e0f49b530042896bd84ac4ff342c"
+      },
+      {
+        "path": "psc1/packages/backend-rust/src/Ps/BackendRust/CompilerService.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "d7f8edf62910c081bd1e97cda1ab3a03dc9c6444",
+        "bytes": 781,
+        "sha256": "69b810aa13096ba9a8a53a1c75717745c017afb3a48ca7f67d924f142a38ebb3"
+      },
+      {
+        "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/Lower/RuntimeNeeds.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "3461bca0119d696496dd6475d24b21f28b8a0dde",
+        "bytes": 17961,
+        "sha256": "c7447639c000227b815e2739258e4ba1400f7186d401ddb3ebe2beee744fee08"
+      },
+      {
+        "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/Model.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "921f6fb050ba380b46839d96471fcd573f42d871",
+        "bytes": 4159,
+        "sha256": "81ba1713ab6e6af9d9bbd3e7bdd9b0ce3f00736250979ca50e4eb81850d97266"
+      },
+      {
+        "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/Type.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "1b625c28f3d4a5ddde74d01de9d9d00307adadf7",
+        "bytes": 7602,
+        "sha256": "c4724f24c4ab5ec3f537f76990f8416c460e14d58e6fbf6678397ba78b55c903"
+      },
+      {
+        "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/Lower/TypeInventory.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "71ff46d8edf61cca5aabaf5459e0d3ceb83b2fa5",
+        "bytes": 23861,
+        "sha256": "f4357ace64c1de768673772c5966fb9d7bb6c21d037392eea5f267498c65d5cd"
+      },
+      {
+        "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/TailCalls.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "8266562679d1ddc26a69ffde3b04a297344eeb1b",
+        "bytes": 4492,
+        "sha256": "40e3b7733b12e6480db5a681060c16db88cf5d8dbc011cd2db69c0a43540ba6f"
+      },
+      {
+        "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/LowerInt.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "1c23333af3627d1b1c04207f0b5afcd8c73f0bf9",
+        "bytes": 4186,
+        "sha256": "f5efb833c5c1ea4914d2802c943d5d6b2ff27eeac2fa900ffff4e1cdc1095c6a"
+      },
+      {
+        "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/LowerFloat.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "32d5d36240294d8ed8bc8ff1b4f78bee24a8830c",
+        "bytes": 1879,
+        "sha256": "18084332ed983dad151a4f34b5eb7e6de58244a7203915c248ff617f467ac0b0"
+      },
+      {
+        "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "76fa438250c0851bb19762890171b02b5b9440bc",
+        "bytes": 32351,
+        "sha256": "7e1e6bb4cfd4600a510f2b3003f13ccb2dfa3c58ab7300da513bc9eaa05a3034"
+      },
+      {
+        "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/IntUtil.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "0c95e9451a2ed2cc49ac88b13c5539060577898f",
+        "bytes": 3077,
+        "sha256": "cbc42fd50286daafdcb91ff3e515302138561c37da11751da2d7539ce407d58d"
+      },
+      {
+        "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/RuntimeInt.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "bbed960c6f7c468dab04cd2d52fd80c30600f2d2",
+        "bytes": 13180,
+        "sha256": "7f1b7c0a567243caa31d5485672d0c6f73b0560c1d5daf69ce2276347531e1a9"
+      },
+      {
+        "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/RuntimeString.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "9ac25db251581e658a71f4fb0a2e107d2354f286",
+        "bytes": 45775,
+        "sha256": "e55547cc194ed516cac8d78fd3eb4434330c03a031f28e9da466c49b3949a4e4"
+      },
+      {
+        "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/RuntimeIntRepr.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "cc2c91f86b2f2dd6b15ece13bfe2226033825e71",
+        "bytes": 4706,
+        "sha256": "cc56aa7f403c845a37eb86946207ab5a0a4b575361eda09d79272eaba5c3852e"
+      },
+      {
+        "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/Lower.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "11a3d1f5f6a277820a816b420a454421d832132b",
+        "bytes": 143365,
+        "sha256": "e0bf3eda26b0b36c0d77d4f9e6f76b1eb5d0907ee5a4994cb809c1b3415ee40c"
+      },
+      {
+        "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/BinaryBytes.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "85ff61834075cbf6410255f17fb5fa1bc4ca8933",
+        "bytes": 52711,
+        "sha256": "a54fc196363302f49966ebcadc9b43721d25a42b0b0cbd90f1db2df54e1fecc1"
+      },
+      {
+        "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/ValidateStructure.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "c32500da69b03aa029b177be6422d4745e4a4a7e",
+        "bytes": 23539,
+        "sha256": "fdc3422842a4440b0a949e20b42b1876d0b216f76ae0b73b9e9627c800405830"
+      },
+      {
+        "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/ValidateTyping.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "3eb3b72539191b2cc8ce48ce4f5547b2ccd437de",
+        "bytes": 39592,
+        "sha256": "ed0af5e376bed3c913cd30f3cbfac089d4b80269fb2772d4ee01d7cbdb3652a3"
+      },
+      {
+        "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/ValidateIr.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "1fe22c1218faba50cc6de8ad576f00c0c95c1cde",
+        "bytes": 611,
+        "sha256": "4ca21990c91988cd4867cf965b1667eda526661916edaaab5d15eb0c96f8c622"
+      },
+      {
+        "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/ServiceAbi.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "b8e1c917f97387666657fcf1fcdd3e3dfae961b6",
+        "bytes": 6440,
+        "sha256": "c1862ca84a1a3f8731bb6cff4f0d31694368b76b2f517d8b06be763e31855ec8"
+      },
+      {
+        "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/CompilerService.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "311b0fb2aaa0d4a50a84c92f567471118bcab330",
+        "bytes": 2633,
+        "sha256": "ff8831f2f678bdcfe2a35591268c6adc63a1fe338f240ef89393d06be285042f"
+      },
+      {
+        "path": "psc1/packages/compiler-unified/src/Ps/CompilerUnified/Service.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "399778f5763d6dd2cc0aedfc0283fc6d01e158d2",
+        "bytes": 3806,
+        "sha256": "4b6a1c1cb433d483e6172cd528ac45b7cb9d032e7eee056237be2a2c3a59a7f7"
+      },
+      {
+        "path": "psc1/packages/foundation/src/Ps/Foundation/Diagnostic.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "4d54452e6ddefd79bfba0e0d6877edb4d39d2272",
+        "bytes": 210,
+        "sha256": "d27cb1f99e258b5b04bb58b651320b7d484f9eb71228f836530d4cf37c2fd3a2"
+      },
+      {
+        "path": "psc1/packages/syntax/src/Ps/Syntax/Lossless.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "1bb72eb851b007ef911a4f21afc2f57aca31bca3",
+        "bytes": 9429,
+        "sha256": "79f5150e2230042e9d209caf7937b86fd658ddf2c787bd523427cdd70777dd78"
+      },
+      {
+        "path": "psc1/packages/bridge/src/Ps/Bridge/Codec.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "5212afc4de089969057dc11fd9c3a173af927a5a",
+        "bytes": 12951,
+        "sha256": "fa53a5aab916751cda3d7016a50550bc4ed12d76b4b9f80bd7dc4cb47107466a"
+      },
+      {
+        "path": "psc1/packages/bridge/src/Ps/Bridge/Protocol.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "b518d2568a12dd466af5235573b8c20e440739ca",
+        "bytes": 7412,
+        "sha256": "f75c20b3aa0fb7dc446d9c4691365a330a2267ef658405407714d6db39dafe92"
+      },
+      {
+        "path": "psc1/packages/compiler-ir/src/Ps/CompilerIr/Construct.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "9844023e5935a05ce18d2aee69d8f18b61f81237",
+        "bytes": 2436,
+        "sha256": "99f6c0f652a5169de54de572731ce411691708b67117dc2fe2c60106641aaadf"
+      },
+      {
+        "path": "psc1/packages/backend-common/src/Ps/BackendCommon/StateExcept.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "14d48274de8151d7cbd0c59410e6a43520ffc470",
+        "bytes": 1770,
+        "sha256": "f50b07b71383e7d5f832df0cc8bcb77b27f7e796f6dc7af8a420b45a7abc463d"
+      },
+      {
+        "path": "psc1/packages/backend-common/src/Ps/BackendCommon/Source.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "c08232d0af384e1b0dd32f9c549ec1064d029427",
+        "bytes": 4911,
+        "sha256": "0b304d87d4c72e6e39cc80d1ef21f1a0f06e9af9fde880cd83949e106b8e36aa"
+      },
+      {
+        "path": "psc1/packages/backend-common/src/Ps/BackendCommon/DirectCalls.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "d2bb5c64f00e1862d612edb049433f164210bf13",
+        "bytes": 6332,
+        "sha256": "fa68e64c4f560baeefe58b2a5fd9ce06866404826d692165e4b11bdb722d4dce"
+      },
+      {
+        "path": "psc1/packages/backend-common/src/Ps/BackendCommon/Modules.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "60ec0be93001d47cd4261e5e45fb338e5135e1a8",
+        "bytes": 27613,
+        "sha256": "f37d006a3516735925c56e18c1f78c7033e2e5630300532f1f62c745d6890acd"
+      },
+      {
+        "path": "psc1/packages/compiler/src/Ps/Compiler.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "cd70a1f23af11022cb19b1b6e01f82de8391f5cd",
+        "bytes": 23,
+        "sha256": "26e7fdbaad5fd297d98dcc8b5c19213c3fedc42a97d0b99e98a3467def538231"
+      },
+      {
+        "path": "psc1/packages/compiler/src/Ps/Compiler/Sh1.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "9e72278bbb1f94ed3acbc07d7da0cc38569ebb83",
+        "bytes": 35341,
+        "sha256": "cfefb231ede54ff584a3b46de9a96d09a6a112b5502459407be6a774ae9c3536"
+      },
+      {
+        "path": "psc1/packages/backend-ts/src/Ps/BackendTs/Checked.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "6f69f0079c64dedb67ff8e14dcf8017b29e39e8e",
+        "bytes": 2558,
+        "sha256": "e27e111092bb6a494986a6456b9b101832651a08fb3cfde0739306bbbc9f0b94"
+      },
+      {
+        "path": "psc1/packages/backend-ts/src/Ps/BackendTs/Sh1Target.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "33709fd7aeefd13313491fd1cd733fedd39c7971",
+        "bytes": 32415,
+        "sha256": "edeb8ed35734ba922bcca550275e1c161d36763394db92428effbc68dff90f90"
+      },
+      {
+        "path": "psc1/packages/backend-ts/src/Ps/BackendTs/Sh1.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "532cad23098f334ab06da39397296110a14bf345",
+        "bytes": 3034,
+        "sha256": "3c549619c64a0b098f7ab5824fddd52d439f67480be09e9e236cc9c9de63d5d4"
+      },
+      {
+        "path": "psc1/packages/backend-ts/src/Ps/BackendTs/Compiler.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "3931ff5e68c69de32b550a5cd2bd74ed8f8eea24",
+        "bytes": 1344,
+        "sha256": "4a056db74d9c1430c41fb9dd215cd81665faf28ef2c03b30e31fdf893a15077e"
+      },
+      {
+        "path": "psc1/packages/backend-ts/src/Ps/BackendTs/Modules.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "a8151962d21e9e6237c379bf8f1c83ed19c34dd6",
+        "bytes": 7284,
+        "sha256": "5b539440b5dd87a9d4a0b0fbcac805b4e5f391a62ebf7e50fe4fab9a815cebf5"
+      },
+      {
+        "path": "psc1/packages/backend-js/src/Ps/BackendJs/Encode.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "ed605863f30b270024fad6d247f9698b9bf6fa55",
+        "bytes": 13140,
+        "sha256": "c1fbf9d467fd0ea9c11bda58551aca9c6f8a55b3905ca3eacdab432c6c84ecc4"
+      },
+      {
+        "path": "psc1/packages/backend-js/src/Ps/BackendJs/Modules.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "619f5aa6ec07eef0d120e7be66663ad2a9519f99",
+        "bytes": 11723,
+        "sha256": "f0f463fa894c2a2b3fa12c38cdc4f2656c44dd3e2bb1ebc941a84576787f09f6"
+      },
+      {
+        "path": "psc1/packages/backend-wasm/src/Ps/BackendWasm/Encode.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "79011a9d30bbb1e66a5f4ed6bd1b3f290c620175",
+        "bytes": 16020,
+        "sha256": "e8da2f64e1d40ffb43b8b4cae62ae7c9370bbf947ca3ee55827812bb583ba5d1"
+      },
+      {
+        "path": "psc1/packages/backend-python/src/Ps/BackendPython/Runtime.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "0412ae1c0948c7e5da8039a35eee5ad357c635e0",
+        "bytes": 8470,
+        "sha256": "259215c8022744886a0ac7e9c547d753f6476f2592bc0de0ea3083edcb014d8d"
+      },
+      {
+        "path": "psc1/packages/backend-python/src/Ps/BackendPython/Portable.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "6e08fee0d0cf4807ae50a5583133c12d0ce7bba3",
+        "bytes": 54795,
+        "sha256": "c2fcb0c26eab6722add432daad1e8623bdd0dafa52cde4e2765a04a739e1f415"
+      },
+      {
+        "path": "psc1/packages/backend-python/src/Ps/BackendPython/CompilerService.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "a397a1166686bf9abcef54b64d9fd52c3aad4ea4",
+        "bytes": 801,
+        "sha256": "89f6e1fede0f117ac35f2d78e8a694249f986eb2d630e6eb76d0133d74353e00"
+      },
+      {
+        "path": "psc1/packages/backend-php/src/Ps/BackendPhp/Runtime.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "3b579f434293b47b0db7b40ef8999364d811b33b",
+        "bytes": 13592,
+        "sha256": "d63b418565c1e8f1df03849414e99a537f7b998f93e228ad31a2599eda7e0141"
+      },
+      {
+        "path": "psc1/packages/backend-php/src/Ps/BackendPhp/Portable.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "782a386fd906af260d2acd3e5ef98b0c9eb372e3",
+        "bytes": 76072,
+        "sha256": "43a9529f2f88602853651a4981f4d96d348eae8b8bde676a1860391cf8e5f5b1"
+      },
+      {
+        "path": "psc1/packages/backend-php/src/Ps/BackendPhp/CompilerService.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "390efe76347c88ec4bbc5aa6fa64ff78bf9f3fd4",
+        "bytes": 782,
+        "sha256": "f2f4a941e4b0ce3d0379baab28d05c7d1417ed65e579b8b74f9124858c48900a"
+      },
+      {
+        "path": "psc1/packages/bootstrap/src/Ps/Bootstrap/SelfHost.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "18777d3f15dcff949034142e9e5ac678fba2260b",
+        "bytes": 241,
+        "sha256": "b9f98fbd32ab02fcbed04fa8c9071e0df41d8ef6bbfbc1497dfcba9ea31cdcc1"
+      },
+      {
+        "path": "psc1/stdlib/ProofScript/Data/Prod.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "27e23824dfe5410dc95462631d6d91383458aca9",
+        "bytes": 572,
+        "sha256": "1eaf21decae4b77c5dea3ac31747ddf0139f9e443fab7dd1e8b9a127a145f1c5"
+      },
+      {
+        "path": "psc1/stdlib/ProofScript/Data/Option.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "471dd263af057a971198160b94b021a3b584f9fe",
+        "bytes": 1060,
+        "sha256": "c07cad631bbeeb0bc6ebce9c6a13ac4da926ece267f5ef3ed2855b41b34904a3"
+      },
+      {
+        "path": "psc1/stdlib/ProofScript/Data/Result.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "c2be50f463cf45bedfb353f0c7b6f0b6b7423bf0",
+        "bytes": 1455,
+        "sha256": "9523a763af9c181469a471a3ca800323c583eb24d27534aa1cc663baafa44bab"
+      },
+      {
+        "path": "psc1/stdlib/ProofScript/Compiler/Effect.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "e951b69141730427831ff0f5a1876b635d35da74",
+        "bytes": 7110,
+        "sha256": "976a273946b797141df598b69d26be92b6396e5541d91c6d890357e7e074a6c1"
+      },
+      {
+        "path": "psc1/stdlib/ProofScript/Data/Ordering.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "2f26112f9c8bca6ad70bf07aea430642b75ad03f",
+        "bytes": 387,
+        "sha256": "3c65eaedb36728a61de3fda2ef1f46d42bdd0c3fd5ec2e2d0f9316df20256d0f"
+      },
+      {
+        "path": "psc1/stdlib/ProofScript/Data/Json.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "40bbb665b79e6ced29fc3a0fc5f8c346dc3b0725",
+        "bytes": 24727,
+        "sha256": "20f274e6372ec575f9de928eb81d48df82e118e2a5a47b4be2c8f42a65676e41"
+      },
+      {
+        "path": "psc1/stdlib/ProofScript/Compiler/KernelProtocol.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "5460e682cec21ba0551c392ccb066f4f00dff12c",
+        "bytes": 7202,
+        "sha256": "659985893c1d2bdded3d930d26cfa293425152deaeab58eb94d8e012d26a1f01"
+      },
+      {
+        "path": "psc1/stdlib/ProofScript/Data/Array.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "a5337e4c29524d86134ea341a1eb9e3d00b48211",
+        "bytes": 2211,
+        "sha256": "3b253a1dd4e251d9ce8a7f586875b169acb1c426341d36216c1da8c4d8e5c8a3"
+      },
+      {
+        "path": "psc1/stdlib/ProofScript/Data/Except.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "3cff616b5dba22fbf763ffaea645388be11464b0",
+        "bytes": 225,
+        "sha256": "7090aee9894a431e85b28d63234d079dc49ff9d5aff012342f7e1ae03832c38d"
+      },
+      {
+        "path": "psc1/stdlib/ProofScript/Data/List.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "20607f7c4e2603c9682a95ce73653eb542e7e7ac",
+        "bytes": 1713,
+        "sha256": "8f4f1cb2dfdf9e9a012ceddba2a4f2f17f792430c645c3beb08a6f40f896812d"
+      },
+      {
+        "path": "psc1/stdlib/ProofScript/Data/Map.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "f668281ec817261a095989e369db6ab5ec8aefd5",
+        "bytes": 1390,
+        "sha256": "18bbda65d9d07e4a6a72364961d2e8a1387e8c80d2e8c5e76c427df6895aa594"
+      },
+      {
+        "path": "psc1/stdlib/ProofScript/Data/Set.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "fe3dc6b7f0aa992f939cb6150333fb7d3d303d8b",
+        "bytes": 482,
+        "sha256": "be69f712ba12fc2b2e1aa08347474b993b13879e096799a68db58dba29d48787"
+      },
+      {
+        "path": "psc1/stdlib/ProofScript/System/IO.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "d5250f044c93e9c3e5d0f928d6dd6f60699009b1",
+        "bytes": 5820,
+        "sha256": "54dde9210eaece347e5ff96396eb7168255ff999961be16664132b7bdfc7b601"
+      },
+      {
+        "path": "psc1/compiler.project.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "d2a32bf1dc6895d45df8e3d4ef62570c71669a95",
+        "bytes": 14626,
+        "sha256": "36bedf25da22e5b65b3318ea972efe2a069160ba826fbb001e27cbfb9775b58e"
+      },
+      {
+        "path": "psc1/CANONICAL_SOURCES.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "0edcf5c1e2ce5da05f0dfc4a17e11f72b901402a",
+        "bytes": 141612,
+        "sha256": "941c23fc7bd63b6168f4baea54ccdf26252761cdfa43e3a1a84eb157884c049f"
+      },
+      {
+        "path": "psc1/bootstrap/CANONICAL_REFERENCES.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "def885972a55a023063d384d1dace5f6b65bca67",
+        "bytes": 1237,
+        "sha256": "fa09389194619439b3cb2cc63a8630816391fc435a1cb794cb6ba7cc4ca17558"
+      },
+      {
+        "path": "psc1/packages/backend-common/package.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "c37e9d307b75f66a5a1ff233b98aa37f6d23173f",
+        "bytes": 1980,
+        "sha256": "e2865d8d1737a0ca16435256e3e9cbee6496ccd3ea4ecaf7028730efea54b80f"
+      },
+      {
+        "path": "psc1/packages/backend-common/README.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "1726789315afd9da8eb8502b0479be88a5a4c7ea",
+        "bytes": 1572,
+        "sha256": "9eda793b7bf94f0cc4354537c69260dc0e3dc240ef859137d1272ad7b4af763d"
+      },
+      {
+        "path": "psc1/packages/backend-js/package.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "1626f56ec8e6630e8e8e53b5ffb34207e1d3b12b",
+        "bytes": 1971,
+        "sha256": "b99aa2909b4a5058317dbc5217c795efe78fad2f5edd33a964f7573a516bf646"
+      },
+      {
+        "path": "psc1/packages/backend-js/README.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "9c6ebaa28986b461a41d49c1ed48f12867a20e99",
+        "bytes": 1701,
+        "sha256": "ffd4a9b9e3e5cc8f0238b2884e5eb084180225e34e963c8f534428b58b8c3c2e"
+      },
+      {
+        "path": "psc1/packages/backend-php/package.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "dde81655c8198e0abb87fd1d11afa71511de6cfb",
+        "bytes": 2209,
+        "sha256": "92b63e5a3d169154c1bfbdd13d8d2cb6aafe607cfe8edec42da041826d4468b8"
+      },
+      {
+        "path": "psc1/packages/backend-python/package.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "1c3a852287a120cf272a4f67b48a2a279c335f94",
+        "bytes": 2227,
+        "sha256": "03549ad176bacfce7113ea3374623b7ba6383a6b5aeb2720ad87dd5faf387b7e"
+      },
+      {
+        "path": "psc1/packages/backend-rust/package.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "8ef58593499d0822fd3d71937c40fc93a11c93b3",
+        "bytes": 1981,
+        "sha256": "52ff55871622cdcf9d3bd162a1fc7bd800c2d6a6b23ca04e3dd12229242ea5c4"
+      },
+      {
+        "path": "psc1/packages/backend-rust/README.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "94b05564148eb180ef5d57d938252af84e818522",
+        "bytes": 1682,
+        "sha256": "cc484ac047742fd9b1d0a07aaafa1e471e5aaaac535e6cc4a917e62addc8c06e"
+      },
+      {
+        "path": "psc1/packages/backend-ts/package.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "92edfafbdf71d0fa54c63bcee1e0373b76da8d3f",
+        "bytes": 1971,
+        "sha256": "aea5a423685961e6527816a13345d499129bf5116a4f623f2b3b526bc079cf96"
+      },
+      {
+        "path": "psc1/packages/backend-ts/README.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "e894ee3b28c1e3bd4399c7990a6329ab5b63b4ac",
+        "bytes": 1710,
+        "sha256": "d1db515ccc1770c3d7e414efaaac202cc11a5adb6f25f1e526b4af932da36251"
+      },
+      {
+        "path": "psc1/packages/backend-wasm/package.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "899da8f6e2069d4438c1ef738bf58f14de7524ab",
+        "bytes": 1981,
+        "sha256": "ecba6a3e5700ec6e59cabb21211f22f01a8ef602597a00d04c0b6f012588efbd"
+      },
+      {
+        "path": "psc1/packages/backend-wasm/README.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "8ca923390f8d0edd677100cb88964b57788b6f77",
+        "bytes": 1717,
+        "sha256": "6a69ceaef97548be1cef5126e09b57de4508126ae7c38c14f80702305468f106"
+      },
+      {
+        "path": "psc1/packages/bootstrap/package.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "bc256bfa53278bf1c544ae55c6f0608004ea6fd4",
+        "bytes": 1935,
+        "sha256": "acb3e676334e2bbf0f94a436ec1cf1b4a7583aeb2b266297d66210d6c8745c50"
+      },
+      {
+        "path": "psc1/packages/bootstrap/README.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "3067fdeb0bfec67e5dc3b23fdb48971d01e879ac",
+        "bytes": 1695,
+        "sha256": "f34a624f75d6ad9492a5e051d3f064514acfbc55e2e1f1b8e7216c8f9bc27345"
+      },
+      {
+        "path": "psc1/packages/bridge/package.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "ca4e1655ea9d595423c07009f1b2905f853dc21f",
+        "bytes": 1908,
+        "sha256": "e6e489b9106a8d3930edecef0504f25f065844f51366d19444a3c8bc7d0aff22"
+      },
+      {
+        "path": "psc1/packages/bridge/README.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "73aea30b2ba01893a09d38b5b0162929fec99fa0",
+        "bytes": 1617,
+        "sha256": "062e28c02d49cd6ad90939065398088668845b80d9b585922d87000a225e9e9a"
+      },
+      {
+        "path": "psc1/packages/cli/package.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "abe8fb5fa4066b47eb1a5fd235d0667bcb5dda12",
+        "bytes": 1791,
+        "sha256": "9ef2eacf2989d2f4ce3ff1b09583eaeaee8a4e8a7acfd1c97af725ba00e15118"
+      },
+      {
+        "path": "psc1/packages/compiler/package.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "566abcf8aa0473fb5e6b6c7353c34e4269c6c612",
+        "bytes": 2994,
+        "sha256": "1d984f51db67aa3d2eba33e7e507c9cb8ffab3c5868a76b14686b8c640def5f4"
+      },
+      {
+        "path": "psc1/packages/compiler-ir/package.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "e986ba2581d0268d33727a051156cc3208dea6bd",
+        "bytes": 1933,
+        "sha256": "7ee1fb488ef3df6df21e6b6a47c8a570424391daa57d92e1b1fed26d272bd92f"
+      },
+      {
+        "path": "psc1/packages/compiler-ir/README.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "e44569449044c5f8fbf581f0b7b1d63d666a7560",
+        "bytes": 1604,
+        "sha256": "c4426dcafce8af2a30329a7d639e82cebd116fca3f3e6827cc59a4ae4784ec9e"
+      },
+      {
+        "path": "psc1/packages/core/package.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "1f1105a5608e65d01eea4187746fa6bf8ccc451d",
+        "bytes": 1898,
+        "sha256": "926d6e62c028bf0f345f1a50393a3fcca4230df4d28d2f59d653d4fdb774379f"
+      },
+      {
+        "path": "psc1/packages/core/README.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "ebff7b68867c7ac0385ca68f34ca7db6d0184365",
+        "bytes": 1585,
+        "sha256": "a62e8b2e5d17411f4ae4a5c9228a43968c40d9a12e4ec172f2fb5e1cb5d6ef37"
+      },
+      {
+        "path": "psc1/packages/elab/package.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "4650521468f1c1f27664f976bf3092d3ea743348",
+        "bytes": 1898,
+        "sha256": "4705ff1cf2ac770425a036a76ac0a2cfa8d33bfbe9b37209ca456fe2d7f24286"
+      },
+      {
+        "path": "psc1/packages/elab/README.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "7863ce6e92e0df48ddc8857672423040c3ffdbba",
+        "bytes": 1638,
+        "sha256": "0f70626703b43a6905bb1ac301ee1d3aad23b6b2f3a81065195f9f3912c7b3ac"
+      },
+      {
+        "path": "psc1/packages/environment/package.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "f693b808fa9e3f357b634a64ed6330198daf110f",
+        "bytes": 1933,
+        "sha256": "477569877ec41bde77aaf3627027ed32e14d8509e43fe2ece5d5ffff5bf2f7aa"
+      },
+      {
+        "path": "psc1/packages/environment/README.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "4d25ffd25207b1197dda1722818b6c85f996e561",
+        "bytes": 1646,
+        "sha256": "4e5b16e57826e924ba7878a0d14d89c31e35a88fa7f7791468c700850b89e5d9"
+      },
+      {
+        "path": "psc1/packages/erasure/package.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "6be75f12bf2ba71da3ff644dcc0413deef95bbb4",
+        "bytes": 1913,
+        "sha256": "3e7893b5b570e0971e55bf2f75756ae0ccfb2ef4d661d48e4039930d388b1521"
+      },
+      {
+        "path": "psc1/packages/erasure/README.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "c8296a90d051f309154c43d6524107b22c2f704a",
+        "bytes": 1604,
+        "sha256": "f5d8cdb4807b21fcabdfc856c182074e79a47698fb930102c304c30efea7df12"
+      },
+      {
+        "path": "psc1/packages/foundation/package.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "19c42afc0d646ee589921d63463e84ccc89d6c82",
+        "bytes": 1928,
+        "sha256": "abd9e9fc4036f89fe1c0c2e2a8725955f68870bf43d74044ba180570da472242"
+      },
+      {
+        "path": "psc1/packages/foundation/README.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "e1294e9b58485eb64a0f986710a24ae4e29a399b",
+        "bytes": 1593,
+        "sha256": "1bbb5f698c186d909a615f559f465d0f389dc07ac9e79075989a55f3a76b1e9a"
+      },
+      {
+        "path": "psc1/packages/meta/package.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "981977f09dc2c1ea39c68d0f0c6aca5a3e13e584",
+        "bytes": 1898,
+        "sha256": "86cda6c576ae96c61491bf8a39e80f39bee69964f66718df2cbbb6932dff327f"
+      },
+      {
+        "path": "psc1/packages/meta/README.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "8ea839092566e5f8d8c83df35a2cc237ac74b335",
+        "bytes": 1602,
+        "sha256": "a99841dbd4a6baafabc116222294d10547c6d39eba8d1fde531211c8aca72923"
+      },
+      {
+        "path": "psc1/packages/proofscript/package.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "47136552ed06ff909d66e4165bcf868aec72b987",
+        "bytes": 7246,
+        "sha256": "67ec3e84c15f9dc0b3c1473fe83ab5b312c650790253b497b0552c78b5148c15"
+      },
+      {
+        "path": "psc1/packages/stdlib/package.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "c1fa087012a131701db65a891c21b5c43a5d2e78",
+        "bytes": 1958,
+        "sha256": "0d6e45f2558b1c21fefe768a1a75a49d638c37e43fbea323770493c554cb9a67"
+      },
+      {
+        "path": "psc1/packages/syntax/package.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "c67bb7fa94d44cfb7be54d27ca9b916e1f60fa14",
+        "bytes": 1908,
+        "sha256": "71cb8a3176c789fc9727b8289d1d9f4131e1545ce77184c3e86c8d3c1aecf4c1"
+      },
+      {
+        "path": "psc1/packages/syntax/README.md",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "23f2a07f676a7c6d83c3801d41672e62543a54f2",
+        "bytes": 1597,
+        "sha256": "9452008c04f2dbcff1d480a5d8a6b2e5a844e37d2748ad43230a7968f10f8b59"
+      }
+    ],
+    "preparedFiles": {
+      "path": "prepared-files.json",
+      "bytes": 3150364,
+      "sha256": "7c36ece7fad0291a203d616c4b5752316a49888a6c9f6408215bcdc2fb0b5c73"
+    }
+  },
+  "interpretation": "Fresh paired-grammar compiler and library admission/strict-IR correspondence passed. Initial promotion retains all qualified native reference bytes. Whole reverse-rendered native replacement failed and is not promoted.",
+  "receiptGrantsAdmissionAuthority": false
+}

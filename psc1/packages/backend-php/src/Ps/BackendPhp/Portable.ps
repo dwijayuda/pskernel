@@ -1,0 +1,1065 @@
+import Ps.CompilerIr.Validate
+import Ps.Bridge.Json
+import Ps.BackendPhp.Runtime
+import Ps.BackendCommon.Plan
+import Ps.BackendCommon.Source
+import Ps.BackendCommon.DirectCalls
+
+structure PsPhpPortableModule where {
+  source : String
+  composer : String
+  runtimeSource : String
+  runtimeVersion : String
+  runtimeRequirements : List(String)
+  declarations : List((Prod(String, String)))
+  declarationLines : List((Prod(String, Nat)))
+}
+
+namespace PsPhp
+def cat(parts : List(String)) : String := psTextJoin("", parts)
+end PsPhp
+
+namespace PsPhp
+def decimal(value : Nat) : String := Int.repr((Int.ofNat(value)))
+end PsPhp
+
+namespace PsPhp
+def quoteAcc(chars : List(Char), builder : PsTextBuilder) : String := match chars with {
+  | List.nil => cat((_root_.List.cons((psTextBuilderFinish(builder)), (_root_.List.cons("\"", _root_.List.nil)))))
+  | List.cons char rest => let code : Nat := (Char.toNat(char))
+let text : String := (if (Nat.beq(code, 92)) { "\\\\" } else { if (Nat.beq(code, 34)) { "\\\"" } else { if (Nat.beq(code, 36)) { "\\$" } else { if (Nat.beq(code, 10)) { "\\n" } else { if (Nat.beq(code, 13)) { "\\r" } else { if (Nat.beq(code, 9)) { "\\t" } else { if (Nat.blt(code, 32)) { cat((_root_.List.cons("\\x", (_root_.List.cons((psJsonHexDigit((Nat.div(code, 16)))), (_root_.List.cons((psJsonHexDigit((Nat.mod(code, 16)))), _root_.List.nil))))))) } else { String.singleton(char) } } } } } } })
+quoteAcc(rest, (psTextBuilderAppend(builder, text)))
+}
+end PsPhp
+
+namespace PsPhp
+def quote(value : String) : String := quoteAcc((psJsonStringToChars(value)), (psTextBuilderAppend(psTextBuilderEmpty, "\"")))
+end PsPhp
+
+namespace PsPhp
+def asciiLetter(code : Nat) : Bool := ((Nat.ble(65, code) && Nat.ble(code, 90)) || (Nat.ble(97, code) && Nat.ble(code, 122)))
+end PsPhp
+
+namespace PsPhp
+def asciiDigit(code : Nat) : Bool := (Nat.ble(48, code) && Nat.ble(code, 57))
+end PsPhp
+
+namespace PsPhp
+def stemAcc(chars : List(Char), builder : PsTextBuilder) : String := match chars with {
+  | List.nil => psTextBuilderFinish(builder)
+  | List.cons char rest => let code : Nat := (Char.toNat(char))
+let text : String := (if (((asciiLetter(code) || asciiDigit(code)) || Nat.beq(code, 95))) { String.singleton(char) } else { cat((_root_.List.cons("_u", (_root_.List.cons((decimal(code)), (_root_.List.cons("_", _root_.List.nil))))))) })
+stemAcc(rest, (psTextBuilderAppend(builder, text)))
+}
+end PsPhp
+
+namespace PsPhp
+def stem(value : String) : String := stemAcc((psJsonStringToChars(value)), psTextBuilderEmpty)
+end PsPhp
+
+namespace PsPhp
+def typeTextWithCarrier(nodes : Bool, fuel : Nat) : (_ : PsVerifiedIrType) -> Except(String, String) := match fuel with {
+  | Nat.zero => fun (_type : PsVerifiedIrType) => Except.error("PSC1_PHP_TYPE_BUDGET")
+  | Nat.succ remaining => fun (type : PsVerifiedIrType) => let check : (_ : PsVerifiedIrType) -> Except(String, String) := (typeTextWithCarrier(nodes, remaining))
+match type with {
+  | PsVerifiedIrType.primitive scalar => match scalar with {
+  | PsVerifiedIrPrimitiveType.nat => Except.ok("\\GMP")
+  | PsVerifiedIrPrimitiveType.int => Except.ok("\\GMP")
+  | PsVerifiedIrPrimitiveType.bool => Except.ok("bool")
+  | PsVerifiedIrPrimitiveType.string => Except.ok("string")
+  | PsVerifiedIrPrimitiveType.char => Except.ok("string")
+  | PsVerifiedIrPrimitiveType.unit => Except.ok("null")
+  | _ => Except.error("PSC1_PHP_TYPE_UNSUPPORTED: machine scalars, floats and unresolved types are not qualified")
+}
+  | PsVerifiedIrType.function parameters result => do {
+  let _ <- (psListMapExcept(check, parameters))
+  let _ <- (check(result))
+  (Except.ok("\\Closure"))
+}
+  | PsVerifiedIrType.named _ arguments => do {
+  let _ <- (psListMapExcept(check, arguments))
+  (Except.ok((if (nodes) { "array|\\ArrayAccess" } else { "array" })))
+}
+  | _ => Except.error("PSC1_PHP_TYPE_UNSUPPORTED: machine scalars, floats and unresolved types are not qualified")
+}
+}
+end PsPhp
+
+namespace PsPhp
+def typeText(fuel : Nat, type : PsVerifiedIrType) : Except(String, String) := typeTextWithCarrier(false, fuel, type)
+end PsPhp
+
+namespace PsPhp
+def typeRequirements(fuel : Nat) : (_ : PsVerifiedIrType) -> List(String) := match fuel with {
+  | Nat.zero => fun (_type : PsVerifiedIrType) => List.nil
+  | Nat.succ remaining => fun (type : PsVerifiedIrType) => let visit : (_ : PsVerifiedIrType) -> List(String) := (typeRequirements(remaining))
+match type with {
+  | PsVerifiedIrType.primitive scalar => match scalar with {
+  | PsVerifiedIrPrimitiveType.nat => _root_.List.cons("gmp", _root_.List.nil)
+  | PsVerifiedIrPrimitiveType.int => _root_.List.cons("gmp", _root_.List.nil)
+  | _ => List.nil
+}
+  | PsVerifiedIrType.function parameters result => psListAppend((psBackendSourceFlatMap(visit, parameters)), (visit(result)))
+  | PsVerifiedIrType.named _ arguments => psBackendSourceFlatMap(visit, arguments)
+  | _ => List.nil
+}
+}
+end PsPhp
+
+namespace PsPhp
+def intrinsicRequirements(operation : PsVerifiedIrIntrinsic) : List(String) := match operation with {
+  | PsVerifiedIrIntrinsic.boolNot => List.nil
+  | PsVerifiedIrIntrinsic.boolAnd => List.nil
+  | PsVerifiedIrIntrinsic.boolOr => List.nil
+  | PsVerifiedIrIntrinsic.boolEq => List.nil
+  | PsVerifiedIrIntrinsic.boolNe => List.nil
+  | PsVerifiedIrIntrinsic.stringPush => List.nil
+  | PsVerifiedIrIntrinsic.stringSingleton => List.nil
+  | PsVerifiedIrIntrinsic.stringAppend => List.nil
+  | PsVerifiedIrIntrinsic.stringEq => List.nil
+  | PsVerifiedIrIntrinsic.charOfNat => _root_.List.cons("charOfNat", _root_.List.nil)
+  | PsVerifiedIrIntrinsic.charToNat => _root_.List.cons("charToNat", _root_.List.nil)
+  | PsVerifiedIrIntrinsic.stringLength => _root_.List.cons("unicodeChars", (_root_.List.cons("gmp", _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.stringGet => _root_.List.cons("stringGet", _root_.List.nil)
+  | PsVerifiedIrIntrinsic.stringNext => _root_.List.cons("stringNext", _root_.List.nil)
+  | PsVerifiedIrIntrinsic.stringExtract => _root_.List.cons("stringExtract", _root_.List.nil)
+  | PsVerifiedIrIntrinsic.arrayMap => _root_.List.cons("calls", _root_.List.nil)
+  | PsVerifiedIrIntrinsic.arrayFoldl => _root_.List.cons("calls", (_root_.List.cons("gmp", _root_.List.nil)))
+  | _ => _root_.List.cons("gmp", _root_.List.nil)
+}
+end PsPhp
+
+namespace PsPhp
+def exprRequirements(valueNames : List(String), fuel : Nat) : (_ : List(String)) -> (_ : PsVerifiedIrExpr) -> List(String) := match fuel with {
+  | Nat.zero => fun (_bound : List(String)) (_expr : PsVerifiedIrExpr) => List.nil
+  | Nat.succ remaining => fun (bound : List(String)) (expr : PsVerifiedIrExpr) => let smaller : (_ : List(String)) -> (_ : PsVerifiedIrExpr) -> List(String) := (exprRequirements(valueNames, remaining))
+let visit : (_ : PsVerifiedIrExpr) -> List(String) := (smaller(bound))
+match expr with {
+  | PsVerifiedIrExpr.literal value => match value with {
+  | PsVerifiedIrLiteral.natural _ => _root_.List.cons("gmp", _root_.List.nil)
+  | PsVerifiedIrLiteral.integer _ => _root_.List.cons("gmp", _root_.List.nil)
+  | _ => List.nil
+}
+  | PsVerifiedIrExpr.var name => if ((psBackendNameSeen(name, valueNames) && (!psBackendNameSeen(name, bound)))) { _root_.List.cons("calls", _root_.List.nil) } else { List.nil }
+  | PsVerifiedIrExpr.intrinsic operation types arguments => psListAppend((intrinsicRequirements(operation)), (psListAppend((psBackendSourceFlatMap((typeRequirements(remaining)), types)), (psBackendSourceFlatMap(visit, arguments)))))
+  | PsVerifiedIrExpr.lambda parameters result body => psListAppend((psBackendSourceFlatMap((fun (parameter : PsVerifiedIrParameter) => typeRequirements(remaining, parameter.type)), parameters)), (psListAppend((typeRequirements(remaining, result)), (smaller((psListAppend((psListMap((fun (parameter : PsVerifiedIrParameter) => parameter.name), parameters)), bound)), body)))))
+  | PsVerifiedIrExpr.call fn _ arguments => List.cons("calls", (psListAppend((visit(fn)), (psBackendSourceFlatMap(visit, arguments)))))
+  | PsVerifiedIrExpr.letE name type value body => psListAppend((typeRequirements(remaining, type)), (psListAppend((visit(value)), (smaller((List.cons(name, bound)), body)))))
+  | PsVerifiedIrExpr.ifE condition yes no => psListAppend((visit(condition)), (psListAppend((visit(yes)), (visit(no)))))
+  | PsVerifiedIrExpr.record _ _ fields => psBackendSourceFlatMap((fun (field : Prod(String, PsVerifiedIrExpr)) => visit(field.snd)), fields)
+  | PsVerifiedIrExpr.constructor _ _ _ fields => List.cons("nodes", (psBackendSourceFlatMap((fun (field : Prod(String, PsVerifiedIrExpr)) => visit(field.snd)), fields)))
+  | PsVerifiedIrExpr.projection _ _ target _ => visit(target)
+  | PsVerifiedIrExpr.matchE _ _ target alternatives => psListAppend((visit(target)), (psBackendSourceFlatMap((fun (alternative : Prod(String, (Prod((List(PsVerifiedIrMatchBinding)), PsVerifiedIrExpr)))) => smaller((psListAppend((psListMap((fun (binding : PsVerifiedIrMatchBinding) => binding.name), alternative.snd.fst)), bound)), alternative.snd.snd)), alternatives)))
+}
+}
+end PsPhp
+
+namespace PsPhp
+structure Context where {
+  globals : List((Prod(String, String)))
+  valueNames : List(String)
+  locals : List((Prod(String, String)))
+  helpers : List(String)
+  scheduled : Bool
+  preciseCaptures : Bool
+  flatConstructors : Bool
+  inductives : List(PsVerifiedIrInductive)
+  directNames : PsStringSet
+  directSlots : Bool
+}
+end PsPhp
+
+namespace PsPhp
+structure EmitState where {
+  linesRev : List(String)
+  lineCount : Nat
+  counter : Nat
+  indent : Nat
+}
+end PsPhp
+
+namespace PsPhp
+def Emit(Value : Type) : Type := PsBackendStateExcept(EmitState, String, Value)
+end PsPhp
+
+namespace PsPhp
+def withLocals(context : Context, locals : List((Prod(String, String)))) : Context := Context.mk(context.globals, context.valueNames, locals, context.helpers, context.scheduled, context.preciseCaptures, context.flatConstructors, context.inductives, context.directNames, context.directSlots)
+end PsPhp
+
+namespace PsPhp
+def withScheduling(context : Context, scheduled : Bool) : Context := Context.mk(context.globals, context.valueNames, context.locals, context.helpers, scheduled, context.preciseCaptures, context.flatConstructors, context.inductives, context.directNames, context.directSlots)
+end PsPhp
+
+namespace PsPhp
+def padding(count : Nat, builder : PsTextBuilder) : String := match count with {
+  | Nat.zero => psTextBuilderFinish(builder)
+  | Nat.succ remaining => padding(remaining, (psTextBuilderAppend(builder, "    ")))
+}
+end PsPhp
+
+namespace PsPhp
+def line(text : String) : Emit(Unit) := psBackendStateModify((fun (state : EmitState) => EmitState.mk((List.cons((cat((_root_.List.cons((padding(state.indent, psTextBuilderEmpty)), (_root_.List.cons(text, _root_.List.nil)))))), state.linesRev)), (Nat.succ(state.lineCount)), state.counter, state.indent)))
+end PsPhp
+
+namespace PsPhp
+def indent(increase : Bool) : Emit(Unit) := psBackendStateModify((fun (state : EmitState) => EmitState.mk(state.linesRev, state.lineCount, state.counter, (if (increase) { Nat.succ(state.indent) } else { Nat.sub(state.indent, 1) }))))
+end PsPhp
+
+namespace PsPhp
+def fresh(hint : String) : Emit(String) := psBackendStateBind((psBackendStateGet(Unit.unit)), (fun (state : EmitState) => psBackendStateBind((psBackendStateSet((EmitState.mk(state.linesRev, state.lineCount, (Nat.succ(state.counter)), state.indent)))), (fun (_unit : Unit) => psBackendStatePure((cat((_root_.List.cons("$v", (_root_.List.cons((decimal(state.counter)), (_root_.List.cons("_", (_root_.List.cons((stem(hint)), _root_.List.nil)))))))))))))))
+end PsPhp
+
+namespace PsPhp
+def bindValue(expression : String) : Emit(String) := psBackendStateBind((fresh("tmp")), (fun (name : String) => psBackendStateBind((line((cat((_root_.List.cons(name, (_root_.List.cons(" = ", (_root_.List.cons(expression, (_root_.List.cons(";", _root_.List.nil)))))))))))), (fun (_unit : Unit) => psBackendStatePure(name)))))
+end PsPhp
+
+namespace PsPhp
+def captureValues(values : List(String), seen : List(String)) : List(String) := match values with {
+  | List.nil => seen
+  | List.cons value rest => captureValues(rest, (if (psBackendNameSeen(value, seen)) { seen } else { psListAppend(seen, (_root_.List.cons(value, _root_.List.nil))) }))
+}
+end PsPhp
+
+namespace PsPhp
+def capture(context : Context) : String := let refs : List(String) := (psListMap((fun (pair : Prod(String, String)) => cat((_root_.List.cons("&", (_root_.List.cons(pair.snd, _root_.List.nil)))))), context.globals))
+let values : List(String) := (captureValues((psListAppend((psListMap((fun (pair : Prod(String, String)) => pair.snd), context.locals)), context.helpers)), List.nil))
+let captures : List(String) := (psListAppend(refs, values))
+if (psListIsEmpty(captures)) { "" } else { cat((_root_.List.cons(" use (", (_root_.List.cons((psTextJoin(", ", captures)), (_root_.List.cons(")", _root_.List.nil))))))) }
+end PsPhp
+
+namespace PsPhp
+-- Conservative lexical global-demand analysis. Exhausted analysis retains the
+-- original complete capture set; compiler and source execution fuel are unchanged.
+def collectChunks(chunks : List((List(String)))) : List(String) := psBackendSourceFlatMap((fun (chunk : List(String)) => chunk), chunks)
+end PsPhp
+
+namespace PsPhp
+def collectMany {Value : Type}(visit : (_ : Value) -> Except(Unit, (List(String))), values : List(Value)) : Except(Unit, (List(String))) := match (psListMapExcept(visit, values)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok chunks => Except.ok((collectChunks(chunks)))
+}
+end PsPhp
+
+namespace PsPhp
+def collectJoin(left : Except(Unit, (List(String))), right : Except(Unit, (List(String)))) : Except(Unit, (List(String))) := match left with {
+  | Except.error error => Except.error(error)
+  | Except.ok names => match right with {
+  | Except.error error => Except.error(error)
+  | Except.ok others => Except.ok((psListAppend(names, others)))
+}
+}
+end PsPhp
+
+namespace PsPhp
+def freeGlobalNames(fuel : Nat) : (_ : List(String)) -> (_ : PsVerifiedIrExpr) -> Except(Unit, (List(String))) := match fuel with {
+  | Nat.zero => fun (_bound : List(String)) (_expr : PsVerifiedIrExpr) => Except.error(Unit.unit)
+  | Nat.succ remaining => fun (bound : List(String)) (expr : PsVerifiedIrExpr) => let smaller : (_ : List(String)) -> (_ : PsVerifiedIrExpr) -> Except(Unit, (List(String))) := (freeGlobalNames(remaining))
+let visit : (_ : PsVerifiedIrExpr) -> Except(Unit, (List(String))) := (smaller(bound))
+match expr with {
+  | PsVerifiedIrExpr.literal _ => Except.ok(List.nil)
+  | PsVerifiedIrExpr.var name => Except.ok((if (psBackendNameSeen(name, bound)) { List.nil } else { _root_.List.cons(name, _root_.List.nil) }))
+  | PsVerifiedIrExpr.intrinsic _ _ arguments => collectMany(visit, arguments)
+  | PsVerifiedIrExpr.lambda parameters _ body => smaller((psListAppend((psListMap((fun (parameter : PsVerifiedIrParameter) => parameter.name), parameters)), bound)), body)
+  | PsVerifiedIrExpr.call fn _ arguments => collectJoin((visit(fn)), (collectMany(visit, arguments)))
+  | PsVerifiedIrExpr.letE name _ value body => collectJoin((visit(value)), (smaller((List.cons(name, bound)), body)))
+  | PsVerifiedIrExpr.ifE condition yes no => collectJoin((visit(condition)), (collectJoin((visit(yes)), (visit(no)))))
+  | PsVerifiedIrExpr.record _ _ fields => collectMany((fun (field : Prod(String, PsVerifiedIrExpr)) => visit(field.snd)), fields)
+  | PsVerifiedIrExpr.projection _ _ target _ => visit(target)
+  | PsVerifiedIrExpr.constructor _ _ _ fields => collectMany((fun (field : Prod(String, PsVerifiedIrExpr)) => visit(field.snd)), fields)
+  | PsVerifiedIrExpr.matchE _ _ target alternatives => collectJoin((visit(target)), (collectMany((fun (alternative : Prod(String, (Prod((List(PsVerifiedIrMatchBinding)), PsVerifiedIrExpr)))) => smaller((psListAppend((psListMap((fun (binding : PsVerifiedIrMatchBinding) => binding.name), alternative.snd.fst)), bound)), alternative.snd.snd)), alternatives)))
+}
+}
+end PsPhp
+
+namespace PsPhp
+def selectedGlobalsAcc(names : List(String), globals : List((Prod(String, String))), reversed : List((Prod(String, String)))) : List((Prod(String, String))) := match globals with {
+  | List.nil => psListReverse(reversed)
+  | List.cons entry rest => selectedGlobalsAcc(names, rest, (if (psBackendNameSeen(entry.fst, names)) { List.cons(entry, reversed) } else { reversed }))
+}
+end PsPhp
+
+namespace PsPhp
+def captureForWithFuel(fuel : Nat, context : Context, parameters : List(PsVerifiedIrParameter), body : PsVerifiedIrExpr) : String := let bound : List(String) := (psListAppend((psListMap((fun (parameter : PsVerifiedIrParameter) => parameter.name), parameters)), (psListMap((fun (entry : Prod(String, String)) => entry.fst), context.locals))))
+if ((!context.preciseCaptures)) { capture(context) } else { match (freeGlobalNames(fuel, bound, body)) with {
+  | Except.error _ => capture(context)
+  | Except.ok names => capture((Context.mk((selectedGlobalsAcc(names, context.globals, List.nil)), context.valueNames, context.locals, context.helpers, context.scheduled, context.preciseCaptures, context.flatConstructors, context.inductives, context.directNames, context.directSlots)))
+} }
+end PsPhp
+
+namespace PsPhp
+def captureFor(context : Context, parameters : List(PsVerifiedIrParameter), body : PsVerifiedIrExpr) : String := captureForWithFuel(4096, context, parameters, body)
+end PsPhp
+
+namespace PsPhp
+def guardCondition(context : Context, name : String, type : PsVerifiedIrType) : String := match type with {
+  | PsVerifiedIrType.primitive scalar => match scalar with {
+  | PsVerifiedIrPrimitiveType.nat => cat((_root_.List.cons("!(", (_root_.List.cons(name, (_root_.List.cons(" instanceof \\GMP) || gmp_cmp(", (_root_.List.cons(name, (_root_.List.cons(", 0) < 0", _root_.List.nil)))))))))))
+  | PsVerifiedIrPrimitiveType.int => cat((_root_.List.cons("!(", (_root_.List.cons(name, (_root_.List.cons(" instanceof \\GMP)", _root_.List.nil)))))))
+  | PsVerifiedIrPrimitiveType.bool => cat((_root_.List.cons("!is_bool(", (_root_.List.cons(name, (_root_.List.cons(")", _root_.List.nil)))))))
+  | PsVerifiedIrPrimitiveType.string => if (psBackendNameSeen("$__ps_utf8Valid", context.helpers)) { cat((_root_.List.cons("!is_string(", (_root_.List.cons(name, (_root_.List.cons(") || !$__ps_utf8Valid(", (_root_.List.cons(name, (_root_.List.cons(")", _root_.List.nil))))))))))) } else { cat((_root_.List.cons("!is_string(", (_root_.List.cons(name, (_root_.List.cons(") || preg_match('//u', ", (_root_.List.cons(name, (_root_.List.cons(") !== 1", _root_.List.nil))))))))))) }
+  | PsVerifiedIrPrimitiveType.char => cat((_root_.List.cons("!is_string(", (_root_.List.cons(name, (_root_.List.cons(") || preg_match('/\\A.\\z/us', ", (_root_.List.cons(name, (_root_.List.cons(") !== 1", _root_.List.nil)))))))))))
+  | PsVerifiedIrPrimitiveType.unit => cat((_root_.List.cons(name, (_root_.List.cons(" !== null", _root_.List.nil)))))
+  | _ => "true"
+}
+  | PsVerifiedIrType.function _ _ => cat((_root_.List.cons("!(", (_root_.List.cons(name, (_root_.List.cons(" instanceof \\Closure)", _root_.List.nil)))))))
+  | PsVerifiedIrType.named _ _ => if (context.flatConstructors) { cat((_root_.List.cons("!(is_array(", (_root_.List.cons(name, (_root_.List.cons(") || ", (_root_.List.cons(name, (_root_.List.cons(" instanceof \\ArrayAccess)", _root_.List.nil))))))))))) } else { cat((_root_.List.cons("!is_array(", (_root_.List.cons(name, (_root_.List.cons(")", _root_.List.nil))))))) }
+  | _ => "true"
+}
+end PsPhp
+
+namespace PsPhp
+def guard(context : Context, name : String, type : PsVerifiedIrType) : Emit(Unit) := fun (state : EmitState) => do {
+  let _psc_step_0 <- (line((cat((_root_.List.cons("if (", (_root_.List.cons((guardCondition(context, name, type)), (_root_.List.cons(") {", _root_.List.nil)))))))), state))
+  let state := _psc_step_0.snd
+  let _psc_step_1 <- (indent(true, state))
+  let state := _psc_step_1.snd
+  let _psc_step_2 <- (line("throw new \\TypeError('PSC1_PHP_ARGUMENT_TYPE');", state))
+  let state := _psc_step_2.snd
+  let _psc_step_3 <- (indent(false, state))
+  let state := _psc_step_3.snd
+  (line("}", state))
+}
+end PsPhp
+
+namespace PsPhp
+def invoke(context : Context, fn : String, args : List(String)) : String := if (context.scheduled) { cat((_root_.List.cons("(yield [", (_root_.List.cons(fn, (_root_.List.cons(", [", (_root_.List.cons((psTextJoin(", ", args)), (_root_.List.cons("]])", _root_.List.nil))))))))))) } else { cat((_root_.List.cons(fn, (_root_.List.cons("(", (_root_.List.cons((psTextJoin(", ", args)), (_root_.List.cons(")", _root_.List.nil))))))))) }
+end PsPhp
+
+namespace PsPhp
+def callText(name : String, args : List(String)) : String := cat((_root_.List.cons(name, (_root_.List.cons("(", (_root_.List.cons((psTextJoin(", ", args)), (_root_.List.cons(")", _root_.List.nil)))))))))
+end PsPhp
+
+namespace PsPhp
+def callBind(name : String, arity : Nat, args : List(String)) : Emit(String) := if (Nat.beq((psListLength(args)), arity)) { bindValue((callText(name, args))) } else { psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY") }
+end PsPhp
+
+namespace PsPhp
+def binary(args : List(String), symbol : String) : Emit(String) := psBackendSourceArgs2((fun (a : String) (b : String) => bindValue((cat((_root_.List.cons("(", (_root_.List.cons(a, (_root_.List.cons(" ", (_root_.List.cons(symbol, (_root_.List.cons(" ", (_root_.List.cons(b, (_root_.List.cons(")", _root_.List.nil)))))))))))))))))), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+end PsPhp
+
+namespace PsPhp
+def intrinsic(context : Context, operation : PsVerifiedIrIntrinsic, args : List(String)) : Emit(String) := match operation with {
+  | PsVerifiedIrIntrinsic.natAdd => callBind("gmp_add", 2, args)
+  | PsVerifiedIrIntrinsic.intAdd => callBind("gmp_add", 2, args)
+  | PsVerifiedIrIntrinsic.natMul => callBind("gmp_mul", 2, args)
+  | PsVerifiedIrIntrinsic.intMul => callBind("gmp_mul", 2, args)
+  | PsVerifiedIrIntrinsic.intSub => callBind("gmp_sub", 2, args)
+  | PsVerifiedIrIntrinsic.natSub => psBackendSourceArgs2((fun (a : String) (b : String) => bindValue((cat((_root_.List.cons("(gmp_cmp(", (_root_.List.cons(a, (_root_.List.cons(", ", (_root_.List.cons(b, (_root_.List.cons(") < 0 ? gmp_init(0) : gmp_sub(", (_root_.List.cons(a, (_root_.List.cons(", ", (_root_.List.cons(b, (_root_.List.cons("))", _root_.List.nil)))))))))))))))))))))), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | PsVerifiedIrIntrinsic.natDiv => psBackendSourceArgs2((fun (a : String) (b : String) => bindValue((cat((_root_.List.cons("(gmp_cmp(", (_root_.List.cons(b, (_root_.List.cons(", 0) === 0 ? gmp_init(0) : gmp_div_q(", (_root_.List.cons(a, (_root_.List.cons(", ", (_root_.List.cons(b, (_root_.List.cons(", GMP_ROUND_ZERO))", _root_.List.nil)))))))))))))))))), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | PsVerifiedIrIntrinsic.natMod => psBackendSourceArgs2((fun (a : String) (b : String) => bindValue((cat((_root_.List.cons("(gmp_cmp(", (_root_.List.cons(b, (_root_.List.cons(", 0) === 0 ? ", (_root_.List.cons(a, (_root_.List.cons(" : gmp_mod(", (_root_.List.cons(a, (_root_.List.cons(", ", (_root_.List.cons(b, (_root_.List.cons("))", _root_.List.nil)))))))))))))))))))))), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | PsVerifiedIrIntrinsic.natEq => psBackendSourceArgs2((fun (a : String) (b : String) => bindValue((cat((_root_.List.cons("(gmp_cmp(", (_root_.List.cons(a, (_root_.List.cons(", ", (_root_.List.cons(b, (_root_.List.cons(") === 0)", _root_.List.nil)))))))))))))), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | PsVerifiedIrIntrinsic.intEq => psBackendSourceArgs2((fun (a : String) (b : String) => bindValue((cat((_root_.List.cons("(gmp_cmp(", (_root_.List.cons(a, (_root_.List.cons(", ", (_root_.List.cons(b, (_root_.List.cons(") === 0)", _root_.List.nil)))))))))))))), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | PsVerifiedIrIntrinsic.natNe => psBackendSourceArgs2((fun (a : String) (b : String) => bindValue((cat((_root_.List.cons("(gmp_cmp(", (_root_.List.cons(a, (_root_.List.cons(", ", (_root_.List.cons(b, (_root_.List.cons(") !== 0)", _root_.List.nil)))))))))))))), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | PsVerifiedIrIntrinsic.natLe => psBackendSourceArgs2((fun (a : String) (b : String) => bindValue((cat((_root_.List.cons("(gmp_cmp(", (_root_.List.cons(a, (_root_.List.cons(", ", (_root_.List.cons(b, (_root_.List.cons(") <= 0)", _root_.List.nil)))))))))))))), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | PsVerifiedIrIntrinsic.intLe => psBackendSourceArgs2((fun (a : String) (b : String) => bindValue((cat((_root_.List.cons("(gmp_cmp(", (_root_.List.cons(a, (_root_.List.cons(", ", (_root_.List.cons(b, (_root_.List.cons(") <= 0)", _root_.List.nil)))))))))))))), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | PsVerifiedIrIntrinsic.natLt => psBackendSourceArgs2((fun (a : String) (b : String) => bindValue((cat((_root_.List.cons("(gmp_cmp(", (_root_.List.cons(a, (_root_.List.cons(", ", (_root_.List.cons(b, (_root_.List.cons(") < 0)", _root_.List.nil)))))))))))))), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | PsVerifiedIrIntrinsic.intLt => psBackendSourceArgs2((fun (a : String) (b : String) => bindValue((cat((_root_.List.cons("(gmp_cmp(", (_root_.List.cons(a, (_root_.List.cons(", ", (_root_.List.cons(b, (_root_.List.cons(") < 0)", _root_.List.nil)))))))))))))), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | PsVerifiedIrIntrinsic.intOfNat => psBackendSourceArgs1((fun (a : String) => psBackendStatePure(a)), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | PsVerifiedIrIntrinsic.intRepr => psBackendSourceArgs1((fun (a : String) => bindValue((cat((_root_.List.cons("gmp_strval(", (_root_.List.cons(a, (_root_.List.cons(", 10)", _root_.List.nil)))))))))), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | PsVerifiedIrIntrinsic.intNegSucc => psBackendSourceArgs1((fun (a : String) => bindValue((cat((_root_.List.cons("gmp_neg(gmp_add(", (_root_.List.cons(a, (_root_.List.cons(", 1))", _root_.List.nil)))))))))), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | PsVerifiedIrIntrinsic.intNeg => callBind("gmp_neg", 1, args)
+  | PsVerifiedIrIntrinsic.boolNot => psBackendSourceArgs1((fun (a : String) => bindValue((cat((_root_.List.cons("(!", (_root_.List.cons(a, (_root_.List.cons(")", _root_.List.nil)))))))))), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | PsVerifiedIrIntrinsic.boolEq => binary(args, "===")
+  | PsVerifiedIrIntrinsic.stringEq => binary(args, "===")
+  | PsVerifiedIrIntrinsic.boolNe => binary(args, "!==")
+  | PsVerifiedIrIntrinsic.boolAnd => binary(args, "&&")
+  | PsVerifiedIrIntrinsic.boolOr => binary(args, "||")
+  | PsVerifiedIrIntrinsic.charOfNat => callBind("$__ps_charOfNat", 1, args)
+  | PsVerifiedIrIntrinsic.charToNat => callBind("$__ps_charToNat", 1, args)
+  | PsVerifiedIrIntrinsic.stringSingleton => psBackendSourceArgs1((fun (a : String) => psBackendStatePure(a)), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | PsVerifiedIrIntrinsic.stringPush => binary(args, ".")
+  | PsVerifiedIrIntrinsic.stringAppend => binary(args, ".")
+  | PsVerifiedIrIntrinsic.stringLength => psBackendSourceArgs1((fun (a : String) => bindValue((cat((_root_.List.cons("gmp_init(count($__ps_unicodeChars(", (_root_.List.cons(a, (_root_.List.cons(")))", _root_.List.nil)))))))))), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | PsVerifiedIrIntrinsic.stringUtf8ByteSize => psBackendSourceArgs1((fun (a : String) => bindValue((cat((_root_.List.cons("gmp_init(strlen(", (_root_.List.cons(a, (_root_.List.cons("))", _root_.List.nil)))))))))), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | PsVerifiedIrIntrinsic.stringGet => callBind("$__ps_stringGet", 2, args)
+  | PsVerifiedIrIntrinsic.stringNext => callBind("$__ps_stringNext", 2, args)
+  | PsVerifiedIrIntrinsic.stringExtract => callBind("$__ps_stringExtract", 3, args)
+  | PsVerifiedIrIntrinsic.stringAtEnd => psBackendSourceArgs2((fun (a : String) (b : String) => bindValue((cat((_root_.List.cons("(gmp_cmp(", (_root_.List.cons(b, (_root_.List.cons(", strlen(", (_root_.List.cons(a, (_root_.List.cons(")) >= 0)", _root_.List.nil)))))))))))))), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | PsVerifiedIrIntrinsic.arrayEmptyWithCapacity => psBackendSourceArgs1((fun (_value : String) => bindValue("[]")), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | PsVerifiedIrIntrinsic.arraySize => psBackendSourceArgs1((fun (a : String) => bindValue((cat((_root_.List.cons("gmp_init(count(", (_root_.List.cons(a, (_root_.List.cons("))", _root_.List.nil)))))))))), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | PsVerifiedIrIntrinsic.arrayPush => psBackendSourceArgs2((fun (a : String) (value : String) => psBackendStateBind((bindValue(a)), (fun (result : String) => psBackendStateBind((line((cat((_root_.List.cons(result, (_root_.List.cons("[] = ", (_root_.List.cons(value, (_root_.List.cons(";", _root_.List.nil)))))))))))), (fun (_unit : Unit) => psBackendStatePure(result)))))), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | PsVerifiedIrIntrinsic.arrayGet => psBackendSourceArgs2((fun (a : String) (index : String) => fun (state : EmitState) => do {
+  let _psc_step_4 <- (line((cat((_root_.List.cons("if (gmp_cmp(", (_root_.List.cons(index, (_root_.List.cons(", 0) < 0 || gmp_cmp(", (_root_.List.cons(index, (_root_.List.cons(", count(", (_root_.List.cons(a, (_root_.List.cons(")) >= 0) {", _root_.List.nil)))))))))))))))), state))
+  let state := _psc_step_4.snd
+  let _psc_step_5 <- (indent(true, state))
+  let state := _psc_step_5.snd
+  let _psc_step_6 <- (line("throw new \\OutOfBoundsException('PSC1_ARRAY_GET_BOUNDS');", state))
+  let state := _psc_step_6.snd
+  let _psc_step_7 <- (indent(false, state))
+  let state := _psc_step_7.snd
+  let _psc_step_8 <- (line("}", state))
+  let state := _psc_step_8.snd
+  (bindValue((cat((_root_.List.cons(a, (_root_.List.cons("[gmp_intval(", (_root_.List.cons(index, (_root_.List.cons(")]", _root_.List.nil)))))))))), state))
+}), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | PsVerifiedIrIntrinsic.arrayGetD => psBackendSourceArgs3((fun (a : String) (index : String) (fallback : String) => bindValue((cat((_root_.List.cons("(gmp_cmp(", (_root_.List.cons(index, (_root_.List.cons(", 0) >= 0 && gmp_cmp(", (_root_.List.cons(index, (_root_.List.cons(", count(", (_root_.List.cons(a, (_root_.List.cons(")) < 0 ? ", (_root_.List.cons(a, (_root_.List.cons("[gmp_intval(", (_root_.List.cons(index, (_root_.List.cons(")] : ", (_root_.List.cons(fallback, (_root_.List.cons(")", _root_.List.nil)))))))))))))))))))))))))))))), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | PsVerifiedIrIntrinsic.arraySet => psBackendSourceArgs3((fun (a : String) (index : String) (value : String) => fun (state : EmitState) => do {
+  let _psc_step_9 <- (bindValue(a, state))
+  let result := _psc_step_9.fst
+  let state := _psc_step_9.snd
+  let _psc_step_10 <- (line((cat((_root_.List.cons("if (gmp_cmp(", (_root_.List.cons(index, (_root_.List.cons(", 0) >= 0 && gmp_cmp(", (_root_.List.cons(index, (_root_.List.cons(", count(", (_root_.List.cons(a, (_root_.List.cons(")) < 0) {", _root_.List.nil)))))))))))))))), state))
+  let state := _psc_step_10.snd
+  let _psc_step_11 <- (indent(true, state))
+  let state := _psc_step_11.snd
+  let _psc_step_12 <- (line((cat((_root_.List.cons(result, (_root_.List.cons("[gmp_intval(", (_root_.List.cons(index, (_root_.List.cons(")] = ", (_root_.List.cons(value, (_root_.List.cons(";", _root_.List.nil)))))))))))))), state))
+  let state := _psc_step_12.snd
+  let _psc_step_13 <- (indent(false, state))
+  let state := _psc_step_13.snd
+  let _psc_step_14 <- (line("} else {", state))
+  let state := _psc_step_14.snd
+  let _psc_step_15 <- (indent(true, state))
+  let state := _psc_step_15.snd
+  let _psc_step_16 <- (line("throw new \\OutOfBoundsException('PSC1_ARRAY_SET_BOUNDS');", state))
+  let state := _psc_step_16.snd
+  let _psc_step_17 <- (indent(false, state))
+  let state := _psc_step_17.snd
+  let _psc_step_18 <- (line("}", state))
+  let state := _psc_step_18.snd
+  (Except.ok((Prod.mk(result, state))))
+}), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | PsVerifiedIrIntrinsic.arraySetIfInBounds => psBackendSourceArgs3((fun (a : String) (index : String) (value : String) => fun (state : EmitState) => do {
+  let _psc_step_19 <- (bindValue(a, state))
+  let result := _psc_step_19.fst
+  let state := _psc_step_19.snd
+  let _psc_step_20 <- (line((cat((_root_.List.cons("if (gmp_cmp(", (_root_.List.cons(index, (_root_.List.cons(", 0) >= 0 && gmp_cmp(", (_root_.List.cons(index, (_root_.List.cons(", count(", (_root_.List.cons(a, (_root_.List.cons(")) < 0) {", _root_.List.nil)))))))))))))))), state))
+  let state := _psc_step_20.snd
+  let _psc_step_21 <- (indent(true, state))
+  let state := _psc_step_21.snd
+  let _psc_step_22 <- (line((cat((_root_.List.cons(result, (_root_.List.cons("[gmp_intval(", (_root_.List.cons(index, (_root_.List.cons(")] = ", (_root_.List.cons(value, (_root_.List.cons(";", _root_.List.nil)))))))))))))), state))
+  let state := _psc_step_22.snd
+  let _psc_step_23 <- (indent(false, state))
+  let state := _psc_step_23.snd
+  let _psc_step_24 <- (line("}", state))
+  let state := _psc_step_24.snd
+  (Except.ok((Prod.mk(result, state))))
+}), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | PsVerifiedIrIntrinsic.arrayMap => psBackendSourceArgs2((fun (fn : String) (array : String) => fun (state : EmitState) => do {
+  let _psc_step_25 <- (bindValue("[]", state))
+  let result := _psc_step_25.fst
+  let state := _psc_step_25.snd
+  let _psc_step_26 <- (fresh("item", state))
+  let item := _psc_step_26.fst
+  let state := _psc_step_26.snd
+  let _psc_step_27 <- (line((cat((_root_.List.cons("foreach (", (_root_.List.cons(array, (_root_.List.cons(" as ", (_root_.List.cons(item, (_root_.List.cons(") {", _root_.List.nil)))))))))))), state))
+  let state := _psc_step_27.snd
+  let _psc_step_28 <- (indent(true, state))
+  let state := _psc_step_28.snd
+  let _psc_step_29 <- (line((cat((_root_.List.cons(result, (_root_.List.cons("[] = ", (_root_.List.cons((invoke(context, fn, (_root_.List.cons(item, _root_.List.nil)))), (_root_.List.cons(";", _root_.List.nil)))))))))), state))
+  let state := _psc_step_29.snd
+  let _psc_step_30 <- (indent(false, state))
+  let state := _psc_step_30.snd
+  let _psc_step_31 <- (line("}", state))
+  let state := _psc_step_31.snd
+  (Except.ok((Prod.mk(result, state))))
+}), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | PsVerifiedIrIntrinsic.arrayFoldl => psBackendSourceArgs5((fun (fn : String) (initial : String) (array : String) (start : String) (stop : String) => fun (state : EmitState) => do {
+  let _psc_step_32 <- (bindValue(initial, state))
+  let result := _psc_step_32.fst
+  let state := _psc_step_32.snd
+  let _psc_step_33 <- (fresh("index", state))
+  let index := _psc_step_33.fst
+  let state := _psc_step_33.snd
+  let _psc_step_34 <- (bindValue((cat((_root_.List.cons("gmp_init(count(", (_root_.List.cons(array, (_root_.List.cons("))", _root_.List.nil)))))))), state))
+  let limit := _psc_step_34.fst
+  let state := _psc_step_34.snd
+  let _psc_step_35 <- (line((cat((_root_.List.cons("for (", (_root_.List.cons(index, (_root_.List.cons(" = ", (_root_.List.cons(start, (_root_.List.cons("; gmp_cmp(", (_root_.List.cons(index, (_root_.List.cons(", ", (_root_.List.cons(stop, (_root_.List.cons(") < 0 && gmp_cmp(", (_root_.List.cons(index, (_root_.List.cons(", ", (_root_.List.cons(limit, (_root_.List.cons(") < 0; ", (_root_.List.cons(index, (_root_.List.cons(" = gmp_add(", (_root_.List.cons(index, (_root_.List.cons(", 1)) {", _root_.List.nil)))))))))))))))))))))))))))))))))))), state))
+  let state := _psc_step_35.snd
+  let _psc_step_36 <- (indent(true, state))
+  let state := _psc_step_36.snd
+  let _psc_step_37 <- (line((cat((_root_.List.cons(result, (_root_.List.cons(" = ", (_root_.List.cons((invoke(context, fn, (_root_.List.cons(result, (_root_.List.cons((cat((_root_.List.cons(array, (_root_.List.cons("[gmp_intval(", (_root_.List.cons(index, (_root_.List.cons(")]", _root_.List.nil)))))))))), _root_.List.nil)))))), (_root_.List.cons(";", _root_.List.nil)))))))))), state))
+  let state := _psc_step_37.snd
+  let _psc_step_38 <- (indent(false, state))
+  let state := _psc_step_38.snd
+  let _psc_step_39 <- (line("}", state))
+  let state := _psc_step_39.snd
+  (Except.ok((Prod.mk(result, state))))
+}), (psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")), args)
+  | _ => psBackendStateThrow("PSC1_PHP_INTRINSIC_UNSUPPORTED_OR_ARITY")
+}
+end PsPhp
+
+namespace PsPhp
+structure ParameterInfo where {
+  sourceName : String
+  localName : String
+  printedType : String
+  irType : PsVerifiedIrType
+}
+end PsPhp
+
+namespace PsPhp
+def emitParameterFor(nodes : Bool, parameter : PsVerifiedIrParameter) : Emit(ParameterInfo) := psBackendStateBind((psBackendStateLift((typeTextWithCarrier(nodes, 4096, parameter.type)))), (fun (text : String) => psBackendStateBind((fresh(parameter.name)), (fun (name : String) => psBackendStatePure((ParameterInfo.mk(parameter.name, name, text, parameter.type)))))))
+end PsPhp
+
+namespace PsPhp
+-- Packed constructor positions come from the owner-qualified validated layout.
+-- Expression evaluation stays in source field order before values are reordered.
+def emitParameter(parameter : PsVerifiedIrParameter) : Emit(ParameterInfo) := emitParameterFor(false, parameter)
+end PsPhp
+
+namespace PsPhp
+def constructorFields(context : Context, owner : String, constructorName : String) : Except(String, (List(String))) := do {
+  let info <- (match (psBackendSourceFind((fun (info : PsVerifiedIrInductive) => psStringEq(info.name, owner)), context.inductives)) with {
+  | Option.none => Except.error("PSC1_PHP_INTERNAL_INDUCTIVE_LAYOUT")
+  | Option.some info => Except.ok(info)
+})
+  let layout <- (match (psBackendSourceFind((fun (layout : PsVerifiedIrConstructor) => psStringEq(layout.name, constructorName)), info.constructors)) with {
+  | Option.none => Except.error("PSC1_PHP_INTERNAL_CONSTRUCTOR_LAYOUT")
+  | Option.some layout => Except.ok(layout)
+})
+  (Except.ok((psListMap((fun (field : PsVerifiedIrConstructorField) => field.name), layout.fields))))
+}
+end PsPhp
+
+namespace PsPhp
+-- Canonical logical flat slots; the strict IR owner/constructor layout supplies the index.
+def flatFieldAccess(index : Nat) : String := if (Nat.beq(index, 0)) { "->tag" } else { if (Nat.beq(index, 1)) { "->first" } else { if (Nat.beq(index, 2)) { "->second" } else { cat((_root_.List.cons("->rest[", (_root_.List.cons((decimal((Nat.sub(index, 3)))), (_root_.List.cons("]", _root_.List.nil))))))) } } }
+end PsPhp
+
+namespace PsPhp
+def fieldIndex(field : String, fields : List(String), index : Nat) : Except(String, Nat) := match fields with {
+  | List.nil => Except.error("PSC1_PHP_INTERNAL_CONSTRUCTOR_FIELD")
+  | List.cons name rest => if (psStringEq(name, field)) { Except.ok(index) } else { fieldIndex(field, rest, (Nat.succ(index))) }
+}
+end PsPhp
+
+namespace PsPhp
+def emitBindings(context : Context, owner : String, constructorName : String, target : String, bindings : List(PsVerifiedIrMatchBinding), locals : List((Prod(String, String))), state : EmitState) : Except(String, (Prod((List((Prod(String, String)))), EmitState))) := match bindings with {
+  | List.nil => Except.ok((Prod.mk(locals, state)))
+  | List.cons binding rest => do {
+  let _ <- (typeText(4096, binding.type))
+  let _psc_step_40 <- (fresh(binding.name, state))
+  let name := _psc_step_40.fst
+  let state := _psc_step_40.snd
+  let access <- (if (context.flatConstructors) { do {
+  let fields <- (constructorFields(context, owner, constructorName))
+  let index <- (fieldIndex(binding.field, fields, 1))
+  if (context.directSlots) {
+  (Except.ok((flatFieldAccess(index))))
+} else {
+  (Except.ok((cat((_root_.List.cons("[", (_root_.List.cons((decimal(index)), (_root_.List.cons("]", _root_.List.nil))))))))))
+}
+} } else { Except.ok((cat((_root_.List.cons("[1][", (_root_.List.cons((quote(binding.field)), (_root_.List.cons("]", _root_.List.nil))))))))) })
+  let _psc_step_41 <- (line((cat((_root_.List.cons(name, (_root_.List.cons(" = ", (_root_.List.cons(target, (_root_.List.cons(access, (_root_.List.cons(";", _root_.List.nil)))))))))))), state))
+  let state := _psc_step_41.snd
+  (emitBindings(context, owner, constructorName, target, rest, (List.cons((Prod.mk(binding.name, name)), locals)), state))
+}
+}
+end PsPhp
+
+namespace PsPhp
+def emitAlternatives(body : (_ : Context) -> (_ : PsVerifiedIrExpr) -> Emit(Unit), context : Context, owner : String, target : String, alternatives : List((Prod(String, (Prod((List(PsVerifiedIrMatchBinding)), PsVerifiedIrExpr))))), first : Bool, state : EmitState) : Except(String, (Prod(Unit, EmitState))) := match alternatives with {
+  | List.nil => if (first) { line("throw new \\UnexpectedValueException('PSC1_PHP_EMPTY_MATCH');", state) } else { do {
+  let _psc_step_42 <- (line("} else {", state))
+  let state := _psc_step_42.snd
+  let _psc_step_43 <- (indent(true, state))
+  let state := _psc_step_43.snd
+  let _psc_step_44 <- (line("throw new \\UnexpectedValueException('PSC1_PHP_CONSTRUCTOR_TAG');", state))
+  let state := _psc_step_44.snd
+  let _psc_step_45 <- (indent(false, state))
+  let state := _psc_step_45.snd
+  (line("}", state))
+} }
+  | List.cons alternative rest => do {
+  let _psc_step_46 <- (line((cat((_root_.List.cons((if (first) { "if (" } else { "} elseif (" }), (_root_.List.cons(target, (_root_.List.cons((if ((context.flatConstructors && context.directSlots)) { "->tag" } else { "[0]" }), (_root_.List.cons(" === ", (_root_.List.cons((quote(alternative.fst)), (_root_.List.cons(") {", _root_.List.nil)))))))))))))), state))
+  let state := _psc_step_46.snd
+  let _psc_step_47 <- (indent(true, state))
+  let state := _psc_step_47.snd
+  let _psc_step_48 <- (emitBindings(context, owner, alternative.fst, target, alternative.snd.fst, context.locals, state))
+  let locals := _psc_step_48.fst
+  let state := _psc_step_48.snd
+  let _psc_step_49 <- (body((withLocals(context, locals)), alternative.snd.snd, state))
+  let state := _psc_step_49.snd
+  let _psc_step_50 <- (indent(false, state))
+  let state := _psc_step_50.snd
+  (emitAlternatives(body, context, owner, target, rest, false, state))
+}
+}
+end PsPhp
+
+namespace PsPhp
+def emitField(emit : (_ : PsVerifiedIrExpr) -> Emit(String), field : Prod(String, PsVerifiedIrExpr)) : Emit(String) := psBackendStateBind((emit(field.snd)), (fun (value : String) => psBackendStatePure((cat((_root_.List.cons((quote(field.fst)), (_root_.List.cons(" => ", (_root_.List.cons(value, _root_.List.nil)))))))))))
+end PsPhp
+
+namespace PsPhp
+-- Strict IR requires canonical constructor field order. Map expressions
+-- once in that same order; never reorder potentially effectful calls.
+def emitConstructor(emit : (_ : PsVerifiedIrExpr) -> Emit(String), context : Context, _owner : String, constructorName : String, fields : List((Prod(String, PsVerifiedIrExpr)))) : Emit(String) := fun (state : EmitState) => if ((!context.flatConstructors)) { do {
+  let pair <- (psBackendSourceMapState((emitField(emit)), fields, state))
+  (bindValue((cat((_root_.List.cons("[", (_root_.List.cons((quote(constructorName)), (_root_.List.cons(", [", (_root_.List.cons((psTextJoin(", ", pair.fst)), (_root_.List.cons("]]", _root_.List.nil)))))))))))), pair.snd))
+} } else { do {
+  let pair <- (psBackendSourceMapState((fun (field : Prod(String, PsVerifiedIrExpr)) => emit(field.snd)), fields, state))
+  (bindValue((cat((_root_.List.cons("$__ps_nodes(", (_root_.List.cons((psTextJoin(", ", (List.cons((quote(constructorName)), pair.fst)))), (_root_.List.cons(")", _root_.List.nil)))))))), pair.snd))
+} }
+end PsPhp
+
+namespace PsPhp
+def regularIntrinsic(emit : (_ : PsVerifiedIrExpr) -> Emit(String), context : Context, operation : PsVerifiedIrIntrinsic, arguments : List(PsVerifiedIrExpr)) : Emit(String) := fun (state : EmitState) => do {
+  let pair <- (psBackendSourceMapState(emit, arguments, state))
+  (intrinsic(context, operation, pair.fst, pair.snd))
+}
+end PsPhp
+
+namespace PsPhp
+def expression(fuel : Nat) : (_ : Context) -> (_ : PsVerifiedIrExpr) -> Emit(String) := match fuel with {
+  | Nat.zero => fun (_context : Context) (_expr : PsVerifiedIrExpr) => psBackendStateThrow("PSC1_PHP_LOWERING_BUDGET")
+  | Nat.succ remaining => fun (context : Context) (expr : PsVerifiedIrExpr) (state : EmitState) => let smaller : (_ : Context) -> (_ : PsVerifiedIrExpr) -> Emit(String) := (expression(remaining))
+let emit : (_ : PsVerifiedIrExpr) -> Emit(String) := (smaller(context))
+match expr with {
+  | PsVerifiedIrExpr.literal value => match value with {
+  | PsVerifiedIrLiteral.natural number => bindValue((cat((_root_.List.cons("gmp_init(", (_root_.List.cons((quote((decimal(number)))), (_root_.List.cons(", 10)", _root_.List.nil)))))))), state)
+  | PsVerifiedIrLiteral.integer number => bindValue((cat((_root_.List.cons("gmp_init(", (_root_.List.cons((quote((Int.repr(number)))), (_root_.List.cons(", 10)", _root_.List.nil)))))))), state)
+  | PsVerifiedIrLiteral.bool flag => Except.ok((Prod.mk((if (flag) { "true" } else { "false" }), state)))
+  | PsVerifiedIrLiteral.string text => Except.ok((Prod.mk((quote(text)), state)))
+  | PsVerifiedIrLiteral.unit => Except.ok((Prod.mk("null", state)))
+  | PsVerifiedIrLiteral.machineInteger _ _ => Except.error("PSC1_PHP_MACHINE_SCALAR_UNSUPPORTED")
+}
+  | PsVerifiedIrExpr.var name => match (psBackendSourceFind((fun (entry : Prod(String, String)) => psStringEq(entry.fst, name)), context.locals)) with {
+  | Option.some entry => Except.ok((Prod.mk(entry.snd, state)))
+  | Option.none => match (psBackendSourceFind((fun (entry : Prod(String, String)) => psStringEq(entry.fst, name)), context.globals)) with {
+  | Option.none => Except.error((cat((_root_.List.cons("PSC1_PHP_UNKNOWN_SYMBOL: ", (_root_.List.cons(name, _root_.List.nil)))))))
+  | Option.some entry => if (psBackendNameSeen(name, context.valueNames)) { bindValue((invoke(context, entry.snd, List.nil)), state) } else { Except.ok((Prod.mk(entry.snd, state))) }
+}
+}
+  | PsVerifiedIrExpr.intrinsic operation _ arguments => let fallback : Emit(String) := (regularIntrinsic(emit, context, operation, arguments))
+let action : Emit(String) := (match operation with {
+  | PsVerifiedIrIntrinsic.boolAnd => psBackendSourceArgs2((fun (left : PsVerifiedIrExpr) (right : PsVerifiedIrExpr) => smaller(context, (PsVerifiedIrExpr.ifE(left, right, (PsVerifiedIrExpr.literal((PsVerifiedIrLiteral.bool(false)))))))), fallback, arguments)
+  | PsVerifiedIrIntrinsic.boolOr => psBackendSourceArgs2((fun (left : PsVerifiedIrExpr) (right : PsVerifiedIrExpr) => smaller(context, (PsVerifiedIrExpr.ifE(left, (PsVerifiedIrExpr.literal((PsVerifiedIrLiteral.bool(true)))), right)))), fallback, arguments)
+  | _ => fallback
+})
+action(state)
+  | PsVerifiedIrExpr.call fn _ arguments => do {
+  let _psc_step_52 <- (emit(fn, state))
+  let value := _psc_step_52.fst
+  let state := _psc_step_52.snd
+  let _psc_step_53 <- (bindValue(value, state))
+  let target := _psc_step_53.fst
+  let state := _psc_step_53.snd
+  let _psc_step_54 <- (psBackendSourceMapState(emit, arguments, state))
+  let printed := _psc_step_54.fst
+  let state := _psc_step_54.snd
+  let callContext : Context := (if (psBackendDirectGlobalCall(context.directNames, (psListMap((fun (entry : Prod(String, String)) => entry.fst), context.locals)), fn)) { withScheduling(context, false) } else { context })
+  (bindValue((invoke(callContext, target, printed)), state))
+}
+  | PsVerifiedIrExpr.letE name type value body => do {
+  let _ <- (typeText(4096, type))
+  let _psc_step_55 <- (emit(value, state))
+  let printed := _psc_step_55.fst
+  let state := _psc_step_55.snd
+  let _psc_step_56 <- (fresh(name, state))
+  let localName := _psc_step_56.fst
+  let state := _psc_step_56.snd
+  let _psc_step_57 <- (line((cat((_root_.List.cons(localName, (_root_.List.cons(" = ", (_root_.List.cons(printed, (_root_.List.cons(";", _root_.List.nil)))))))))), state))
+  let state := _psc_step_57.snd
+  (smaller((withLocals(context, (List.cons((Prod.mk(name, localName)), context.locals)))), body, state))
+}
+  | PsVerifiedIrExpr.ifE condition yes no => do {
+  let _psc_step_58 <- (emit(condition, state))
+  let printedCondition := _psc_step_58.fst
+  let state := _psc_step_58.snd
+  let _psc_step_59 <- (fresh("branch", state))
+  let result := _psc_step_59.fst
+  let state := _psc_step_59.snd
+  let _psc_step_60 <- (line((cat((_root_.List.cons("if (", (_root_.List.cons(printedCondition, (_root_.List.cons(" === true) {", _root_.List.nil)))))))), state))
+  let state := _psc_step_60.snd
+  let _psc_step_61 <- (indent(true, state))
+  let state := _psc_step_61.snd
+  let _psc_step_62 <- (emit(yes, state))
+  let printedYes := _psc_step_62.fst
+  let state := _psc_step_62.snd
+  let _psc_step_63 <- (line((cat((_root_.List.cons(result, (_root_.List.cons(" = ", (_root_.List.cons(printedYes, (_root_.List.cons(";", _root_.List.nil)))))))))), state))
+  let state := _psc_step_63.snd
+  let _psc_step_64 <- (indent(false, state))
+  let state := _psc_step_64.snd
+  let _psc_step_65 <- (line("} else {", state))
+  let state := _psc_step_65.snd
+  let _psc_step_66 <- (indent(true, state))
+  let state := _psc_step_66.snd
+  let _psc_step_67 <- (emit(no, state))
+  let printedNo := _psc_step_67.fst
+  let state := _psc_step_67.snd
+  let _psc_step_68 <- (line((cat((_root_.List.cons(result, (_root_.List.cons(" = ", (_root_.List.cons(printedNo, (_root_.List.cons(";", _root_.List.nil)))))))))), state))
+  let state := _psc_step_68.snd
+  let _psc_step_69 <- (indent(false, state))
+  let state := _psc_step_69.snd
+  let _psc_step_70 <- (line("}", state))
+  let state := _psc_step_70.snd
+  (Except.ok((Prod.mk(result, state))))
+}
+  | PsVerifiedIrExpr.lambda parameters result body => do {
+  let _psc_step_71 <- (fresh("closure", state))
+  let target := _psc_step_71.fst
+  let state := _psc_step_71.snd
+  let _psc_step_72 <- (psBackendSourceMapState((emitParameterFor(context.flatConstructors)), parameters, state))
+  let printedParameters := _psc_step_72.fst
+  let state := _psc_step_72.snd
+  let resultType <- (typeTextWithCarrier(context.flatConstructors, 4096, result))
+  let printed : List(String) := (psListMap((fun (parameter : ParameterInfo) => cat((_root_.List.cons("mixed ", (_root_.List.cons(parameter.localName, _root_.List.nil)))))), printedParameters))
+  let _psc_step_73 <- (line((cat((_root_.List.cons(target, (_root_.List.cons(" = ", (_root_.List.cons((if (context.scheduled) { "$__ps_wrap(" } else { "" }), (_root_.List.cons("static function (", (_root_.List.cons((psTextJoin(", ", printed)), (_root_.List.cons(")", (_root_.List.cons((captureFor(context, parameters, body)), (_root_.List.cons(": ", (_root_.List.cons((if (context.scheduled) { "\\Generator" } else { resultType }), (_root_.List.cons(" {", _root_.List.nil)))))))))))))))))))))), state))
+  let state := _psc_step_73.snd
+  let _psc_step_74 <- (indent(true, state))
+  let state := _psc_step_74.snd
+  let _psc_step_75 <- (line((cat((_root_.List.cons("if (func_num_args() !== ", (_root_.List.cons((decimal((psListLength(parameters)))), (_root_.List.cons(") { throw new \\ArgumentCountError('PSC1_PHP_ARITY'); }", _root_.List.nil)))))))), state))
+  let state := _psc_step_75.snd
+  let action : Emit(Unit) := (if (psBackendNameSeen("$__ps_wrap", context.helpers)) { line((if (context.scheduled) { "if (false) { yield; }" } else { "// Bounded direct leaf: ordinary native return." })) } else { psBackendStatePure(Unit.unit) })
+  let _psc_step_76 <- (action(state))
+  let state := _psc_step_76.snd
+  let _psc_step_77 <- (psBackendSourceForState((fun (parameter : ParameterInfo) => guard(context, parameter.localName, parameter.irType)), printedParameters, state))
+  let state := _psc_step_77.snd
+  let locals : List((Prod(String, String))) := (psListMap((fun (parameter : ParameterInfo) => Prod.mk(parameter.sourceName, parameter.localName)), printedParameters))
+  let _psc_step_78 <- (smaller((withLocals(context, (psListAppend(locals, context.locals)))), body, state))
+  let value := _psc_step_78.fst
+  let state := _psc_step_78.snd
+  let _psc_step_79 <- (line((cat((_root_.List.cons("return ", (_root_.List.cons(value, (_root_.List.cons(";", _root_.List.nil)))))))), state))
+  let state := _psc_step_79.snd
+  let _psc_step_80 <- (indent(false, state))
+  let state := _psc_step_80.snd
+  let _psc_step_81 <- (line((if (context.scheduled) { "});" } else { "};" }), state))
+  let state := _psc_step_81.snd
+  (Except.ok((Prod.mk(target, state))))
+}
+  | PsVerifiedIrExpr.record _ _ fields => do {
+  let _psc_step_82 <- (psBackendSourceMapState((emitField(emit)), fields, state))
+  let values := _psc_step_82.fst
+  let state := _psc_step_82.snd
+  (bindValue((cat((_root_.List.cons("[", (_root_.List.cons((psTextJoin(", ", values)), (_root_.List.cons("]", _root_.List.nil)))))))), state))
+}
+  | PsVerifiedIrExpr.projection _ _ target field => do {
+  let _psc_step_83 <- (emit(target, state))
+  let value := _psc_step_83.fst
+  let state := _psc_step_83.snd
+  (bindValue((cat((_root_.List.cons(value, (_root_.List.cons("[", (_root_.List.cons((quote(field)), (_root_.List.cons("]", _root_.List.nil)))))))))), state))
+}
+  | PsVerifiedIrExpr.constructor owner constructorName _ fields => emitConstructor(emit, context, owner, constructorName, fields, state)
+  | PsVerifiedIrExpr.matchE owner _ scrutinee alternatives => do {
+  let _psc_step_85 <- (emit(scrutinee, state))
+  let target := _psc_step_85.fst
+  let state := _psc_step_85.snd
+  let _psc_step_86 <- (fresh("match", state))
+  let result := _psc_step_86.fst
+  let state := _psc_step_86.snd
+  let body : (_ : Context) -> (_ : PsVerifiedIrExpr) -> Emit(Unit) := (fun (inner : Context) (branch : PsVerifiedIrExpr) => psBackendStateBind((smaller(inner, branch)), (fun (value : String) => line((cat((_root_.List.cons(result, (_root_.List.cons(" = ", (_root_.List.cons(value, (_root_.List.cons(";", _root_.List.nil))))))))))))))
+  let _psc_step_87 <- (emitAlternatives(body, context, owner, target, alternatives, true, state))
+  let state := _psc_step_87.snd
+  (Except.ok((Prod.mk(result, state))))
+}
+}
+}
+end PsPhp
+
+namespace PsPhp
+def directSelfCall(declaration : PsVerifiedIrDeclaration, bound : List(String), expr : PsVerifiedIrExpr) : Option((List(PsVerifiedIrExpr))) := match expr with {
+  | PsVerifiedIrExpr.call fn _ arguments => match fn with {
+  | PsVerifiedIrExpr.var name => if (((((!psListIsEmpty(declaration.parameters)) && psStringEq(name, declaration.name)) && (!psBackendNameSeen(name, bound))) && Nat.beq((psListLength(arguments)), (psListLength(declaration.parameters))))) { Option.some(arguments) } else { Option.none }
+  | _ => Option.none
+}
+  | _ => Option.none
+}
+end PsPhp
+
+namespace PsPhp
+def hasDirectSelfTail(declaration : PsVerifiedIrDeclaration, fuel : Nat) : (_ : List(String)) -> (_ : PsVerifiedIrExpr) -> Bool := match fuel with {
+  | Nat.zero => fun (_bound : List(String)) (_expr : PsVerifiedIrExpr) => false
+  | Nat.succ remaining => fun (bound : List(String)) (expr : PsVerifiedIrExpr) => let smaller : (_ : List(String)) -> (_ : PsVerifiedIrExpr) -> Bool := (hasDirectSelfTail(declaration, remaining))
+match (directSelfCall(declaration, bound, expr)) with {
+  | Option.some _ => true
+  | Option.none => match expr with {
+  | PsVerifiedIrExpr.letE name _ _ body => smaller((List.cons(name, bound)), body)
+  | PsVerifiedIrExpr.ifE _ yes no => (smaller(bound, yes) || smaller(bound, no))
+  | PsVerifiedIrExpr.matchE _ _ _ alternatives => psListAny((fun (alternative : Prod(String, (Prod((List(PsVerifiedIrMatchBinding)), PsVerifiedIrExpr)))) => smaller((psListAppend((psListMap((fun (binding : PsVerifiedIrMatchBinding) => binding.name), alternative.snd.fst)), bound)), alternative.snd.snd)), alternatives)
+  | _ => false
+}
+}
+}
+end PsPhp
+
+namespace PsPhp
+def assignParameter(pair : Prod(String, String)) : Emit(Unit) := line((cat((_root_.List.cons(pair.fst, (_root_.List.cons(" = ", (_root_.List.cons(pair.snd, (_root_.List.cons(";", _root_.List.nil)))))))))))
+end PsPhp
+
+namespace PsPhp
+def directSelfTail(declaration : PsVerifiedIrDeclaration, parameters : List(String), fuel : Nat) : (_ : Context) -> (_ : PsVerifiedIrExpr) -> Emit(Unit) := match fuel with {
+  | Nat.zero => fun (_context : Context) (_expr : PsVerifiedIrExpr) => psBackendStateThrow("PSC1_PHP_LOWERING_BUDGET")
+  | Nat.succ remaining => fun (context : Context) (expr : PsVerifiedIrExpr) (state : EmitState) => let smaller : (_ : Context) -> (_ : PsVerifiedIrExpr) -> Emit(Unit) := (directSelfTail(declaration, parameters, remaining))
+let emit : (_ : PsVerifiedIrExpr) -> Emit(String) := (expression(remaining, context))
+match (directSelfCall(declaration, (psListMap((fun (entry : Prod(String, String)) => entry.fst), context.locals)), expr)) with {
+  | Option.some arguments => do {
+  let _psc_step_88 <- (psBackendSourceMapState((fun (argument : PsVerifiedIrExpr) => psBackendStateBind((emit(argument)), (fun (value : String) => bindValue(value)))), arguments, state))
+  let values := _psc_step_88.fst
+  let state := _psc_step_88.snd
+  let _psc_step_89 <- (psBackendSourceForState(assignParameter, (psListZip(parameters, values)), state))
+  let state := _psc_step_89.snd
+  (line("continue;", state))
+}
+  | Option.none => match expr with {
+  | PsVerifiedIrExpr.letE name type value body => do {
+  let _ <- (typeText(4096, type))
+  let _psc_step_90 <- (emit(value, state))
+  let printed := _psc_step_90.fst
+  let state := _psc_step_90.snd
+  let _psc_step_91 <- (fresh(name, state))
+  let localName := _psc_step_91.fst
+  let state := _psc_step_91.snd
+  let _psc_step_92 <- (line((cat((_root_.List.cons(localName, (_root_.List.cons(" = ", (_root_.List.cons(printed, (_root_.List.cons(";", _root_.List.nil)))))))))), state))
+  let state := _psc_step_92.snd
+  (smaller((withLocals(context, (List.cons((Prod.mk(name, localName)), context.locals)))), body, state))
+}
+  | PsVerifiedIrExpr.ifE condition yes no => do {
+  let _psc_step_93 <- (emit(condition, state))
+  let printedCondition := _psc_step_93.fst
+  let state := _psc_step_93.snd
+  let _psc_step_94 <- (line((cat((_root_.List.cons("if (", (_root_.List.cons(printedCondition, (_root_.List.cons(" === true) {", _root_.List.nil)))))))), state))
+  let state := _psc_step_94.snd
+  let _psc_step_95 <- (indent(true, state))
+  let state := _psc_step_95.snd
+  let _psc_step_96 <- (smaller(context, yes, state))
+  let state := _psc_step_96.snd
+  let _psc_step_97 <- (indent(false, state))
+  let state := _psc_step_97.snd
+  let _psc_step_98 <- (line("} else {", state))
+  let state := _psc_step_98.snd
+  let _psc_step_99 <- (indent(true, state))
+  let state := _psc_step_99.snd
+  let _psc_step_100 <- (smaller(context, no, state))
+  let state := _psc_step_100.snd
+  let _psc_step_101 <- (indent(false, state))
+  let state := _psc_step_101.snd
+  (line("}", state))
+}
+  | PsVerifiedIrExpr.matchE owner _ scrutinee alternatives => do {
+  let _psc_step_102 <- (emit(scrutinee, state))
+  let target := _psc_step_102.fst
+  let state := _psc_step_102.snd
+  (emitAlternatives(smaller, context, owner, target, alternatives, true, state))
+}
+  | _ => do {
+  let _psc_step_103 <- (emit(expr, state))
+  let value := _psc_step_103.fst
+  let state := _psc_step_103.snd
+  (line((cat((_root_.List.cons("return ", (_root_.List.cons(value, (_root_.List.cons(";", _root_.List.nil)))))))), state))
+}
+}
+}
+}
+end PsPhp
+
+namespace PsPhp
+def parameterLocal(parameter : ParameterInfo) : Prod(String, String) := Prod.mk(parameter.sourceName, parameter.localName)
+end PsPhp
+
+namespace PsPhp
+def emitDeclaration(moduleContext : Context, declaration : PsVerifiedIrDeclaration) : Emit(Nat) := fun (state : EmitState) => do {
+  let context : Context := (if ((moduleContext.flatConstructors && psStringSetContains(moduleContext.directNames, declaration.name))) { withScheduling(moduleContext, false) } else { moduleContext })
+  let symbol <- (match (psBackendSourceFind((fun (entry : Prod(String, String)) => psStringEq(entry.fst, declaration.name)), context.globals)) with {
+  | Option.some entry => Except.ok(entry.snd)
+  | Option.none => Except.error("PSC1_PHP_INTERNAL_SYMBOL")
+})
+  let _psc_step_104 <- (psBackendSourceMapState((emitParameterFor(context.flatConstructors)), declaration.parameters, state))
+  let parameters := _psc_step_104.fst
+  let state := _psc_step_104.snd
+  let resultType <- (typeTextWithCarrier(context.flatConstructors, 4096, declaration.resultType))
+  let _psc_step_105 <- (line((cat((_root_.List.cons("// declaration ", (_root_.List.cons((quote(declaration.name)), _root_.List.nil)))))), state))
+  let state := _psc_step_105.snd
+  let _psc_step_106 <- (psBackendSourceForState((fun (parameter : ParameterInfo) => line((cat((_root_.List.cons("/** @param ", (_root_.List.cons(parameter.printedType, (_root_.List.cons(" ", (_root_.List.cons(parameter.localName, (_root_.List.cons(" */", _root_.List.nil)))))))))))))), parameters, state))
+  let state := _psc_step_106.snd
+  let _psc_step_107 <- (line((cat((_root_.List.cons("/** @return ", (_root_.List.cons((if (context.scheduled) { cat((_root_.List.cons("\\Generator<mixed, mixed, mixed, ", (_root_.List.cons(resultType, (_root_.List.cons(">", _root_.List.nil))))))) } else { resultType }), (_root_.List.cons(" */", _root_.List.nil)))))))), state))
+  let state := _psc_step_107.snd
+  let declarationLine : Nat := (Nat.succ(state.lineCount))
+  let _psc_step_108 <- (line((cat((_root_.List.cons(symbol, (_root_.List.cons(" = ", (_root_.List.cons((if (context.scheduled) { "$__ps_wrap(" } else { "" }), (_root_.List.cons("static function (", (_root_.List.cons((psTextJoin(", ", (psListMap((fun (parameter : ParameterInfo) => cat((_root_.List.cons("mixed ", (_root_.List.cons(parameter.localName, _root_.List.nil)))))), parameters)))), (_root_.List.cons(")", (_root_.List.cons((captureFor(context, declaration.parameters, declaration.body)), (_root_.List.cons(": ", (_root_.List.cons((if (context.scheduled) { "\\Generator" } else { resultType }), (_root_.List.cons(" {", _root_.List.nil)))))))))))))))))))))), state))
+  let state := _psc_step_108.snd
+  let _psc_step_109 <- (indent(true, state))
+  let state := _psc_step_109.snd
+  let _psc_step_110 <- (line((cat((_root_.List.cons("if (func_num_args() !== ", (_root_.List.cons((decimal((psListLength(parameters)))), (_root_.List.cons(") { throw new \\ArgumentCountError('PSC1_PHP_ARITY'); }", _root_.List.nil)))))))), state))
+  let state := _psc_step_110.snd
+  let generatorAction : Emit(Unit) := (if (psBackendNameSeen("$__ps_wrap", context.helpers)) { line((if (context.scheduled) { "if (false) { yield; }" } else { "// Bounded direct leaf: ordinary native return." })) } else { psBackendStatePure(Unit.unit) })
+  let _psc_step_111 <- (generatorAction(state))
+  let state := _psc_step_111.snd
+  let locals : List((Prod(String, String))) := (psListMap(parameterLocal, parameters))
+  let hasTail : Bool := (hasDirectSelfTail(declaration, 4096, (psListMap((fun (parameter : PsVerifiedIrParameter) => parameter.name), declaration.parameters)), declaration.body))
+  let loopStart : Emit(Unit) := (if (hasTail) { psBackendStateBind((line("while (true) {")), (fun (_unit : Unit) => indent(true))) } else { psBackendStatePure(Unit.unit) })
+  let _psc_step_112 <- (loopStart(state))
+  let state := _psc_step_112.snd
+  let _psc_step_113 <- (psBackendSourceForState((fun (parameter : ParameterInfo) => guard(context, parameter.localName, parameter.irType)), parameters, state))
+  let state := _psc_step_113.snd
+  let body : Emit(Unit) := (if (hasTail) { directSelfTail(declaration, (psListMap((fun (parameter : ParameterInfo) => parameter.localName), parameters)), 4096, (withLocals(context, locals)), declaration.body) } else { psBackendStateBind((expression(4096, (withLocals(context, locals)), declaration.body)), (fun (value : String) => line((cat((_root_.List.cons("return ", (_root_.List.cons(value, (_root_.List.cons(";", _root_.List.nil))))))))))) })
+  let _psc_step_114 <- (body(state))
+  let state := _psc_step_114.snd
+  let loopEnd : Emit(Unit) := (if (hasTail) { psBackendStateBind((indent(false)), (fun (_unit : Unit) => line("}"))) } else { psBackendStatePure(Unit.unit) })
+  let _psc_step_115 <- (loopEnd(state))
+  let state := _psc_step_115.snd
+  let _psc_step_116 <- (indent(false, state))
+  let state := _psc_step_116.snd
+  let _psc_step_117 <- (line((if (context.scheduled) { "});" } else { "};" }), state))
+  let state := _psc_step_117.snd
+  let _psc_step_118 <- (line("", state))
+  let state := _psc_step_118.snd
+  (Except.ok((Prod.mk(declarationLine, state))))
+}
+end PsPhp
+
+namespace PsPhp
+def publicScalar(type : PsVerifiedIrType) : Bool := match type with {
+  | PsVerifiedIrType.primitive scalar => psBackendActivePrimitive(scalar)
+  | _ => false
+}
+end PsPhp
+
+namespace PsPhp
+def checkType(type : PsVerifiedIrType) : Except(String, Unit) := match (typeText(4096, type)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok _ => Except.ok(Unit.unit)
+}
+end PsPhp
+
+namespace PsPhp
+def checkDeclaration(declaration : PsVerifiedIrDeclaration) : Except(String, Unit) := do {
+  if ((!psListIsEmpty(declaration.typeParameters))) {
+  (Except.error("PSC1_PHP_SPECIALIZATION_REQUIRED"))
+}
+  (checkType(declaration.resultType))
+  (psBackendSourceForExcept((fun (parameter : PsVerifiedIrParameter) => checkType(parameter.type)), declaration.parameters))
+}
+end PsPhp
+
+namespace PsPhp
+def checkStructure(info : PsVerifiedIrStructure) : Except(String, Unit) := do {
+  if ((!psListIsEmpty(info.typeParameters))) {
+  (Except.error("PSC1_PHP_SPECIALIZATION_REQUIRED"))
+}
+  (psBackendSourceForExcept((fun (field : PsVerifiedIrStructureField) => checkType(field.type)), info.fields))
+}
+end PsPhp
+
+namespace PsPhp
+def checkInductive(info : PsVerifiedIrInductive) : Except(String, Unit) := do {
+  if ((!psListIsEmpty(info.typeParameters))) {
+  (Except.error("PSC1_PHP_SPECIALIZATION_REQUIRED"))
+}
+  (psBackendSourceForExcept((fun (constructor : PsVerifiedIrConstructor) => psBackendSourceForExcept((fun (field : PsVerifiedIrConstructorField) => checkType(field.type)), constructor.fields)), info.constructors))
+}
+end PsPhp
+
+namespace PsPhp
+def checkPublics(module : PsVerifiedIrModule, ioAbi : Bool, names : List(String), seen : List(String)) : Except(String, Unit) := match names with {
+  | List.nil => Except.ok(Unit.unit)
+  | List.cons name rest => do {
+  if (psBackendNameSeen(name, seen)) {
+  (Except.error((cat((_root_.List.cons("PSC1_PHP_DUPLICATE_PUBLIC_DECLARATION: ", (_root_.List.cons(name, _root_.List.nil))))))))
+}
+  let declaration <- (match (psBackendSourceFind((fun (value : PsVerifiedIrDeclaration) => psStringEq(value.name, name)), module.declarations)) with {
+  | Option.none => Except.error((cat((_root_.List.cons("PSC1_PHP_UNKNOWN_PUBLIC_DECLARATION: ", (_root_.List.cons(name, _root_.List.nil)))))))
+  | Option.some value => Except.ok(value)
+})
+  if (((!publicScalar(declaration.resultType)) || (!psBackendSourceAll((fun (parameter : PsVerifiedIrParameter) => (publicScalar(parameter.type) || (ioAbi && psBackendIoDispatcherType(parameter.type)))), declaration.parameters)))) {
+  (Except.error((cat((_root_.List.cons("PSC1_PHP_PUBLIC_ABI_UNSUPPORTED: ", (_root_.List.cons(name, _root_.List.nil))))))))
+}
+  (checkPublics(module, ioAbi, rest, (List.cons(name, seen))))
+}
+}
+end PsPhp
+
+namespace PsPhp
+def globalEntry(entry : Prod(PsVerifiedIrDeclaration, Nat)) : Prod(String, String) := Prod.mk(entry.fst.name, (cat((_root_.List.cons("$g", (_root_.List.cons((decimal(entry.snd)), (_root_.List.cons("_", (_root_.List.cons((stem(entry.fst.name)), _root_.List.nil)))))))))))
+end PsPhp
+
+namespace PsPhp
+def valueNamesAcc(declarations : List(PsVerifiedIrDeclaration), reversed : List(String)) : List(String) := match declarations with {
+  | List.nil => psListReverse(reversed)
+  | List.cons declaration rest => valueNamesAcc(rest, (if (psListIsEmpty(declaration.parameters)) { List.cons(declaration.name, reversed) } else { reversed }))
+}
+end PsPhp
+
+namespace PsPhp
+def countNewlines(chars : List(Char), count : Nat) : Nat := match chars with {
+  | List.nil => count
+  | List.cons char rest => countNewlines(rest, (if (Nat.beq((Char.toNat(char)), 10)) { Nat.succ(count) } else { count }))
+}
+end PsPhp
+
+namespace PsPhp
+def emitGlobal(entry : Prod(String, String)) : Emit(Unit) := line((cat((_root_.List.cons(entry.snd, (_root_.List.cons(" = null;", _root_.List.nil)))))))
+end PsPhp
+
+namespace PsPhp
+def emitPublic(context : Context, name : String) : Emit(Unit) := fun (state : EmitState) => do {
+  let symbol <- (match (psBackendSourceFind((fun (entry : Prod(String, String)) => psStringEq(entry.fst, name)), context.globals)) with {
+  | Option.some entry => Except.ok(entry.snd)
+  | Option.none => Except.error("PSC1_PHP_INTERNAL_PUBLIC_SYMBOL")
+})
+  (line((cat((_root_.List.cons((quote(name)), (_root_.List.cons(" => ", (_root_.List.cons(symbol, (_root_.List.cons((if (psBackendNameSeen(name, context.valueNames)) { "()" } else { "" }), (_root_.List.cons(",", _root_.List.nil)))))))))))), state))
+}
+end PsPhp
+
+namespace PsPhp
+def emitModule(module : PsVerifiedIrModule, context : Context, publicNames : List(String)) : Emit((List((Prod(String, Nat))))) := fun (state : EmitState) => do {
+  let _psc_step_119 <- (psBackendSourceForState(emitGlobal, context.globals, state))
+  let state := _psc_step_119.snd
+  let blank : Emit(Unit) := (if (psListIsEmpty(context.globals)) { psBackendStatePure(Unit.unit) } else { line("") })
+  let _psc_step_120 <- (blank(state))
+  let state := _psc_step_120.snd
+  let _psc_step_121 <- (psBackendSourceMapState((fun (declaration : PsVerifiedIrDeclaration) => psBackendStateBind((emitDeclaration(context, declaration)), (fun (position : Nat) => psBackendStatePure((Prod.mk(declaration.name, position)))))), module.declarations, state))
+  let positions := _psc_step_121.fst
+  let state := _psc_step_121.snd
+  let _psc_step_122 <- (line("return [", state))
+  let state := _psc_step_122.snd
+  let _psc_step_123 <- (indent(true, state))
+  let state := _psc_step_123.snd
+  let _psc_step_124 <- (psBackendSourceForState((emitPublic(context)), publicNames, state))
+  let state := _psc_step_124.snd
+  let _psc_step_125 <- (indent(false, state))
+  let state := _psc_step_125.snd
+  let _psc_step_126 <- (line("];", state))
+  let state := _psc_step_126.snd
+  let _psc_step_127 <- (indent(false, state))
+  let state := _psc_step_127.snd
+  let _psc_step_128 <- (line("})();", state))
+  let state := _psc_step_128.snd
+  (Except.ok((Prod.mk(positions, state))))
+}
+end PsPhp
+
+namespace PsPhp
+def withoutNodeRequirements(requirements : List(String)) : List(String) := match requirements with {
+  | List.nil => List.nil
+  | List.cons helper rest => if (psStringEq(helper, "nodes")) { withoutNodeRequirements(rest) } else { List.cons(helper, (withoutNodeRequirements(rest))) }
+}
+end PsPhp
+
+def psPhpEmitModuleWithIoAndOptimizations(validated : PsValidatedIrModule, publicNames : List(String), ioAbi : Bool, preciseCaptures : Bool, flatConstructors : Bool, directCalls : Bool, directSlots : Bool) : Except(String, PsPhpPortableModule) := do {
+  (match (psStrictValidateModule(validated.raw)) with {
+  | Except.error _ => Except.error("PSC1_PHP_IR_VALIDATION_FAILED")
+  | Except.ok _ => Except.ok(Unit.unit)
+})
+  let module : PsVerifiedIrModule := validated.raw
+  if ((!psListIsEmpty(module.imports))) {
+  (Except.error("PSC1_PHP_EXTERNAL_IMPORT_UNSUPPORTED"))
+}
+  (psBackendSourceForExcept(PsPhp.checkDeclaration, module.declarations))
+  (psBackendSourceForExcept(PsPhp.checkStructure, module.structures))
+  (psBackendSourceForExcept(PsPhp.checkInductive, module.inductives))
+  (PsPhp.checkPublics(module, ioAbi, publicNames, List.nil))
+  let valueNames : List(String) := (PsPhp.valueNamesAcc(module.declarations, List.nil))
+  let requested : List(String) := (psBackendSourceFlatMap((fun (declaration : PsVerifiedIrDeclaration) => psListAppend((PsPhp.typeRequirements(4096, declaration.resultType)), (psListAppend((psBackendSourceFlatMap((fun (parameter : PsVerifiedIrParameter) => PsPhp.typeRequirements(4096, parameter.type)), declaration.parameters)), (PsPhp.exprRequirements(valueNames, 4096, (psListMap((fun (parameter : PsVerifiedIrParameter) => parameter.name), declaration.parameters)), declaration.body)))))), module.declarations))
+  let requirements : List(String) := (psPhpRuntimeClosureWithExtractionPolicy((if (flatConstructors) { requested } else { PsPhp.withoutNodeRequirements(requested) }), flatConstructors))
+  let runtimeSource : String := (psPhpSelectedRuntimeSourceWithExtractionPolicy(requirements, flatConstructors))
+  let globals : List((Prod(String, String))) := (psListMap(PsPhp.globalEntry, (psBackendSourceZipIndex(module.declarations))))
+  let context : PsPhp.Context := (PsPhp.Context.mk(globals, valueNames, List.nil, (psPhpRuntimeVariables(requirements)), (psBackendNameSeen("calls", requirements)), preciseCaptures, flatConstructors, module.inductives, (if ((flatConstructors && directCalls)) { psBackendDirectCallNames(module.declarations) } else { PsStringSet.empty }), directSlots))
+  let sourcePrefix : String := (PsPhp.cat((_root_.List.cons("<?php\n", (_root_.List.cons("// Generated by ProofScript PSC1 DirectPHP. Public API: return value of require.\n", (_root_.List.cons("declare(strict_types=1);\n\nreturn (static function (): array {\n", (_root_.List.cons(runtimeSource, _root_.List.nil))))))))))
+  let initial : PsPhp.EmitState := (PsPhp.EmitState.mk(List.nil, (PsPhp.countNewlines((psJsonStringToChars(sourcePrefix)), 0)), 0, 1))
+  let _psc_step_129 <- (PsPhp.emitModule(module, context, publicNames, initial))
+  let positions := _psc_step_129.fst
+  let state := _psc_step_129.snd
+  let composer : String := (PsPhp.cat((_root_.List.cons("{\n  \"type\": \"library\",\n  \"require\": {\n    \"php\": \">=8.5\"", (_root_.List.cons((if (psBackendNameSeen("gmp", requirements)) { ",\n    \"ext-gmp\": \"*\"" } else { "" }), (_root_.List.cons("\n  }\n}\n", _root_.List.nil))))))))
+  (Except.ok((PsPhpPortableModule.mk((PsPhp.cat((_root_.List.cons(sourcePrefix, (_root_.List.cons((psTextJoin("\n", (psListReverse(state.linesRev)))), (_root_.List.cons("\n", _root_.List.nil)))))))), composer, runtimeSource, psPhpRuntimeVersion, requirements, globals, positions))))
+}
+
+-- Retained indexed-node access remains a policy of this same emitter.
+def psPhpEmitModuleWithIoAndPoliciesAndDirectCalls(validated : PsValidatedIrModule, publicNames : List(String), ioAbi : Bool, preciseCaptures : Bool, flatConstructors : Bool, directCalls : Bool) : Except(String, PsPhpPortableModule) := psPhpEmitModuleWithIoAndOptimizations(validated, publicNames, ioAbi, preciseCaptures, flatConstructors, directCalls, true)
+
+-- Independent retained scheduler policy supports exact differential tests.
+def psPhpEmitModuleWithIoAndPolicies(validated : PsValidatedIrModule, publicNames : List(String), ioAbi : Bool, preciseCaptures : Bool, flatConstructors : Bool) : Except(String, PsPhpPortableModule) := psPhpEmitModuleWithIoAndPoliciesAndDirectCalls(validated, publicNames, ioAbi, preciseCaptures, flatConstructors, true)
+
+-- Retained layout is a testable policy of the same emitter, not another compiler.
+def psPhpEmitModuleWithIoAndCapturePolicy(validated : PsValidatedIrModule, publicNames : List(String), ioAbi : Bool, preciseCaptures : Bool) : Except(String, PsPhpPortableModule) := psPhpEmitModuleWithIoAndPolicies(validated, publicNames, ioAbi, preciseCaptures, false)
+
+-- Native compatibility and generated service use the same optimized emitter.
+def psPhpEmitModuleWithIo(validated : PsValidatedIrModule, publicNames : List(String), ioAbi : Bool) : Except(String, PsPhpPortableModule) := psPhpEmitModuleWithIoAndPolicies(validated, publicNames, ioAbi, true, true)

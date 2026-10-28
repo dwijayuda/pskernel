@@ -1,6 +1,6 @@
 # erasure
 
-Proof/type erasure. Start at [src/Ps/Erasure/Definition.lean](src/Ps/Erasure/Definition.lean).
+Proof/type erasure. Start at [src/Ps/Erasure/Definition.lean](src/Ps/Erasure/Definition.ps).
 
 - Representation: Prepared canonical declarations → executable IR.
 - Boundary: Do not bypass independent logical admission or strict IR.

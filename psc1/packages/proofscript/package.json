@@ -77,11 +77,8 @@
     "implementationOwner": "@proofscript/compiler",
     "internalCompilerModules": false,
     "packageKind": "core-package-umbrella",
-    "canonicalSources": "src",
-    "sourceVariants": [
-      "lean",
-      "ps"
-    ],
+    "canonicalSources": null,
+    "sourceVariants": [],
     "publishingRequiresQualification": true,
     "defaultKernel": "wasm",
     "defaultEngine": "js",
@@ -90,7 +87,14 @@
     "compilerInputGrammars": [
       "lean",
       "ps"
-    ]
+    ],
+    "canonicalGrammar": null,
+    "sourceOwnership": {
+      "role": "source-free-package",
+      "manifest": "dist/source-manifest.json",
+      "repositoryManifest": "psc1/CANONICAL_SOURCES.json"
+    },
+    "bootstrapReferences": null
   },
   "scripts": {
     "build": "node ../../scripts/build-packages.mjs build --package proofscript",

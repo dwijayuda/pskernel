@@ -1,0 +1,12 @@
+import Ps.Compiler.Service
+import Ps.BackendPython.Portable
+
+namespace Ps.Internal.PythonCompilerService
+def emit(module : PsValidatedIrModule, publicNames : List(String)) : Except(Ps.Internal.CompilerService.Error, (Prod(String, (List(String))))) := match (psPythonEmitModuleWithIo(module, publicNames, false)) with {
+  | Except.error detail => Except.error((Ps.Internal.CompilerService.failure("python-emission", detail)))
+  | Except.ok output => Except.ok((Prod.mk(output.source, output.runtimeHelpers)))
+}
+end Ps.Internal.PythonCompilerService
+
+/-- Provisional output only; independent host admission remains mandatory. -/
+def psCompilerPythonServiceCandidate(input : String) : String := Ps.Internal.CompilerService.candidate(PsBackendTarget.python, Ps.Internal.PythonCompilerService.emit, input)

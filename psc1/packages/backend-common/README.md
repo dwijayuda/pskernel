@@ -1,6 +1,6 @@
 # backend-common
 
-Closed shared target planning. Start at [src/Ps/BackendCommon/Plan.lean](src/Ps/BackendCommon/Plan.lean).
+Closed shared target planning. Start at [src/Ps/BackendCommon/Plan.lean](src/Ps/BackendCommon/Plan.ps).
 
 - Representation: Strict executable IR → target plan.
 - Boundary: No frontend duplication; unsupported ABI stays explicit.

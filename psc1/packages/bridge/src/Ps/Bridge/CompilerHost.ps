@@ -1,0 +1,8 @@
+import Ps.Bridge.Json
+
+/-- Portable transport only. These bytes are a request, never checking authority. -/
+def psCompilerHostAdmissionRequest(requestId : String, sourceClosureDigest : String, target : String, canonicalAdmissions : String) : String := psJsonObject((_root_.List.cons((_root_.Prod.mk("admissions", (psJsonQuote(canonicalAdmissions)))), (_root_.List.cons((_root_.Prod.mk("op", (psJsonQuote("admit")))), (_root_.List.cons((_root_.Prod.mk("protocol", (psJsonQuote("psc1-compiler-host/1")))), (_root_.List.cons((_root_.Prod.mk("requestId", (psJsonQuote(requestId)))), (_root_.List.cons((_root_.Prod.mk("sourceClosureDigest", (psJsonQuote(sourceClosureDigest)))), (_root_.List.cons((_root_.Prod.mk("target", (psJsonQuote(target)))), _root_.List.nil)))))))))))))
+
+/-- Compiler continuation correlation. Publication remains owned by the external
+host, which independently checks and retains the exact canonical graph bytes. -/
+def psCompilerHostReceiptMatches(expectedId : String, expectedSource : String, expectedGraph : String, expectedTarget : String, actualId : String, actualSource : String, actualGraph : String, actualTarget : String, checkerCommit : String, accepted : Bool) : Bool := if (accepted) { if (psJsonStringEq(expectedId, actualId)) { if (psJsonStringEq(expectedSource, actualSource)) { if (psJsonStringEq(expectedGraph, actualGraph)) { if (psJsonStringEq(expectedTarget, actualTarget)) { psJsonStringEq(checkerCommit, "eb6cafb7290e8bd5f2937522d8d804f58f02bafc") } else { false } } else { false } } else { false } } else { false } } else { false }

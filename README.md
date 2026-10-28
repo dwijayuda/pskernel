@@ -2,6 +2,12 @@
 
 This repository contains several independently scoped compiler and kernel projects.
 For the current PSC1 compiler and npm toolchain, start at [psc1/README.md](psc1/README.md).
+The repository-wide [ProofScript ownership index](SOURCE_OWNERSHIP.json) identifies
+PSC1 canonical sources, explicit bootstrap references, independent-project sources,
+test fixtures and retained generated artifacts. The inventory gate refuses an
+unclassified tracked `.ps` file. PSC1 authoring starts from its `.ps` owners and
+[checked bootstrap-reference workflow](psc1/bootstrap/CANONICAL_REFERENCES.md).
+
 The sections below describe the root TypeScript kernel research project; its Lean
 4.34 compatibility oracle is distinct from PSC1's official Lean 4.35 admission provider.
 

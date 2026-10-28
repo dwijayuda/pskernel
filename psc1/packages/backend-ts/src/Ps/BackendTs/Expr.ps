@@ -1,0 +1,449 @@
+import Ps.BackendTs.Type
+
+def psTsLookupApplied(entries : List((_root_.Prod(String, String))), name : String) : Option(String) := match entries with {
+  | List.nil => Option.none
+  | List.cons entry rest => match entry with {
+  | Prod.mk key value => if (psStringEq(key, name)) { Option.some(value) } else { psTsLookupApplied(rest, name) }
+}
+}
+
+def psTsLookup(entries : List((_root_.Prod(String, String)))) : (_ : String) -> Option(String) := fun (name : String) => psTsLookupApplied(entries, name)
+
+def psTsExprUsesNameWithFuelWorker(fuel : Nat, expr : PsVerifiedIrExpr, name : String) : Bool := match fuel with {
+  | Nat.zero => true
+  | Nat.succ remaining => match expr with {
+  | literal _ => false
+  | var value => psStringEq(value, name)
+  | intrinsic _ _ arguments => psListAny((fun (value : PsVerifiedIrExpr) => psTsExprUsesNameWithFuelWorker(remaining, value, name)), arguments)
+  | lambda parameters _ body => if (psListAny((fun (parameter : PsVerifiedIrParameter) => psStringEq(parameter.name, name)), parameters)) { true } else { psTsExprUsesNameWithFuelWorker(remaining, body, name) }
+  | call fn _ arguments => if (psTsExprUsesNameWithFuelWorker(remaining, fn, name)) { true } else { psListAny((fun (value : PsVerifiedIrExpr) => psTsExprUsesNameWithFuelWorker(remaining, value, name)), arguments) }
+  | letE localName _ value body => if (psStringEq(localName, name)) { true } else { if (psTsExprUsesNameWithFuelWorker(remaining, value, name)) { true } else { psTsExprUsesNameWithFuelWorker(remaining, body, name) } }
+  | ifE condition thenBranch elseBranch => if (psTsExprUsesNameWithFuelWorker(remaining, condition, name)) { true } else { if (psTsExprUsesNameWithFuelWorker(remaining, thenBranch, name)) { true } else { psTsExprUsesNameWithFuelWorker(remaining, elseBranch, name) } }
+  | record _ _ fields => psListAny((fun (field : _root_.Prod(String, PsVerifiedIrExpr)) => match field with {
+  | Prod.mk _ value => psTsExprUsesNameWithFuelWorker(remaining, value, name)
+}), fields)
+  | projection _ _ target _ => psTsExprUsesNameWithFuelWorker(remaining, target, name)
+  | constructor _ _ _ fields => psListAny((fun (field : _root_.Prod(String, PsVerifiedIrExpr)) => match field with {
+  | Prod.mk _ value => psTsExprUsesNameWithFuelWorker(remaining, value, name)
+}), fields)
+  | matchE _ _ scrutinee alternatives => if (psTsExprUsesNameWithFuelWorker(remaining, scrutinee, name)) { true } else { psListAny((fun (alternative : _root_.Prod(String, (_root_.Prod((List(PsVerifiedIrMatchBinding)), PsVerifiedIrExpr)))) => match alternative with {
+  | Prod.mk _ detail => match detail with {
+  | Prod.mk bindings body => if (psListAny((fun (binding : PsVerifiedIrMatchBinding) => psStringEq(binding.name, name)), bindings)) { true } else { psTsExprUsesNameWithFuelWorker(remaining, body, name) }
+}
+}), alternatives) }
+}
+}
+
+def psTsExprUsesNameWithFuel(fuel : Nat) : (_ : PsVerifiedIrExpr) -> (_ : String) -> Bool := fun (expr : PsVerifiedIrExpr) (name : String) => psTsExprUsesNameWithFuelWorker(fuel, expr, name)
+
+def psTsFreshMatchTempWorker(expr : PsVerifiedIrExpr, attempts : Nat, index : Nat) : String := match attempts with {
+  | Nat.zero => "__ps$match$overflow"
+  | Nat.succ remaining => let candidate := (String.Internal.append("__ps$match$", (psNatToString(index))))
+if (psTsExprUsesNameWithFuel(4096, expr, candidate)) { psTsFreshMatchTempWorker(expr, remaining, (Nat.succ(index))) } else { candidate }
+}
+
+def psTsFreshMatchTempLoop(expr : PsVerifiedIrExpr, index : Nat, attempts : Nat) : String := psTsFreshMatchTempWorker(expr, attempts, index)
+
+def psTsFreshMatchTemp(expr : PsVerifiedIrExpr) : String := psTsFreshMatchTempLoop(expr, 0, 4096)
+
+def psTsEmitTypeArguments(arguments : List(PsVerifiedIrType)) : Except(PsTsEmitError, String) := match (psListMapExcept(psTsEmitType, arguments)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printed => if (psListIsEmpty(printed)) { Except.ok("") } else { Except.ok((psTsJoin("", (_root_.List.cons("<", (_root_.List.cons((psTsJoin(", ", printed)), (_root_.List.cons(">", _root_.List.nil))))))))) }
+}
+
+def psTsNormalizeMachineInteger(type : PsVerifiedIrMachineIntegerType, value : String) : Except(PsTsEmitError, String) := match type with {
+  | uint8 => Except.ok((psTsJoin("", (_root_.List.cons("((", (_root_.List.cons(value, (_root_.List.cons(") & 255)", _root_.List.nil)))))))))
+  | uint16 => Except.ok((psTsJoin("", (_root_.List.cons("((", (_root_.List.cons(value, (_root_.List.cons(") & 65535)", _root_.List.nil)))))))))
+  | uint32 => Except.ok((psTsJoin("", (_root_.List.cons("((", (_root_.List.cons(value, (_root_.List.cons(") >>> 0)", _root_.List.nil)))))))))
+  | int8 => Except.ok((psTsJoin("", (_root_.List.cons("(((", (_root_.List.cons(value, (_root_.List.cons(") << 24) >> 24)", _root_.List.nil)))))))))
+  | int16 => Except.ok((psTsJoin("", (_root_.List.cons("(((", (_root_.List.cons(value, (_root_.List.cons(") << 16) >> 16)", _root_.List.nil)))))))))
+  | int32 => Except.ok((psTsJoin("", (_root_.List.cons("((", (_root_.List.cons(value, (_root_.List.cons(") | 0)", _root_.List.nil)))))))))
+  | uint64 => Except.ok((psTsJoin("", (_root_.List.cons("BigInt.asUintN(64, (", (_root_.List.cons(value, (_root_.List.cons("))", _root_.List.nil)))))))))
+  | int64 => Except.ok((psTsJoin("", (_root_.List.cons("BigInt.asIntN(64, (", (_root_.List.cons(value, (_root_.List.cons("))", _root_.List.nil)))))))))
+  | usize => Except.error(PsTsEmitError.targetWordSizeRequired)
+  | isize => Except.error(PsTsEmitError.targetWordSizeRequired)
+}
+
+def psTsMachineIntegerBinaryRaw(type : PsVerifiedIrMachineIntegerType, operation : PsVerifiedIrIntegerBinaryOp, left : String, right : String) : String := match operation with {
+  | add => psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" + ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+  | sub => psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" - ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+  | mul => match type with {
+  | uint8 => psTsJoin("", (_root_.List.cons("Math.imul(", (_root_.List.cons(left, (_root_.List.cons(", ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+  | uint16 => psTsJoin("", (_root_.List.cons("Math.imul(", (_root_.List.cons(left, (_root_.List.cons(", ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+  | uint32 => psTsJoin("", (_root_.List.cons("Math.imul(", (_root_.List.cons(left, (_root_.List.cons(", ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+  | int8 => psTsJoin("", (_root_.List.cons("Math.imul(", (_root_.List.cons(left, (_root_.List.cons(", ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+  | int16 => psTsJoin("", (_root_.List.cons("Math.imul(", (_root_.List.cons(left, (_root_.List.cons(", ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+  | int32 => psTsJoin("", (_root_.List.cons("Math.imul(", (_root_.List.cons(left, (_root_.List.cons(", ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+  | _ => psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" * ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+}
+  | bitAnd => psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" & ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+  | bitOr => psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" | ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+  | bitXor => psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" ^ ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+}
+
+def psTsEmitMachineIntegerBinary(type : PsVerifiedIrMachineIntegerType, operation : PsVerifiedIrIntegerBinaryOp, left : String, right : String) : Except(PsTsEmitError, String) := psTsNormalizeMachineInteger(type, (psTsMachineIntegerBinaryRaw(type, operation, left, right)))
+
+def psTsEmitMachineIntegerCompare(operation : PsVerifiedIrIntegerCompareOp, left : String, right : String) : String := match operation with {
+  | eq => psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" === ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+  | ne => psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" !== ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+  | lt => psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" < ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+  | le => psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" <= ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+  | gt => psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" > ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+  | ge => psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" >= ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+}
+
+def psTsEmitFloatBinary(type : PsVerifiedIrFloatingType, operation : PsVerifiedIrFloatBinaryOp, left : String, right : String) : String := let raw : String := (match operation with {
+  | add => psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" + ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+  | sub => psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" - ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+  | mul => psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" * ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+  | div => psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" / ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+})
+match type with {
+  | float => raw
+  | float32 => psTsJoin("", (_root_.List.cons("Math.fround(", (_root_.List.cons(raw, (_root_.List.cons(")", _root_.List.nil)))))))
+}
+
+def psTsEmitFloatCompare(operation : PsVerifiedIrFloatCompareOp, left : String, right : String) : String := match operation with {
+  | eq => psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" === ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+  | ne => psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" !== ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+  | lt => psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" < ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+  | le => psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" <= ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+  | gt => psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" > ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+  | ge => psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" >= ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil)))))))))))
+}
+
+def psTsPrinted1(emit : (_ : String) -> Except(PsTsEmitError, String), arguments : List(String)) : Except(PsTsEmitError, String) := match arguments with {
+  | List.nil => Except.error(PsTsEmitError.intrinsicArity)
+  | List.cons arg0 rest0 => match rest0 with {
+  | List.nil => emit(arg0)
+  | List.cons _ _ => Except.error(PsTsEmitError.intrinsicArity)
+}
+}
+
+def psTsPrinted2(emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String), arguments : List(String)) : Except(PsTsEmitError, String) := match arguments with {
+  | List.nil => Except.error(PsTsEmitError.intrinsicArity)
+  | List.cons arg0 rest0 => match rest0 with {
+  | List.nil => Except.error(PsTsEmitError.intrinsicArity)
+  | List.cons arg1 rest1 => match rest1 with {
+  | List.nil => emit(arg0, arg1)
+  | List.cons _ _ => Except.error(PsTsEmitError.intrinsicArity)
+}
+}
+}
+
+def psTsPrinted3(emit : (_ : String) -> (_ : String) -> (_ : String) -> Except(PsTsEmitError, String), arguments : List(String)) : Except(PsTsEmitError, String) := match arguments with {
+  | List.nil => Except.error(PsTsEmitError.intrinsicArity)
+  | List.cons arg0 rest0 => match rest0 with {
+  | List.nil => Except.error(PsTsEmitError.intrinsicArity)
+  | List.cons arg1 rest1 => match rest1 with {
+  | List.nil => Except.error(PsTsEmitError.intrinsicArity)
+  | List.cons arg2 rest2 => match rest2 with {
+  | List.nil => emit(arg0, arg1, arg2)
+  | List.cons _ _ => Except.error(PsTsEmitError.intrinsicArity)
+}
+}
+}
+}
+
+def psTsPrinted5(emit : (_ : String) -> (_ : String) -> (_ : String) -> (_ : String) -> (_ : String) -> Except(PsTsEmitError, String), arguments : List(String)) : Except(PsTsEmitError, String) := match arguments with {
+  | List.nil => Except.error(PsTsEmitError.intrinsicArity)
+  | List.cons arg0 rest0 => match rest0 with {
+  | List.nil => Except.error(PsTsEmitError.intrinsicArity)
+  | List.cons arg1 rest1 => match rest1 with {
+  | List.nil => Except.error(PsTsEmitError.intrinsicArity)
+  | List.cons arg2 rest2 => match rest2 with {
+  | List.nil => Except.error(PsTsEmitError.intrinsicArity)
+  | List.cons arg3 rest3 => match rest3 with {
+  | List.nil => Except.error(PsTsEmitError.intrinsicArity)
+  | List.cons arg4 rest4 => match rest4 with {
+  | List.nil => emit(arg0, arg1, arg2, arg3, arg4)
+  | List.cons _ _ => Except.error(PsTsEmitError.intrinsicArity)
+}
+}
+}
+}
+}
+}
+
+def psTsEmitIntrinsicFromPrinted(operation : PsVerifiedIrIntrinsic, arguments : List(String)) : Except(PsTsEmitError, String) := match operation with {
+  | machineIntBinary type integerOperation => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (left : String) (right : String) => psTsEmitMachineIntegerBinary(type, integerOperation, left, right))
+psTsPrinted2(emit, arguments)
+  | machineIntCompare _ integerOperation => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (left : String) (right : String) => Except.ok((psTsEmitMachineIntegerCompare(integerOperation, left, right))))
+psTsPrinted2(emit, arguments)
+  | floatBinary type floatOperation => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (left : String) (right : String) => Except.ok((psTsEmitFloatBinary(type, floatOperation, left, right))))
+psTsPrinted2(emit, arguments)
+  | floatCompare _ floatOperation => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (left : String) (right : String) => Except.ok((psTsEmitFloatCompare(floatOperation, left, right))))
+psTsPrinted2(emit, arguments)
+  | natAdd => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (left : String) (right : String) => Except.ok((psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" + ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil))))))))))))))
+psTsPrinted2(emit, arguments)
+  | natSub => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (left : String) (right : String) => Except.ok((psTsJoin("", (_root_.List.cons("((__ps_a: bigint, __ps_b: bigint) => ", (_root_.List.cons("(__ps_a >= __ps_b ? __ps_a - __ps_b : 0n))(", (_root_.List.cons(left, (_root_.List.cons(", ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil))))))))))))))))
+psTsPrinted2(emit, arguments)
+  | natMul => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (left : String) (right : String) => Except.ok((psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" * ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil))))))))))))))
+psTsPrinted2(emit, arguments)
+  | natDiv => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (left : String) (right : String) => Except.ok((psTsJoin("", (_root_.List.cons("((__ps_a: bigint, __ps_b: bigint) => ", (_root_.List.cons("(__ps_b === 0n ? 0n : __ps_a / __ps_b))(", (_root_.List.cons(left, (_root_.List.cons(", ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil))))))))))))))))
+psTsPrinted2(emit, arguments)
+  | natMod => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (left : String) (right : String) => Except.ok((psTsJoin("", (_root_.List.cons("((__ps_a: bigint, __ps_b: bigint) => ", (_root_.List.cons("(__ps_b === 0n ? __ps_a : __ps_a % __ps_b))(", (_root_.List.cons(left, (_root_.List.cons(", ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil))))))))))))))))
+psTsPrinted2(emit, arguments)
+  | natEq => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (left : String) (right : String) => Except.ok((psTsJoin("", (_root_.List.cons("(((", (_root_.List.cons(left, (_root_.List.cons(") as bigint) === ((", (_root_.List.cons(right, (_root_.List.cons(") as bigint))", _root_.List.nil))))))))))))))
+psTsPrinted2(emit, arguments)
+  | natNe => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (left : String) (right : String) => Except.ok((psTsJoin("", (_root_.List.cons("(((", (_root_.List.cons(left, (_root_.List.cons(") as bigint) !== ((", (_root_.List.cons(right, (_root_.List.cons(") as bigint))", _root_.List.nil))))))))))))))
+psTsPrinted2(emit, arguments)
+  | natLe => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (left : String) (right : String) => Except.ok((psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" <= ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil))))))))))))))
+psTsPrinted2(emit, arguments)
+  | natLt => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (left : String) (right : String) => Except.ok((psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" < ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil))))))))))))))
+psTsPrinted2(emit, arguments)
+  | intOfNat => let emit : (_ : String) -> Except(PsTsEmitError, String) := (fun (value : String) => Except.ok(value))
+psTsPrinted1(emit, arguments)
+  | intRepr => let emit : (_ : String) -> Except(PsTsEmitError, String) := (fun (value : String) => Except.ok((psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(value, (_root_.List.cons(").toString()", _root_.List.nil))))))))))
+psTsPrinted1(emit, arguments)
+  | intNegSucc => let emit : (_ : String) -> Except(PsTsEmitError, String) := (fun (value : String) => Except.ok((psTsJoin("", (_root_.List.cons("(-(", (_root_.List.cons(value, (_root_.List.cons(" + 1n))", _root_.List.nil))))))))))
+psTsPrinted1(emit, arguments)
+  | intNeg => let emit : (_ : String) -> Except(PsTsEmitError, String) := (fun (value : String) => Except.ok((psTsJoin("", (_root_.List.cons("(-(", (_root_.List.cons(value, (_root_.List.cons("))", _root_.List.nil))))))))))
+psTsPrinted1(emit, arguments)
+  | intAdd => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (left : String) (right : String) => Except.ok((psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" + ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil))))))))))))))
+psTsPrinted2(emit, arguments)
+  | intSub => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (left : String) (right : String) => Except.ok((psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" - ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil))))))))))))))
+psTsPrinted2(emit, arguments)
+  | intMul => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (left : String) (right : String) => Except.ok((psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" * ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil))))))))))))))
+psTsPrinted2(emit, arguments)
+  | intEq => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (left : String) (right : String) => Except.ok((psTsJoin("", (_root_.List.cons("(((", (_root_.List.cons(left, (_root_.List.cons(") as bigint) === ((", (_root_.List.cons(right, (_root_.List.cons(") as bigint))", _root_.List.nil))))))))))))))
+psTsPrinted2(emit, arguments)
+  | intLe => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (left : String) (right : String) => Except.ok((psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" <= ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil))))))))))))))
+psTsPrinted2(emit, arguments)
+  | intLt => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (left : String) (right : String) => Except.ok((psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" < ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil))))))))))))))
+psTsPrinted2(emit, arguments)
+  | boolNot => let emit : (_ : String) -> Except(PsTsEmitError, String) := (fun (value : String) => Except.ok((psTsJoin("", (_root_.List.cons("(!", (_root_.List.cons(value, (_root_.List.cons(")", _root_.List.nil))))))))))
+psTsPrinted1(emit, arguments)
+  | boolAnd => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (left : String) (right : String) => Except.ok((psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" && ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil))))))))))))))
+psTsPrinted2(emit, arguments)
+  | boolOr => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (left : String) (right : String) => Except.ok((psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" || ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil))))))))))))))
+psTsPrinted2(emit, arguments)
+  | boolEq => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (left : String) (right : String) => Except.ok((psTsJoin("", (_root_.List.cons("(((", (_root_.List.cons(left, (_root_.List.cons(") as boolean) === ((", (_root_.List.cons(right, (_root_.List.cons(") as boolean))", _root_.List.nil))))))))))))))
+psTsPrinted2(emit, arguments)
+  | boolNe => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (left : String) (right : String) => Except.ok((psTsJoin("", (_root_.List.cons("(((", (_root_.List.cons(left, (_root_.List.cons(") as boolean) !== ((", (_root_.List.cons(right, (_root_.List.cons(") as boolean))", _root_.List.nil))))))))))))))
+psTsPrinted2(emit, arguments)
+  | charOfNat => let emit : (_ : String) -> Except(PsTsEmitError, String) := (fun (value : String) => Except.ok((psTsJoin("", (_root_.List.cons("((__ps_n: bigint) => ", (_root_.List.cons("((__ps_n < 0xd800n || (__ps_n > 0xdfffn && __ps_n < 0x110000n)) ", (_root_.List.cons("? String.fromCodePoint(Number(__ps_n)) : \"\\0\"))(", (_root_.List.cons(value, (_root_.List.cons(")", _root_.List.nil))))))))))))))
+psTsPrinted1(emit, arguments)
+  | charToNat => let emit : (_ : String) -> Except(PsTsEmitError, String) := (fun (value : String) => Except.ok((psTsJoin("", (_root_.List.cons("((__ps_c: string) => BigInt(__ps_c.codePointAt(0) ?? 0))(", (_root_.List.cons(value, (_root_.List.cons(")", _root_.List.nil))))))))))
+psTsPrinted1(emit, arguments)
+  | stringPush => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (left : String) (right : String) => Except.ok((psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" + ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil))))))))))))))
+psTsPrinted2(emit, arguments)
+  | stringSingleton => let emit : (_ : String) -> Except(PsTsEmitError, String) := (fun (value : String) => Except.ok(value))
+psTsPrinted1(emit, arguments)
+  | stringLength => let emit : (_ : String) -> Except(PsTsEmitError, String) := (fun (value : String) => Except.ok((psTsJoin("", (_root_.List.cons("((__ps_s: string) => BigInt(Array.from(__ps_s).length))(", (_root_.List.cons(value, (_root_.List.cons(")", _root_.List.nil))))))))))
+psTsPrinted1(emit, arguments)
+  | stringAppend => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (left : String) (right : String) => Except.ok((psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(left, (_root_.List.cons(" + ", (_root_.List.cons(right, (_root_.List.cons(")", _root_.List.nil))))))))))))))
+psTsPrinted2(emit, arguments)
+  | stringUtf8ByteSize => let emit : (_ : String) -> Except(PsTsEmitError, String) := (fun (value : String) => Except.ok((psTsJoin("", (_root_.List.cons("__ps$stringUtf8Size(", (_root_.List.cons(value, (_root_.List.cons(")", _root_.List.nil))))))))))
+psTsPrinted1(emit, arguments)
+  | stringNext => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (value : String) (position : String) => Except.ok((psTsJoin("", (_root_.List.cons("__ps$stringNext(", (_root_.List.cons(value, (_root_.List.cons(", ", (_root_.List.cons(position, (_root_.List.cons(")", _root_.List.nil))))))))))))))
+psTsPrinted2(emit, arguments)
+  | stringGet => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (value : String) (position : String) => Except.ok((psTsJoin("", (_root_.List.cons("__ps$stringGet(", (_root_.List.cons(value, (_root_.List.cons(", ", (_root_.List.cons(position, (_root_.List.cons(")", _root_.List.nil))))))))))))))
+psTsPrinted2(emit, arguments)
+  | stringAtEnd => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (value : String) (position : String) => Except.ok((psTsJoin("", (_root_.List.cons("((__ps_s: string, __ps_p: bigint) => ", (_root_.List.cons("(__ps_p >= __ps$utf8(__ps_s).size))(", (_root_.List.cons(value, (_root_.List.cons(", ", (_root_.List.cons(position, (_root_.List.cons(")", _root_.List.nil))))))))))))))))
+psTsPrinted2(emit, arguments)
+  | stringExtract => let emit : (_ : String) -> (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (value : String) (start : String) (stop : String) => Except.ok((psTsJoin("", (_root_.List.cons("__ps$stringExtract(", (_root_.List.cons(value, (_root_.List.cons(", ", (_root_.List.cons(start, (_root_.List.cons(", ", (_root_.List.cons(stop, (_root_.List.cons(")", _root_.List.nil))))))))))))))))))
+psTsPrinted3(emit, arguments)
+  | stringEq => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (left : String) (right : String) => Except.ok((psTsJoin("", (_root_.List.cons("(((", (_root_.List.cons(left, (_root_.List.cons(") as string) === ((", (_root_.List.cons(right, (_root_.List.cons(") as string))", _root_.List.nil))))))))))))))
+psTsPrinted2(emit, arguments)
+  | arrayEmptyWithCapacity => let emit : (_ : String) -> Except(PsTsEmitError, String) := (fun (capacity : String) => Except.ok((psTsJoin("", (_root_.List.cons("((__ps_capacity: bigint) => { void __ps_capacity; return []; })(", (_root_.List.cons(capacity, (_root_.List.cons(")", _root_.List.nil))))))))))
+psTsPrinted1(emit, arguments)
+  | arraySize => let emit : (_ : String) -> Except(PsTsEmitError, String) := (fun (value : String) => Except.ok((psTsJoin("", (_root_.List.cons("BigInt((", (_root_.List.cons(value, (_root_.List.cons(").length)", _root_.List.nil))))))))))
+psTsPrinted1(emit, arguments)
+  | arrayPush => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (array : String) (value : String) => Except.ok((psTsJoin("", (_root_.List.cons("[...(", (_root_.List.cons(array, (_root_.List.cons("), ", (_root_.List.cons(value, (_root_.List.cons("]", _root_.List.nil))))))))))))))
+psTsPrinted2(emit, arguments)
+  | arrayGet => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (array : String) (index : String) => Except.ok((psTsJoin("", (_root_.List.cons("(<T>(__ps_a: T[], __ps_i: bigint): T => { ", (_root_.List.cons("if (__ps_i < 0n || __ps_i >= BigInt(__ps_a.length)) ", (_root_.List.cons("throw { code: \"PSC0_ARRAY_GET_BOUNDS\" }; ", (_root_.List.cons("return __ps_a[Number(__ps_i)]!; })(", (_root_.List.cons(array, (_root_.List.cons(", ", (_root_.List.cons(index, (_root_.List.cons(")", _root_.List.nil))))))))))))))))))))
+psTsPrinted2(emit, arguments)
+  | arrayGetD => let emit : (_ : String) -> (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (array : String) (index : String) (fallback : String) => Except.ok((psTsJoin("", (_root_.List.cons("(<T>(__ps_a: T[], __ps_i: bigint, __ps_fallback: T): T => ", (_root_.List.cons("(__ps_i < BigInt(__ps_a.length) ? ", (_root_.List.cons("__ps_a[Number(__ps_i)]! : __ps_fallback))(", (_root_.List.cons(array, (_root_.List.cons(", ", (_root_.List.cons(index, (_root_.List.cons(", ", (_root_.List.cons(fallback, (_root_.List.cons(")", _root_.List.nil))))))))))))))))))))))
+psTsPrinted3(emit, arguments)
+  | arraySet => let emit : (_ : String) -> (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (array : String) (index : String) (value : String) => Except.ok((psTsJoin("", (_root_.List.cons("(<T>(__ps_a: T[], __ps_i: bigint, __ps_v: T): T[] => { ", (_root_.List.cons("if (__ps_i < 0n || __ps_i >= BigInt(__ps_a.length)) ", (_root_.List.cons("throw { code: \"PSC0_ARRAY_SET_BOUNDS\" }; ", (_root_.List.cons("const __ps_out = [...__ps_a]; __ps_out[Number(__ps_i)] = __ps_v; ", (_root_.List.cons("return __ps_out; })(", (_root_.List.cons(array, (_root_.List.cons(", ", (_root_.List.cons(index, (_root_.List.cons(", ", (_root_.List.cons(value, (_root_.List.cons(")", _root_.List.nil))))))))))))))))))))))))))
+psTsPrinted3(emit, arguments)
+  | arraySetIfInBounds => let emit : (_ : String) -> (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (array : String) (index : String) (value : String) => Except.ok((psTsJoin("", (_root_.List.cons("(<T>(__ps_a: T[], __ps_i: bigint, __ps_v: T): T[] => { ", (_root_.List.cons("if (__ps_i >= BigInt(__ps_a.length)) return __ps_a; ", (_root_.List.cons("const __ps_out = [...__ps_a]; __ps_out[Number(__ps_i)] = __ps_v; ", (_root_.List.cons("return __ps_out; })(", (_root_.List.cons(array, (_root_.List.cons(", ", (_root_.List.cons(index, (_root_.List.cons(", ", (_root_.List.cons(value, (_root_.List.cons(")", _root_.List.nil))))))))))))))))))))))))
+psTsPrinted3(emit, arguments)
+  | arrayMap => let emit : (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (fn : String) (array : String) => Except.ok((psTsJoin("", (_root_.List.cons("(<A, B>(__ps_f: (__ps_x: A) => B, __ps_a: A[]): B[] => ", (_root_.List.cons("__ps_a.map((__ps_x) => __ps_f(__ps_x)))(", (_root_.List.cons(fn, (_root_.List.cons(", ", (_root_.List.cons(array, (_root_.List.cons(")", _root_.List.nil))))))))))))))))
+psTsPrinted2(emit, arguments)
+  | arrayFoldl => let emit : (_ : String) -> (_ : String) -> (_ : String) -> (_ : String) -> (_ : String) -> Except(PsTsEmitError, String) := (fun (fn : String) (init : String) (array : String) (start : String) (stop : String) => Except.ok((psTsJoin("", (_root_.List.cons("(<A, B>(__ps_f: (__ps_b: B, __ps_x: A) => B, __ps_init: B, ", (_root_.List.cons("__ps_a: A[], __ps_start: bigint, __ps_stop: bigint): B => {", (_root_.List.cons(" const __ps_size = BigInt(__ps_a.length); ", (_root_.List.cons("const __ps_end = __ps_stop <= __ps_size ? __ps_stop : __ps_size; ", (_root_.List.cons("let __ps_acc = __ps_init; ", (_root_.List.cons("for (let __ps_i = __ps_start; __ps_i < __ps_end; __ps_i += 1n) {", (_root_.List.cons(" __ps_acc = __ps_f(__ps_acc, __ps_a[Number(__ps_i)]!); } ", (_root_.List.cons("return __ps_acc; })(", (_root_.List.cons(fn, (_root_.List.cons(", ", (_root_.List.cons(init, (_root_.List.cons(", ", (_root_.List.cons(array, (_root_.List.cons(", ", (_root_.List.cons(start, (_root_.List.cons(", ", (_root_.List.cons(stop, (_root_.List.cons(")", _root_.List.nil))))))))))))))))))))))))))))))))))))))))
+psTsPrinted5(emit, arguments)
+}
+
+def psTsEmitLetStatementsWithResult(emit : (_ : PsVerifiedIrExpr) -> Except(PsTsEmitError, String), emitResult : (_ : PsVerifiedIrExpr) -> Except(PsTsEmitError, String), expr : PsVerifiedIrExpr) : Except(PsTsEmitError, String) := match expr with {
+  | PsVerifiedIrExpr.letE name type value body => match (psTsEmitType(type)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printedType => match (emit(value)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printedValue => match (psTsEmitLetStatementsWithResult(emit, emitResult, body)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printedBody => if (psTsExprUsesNameWithFuel(4096, value, name)) { Except.ok((psTsJoin("", (_root_.List.cons("return yield* (function*(", (_root_.List.cons(name, (_root_.List.cons(": ", (_root_.List.cons(printedType, (_root_.List.cons(") { ", (_root_.List.cons(printedBody, (_root_.List.cons(" })(", (_root_.List.cons(printedValue, (_root_.List.cons(");", _root_.List.nil))))))))))))))))))))) } else { Except.ok((psTsJoin("", (_root_.List.cons("{ const ", (_root_.List.cons(name, (_root_.List.cons(": ", (_root_.List.cons(printedType, (_root_.List.cons(" = ", (_root_.List.cons(printedValue, (_root_.List.cons("; ", (_root_.List.cons(printedBody, (_root_.List.cons(" }", _root_.List.nil))))))))))))))))))))) }
+}
+}
+}
+  | _ => match (emitResult(expr)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printed => Except.ok((psTsJoin("", (_root_.List.cons("return ", (_root_.List.cons(printed, (_root_.List.cons(";", _root_.List.nil)))))))))
+}
+}
+
+def psTsEmitLetStatements(emit : (_ : PsVerifiedIrExpr) -> Except(PsTsEmitError, String), expr : PsVerifiedIrExpr) : Except(PsTsEmitError, String) := psTsEmitLetStatementsWithResult(emit, emit, expr)
+
+-- Result annotations come from checked IR, never from a guessed dynamic type.
+def psTsGeneratorResultAnnotation(enabled : Bool, expected : Option(PsVerifiedIrType)) : Except(PsTsEmitError, String) := if (enabled) { match expected with {
+  | Option.none => Except.ok("")
+  | Option.some type => match (psTsEmitType(type)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printed => Except.ok((psTsJoin("", (_root_.List.cons(": __ps$Computation<", (_root_.List.cons(printed, (_root_.List.cons(">", _root_.List.nil)))))))))
+}
+} } else { Except.ok("") }
+
+def psTsEmitTypedLetStatementsWithResult(emit : (_ : PsVerifiedIrType) -> (_ : PsVerifiedIrExpr) -> Except(PsTsEmitError, String), emitResult : (_ : PsVerifiedIrExpr) -> Except(PsTsEmitError, String), annotation : String, expr : PsVerifiedIrExpr) : Except(PsTsEmitError, String) := match expr with {
+  | PsVerifiedIrExpr.letE name type value body => match (psTsEmitType(type)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printedType => match (emit(type, value)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printedValue => match (psTsEmitTypedLetStatementsWithResult(emit, emitResult, annotation, body)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printedBody => if (psTsExprUsesNameWithFuel(4096, value, name)) { Except.ok((psTsJoin("", (_root_.List.cons("return yield* (function*(", (_root_.List.cons(name, (_root_.List.cons(": ", (_root_.List.cons(printedType, (_root_.List.cons(")", (_root_.List.cons(annotation, (_root_.List.cons(" { ", (_root_.List.cons(printedBody, (_root_.List.cons(" })(", (_root_.List.cons(printedValue, (_root_.List.cons(");", _root_.List.nil))))))))))))))))))))))))) } else { Except.ok((psTsJoin("", (_root_.List.cons("{ const ", (_root_.List.cons(name, (_root_.List.cons(": ", (_root_.List.cons(printedType, (_root_.List.cons(" = ", (_root_.List.cons(printedValue, (_root_.List.cons("; ", (_root_.List.cons(printedBody, (_root_.List.cons(" }", _root_.List.nil))))))))))))))))))))) }
+}
+}
+}
+  | _ => match (emitResult(expr)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printed => Except.ok((psTsJoin("", (_root_.List.cons("return ", (_root_.List.cons(printed, (_root_.List.cons(";", _root_.List.nil)))))))))
+}
+}
+
+def psTsEmitTypedExprContextWithFuel(brands : List((_root_.Prod(String, String))), tags : List((_root_.Prod(String, String))), annotate : Bool, fuel : Nat) : (_ : Option(PsVerifiedIrType)) -> (_ : Bool) -> (_ : PsVerifiedIrExpr) -> Except(PsTsEmitError, String) := match fuel with {
+  | Nat.zero => fun (_expected : Option(PsVerifiedIrType)) (_tail : Bool) (_expr : PsVerifiedIrExpr) => Except.error(PsTsEmitError.fuelExhausted)
+  | Nat.succ remaining => fun (expected : Option(PsVerifiedIrType)) (tail : Bool) (expr : PsVerifiedIrExpr) => let recur : (_ : Option(PsVerifiedIrType)) -> (_ : Bool) -> (_ : PsVerifiedIrExpr) -> Except(PsTsEmitError, String) := (psTsEmitTypedExprContextWithFuel(brands, tags, annotate, remaining))
+let untyped : (_ : Bool) -> (_ : PsVerifiedIrExpr) -> Except(PsTsEmitError, String) := (recur(Option.none))
+let smaller : (_ : PsVerifiedIrExpr) -> Except(PsTsEmitError, String) := (untyped(false))
+let result : (_ : PsVerifiedIrExpr) -> Except(PsTsEmitError, String) := (recur(expected, tail))
+let owned : (_ : PsVerifiedIrExpr) -> Except(PsTsEmitError, String) := (untyped(true))
+match (psTsGeneratorResultAnnotation(annotate, expected)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok annotation => match expr with {
+  | literal literal => psTsEmitLiteral(literal)
+  | var name => Except.ok(name)
+  | intrinsic operation _ arguments => match (psListMapExcept(smaller, arguments)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printed => psTsEmitIntrinsicFromPrinted(operation, printed)
+}
+  | lambda parameters resultType body => let printParameter : (_ : PsVerifiedIrParameter) -> Except(PsTsEmitError, String) := (fun (parameter : PsVerifiedIrParameter) => match (psTsEmitType(parameter.type)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok type => Except.ok((psTsJoin("", (_root_.List.cons(parameter.name, (_root_.List.cons(": ", (_root_.List.cons(type, _root_.List.nil)))))))))
+})
+match (psListMapExcept(printParameter, parameters)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printedParameters => match (if (annotate) { recur((Option.some(resultType)), true, body) } else { owned(body) }) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printedBody => match (psTsEmitType(resultType)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printedResult => Except.ok((psTsJoin("", (_root_.List.cons("__ps$wrap(function*(", (_root_.List.cons((psTsJoin(", ", printedParameters)), (_root_.List.cons("): __ps$Computation<", (_root_.List.cons(printedResult, (_root_.List.cons("> { return ", (_root_.List.cons(printedBody, (_root_.List.cons("; })", _root_.List.nil)))))))))))))))))
+}
+}
+}
+  | call fn typeArguments arguments => match (smaller(fn)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printedFn => let callable : String := (match fn with {
+  | PsVerifiedIrExpr.lambda _ _ _ => psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(printedFn, (_root_.List.cons(")", _root_.List.nil)))))))
+  | _ => printedFn
+})
+match (psTsEmitTypeArguments(typeArguments)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok generic => match (psListMapExcept(smaller, arguments)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printedArguments => let suffix := (if (psListIsEmpty(printedArguments)) { "" } else { psTsJoin("", (_root_.List.cons(", ", (_root_.List.cons((psTsJoin(", ", printedArguments)), _root_.List.nil))))) })
+Except.ok((psTsJoin("", (_root_.List.cons("(yield* ", (_root_.List.cons((if (tail) { "__ps$tail" } else { "__ps$invoke" }), (_root_.List.cons("(", (_root_.List.cons(callable, (_root_.List.cons(generic, (_root_.List.cons(suffix, (_root_.List.cons("))", _root_.List.nil)))))))))))))))))
+}
+}
+}
+  | letE _ _ _ _ => match (if (annotate) { psTsEmitTypedLetStatementsWithResult((fun (type : PsVerifiedIrType) (value : PsVerifiedIrExpr) => recur((Option.some(type)), false, value)), result, annotation, expr) } else { psTsEmitLetStatementsWithResult(smaller, result, expr) }) with {
+  | Except.error error => Except.error(error)
+  | Except.ok statements => Except.ok((if (annotate) { psTsJoin("", (_root_.List.cons("(yield* (function*()", (_root_.List.cons(annotation, (_root_.List.cons(" { ", (_root_.List.cons(statements, (_root_.List.cons(" })())", _root_.List.nil))))))))))) } else { psTsJoin("", (_root_.List.cons("(yield* (function*() { ", (_root_.List.cons(statements, (_root_.List.cons(" })())", _root_.List.nil))))))) }))
+}
+  | ifE condition thenBranch elseBranch => match (smaller(condition)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printedCondition => match (result(thenBranch)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printedThen => match (result(elseBranch)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printedElse => Except.ok((psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(printedCondition, (_root_.List.cons(" ? ", (_root_.List.cons(printedThen, (_root_.List.cons(" : ", (_root_.List.cons(printedElse, (_root_.List.cons(")", _root_.List.nil)))))))))))))))))
+}
+}
+}
+  | record structureName _ fields => match (psTsLookup(brands, structureName)) with {
+  | Option.none => Except.error((PsTsEmitError.unknownStructure(structureName)))
+  | Option.some brand => let printField : (_ : _root_.Prod(String, PsVerifiedIrExpr)) -> Except(PsTsEmitError, String) := (fun (field : _root_.Prod(String, PsVerifiedIrExpr)) => match field with {
+  | Prod.mk fieldName fieldValue => match (smaller(fieldValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok value => Except.ok((psTsJoin("", (_root_.List.cons("[", (_root_.List.cons((psJsonQuote(fieldName)), (_root_.List.cons("]: ", (_root_.List.cons(value, _root_.List.nil)))))))))))
+}
+})
+match (psListMapExcept(printField, fields)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printedFields => let suffix := (if (psListIsEmpty(printedFields)) { "" } else { psTsJoin("", (_root_.List.cons(", ", (_root_.List.cons((psTsJoin(", ", printedFields)), _root_.List.nil))))) })
+Except.ok((psTsJoin("", (_root_.List.cons("({ [", (_root_.List.cons(brand, (_root_.List.cons("]: true as const", (_root_.List.cons(suffix, (_root_.List.cons(" })", _root_.List.nil)))))))))))))
+}
+}
+  | projection _ _ target field => match (smaller(target)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printedTarget => Except.ok((psTsJoin("", (_root_.List.cons(printedTarget, (_root_.List.cons(".", (_root_.List.cons(field, _root_.List.nil)))))))))
+}
+  | constructor inductiveName constructorName typeArguments fields => match (psTsLookup(tags, inductiveName)) with {
+  | Option.none => Except.error((PsTsEmitError.unknownInductive(inductiveName)))
+  | Option.some _ => match (psTsEmitTypeArguments(typeArguments)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok generic => let access := (psTsJoin("", (_root_.List.cons(inductiveName, (_root_.List.cons("[", (_root_.List.cons((psJsonQuote(constructorName)), (_root_.List.cons("]", _root_.List.nil))))))))))
+let printField : (_ : _root_.Prod(String, PsVerifiedIrExpr)) -> Except(PsTsEmitError, String) := (fun (field : _root_.Prod(String, PsVerifiedIrExpr)) => match field with {
+  | Prod.mk fieldName fieldValue => smaller(fieldValue)
+})
+match (psListMapExcept(printField, fields)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printedFields => if (if (psListIsEmpty(typeArguments)) { psListIsEmpty(fields) } else { false }) { Except.ok(access) } else { Except.ok((psTsJoin("", (_root_.List.cons(access, (_root_.List.cons(generic, (_root_.List.cons("(", (_root_.List.cons((psTsJoin(", ", printedFields)), (_root_.List.cons(")", _root_.List.nil))))))))))))) }
+}
+}
+}
+  | matchE inductiveName _ scrutinee alternatives => match (psTsLookup(tags, inductiveName)) with {
+  | Option.none => Except.error((PsTsEmitError.unknownInductive(inductiveName)))
+  | Option.some tag => if (psListIsEmpty(alternatives)) { match (smaller(scrutinee)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printedScrutinee => Except.ok((psTsJoin("", (_root_.List.cons("(yield* (function*(): __ps$Computation<never> { void (", (_root_.List.cons(printedScrutinee, (_root_.List.cons("); throw new Error(", (_root_.List.cons((psJsonQuote("unreachable empty ProofScript match")), (_root_.List.cons("); })())", _root_.List.nil)))))))))))))
+} } else { let temp := (psTsFreshMatchTemp(expr))
+let printAlternative : (_ : _root_.Prod(String, (_root_.Prod((List(PsVerifiedIrMatchBinding)), PsVerifiedIrExpr)))) -> Except(PsTsEmitError, String) := (fun (alternative : _root_.Prod(String, (_root_.Prod((List(PsVerifiedIrMatchBinding)), PsVerifiedIrExpr)))) => match alternative with {
+  | Prod.mk constructorName detail => match detail with {
+  | Prod.mk bindings body => match (result(body)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printedBody => if (psListIsEmpty(bindings)) { Except.ok((psTsJoin("", (_root_.List.cons("case ", (_root_.List.cons((psJsonQuote(constructorName)), (_root_.List.cons(": return ", (_root_.List.cons(printedBody, (_root_.List.cons(";", _root_.List.nil))))))))))))) } else { let printBinding : (_ : PsVerifiedIrMatchBinding) -> Except(PsTsEmitError, String) := (fun (binding : PsVerifiedIrMatchBinding) => match (psTsEmitType(binding.type)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok type => Except.ok((psTsJoin("", (_root_.List.cons("const ", (_root_.List.cons(binding.name, (_root_.List.cons(": ", (_root_.List.cons(type, (_root_.List.cons(" = ", (_root_.List.cons(temp, (_root_.List.cons(".", (_root_.List.cons(binding.field, (_root_.List.cons(";", _root_.List.nil)))))))))))))))))))))
+})
+match (psListMapExcept(printBinding, bindings)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printedBindings => Except.ok((psTsJoin("", (_root_.List.cons("case ", (_root_.List.cons((psJsonQuote(constructorName)), (_root_.List.cons(": { ", (_root_.List.cons((psTsJoin(" ", printedBindings)), (_root_.List.cons(" return ", (_root_.List.cons(printedBody, (_root_.List.cons("; }", _root_.List.nil)))))))))))))))))
+} }
+}
+}
+})
+match (psListMapExcept(printAlternative, alternatives)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok cases => match (smaller(scrutinee)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printedScrutinee => Except.ok((if (annotate) { psTsJoin("", (_root_.List.cons("(yield* (function*()", (_root_.List.cons(annotation, (_root_.List.cons(" { const ", (_root_.List.cons(temp, (_root_.List.cons(" = ", (_root_.List.cons(printedScrutinee, (_root_.List.cons("; switch (", (_root_.List.cons(temp, (_root_.List.cons("[", (_root_.List.cons(tag, (_root_.List.cons("]) { ", (_root_.List.cons((psTsJoin(" ", cases)), (_root_.List.cons(" } throw new Error(", (_root_.List.cons((psJsonQuote("invalid ProofScript constructor tag")), (_root_.List.cons("); })())", _root_.List.nil))))))))))))))))))))))))))))))) } else { psTsJoin("", (_root_.List.cons("(yield* (function*() { const ", (_root_.List.cons(temp, (_root_.List.cons(" = ", (_root_.List.cons(printedScrutinee, (_root_.List.cons("; switch (", (_root_.List.cons(temp, (_root_.List.cons("[", (_root_.List.cons(tag, (_root_.List.cons("]) { ", (_root_.List.cons((psTsJoin(" ", cases)), (_root_.List.cons(" } throw new Error(", (_root_.List.cons((psJsonQuote("invalid ProofScript constructor tag")), (_root_.List.cons("); })())", _root_.List.nil))))))))))))))))))))))))))) }))
+}
+} }
+}
+}
+}
+}
+
+-- Existing expression consumers keep exact legacy rendering and fuel behavior.
+def psTsEmitExprContextWithFuel(brands : List((_root_.Prod(String, String))), tags : List((_root_.Prod(String, String))), fuel : Nat) : (_ : Bool) -> (_ : PsVerifiedIrExpr) -> Except(PsTsEmitError, String) := psTsEmitTypedExprContextWithFuel(brands, tags, false, fuel, Option.none)
+
+def psTsEmitTypedTailExpr(brands : List((_root_.Prod(String, String))), tags : List((_root_.Prod(String, String))), resultType : PsVerifiedIrType, expr : PsVerifiedIrExpr) : Except(PsTsEmitError, String) := psTsEmitTypedExprContextWithFuel(brands, tags, true, 4096, (Option.some(resultType)), true, expr)
+
+-- Ordinary expression consumers preserve their surrounding continuation.
+def psTsEmitExprWithFuel(brands : List((_root_.Prod(String, String))), tags : List((_root_.Prod(String, String))), fuel : Nat) : (_ : PsVerifiedIrExpr) -> Except(PsTsEmitError, String) := psTsEmitExprContextWithFuel(brands, tags, fuel, false)
+
+-- Only complete function/value results may replace the current driver frame.
+def psTsEmitTailExpr(brands : List((_root_.Prod(String, String))), tags : List((_root_.Prod(String, String))), expr : PsVerifiedIrExpr) : Except(PsTsEmitError, String) := psTsEmitExprContextWithFuel(brands, tags, 4096, true, expr)
+
+def psTsEmitExpr(brands : List((_root_.Prod(String, String))), tags : List((_root_.Prod(String, String))), expr : PsVerifiedIrExpr) : Except(PsTsEmitError, String) := psTsEmitExprWithFuel(brands, tags, 4096, expr)

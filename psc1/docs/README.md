@@ -13,6 +13,7 @@ from immutable evidence; dated records remain preserved.
 
 | Question | Read |
 | --- | --- |
+| Which compiler source should I edit, and how are bootstrap references refreshed? | [Canonical ownership and maintenance](./CANONICAL_SOURCE_OWNERSHIP.md), [owner manifest](../CANONICAL_SOURCES.json), [repository inventory](../../SOURCE_OWNERSHIP.json) |
 | How do I use the qualified project-oriented CLI? | [CLI guide](./guides/cli.md), [workflow research](./development/typescript-workflows.md) |
 | How do the existing npm packages build, install and import? | [Simple npm package guide](./guides/npm-packages.md), [finite contract](../NPM_PACKAGE_CONTRACT.json), [current .13 umbrella qualification](./PSC1_NPM_UMBRELLA_QUALIFICATION_2026-10-27.json), [prior .12 evidence](./PSC1_SIMPLE_NPM_PACKAGE_QUALIFICATION_2026-10-27.json) |
 | How do I install/use the current slim toolchain? | [Slim package guide](./PSC1_SLIM_UNIVERSAL_PACKAGE.md) |

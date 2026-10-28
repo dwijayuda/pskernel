@@ -1,0 +1,166 @@
+import Ps.BackendJs.Model
+import Ps.Bridge.Json
+import Ps.Foundation.List
+
+inductive PsJsIrEncodeError where {
+  | depthExhausted
+}
+
+def psJsIrEncodeValues(values : List((Except(PsJsIrEncodeError, String)))) : Except(PsJsIrEncodeError, String) := let unwrap : (_ : Except(PsJsIrEncodeError, String)) -> Except(PsJsIrEncodeError, String) := (fun (value : Except(PsJsIrEncodeError, String)) => value)
+match (psListMapExcept(unwrap, values)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encoded => Except.ok((psJsonArray(encoded)))
+}
+
+def psJsIrEncodeNode(tag : String, values : List((Except(PsJsIrEncodeError, String)))) : Except(PsJsIrEncodeError, String) := psJsIrEncodeValues((List.cons((Except.ok((psJsonQuote(tag)))), values)))
+
+def psJsIrEncodeText(value : String) : Except(PsJsIrEncodeError, String) := Except.ok((psJsonQuote(value)))
+
+def psJsIrEncodeBoolText(value : Bool) : String := if (value) { "true" } else { "false" }
+
+def psJsIrEncodeMachineType(value : PsJsIrMachineIntegerType) : String := match value with {
+  | PsJsIrMachineIntegerType.uint8 => psJsonQuote("uint8")
+  | PsJsIrMachineIntegerType.uint16 => psJsonQuote("uint16")
+  | PsJsIrMachineIntegerType.uint32 => psJsonQuote("uint32")
+  | PsJsIrMachineIntegerType.uint64 => psJsonQuote("uint64")
+  | PsJsIrMachineIntegerType.int8 => psJsonQuote("int8")
+  | PsJsIrMachineIntegerType.int16 => psJsonQuote("int16")
+  | PsJsIrMachineIntegerType.int32 => psJsonQuote("int32")
+  | PsJsIrMachineIntegerType.int64 => psJsonQuote("int64")
+}
+
+def psJsIrEncodeIntegerBinary(value : PsJsIrIntegerBinaryOp) : String := match value with {
+  | PsJsIrIntegerBinaryOp.add => psJsonQuote("add")
+  | PsJsIrIntegerBinaryOp.sub => psJsonQuote("sub")
+  | PsJsIrIntegerBinaryOp.mul => psJsonQuote("mul")
+  | PsJsIrIntegerBinaryOp.bitAnd => psJsonQuote("bitAnd")
+  | PsJsIrIntegerBinaryOp.bitOr => psJsonQuote("bitOr")
+  | PsJsIrIntegerBinaryOp.bitXor => psJsonQuote("bitXor")
+}
+
+def psJsIrEncodeIntegerCompare(value : PsJsIrIntegerCompareOp) : String := match value with {
+  | PsJsIrIntegerCompareOp.eq => psJsonQuote("eq")
+  | PsJsIrIntegerCompareOp.ne => psJsonQuote("ne")
+  | PsJsIrIntegerCompareOp.lt => psJsonQuote("lt")
+  | PsJsIrIntegerCompareOp.le => psJsonQuote("le")
+  | PsJsIrIntegerCompareOp.gt => psJsonQuote("gt")
+  | PsJsIrIntegerCompareOp.ge => psJsonQuote("ge")
+}
+
+def psJsIrEncodeFloatingType(value : PsJsIrFloatingType) : String := match value with {
+  | PsJsIrFloatingType.float => psJsonQuote("float")
+  | PsJsIrFloatingType.float32 => psJsonQuote("float32")
+}
+
+def psJsIrEncodeFloatBinary(value : PsJsIrFloatBinaryOp) : String := match value with {
+  | PsJsIrFloatBinaryOp.add => psJsonQuote("add")
+  | PsJsIrFloatBinaryOp.sub => psJsonQuote("sub")
+  | PsJsIrFloatBinaryOp.mul => psJsonQuote("mul")
+  | PsJsIrFloatBinaryOp.div => psJsonQuote("div")
+}
+
+def psJsIrEncodeFloatCompare(value : PsJsIrFloatCompareOp) : String := match value with {
+  | PsJsIrFloatCompareOp.eq => psJsonQuote("eq")
+  | PsJsIrFloatCompareOp.ne => psJsonQuote("ne")
+  | PsJsIrFloatCompareOp.lt => psJsonQuote("lt")
+  | PsJsIrFloatCompareOp.le => psJsonQuote("le")
+  | PsJsIrFloatCompareOp.gt => psJsonQuote("gt")
+  | PsJsIrFloatCompareOp.ge => psJsonQuote("ge")
+}
+
+def psJsIrEncodeLiteral(value : PsJsIrLiteral) : Except(PsJsIrEncodeError, String) := match value with {
+  | PsJsIrLiteral.natural natural => psJsIrEncodeNode("natural", (_root_.List.cons((psJsIrEncodeText((Int.repr((Int.ofNat(natural)))))), _root_.List.nil)))
+  | PsJsIrLiteral.integer integer => psJsIrEncodeNode("integer", (_root_.List.cons((psJsIrEncodeText((Int.repr(integer)))), _root_.List.nil)))
+  | PsJsIrLiteral.machineInteger type integer => psJsIrEncodeNode("machineInteger", (_root_.List.cons((Except.ok((psJsIrEncodeMachineType(type)))), (_root_.List.cons((psJsIrEncodeText((Int.repr(integer)))), _root_.List.nil)))))
+  | PsJsIrLiteral.string value => psJsIrEncodeNode("string", (_root_.List.cons((psJsIrEncodeText(value)), _root_.List.nil)))
+  | PsJsIrLiteral.bool value => psJsIrEncodeNode("bool", (_root_.List.cons((Except.ok((psJsIrEncodeBoolText(value)))), _root_.List.nil)))
+  | PsJsIrLiteral.unit => psJsIrEncodeNode("unit", List.nil)
+}
+
+def psJsIrEncodeUnary(value : PsJsIrUnaryOp) : String := match value with {
+  | PsJsIrUnaryOp.bigintNeg => psJsonQuote("bigintNeg")
+  | PsJsIrUnaryOp.boolNot => psJsonQuote("boolNot")
+}
+
+def psJsIrEncodeBinary(value : PsJsIrBinaryOp) : String := match value with {
+  | PsJsIrBinaryOp.bigintAdd => psJsonArray((_root_.List.cons((psJsonQuote("bigintAdd")), _root_.List.nil)))
+  | PsJsIrBinaryOp.bigintSub => psJsonArray((_root_.List.cons((psJsonQuote("bigintSub")), _root_.List.nil)))
+  | PsJsIrBinaryOp.bigintMul => psJsonArray((_root_.List.cons((psJsonQuote("bigintMul")), _root_.List.nil)))
+  | PsJsIrBinaryOp.bigintEq => psJsonArray((_root_.List.cons((psJsonQuote("bigintEq")), _root_.List.nil)))
+  | PsJsIrBinaryOp.bigintNe => psJsonArray((_root_.List.cons((psJsonQuote("bigintNe")), _root_.List.nil)))
+  | PsJsIrBinaryOp.bigintLe => psJsonArray((_root_.List.cons((psJsonQuote("bigintLe")), _root_.List.nil)))
+  | PsJsIrBinaryOp.bigintLt => psJsonArray((_root_.List.cons((psJsonQuote("bigintLt")), _root_.List.nil)))
+  | PsJsIrBinaryOp.boolAnd => psJsonArray((_root_.List.cons((psJsonQuote("boolAnd")), _root_.List.nil)))
+  | PsJsIrBinaryOp.boolOr => psJsonArray((_root_.List.cons((psJsonQuote("boolOr")), _root_.List.nil)))
+  | PsJsIrBinaryOp.boolEq => psJsonArray((_root_.List.cons((psJsonQuote("boolEq")), _root_.List.nil)))
+  | PsJsIrBinaryOp.boolNe => psJsonArray((_root_.List.cons((psJsonQuote("boolNe")), _root_.List.nil)))
+  | PsJsIrBinaryOp.stringConcat => psJsonArray((_root_.List.cons((psJsonQuote("stringConcat")), _root_.List.nil)))
+  | PsJsIrBinaryOp.stringEq => psJsonArray((_root_.List.cons((psJsonQuote("stringEq")), _root_.List.nil)))
+  | PsJsIrBinaryOp.machineInt type operation => psJsonArray((_root_.List.cons((psJsonQuote("machineInt")), (_root_.List.cons((psJsIrEncodeMachineType(type)), (_root_.List.cons((psJsIrEncodeIntegerBinary(operation)), _root_.List.nil)))))))
+  | PsJsIrBinaryOp.machineIntCompare operation => psJsonArray((_root_.List.cons((psJsonQuote("machineIntCompare")), (_root_.List.cons((psJsIrEncodeIntegerCompare(operation)), _root_.List.nil)))))
+  | PsJsIrBinaryOp.floatBinary type operation => psJsonArray((_root_.List.cons((psJsonQuote("floatBinary")), (_root_.List.cons((psJsIrEncodeFloatingType(type)), (_root_.List.cons((psJsIrEncodeFloatBinary(operation)), _root_.List.nil)))))))
+  | PsJsIrBinaryOp.floatCompare operation => psJsonArray((_root_.List.cons((psJsonQuote("floatCompare")), (_root_.List.cons((psJsIrEncodeFloatCompare(operation)), _root_.List.nil)))))
+}
+
+def psJsIrEncodeRuntime(value : PsJsIrRuntimeOp) : String := match value with {
+  | PsJsIrRuntimeOp.uint8OfNat => "uint8OfNat"
+  | PsJsIrRuntimeOp.natSub => "natSub"
+  | PsJsIrRuntimeOp.natDiv => "natDiv"
+  | PsJsIrRuntimeOp.natMod => "natMod"
+  | PsJsIrRuntimeOp.intNegSucc => "intNegSucc"
+  | PsJsIrRuntimeOp.intRepr => "intRepr"
+  | PsJsIrRuntimeOp.charOfNat => "charOfNat"
+  | PsJsIrRuntimeOp.charToNat => "charToNat"
+  | PsJsIrRuntimeOp.stringLength => "stringLength"
+  | PsJsIrRuntimeOp.stringUtf8ByteSize => "stringUtf8ByteSize"
+  | PsJsIrRuntimeOp.stringNext => "stringNext"
+  | PsJsIrRuntimeOp.stringGet => "stringGet"
+  | PsJsIrRuntimeOp.stringAtEnd => "stringAtEnd"
+  | PsJsIrRuntimeOp.stringExtract => "stringExtract"
+  | PsJsIrRuntimeOp.arrayEmptyWithCapacity => "arrayEmptyWithCapacity"
+  | PsJsIrRuntimeOp.arraySize => "arraySize"
+  | PsJsIrRuntimeOp.arrayPush => "arrayPush"
+  | PsJsIrRuntimeOp.arrayGet => "arrayGet"
+  | PsJsIrRuntimeOp.arrayGetD => "arrayGetD"
+  | PsJsIrRuntimeOp.arraySet => "arraySet"
+  | PsJsIrRuntimeOp.arraySetIfInBounds => "arraySetIfInBounds"
+  | PsJsIrRuntimeOp.arrayMap => "arrayMap"
+  | PsJsIrRuntimeOp.arrayFoldl => "arrayFoldl"
+}
+
+def psJsIrEncodeStringValues(values : List(String)) : Except(PsJsIrEncodeError, String) := Except.ok((psJsonArray((psListMap(psJsonQuote, values)))))
+
+def psJsIrEncodeFieldWith(encode : (_ : PsJsIrExpr) -> Except(PsJsIrEncodeError, String), field : _root_.Prod(String, PsJsIrExpr)) : Except(PsJsIrEncodeError, String) := psJsIrEncodeValues((_root_.List.cons((psJsIrEncodeText((Prod.fst(field)))), (_root_.List.cons((encode((Prod.snd(field)))), _root_.List.nil)))))
+
+def psJsIrEncodeBinding(binding : PsJsIrMatchBinding) : Except(PsJsIrEncodeError, String) := psJsIrEncodeValues((_root_.List.cons((psJsIrEncodeText(binding.field)), (_root_.List.cons((psJsIrEncodeText(binding.name)), _root_.List.nil)))))
+
+def psJsIrEncodeAlternativeWith(encode : (_ : PsJsIrExpr) -> Except(PsJsIrEncodeError, String), value : _root_.Prod(String, (_root_.Prod((List(PsJsIrMatchBinding)), PsJsIrExpr)))) : Except(PsJsIrEncodeError, String) := let payload : _root_.Prod((List(PsJsIrMatchBinding)), PsJsIrExpr) := (Prod.snd(value))
+psJsIrEncodeValues((_root_.List.cons((psJsIrEncodeText((Prod.fst(value)))), (_root_.List.cons((psJsIrEncodeValues((psListMap(psJsIrEncodeBinding, (Prod.fst(payload)))))), (_root_.List.cons((encode((Prod.snd(payload)))), _root_.List.nil)))))))
+
+def psJsIrEncodeExprWithFuel(fuel : Nat) : (_ : PsJsIrExpr) -> Except(PsJsIrEncodeError, String) := match fuel with {
+  | Nat.zero => fun (_value : PsJsIrExpr) => Except.error(PsJsIrEncodeError.depthExhausted)
+  | Nat.succ remaining => let smaller : (_ : PsJsIrExpr) -> Except(PsJsIrEncodeError, String) := (psJsIrEncodeExprWithFuel(remaining))
+fun (value : PsJsIrExpr) => match value with {
+  | PsJsIrExpr.literal literal => psJsIrEncodeNode("literal", (_root_.List.cons((psJsIrEncodeLiteral(literal)), _root_.List.nil)))
+  | PsJsIrExpr.var name => psJsIrEncodeNode("var", (_root_.List.cons((psJsIrEncodeText(name)), _root_.List.nil)))
+  | PsJsIrExpr.unary operation operand => psJsIrEncodeNode("unary", (_root_.List.cons((Except.ok((psJsIrEncodeUnary(operation)))), (_root_.List.cons((smaller(operand)), _root_.List.nil)))))
+  | PsJsIrExpr.binary operation left right => psJsIrEncodeNode("binary", (_root_.List.cons((Except.ok((psJsIrEncodeBinary(operation)))), (_root_.List.cons((smaller(left)), (_root_.List.cons((smaller(right)), _root_.List.nil)))))))
+  | PsJsIrExpr.runtime operation arguments => psJsIrEncodeNode("runtime", (_root_.List.cons((psJsIrEncodeText((psJsIrEncodeRuntime(operation)))), (_root_.List.cons((psJsIrEncodeValues((psListMap(smaller, arguments)))), _root_.List.nil)))))
+  | PsJsIrExpr.lambda parameters body => psJsIrEncodeNode("lambda", (_root_.List.cons((psJsIrEncodeStringValues(parameters)), (_root_.List.cons((smaller(body)), _root_.List.nil)))))
+  | PsJsIrExpr.call fn arguments => psJsIrEncodeNode("call", (_root_.List.cons((smaller(fn)), (_root_.List.cons((psJsIrEncodeValues((psListMap(smaller, arguments)))), _root_.List.nil)))))
+  | PsJsIrExpr.letE name bound body => psJsIrEncodeNode("let", (_root_.List.cons((psJsIrEncodeText(name)), (_root_.List.cons((smaller(bound)), (_root_.List.cons((smaller(body)), _root_.List.nil)))))))
+  | PsJsIrExpr.ifE condition yes no => psJsIrEncodeNode("if", (_root_.List.cons((smaller(condition)), (_root_.List.cons((smaller(yes)), (_root_.List.cons((smaller(no)), _root_.List.nil)))))))
+  | PsJsIrExpr.record fields => psJsIrEncodeNode("record", (_root_.List.cons((psJsIrEncodeValues((psListMap((psJsIrEncodeFieldWith(smaller)), fields)))), _root_.List.nil)))
+  | PsJsIrExpr.projection target field => psJsIrEncodeNode("projection", (_root_.List.cons((smaller(target)), (_root_.List.cons((psJsIrEncodeText(field)), _root_.List.nil)))))
+  | PsJsIrExpr.constructor constructorName fields => psJsIrEncodeNode("constructor", (_root_.List.cons((psJsIrEncodeText(constructorName)), (_root_.List.cons((psJsIrEncodeValues((psListMap((psJsIrEncodeFieldWith(smaller)), fields)))), _root_.List.nil)))))
+  | PsJsIrExpr.matchE scrutinee alternatives => psJsIrEncodeNode("match", (_root_.List.cons((smaller(scrutinee)), (_root_.List.cons((psJsIrEncodeValues((psListMap((psJsIrEncodeAlternativeWith(smaller)), alternatives)))), _root_.List.nil)))))
+}
+}
+
+def psJsIrEncodeImport(value : PsJsIrImport) : Except(PsJsIrEncodeError, String) := psJsIrEncodeValues((_root_.List.cons((psJsIrEncodeText(value.localName)), (_root_.List.cons((psJsIrEncodeText(value.source)), (_root_.List.cons((psJsIrEncodeText(value.importedName)), _root_.List.nil)))))))
+
+def psJsIrEncodeParameter(value : PsJsIrParameter) : Except(PsJsIrEncodeError, String) := psJsIrEncodeText(value.name)
+
+def psJsIrEncodeDeclaration(value : PsJsIrDeclaration) : Except(PsJsIrEncodeError, String) := psJsIrEncodeValues((_root_.List.cons((psJsIrEncodeText(value.name)), (_root_.List.cons((psJsIrEncodeValues((psListMap(psJsIrEncodeParameter, value.parameters)))), (_root_.List.cons((psJsIrEncodeExprWithFuel(65536, value.body)), _root_.List.nil)))))))
+
+def psJsIrEncodeModule(value : PsJsIrModule) : Except(PsJsIrEncodeError, String) := psJsIrEncodeNode("psc-js-ir-json/1", (_root_.List.cons((psJsIrEncodeValues((psListMap(psJsIrEncodeImport, value.imports)))), (_root_.List.cons((psJsIrEncodeValues((psListMap(psJsIrEncodeDeclaration, value.declarations)))), _root_.List.nil)))))

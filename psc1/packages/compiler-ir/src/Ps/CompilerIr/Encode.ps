@@ -1,0 +1,341 @@
+import Ps.CompilerIr.Model
+import Ps.Bridge.Json
+import Ps.Foundation.List
+import Ps.Foundation.Name
+
+-- Deterministic tagged-tuple transport of actual IR; never a validation token.
+inductive PsIrEncodeError where {
+  | fuelExhausted
+}
+
+def psIrEncodePrimitiveType(value : PsVerifiedIrPrimitiveType) : String := match value with {
+  | PsVerifiedIrPrimitiveType.nat => psJsonQuote("nat")
+  | PsVerifiedIrPrimitiveType.int => psJsonQuote("int")
+  | PsVerifiedIrPrimitiveType.uint8 => psJsonQuote("uint8")
+  | PsVerifiedIrPrimitiveType.uint16 => psJsonQuote("uint16")
+  | PsVerifiedIrPrimitiveType.uint32 => psJsonQuote("uint32")
+  | PsVerifiedIrPrimitiveType.uint64 => psJsonQuote("uint64")
+  | PsVerifiedIrPrimitiveType.usize => psJsonQuote("usize")
+  | PsVerifiedIrPrimitiveType.int8 => psJsonQuote("int8")
+  | PsVerifiedIrPrimitiveType.int16 => psJsonQuote("int16")
+  | PsVerifiedIrPrimitiveType.int32 => psJsonQuote("int32")
+  | PsVerifiedIrPrimitiveType.int64 => psJsonQuote("int64")
+  | PsVerifiedIrPrimitiveType.isize => psJsonQuote("isize")
+  | PsVerifiedIrPrimitiveType.float => psJsonQuote("float")
+  | PsVerifiedIrPrimitiveType.float32 => psJsonQuote("float32")
+  | PsVerifiedIrPrimitiveType.bool => psJsonQuote("bool")
+  | PsVerifiedIrPrimitiveType.char => psJsonQuote("char")
+  | PsVerifiedIrPrimitiveType.string => psJsonQuote("string")
+  | PsVerifiedIrPrimitiveType.unit => psJsonQuote("unit")
+}
+
+def psIrEncodeMachineIntegerType(value : PsVerifiedIrMachineIntegerType) : String := match value with {
+  | PsVerifiedIrMachineIntegerType.uint8 => psJsonQuote("uint8")
+  | PsVerifiedIrMachineIntegerType.uint16 => psJsonQuote("uint16")
+  | PsVerifiedIrMachineIntegerType.uint32 => psJsonQuote("uint32")
+  | PsVerifiedIrMachineIntegerType.uint64 => psJsonQuote("uint64")
+  | PsVerifiedIrMachineIntegerType.usize => psJsonQuote("usize")
+  | PsVerifiedIrMachineIntegerType.int8 => psJsonQuote("int8")
+  | PsVerifiedIrMachineIntegerType.int16 => psJsonQuote("int16")
+  | PsVerifiedIrMachineIntegerType.int32 => psJsonQuote("int32")
+  | PsVerifiedIrMachineIntegerType.int64 => psJsonQuote("int64")
+  | PsVerifiedIrMachineIntegerType.isize => psJsonQuote("isize")
+}
+
+def psIrEncodeIntegerBinaryOp(value : PsVerifiedIrIntegerBinaryOp) : String := match value with {
+  | PsVerifiedIrIntegerBinaryOp.add => psJsonQuote("add")
+  | PsVerifiedIrIntegerBinaryOp.sub => psJsonQuote("sub")
+  | PsVerifiedIrIntegerBinaryOp.mul => psJsonQuote("mul")
+  | PsVerifiedIrIntegerBinaryOp.bitAnd => psJsonQuote("bitAnd")
+  | PsVerifiedIrIntegerBinaryOp.bitOr => psJsonQuote("bitOr")
+  | PsVerifiedIrIntegerBinaryOp.bitXor => psJsonQuote("bitXor")
+}
+
+def psIrEncodeIntegerCompareOp(value : PsVerifiedIrIntegerCompareOp) : String := match value with {
+  | PsVerifiedIrIntegerCompareOp.eq => psJsonQuote("eq")
+  | PsVerifiedIrIntegerCompareOp.ne => psJsonQuote("ne")
+  | PsVerifiedIrIntegerCompareOp.lt => psJsonQuote("lt")
+  | PsVerifiedIrIntegerCompareOp.le => psJsonQuote("le")
+  | PsVerifiedIrIntegerCompareOp.gt => psJsonQuote("gt")
+  | PsVerifiedIrIntegerCompareOp.ge => psJsonQuote("ge")
+}
+
+def psIrEncodeFloatingType(value : PsVerifiedIrFloatingType) : String := match value with {
+  | PsVerifiedIrFloatingType.float => psJsonQuote("float")
+  | PsVerifiedIrFloatingType.float32 => psJsonQuote("float32")
+}
+
+def psIrEncodeFloatBinaryOp(value : PsVerifiedIrFloatBinaryOp) : String := match value with {
+  | PsVerifiedIrFloatBinaryOp.add => psJsonQuote("add")
+  | PsVerifiedIrFloatBinaryOp.sub => psJsonQuote("sub")
+  | PsVerifiedIrFloatBinaryOp.mul => psJsonQuote("mul")
+  | PsVerifiedIrFloatBinaryOp.div => psJsonQuote("div")
+}
+
+def psIrEncodeFloatCompareOp(value : PsVerifiedIrFloatCompareOp) : String := match value with {
+  | PsVerifiedIrFloatCompareOp.eq => psJsonQuote("eq")
+  | PsVerifiedIrFloatCompareOp.ne => psJsonQuote("ne")
+  | PsVerifiedIrFloatCompareOp.lt => psJsonQuote("lt")
+  | PsVerifiedIrFloatCompareOp.le => psJsonQuote("le")
+  | PsVerifiedIrFloatCompareOp.gt => psJsonQuote("gt")
+  | PsVerifiedIrFloatCompareOp.ge => psJsonQuote("ge")
+}
+
+def psIrEncodeIntrinsic(value : PsVerifiedIrIntrinsic) : String := match value with {
+  | PsVerifiedIrIntrinsic.machineIntBinary type operation => psJsonArray((_root_.List.cons((psJsonQuote("machineIntBinary")), (_root_.List.cons((psIrEncodeMachineIntegerType(type)), (_root_.List.cons((psIrEncodeIntegerBinaryOp(operation)), _root_.List.nil)))))))
+  | PsVerifiedIrIntrinsic.machineIntCompare type operation => psJsonArray((_root_.List.cons((psJsonQuote("machineIntCompare")), (_root_.List.cons((psIrEncodeMachineIntegerType(type)), (_root_.List.cons((psIrEncodeIntegerCompareOp(operation)), _root_.List.nil)))))))
+  | PsVerifiedIrIntrinsic.floatBinary type operation => psJsonArray((_root_.List.cons((psJsonQuote("floatBinary")), (_root_.List.cons((psIrEncodeFloatingType(type)), (_root_.List.cons((psIrEncodeFloatBinaryOp(operation)), _root_.List.nil)))))))
+  | PsVerifiedIrIntrinsic.floatCompare type operation => psJsonArray((_root_.List.cons((psJsonQuote("floatCompare")), (_root_.List.cons((psIrEncodeFloatingType(type)), (_root_.List.cons((psIrEncodeFloatCompareOp(operation)), _root_.List.nil)))))))
+  | PsVerifiedIrIntrinsic.natAdd => psJsonArray((_root_.List.cons((psJsonQuote("natAdd")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.natSub => psJsonArray((_root_.List.cons((psJsonQuote("natSub")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.natMul => psJsonArray((_root_.List.cons((psJsonQuote("natMul")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.natDiv => psJsonArray((_root_.List.cons((psJsonQuote("natDiv")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.natMod => psJsonArray((_root_.List.cons((psJsonQuote("natMod")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.natEq => psJsonArray((_root_.List.cons((psJsonQuote("natEq")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.natNe => psJsonArray((_root_.List.cons((psJsonQuote("natNe")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.natLe => psJsonArray((_root_.List.cons((psJsonQuote("natLe")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.natLt => psJsonArray((_root_.List.cons((psJsonQuote("natLt")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.intOfNat => psJsonArray((_root_.List.cons((psJsonQuote("intOfNat")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.intRepr => psJsonArray((_root_.List.cons((psJsonQuote("intRepr")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.intNegSucc => psJsonArray((_root_.List.cons((psJsonQuote("intNegSucc")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.intNeg => psJsonArray((_root_.List.cons((psJsonQuote("intNeg")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.intAdd => psJsonArray((_root_.List.cons((psJsonQuote("intAdd")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.intSub => psJsonArray((_root_.List.cons((psJsonQuote("intSub")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.intMul => psJsonArray((_root_.List.cons((psJsonQuote("intMul")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.intEq => psJsonArray((_root_.List.cons((psJsonQuote("intEq")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.intLe => psJsonArray((_root_.List.cons((psJsonQuote("intLe")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.intLt => psJsonArray((_root_.List.cons((psJsonQuote("intLt")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.boolNot => psJsonArray((_root_.List.cons((psJsonQuote("boolNot")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.boolAnd => psJsonArray((_root_.List.cons((psJsonQuote("boolAnd")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.boolOr => psJsonArray((_root_.List.cons((psJsonQuote("boolOr")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.boolEq => psJsonArray((_root_.List.cons((psJsonQuote("boolEq")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.boolNe => psJsonArray((_root_.List.cons((psJsonQuote("boolNe")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.charOfNat => psJsonArray((_root_.List.cons((psJsonQuote("charOfNat")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.charToNat => psJsonArray((_root_.List.cons((psJsonQuote("charToNat")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.stringPush => psJsonArray((_root_.List.cons((psJsonQuote("stringPush")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.stringSingleton => psJsonArray((_root_.List.cons((psJsonQuote("stringSingleton")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.stringLength => psJsonArray((_root_.List.cons((psJsonQuote("stringLength")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.stringAppend => psJsonArray((_root_.List.cons((psJsonQuote("stringAppend")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.stringUtf8ByteSize => psJsonArray((_root_.List.cons((psJsonQuote("stringUtf8ByteSize")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.stringNext => psJsonArray((_root_.List.cons((psJsonQuote("stringNext")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.stringGet => psJsonArray((_root_.List.cons((psJsonQuote("stringGet")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.stringAtEnd => psJsonArray((_root_.List.cons((psJsonQuote("stringAtEnd")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.stringExtract => psJsonArray((_root_.List.cons((psJsonQuote("stringExtract")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.stringEq => psJsonArray((_root_.List.cons((psJsonQuote("stringEq")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.arrayEmptyWithCapacity => psJsonArray((_root_.List.cons((psJsonQuote("arrayEmptyWithCapacity")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.arraySize => psJsonArray((_root_.List.cons((psJsonQuote("arraySize")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.arrayPush => psJsonArray((_root_.List.cons((psJsonQuote("arrayPush")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.arrayGet => psJsonArray((_root_.List.cons((psJsonQuote("arrayGet")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.arrayGetD => psJsonArray((_root_.List.cons((psJsonQuote("arrayGetD")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.arraySet => psJsonArray((_root_.List.cons((psJsonQuote("arraySet")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.arraySetIfInBounds => psJsonArray((_root_.List.cons((psJsonQuote("arraySetIfInBounds")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.arrayMap => psJsonArray((_root_.List.cons((psJsonQuote("arrayMap")), _root_.List.nil)))
+  | PsVerifiedIrIntrinsic.arrayFoldl => psJsonArray((_root_.List.cons((psJsonQuote("arrayFoldl")), _root_.List.nil)))
+}
+
+def psIrEncodeLiteral(value : PsVerifiedIrLiteral) : String := match value with {
+  | PsVerifiedIrLiteral.natural number => psJsonArray((_root_.List.cons((psJsonQuote("natural")), (_root_.List.cons((psJsonQuote((psNatToString(number)))), _root_.List.nil)))))
+  | PsVerifiedIrLiteral.integer number => psJsonArray((_root_.List.cons((psJsonQuote("integer")), (_root_.List.cons((psJsonQuote((Int.repr(number)))), _root_.List.nil)))))
+  | PsVerifiedIrLiteral.machineInteger type number => psJsonArray((_root_.List.cons((psJsonQuote("machineInteger")), (_root_.List.cons((psIrEncodeMachineIntegerType(type)), (_root_.List.cons((psJsonQuote((Int.repr(number)))), _root_.List.nil)))))))
+  | PsVerifiedIrLiteral.string text => psJsonArray((_root_.List.cons((psJsonQuote("string")), (_root_.List.cons((psJsonQuote(text)), _root_.List.nil)))))
+  | PsVerifiedIrLiteral.bool flag => psJsonArray((_root_.List.cons((psJsonQuote("bool")), (_root_.List.cons((if (flag) { "true" } else { "false" }), _root_.List.nil)))))
+  | PsVerifiedIrLiteral.unit => psJsonArray((_root_.List.cons((psJsonQuote("unit")), _root_.List.nil)))
+}
+
+def psIrEncodeArray {alpha : Type}(encode : (_ : alpha) -> Except(PsIrEncodeError, String), values : List(alpha)) : Except(PsIrEncodeError, String) := match (psListMapExcept(encode, values)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encoded => Except.ok((psJsonArray(encoded)))
+}
+
+def psIrEncodeTypeWithFuelWorker(fuel : Nat, type : PsVerifiedIrType) : Except(PsIrEncodeError, String) := match fuel with {
+  | Nat.zero => Except.error(PsIrEncodeError.fuelExhausted)
+  | Nat.succ remaining => let smaller : (_ : PsVerifiedIrType) -> Except(PsIrEncodeError, String) := (fun (value : PsVerifiedIrType) => psIrEncodeTypeWithFuelWorker(remaining, value))
+match type with {
+  | PsVerifiedIrType.unknown => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote("unknown")), _root_.List.nil)))))
+  | PsVerifiedIrType.typeParameter name => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote("typeParameter")), (_root_.List.cons((psJsonQuote(name)), _root_.List.nil)))))))
+  | PsVerifiedIrType.primitive name => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote("primitive")), (_root_.List.cons((psIrEncodePrimitiveType(name)), _root_.List.nil)))))))
+  | PsVerifiedIrType.function parameters result => match (psIrEncodeArray(smaller, parameters)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedParameters => match (smaller(result)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedResult => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote("function")), (_root_.List.cons(encodedParameters, (_root_.List.cons(encodedResult, _root_.List.nil)))))))))
+}
+}
+  | PsVerifiedIrType.named name arguments => match (psIrEncodeArray(smaller, arguments)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encoded => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote("named")), (_root_.List.cons((psJsonQuote(name)), (_root_.List.cons(encoded, _root_.List.nil)))))))))
+}
+}
+}
+
+def psIrEncodeTypeWithFuel(fuel : Nat) : (_ : PsVerifiedIrType) -> Except(PsIrEncodeError, String) := fun (value : PsVerifiedIrType) => psIrEncodeTypeWithFuelWorker(fuel, value)
+
+def psIrEncodeType(type : PsVerifiedIrType) : Except(PsIrEncodeError, String) := psIrEncodeTypeWithFuel(4096, type)
+
+def psIrEncodeParameter(value : PsVerifiedIrParameter) : Except(PsIrEncodeError, String) := match (psIrEncodeType(value.type)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encoded => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote(value.name)), (_root_.List.cons(encoded, _root_.List.nil)))))))
+}
+
+def psIrEncodeMatchBinding(value : PsVerifiedIrMatchBinding) : Except(PsIrEncodeError, String) := match (psIrEncodeType(value.type)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encoded => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote(value.field)), (_root_.List.cons((psJsonQuote(value.name)), (_root_.List.cons(encoded, _root_.List.nil)))))))))
+}
+
+def psIrEncodeExprWithFuelWorker(fuel : Nat, expression : PsVerifiedIrExpr) : Except(PsIrEncodeError, String) := match fuel with {
+  | Nat.zero => Except.error(PsIrEncodeError.fuelExhausted)
+  | Nat.succ remaining => let smaller : (_ : PsVerifiedIrExpr) -> Except(PsIrEncodeError, String) := (fun (value : PsVerifiedIrExpr) => psIrEncodeExprWithFuelWorker(remaining, value))
+let encodeField : (_ : Prod(String, PsVerifiedIrExpr)) -> Except(PsIrEncodeError, String) := (fun (field : Prod(String, PsVerifiedIrExpr)) => match (smaller(field.snd)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encoded => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote(field.fst)), (_root_.List.cons(encoded, _root_.List.nil)))))))
+})
+match expression with {
+  | PsVerifiedIrExpr.literal value => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote("literal")), (_root_.List.cons((psIrEncodeLiteral(value)), _root_.List.nil)))))))
+  | PsVerifiedIrExpr.var name => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote("var")), (_root_.List.cons((psJsonQuote(name)), _root_.List.nil)))))))
+  | PsVerifiedIrExpr.intrinsic operation types arguments => match (psIrEncodeArray(psIrEncodeType, types)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedTypes => match (psIrEncodeArray(smaller, arguments)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedArguments => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote("intrinsic")), (_root_.List.cons((psIrEncodeIntrinsic(operation)), (_root_.List.cons(encodedTypes, (_root_.List.cons(encodedArguments, _root_.List.nil)))))))))))
+}
+}
+  | PsVerifiedIrExpr.lambda parameters result body => match (psIrEncodeArray(psIrEncodeParameter, parameters)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedParameters => match (psIrEncodeType(result)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedResult => match (smaller(body)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedBody => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote("lambda")), (_root_.List.cons(encodedParameters, (_root_.List.cons(encodedResult, (_root_.List.cons(encodedBody, _root_.List.nil)))))))))))
+}
+}
+}
+  | PsVerifiedIrExpr.call fn types arguments => match (smaller(fn)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedFn => match (psIrEncodeArray(psIrEncodeType, types)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedTypes => match (psIrEncodeArray(smaller, arguments)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedArguments => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote("call")), (_root_.List.cons(encodedFn, (_root_.List.cons(encodedTypes, (_root_.List.cons(encodedArguments, _root_.List.nil)))))))))))
+}
+}
+}
+  | PsVerifiedIrExpr.letE name type value body => match (psIrEncodeType(type)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedType => match (smaller(value)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedValue => match (smaller(body)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedBody => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote("letE")), (_root_.List.cons((psJsonQuote(name)), (_root_.List.cons(encodedType, (_root_.List.cons(encodedValue, (_root_.List.cons(encodedBody, _root_.List.nil)))))))))))))
+}
+}
+}
+  | PsVerifiedIrExpr.ifE condition yes no => match (smaller(condition)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedCondition => match (smaller(yes)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedYes => match (smaller(no)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedNo => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote("ifE")), (_root_.List.cons(encodedCondition, (_root_.List.cons(encodedYes, (_root_.List.cons(encodedNo, _root_.List.nil)))))))))))
+}
+}
+}
+  | PsVerifiedIrExpr.record name types fields => match (psIrEncodeArray(psIrEncodeType, types)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedTypes => match (psIrEncodeArray(encodeField, fields)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedFields => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote("record")), (_root_.List.cons((psJsonQuote(name)), (_root_.List.cons(encodedTypes, (_root_.List.cons(encodedFields, _root_.List.nil)))))))))))
+}
+}
+  | PsVerifiedIrExpr.projection name types value field => match (psIrEncodeArray(psIrEncodeType, types)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedTypes => match (smaller(value)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedValue => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote("projection")), (_root_.List.cons((psJsonQuote(name)), (_root_.List.cons(encodedTypes, (_root_.List.cons(encodedValue, (_root_.List.cons((psJsonQuote(field)), _root_.List.nil)))))))))))))
+}
+}
+  | PsVerifiedIrExpr.constructor owner name types fields => match (psIrEncodeArray(psIrEncodeType, types)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedTypes => match (psIrEncodeArray(encodeField, fields)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedFields => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote("constructor")), (_root_.List.cons((psJsonQuote(owner)), (_root_.List.cons((psJsonQuote(name)), (_root_.List.cons(encodedTypes, (_root_.List.cons(encodedFields, _root_.List.nil)))))))))))))
+}
+}
+  | PsVerifiedIrExpr.matchE name types value alternatives => match (psIrEncodeArray(psIrEncodeType, types)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedTypes => match (smaller(value)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedValue => match (psIrEncodeArray((fun (alternative : Prod(String, (Prod((List(PsVerifiedIrMatchBinding)), PsVerifiedIrExpr)))) => match (psIrEncodeArray(psIrEncodeMatchBinding, alternative.snd.fst)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedBindings => match (smaller(alternative.snd.snd)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedBody => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote(alternative.fst)), (_root_.List.cons(encodedBindings, (_root_.List.cons(encodedBody, _root_.List.nil)))))))))
+}
+}), alternatives)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encodedAlternatives => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote("matchE")), (_root_.List.cons((psJsonQuote(name)), (_root_.List.cons(encodedTypes, (_root_.List.cons(encodedValue, (_root_.List.cons(encodedAlternatives, _root_.List.nil)))))))))))))
+}
+}
+}
+}
+}
+
+def psIrEncodeExprWithFuel(fuel : Nat) : (_ : PsVerifiedIrExpr) -> Except(PsIrEncodeError, String) := fun (value : PsVerifiedIrExpr) => psIrEncodeExprWithFuelWorker(fuel, value)
+
+def psIrEncodeExpr(expression : PsVerifiedIrExpr) : Except(PsIrEncodeError, String) := psIrEncodeExprWithFuel(4096, expression)
+
+def psIrEncodeTypeParameters(values : List(PsVerifiedIrTypeParameter)) : String := psJsonArray((psListMap((fun (value : PsVerifiedIrTypeParameter) => psJsonQuote(value.name)), values)))
+
+def psIrEncodeStructureField(value : PsVerifiedIrStructureField) : Except(PsIrEncodeError, String) := match (psIrEncodeType(value.type)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encoded => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote(value.name)), (_root_.List.cons(encoded, _root_.List.nil)))))))
+}
+
+def psIrEncodeStructure(value : PsVerifiedIrStructure) : Except(PsIrEncodeError, String) := match (psIrEncodeArray(psIrEncodeStructureField, value.fields)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok fields => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote(value.name)), (_root_.List.cons((psIrEncodeTypeParameters(value.typeParameters)), (_root_.List.cons(fields, _root_.List.nil)))))))))
+}
+
+def psIrEncodeConstructorField(value : PsVerifiedIrConstructorField) : Except(PsIrEncodeError, String) := match (psIrEncodeType(value.type)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encoded => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote(value.name)), (_root_.List.cons(encoded, _root_.List.nil)))))))
+}
+
+def psIrEncodeConstructor(value : PsVerifiedIrConstructor) : Except(PsIrEncodeError, String) := match (psIrEncodeArray(psIrEncodeConstructorField, value.fields)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok fields => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote(value.name)), (_root_.List.cons(fields, _root_.List.nil)))))))
+}
+
+def psIrEncodeInductive(value : PsVerifiedIrInductive) : Except(PsIrEncodeError, String) := match (psIrEncodeArray(psIrEncodeConstructor, value.constructors)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok constructors => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote(value.name)), (_root_.List.cons((psIrEncodeTypeParameters(value.typeParameters)), (_root_.List.cons(constructors, _root_.List.nil)))))))))
+}
+
+def psIrEncodeDeclaration(value : PsVerifiedIrDeclaration) : Except(PsIrEncodeError, String) := match (psIrEncodeArray(psIrEncodeParameter, value.parameters)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok parameters => match (psIrEncodeType(value.resultType)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok result => match (psIrEncodeExpr(value.body)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok body => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote(value.name)), (_root_.List.cons((psIrEncodeTypeParameters(value.typeParameters)), (_root_.List.cons(parameters, (_root_.List.cons(result, (_root_.List.cons(body, _root_.List.nil)))))))))))))
+}
+}
+}
+
+def psIrEncodeImport(value : PsVerifiedIrExternalImport) : Except(PsIrEncodeError, String) := match (psIrEncodeType(value.type)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encoded => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote(value.localName)), (_root_.List.cons((psJsonQuote(value.source)), (_root_.List.cons((psJsonQuote(value.importedName)), (_root_.List.cons(encoded, _root_.List.nil)))))))))))
+}
+
+def psIrEncodeModule(value : PsVerifiedIrModule) : Except(PsIrEncodeError, String) := match (psIrEncodeArray(psIrEncodeImport, value.imports)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok imports => match (psIrEncodeArray(psIrEncodeStructure, value.structures)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok structures => match (psIrEncodeArray(psIrEncodeInductive, value.inductives)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok inductives => match (psIrEncodeArray(psIrEncodeDeclaration, value.declarations)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok declarations => Except.ok((psJsonArray((_root_.List.cons((psJsonQuote("psc1-ir/1")), (_root_.List.cons(imports, (_root_.List.cons(structures, (_root_.List.cons(inductives, (_root_.List.cons(declarations, _root_.List.nil)))))))))))))
+}
+}
+}
+}

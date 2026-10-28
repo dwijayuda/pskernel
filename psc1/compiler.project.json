@@ -1,0 +1,506 @@
+{
+  "schemaVersion": 1,
+  "entryModule": "Ps.CompilerUnified.Service",
+  "sources": [
+    {
+      "module": "Ps.Foundation.Source",
+      "path": "packages/foundation/src/Ps/Foundation/Source.ps"
+    },
+    {
+      "module": "Ps.Foundation.List",
+      "path": "packages/foundation/src/Ps/Foundation/List.ps"
+    },
+    {
+      "module": "Ps.Syntax.Cursor",
+      "path": "packages/syntax/src/Ps/Syntax/Cursor.ps"
+    },
+    {
+      "module": "Ps.Syntax.Token",
+      "path": "packages/syntax/src/Ps/Syntax/Token.ps"
+    },
+    {
+      "module": "Ps.Syntax.Lexer",
+      "path": "packages/syntax/src/Ps/Syntax/Lexer.ps"
+    },
+    {
+      "module": "Ps.Foundation.Name",
+      "path": "packages/foundation/src/Ps/Foundation/Name.ps"
+    },
+    {
+      "module": "Ps.Syntax.Ast",
+      "path": "packages/syntax/src/Ps/Syntax/Ast.ps"
+    },
+    {
+      "module": "Ps.Syntax.ParserState",
+      "path": "packages/syntax/src/Ps/Syntax/ParserState.ps"
+    },
+    {
+      "module": "Ps.Syntax.ParseCommon",
+      "path": "packages/syntax/src/Ps/Syntax/ParseCommon.ps"
+    },
+    {
+      "module": "Ps.Syntax.ParseBinding",
+      "path": "packages/syntax/src/Ps/Syntax/ParseBinding.ps"
+    },
+    {
+      "module": "Ps.Syntax.ParseDo",
+      "path": "packages/syntax/src/Ps/Syntax/ParseDo.ps"
+    },
+    {
+      "module": "Ps.Syntax.ParseData",
+      "path": "packages/syntax/src/Ps/Syntax/ParseData.ps"
+    },
+    {
+      "module": "Ps.Syntax.Operators",
+      "path": "packages/syntax/src/Ps/Syntax/Operators.ps"
+    },
+    {
+      "module": "Ps.Syntax.ParseLean",
+      "path": "packages/syntax/src/Ps/Syntax/ParseLean.ps"
+    },
+    {
+      "module": "Ps.Syntax.ParseProofScript",
+      "path": "packages/syntax/src/Ps/Syntax/ParseProofScript.ps"
+    },
+    {
+      "module": "Ps.Syntax.PrintCommon",
+      "path": "packages/syntax/src/Ps/Syntax/PrintCommon.ps"
+    },
+    {
+      "module": "Ps.Syntax.PrintLean",
+      "path": "packages/syntax/src/Ps/Syntax/PrintLean.ps"
+    },
+    {
+      "module": "Ps.Syntax.PrintProofScript",
+      "path": "packages/syntax/src/Ps/Syntax/PrintProofScript.ps"
+    },
+    {
+      "module": "Ps.Syntax.Translate",
+      "path": "packages/syntax/src/Ps/Syntax/Translate.ps"
+    },
+    {
+      "module": "Ps.Foundation.Text",
+      "path": "packages/foundation/src/Ps/Foundation/Text.ps"
+    },
+    {
+      "module": "Ps.Bridge.Json",
+      "path": "packages/bridge/src/Ps/Bridge/Json.ps"
+    },
+    {
+      "module": "Ps.Core.Level",
+      "path": "packages/core/src/Ps/Core/Level.ps"
+    },
+    {
+      "module": "Ps.Core.Expr",
+      "path": "packages/core/src/Ps/Core/Expr.ps"
+    },
+    {
+      "module": "Ps.Core.Declaration",
+      "path": "packages/core/src/Ps/Core/Declaration.ps"
+    },
+    {
+      "module": "Ps.Core.Abstract",
+      "path": "packages/core/src/Ps/Core/Abstract.ps"
+    },
+    {
+      "module": "Ps.Core.Subst",
+      "path": "packages/core/src/Ps/Core/Subst.ps"
+    },
+    {
+      "module": "Ps.Core.Equality",
+      "path": "packages/core/src/Ps/Core/Equality.ps"
+    },
+    {
+      "module": "Ps.Environment.Basic",
+      "path": "packages/environment/src/Ps/Environment/Basic.ps"
+    },
+    {
+      "module": "Ps.Bridge.CheckedAdmissions",
+      "path": "packages/bridge/src/Ps/Bridge/CheckedAdmissions.ps"
+    },
+    {
+      "module": "Ps.Core.Builtin",
+      "path": "packages/core/src/Ps/Core/Builtin.ps"
+    },
+    {
+      "module": "Ps.Environment.Prelude",
+      "path": "packages/environment/src/Ps/Environment/Prelude.ps"
+    },
+    {
+      "module": "Ps.Environment.SelfHostPrelude",
+      "path": "packages/environment/src/Ps/Environment/SelfHostPrelude.ps"
+    },
+    {
+      "module": "Ps.Environment.Control",
+      "path": "packages/environment/src/Ps/Environment/Control.ps"
+    },
+    {
+      "module": "Ps.Environment.Order",
+      "path": "packages/environment/src/Ps/Environment/Order.ps"
+    },
+    {
+      "module": "Ps.Environment.SelfHostProd",
+      "path": "packages/environment/src/Ps/Environment/SelfHostProd.ps"
+    },
+    {
+      "module": "Ps.Environment.LocalContext",
+      "path": "packages/environment/src/Ps/Environment/LocalContext.ps"
+    },
+    {
+      "module": "Ps.Environment.Resolve",
+      "path": "packages/environment/src/Ps/Environment/Resolve.ps"
+    },
+    {
+      "module": "Ps.Core.LevelSubst",
+      "path": "packages/core/src/Ps/Core/LevelSubst.ps"
+    },
+    {
+      "module": "Ps.Meta.LevelContext",
+      "path": "packages/meta/src/Ps/Meta/LevelContext.ps"
+    },
+    {
+      "module": "Ps.Meta.Context",
+      "path": "packages/meta/src/Ps/Meta/Context.ps"
+    },
+    {
+      "module": "Ps.Meta.Reduce",
+      "path": "packages/meta/src/Ps/Meta/Reduce.ps"
+    },
+    {
+      "module": "Ps.Meta.Infer",
+      "path": "packages/meta/src/Ps/Meta/Infer.ps"
+    },
+    {
+      "module": "Ps.Environment.Instances",
+      "path": "packages/environment/src/Ps/Environment/Instances.ps"
+    },
+    {
+      "module": "Ps.Meta.Unify",
+      "path": "packages/meta/src/Ps/Meta/Unify.ps"
+    },
+    {
+      "module": "Ps.Meta.SynthInstance",
+      "path": "packages/meta/src/Ps/Meta/SynthInstance.ps"
+    },
+    {
+      "module": "Ps.Elab.SourceTrace",
+      "path": "packages/elab/src/Ps/Elab/SourceTrace.ps"
+    },
+    {
+      "module": "Ps.Elab.Context",
+      "path": "packages/elab/src/Ps/Elab/Context.ps"
+    },
+    {
+      "module": "Ps.Elab.Literal",
+      "path": "packages/elab/src/Ps/Elab/Literal.ps"
+    },
+    {
+      "module": "Ps.Elab.Basic",
+      "path": "packages/elab/src/Ps/Elab/Basic.ps"
+    },
+    {
+      "module": "Ps.Elab.DoBase",
+      "path": "packages/elab/src/Ps/Elab/DoBase.ps"
+    },
+    {
+      "module": "Ps.Elab.DoFor",
+      "path": "packages/elab/src/Ps/Elab/DoFor.ps"
+    },
+    {
+      "module": "Ps.Elab.DoLoop",
+      "path": "packages/elab/src/Ps/Elab/DoLoop.ps"
+    },
+    {
+      "module": "Ps.Elab.DoWhile",
+      "path": "packages/elab/src/Ps/Elab/DoWhile.ps"
+    },
+    {
+      "module": "Ps.Elab.DoTry",
+      "path": "packages/elab/src/Ps/Elab/DoTry.ps"
+    },
+    {
+      "module": "Ps.Elab.Data",
+      "path": "packages/elab/src/Ps/Elab/Data.ps"
+    },
+    {
+      "module": "Ps.Elab.Do",
+      "path": "packages/elab/src/Ps/Elab/Do.ps"
+    },
+    {
+      "module": "Ps.Elab.Operators",
+      "path": "packages/elab/src/Ps/Elab/Operators.ps"
+    },
+    {
+      "module": "Ps.Elab.Term",
+      "path": "packages/elab/src/Ps/Elab/Term.ps"
+    },
+    {
+      "module": "Ps.Elab.Recursion",
+      "path": "packages/elab/src/Ps/Elab/Recursion.ps"
+    },
+    {
+      "module": "Ps.Elab.DoLoopLift",
+      "path": "packages/elab/src/Ps/Elab/DoLoopLift.ps"
+    },
+    {
+      "module": "Ps.Elab.DoForLift",
+      "path": "packages/elab/src/Ps/Elab/DoForLift.ps"
+    },
+    {
+      "module": "Ps.Elab.Declaration",
+      "path": "packages/elab/src/Ps/Elab/Declaration.ps"
+    },
+    {
+      "module": "Ps.CompilerIr.Model",
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/Model.ps"
+    },
+    {
+      "module": "Ps.Erasure.Basic",
+      "path": "packages/erasure/src/Ps/Erasure/Basic.ps"
+    },
+    {
+      "module": "Ps.Erasure.Expr",
+      "path": "packages/erasure/src/Ps/Erasure/Expr.ps"
+    },
+    {
+      "module": "Ps.Erasure.Inductive",
+      "path": "packages/erasure/src/Ps/Erasure/Inductive.ps"
+    },
+    {
+      "module": "Ps.Erasure.Structure",
+      "path": "packages/erasure/src/Ps/Erasure/Structure.ps"
+    },
+    {
+      "module": "Ps.Erasure.StructureRecursor",
+      "path": "packages/erasure/src/Ps/Erasure/StructureRecursor.ps"
+    },
+    {
+      "module": "Ps.Erasure.Definition",
+      "path": "packages/erasure/src/Ps/Erasure/Definition.ps"
+    },
+    {
+      "module": "Ps.Compiler.Api",
+      "path": "packages/compiler/src/Ps/Compiler/Api.ps"
+    },
+    {
+      "module": "Ps.Compiler.Ordinary",
+      "path": "packages/compiler/src/Ps/Compiler/Ordinary.ps"
+    },
+    {
+      "module": "Ps.CompilerIr.Encode",
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/Encode.ps"
+    },
+    {
+      "module": "Ps.Bridge.CompilerHost",
+      "path": "packages/bridge/src/Ps/Bridge/CompilerHost.ps"
+    },
+    {
+      "module": "Ps.CompilerIr.CheckTypes",
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/CheckTypes.ps"
+    },
+    {
+      "module": "Ps.CompilerIr.CheckSize",
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/CheckSize.ps"
+    },
+    {
+      "module": "Ps.CompilerIr.Check",
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/Check.ps"
+    },
+    {
+      "module": "Ps.CompilerIr.Provenance",
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/Provenance.ps"
+    },
+    {
+      "module": "Ps.Foundation.StringSet",
+      "path": "packages/foundation/src/Ps/Foundation/StringSet.ps"
+    },
+    {
+      "module": "Ps.CompilerIr.Specialize",
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/Specialize.ps"
+    },
+    {
+      "module": "Ps.CompilerIr.Validate",
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/Validate.ps"
+    },
+    {
+      "module": "Ps.CompilerIr.WorkerFusion",
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/WorkerFusion.ps"
+    },
+    {
+      "module": "Ps.BackendCommon.Plan",
+      "path": "packages/backend-common/src/Ps/BackendCommon/Plan.ps"
+    },
+    {
+      "module": "Ps.Compiler.Service",
+      "path": "packages/compiler/src/Ps/Compiler/Service.ps"
+    },
+    {
+      "module": "Ps.BackendJs.Model",
+      "path": "packages/backend-js/src/Ps/BackendJs/Model.ps"
+    },
+    {
+      "module": "Ps.BackendJs.Lower",
+      "path": "packages/backend-js/src/Ps/BackendJs/Lower.ps"
+    },
+    {
+      "module": "Ps.BackendJs.Validate",
+      "path": "packages/backend-js/src/Ps/BackendJs/Validate.ps"
+    },
+    {
+      "module": "Ps.BackendJs.TailAlias",
+      "path": "packages/backend-js/src/Ps/BackendJs/TailAlias.ps"
+    },
+    {
+      "module": "Ps.BackendJs.Print",
+      "path": "packages/backend-js/src/Ps/BackendJs/Print.ps"
+    },
+    {
+      "module": "Ps.BackendJs.CompilerService",
+      "path": "packages/backend-js/src/Ps/BackendJs/CompilerService.ps"
+    },
+    {
+      "module": "Ps.BackendTs.Type",
+      "path": "packages/backend-ts/src/Ps/BackendTs/Type.ps"
+    },
+    {
+      "module": "Ps.BackendTs.RuntimeSupport",
+      "path": "packages/backend-ts/src/Ps/BackendTs/RuntimeSupport.ps"
+    },
+    {
+      "module": "Ps.BackendTs.Expr",
+      "path": "packages/backend-ts/src/Ps/BackendTs/Expr.ps"
+    },
+    {
+      "module": "Ps.BackendTs.Module",
+      "path": "packages/backend-ts/src/Ps/BackendTs/Module.ps"
+    },
+    {
+      "module": "Ps.BackendTs.CompilerService",
+      "path": "packages/backend-ts/src/Ps/BackendTs/CompilerService.ps"
+    },
+    {
+      "module": "Ps.BackendRust.RuntimePlan",
+      "path": "packages/backend-rust/src/Ps/BackendRust/RuntimePlan.ps"
+    },
+    {
+      "module": "Ps.BackendRust.Identifier",
+      "path": "packages/backend-rust/src/Ps/BackendRust/Identifier.ps"
+    },
+    {
+      "module": "Ps.BackendRust.Type",
+      "path": "packages/backend-rust/src/Ps/BackendRust/Type.ps"
+    },
+    {
+      "module": "Ps.BackendRust.ValueRefs",
+      "path": "packages/backend-rust/src/Ps/BackendRust/ValueRefs.ps"
+    },
+    {
+      "module": "Ps.BackendRust.Captures",
+      "path": "packages/backend-rust/src/Ps/BackendRust/Captures.ps"
+    },
+    {
+      "module": "Ps.BackendRust.Expr",
+      "path": "packages/backend-rust/src/Ps/BackendRust/Expr.ps"
+    },
+    {
+      "module": "Ps.BackendRust.TailAlias",
+      "path": "packages/backend-rust/src/Ps/BackendRust/TailAlias.ps"
+    },
+    {
+      "module": "Ps.BackendRust.Tail",
+      "path": "packages/backend-rust/src/Ps/BackendRust/Tail.ps"
+    },
+    {
+      "module": "Ps.BackendRust.Runtime",
+      "path": "packages/backend-rust/src/Ps/BackendRust/Runtime.ps"
+    },
+    {
+      "module": "Ps.BackendRust.Module",
+      "path": "packages/backend-rust/src/Ps/BackendRust/Module.ps"
+    },
+    {
+      "module": "Ps.BackendRust.CompilerService",
+      "path": "packages/backend-rust/src/Ps/BackendRust/CompilerService.ps"
+    },
+    {
+      "module": "Ps.BackendWasm.Lower.RuntimeNeeds",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower/RuntimeNeeds.ps"
+    },
+    {
+      "module": "Ps.BackendWasm.Model",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/Model.ps"
+    },
+    {
+      "module": "Ps.BackendWasm.Type",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/Type.ps"
+    },
+    {
+      "module": "Ps.BackendWasm.Lower.TypeInventory",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower/TypeInventory.ps"
+    },
+    {
+      "module": "Ps.BackendWasm.TailCalls",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/TailCalls.ps"
+    },
+    {
+      "module": "Ps.BackendWasm.LowerInt",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/LowerInt.ps"
+    },
+    {
+      "module": "Ps.BackendWasm.LowerFloat",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/LowerFloat.ps"
+    },
+    {
+      "module": "Ps.BackendWasm.RuntimeNat",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.ps"
+    },
+    {
+      "module": "Ps.BackendWasm.IntUtil",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/IntUtil.ps"
+    },
+    {
+      "module": "Ps.BackendWasm.RuntimeInt",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/RuntimeInt.ps"
+    },
+    {
+      "module": "Ps.BackendWasm.RuntimeString",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/RuntimeString.ps"
+    },
+    {
+      "module": "Ps.BackendWasm.RuntimeIntRepr",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/RuntimeIntRepr.ps"
+    },
+    {
+      "module": "Ps.BackendWasm.Lower",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower.ps"
+    },
+    {
+      "module": "Ps.BackendWasm.BinaryBytes",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/BinaryBytes.ps"
+    },
+    {
+      "module": "Ps.BackendWasm.ValidateStructure",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/ValidateStructure.ps"
+    },
+    {
+      "module": "Ps.BackendWasm.ValidateTyping",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/ValidateTyping.ps"
+    },
+    {
+      "module": "Ps.BackendWasm.ValidateIr",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/ValidateIr.ps"
+    },
+    {
+      "module": "Ps.BackendWasm.ServiceAbi",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/ServiceAbi.ps"
+    },
+    {
+      "module": "Ps.BackendWasm.CompilerService",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/CompilerService.ps"
+    },
+    {
+      "module": "Ps.CompilerUnified.Service",
+      "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.ps"
+    }
+  ]
+}

@@ -1,0 +1,497 @@
+import Ps.Syntax.ParseCommon
+import Ps.Syntax.ParseBinding
+
+-- Both surfaces build the same procedural AST. Layout and delimiters are
+-- frontend concerns; lexical mutation and return are elaborated into checked Core.
+def psParseDoTermStop(value : PsSyntaxTerm) : PsSourcePos := let span := (psSyntaxTermSpan(value))
+span.stop
+
+def psParseDoExpected(expected : String, cursor : PsTokenCursor) : PsParseError := match (psTokenCursorPeek(cursor)) with {
+  | Option.none => PsParseError.unexpectedEnd(expected)
+  | Option.some token => PsParseError.expectedText(expected, token.text, token.span)
+}
+
+def psParseDoOpenToken(text : String) : Bool := if (psStringEq(text, "(")) { true } else { if (psStringEq(text, "[")) { true } else { psStringEq(text, "{") } }
+
+def psParseDoCloseToken(text : String) : Bool := if (psStringEq(text, ")")) { true } else { if (psStringEq(text, "]")) { true } else { psStringEq(text, "}") } }
+
+def psParseDoArrow(cursor : PsTokenCursor) : Bool := if (psTokenCursorAtText(cursor, "<-")) { true } else { psTokenCursorAtText(cursor, "←") }
+
+-- Track unbracketed term conditionals so the else of an enclosing procedural
+-- branch closes the statement, while an else in its RHS remains part of the term.
+-- Match alternatives may align with their match expression.
+def psParseDoTakeStatement(fuel : Nat, start : PsSourcePos) : (_ : Nat) -> (_ : Nat) -> (_ : Nat) -> (_ : PsTokenCursor) -> (_ : List(PsToken)) -> PsParseResult((List(PsToken))) := match fuel with {
+  | Nat.zero => fun (_depth : Nat) (_conditionals : Nat) (_handlers : Nat) (cursor : PsTokenCursor) (tokensRev : List(PsToken)) => PsParseResult.mk((psParseListReverse(tokensRev)), cursor)
+  | Nat.succ remaining => fun (depth : Nat) (conditionals : Nat) (handlers : Nat) (cursor : PsTokenCursor) (tokensRev : List(PsToken)) => let smaller := (psParseDoTakeStatement(remaining, start))
+match (psTokenCursorPeek(cursor)) with {
+  | Option.none => PsParseResult.mk((psParseListReverse(tokensRev)), cursor)
+  | Option.some token => let stop := (if (psTokenKindEq(token.kind, PsTokenKind.endOfInput)) { true } else { if (Nat.beq(depth, 0)) { if (psParseDoCloseToken(token.text)) { true } else { if (psStringEq(token.text, ";")) { true } else { if (psStringEq(token.text, "catch")) { Nat.beq(handlers, 0) } else { if (psStringEq(token.text, "else")) { Nat.beq(conditionals, 0) } else { if (Nat.ble((Nat.succ(start.line)), token.span.start.line)) { if (psStringEq(token.text, "|")) { Nat.blt(token.span.start.column, start.column) } else { Nat.ble(token.span.start.column, start.column) } } else { false } } } } } } else { false } })
+if (stop) { PsParseResult.mk((psParseListReverse(tokensRev)), cursor) } else { match (psTokenCursorAdvance(cursor)) with {
+  | Option.none => PsParseResult.mk((psParseListReverse(tokensRev)), cursor)
+  | Option.some read => let nextDepth := (if (psParseDoOpenToken(token.text)) { Nat.succ(depth) } else { if (psParseDoCloseToken(token.text)) { Nat.sub(depth, 1) } else { depth } })
+let nextConditionals := (if (Nat.beq(depth, 0)) { if (psStringEq(token.text, "if")) { Nat.succ(conditionals) } else { if (psStringEq(token.text, "else")) { Nat.sub(conditionals, 1) } else { conditionals } } } else { conditionals })
+let nextHandlers := (if (Nat.beq(depth, 0)) { if (psStringEq(token.text, "try")) { Nat.succ(handlers) } else { if (psStringEq(token.text, "catch")) { Nat.sub(handlers, 1) } else { handlers } } } else { handlers })
+smaller(nextDepth, nextConditionals, nextHandlers, read.cursor, (List.cons(token, tokensRev)))
+} }
+}
+}
+
+inductive PsParseDoHead where {
+  | binding(name : PsSyntaxName, annotation : Option(PsSyntaxTerm), value : PsSyntaxTerm, monadic : Bool, mutable : Bool, span : PsSourceSpan)
+  | patternBinding(pattern : PsSyntaxBindingPattern, annotation : Option(PsSyntaxTerm), value : PsSyntaxTerm, span : PsSourceSpan)
+  | assignment(name : PsSyntaxName, value : PsSyntaxTerm, span : PsSourceSpan)
+  | conditional(condition : PsSyntaxTerm, thenBody : PsSyntaxTerm, elseBody : PsSyntaxTerm, span : PsSourceSpan)
+  | forEach(name : PsSyntaxName, collection : PsSyntaxTerm, body : PsSyntaxTerm, span : PsSourceSpan)
+  | forRange(name : PsSyntaxName, lower : PsSyntaxTerm, upper : PsSyntaxTerm, body : PsSyntaxTerm, span : PsSourceSpan)
+  | whileLoop(condition : PsSyntaxTerm, body : PsSyntaxTerm, span : PsSourceSpan)
+  | handler(body : PsSyntaxTerm, name : PsSyntaxName, recovery : PsSyntaxTerm, span : PsSourceSpan)
+  | action(value : PsSyntaxTerm)
+  | nested(body : PsSyntaxTerm, span : PsSourceSpan)
+  | returnValue(value : PsSyntaxTerm, span : PsSourceSpan)
+}
+
+def psParseDoCompleteTerm(parseTerm : (_ : PsTokenCursor) -> Except(PsParseError, (PsParseResult(PsSyntaxTerm))), cursor : PsTokenCursor) : Except(PsParseError, PsSyntaxTerm) := match (parseTerm(cursor)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok value => if (psTokenCursorDone(value.cursor)) { Except.ok(value.value) } else { Except.error((psParseDoExpected("end of do statement", value.cursor))) }
+}
+
+def psParseDoBindingValue(parseTerm : (_ : PsTokenCursor) -> Except(PsParseError, (PsParseResult(PsSyntaxTerm))), start : PsSourcePos, name : PsSyntaxName, mutable : Bool, annotation : Option(PsSyntaxTerm), cursor : PsTokenCursor) : Except(PsParseError, PsParseDoHead) := let monadic := (psParseDoArrow(cursor))
+if (if (mutable) { monadic } else { false }) { Except.error((psParseDoExpected(":= for a mutable local", cursor))) } else { if (if (monadic) { true } else { psTokenCursorAtText(cursor, ":=") }) { match (psTokenCursorAdvance(cursor)) with {
+  | Option.none => Except.error((PsParseError.unexpectedEnd("do binding value")))
+  | Option.some separator => match (psParseDoCompleteTerm(parseTerm, separator.cursor)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok value => Except.ok((PsParseDoHead.binding(name, annotation, value, monadic, mutable, ({ start := start, stop := psParseDoTermStop(value) }))))
+}
+} } else { Except.error((psParseDoExpected(":= or <-", cursor))) } }
+
+def psParseDoNamedBinding(parseTerm : (_ : PsTokenCursor) -> Except(PsParseError, (PsParseResult(PsSyntaxTerm))), start : PsSourcePos, mutable : Bool, cursor : PsTokenCursor) : Except(PsParseError, PsParseDoHead) := match (psTokenCursorExpectKind(cursor, PsTokenKind.identifier)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok name => let sourceName : PsSyntaxName := (psSyntaxSourceName((_root_.List.cons(name.token.text, _root_.List.nil)), name.token.span))
+if (psTokenCursorAtText(name.cursor, ":")) { match (psTokenCursorAdvance(name.cursor)) with {
+  | Option.none => Except.error((PsParseError.unexpectedEnd("binding type")))
+  | Option.some colon => match (parseTerm(colon.cursor)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok annotation => psParseDoBindingValue(parseTerm, start, sourceName, mutable, (Option.some(annotation.value)), annotation.cursor)
+}
+} } else { psParseDoBindingValue(parseTerm, start, sourceName, mutable, Option.none, name.cursor) }
+}
+
+def psParseDoPatternBinding(parseTerm : (_ : PsTokenCursor) -> Except(PsParseError, (PsParseResult(PsSyntaxTerm))), start : PsSourcePos, cursor : PsTokenCursor) : Except(PsParseError, PsParseDoHead) := match (psParseBindingPatternHeader(parseTerm, cursor)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok header => match (psTokenCursorExpectText(header.cursor, ":=")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok assign => match (psParseDoCompleteTerm(parseTerm, assign.cursor)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok value => Except.ok((PsParseDoHead.patternBinding(header.pattern, header.annotation, value, ({ start := start, stop := psParseDoTermStop(value) }))))
+}
+}
+}
+
+def psParseDoStatement(parseTerm : (_ : PsTokenCursor) -> Except(PsParseError, (PsParseResult(PsSyntaxTerm))), cursor : PsTokenCursor) : Except(PsParseError, PsParseDoHead) := if (psTokenCursorAtText(cursor, "throw")) { match (psTokenCursorAdvance(cursor)) with {
+  | none => Except.error((PsParseError.unexpectedEnd("throw value")))
+  | some keyword => match (psParseDoCompleteTerm(parseTerm, keyword.cursor)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok value => let span := (psSyntaxSpanJoin(keyword.token.span, (psSyntaxTermSpan(value))))
+Except.ok((PsParseDoHead.action((PsSyntaxTerm.app((psSyntaxSyntheticReference("throw", keyword.token.span)), (_root_.List.cons(value, _root_.List.nil)), span)))))
+}
+} } else { if (psTokenCursorAtText(cursor, "return")) { match (psTokenCursorAdvance(cursor)) with {
+  | Option.none => Except.error((PsParseError.unexpectedEnd("return value")))
+  | Option.some keyword => match (psParseDoCompleteTerm(parseTerm, keyword.cursor)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok value => Except.ok((PsParseDoHead.returnValue(value, ({ start := keyword.token.span.start, stop := psParseDoTermStop(value) }))))
+}
+} } else { if (psTokenCursorAtText(cursor, "do")) { match (psParseDoCompleteTerm(parseTerm, cursor)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok value => match value with {
+  | PsSyntaxTerm.doE body span => Except.ok((PsParseDoHead.nested(body, span)))
+  | _ => Except.error((psParseDoExpected("nested do block", cursor)))
+}
+} } else { if (psTokenCursorAtText(cursor, "let")) { match (psTokenCursorAdvance(cursor)) with {
+  | Option.none => Except.error((PsParseError.unexpectedEnd("do binding")))
+  | Option.some keyword => if (psTokenCursorAtText(keyword.cursor, "mut")) { match (psTokenCursorAdvance(keyword.cursor)) with {
+  | Option.none => Except.error((PsParseError.unexpectedEnd("mutable local name")))
+  | Option.some marker => psParseDoNamedBinding(parseTerm, keyword.token.span.start, true, marker.cursor)
+} } else { if (psTokenCursorAtText(keyword.cursor, "(")) { psParseDoPatternBinding(parseTerm, keyword.token.span.start, keyword.cursor) } else { psParseDoNamedBinding(parseTerm, keyword.token.span.start, false, keyword.cursor) } }
+} } else { let action : Except(PsParseError, PsParseDoHead) := (match (psParseDoCompleteTerm(parseTerm, cursor)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok value => Except.ok((PsParseDoHead.action(value)))
+})
+match (psTokenCursorAdvance(cursor)) with {
+  | Option.none => action
+  | Option.some name => if (psTokenKindEq(name.token.kind, PsTokenKind.identifier)) { if (psTokenCursorAtText(name.cursor, ":=")) { match (psTokenCursorAdvance(name.cursor)) with {
+  | Option.none => Except.error((PsParseError.unexpectedEnd("assignment value")))
+  | Option.some separator => match (psParseDoCompleteTerm(parseTerm, separator.cursor)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok value => Except.ok((PsParseDoHead.assignment((psSyntaxSourceName((_root_.List.cons(name.token.text, _root_.List.nil)), name.token.span)), value, ({ start := name.token.span.start, stop := psParseDoTermStop(value) }))))
+}
+} } else { action } } else { action }
+} } } } }
+
+def psParseDoHeadSpan(head : PsParseDoHead) : PsSourceSpan := match head with {
+  | PsParseDoHead.binding _ _ _ _ _ span => span
+  | PsParseDoHead.patternBinding _ _ _ span => span
+  | PsParseDoHead.assignment _ _ span => span
+  | PsParseDoHead.conditional _ _ _ span => span
+  | PsParseDoHead.forEach _ _ _ span => span
+  | PsParseDoHead.forRange _ _ _ _ span => span
+  | PsParseDoHead.whileLoop _ _ span => span
+  | PsParseDoHead.returnValue _ span => span
+  | PsParseDoHead.handler _ _ _ span => span
+  | PsParseDoHead.action value => psSyntaxTermSpan(value)
+  | PsParseDoHead.nested _ span => span
+}
+
+def psParseDoHeadStopLine(head : PsParseDoHead) : Nat := let span := (psParseDoHeadSpan(head))
+span.stop.line
+
+-- A branch followed by another statement has a Unit fallthrough path.
+-- Explicit returns remain separate and do not execute the continuation.
+def psParseDoFallthrough(body : PsSyntaxTerm) : PsSyntaxTerm := match body with {
+  | PsSyntaxTerm.letE name type value rest span => PsSyntaxTerm.letE(name, type, value, (psParseDoFallthrough(rest)), span)
+  | PsSyntaxTerm.letPatternE pattern type value rest span => PsSyntaxTerm.letPatternE(pattern, type, value, (psParseDoFallthrough(rest)), span)
+  | PsSyntaxTerm.doLetMutE name type value rest span => PsSyntaxTerm.doLetMutE(name, type, value, (psParseDoFallthrough(rest)), span)
+  | PsSyntaxTerm.doAssignE name value rest span => PsSyntaxTerm.doAssignE(name, value, (psParseDoFallthrough(rest)), span)
+  | PsSyntaxTerm.doBindE name type value rest span => PsSyntaxTerm.doBindE(name, type, value, (psParseDoFallthrough(rest)), span)
+  | PsSyntaxTerm.doThenE action rest span => PsSyntaxTerm.doThenE(action, (psParseDoFallthrough(rest)), span)
+  | PsSyntaxTerm.doIfE condition thenBody elseBody rest span => match rest with {
+  | PsSyntaxTerm.doEndE _ => PsSyntaxTerm.doIfE(condition, (psParseDoFallthrough(thenBody)), (psParseDoFallthrough(elseBody)), rest, span)
+  | _ => PsSyntaxTerm.doIfE(condition, thenBody, elseBody, (psParseDoFallthrough(rest)), span)
+}
+  | PsSyntaxTerm.doForE name collection loopBody rest span => PsSyntaxTerm.doForE(name, collection, loopBody, (psParseDoFallthrough(rest)), span)
+  | PsSyntaxTerm.doForRangeE name lower upper loopBody rest span => PsSyntaxTerm.doForRangeE(name, lower, upper, loopBody, (psParseDoFallthrough(rest)), span)
+  | PsSyntaxTerm.doWhileE condition loopBody rest span => PsSyntaxTerm.doWhileE(condition, loopBody, (psParseDoFallthrough(rest)), span)
+  | PsSyntaxTerm.doTryE action name recovery rest span => match rest with {
+  | PsSyntaxTerm.doEndE _ => PsSyntaxTerm.doTryE((psParseDoFallthrough(action)), name, (psParseDoFallthrough(recovery)), rest, span)
+  | _ => PsSyntaxTerm.doTryE(action, name, recovery, (psParseDoFallthrough(rest)), span)
+}
+  | PsSyntaxTerm.doReturnE _ _ => body
+  | PsSyntaxTerm.doEndE _ => body
+  | _ => PsSyntaxTerm.doThenE(body, (PsSyntaxTerm.doEndE((psSyntaxTermSpan(body)))), (psSyntaxTermSpan(body)))
+}
+
+-- Lean's direct do-element nests by splicing its statement sequence. A
+-- parenthesized do term remains an ordinary action with its own return context.
+def psParseDoAppend(fuel : Nat, tail : PsSyntaxTerm) : (_ : PsSyntaxTerm) -> Except(PsParseError, PsSyntaxTerm) := match fuel with {
+  | Nat.zero => fun (_body : PsSyntaxTerm) => Except.error(PsParseError.fuelExhausted)
+  | Nat.succ remaining => fun (body : PsSyntaxTerm) => let smaller := (psParseDoAppend(remaining, tail))
+let rebuild : (_ : PsSyntaxTerm) -> (_ : (_ : PsSyntaxTerm) -> PsSyntaxTerm) -> Except(PsParseError, PsSyntaxTerm) := (fun (rest : PsSyntaxTerm) (make : (_ : PsSyntaxTerm) -> PsSyntaxTerm) => match (smaller(rest)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok appended => Except.ok((make(appended)))
+})
+match body with {
+  | PsSyntaxTerm.letE name type value rest span => rebuild(rest, (fun (appended : PsSyntaxTerm) => PsSyntaxTerm.letE(name, type, value, appended, (psSyntaxSpanJoin(span, (psSyntaxTermSpan(tail)))))))
+  | PsSyntaxTerm.letPatternE pattern type value rest span => rebuild(rest, (fun (appended : PsSyntaxTerm) => PsSyntaxTerm.letPatternE(pattern, type, value, appended, (psSyntaxSpanJoin(span, (psSyntaxTermSpan(tail)))))))
+  | PsSyntaxTerm.doLetMutE name type value rest span => rebuild(rest, (fun (appended : PsSyntaxTerm) => PsSyntaxTerm.doLetMutE(name, type, value, appended, (psSyntaxSpanJoin(span, (psSyntaxTermSpan(tail)))))))
+  | PsSyntaxTerm.doAssignE name value rest span => rebuild(rest, (fun (appended : PsSyntaxTerm) => PsSyntaxTerm.doAssignE(name, value, appended, (psSyntaxSpanJoin(span, (psSyntaxTermSpan(tail)))))))
+  | PsSyntaxTerm.doBindE name type value rest span => rebuild(rest, (fun (appended : PsSyntaxTerm) => PsSyntaxTerm.doBindE(name, type, value, appended, (psSyntaxSpanJoin(span, (psSyntaxTermSpan(tail)))))))
+  | PsSyntaxTerm.doThenE action rest span => rebuild(rest, (fun (appended : PsSyntaxTerm) => PsSyntaxTerm.doThenE(action, appended, (psSyntaxSpanJoin(span, (psSyntaxTermSpan(tail)))))))
+  | PsSyntaxTerm.doIfE condition thenBody elseBody rest span => match rest with {
+  | PsSyntaxTerm.doEndE _ => Except.ok((PsSyntaxTerm.doIfE(condition, (psParseDoFallthrough(thenBody)), (psParseDoFallthrough(elseBody)), tail, (psSyntaxSpanJoin(span, (psSyntaxTermSpan(tail)))))))
+  | _ => rebuild(rest, (fun (appended : PsSyntaxTerm) => PsSyntaxTerm.doIfE(condition, thenBody, elseBody, appended, (psSyntaxSpanJoin(span, (psSyntaxTermSpan(tail)))))))
+}
+  | PsSyntaxTerm.doForE name collection loopBody rest span => rebuild(rest, (fun (appended : PsSyntaxTerm) => PsSyntaxTerm.doForE(name, collection, loopBody, appended, (psSyntaxSpanJoin(span, (psSyntaxTermSpan(tail)))))))
+  | PsSyntaxTerm.doForRangeE name lower upper loopBody rest span => rebuild(rest, (fun (appended : PsSyntaxTerm) => PsSyntaxTerm.doForRangeE(name, lower, upper, loopBody, appended, (psSyntaxSpanJoin(span, (psSyntaxTermSpan(tail)))))))
+  | PsSyntaxTerm.doWhileE condition loopBody rest span => rebuild(rest, (fun (appended : PsSyntaxTerm) => PsSyntaxTerm.doWhileE(condition, loopBody, appended, (psSyntaxSpanJoin(span, (psSyntaxTermSpan(tail)))))))
+  | PsSyntaxTerm.doTryE action name recovery rest span => match rest with {
+  | PsSyntaxTerm.doEndE _ => Except.ok((PsSyntaxTerm.doTryE((psParseDoFallthrough(action)), name, (psParseDoFallthrough(recovery)), tail, (psSyntaxSpanJoin(span, (psSyntaxTermSpan(tail)))))))
+  | _ => rebuild(rest, (fun (appended : PsSyntaxTerm) => PsSyntaxTerm.doTryE(action, name, recovery, appended, (psSyntaxSpanJoin(span, (psSyntaxTermSpan(tail)))))))
+}
+  | PsSyntaxTerm.doReturnE _ _ => Except.error((PsParseError.expectedText("terminal return in this statement sequence", "following statement", (psSyntaxTermSpan(tail)))))
+  | PsSyntaxTerm.doEndE _ => Except.ok(tail)
+  | _ => Except.ok((PsSyntaxTerm.doThenE(body, tail, (psSyntaxSpanJoin((psSyntaxTermSpan(body)), (psSyntaxTermSpan(tail)))))))
+}
+}
+
+def psParseDoCloseHead(head : PsParseDoHead, tail : Option(PsSyntaxTerm)) : Except(PsParseError, PsSyntaxTerm) := let span := (psParseDoHeadSpan(head))
+let rest : PsSyntaxTerm := (match tail with {
+  | Option.none => PsSyntaxTerm.doEndE(span)
+  | Option.some body => body
+})
+let fullSpan := (psSyntaxSpanJoin(span, (psSyntaxTermSpan(rest))))
+match head with {
+  | PsParseDoHead.nested body _ => match tail with {
+  | Option.none => Except.ok(body)
+  | Option.some following => psParseDoAppend(4096, following, body)
+}
+  | PsParseDoHead.returnValue value returnSpan => match tail with {
+  | Option.none => Except.ok((PsSyntaxTerm.doReturnE(value, returnSpan)))
+  | Option.some following => Except.error((PsParseError.expectedText("terminal return in this statement sequence", "following statement", (psSyntaxTermSpan(following)))))
+}
+  | PsParseDoHead.action value => match tail with {
+  | Option.none => Except.ok(value)
+  | Option.some following => Except.ok((PsSyntaxTerm.doThenE(value, following, fullSpan)))
+}
+  | PsParseDoHead.patternBinding pattern annotation value _ => Except.ok((PsSyntaxTerm.letPatternE(pattern, annotation, value, rest, fullSpan)))
+  | PsParseDoHead.binding name annotation value monadic mutable _ => if (mutable) { Except.ok((PsSyntaxTerm.doLetMutE(name, annotation, value, rest, fullSpan))) } else { if (monadic) { Except.ok((PsSyntaxTerm.doBindE(name, annotation, value, rest, fullSpan))) } else { Except.ok((PsSyntaxTerm.letE(name, annotation, value, rest, fullSpan))) } }
+  | PsParseDoHead.assignment name value _ => Except.ok((PsSyntaxTerm.doAssignE(name, value, rest, fullSpan)))
+  | PsParseDoHead.forEach name collection body _ => Except.ok((PsSyntaxTerm.doForE(name, collection, (psParseDoFallthrough(body)), rest, fullSpan)))
+  | PsParseDoHead.forRange name lower upper body _ => Except.ok((PsSyntaxTerm.doForRangeE(name, lower, upper, (psParseDoFallthrough(body)), rest, fullSpan)))
+  | PsParseDoHead.whileLoop condition body _ => Except.ok((PsSyntaxTerm.doWhileE(condition, (psParseDoFallthrough(body)), rest, fullSpan)))
+  | PsParseDoHead.handler action name recovery _ => match tail with {
+  | none => Except.ok((PsSyntaxTerm.doTryE(action, name, recovery, rest, fullSpan)))
+  | some _ => Except.ok((PsSyntaxTerm.doTryE((psParseDoFallthrough(action)), name, (psParseDoFallthrough(recovery)), rest, fullSpan)))
+}
+  | PsParseDoHead.conditional condition thenBody elseBody _ => match tail with {
+  | Option.none => Except.ok((PsSyntaxTerm.doIfE(condition, thenBody, elseBody, rest, fullSpan)))
+  | Option.some _ => Except.ok((PsSyntaxTerm.doIfE(condition, (psParseDoFallthrough(thenBody)), (psParseDoFallthrough(elseBody)), rest, fullSpan)))
+}
+}
+
+def psParseDoBranch(parseBody : (_ : Bool) -> (_ : Nat) -> (_ : PsTokenCursor) -> Except(PsParseError, (PsParseResult(PsSyntaxTerm))), allowLayout : Bool, cursor : PsTokenCursor) : Except(PsParseError, (PsParseResult(PsSyntaxTerm))) := if (psTokenCursorAtText(cursor, "{")) { match (psTokenCursorAdvance(cursor)) with {
+  | Option.none => Except.error((PsParseError.unexpectedEnd("branch body")))
+  | Option.some opening => if (psTokenCursorAtText(opening.cursor, "}")) { Except.error((psParseDoExpected("nonempty procedural branch", opening.cursor))) } else { match (psTokenCursorPeek(opening.cursor)) with {
+  | Option.none => Except.error((PsParseError.unexpectedEnd("branch body")))
+  | Option.some first => match (parseBody(true, first.span.start.column, opening.cursor)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok body => match (psTokenCursorExpectText(body.cursor, "}")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok closing => Except.ok((PsParseResult.mk(body.value, closing.cursor)))
+}
+}
+} }
+} } else { if (allowLayout) { match (psTokenCursorPeek(cursor)) with {
+  | Option.none => Except.error((PsParseError.unexpectedEnd("branch body")))
+  | Option.some first => if ((psTokenCursorAtText(cursor, "else") || psTokenCursorAtText(cursor, "catch"))) { Except.error((psParseDoExpected("branch body", cursor))) } else { parseBody(false, first.span.start.column, cursor) }
+} } else { Except.error((psParseDoExpected("{", cursor))) } }
+
+-- An inline native else-if chain inherits the original conditional's layout
+-- owner. Parsing it as an ordinary branch instead anchors the child at its
+-- later "if" column and can give its final else to an enclosing conditional.
+-- Only the chain is recursive here: following statements remain outside it.
+-- Source spans, the ordinary branch grammar and PS brace policy are unchanged.
+def psParseDoConditionalWithFuel(parseTerm : (_ : PsTokenCursor) -> Except(PsParseError, (PsParseResult(PsSyntaxTerm))), parseBody : (_ : Bool) -> (_ : Nat) -> (_ : PsTokenCursor) -> Except(PsParseError, (PsParseResult(PsSyntaxTerm))), fuel : Nat) : (_ : Nat) -> (_ : Bool) -> (_ : PsTokenCursor) -> Except(PsParseError, (PsParseResult(PsParseDoHead))) := match fuel with {
+  | Nat.zero => fun (_ownerColumn : Nat) (_native : Bool) (_cursor : PsTokenCursor) => Except.error(PsParseError.fuelExhausted)
+  | Nat.succ remaining => fun (ownerColumn : Nat) (native : Bool) (cursor : PsTokenCursor) => let smaller := (psParseDoConditionalWithFuel(parseTerm, parseBody, remaining))
+match (psTokenCursorExpectText(cursor, "if")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok keyword => let condition : Except(PsParseError, (PsParseResult(PsSyntaxTerm))) := (if (native) { match (parseTerm(keyword.cursor)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok value => match (psTokenCursorExpectText(value.cursor, "then")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok separator => Except.ok((PsParseResult.mk(value.value, separator.cursor)))
+}
+} } else { match (psTokenCursorExpectText(keyword.cursor, "(")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok opening => match (parseTerm(opening.cursor)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok value => match (psTokenCursorExpectText(value.cursor, ")")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok closing => Except.ok((PsParseResult.mk(value.value, closing.cursor)))
+}
+}
+} })
+match condition with {
+  | Except.error error => Except.error(error)
+  | Except.ok condition => match (psParseDoBranch(parseBody, native, condition.cursor)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok thenBody => let hasElse : Bool := (if (psTokenCursorAtText(thenBody.cursor, "else")) { if (native) { match (psTokenCursorPeek(thenBody.cursor)) with {
+  | Option.none => false
+  | Option.some token => Nat.ble(ownerColumn, token.span.start.column)
+} } else { true } } else { false })
+let elseBody : Except(PsParseError, (PsParseResult(PsSyntaxTerm))) := (if (hasElse) { match (psTokenCursorAdvance(thenBody.cursor)) with {
+  | Option.none => Except.error((PsParseError.unexpectedEnd("else branch")))
+  | Option.some elseKeyword => let inlineIf : Bool := (if ((native && psTokenCursorAtText(elseKeyword.cursor, "if"))) { match (psTokenCursorPeek(elseKeyword.cursor)) with {
+  | Option.none => false
+  | Option.some first => Nat.beq(elseKeyword.token.span.start.line, first.span.start.line)
+} } else { false })
+if (inlineIf) { match (smaller(ownerColumn, native, elseKeyword.cursor)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok nested => match (psParseDoCloseHead(nested.value, Option.none)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok value => Except.ok((PsParseResult.mk(value, nested.cursor)))
+}
+} } else { psParseDoBranch(parseBody, native, elseKeyword.cursor) }
+} } else { Except.ok((PsParseResult.mk((PsSyntaxTerm.doEndE((psSyntaxTermSpan(thenBody.value)))), thenBody.cursor))) })
+match elseBody with {
+  | Except.error error => Except.error(error)
+  | Except.ok elseBody => Except.ok((PsParseResult.mk((PsParseDoHead.conditional(condition.value, thenBody.value, elseBody.value, ({ start := keyword.token.span.start, stop := psParseDoTermStop(elseBody.value) }))), elseBody.cursor)))
+}
+}
+}
+}
+}
+
+def psParseDoConditional(parseTerm : (_ : PsTokenCursor) -> Except(PsParseError, (PsParseResult(PsSyntaxTerm))), parseBody : (_ : Bool) -> (_ : Nat) -> (_ : PsTokenCursor) -> Except(PsParseError, (PsParseResult(PsSyntaxTerm))), native : Bool, cursor : PsTokenCursor) : Except(PsParseError, (PsParseResult(PsParseDoHead))) := match (psTokenCursorPeek(cursor)) with {
+  | Option.none => Except.error((PsParseError.unexpectedEnd("if")))
+  | Option.some first => psParseDoConditionalWithFuel(parseTerm, parseBody, (Nat.succ((psTokenCursorLength(cursor)))), first.span.start.column, native, cursor)
+}
+
+-- A procedural header ends at an outer delimiter. This prevents the PS body
+-- brace from being mistaken for a native record argument to the iterable.
+def psParseDoTakeHeader(delimiter : String, fuel : Nat) : (_ : Nat) -> (_ : PsTokenCursor) -> (_ : List(PsToken)) -> Except(PsParseError, (PsParseResult((List(PsToken))))) := match fuel with {
+  | Nat.zero => fun (_depth : Nat) (_cursor : PsTokenCursor) (_tokensRev : List(PsToken)) => Except.error(PsParseError.fuelExhausted)
+  | Nat.succ remaining => fun (depth : Nat) (cursor : PsTokenCursor) (tokensRev : List(PsToken)) => let smaller : (_ : Nat) -> (_ : PsTokenCursor) -> (_ : List(PsToken)) -> Except(PsParseError, (PsParseResult((List(PsToken))))) := (psParseDoTakeHeader(delimiter, remaining))
+match (psTokenCursorPeek(cursor)) with {
+  | Option.none => Except.error((psParseDoExpected(delimiter, cursor)))
+  | Option.some token => if (if (Nat.beq(depth, 0)) { psStringEq(token.text, delimiter) } else { false }) { Except.ok((PsParseResult.mk((psParseListReverse(tokensRev)), cursor))) } else { if (psTokenKindEq(token.kind, PsTokenKind.endOfInput)) { Except.error((psParseDoExpected(delimiter, cursor))) } else { match (psTokenCursorAdvance(cursor)) with {
+  | Option.none => Except.error((psParseDoExpected(delimiter, cursor)))
+  | Option.some read => let nextDepth := (if (psParseDoOpenToken(token.text)) { Nat.succ(depth) } else { if (psParseDoCloseToken(token.text)) { Nat.sub(depth, 1) } else { depth } })
+smaller(nextDepth, read.cursor, (List.cons(token, tokensRev)))
+} } }
+}
+}
+
+def psParseDoLoopBody(parseBody : (_ : Bool) -> (_ : Nat) -> (_ : PsTokenCursor) -> Except(PsParseError, (PsParseResult(PsSyntaxTerm))), native : Bool, cursor : PsTokenCursor) : Except(PsParseError, (PsParseResult(PsSyntaxTerm))) := if (native) { match (psTokenCursorExpectText(cursor, "do")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok keyword => psParseDoBranch(parseBody, true, keyword.cursor)
+} } else { psParseDoBranch(parseBody, false, cursor) }
+
+-- A bracketed List literal is an ordinary iterable. Only a colon at the
+-- outer bracket level selects range syntax; nested type/group delimiters do not.
+def psParseDoRangeColon(tokens : List(PsToken)) : (_ : Nat) -> Bool := match tokens with {
+  | List.nil => fun (_depth : Nat) => false
+  | List.cons token rest => fun (depth : Nat) => let smaller : (_ : Nat) -> Bool := (psParseDoRangeColon(rest))
+if ((Nat.beq(depth, 0) && psStringEq(token.text, "]"))) { false } else { if ((Nat.beq(depth, 0) && psStringEq(token.text, ":"))) { true } else { let nextDepth := (if (psParseDoOpenToken(token.text)) { Nat.succ(depth) } else { if (psParseDoCloseToken(token.text)) { Nat.sub(depth, 1) } else { depth } })
+smaller(nextDepth) } }
+}
+
+def psParseDoIsRange(cursor : PsTokenCursor) : Bool := if (psTokenCursorAtText(cursor, "[")) { match (psTokenCursorAdvance(cursor)) with {
+  | none => false
+  | some opening => psParseDoRangeColon(opening.cursor.remaining, 0)
+} } else { false }
+
+def psParseDoFor(parseTerm : (_ : PsTokenCursor) -> Except(PsParseError, (PsParseResult(PsSyntaxTerm))), parseBody : (_ : Bool) -> (_ : Nat) -> (_ : PsTokenCursor) -> Except(PsParseError, (PsParseResult(PsSyntaxTerm))), native : Bool, cursor : PsTokenCursor) : Except(PsParseError, (PsParseResult(PsParseDoHead))) := match (psTokenCursorExpectText(cursor, "for")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok keyword => match (psTokenCursorExpectKind(keyword.cursor, PsTokenKind.identifier)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok name => match (psTokenCursorExpectText(name.cursor, "in")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok separator => let sourceName := (psSyntaxSourceName((_root_.List.cons(name.token.text, _root_.List.nil)), name.token.span))
+let delimiter := (if (native) { "do" } else { "{" })
+match (psParseDoTakeHeader(delimiter, (Nat.succ((psTokenCursorLength(separator.cursor)))), 0, separator.cursor, _root_.List.nil)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok header => let headerCursor := (psTokenCursorFromTokens(header.value))
+let iterable : Except(PsParseError, (Prod(PsSyntaxTerm, (Option(PsSyntaxTerm))))) := (if (psParseDoIsRange(headerCursor)) { match (psTokenCursorAdvance(headerCursor)) with {
+  | Option.none => Except.error((PsParseError.unexpectedEnd("range")))
+  | Option.some opening => let lower : Except(PsParseError, (PsParseResult(PsSyntaxTerm))) := (if (psTokenCursorAtText(opening.cursor, ":")) { Except.ok((PsParseResult.mk((PsSyntaxTerm.natural("0", opening.token.span)), opening.cursor))) } else { parseTerm(opening.cursor) })
+match lower with {
+  | Except.error error => Except.error(error)
+  | Except.ok lower => match (psTokenCursorExpectText(lower.cursor, ":")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok colon => match (parseTerm(colon.cursor)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok upper => match (psTokenCursorExpectText(upper.cursor, "]")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok closing => if (psTokenCursorDone(closing.cursor)) { Except.ok((Prod.mk(lower.value, (Option.some(upper.value))))) } else { Except.error((psParseDoExpected("end of unit-step range", closing.cursor))) }
+}
+}
+}
+}
+} } else { match (psParseDoCompleteTerm(parseTerm, headerCursor)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok collection => Except.ok((Prod.mk(collection, Option.none)))
+} })
+match iterable with {
+  | Except.error error => Except.error(error)
+  | Except.ok iterable => match (psParseDoLoopBody(parseBody, native, header.cursor)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok body => let span : PsSourceSpan := ({ start := keyword.token.span.start, stop := psParseDoTermStop(body.value) })
+let head : PsParseDoHead := (match iterable.snd with {
+  | Option.none => PsParseDoHead.forEach(sourceName, iterable.fst, body.value, span)
+  | Option.some upper => PsParseDoHead.forRange(sourceName, iterable.fst, upper, body.value, span)
+})
+Except.ok((PsParseResult.mk(head, body.cursor)))
+}
+}
+}
+}
+}
+}
+
+def psParseDoWhile(parseTerm : (_ : PsTokenCursor) -> Except(PsParseError, (PsParseResult(PsSyntaxTerm))), parseBody : (_ : Bool) -> (_ : Nat) -> (_ : PsTokenCursor) -> Except(PsParseError, (PsParseResult(PsSyntaxTerm))), native : Bool, cursor : PsTokenCursor) : Except(PsParseError, (PsParseResult(PsParseDoHead))) := match (psTokenCursorExpectText(cursor, "while")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok keyword => let condition : Except(PsParseError, (PsParseResult(PsSyntaxTerm))) := (if (native) { parseTerm(keyword.cursor) } else { match (psTokenCursorExpectText(keyword.cursor, "(")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok opening => match (parseTerm(opening.cursor)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok value => match (psTokenCursorExpectText(value.cursor, ")")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok closing => Except.ok((PsParseResult.mk(value.value, closing.cursor)))
+}
+}
+} })
+match condition with {
+  | Except.error error => Except.error(error)
+  | Except.ok condition => match (psParseDoLoopBody(parseBody, native, condition.cursor)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok body => Except.ok((PsParseResult.mk((PsParseDoHead.whileLoop(condition.value, body.value, ({ start := keyword.token.span.start, stop := psParseDoTermStop(body.value) }))), body.cursor)))
+}
+}
+}
+
+-- A single typed catch delimits the handler scope. Braces are required by PS;
+-- native Lean may use layout. A nested try may not steal an outer catch.
+def psParseDoTry(parseBody : (_ : Bool) -> (_ : Nat) -> (_ : PsTokenCursor) -> Except(PsParseError, (PsParseResult(PsSyntaxTerm))), native : Bool, cursor : PsTokenCursor) : Except(PsParseError, (PsParseResult(PsParseDoHead))) := match (psTokenCursorExpectText(cursor, "try")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok keyword => match (psParseDoBranch(parseBody, native, keyword.cursor)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok body => match (psTokenCursorExpectText(body.cursor, "catch")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok catchToken => if ((native && Nat.blt(catchToken.token.span.start.column, keyword.token.span.start.column))) { Except.error((psParseDoExpected("catch aligned with its try", body.cursor))) } else { match (psTokenCursorExpectKind(catchToken.cursor, PsTokenKind.identifier)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok binder => match (psTokenCursorExpectText(binder.cursor, "=>")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok separator => match (psParseDoBranch(parseBody, native, separator.cursor)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok recovery => let name := (psSyntaxSourceName((_root_.List.cons(binder.token.text, _root_.List.nil)), binder.token.span))
+let span := (psSyntaxSpanJoin(keyword.token.span, (psSyntaxTermSpan(recovery.value))))
+Except.ok((PsParseResult.mk((PsParseDoHead.handler(body.value, name, recovery.value, span)), recovery.cursor)))
+}
+}
+} }
+}
+}
+}
+
+def psParseDoBody(parseTerm : (_ : PsTokenCursor) -> Except(PsParseError, (PsParseResult(PsSyntaxTerm))), allowSemicolon : Bool, fuel : Nat) : (_ : Bool) -> (_ : Nat) -> (_ : PsTokenCursor) -> Except(PsParseError, (PsParseResult(PsSyntaxTerm))) := match fuel with {
+  | Nat.zero => fun (_braced : Bool) (_column : Nat) (_cursor : PsTokenCursor) => Except.error(PsParseError.fuelExhausted)
+  | Nat.succ remaining => fun (braced : Bool) (column : Nat) (cursor : PsTokenCursor) => let smaller := (psParseDoBody(parseTerm, allowSemicolon, remaining))
+match (psTokenCursorPeek(cursor)) with {
+  | Option.none => Except.error((PsParseError.unexpectedEnd("do statement")))
+  | Option.some first => let parsedHead : Except(PsParseError, (PsParseResult(PsParseDoHead))) := (if (psTokenCursorAtText(cursor, "if")) { psParseDoConditional(parseTerm, smaller, allowSemicolon, cursor) } else { if (psTokenCursorAtText(cursor, "for")) { psParseDoFor(parseTerm, smaller, allowSemicolon, cursor) } else { if (psTokenCursorAtText(cursor, "try")) { psParseDoTry(smaller, allowSemicolon, cursor) } else { if (psTokenCursorAtText(cursor, "while")) { psParseDoWhile(parseTerm, smaller, allowSemicolon, cursor) } else { let chunk := (psParseDoTakeStatement((Nat.succ((psTokenCursorLength(cursor)))), first.span.start, 0, 0, 0, cursor, _root_.List.nil))
+match (psParseDoStatement(parseTerm, (psTokenCursorFromTokens(chunk.value)))) with {
+  | Except.error error => Except.error(error)
+  | Except.ok head => Except.ok((PsParseResult.mk(head, chunk.cursor)))
+} } } } })
+match parsedHead with {
+  | Except.error error => Except.error(error)
+  | Except.ok parsed => let next : Except(PsParseError, (Prod(Bool, PsTokenCursor))) := (if (psTokenCursorAtText(parsed.cursor, ";")) { if (allowSemicolon) { match (psTokenCursorAdvance(parsed.cursor)) with {
+  | Option.none => Except.error((PsParseError.unexpectedEnd("do statement")))
+  | Option.some separator => Except.ok((Prod.mk(true, separator.cursor)))
+} } else { Except.error((psParseDoExpected("newline-separated do statements, without semicolon", parsed.cursor))) } } else { Except.ok((Prod.mk(false, parsed.cursor))) })
+match next with {
+  | Except.error error => Except.error(error)
+  | Except.ok next => let hasNext : Bool := (if (psTokenCursorDone(next.snd)) { false } else { if (psTokenCursorAtText(next.snd, "}")) { false } else { if (psTokenCursorAtText(next.snd, "catch")) { false } else { if (psTokenCursorAtText(next.snd, "else")) { false } else { if (braced) { true } else { match (psTokenCursorPeek(next.snd)) with {
+  | Option.none => false
+  | Option.some token => if (psParseDoCloseToken(token.text)) { false } else { if (next.fst) { if (Nat.beq(token.span.start.line, (psParseDoHeadStopLine(parsed.value)))) { true } else { Nat.ble(column, token.span.start.column) } } else { if (Nat.ble((Nat.succ((psParseDoHeadStopLine(parsed.value)))), token.span.start.line)) { Nat.beq(column, token.span.start.column) } else { false } } }
+} } } } } })
+if (hasNext) { match (smaller(braced, column, next.snd)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok tail => match (psParseDoCloseHead(parsed.value, (Option.some(tail.value)))) with {
+  | Except.error error => Except.error(error)
+  | Except.ok value => Except.ok((PsParseResult.mk(value, tail.cursor)))
+}
+} } else { match (psParseDoCloseHead(parsed.value, Option.none)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok value => Except.ok((PsParseResult.mk(value, next.snd)))
+} }
+}
+}
+}
+}
+
+def psParseDo(parseTerm : (_ : PsTokenCursor) -> Except(PsParseError, (PsParseResult(PsSyntaxTerm))), allowSemicolon : Bool, requireBraces : Bool, start : PsSourcePos, cursor : PsTokenCursor) : Except(PsParseError, (PsParseResult(PsSyntaxTerm))) := let braced := (psTokenCursorAtText(cursor, "{"))
+if (if (requireBraces) { if (braced) { false } else { true } } else { false }) { Except.error((psParseDoExpected("{", cursor))) } else { let bodyCursor : PsTokenCursor := (if (braced) { match (psTokenCursorAdvance(cursor)) with {
+  | Option.none => cursor
+  | Option.some opening => opening.cursor
+} } else { cursor })
+match (psTokenCursorPeek(bodyCursor)) with {
+  | Option.none => Except.error((PsParseError.unexpectedEnd("do statement")))
+  | Option.some first => match (psParseDoBody(parseTerm, allowSemicolon, (Nat.succ((psTokenCursorLength(bodyCursor)))), braced, first.span.start.column, bodyCursor)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok body => if (braced) { match (psTokenCursorExpectText(body.cursor, "}")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok close => Except.ok((PsParseResult.mk((PsSyntaxTerm.doE(body.value, ({ start := start, stop := close.token.span.stop }))), close.cursor)))
+} } else { Except.ok((PsParseResult.mk((PsSyntaxTerm.doE(body.value, ({ start := start, stop := psParseDoTermStop(body.value) }))), body.cursor))) }
+}
+} }

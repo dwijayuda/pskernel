@@ -1,0 +1,130 @@
+import Ps.Bridge.Codec
+
+def psKernelBridgeProtocol : String := "proofscript-kernel-bridge"
+
+def psKernelBridgeVersion : Nat := 1
+
+def psKernelBridgeKernelFingerprint : String := "lean-ts-kernel@0.1.0"
+
+def psKernelBridgeFoundationFingerprint : String := "lean4:v4.35.0@eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+
+inductive PsKernelBridgeRequest where {
+  | ping
+  | lookup(name : PsName)
+  | infer(expr : PsExpr)
+  | defeq(left : PsExpr, right : PsExpr)
+  | replayAdmissions(declarations : List(PsDeclaration))
+}
+
+inductive PsKernelBridgeProtocolError where {
+  | json(error : PsJsonParseError)
+  | codec(error : PsCodecDecodeError)
+  | encode(error : PsCheckedAdmissionCodecError)
+  | missingField(name : String)
+  | invalidField(name : String)
+  | protocolMismatch
+  | versionMismatch
+  | kernelFingerprintMismatch
+  | foundationFingerprintMismatch
+  | remoteError(message : String)
+}
+
+structure PsKernelBridgeResponse where {
+  value : Option(PsJsonValue)
+}
+
+def psKernelBridgeEnvelope(op : String, payload : String) : String := psJsonObject((_root_.List.cons((_root_.Prod.mk("foundation", (psJsonQuote(psKernelBridgeFoundationFingerprint)))), (_root_.List.cons((_root_.Prod.mk("kernel", (psJsonQuote(psKernelBridgeKernelFingerprint)))), (_root_.List.cons((_root_.Prod.mk("op", (psJsonQuote(op)))), (_root_.List.cons((_root_.Prod.mk("payload", payload)), (_root_.List.cons((_root_.Prod.mk("protocol", (psJsonQuote(psKernelBridgeProtocol)))), (_root_.List.cons((_root_.Prod.mk("version", (psCheckedAdmissionNatToString(psKernelBridgeVersion)))), _root_.List.nil)))))))))))))
+
+def psEncodeKernelBridgeRequest(request : PsKernelBridgeRequest) : Except(PsKernelBridgeProtocolError, String) := match request with {
+  | ping => Except.ok((psKernelBridgeEnvelope("ping", (psJsonObject(_root_.List.nil)))))
+  | lookup name => Except.ok((psKernelBridgeEnvelope("lookup", (psJsonObject((_root_.List.cons((_root_.Prod.mk("name", (psEncodeCodecName(name)))), _root_.List.nil)))))))
+  | infer expr => match (psEncodeCodecExpr(expr)) with {
+  | Except.error error => Except.error((PsKernelBridgeProtocolError.encode(error)))
+  | Except.ok encoded => Except.ok((psKernelBridgeEnvelope("infer", (psJsonObject((_root_.List.cons((_root_.Prod.mk("expr", encoded)), _root_.List.nil)))))))
+}
+  | defeq left right => match (psEncodeCodecExpr(left)) with {
+  | Except.error error => Except.error((PsKernelBridgeProtocolError.encode(error)))
+  | Except.ok encodedLeft => match (psEncodeCodecExpr(right)) with {
+  | Except.error error => Except.error((PsKernelBridgeProtocolError.encode(error)))
+  | Except.ok encodedRight => Except.ok((psKernelBridgeEnvelope("defeq", (psJsonObject((_root_.List.cons((_root_.Prod.mk("left", encodedLeft)), (_root_.List.cons((_root_.Prod.mk("right", encodedRight)), _root_.List.nil)))))))))
+}
+}
+  | replayAdmissions declarations => match (psEncodeCheckedAdmissionsCanonical(declarations)) with {
+  | Except.error error => Except.error((PsKernelBridgeProtocolError.encode(error)))
+  | Except.ok encoded => Except.ok((psKernelBridgeEnvelope("replay", encoded)))
+}
+}
+
+def psKernelBridgeRequireField(value : PsJsonValue, name : String) : Except(PsKernelBridgeProtocolError, PsJsonValue) := match (psJsonGetField(value, name)) with {
+  | Option.none => Except.error((PsKernelBridgeProtocolError.missingField(name)))
+  | Option.some field => Except.ok(field)
+}
+
+def psKernelBridgeRequireString(value : PsJsonValue, name : String) : Except(PsKernelBridgeProtocolError, String) := match (psKernelBridgeRequireField(value, name)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok field => match (psJsonAsString(field)) with {
+  | Option.none => Except.error((PsKernelBridgeProtocolError.invalidField(name)))
+  | Option.some text => Except.ok(text)
+}
+}
+
+def psKernelBridgeRequireNumberText(value : PsJsonValue, name : String) : Except(PsKernelBridgeProtocolError, String) := match (psKernelBridgeRequireField(value, name)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok field => match (psJsonAsNumberText(field)) with {
+  | Option.none => Except.error((PsKernelBridgeProtocolError.invalidField(name)))
+  | Option.some text => Except.ok(text)
+}
+}
+
+def psKernelBridgeValidateEnvelope(value : PsJsonValue) : Except(PsKernelBridgeProtocolError, Unit) := match (psKernelBridgeRequireString(value, "protocol")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok protocol => match (psKernelBridgeRequireNumberText(value, "version")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok version => match (psKernelBridgeRequireString(value, "kernel")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok kernel => match (psKernelBridgeRequireString(value, "foundation")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok foundation => if ((!psStringEq(protocol, psKernelBridgeProtocol))) { Except.error(PsKernelBridgeProtocolError.protocolMismatch) } else { if ((!psStringEq(version, (psCheckedAdmissionNatToString(psKernelBridgeVersion))))) { Except.error(PsKernelBridgeProtocolError.versionMismatch) } else { if ((!psStringEq(kernel, psKernelBridgeKernelFingerprint))) { Except.error(PsKernelBridgeProtocolError.kernelFingerprintMismatch) } else { if ((!psStringEq(foundation, psKernelBridgeFoundationFingerprint))) { Except.error(PsKernelBridgeProtocolError.foundationFingerprintMismatch) } else { Except.ok(()) } } } }
+}
+}
+}
+}
+
+def psDecodeKernelBridgeResponse(source : String) : Except(PsKernelBridgeProtocolError, PsKernelBridgeResponse) := match (psJsonParse(source)) with {
+  | Except.error error => Except.error((PsKernelBridgeProtocolError.json(error)))
+  | Except.ok value => match (psKernelBridgeValidateEnvelope(value)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok _ => match (psKernelBridgeRequireField(value, "ok")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok okValue => match (psJsonAsBool(okValue)) with {
+  | Option.none => Except.error((PsKernelBridgeProtocolError.invalidField("ok")))
+  | Option.some succeeded => if (succeeded) { match (psJsonGetField(value, "value")) with {
+  | Option.none => Except.ok(({ value := Option.none }))
+  | Option.some responseValue => match responseValue with {
+  | PsJsonValue.nullE => Except.ok(({ value := Option.none }))
+  | _ => Except.ok(({ value := Option.some(responseValue) }))
+}
+} } else { match (psKernelBridgeRequireString(value, "error")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok message => Except.error((PsKernelBridgeProtocolError.remoteError(message)))
+} }
+}
+}
+}
+}
+
+def psKernelBridgeResponseExpr(response : PsKernelBridgeResponse) : Except(PsKernelBridgeProtocolError, PsExpr) := match response.value with {
+  | Option.none => Except.error((PsKernelBridgeProtocolError.missingField("value")))
+  | Option.some value => match (psDecodeCodecExpr(value)) with {
+  | Except.error error => Except.error((PsKernelBridgeProtocolError.codec(error)))
+  | Except.ok expr => Except.ok(expr)
+}
+}
+
+def psKernelBridgeResponseBool(response : PsKernelBridgeResponse) : Except(PsKernelBridgeProtocolError, Bool) := match response.value with {
+  | Option.none => Except.error((PsKernelBridgeProtocolError.invalidField("value")))
+  | Option.some value => match value with {
+  | PsJsonValue.bool result => Except.ok(result)
+  | _ => Except.error((PsKernelBridgeProtocolError.invalidField("value")))
+}
+}

@@ -7,6 +7,7 @@ lean_lib PsFoundation where
   srcDir := "packages/foundation/src"
   roots := #[
     `Ps.Foundation.List,
+    `Ps.Foundation.Collections,
     `Ps.Foundation.Name,
     `Ps.Foundation.StringSet,
     `Ps.Foundation.StringMap,
@@ -221,6 +222,7 @@ lean_lib PsHost where
     `Ps.Host.SourceOwnership,
     `Ps.Host.SourceModules,
     `Ps.Host.ExecutablePlan,
+    `Ps.Host.M5RendererReference,
     `Ps.Host.SourceBindings,
     `Ps.Host.ArtifactBundle,
     `Ps.Host.CompilerDriver,

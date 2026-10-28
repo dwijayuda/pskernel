@@ -35,13 +35,15 @@ def psStringMapGetWithDepth {alpha : Type} (depth : Nat) :
         | _ => Option.none
   | Nat.succ remaining =>
       fun (index : PsStringMap alpha) (hash : Nat) (key : String) =>
+        let smaller : PsStringMap alpha -> Nat -> String -> Option alpha :=
+          psStringMapGetWithDepth remaining;
         match index with
         | PsStringMap.empty => Option.none
         | PsStringMap.bucket entries => psStringMapBucketGet entries key
         | PsStringMap.branch left right =>
             if Nat.beq (Nat.mod hash 2) 0 then
-              psStringMapGetWithDepth remaining left (Nat.div hash 2) key
-            else psStringMapGetWithDepth remaining right (Nat.div hash 2) key
+              smaller left (Nat.div hash 2) key
+            else smaller right (Nat.div hash 2) key
 
 def psStringMapPutWithDepth {alpha : Type} (depth : Nat) :
     PsStringMap alpha -> Nat -> String -> alpha -> PsStringMap alpha :=
@@ -54,6 +56,8 @@ def psStringMapPutWithDepth {alpha : Type} (depth : Nat) :
         PsStringMap.bucket (psStringMapBucketPut entries key value)
   | Nat.succ remaining =>
       fun (index : PsStringMap alpha) (hash : Nat) (key : String) (value : alpha) =>
+        let smaller : PsStringMap alpha -> Nat -> String -> alpha -> PsStringMap alpha :=
+          psStringMapPutWithDepth remaining;
         match index with
         | PsStringMap.bucket entries =>
             PsStringMap.bucket (psStringMapBucketPut entries key value)
@@ -66,9 +70,9 @@ def psStringMapPutWithDepth {alpha : Type} (depth : Nat) :
               | _ => PsStringMap.empty;
             if Nat.beq (Nat.mod hash 2) 0 then
               PsStringMap.branch
-                (psStringMapPutWithDepth remaining left (Nat.div hash 2) key value) right
+                (smaller left (Nat.div hash 2) key value) right
             else PsStringMap.branch left
-                (psStringMapPutWithDepth remaining right (Nat.div hash 2) key value)
+                (smaller right (Nat.div hash 2) key value)
 
 def psStringMapGet {alpha : Type} (index : PsStringMap alpha)
     (key : String) : Option alpha :=

@@ -46,7 +46,9 @@ jobs:
           fi
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: Build portable planner, immutable reference and source census
-        run: lake build psc1_portable_plan_tests psc1_executable_plan_tests psc1_source_census_probe psc1_portable_module_seed psc1_portable_module_tests
+        run: |
+          node scripts/check-portable-renderer-reference.mjs
+          lake build psc1_portable_plan_tests psc1_executable_plan_tests psc1_source_census_probe psc1_portable_module_seed psc1_portable_module_tests
       - uses: actions/cache/save@v4
         if: always() && steps.native.outputs.cache-hit != 'true'
         with:

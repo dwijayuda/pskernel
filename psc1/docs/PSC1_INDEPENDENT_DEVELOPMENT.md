@@ -1,8 +1,14 @@
 # Independent PSC1 compiler development
 
-Status: first Linux x64 independent-development milestone and measured TypeKey
-improvement qualified, 2026-10-28 UTC; expanded O2 installation qualification pending.
-Implementation `5484a04df34de1bbcfa46a248b6a93ce510035d6` passes
+Status: measured TypeKey improvement, canonical editable sources, broader changed
+compiler regressions and three Linux installation environments qualified,
+2026-10-28 UTC. Current O2 evidence is
+[run 40655419917](https://github.com/dwijayuda/pskernel/actions/runs/40655419917)
+at `a4ca02ef9af1859dfb532a051f6ea4760ed113d0`; see the
+[complete environment receipt](PSC1_INDEPENDENT_ENVIRONMENTS_QUALIFICATION_2026-10-28.json).
+
+The initial independent-development implementation
+`5484a04df34de1bbcfa46a248b6a93ce510035d6` passes
 [40618697529](https://github.com/dwijayuda/pskernel/actions/runs/40618697529).
 The [dated receipt](PSC1_INDEPENDENT_DEVELOPMENT_QUALIFICATION_2026-10-28.json)
 binds the exact implementation, source, generations, checker and archive.
@@ -365,22 +371,90 @@ The optimized seed is selected from `O2/`.
 The initial standalone download remains separately pinned by its original receipt.
 Refreshed assembly binds the O2 archive and all seven publication files, requires
 exact current `.ps` source correspondence, and freshly establishes native
-source/admission/IR correspondence before selecting O2. The expanded installation
-and publication matrix for that refreshed distribution is pending.
+source/admission/IR correspondence before selecting O2. The complete installation
+and publication matrix now passes for that refreshed distribution, as recorded
+in the environment qualification below.
 
 [Runtime/checker ABI preflight](PSC1_ADDITIONAL_PLATFORM_ABI_QUALIFICATION_2026-10-28.json)
 passes on Ubuntu 24.04 x64, Ubuntu 22.04 x64 and Ubuntu 24.04 ARM64 in
 [run 40633426535](https://github.com/dwijayuda/pskernel/actions/runs/40633426535).
 That receipt retains runtime, native-checker, system-library and shell identities;
 it records `fullCompilerQualified: false` and `publicationQualified: false`.
-Full compiler chains, installed behavior and publication boundaries require their
-own completed environment evidence.
+That historical preflight remains separate from the subsequently completed full
+compiler, installation and publication evidence below.
 
 The optimized worker still takes 1,485.908 seconds on this workload. The original
 240-second full-compiler target remains unmet; the successful run uses the
 explicit 3,600-second correctness profile. Ordinary 240-second requests,
 120-second independent checking, semantic fuel and strict acceptance conditions
 retain their existing policies.
+
+
+## Qualified O2 environments and expanded compiler regressions
+
+[Run 40655419917](https://github.com/dwijayuda/pskernel/actions/runs/40655419917)
+qualifies `a4ca02ef9af1859dfb532a051f6ea4760ed113d0` across all three environments.
+Each child gate binds its own bootstrap archive, source and executable identities,
+actual process logs and publication observations. The aggregate gate requires every
+child receipt to come from this exact run and commit, then compares original and
+changed source identities and all four emitted generations across architectures.
+
+| Environment | Runtime glibc | Actual kernels by phase | Namespace utility | Checker calls: smoke / baseline / changed |
+| --- | --- | --- | --- | --- |
+| Ubuntu 24.04.5 LTS x64 | 2.39 | smoke: `7.0.0-1017-azure`; baseline: `6.17.0-1022-azure`; changed: `7.0.0-1017-azure` | util-linux 2.39.3 | 4 / 2 / 7 |
+| Ubuntu 22.04.5 LTS x64 | 2.35 | `6.8.0-1064-azure` | util-linux 2.37.2 | 4 / 2 / 7 |
+| Ubuntu 24.04.5 LTS ARM64 | 2.39 | `6.17.0-1022-azure` | util-linux 2.39.3 | 4 / 2 / 7 |
+
+Each installation bundles private Node 22.23.3 and the official Lean 4.35.0
+native checker for its architecture. The committed
+[full receipt](PSC1_INDEPENDENT_ENVIRONMENTS_QUALIFICATION_2026-10-28.json)
+retains complete runtime component versions, OS release bytes, kernel identity,
+filesystem observations, exact shell and resolved library bytes/SHA-256, actual
+namespace-tool version/hash, and inside/outside process identities for smoke,
+baseline and changed phases. Actual UID/GID 65534 execution and a fresh private
+mount/PID/network namespace are verified. System libraries remain explicit
+installation dependencies.
+
+The source-to-new-compiler-to-self-rebuild regression changes three canonical
+modules only in a copied workspace:
+
+| Module | Actual source change | Required observation |
+| --- | --- | --- |
+| `Ps.CompilerUnified.Service` | Extend the invalid-envelope arity diagnostic | C1 and C2 report `request-arity:expected-three-fields` |
+| `Ps.Syntax.ParseProofScript` | Recognize a test-only `defconst` alias at both constant-dispatch sites | Seed refuses; C1 and C2 compile and execute the typed function-call program to 42 |
+| `Ps.Compiler.Service` | Distinguish parse failures as `parse-source-refused` | C1 and C2 retain the new code through their actual parser/compiler paths |
+
+The six frontend/compiler cases execute at seed, C1 and C2 on every environment:
+an existing constant, the new declaration with a function call, malformed existing
+syntax, a missing type, forbidden constant parameters, and an ill-typed body.
+That gives 18 observations per environment and 54 across the matrix. The changed
+workspace is re-captured for both full builds; installed sources and executable
+resources remain unchanged. This test does not add `defconst` to the installed
+language. B1/B2 and C1/C2 each match the five canonical payloads: emitted compiler,
+admissions, original IR, transformed IR and sources. All four generation identity
+sets agree across the qualified environments. Installation archives, private binaries,
+completion manifests and timing-bearing build receipts retain their own identities.
+
+Publication evidence includes a real checked application executing to 42, the
+same operation after relocating the installation and output into paths containing
+spaces, actual permission refusal on a read-only output parent, preservation of
+an accepted output on refused overwrite, and refusal of incomplete/tampered
+generations. The relocation workload is a small application. Every accepted build
+retains fresh independent admission and strict original/transformed IR checks;
+frontend refusals stop before admission.
+
+The [compatibility correction record](PSC1_ENVIRONMENT_COMPATIBILITY_QUALIFICATION_2026-10-28.json)
+retains the first Ubuntu 22.04 namespace setup failure, exact artifacts and
+correction. The completed qualification uses the repaired harness throughout
+one run; it does not combine successful pieces from different attempts.
+The same record retains the old mixed-grammar npm test failure and its corrected
+PS/Lean consumers. [Integration qualification](PSC1_CANONICAL_INTEGRATION_QUALIFICATION_2026-10-28.json)
+records package, CLI/runtime and broader source gates separately.
+
+[Qualified downloads and installation](../standalone/README.md) list the exact
+archives. macOS, Windows and environments beyond this measured Linux matrix
+remain separate qualification work. This is finite execution, admission,
+IR and fixed-point evidence, not a formal compiler semantic-preservation theorem.
 
 ## Next engineering priorities
 
@@ -391,7 +465,8 @@ full-compiler target remains open. Every optimization must retain fresh
 independent admission, strict original/transformed IR checks, semantic fuel and
 refusal conditions.
 
-Complete current-source/native correspondence and O2 assembly, then qualify the
-broader changed-compiler chains and installation matrix. Each supported environment
-needs exact runtime, native checker, system-library, generation and publication
-evidence. Full environment qualification remains pending actual execution.
+Keep the canonical source/reference transition and the three-environment regression
+matrix required for future changes within their recorded scope. Additional operating
+systems, filesystems, SDK/provider consumers and permanent binary retention need their
+own evidence. The full 240-second compiler rebuild remains the performance target;
+the present correctness qualification does not redefine that target.

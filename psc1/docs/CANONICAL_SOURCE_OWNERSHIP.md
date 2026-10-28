@@ -38,7 +38,7 @@ The repository project uses the same canonical module bytes. Repository tooling 
 
 1. Edit the canonical `.ps` file. Keep its paired `.lean` file and the existing ownership manifest unchanged.
 2. Run the **PSC1 canonical bootstrap reference refresh** GitHub Actions workflow on the source-edit branch. Supply the exact ancestral commit containing the qualified manifest, or let the workflow select the last commit that changed that manifest. The script verifies this choice against the current manifest bytes.
-3. Inspect the retained source, graph, native-build and conversion evidence. The workflow prepares content-addressed Git objects only. Review its exact prepared files and integrate them with an expected-head branch update.
+3. Inspect the retained source, graph, conversion and any required native-build evidence. The workflow prepares content-addressed Git objects only. Review its exact prepared files and integrate them with an expected-head branch update.
 4. Require the canonical ownership gate and the selected compiler, package and environment regression gates before treating the change as qualified.
 
 The CI entry point is:
@@ -49,7 +49,11 @@ node scripts/refresh-canonical-sources.mjs --baseline EXACT_QUALIFIED_COMMIT
 
 This is a repository-maintenance operation with native bootstrap tools available in CI. It is separate from ordinary installed compiler development. The refresh does not require callers of the installed compiler to install those tools.
 
-The refresh captures each source again, parses actual imports, orders both ownership graphs, and refuses cycles or imports that cross their declared boundaries. It independently admits the canonical and reference graphs and requires identical admission bytes, strict original IR, partial names and member ownership. Changed references must be the checked reverse projection, followed by the host adapter that restores native constructor shorthand at parser-identified pattern spans. That adapter preserves every other byte, reparses its result, verifies idempotence, and records input/output hashes and every inserted dot. The adapted reference then passes fresh graph correspondence and native compilation. It builds the affected native bootstrap with those projected references and repeats correspondence using the rebuilt helpers. A failed check prepares no reference tree.
+The refresh captures each source again, parses actual imports, orders both ownership graphs, and refuses cycles or imports that cross their declared boundaries. It independently admits the canonical and reference graphs and requires identical admission bytes, strict original IR, partial names and member ownership.
+
+Changed references must be the checked reverse projection, followed by the host adapter that restores native constructor shorthand at parser-identified pattern spans. That adapter preserves every other byte, reparses its result, verifies idempotence, and records input/output hashes and every inserted dot. Every adapted reference passes fresh graph correspondence.
+
+When at least one compiler reference changes bytes, the refresh also builds the native bootstrap with the projected references and repeats compiler and library correspondence using the rebuilt helpers. Library-only edits, or edits that leave all compiler reference bytes unchanged, retain the fresh graph and projection checks but record `nativeBuild: false`. A failed required check prepares no reference tree.
 
 Untouched reference bytes remain unchanged, even if a printer could render them differently. The transition gate compares with an exact ancestral manifest: changing a reference and merely updating its hash does not satisfy the rule. The initial promotion is pinned separately in `bootstrap/CANONICAL_BASELINE.json`; it is not a recurring permission to regenerate authored PS from Lean.
 
@@ -57,7 +61,7 @@ Untouched reference bytes remain unchanged, even if a printer could render them 
 
 The static gate checks safe relative paths, regular files, exact UTF-8 bytes, unique owners, imports, package metadata, the generated standard-library view and exhaustive source classification. Ordinary source reads use files and hashes; Git history is consulted only by CI provenance checks.
 
-The semantic gate freshly checks compiler and library graphs in both grammars. For changed owners it also checks the exact new projection and builds the native tools from the resulting references. Recorded correspondence establishes byte-equal canonical admissions and original strict IR for those captured inputs. It is finite qualification evidence, not a formal proof that every compiler transformation preserves every program.
+The semantic gate freshly checks compiler and library graphs in both grammars. For changed owners it also checks the exact new projection. Changed compiler-reference bytes additionally require native compilation and correspondence through the rebuilt helpers, as described above. Recorded correspondence establishes byte-equal canonical admissions and original strict IR for those captured inputs. It is finite qualification evidence, not a formal proof that every compiler transformation preserves every program.
 
 The all-151 compiler ownership graph produced 34,431,244 admission bytes and 10,029,216 original-IR bytes in the measured capacity probe. Only this synthetic repository index can explicitly request the bounded `canonical-repository-40m` graph-file profile. Ordinary helper calls retain the 32 MiB graph cap; request, index, stdout, source and process limits are unchanged. The initial preparation checks the ordinary-capacity refusal before proceeding with the larger audit profile. See the [capacity observation](PSC1_CANONICAL_GRAPH_CAPACITY_2026-10-28.json).
 

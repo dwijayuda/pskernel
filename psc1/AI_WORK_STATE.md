@@ -77,7 +77,7 @@ API/default equalities, lossless tests, 28 modular and 29 extended cases. Python
 optional-argument wrappers remain explicitly classified native adapters pointing to
 portable canonical implementations.
 
-## Checked reference integration and active environment qualification
+## Qualified reference integration and environment matrix
 
 The exact measured TypeKey source edit at `0575b1a39a09c4253fd5691eec9fbc270fac6f5b`
 passed [checked reference refresh 40646380001](https://github.com/dwijayuda/pskernel/actions/runs/40646380001).
@@ -87,20 +87,59 @@ native compiler built, and rebuilt helpers freshly confirmed both ownership grap
 The resulting 125-module closure exactly matches qualified O2.
 See [the complete refresh receipt](docs/PSC1_CANONICAL_REFERENCE_REFRESH_2026-10-28.json).
 
-The O2 assembly and full three-environment matrix are now activated: Ubuntu 24.04 x64,
-Ubuntu 22.04 x64 and Ubuntu 24.04 ARM64. Each assembles the exact measured O2 seed,
-checks current source correspondence freshly, then runs isolated smoke/publication
-checks and parallel baseline B1/B2 and changed C1/C2 compiler chains. Three real
-source modules change in the regression workspace; six cases execute at seed, C1
-and C2, including parser syntax, compiler diagnostics, positive execution and refusal.
+The complete O2 matrix passes
+[run 40655419917](https://github.com/dwijayuda/pskernel/actions/runs/40655419917)
+at `a4ca02ef9af1859dfb532a051f6ea4760ed113d0`: Ubuntu 24.04 x64, Ubuntu 22.04 x64 and
+Ubuntu 24.04 ARM64. Each assembles the exact measured O2 seed, checks source
+correspondence freshly, passes isolated smoke/publication checks, and completes
+baseline B1/B2 and changed C1/C2 compiler chains. All generation identities agree
+across the environments.
+
+Three real source modules change only in a copied regression workspace: the unified
+protocol arity diagnostic, the ProofScript constant-declaration parser, and compiler
+parse diagnostics. Six cases execute at seed, C1 and C2 on each environment,
+giving 54 frontend/compiler observations. Existing constants keep executing to 42;
+the test-only declaration alias is refused by the seed and executes correctly
+under C1 and C2; malformed, missing-type, parameter and ill-typed cases refuse
+at their required phases. The installed language is unchanged.
 
 ABI preflight already passed in
 [40633426535](https://github.com/dwijayuda/pskernel/actions/runs/40633426535), with exact
 private Node 22.23.3, genuine Lean 4.35 checker and eight linked libraries per environment.
-Full installation/compiler/publication qualification is still pending actual matrix
-completion. Retain exact runtime, OS, filesystem, resolved library, execution, generation
-and publication evidence for each environment. Final broad package and source gates
-must pass on the integrated tree.
+The subsequently completed
+[environment receipt](docs/PSC1_INDEPENDENT_ENVIRONMENTS_QUALIFICATION_2026-10-28.json)
+retains exact runtime, OS release, kernel, filesystem, resolved library, shell,
+namespace tool, UID/GID, execution, generation and publication evidence for each
+environment. All phases run under UID/GID 65534 with private mount/PID/network
+namespaces. Relocation with spaces, actual checked output execution, read-only-parent
+refusal, accepted-output preservation, incomplete generations and tampering pass.
+
+[Integration evidence](docs/PSC1_CANONICAL_INTEGRATION_QUALIFICATION_2026-10-28.json)
+records the 55-case package gate, 125 advertised exports, full source gates and
+CLI/runtime/publication evidence.
+[Source run 40669496813](https://github.com/dwijayuda/pskernel/actions/runs/40669496813)
+passes all 17 selected jobs at `bba5c93309e833508d5610323a27bad756602091`,
+including scoped seven-backend execution and all 37 finite Core criteria with zero
+blocked. Its tested PR merge `d01e597d61b9e6cb6b912418f3b4329be3eee930`
+has the exact same tree. The unselected benchmark remains separate from the
+measured TypeKey experiment and the unmet 240-second full-compiler target. Package readers default to canonical PS; explicit
+Lean readers and mixed-grammar refusal are tested through the installed compiler.
+The first mixed-grammar fixture failure and Ubuntu 22.04 namespace setup failure
+remain in the [compatibility record](docs/PSC1_ENVIRONMENT_COMPATIBILITY_QUALIFICATION_2026-10-28.json).
+They were corrected without relaxing admission, strict IR, homogeneous grammar,
+private namespaces or ordinary-user execution.
+The selected source workflows also use bounded SDK setup and reuse a restored
+Elan installation. The compatibility record preserves the installer stalls and
+links the completed source requalification.
+
+## Remaining engineering work
+
+The 240-second full-compiler target remains unmet. Repeat measured pairs and profile
+O2 before choosing the next implementation change; no incremental or persistent
+semantic cache was added here. macOS/Windows, additional provider/SDK consumers,
+permanent binary retention and the independent human maintainer trial have their
+own remaining acceptance conditions. The present task's additional Linux compiler
+environments are qualified within their exact retained scope.
 
 ## Preserved boundaries
 

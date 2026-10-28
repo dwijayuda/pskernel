@@ -1,0 +1,2811 @@
+{
+  "schema": "psc1-independent-development-evidence/2",
+  "status": "qualified-linux-independent-compiler-development",
+  "testedCommit": "a4ca02ef9af1859dfb532a051f6ea4760ed113d0",
+  "runId": "40655419917",
+  "platform": "linux-arm64",
+  "environmentId": "ubuntu-24.04-arm64",
+  "bootstrap": {
+    "schema": "psc1-independent-bootstrap/1",
+    "status": "assembled-awaiting-development-qualification",
+    "platform": "linux-arm64",
+    "environment": {
+      "schema": "psc1-independent-environment/1",
+      "platform": "linux",
+      "arch": "arm64",
+      "kernel": {
+        "release": "6.17.0-1022-azure",
+        "version": "#22-Ubuntu SMP Mon Jul 27 17:12:01 UTC 2026"
+      },
+      "runtime": {
+        "version": "v22.23.3",
+        "versions": {
+          "node": "22.23.3",
+          "acorn": "8.16.0",
+          "ada": "2.9.2",
+          "amaro": "1.1.8",
+          "ares": "1.34.8",
+          "brotli": "1.1.0",
+          "cjs_module_lexer": "2.2.0",
+          "cldr": "48.0",
+          "icu": "78.3",
+          "llhttp": "9.4.3",
+          "modules": "127",
+          "napi": "10",
+          "nbytes": "0.1.3",
+          "ncrypto": "0.0.1",
+          "nghttp2": "1.69.0",
+          "openssl": "3.5.8",
+          "simdjson": "4.5.0",
+          "simdutf": "6.4.2",
+          "sqlite": "3.51.3",
+          "tz": "2026c",
+          "undici": "6.28.1",
+          "unicode": "17.0",
+          "uv": "1.51.0",
+          "uvwasi": "0.0.23",
+          "v8": "12.4.254.21-node.57",
+          "zlib": "1.3.1-e00f703",
+          "zstd": "1.5.7"
+        },
+        "glibcVersionRuntime": "2.39",
+        "glibcVersionCompiler": "2.28"
+      },
+      "osRelease": {
+        "bytes": 400,
+        "sha256": "87458b3b1f1ca0e5c693ade771de7007c3783bdc692fa6b39eb6414bf2af2763",
+        "text": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n"
+      },
+      "filesystem": {
+        "type": "61267",
+        "bsize": "4096",
+        "blocks": "37815964",
+        "bfree": "25949005",
+        "bavail": "25944909",
+        "files": "19529728",
+        "ffree": "18811509"
+      },
+      "user": {
+        "uid": 1001,
+        "gid": 1001
+      }
+    },
+    "sourceCommit": "a4ca02ef9af1859dfb532a051f6ea4760ed113d0",
+    "toolchainSha256": "04b790545af1ab5f1e7dd5b172f5830e80db1360251318dc1d6eec06cbe96c2a",
+    "tarball": "psc1-independent-linux-arm64.tar.gz",
+    "bytes": 46330627,
+    "sha256": "e87cb2872921218a70de1929e93853720b003c3fb5aba46166a24741e1f8559d",
+    "sourceModules": 125,
+    "sourceClosureDigest": "424c15ce2cf5bb87a293dd2aad1705fa801c07067c972578aa76111627d590d7",
+    "sourceConversionElapsedMs": 276808,
+    "sourceAdmissionsSha256": "9ac7a395b3f473fdb0278e3bf220ece76443ee9502a6d16996684f4c2e52619a",
+    "sourceOriginalIrSha256": "a910cc599e67b93077b004d79dc3c042a6d594e4169ea0ef8abafb8980a2415b",
+    "privateRuntimeSha256": "d09e299258c24f7cdf6f5d5ec185e3a56512b27a697113735dac909f1cac7b8d",
+    "checkerSha256": "d0433c6e187fc0a7b0e165f641eaa8720cdd6b16747237b17cc86ddf01d6052e",
+    "compilerSha256": "49d851d26008abf116b9f4c680c0833311e835b90d6c58e369ca426f33ecd2e6",
+    "compilerSelection": {
+      "strategy": "qualified-type-key-O2",
+      "input": {
+        "run": 40634776830,
+        "job": 122639100927,
+        "artifact": 12796523762,
+        "commit": "bc983a806a2995bed7851512a175652cbf4b5226",
+        "zipSha256": "c17a4d364810714e4dd7ed775fb9ff3547de87ebf89501e402d75fc9a7fb7af1"
+      },
+      "summarySha256": "89f76a873360e14d0438582fa1b20a34d048c960c502a90c6b6c0776abd18710",
+      "filesManifestSha256": "aa1ca6b19585a7be8b21d78b9ab4cbb024abd633466f41a7bfc292380696f80c",
+      "compilerSha256": "49d851d26008abf116b9f4c680c0833311e835b90d6c58e369ca426f33ecd2e6",
+      "sourceClosureDigest": "424c15ce2cf5bb87a293dd2aad1705fa801c07067c972578aa76111627d590d7",
+      "selectedCanonicalSourceSha256": "74fb1bb1c8f9beef611300e06fff3010121ed2589e828b7102f539217a09ad93",
+      "receiptGrantsAdmissionAuthority": false
+    }
+  },
+  "authoritativeSource": {
+    "projectSha256": "36bedf25da22e5b65b3318ea972efe2a069160ba826fbb001e27cbfb9775b58e",
+    "sourceClosureDigest": "424c15ce2cf5bb87a293dd2aad1705fa801c07067c972578aa76111627d590d7",
+    "entryModule": "Ps.CompilerUnified.Service",
+    "moduleCount": 125,
+    "utf8Bytes": 2382708,
+    "files": [
+      {
+        "module": "Ps.Foundation.Source",
+        "path": "packages/foundation/src/Ps/Foundation/Source.ps",
+        "bytes": 156,
+        "sha256": "190c8c4e3dfc27ce344d5c6aea7fabdbc11f780cdf43771d15a7d0e2dc06ddd8"
+      },
+      {
+        "module": "Ps.Foundation.List",
+        "path": "packages/foundation/src/Ps/Foundation/List.ps",
+        "bytes": 3281,
+        "sha256": "9f25f6d12b13de41723df9e5dbeae3aa644e2f917cb6aebc23db50c12b794e95"
+      },
+      {
+        "module": "Ps.Syntax.Cursor",
+        "path": "packages/syntax/src/Ps/Syntax/Cursor.ps",
+        "bytes": 3025,
+        "sha256": "2e2f021f2d056b7f68752da0a293b53123664ee7b3420546dd171bb8bfb1c56d"
+      },
+      {
+        "module": "Ps.Syntax.Token",
+        "path": "packages/syntax/src/Ps/Syntax/Token.ps",
+        "bytes": 899,
+        "sha256": "ed8ce1e58371b2e831bfd0b9ae6bdf0be4a0ff45cb4f6a9e8b0dea18b05f1f13"
+      },
+      {
+        "module": "Ps.Syntax.Lexer",
+        "path": "packages/syntax/src/Ps/Syntax/Lexer.ps",
+        "bytes": 27739,
+        "sha256": "8ea636b2b1dd8b59f2472ecbc21fe1a6d43239144b8056146a54cd7c75a799cd"
+      },
+      {
+        "module": "Ps.Foundation.Name",
+        "path": "packages/foundation/src/Ps/Foundation/Name.ps",
+        "bytes": 3579,
+        "sha256": "594312f307a7f553d8a92ffe00e73e8429887069171617b969c4f5da670bcecd"
+      },
+      {
+        "module": "Ps.Syntax.Ast",
+        "path": "packages/syntax/src/Ps/Syntax/Ast.ps",
+        "bytes": 10612,
+        "sha256": "99882b18ea1c18ce068af0619f36883f7f6eacbf68f9516f07648f575ac89331"
+      },
+      {
+        "module": "Ps.Syntax.ParserState",
+        "path": "packages/syntax/src/Ps/Syntax/ParserState.ps",
+        "bytes": 2891,
+        "sha256": "dfc4a8d4337ff30df2e79cf2d0c189477b4a0e37b5575d6d7ea1a264f555589d"
+      },
+      {
+        "module": "Ps.Syntax.ParseCommon",
+        "path": "packages/syntax/src/Ps/Syntax/ParseCommon.ps",
+        "bytes": 27154,
+        "sha256": "00e6ef7fb0a6f15c11b2be0383033e1af5257a3d1a39340ca131a162579878da"
+      },
+      {
+        "module": "Ps.Syntax.ParseBinding",
+        "path": "packages/syntax/src/Ps/Syntax/ParseBinding.ps",
+        "bytes": 7062,
+        "sha256": "79f8fa74f8d19190a6078362e34cb0f7921cf47b4a70fea41af8a9ea59640247"
+      },
+      {
+        "module": "Ps.Syntax.ParseDo",
+        "path": "packages/syntax/src/Ps/Syntax/ParseDo.ps",
+        "bytes": 40797,
+        "sha256": "de2eec16edd81071cc76823eb419d400377f281fedd0471275d07ca2f27cd750"
+      },
+      {
+        "module": "Ps.Syntax.ParseData",
+        "path": "packages/syntax/src/Ps/Syntax/ParseData.ps",
+        "bytes": 9199,
+        "sha256": "28ab760ad1ff26db1d3522b788f6abef607d6088bbe2ba1d88c2bda9efc70f87"
+      },
+      {
+        "module": "Ps.Syntax.Operators",
+        "path": "packages/syntax/src/Ps/Syntax/Operators.ps",
+        "bytes": 4996,
+        "sha256": "cada90a8e563ab5d1f6cef86a4a06dc1688e593addaf30dc285ee314bb9ca447"
+      },
+      {
+        "module": "Ps.Syntax.ParseLean",
+        "path": "packages/syntax/src/Ps/Syntax/ParseLean.ps",
+        "bytes": 73654,
+        "sha256": "d623ff5ff60c5b03ae8e373c9dbdea189055935d7eb240ab189d50085bb4e4b4"
+      },
+      {
+        "module": "Ps.Syntax.ParseProofScript",
+        "path": "packages/syntax/src/Ps/Syntax/ParseProofScript.ps",
+        "bytes": 61005,
+        "sha256": "1520c624d24c4f287b99775da0aabd479becece2b06bddae5470527f06c1bf93"
+      },
+      {
+        "module": "Ps.Syntax.PrintCommon",
+        "path": "packages/syntax/src/Ps/Syntax/PrintCommon.ps",
+        "bytes": 16782,
+        "sha256": "1226625626a2c3f2b13a3355a0af6f8eb138c96d3941608d1c499437531dd71d"
+      },
+      {
+        "module": "Ps.Syntax.PrintLean",
+        "path": "packages/syntax/src/Ps/Syntax/PrintLean.ps",
+        "bytes": 26262,
+        "sha256": "6bf32d051166a34af6ed1e0feb26478255550078975166f5ddaba6afa964a821"
+      },
+      {
+        "module": "Ps.Syntax.PrintProofScript",
+        "path": "packages/syntax/src/Ps/Syntax/PrintProofScript.ps",
+        "bytes": 27888,
+        "sha256": "6b9c6edc04ad5e40199ea60cdbe9250399db090c70a8be00f129de1531b05621"
+      },
+      {
+        "module": "Ps.Syntax.Translate",
+        "path": "packages/syntax/src/Ps/Syntax/Translate.ps",
+        "bytes": 1939,
+        "sha256": "0ec2e714edc02a69045114124d25e014d155c30f8d7644e1c30129355573120d"
+      },
+      {
+        "module": "Ps.Foundation.Text",
+        "path": "packages/foundation/src/Ps/Foundation/Text.ps",
+        "bytes": 2127,
+        "sha256": "39751af9f50465b0f464a29436e1f3fd8294d475664bde514eb91c4ed2f41df1"
+      },
+      {
+        "module": "Ps.Bridge.Json",
+        "path": "packages/bridge/src/Ps/Bridge/Json.ps",
+        "bytes": 31843,
+        "sha256": "253dd89fb9f2abd42cede99aa72cfeb47e1b1698a6b11cde54d6fca24e8c1425"
+      },
+      {
+        "module": "Ps.Core.Level",
+        "path": "packages/core/src/Ps/Core/Level.ps",
+        "bytes": 281,
+        "sha256": "da652d658d9e2560b9b2a297508ff4169129c04cfa88b5aa0393b31c935470fe"
+      },
+      {
+        "module": "Ps.Core.Expr",
+        "path": "packages/core/src/Ps/Core/Expr.ps",
+        "bytes": 740,
+        "sha256": "636e9cd00ef2c3ca1aa5e2dae49ba5576fd4b8a6f15d66439649cd6670aa7783"
+      },
+      {
+        "module": "Ps.Core.Declaration",
+        "path": "packages/core/src/Ps/Core/Declaration.ps",
+        "bytes": 1222,
+        "sha256": "336d770fcc3adaa486964c5fa652ced8073ff9ef7422521daf83a18dc81b0216"
+      },
+      {
+        "module": "Ps.Core.Abstract",
+        "path": "packages/core/src/Ps/Core/Abstract.ps",
+        "bytes": 2304,
+        "sha256": "2dadb01b12bdc9c1ceb1949cfedfa0cdffa9b65e2013f96e3666f122bea0d5b9"
+      },
+      {
+        "module": "Ps.Core.Subst",
+        "path": "packages/core/src/Ps/Core/Subst.ps",
+        "bytes": 4666,
+        "sha256": "64fd6b12fed98bf4e3d755cd395dcb4be8ff04af2febce62834e2922a848d05a"
+      },
+      {
+        "module": "Ps.Core.Equality",
+        "path": "packages/core/src/Ps/Core/Equality.ps",
+        "bytes": 5361,
+        "sha256": "5edd70ca0a340a73a39e296ea24f053532cb5faa0c478462fd661b8f5d4e56be"
+      },
+      {
+        "module": "Ps.Environment.Basic",
+        "path": "packages/environment/src/Ps/Environment/Basic.ps",
+        "bytes": 9233,
+        "sha256": "791633a0e314288fb5bb95ae0cb535d96d2520c9e625e37fe2a8a196563b19d9"
+      },
+      {
+        "module": "Ps.Bridge.CheckedAdmissions",
+        "path": "packages/bridge/src/Ps/Bridge/CheckedAdmissions.ps",
+        "bytes": 56965,
+        "sha256": "bbc4d8cc27990a024feabea58747b879c839faa2d687dc0b05ad8a69e9b54d32"
+      },
+      {
+        "module": "Ps.Core.Builtin",
+        "path": "packages/core/src/Ps/Core/Builtin.ps",
+        "bytes": 6369,
+        "sha256": "11fd7bbb687a20c2f889920a14c94915c75fc2564de048c743b66297c7c0a64b"
+      },
+      {
+        "module": "Ps.Environment.Prelude",
+        "path": "packages/environment/src/Ps/Environment/Prelude.ps",
+        "bytes": 23722,
+        "sha256": "9130f0d543a174059d45b2a2ad6a0b6769187a8395cccefda4b22d41421f56e7"
+      },
+      {
+        "module": "Ps.Environment.SelfHostPrelude",
+        "path": "packages/environment/src/Ps/Environment/SelfHostPrelude.ps",
+        "bytes": 14608,
+        "sha256": "9579d8548d134c3ef10a97a49195039a21b9dc786b7538689783f32d4949eece"
+      },
+      {
+        "module": "Ps.Environment.Control",
+        "path": "packages/environment/src/Ps/Environment/Control.ps",
+        "bytes": 14152,
+        "sha256": "0e8c80607df8524bc30ec53b1a9c4cdd26909d08df0cb7d1edbce46820dfefed"
+      },
+      {
+        "module": "Ps.Environment.Order",
+        "path": "packages/environment/src/Ps/Environment/Order.ps",
+        "bytes": 40043,
+        "sha256": "5efacfa352bf7a7e3815d3705fdf457bef435d360b9576815821e1673e58fbf8"
+      },
+      {
+        "module": "Ps.Environment.SelfHostProd",
+        "path": "packages/environment/src/Ps/Environment/SelfHostProd.ps",
+        "bytes": 3854,
+        "sha256": "017c9838c5b2e217a00a3c8c4676daf2d006cbc52ceddfb5f819c3a86d1cfb21"
+      },
+      {
+        "module": "Ps.Environment.LocalContext",
+        "path": "packages/environment/src/Ps/Environment/LocalContext.ps",
+        "bytes": 2746,
+        "sha256": "6bcbdb43698907b9bdf414071a09f57e108c1a6197f4a236ebe529c55ba4086b"
+      },
+      {
+        "module": "Ps.Environment.Resolve",
+        "path": "packages/environment/src/Ps/Environment/Resolve.ps",
+        "bytes": 5004,
+        "sha256": "4a77fb1380d7f55e6b2e2d801b1bde6b9e92ccd155c941a68d4d3ba1b3d0ea91"
+      },
+      {
+        "module": "Ps.Core.LevelSubst",
+        "path": "packages/core/src/Ps/Core/LevelSubst.ps",
+        "bytes": 3356,
+        "sha256": "01bdc60ac450b54f86eba0f9520057c7e4cd6219734b8c148288b18da7212b97"
+      },
+      {
+        "module": "Ps.Meta.LevelContext",
+        "path": "packages/meta/src/Ps/Meta/LevelContext.ps",
+        "bytes": 8049,
+        "sha256": "96bd6a16bc256896c95d14cbf4c9e9be8f0234befe9bb38c10a24babbc298b18"
+      },
+      {
+        "module": "Ps.Meta.Context",
+        "path": "packages/meta/src/Ps/Meta/Context.ps",
+        "bytes": 8699,
+        "sha256": "fbaad34aba192f70a095460c9079b4735bba1186888207c366dd00ca2a1fd0c0"
+      },
+      {
+        "module": "Ps.Meta.Reduce",
+        "path": "packages/meta/src/Ps/Meta/Reduce.ps",
+        "bytes": 5185,
+        "sha256": "93308a83711fa18281ce2c0bedd8ee4f89c6a982e1c19b7faa5c397b2911ab89"
+      },
+      {
+        "module": "Ps.Meta.Infer",
+        "path": "packages/meta/src/Ps/Meta/Infer.ps",
+        "bytes": 15545,
+        "sha256": "48af790c129208d37abd58670b5b96fe5b9be419487c4b21b1f04deec1b0ea87"
+      },
+      {
+        "module": "Ps.Environment.Instances",
+        "path": "packages/environment/src/Ps/Environment/Instances.ps",
+        "bytes": 1569,
+        "sha256": "b51036e807a34ed664dad80472ba6990c3e64974289901540cb7060031020de8"
+      },
+      {
+        "module": "Ps.Meta.Unify",
+        "path": "packages/meta/src/Ps/Meta/Unify.ps",
+        "bytes": 8106,
+        "sha256": "0cbc4e40e0a8b846554843fec54ee426a63416b4c2b7de6f44425d477662ead6"
+      },
+      {
+        "module": "Ps.Meta.SynthInstance",
+        "path": "packages/meta/src/Ps/Meta/SynthInstance.ps",
+        "bytes": 10104,
+        "sha256": "9ff823489a2f63215c2148ce0a1ab9daecf94ba665c8912c6618f1d1637ef3ad"
+      },
+      {
+        "module": "Ps.Elab.SourceTrace",
+        "path": "packages/elab/src/Ps/Elab/SourceTrace.ps",
+        "bytes": 5746,
+        "sha256": "e274ffebd72b8eab65f959ed7d613d41cb7123b9128ddb0c66dc407e37364840"
+      },
+      {
+        "module": "Ps.Elab.Context",
+        "path": "packages/elab/src/Ps/Elab/Context.ps",
+        "bytes": 6689,
+        "sha256": "6addc5b0f17f24ca4308bf78921731965b7a295931e0a7459428f66112208887"
+      },
+      {
+        "module": "Ps.Elab.Literal",
+        "path": "packages/elab/src/Ps/Elab/Literal.ps",
+        "bytes": 8835,
+        "sha256": "7aa94a1b01ac24638548c4bd35f599e2e9d3f544035c58261fd426e6b752d71d"
+      },
+      {
+        "module": "Ps.Elab.Basic",
+        "path": "packages/elab/src/Ps/Elab/Basic.ps",
+        "bytes": 7506,
+        "sha256": "654b3f7c3bb801b6467f3188508cafddb26490161fc5168afe2616dcfaac51a8"
+      },
+      {
+        "module": "Ps.Elab.DoBase",
+        "path": "packages/elab/src/Ps/Elab/DoBase.ps",
+        "bytes": 24193,
+        "sha256": "9430ff410ce85f46ee2df7bbe7cfdd4724bb470b8dc5d955a8fc5c2ae698dde7"
+      },
+      {
+        "module": "Ps.Elab.DoFor",
+        "path": "packages/elab/src/Ps/Elab/DoFor.ps",
+        "bytes": 13514,
+        "sha256": "25701750efd209ea354984d331d8355370a7dc52b9982c773493f1270a0ba83c"
+      },
+      {
+        "module": "Ps.Elab.DoLoop",
+        "path": "packages/elab/src/Ps/Elab/DoLoop.ps",
+        "bytes": 3591,
+        "sha256": "0510eeb0338edd9a776b0d1c78c5d562c2bf72006b11c26ba025e8361513f12f"
+      },
+      {
+        "module": "Ps.Elab.DoWhile",
+        "path": "packages/elab/src/Ps/Elab/DoWhile.ps",
+        "bytes": 10140,
+        "sha256": "453e425c59f30cfa743f76b96e9aafba2f1ab8f3c3269c07f72d0a78bce8e56d"
+      },
+      {
+        "module": "Ps.Elab.DoTry",
+        "path": "packages/elab/src/Ps/Elab/DoTry.ps",
+        "bytes": 10505,
+        "sha256": "228bc2accc6e1fb69981e4015c90e22eba554943b5d57a30ebeecdcf9c803f7f"
+      },
+      {
+        "module": "Ps.Elab.Data",
+        "path": "packages/elab/src/Ps/Elab/Data.ps",
+        "bytes": 14173,
+        "sha256": "39921cc481e42e64db308fdc58a0f097fa918db72646236184a2dc6ab3851891"
+      },
+      {
+        "module": "Ps.Elab.Do",
+        "path": "packages/elab/src/Ps/Elab/Do.ps",
+        "bytes": 10731,
+        "sha256": "c8709c65cc3672ddd73a7527acb48dda4ef2d64c564e029810387ca938e69003"
+      },
+      {
+        "module": "Ps.Elab.Operators",
+        "path": "packages/elab/src/Ps/Elab/Operators.ps",
+        "bytes": 15628,
+        "sha256": "ee2035dc84f46a0cb6288f7cd2d64a58abeb7867a46dec6a915a3015b8d4b8a9"
+      },
+      {
+        "module": "Ps.Elab.Term",
+        "path": "packages/elab/src/Ps/Elab/Term.ps",
+        "bytes": 90046,
+        "sha256": "0291cc64b8920314754fac8b3ec7c86ef2a2e97c86b07b20a4d8489269c3a2e9"
+      },
+      {
+        "module": "Ps.Elab.Recursion",
+        "path": "packages/elab/src/Ps/Elab/Recursion.ps",
+        "bytes": 42168,
+        "sha256": "1313fcb76249a939a689c9ad761fc400fdb4f53a1d0898f9208cfed1671272f3"
+      },
+      {
+        "module": "Ps.Elab.DoLoopLift",
+        "path": "packages/elab/src/Ps/Elab/DoLoopLift.ps",
+        "bytes": 22712,
+        "sha256": "fd254e4823bdcd058e6c3cadb7566213bf1c1198735e593ecb1316a853fd35c1"
+      },
+      {
+        "module": "Ps.Elab.DoForLift",
+        "path": "packages/elab/src/Ps/Elab/DoForLift.ps",
+        "bytes": 15513,
+        "sha256": "2289ae4ec9280d37904a96e4866702e39e59cb79ebfb2043af89a0694a21fe4a"
+      },
+      {
+        "module": "Ps.Elab.Declaration",
+        "path": "packages/elab/src/Ps/Elab/Declaration.ps",
+        "bytes": 55844,
+        "sha256": "f29689a9f892734b7d7aae133fc5b9ca0c04a22910ccd6c25b3d59c6932e317a"
+      },
+      {
+        "module": "Ps.CompilerIr.Model",
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/Model.ps",
+        "bytes": 5736,
+        "sha256": "e4dc7c8b2b282d4d0078655b1ee458a56c920f692368f8f33a0937f792fa3dec"
+      },
+      {
+        "module": "Ps.Erasure.Basic",
+        "path": "packages/erasure/src/Ps/Erasure/Basic.ps",
+        "bytes": 33129,
+        "sha256": "8716aa7e22a460690ca142407d1ef2c7762fad4e39d3ce2922e35bd171784aa0"
+      },
+      {
+        "module": "Ps.Erasure.Expr",
+        "path": "packages/erasure/src/Ps/Erasure/Expr.ps",
+        "bytes": 116773,
+        "sha256": "867662dfdb932a546be6f7f0fa71a237590588b7fff05ba1a5ba3e390849da9d"
+      },
+      {
+        "module": "Ps.Erasure.Inductive",
+        "path": "packages/erasure/src/Ps/Erasure/Inductive.ps",
+        "bytes": 13610,
+        "sha256": "05bd5077e9981ae8b80add335570e59501833cb2f2890ae5f07473cd276adab5"
+      },
+      {
+        "module": "Ps.Erasure.Structure",
+        "path": "packages/erasure/src/Ps/Erasure/Structure.ps",
+        "bytes": 4347,
+        "sha256": "549616a642cbf9fc2834739478e8e83fbc4070c28460bb0ce80a955b6ea6a4c6"
+      },
+      {
+        "module": "Ps.Erasure.StructureRecursor",
+        "path": "packages/erasure/src/Ps/Erasure/StructureRecursor.ps",
+        "bytes": 6516,
+        "sha256": "452f325fdcf5ff869ff673220cc3b0159c1d8e46d89c13d5ac1f5b532c6170f2"
+      },
+      {
+        "module": "Ps.Erasure.Definition",
+        "path": "packages/erasure/src/Ps/Erasure/Definition.ps",
+        "bytes": 21054,
+        "sha256": "3db671beef4b3b9d6ffe497ba1c87d29eddff452bd8cc0d98f63a36f195f2801"
+      },
+      {
+        "module": "Ps.Compiler.Api",
+        "path": "packages/compiler/src/Ps/Compiler/Api.ps",
+        "bytes": 11930,
+        "sha256": "136e81f3d8fbf306cb73aa70f2f40a88c02a3a34cd409bba16ef8a77d0f49a36"
+      },
+      {
+        "module": "Ps.Compiler.Ordinary",
+        "path": "packages/compiler/src/Ps/Compiler/Ordinary.ps",
+        "bytes": 16821,
+        "sha256": "41f502e47ec362570dbeddae3429028eef7f69167fc1f95abe63d0fb1074f84f"
+      },
+      {
+        "module": "Ps.CompilerIr.Encode",
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/Encode.ps",
+        "bytes": 25687,
+        "sha256": "bed955e16f553e7aedcc1947543d48fd34b1d1edbddaecf883abf1c98b3a3ca7"
+      },
+      {
+        "module": "Ps.Bridge.CompilerHost",
+        "path": "packages/bridge/src/Ps/Bridge/CompilerHost.ps",
+        "bytes": 1574,
+        "sha256": "1626f914bc6512cb13e32e6225c8f9fe460c7d724d51b2debd2409f8db0d5bc1"
+      },
+      {
+        "module": "Ps.CompilerIr.CheckTypes",
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/CheckTypes.ps",
+        "bytes": 24090,
+        "sha256": "fdac7634e0acc5559bf56f0bce9cda50d00fb677135525efbc713f41768f5c13"
+      },
+      {
+        "module": "Ps.CompilerIr.CheckSize",
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/CheckSize.ps",
+        "bytes": 15748,
+        "sha256": "175aa1acee48211ce824704dbfffe3d16f7ad065be420a05e8471f04cff8c3ab"
+      },
+      {
+        "module": "Ps.CompilerIr.Check",
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/Check.ps",
+        "bytes": 47006,
+        "sha256": "2446e515b7e30806c5bfb099b81d6702079a812d291aeb517f487335d28feeee"
+      },
+      {
+        "module": "Ps.CompilerIr.Provenance",
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/Provenance.ps",
+        "bytes": 1319,
+        "sha256": "cfbebd0b61fc1d157c8d23e912c45068c835040007a79ad5b56452c097247f2f"
+      },
+      {
+        "module": "Ps.Foundation.StringSet",
+        "path": "packages/foundation/src/Ps/Foundation/StringSet.ps",
+        "bytes": 4642,
+        "sha256": "dca7da4b20eb88f9b8052731f21ab1f615a0c45bcc47cd3145c404aa625617a3"
+      },
+      {
+        "module": "Ps.CompilerIr.Specialize",
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/Specialize.ps",
+        "bytes": 60198,
+        "sha256": "74fb1bb1c8f9beef611300e06fff3010121ed2589e828b7102f539217a09ad93"
+      },
+      {
+        "module": "Ps.CompilerIr.Validate",
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/Validate.ps",
+        "bytes": 1275,
+        "sha256": "6c14bf597b2c23c14b0c9ab6fa8ca14e5d615c34c753d1c1c6cbe3ace84ac720"
+      },
+      {
+        "module": "Ps.CompilerIr.WorkerFusion",
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/WorkerFusion.ps",
+        "bytes": 35534,
+        "sha256": "b2b183bc35db3fd9023a1fe4e4dcf7e942fbd382491a00f9b25a5ed2f711d07e"
+      },
+      {
+        "module": "Ps.BackendCommon.Plan",
+        "path": "packages/backend-common/src/Ps/BackendCommon/Plan.ps",
+        "bytes": 11362,
+        "sha256": "ab215bcb08fd433b966133d157c5c467b80269ff777b0b0eb800713fc5537300"
+      },
+      {
+        "module": "Ps.Compiler.Service",
+        "path": "packages/compiler/src/Ps/Compiler/Service.ps",
+        "bytes": 25234,
+        "sha256": "5d5a0ca580ecf66297bf2560404bc08c6d91e593eaa6f15de55f4c3d9649dc31"
+      },
+      {
+        "module": "Ps.BackendJs.Model",
+        "path": "packages/backend-js/src/Ps/BackendJs/Model.ps",
+        "bytes": 3146,
+        "sha256": "64cdba7a526f85b8b814b348e2bead18104abec74bed2526a7bf8511c625306c"
+      },
+      {
+        "module": "Ps.BackendJs.Lower",
+        "path": "packages/backend-js/src/Ps/BackendJs/Lower.ps",
+        "bytes": 50308,
+        "sha256": "dadcb4756b86689deda6f9cfc5b5c78ad4f79cab71456d7e36cc7455d992ec15"
+      },
+      {
+        "module": "Ps.BackendJs.Validate",
+        "path": "packages/backend-js/src/Ps/BackendJs/Validate.ps",
+        "bytes": 13969,
+        "sha256": "7258e1614747f20280c852ef98ce3310473eda9d3a582d1cb5e49fdb79e8e18f"
+      },
+      {
+        "module": "Ps.BackendJs.TailAlias",
+        "path": "packages/backend-js/src/Ps/BackendJs/TailAlias.ps",
+        "bytes": 9769,
+        "sha256": "85b402091696332a77a7fe2039b0cbe3854c0e856ed74b0c7e50a03a4aabf271"
+      },
+      {
+        "module": "Ps.BackendJs.Print",
+        "path": "packages/backend-js/src/Ps/BackendJs/Print.ps",
+        "bytes": 91555,
+        "sha256": "3be490a75016b9f0293a65fecc86d27785d468c0f55653c10ce75805475ec766"
+      },
+      {
+        "module": "Ps.BackendJs.CompilerService",
+        "path": "packages/backend-js/src/Ps/BackendJs/CompilerService.ps",
+        "bytes": 1526,
+        "sha256": "b48fca262918566a03f0e911dc86dfc8cbceb258cbced377a94bb2b47859bbf2"
+      },
+      {
+        "module": "Ps.BackendTs.Type",
+        "path": "packages/backend-ts/src/Ps/BackendTs/Type.ps",
+        "bytes": 4245,
+        "sha256": "91628c36302c3d9be2d6f25d0e8b550614252d2e2a60cb0b3a5a2f98dd90faa9"
+      },
+      {
+        "module": "Ps.BackendTs.RuntimeSupport",
+        "path": "packages/backend-ts/src/Ps/BackendTs/RuntimeSupport.ps",
+        "bytes": 6072,
+        "sha256": "4689263a634231a909ce01426dc56cbfe78318573126fc3304e09a990b7e5bc5"
+      },
+      {
+        "module": "Ps.BackendTs.Expr",
+        "path": "packages/backend-ts/src/Ps/BackendTs/Expr.ps",
+        "bytes": 49607,
+        "sha256": "0462018cd9f6d059cf431c750dcb0d9fcf27a631b66386345adcd38feb38600a"
+      },
+      {
+        "module": "Ps.BackendTs.Module",
+        "path": "packages/backend-ts/src/Ps/BackendTs/Module.ps",
+        "bytes": 71444,
+        "sha256": "787b930ecaaad3a311db7e9def47a926dd679595e610bd6db862361a8d2095e0"
+      },
+      {
+        "module": "Ps.BackendTs.CompilerService",
+        "path": "packages/backend-ts/src/Ps/BackendTs/CompilerService.ps",
+        "bytes": 2046,
+        "sha256": "5d21dfd3fad9d2121eb0ab41dba90ed754ac33a0f52819ba9482e1caf9b4cde7"
+      },
+      {
+        "module": "Ps.BackendRust.RuntimePlan",
+        "path": "packages/backend-rust/src/Ps/BackendRust/RuntimePlan.ps",
+        "bytes": 21815,
+        "sha256": "3cefff1ca92b3c52ccc060fc64056176dd1d78f9347b9a46e579d48918662ed2"
+      },
+      {
+        "module": "Ps.BackendRust.Identifier",
+        "path": "packages/backend-rust/src/Ps/BackendRust/Identifier.ps",
+        "bytes": 5450,
+        "sha256": "5ca0133e17e28fab4af915de0397f8842690196c992e1ed7dd09e44329c673ef"
+      },
+      {
+        "module": "Ps.BackendRust.Type",
+        "path": "packages/backend-rust/src/Ps/BackendRust/Type.ps",
+        "bytes": 10115,
+        "sha256": "64f0f2be9efe4935ce15b6590a1a0acb5461fd6210e998468cb71618718c3da6"
+      },
+      {
+        "module": "Ps.BackendRust.ValueRefs",
+        "path": "packages/backend-rust/src/Ps/BackendRust/ValueRefs.ps",
+        "bytes": 7950,
+        "sha256": "03b8b365f9d1c8a327d375baf20835fc3ed19f10d9ed2a3a120697016eceaa0b"
+      },
+      {
+        "module": "Ps.BackendRust.Captures",
+        "path": "packages/backend-rust/src/Ps/BackendRust/Captures.ps",
+        "bytes": 5497,
+        "sha256": "1df95ce14c9f9807c1bacc1b537a8006aef23eba9de0ae8c5c9f9231694a5bfc"
+      },
+      {
+        "module": "Ps.BackendRust.Expr",
+        "path": "packages/backend-rust/src/Ps/BackendRust/Expr.ps",
+        "bytes": 40758,
+        "sha256": "30de5252dfe53bfe195a9331d1a8316f386f4a4bf8eb13abbf6216cda5297380"
+      },
+      {
+        "module": "Ps.BackendRust.TailAlias",
+        "path": "packages/backend-rust/src/Ps/BackendRust/TailAlias.ps",
+        "bytes": 7615,
+        "sha256": "3970fb5fdff246c3d91f3472401293c9cf4bf747222a22f99aec61ca1518bd20"
+      },
+      {
+        "module": "Ps.BackendRust.Tail",
+        "path": "packages/backend-rust/src/Ps/BackendRust/Tail.ps",
+        "bytes": 13561,
+        "sha256": "c62e56192453842d64910590d50f963d79a6e1b2c547ae59efbbfbd2c0e70200"
+      },
+      {
+        "module": "Ps.BackendRust.Runtime",
+        "path": "packages/backend-rust/src/Ps/BackendRust/Runtime.ps",
+        "bytes": 6216,
+        "sha256": "629fc826121e552fc95123ab1b79889f8c34307f1c2c3a0b5417edf2c7d726c9"
+      },
+      {
+        "module": "Ps.BackendRust.Module",
+        "path": "packages/backend-rust/src/Ps/BackendRust/Module.ps",
+        "bytes": 47445,
+        "sha256": "c0b759896b1e5c5f73ce3f93a940b41c5580e0f49b530042896bd84ac4ff342c"
+      },
+      {
+        "module": "Ps.BackendRust.CompilerService",
+        "path": "packages/backend-rust/src/Ps/BackendRust/CompilerService.ps",
+        "bytes": 781,
+        "sha256": "69b810aa13096ba9a8a53a1c75717745c017afb3a48ca7f67d924f142a38ebb3"
+      },
+      {
+        "module": "Ps.BackendWasm.Lower.RuntimeNeeds",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower/RuntimeNeeds.ps",
+        "bytes": 17961,
+        "sha256": "c7447639c000227b815e2739258e4ba1400f7186d401ddb3ebe2beee744fee08"
+      },
+      {
+        "module": "Ps.BackendWasm.Model",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/Model.ps",
+        "bytes": 4159,
+        "sha256": "81ba1713ab6e6af9d9bbd3e7bdd9b0ce3f00736250979ca50e4eb81850d97266"
+      },
+      {
+        "module": "Ps.BackendWasm.Type",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/Type.ps",
+        "bytes": 7602,
+        "sha256": "c4724f24c4ab5ec3f537f76990f8416c460e14d58e6fbf6678397ba78b55c903"
+      },
+      {
+        "module": "Ps.BackendWasm.Lower.TypeInventory",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower/TypeInventory.ps",
+        "bytes": 23861,
+        "sha256": "f4357ace64c1de768673772c5966fb9d7bb6c21d037392eea5f267498c65d5cd"
+      },
+      {
+        "module": "Ps.BackendWasm.TailCalls",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/TailCalls.ps",
+        "bytes": 4492,
+        "sha256": "40e3b7733b12e6480db5a681060c16db88cf5d8dbc011cd2db69c0a43540ba6f"
+      },
+      {
+        "module": "Ps.BackendWasm.LowerInt",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/LowerInt.ps",
+        "bytes": 4186,
+        "sha256": "f5efb833c5c1ea4914d2802c943d5d6b2ff27eeac2fa900ffff4e1cdc1095c6a"
+      },
+      {
+        "module": "Ps.BackendWasm.LowerFloat",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/LowerFloat.ps",
+        "bytes": 1879,
+        "sha256": "18084332ed983dad151a4f34b5eb7e6de58244a7203915c248ff617f467ac0b0"
+      },
+      {
+        "module": "Ps.BackendWasm.RuntimeNat",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.ps",
+        "bytes": 32351,
+        "sha256": "7e1e6bb4cfd4600a510f2b3003f13ccb2dfa3c58ab7300da513bc9eaa05a3034"
+      },
+      {
+        "module": "Ps.BackendWasm.IntUtil",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/IntUtil.ps",
+        "bytes": 3077,
+        "sha256": "cbc42fd50286daafdcb91ff3e515302138561c37da11751da2d7539ce407d58d"
+      },
+      {
+        "module": "Ps.BackendWasm.RuntimeInt",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/RuntimeInt.ps",
+        "bytes": 13180,
+        "sha256": "7f1b7c0a567243caa31d5485672d0c6f73b0560c1d5daf69ce2276347531e1a9"
+      },
+      {
+        "module": "Ps.BackendWasm.RuntimeString",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/RuntimeString.ps",
+        "bytes": 45775,
+        "sha256": "e55547cc194ed516cac8d78fd3eb4434330c03a031f28e9da466c49b3949a4e4"
+      },
+      {
+        "module": "Ps.BackendWasm.RuntimeIntRepr",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/RuntimeIntRepr.ps",
+        "bytes": 4706,
+        "sha256": "cc56aa7f403c845a37eb86946207ab5a0a4b575361eda09d79272eaba5c3852e"
+      },
+      {
+        "module": "Ps.BackendWasm.Lower",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower.ps",
+        "bytes": 143365,
+        "sha256": "e0bf3eda26b0b36c0d77d4f9e6f76b1eb5d0907ee5a4994cb809c1b3415ee40c"
+      },
+      {
+        "module": "Ps.BackendWasm.BinaryBytes",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/BinaryBytes.ps",
+        "bytes": 52711,
+        "sha256": "a54fc196363302f49966ebcadc9b43721d25a42b0b0cbd90f1db2df54e1fecc1"
+      },
+      {
+        "module": "Ps.BackendWasm.ValidateStructure",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/ValidateStructure.ps",
+        "bytes": 23539,
+        "sha256": "fdc3422842a4440b0a949e20b42b1876d0b216f76ae0b73b9e9627c800405830"
+      },
+      {
+        "module": "Ps.BackendWasm.ValidateTyping",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/ValidateTyping.ps",
+        "bytes": 39592,
+        "sha256": "ed0af5e376bed3c913cd30f3cbfac089d4b80269fb2772d4ee01d7cbdb3652a3"
+      },
+      {
+        "module": "Ps.BackendWasm.ValidateIr",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/ValidateIr.ps",
+        "bytes": 611,
+        "sha256": "4ca21990c91988cd4867cf965b1667eda526661916edaaab5d15eb0c96f8c622"
+      },
+      {
+        "module": "Ps.BackendWasm.ServiceAbi",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/ServiceAbi.ps",
+        "bytes": 6440,
+        "sha256": "c1862ca84a1a3f8731bb6cff4f0d31694368b76b2f517d8b06be763e31855ec8"
+      },
+      {
+        "module": "Ps.BackendWasm.CompilerService",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/CompilerService.ps",
+        "bytes": 2633,
+        "sha256": "ff8831f2f678bdcfe2a35591268c6adc63a1fe338f240ef89393d06be285042f"
+      },
+      {
+        "module": "Ps.CompilerUnified.Service",
+        "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.ps",
+        "bytes": 3806,
+        "sha256": "4b6a1c1cb433d483e6172cd528ac45b7cb9d032e7eee056237be2a2c3a59a7f7"
+      }
+    ]
+  },
+  "changedSource": {
+    "projectSha256": "36bedf25da22e5b65b3318ea972efe2a069160ba826fbb001e27cbfb9775b58e",
+    "sourceClosureDigest": "f4353fdcca3268e69881e99bc7fd8c568acf9a608302f7e0da09bbd79e11c16a",
+    "entryModule": "Ps.CompilerUnified.Service",
+    "moduleCount": 125,
+    "utf8Bytes": 2382846,
+    "files": [
+      {
+        "module": "Ps.Foundation.Source",
+        "path": "packages/foundation/src/Ps/Foundation/Source.ps",
+        "bytes": 156,
+        "sha256": "190c8c4e3dfc27ce344d5c6aea7fabdbc11f780cdf43771d15a7d0e2dc06ddd8"
+      },
+      {
+        "module": "Ps.Foundation.List",
+        "path": "packages/foundation/src/Ps/Foundation/List.ps",
+        "bytes": 3281,
+        "sha256": "9f25f6d12b13de41723df9e5dbeae3aa644e2f917cb6aebc23db50c12b794e95"
+      },
+      {
+        "module": "Ps.Syntax.Cursor",
+        "path": "packages/syntax/src/Ps/Syntax/Cursor.ps",
+        "bytes": 3025,
+        "sha256": "2e2f021f2d056b7f68752da0a293b53123664ee7b3420546dd171bb8bfb1c56d"
+      },
+      {
+        "module": "Ps.Syntax.Token",
+        "path": "packages/syntax/src/Ps/Syntax/Token.ps",
+        "bytes": 899,
+        "sha256": "ed8ce1e58371b2e831bfd0b9ae6bdf0be4a0ff45cb4f6a9e8b0dea18b05f1f13"
+      },
+      {
+        "module": "Ps.Syntax.Lexer",
+        "path": "packages/syntax/src/Ps/Syntax/Lexer.ps",
+        "bytes": 27739,
+        "sha256": "8ea636b2b1dd8b59f2472ecbc21fe1a6d43239144b8056146a54cd7c75a799cd"
+      },
+      {
+        "module": "Ps.Foundation.Name",
+        "path": "packages/foundation/src/Ps/Foundation/Name.ps",
+        "bytes": 3579,
+        "sha256": "594312f307a7f553d8a92ffe00e73e8429887069171617b969c4f5da670bcecd"
+      },
+      {
+        "module": "Ps.Syntax.Ast",
+        "path": "packages/syntax/src/Ps/Syntax/Ast.ps",
+        "bytes": 10612,
+        "sha256": "99882b18ea1c18ce068af0619f36883f7f6eacbf68f9516f07648f575ac89331"
+      },
+      {
+        "module": "Ps.Syntax.ParserState",
+        "path": "packages/syntax/src/Ps/Syntax/ParserState.ps",
+        "bytes": 2891,
+        "sha256": "dfc4a8d4337ff30df2e79cf2d0c189477b4a0e37b5575d6d7ea1a264f555589d"
+      },
+      {
+        "module": "Ps.Syntax.ParseCommon",
+        "path": "packages/syntax/src/Ps/Syntax/ParseCommon.ps",
+        "bytes": 27154,
+        "sha256": "00e6ef7fb0a6f15c11b2be0383033e1af5257a3d1a39340ca131a162579878da"
+      },
+      {
+        "module": "Ps.Syntax.ParseBinding",
+        "path": "packages/syntax/src/Ps/Syntax/ParseBinding.ps",
+        "bytes": 7062,
+        "sha256": "79f8fa74f8d19190a6078362e34cb0f7921cf47b4a70fea41af8a9ea59640247"
+      },
+      {
+        "module": "Ps.Syntax.ParseDo",
+        "path": "packages/syntax/src/Ps/Syntax/ParseDo.ps",
+        "bytes": 40797,
+        "sha256": "de2eec16edd81071cc76823eb419d400377f281fedd0471275d07ca2f27cd750"
+      },
+      {
+        "module": "Ps.Syntax.ParseData",
+        "path": "packages/syntax/src/Ps/Syntax/ParseData.ps",
+        "bytes": 9199,
+        "sha256": "28ab760ad1ff26db1d3522b788f6abef607d6088bbe2ba1d88c2bda9efc70f87"
+      },
+      {
+        "module": "Ps.Syntax.Operators",
+        "path": "packages/syntax/src/Ps/Syntax/Operators.ps",
+        "bytes": 4996,
+        "sha256": "cada90a8e563ab5d1f6cef86a4a06dc1688e593addaf30dc285ee314bb9ca447"
+      },
+      {
+        "module": "Ps.Syntax.ParseLean",
+        "path": "packages/syntax/src/Ps/Syntax/ParseLean.ps",
+        "bytes": 73654,
+        "sha256": "d623ff5ff60c5b03ae8e373c9dbdea189055935d7eb240ab189d50085bb4e4b4"
+      },
+      {
+        "module": "Ps.Syntax.ParseProofScript",
+        "path": "packages/syntax/src/Ps/Syntax/ParseProofScript.ps",
+        "bytes": 61115,
+        "sha256": "81887154582336b2bcbd977c4df93d0a3c3ee78e8764aa6f2f3c5770bc022583"
+      },
+      {
+        "module": "Ps.Syntax.PrintCommon",
+        "path": "packages/syntax/src/Ps/Syntax/PrintCommon.ps",
+        "bytes": 16782,
+        "sha256": "1226625626a2c3f2b13a3355a0af6f8eb138c96d3941608d1c499437531dd71d"
+      },
+      {
+        "module": "Ps.Syntax.PrintLean",
+        "path": "packages/syntax/src/Ps/Syntax/PrintLean.ps",
+        "bytes": 26262,
+        "sha256": "6bf32d051166a34af6ed1e0feb26478255550078975166f5ddaba6afa964a821"
+      },
+      {
+        "module": "Ps.Syntax.PrintProofScript",
+        "path": "packages/syntax/src/Ps/Syntax/PrintProofScript.ps",
+        "bytes": 27888,
+        "sha256": "6b9c6edc04ad5e40199ea60cdbe9250399db090c70a8be00f129de1531b05621"
+      },
+      {
+        "module": "Ps.Syntax.Translate",
+        "path": "packages/syntax/src/Ps/Syntax/Translate.ps",
+        "bytes": 1939,
+        "sha256": "0ec2e714edc02a69045114124d25e014d155c30f8d7644e1c30129355573120d"
+      },
+      {
+        "module": "Ps.Foundation.Text",
+        "path": "packages/foundation/src/Ps/Foundation/Text.ps",
+        "bytes": 2127,
+        "sha256": "39751af9f50465b0f464a29436e1f3fd8294d475664bde514eb91c4ed2f41df1"
+      },
+      {
+        "module": "Ps.Bridge.Json",
+        "path": "packages/bridge/src/Ps/Bridge/Json.ps",
+        "bytes": 31843,
+        "sha256": "253dd89fb9f2abd42cede99aa72cfeb47e1b1698a6b11cde54d6fca24e8c1425"
+      },
+      {
+        "module": "Ps.Core.Level",
+        "path": "packages/core/src/Ps/Core/Level.ps",
+        "bytes": 281,
+        "sha256": "da652d658d9e2560b9b2a297508ff4169129c04cfa88b5aa0393b31c935470fe"
+      },
+      {
+        "module": "Ps.Core.Expr",
+        "path": "packages/core/src/Ps/Core/Expr.ps",
+        "bytes": 740,
+        "sha256": "636e9cd00ef2c3ca1aa5e2dae49ba5576fd4b8a6f15d66439649cd6670aa7783"
+      },
+      {
+        "module": "Ps.Core.Declaration",
+        "path": "packages/core/src/Ps/Core/Declaration.ps",
+        "bytes": 1222,
+        "sha256": "336d770fcc3adaa486964c5fa652ced8073ff9ef7422521daf83a18dc81b0216"
+      },
+      {
+        "module": "Ps.Core.Abstract",
+        "path": "packages/core/src/Ps/Core/Abstract.ps",
+        "bytes": 2304,
+        "sha256": "2dadb01b12bdc9c1ceb1949cfedfa0cdffa9b65e2013f96e3666f122bea0d5b9"
+      },
+      {
+        "module": "Ps.Core.Subst",
+        "path": "packages/core/src/Ps/Core/Subst.ps",
+        "bytes": 4666,
+        "sha256": "64fd6b12fed98bf4e3d755cd395dcb4be8ff04af2febce62834e2922a848d05a"
+      },
+      {
+        "module": "Ps.Core.Equality",
+        "path": "packages/core/src/Ps/Core/Equality.ps",
+        "bytes": 5361,
+        "sha256": "5edd70ca0a340a73a39e296ea24f053532cb5faa0c478462fd661b8f5d4e56be"
+      },
+      {
+        "module": "Ps.Environment.Basic",
+        "path": "packages/environment/src/Ps/Environment/Basic.ps",
+        "bytes": 9233,
+        "sha256": "791633a0e314288fb5bb95ae0cb535d96d2520c9e625e37fe2a8a196563b19d9"
+      },
+      {
+        "module": "Ps.Bridge.CheckedAdmissions",
+        "path": "packages/bridge/src/Ps/Bridge/CheckedAdmissions.ps",
+        "bytes": 56965,
+        "sha256": "bbc4d8cc27990a024feabea58747b879c839faa2d687dc0b05ad8a69e9b54d32"
+      },
+      {
+        "module": "Ps.Core.Builtin",
+        "path": "packages/core/src/Ps/Core/Builtin.ps",
+        "bytes": 6369,
+        "sha256": "11fd7bbb687a20c2f889920a14c94915c75fc2564de048c743b66297c7c0a64b"
+      },
+      {
+        "module": "Ps.Environment.Prelude",
+        "path": "packages/environment/src/Ps/Environment/Prelude.ps",
+        "bytes": 23722,
+        "sha256": "9130f0d543a174059d45b2a2ad6a0b6769187a8395cccefda4b22d41421f56e7"
+      },
+      {
+        "module": "Ps.Environment.SelfHostPrelude",
+        "path": "packages/environment/src/Ps/Environment/SelfHostPrelude.ps",
+        "bytes": 14608,
+        "sha256": "9579d8548d134c3ef10a97a49195039a21b9dc786b7538689783f32d4949eece"
+      },
+      {
+        "module": "Ps.Environment.Control",
+        "path": "packages/environment/src/Ps/Environment/Control.ps",
+        "bytes": 14152,
+        "sha256": "0e8c80607df8524bc30ec53b1a9c4cdd26909d08df0cb7d1edbce46820dfefed"
+      },
+      {
+        "module": "Ps.Environment.Order",
+        "path": "packages/environment/src/Ps/Environment/Order.ps",
+        "bytes": 40043,
+        "sha256": "5efacfa352bf7a7e3815d3705fdf457bef435d360b9576815821e1673e58fbf8"
+      },
+      {
+        "module": "Ps.Environment.SelfHostProd",
+        "path": "packages/environment/src/Ps/Environment/SelfHostProd.ps",
+        "bytes": 3854,
+        "sha256": "017c9838c5b2e217a00a3c8c4676daf2d006cbc52ceddfb5f819c3a86d1cfb21"
+      },
+      {
+        "module": "Ps.Environment.LocalContext",
+        "path": "packages/environment/src/Ps/Environment/LocalContext.ps",
+        "bytes": 2746,
+        "sha256": "6bcbdb43698907b9bdf414071a09f57e108c1a6197f4a236ebe529c55ba4086b"
+      },
+      {
+        "module": "Ps.Environment.Resolve",
+        "path": "packages/environment/src/Ps/Environment/Resolve.ps",
+        "bytes": 5004,
+        "sha256": "4a77fb1380d7f55e6b2e2d801b1bde6b9e92ccd155c941a68d4d3ba1b3d0ea91"
+      },
+      {
+        "module": "Ps.Core.LevelSubst",
+        "path": "packages/core/src/Ps/Core/LevelSubst.ps",
+        "bytes": 3356,
+        "sha256": "01bdc60ac450b54f86eba0f9520057c7e4cd6219734b8c148288b18da7212b97"
+      },
+      {
+        "module": "Ps.Meta.LevelContext",
+        "path": "packages/meta/src/Ps/Meta/LevelContext.ps",
+        "bytes": 8049,
+        "sha256": "96bd6a16bc256896c95d14cbf4c9e9be8f0234befe9bb38c10a24babbc298b18"
+      },
+      {
+        "module": "Ps.Meta.Context",
+        "path": "packages/meta/src/Ps/Meta/Context.ps",
+        "bytes": 8699,
+        "sha256": "fbaad34aba192f70a095460c9079b4735bba1186888207c366dd00ca2a1fd0c0"
+      },
+      {
+        "module": "Ps.Meta.Reduce",
+        "path": "packages/meta/src/Ps/Meta/Reduce.ps",
+        "bytes": 5185,
+        "sha256": "93308a83711fa18281ce2c0bedd8ee4f89c6a982e1c19b7faa5c397b2911ab89"
+      },
+      {
+        "module": "Ps.Meta.Infer",
+        "path": "packages/meta/src/Ps/Meta/Infer.ps",
+        "bytes": 15545,
+        "sha256": "48af790c129208d37abd58670b5b96fe5b9be419487c4b21b1f04deec1b0ea87"
+      },
+      {
+        "module": "Ps.Environment.Instances",
+        "path": "packages/environment/src/Ps/Environment/Instances.ps",
+        "bytes": 1569,
+        "sha256": "b51036e807a34ed664dad80472ba6990c3e64974289901540cb7060031020de8"
+      },
+      {
+        "module": "Ps.Meta.Unify",
+        "path": "packages/meta/src/Ps/Meta/Unify.ps",
+        "bytes": 8106,
+        "sha256": "0cbc4e40e0a8b846554843fec54ee426a63416b4c2b7de6f44425d477662ead6"
+      },
+      {
+        "module": "Ps.Meta.SynthInstance",
+        "path": "packages/meta/src/Ps/Meta/SynthInstance.ps",
+        "bytes": 10104,
+        "sha256": "9ff823489a2f63215c2148ce0a1ab9daecf94ba665c8912c6618f1d1637ef3ad"
+      },
+      {
+        "module": "Ps.Elab.SourceTrace",
+        "path": "packages/elab/src/Ps/Elab/SourceTrace.ps",
+        "bytes": 5746,
+        "sha256": "e274ffebd72b8eab65f959ed7d613d41cb7123b9128ddb0c66dc407e37364840"
+      },
+      {
+        "module": "Ps.Elab.Context",
+        "path": "packages/elab/src/Ps/Elab/Context.ps",
+        "bytes": 6689,
+        "sha256": "6addc5b0f17f24ca4308bf78921731965b7a295931e0a7459428f66112208887"
+      },
+      {
+        "module": "Ps.Elab.Literal",
+        "path": "packages/elab/src/Ps/Elab/Literal.ps",
+        "bytes": 8835,
+        "sha256": "7aa94a1b01ac24638548c4bd35f599e2e9d3f544035c58261fd426e6b752d71d"
+      },
+      {
+        "module": "Ps.Elab.Basic",
+        "path": "packages/elab/src/Ps/Elab/Basic.ps",
+        "bytes": 7506,
+        "sha256": "654b3f7c3bb801b6467f3188508cafddb26490161fc5168afe2616dcfaac51a8"
+      },
+      {
+        "module": "Ps.Elab.DoBase",
+        "path": "packages/elab/src/Ps/Elab/DoBase.ps",
+        "bytes": 24193,
+        "sha256": "9430ff410ce85f46ee2df7bbe7cfdd4724bb470b8dc5d955a8fc5c2ae698dde7"
+      },
+      {
+        "module": "Ps.Elab.DoFor",
+        "path": "packages/elab/src/Ps/Elab/DoFor.ps",
+        "bytes": 13514,
+        "sha256": "25701750efd209ea354984d331d8355370a7dc52b9982c773493f1270a0ba83c"
+      },
+      {
+        "module": "Ps.Elab.DoLoop",
+        "path": "packages/elab/src/Ps/Elab/DoLoop.ps",
+        "bytes": 3591,
+        "sha256": "0510eeb0338edd9a776b0d1c78c5d562c2bf72006b11c26ba025e8361513f12f"
+      },
+      {
+        "module": "Ps.Elab.DoWhile",
+        "path": "packages/elab/src/Ps/Elab/DoWhile.ps",
+        "bytes": 10140,
+        "sha256": "453e425c59f30cfa743f76b96e9aafba2f1ab8f3c3269c07f72d0a78bce8e56d"
+      },
+      {
+        "module": "Ps.Elab.DoTry",
+        "path": "packages/elab/src/Ps/Elab/DoTry.ps",
+        "bytes": 10505,
+        "sha256": "228bc2accc6e1fb69981e4015c90e22eba554943b5d57a30ebeecdcf9c803f7f"
+      },
+      {
+        "module": "Ps.Elab.Data",
+        "path": "packages/elab/src/Ps/Elab/Data.ps",
+        "bytes": 14173,
+        "sha256": "39921cc481e42e64db308fdc58a0f097fa918db72646236184a2dc6ab3851891"
+      },
+      {
+        "module": "Ps.Elab.Do",
+        "path": "packages/elab/src/Ps/Elab/Do.ps",
+        "bytes": 10731,
+        "sha256": "c8709c65cc3672ddd73a7527acb48dda4ef2d64c564e029810387ca938e69003"
+      },
+      {
+        "module": "Ps.Elab.Operators",
+        "path": "packages/elab/src/Ps/Elab/Operators.ps",
+        "bytes": 15628,
+        "sha256": "ee2035dc84f46a0cb6288f7cd2d64a58abeb7867a46dec6a915a3015b8d4b8a9"
+      },
+      {
+        "module": "Ps.Elab.Term",
+        "path": "packages/elab/src/Ps/Elab/Term.ps",
+        "bytes": 90046,
+        "sha256": "0291cc64b8920314754fac8b3ec7c86ef2a2e97c86b07b20a4d8489269c3a2e9"
+      },
+      {
+        "module": "Ps.Elab.Recursion",
+        "path": "packages/elab/src/Ps/Elab/Recursion.ps",
+        "bytes": 42168,
+        "sha256": "1313fcb76249a939a689c9ad761fc400fdb4f53a1d0898f9208cfed1671272f3"
+      },
+      {
+        "module": "Ps.Elab.DoLoopLift",
+        "path": "packages/elab/src/Ps/Elab/DoLoopLift.ps",
+        "bytes": 22712,
+        "sha256": "fd254e4823bdcd058e6c3cadb7566213bf1c1198735e593ecb1316a853fd35c1"
+      },
+      {
+        "module": "Ps.Elab.DoForLift",
+        "path": "packages/elab/src/Ps/Elab/DoForLift.ps",
+        "bytes": 15513,
+        "sha256": "2289ae4ec9280d37904a96e4866702e39e59cb79ebfb2043af89a0694a21fe4a"
+      },
+      {
+        "module": "Ps.Elab.Declaration",
+        "path": "packages/elab/src/Ps/Elab/Declaration.ps",
+        "bytes": 55844,
+        "sha256": "f29689a9f892734b7d7aae133fc5b9ca0c04a22910ccd6c25b3d59c6932e317a"
+      },
+      {
+        "module": "Ps.CompilerIr.Model",
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/Model.ps",
+        "bytes": 5736,
+        "sha256": "e4dc7c8b2b282d4d0078655b1ee458a56c920f692368f8f33a0937f792fa3dec"
+      },
+      {
+        "module": "Ps.Erasure.Basic",
+        "path": "packages/erasure/src/Ps/Erasure/Basic.ps",
+        "bytes": 33129,
+        "sha256": "8716aa7e22a460690ca142407d1ef2c7762fad4e39d3ce2922e35bd171784aa0"
+      },
+      {
+        "module": "Ps.Erasure.Expr",
+        "path": "packages/erasure/src/Ps/Erasure/Expr.ps",
+        "bytes": 116773,
+        "sha256": "867662dfdb932a546be6f7f0fa71a237590588b7fff05ba1a5ba3e390849da9d"
+      },
+      {
+        "module": "Ps.Erasure.Inductive",
+        "path": "packages/erasure/src/Ps/Erasure/Inductive.ps",
+        "bytes": 13610,
+        "sha256": "05bd5077e9981ae8b80add335570e59501833cb2f2890ae5f07473cd276adab5"
+      },
+      {
+        "module": "Ps.Erasure.Structure",
+        "path": "packages/erasure/src/Ps/Erasure/Structure.ps",
+        "bytes": 4347,
+        "sha256": "549616a642cbf9fc2834739478e8e83fbc4070c28460bb0ce80a955b6ea6a4c6"
+      },
+      {
+        "module": "Ps.Erasure.StructureRecursor",
+        "path": "packages/erasure/src/Ps/Erasure/StructureRecursor.ps",
+        "bytes": 6516,
+        "sha256": "452f325fdcf5ff869ff673220cc3b0159c1d8e46d89c13d5ac1f5b532c6170f2"
+      },
+      {
+        "module": "Ps.Erasure.Definition",
+        "path": "packages/erasure/src/Ps/Erasure/Definition.ps",
+        "bytes": 21054,
+        "sha256": "3db671beef4b3b9d6ffe497ba1c87d29eddff452bd8cc0d98f63a36f195f2801"
+      },
+      {
+        "module": "Ps.Compiler.Api",
+        "path": "packages/compiler/src/Ps/Compiler/Api.ps",
+        "bytes": 11930,
+        "sha256": "136e81f3d8fbf306cb73aa70f2f40a88c02a3a34cd409bba16ef8a77d0f49a36"
+      },
+      {
+        "module": "Ps.Compiler.Ordinary",
+        "path": "packages/compiler/src/Ps/Compiler/Ordinary.ps",
+        "bytes": 16821,
+        "sha256": "41f502e47ec362570dbeddae3429028eef7f69167fc1f95abe63d0fb1074f84f"
+      },
+      {
+        "module": "Ps.CompilerIr.Encode",
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/Encode.ps",
+        "bytes": 25687,
+        "sha256": "bed955e16f553e7aedcc1947543d48fd34b1d1edbddaecf883abf1c98b3a3ca7"
+      },
+      {
+        "module": "Ps.Bridge.CompilerHost",
+        "path": "packages/bridge/src/Ps/Bridge/CompilerHost.ps",
+        "bytes": 1574,
+        "sha256": "1626f914bc6512cb13e32e6225c8f9fe460c7d724d51b2debd2409f8db0d5bc1"
+      },
+      {
+        "module": "Ps.CompilerIr.CheckTypes",
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/CheckTypes.ps",
+        "bytes": 24090,
+        "sha256": "fdac7634e0acc5559bf56f0bce9cda50d00fb677135525efbc713f41768f5c13"
+      },
+      {
+        "module": "Ps.CompilerIr.CheckSize",
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/CheckSize.ps",
+        "bytes": 15748,
+        "sha256": "175aa1acee48211ce824704dbfffe3d16f7ad065be420a05e8471f04cff8c3ab"
+      },
+      {
+        "module": "Ps.CompilerIr.Check",
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/Check.ps",
+        "bytes": 47006,
+        "sha256": "2446e515b7e30806c5bfb099b81d6702079a812d291aeb517f487335d28feeee"
+      },
+      {
+        "module": "Ps.CompilerIr.Provenance",
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/Provenance.ps",
+        "bytes": 1319,
+        "sha256": "cfbebd0b61fc1d157c8d23e912c45068c835040007a79ad5b56452c097247f2f"
+      },
+      {
+        "module": "Ps.Foundation.StringSet",
+        "path": "packages/foundation/src/Ps/Foundation/StringSet.ps",
+        "bytes": 4642,
+        "sha256": "dca7da4b20eb88f9b8052731f21ab1f615a0c45bcc47cd3145c404aa625617a3"
+      },
+      {
+        "module": "Ps.CompilerIr.Specialize",
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/Specialize.ps",
+        "bytes": 60198,
+        "sha256": "74fb1bb1c8f9beef611300e06fff3010121ed2589e828b7102f539217a09ad93"
+      },
+      {
+        "module": "Ps.CompilerIr.Validate",
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/Validate.ps",
+        "bytes": 1275,
+        "sha256": "6c14bf597b2c23c14b0c9ab6fa8ca14e5d615c34c753d1c1c6cbe3ace84ac720"
+      },
+      {
+        "module": "Ps.CompilerIr.WorkerFusion",
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/WorkerFusion.ps",
+        "bytes": 35534,
+        "sha256": "b2b183bc35db3fd9023a1fe4e4dcf7e942fbd382491a00f9b25a5ed2f711d07e"
+      },
+      {
+        "module": "Ps.BackendCommon.Plan",
+        "path": "packages/backend-common/src/Ps/BackendCommon/Plan.ps",
+        "bytes": 11362,
+        "sha256": "ab215bcb08fd433b966133d157c5c467b80269ff777b0b0eb800713fc5537300"
+      },
+      {
+        "module": "Ps.Compiler.Service",
+        "path": "packages/compiler/src/Ps/Compiler/Service.ps",
+        "bytes": 25240,
+        "sha256": "446c299112585c2c384c09f4d9f96da18af06c99eb166842207b9e749d789028"
+      },
+      {
+        "module": "Ps.BackendJs.Model",
+        "path": "packages/backend-js/src/Ps/BackendJs/Model.ps",
+        "bytes": 3146,
+        "sha256": "64cdba7a526f85b8b814b348e2bead18104abec74bed2526a7bf8511c625306c"
+      },
+      {
+        "module": "Ps.BackendJs.Lower",
+        "path": "packages/backend-js/src/Ps/BackendJs/Lower.ps",
+        "bytes": 50308,
+        "sha256": "dadcb4756b86689deda6f9cfc5b5c78ad4f79cab71456d7e36cc7455d992ec15"
+      },
+      {
+        "module": "Ps.BackendJs.Validate",
+        "path": "packages/backend-js/src/Ps/BackendJs/Validate.ps",
+        "bytes": 13969,
+        "sha256": "7258e1614747f20280c852ef98ce3310473eda9d3a582d1cb5e49fdb79e8e18f"
+      },
+      {
+        "module": "Ps.BackendJs.TailAlias",
+        "path": "packages/backend-js/src/Ps/BackendJs/TailAlias.ps",
+        "bytes": 9769,
+        "sha256": "85b402091696332a77a7fe2039b0cbe3854c0e856ed74b0c7e50a03a4aabf271"
+      },
+      {
+        "module": "Ps.BackendJs.Print",
+        "path": "packages/backend-js/src/Ps/BackendJs/Print.ps",
+        "bytes": 91555,
+        "sha256": "3be490a75016b9f0293a65fecc86d27785d468c0f55653c10ce75805475ec766"
+      },
+      {
+        "module": "Ps.BackendJs.CompilerService",
+        "path": "packages/backend-js/src/Ps/BackendJs/CompilerService.ps",
+        "bytes": 1526,
+        "sha256": "b48fca262918566a03f0e911dc86dfc8cbceb258cbced377a94bb2b47859bbf2"
+      },
+      {
+        "module": "Ps.BackendTs.Type",
+        "path": "packages/backend-ts/src/Ps/BackendTs/Type.ps",
+        "bytes": 4245,
+        "sha256": "91628c36302c3d9be2d6f25d0e8b550614252d2e2a60cb0b3a5a2f98dd90faa9"
+      },
+      {
+        "module": "Ps.BackendTs.RuntimeSupport",
+        "path": "packages/backend-ts/src/Ps/BackendTs/RuntimeSupport.ps",
+        "bytes": 6072,
+        "sha256": "4689263a634231a909ce01426dc56cbfe78318573126fc3304e09a990b7e5bc5"
+      },
+      {
+        "module": "Ps.BackendTs.Expr",
+        "path": "packages/backend-ts/src/Ps/BackendTs/Expr.ps",
+        "bytes": 49607,
+        "sha256": "0462018cd9f6d059cf431c750dcb0d9fcf27a631b66386345adcd38feb38600a"
+      },
+      {
+        "module": "Ps.BackendTs.Module",
+        "path": "packages/backend-ts/src/Ps/BackendTs/Module.ps",
+        "bytes": 71444,
+        "sha256": "787b930ecaaad3a311db7e9def47a926dd679595e610bd6db862361a8d2095e0"
+      },
+      {
+        "module": "Ps.BackendTs.CompilerService",
+        "path": "packages/backend-ts/src/Ps/BackendTs/CompilerService.ps",
+        "bytes": 2046,
+        "sha256": "5d21dfd3fad9d2121eb0ab41dba90ed754ac33a0f52819ba9482e1caf9b4cde7"
+      },
+      {
+        "module": "Ps.BackendRust.RuntimePlan",
+        "path": "packages/backend-rust/src/Ps/BackendRust/RuntimePlan.ps",
+        "bytes": 21815,
+        "sha256": "3cefff1ca92b3c52ccc060fc64056176dd1d78f9347b9a46e579d48918662ed2"
+      },
+      {
+        "module": "Ps.BackendRust.Identifier",
+        "path": "packages/backend-rust/src/Ps/BackendRust/Identifier.ps",
+        "bytes": 5450,
+        "sha256": "5ca0133e17e28fab4af915de0397f8842690196c992e1ed7dd09e44329c673ef"
+      },
+      {
+        "module": "Ps.BackendRust.Type",
+        "path": "packages/backend-rust/src/Ps/BackendRust/Type.ps",
+        "bytes": 10115,
+        "sha256": "64f0f2be9efe4935ce15b6590a1a0acb5461fd6210e998468cb71618718c3da6"
+      },
+      {
+        "module": "Ps.BackendRust.ValueRefs",
+        "path": "packages/backend-rust/src/Ps/BackendRust/ValueRefs.ps",
+        "bytes": 7950,
+        "sha256": "03b8b365f9d1c8a327d375baf20835fc3ed19f10d9ed2a3a120697016eceaa0b"
+      },
+      {
+        "module": "Ps.BackendRust.Captures",
+        "path": "packages/backend-rust/src/Ps/BackendRust/Captures.ps",
+        "bytes": 5497,
+        "sha256": "1df95ce14c9f9807c1bacc1b537a8006aef23eba9de0ae8c5c9f9231694a5bfc"
+      },
+      {
+        "module": "Ps.BackendRust.Expr",
+        "path": "packages/backend-rust/src/Ps/BackendRust/Expr.ps",
+        "bytes": 40758,
+        "sha256": "30de5252dfe53bfe195a9331d1a8316f386f4a4bf8eb13abbf6216cda5297380"
+      },
+      {
+        "module": "Ps.BackendRust.TailAlias",
+        "path": "packages/backend-rust/src/Ps/BackendRust/TailAlias.ps",
+        "bytes": 7615,
+        "sha256": "3970fb5fdff246c3d91f3472401293c9cf4bf747222a22f99aec61ca1518bd20"
+      },
+      {
+        "module": "Ps.BackendRust.Tail",
+        "path": "packages/backend-rust/src/Ps/BackendRust/Tail.ps",
+        "bytes": 13561,
+        "sha256": "c62e56192453842d64910590d50f963d79a6e1b2c547ae59efbbfbd2c0e70200"
+      },
+      {
+        "module": "Ps.BackendRust.Runtime",
+        "path": "packages/backend-rust/src/Ps/BackendRust/Runtime.ps",
+        "bytes": 6216,
+        "sha256": "629fc826121e552fc95123ab1b79889f8c34307f1c2c3a0b5417edf2c7d726c9"
+      },
+      {
+        "module": "Ps.BackendRust.Module",
+        "path": "packages/backend-rust/src/Ps/BackendRust/Module.ps",
+        "bytes": 47445,
+        "sha256": "c0b759896b1e5c5f73ce3f93a940b41c5580e0f49b530042896bd84ac4ff342c"
+      },
+      {
+        "module": "Ps.BackendRust.CompilerService",
+        "path": "packages/backend-rust/src/Ps/BackendRust/CompilerService.ps",
+        "bytes": 781,
+        "sha256": "69b810aa13096ba9a8a53a1c75717745c017afb3a48ca7f67d924f142a38ebb3"
+      },
+      {
+        "module": "Ps.BackendWasm.Lower.RuntimeNeeds",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower/RuntimeNeeds.ps",
+        "bytes": 17961,
+        "sha256": "c7447639c000227b815e2739258e4ba1400f7186d401ddb3ebe2beee744fee08"
+      },
+      {
+        "module": "Ps.BackendWasm.Model",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/Model.ps",
+        "bytes": 4159,
+        "sha256": "81ba1713ab6e6af9d9bbd3e7bdd9b0ce3f00736250979ca50e4eb81850d97266"
+      },
+      {
+        "module": "Ps.BackendWasm.Type",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/Type.ps",
+        "bytes": 7602,
+        "sha256": "c4724f24c4ab5ec3f537f76990f8416c460e14d58e6fbf6678397ba78b55c903"
+      },
+      {
+        "module": "Ps.BackendWasm.Lower.TypeInventory",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower/TypeInventory.ps",
+        "bytes": 23861,
+        "sha256": "f4357ace64c1de768673772c5966fb9d7bb6c21d037392eea5f267498c65d5cd"
+      },
+      {
+        "module": "Ps.BackendWasm.TailCalls",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/TailCalls.ps",
+        "bytes": 4492,
+        "sha256": "40e3b7733b12e6480db5a681060c16db88cf5d8dbc011cd2db69c0a43540ba6f"
+      },
+      {
+        "module": "Ps.BackendWasm.LowerInt",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/LowerInt.ps",
+        "bytes": 4186,
+        "sha256": "f5efb833c5c1ea4914d2802c943d5d6b2ff27eeac2fa900ffff4e1cdc1095c6a"
+      },
+      {
+        "module": "Ps.BackendWasm.LowerFloat",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/LowerFloat.ps",
+        "bytes": 1879,
+        "sha256": "18084332ed983dad151a4f34b5eb7e6de58244a7203915c248ff617f467ac0b0"
+      },
+      {
+        "module": "Ps.BackendWasm.RuntimeNat",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.ps",
+        "bytes": 32351,
+        "sha256": "7e1e6bb4cfd4600a510f2b3003f13ccb2dfa3c58ab7300da513bc9eaa05a3034"
+      },
+      {
+        "module": "Ps.BackendWasm.IntUtil",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/IntUtil.ps",
+        "bytes": 3077,
+        "sha256": "cbc42fd50286daafdcb91ff3e515302138561c37da11751da2d7539ce407d58d"
+      },
+      {
+        "module": "Ps.BackendWasm.RuntimeInt",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/RuntimeInt.ps",
+        "bytes": 13180,
+        "sha256": "7f1b7c0a567243caa31d5485672d0c6f73b0560c1d5daf69ce2276347531e1a9"
+      },
+      {
+        "module": "Ps.BackendWasm.RuntimeString",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/RuntimeString.ps",
+        "bytes": 45775,
+        "sha256": "e55547cc194ed516cac8d78fd3eb4434330c03a031f28e9da466c49b3949a4e4"
+      },
+      {
+        "module": "Ps.BackendWasm.RuntimeIntRepr",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/RuntimeIntRepr.ps",
+        "bytes": 4706,
+        "sha256": "cc56aa7f403c845a37eb86946207ab5a0a4b575361eda09d79272eaba5c3852e"
+      },
+      {
+        "module": "Ps.BackendWasm.Lower",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower.ps",
+        "bytes": 143365,
+        "sha256": "e0bf3eda26b0b36c0d77d4f9e6f76b1eb5d0907ee5a4994cb809c1b3415ee40c"
+      },
+      {
+        "module": "Ps.BackendWasm.BinaryBytes",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/BinaryBytes.ps",
+        "bytes": 52711,
+        "sha256": "a54fc196363302f49966ebcadc9b43721d25a42b0b0cbd90f1db2df54e1fecc1"
+      },
+      {
+        "module": "Ps.BackendWasm.ValidateStructure",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/ValidateStructure.ps",
+        "bytes": 23539,
+        "sha256": "fdc3422842a4440b0a949e20b42b1876d0b216f76ae0b73b9e9627c800405830"
+      },
+      {
+        "module": "Ps.BackendWasm.ValidateTyping",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/ValidateTyping.ps",
+        "bytes": 39592,
+        "sha256": "ed0af5e376bed3c913cd30f3cbfac089d4b80269fb2772d4ee01d7cbdb3652a3"
+      },
+      {
+        "module": "Ps.BackendWasm.ValidateIr",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/ValidateIr.ps",
+        "bytes": 611,
+        "sha256": "4ca21990c91988cd4867cf965b1667eda526661916edaaab5d15eb0c96f8c622"
+      },
+      {
+        "module": "Ps.BackendWasm.ServiceAbi",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/ServiceAbi.ps",
+        "bytes": 6440,
+        "sha256": "c1862ca84a1a3f8731bb6cff4f0d31694368b76b2f517d8b06be763e31855ec8"
+      },
+      {
+        "module": "Ps.BackendWasm.CompilerService",
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/CompilerService.ps",
+        "bytes": 2633,
+        "sha256": "ff8831f2f678bdcfe2a35591268c6adc63a1fe338f240ef89393d06be285042f"
+      },
+      {
+        "module": "Ps.CompilerUnified.Service",
+        "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.ps",
+        "bytes": 3828,
+        "sha256": "b46d9b71d82439dd62379acd858530df2bc4ca12df99dfdf13cda35702296b8d"
+      }
+    ]
+  },
+  "sourceDifferences": [
+    {
+      "before": {
+        "module": "Ps.Syntax.ParseProofScript",
+        "path": "packages/syntax/src/Ps/Syntax/ParseProofScript.ps",
+        "bytes": 61005,
+        "sha256": "1520c624d24c4f287b99775da0aabd479becece2b06bddae5470527f06c1bf93"
+      },
+      "after": {
+        "module": "Ps.Syntax.ParseProofScript",
+        "path": "packages/syntax/src/Ps/Syntax/ParseProofScript.ps",
+        "bytes": 61115,
+        "sha256": "81887154582336b2bcbd977c4df93d0a3c3ee78e8764aa6f2f3c5770bc022583"
+      }
+    },
+    {
+      "before": {
+        "module": "Ps.Compiler.Service",
+        "path": "packages/compiler/src/Ps/Compiler/Service.ps",
+        "bytes": 25234,
+        "sha256": "5d5a0ca580ecf66297bf2560404bc08c6d91e593eaa6f15de55f4c3d9649dc31"
+      },
+      "after": {
+        "module": "Ps.Compiler.Service",
+        "path": "packages/compiler/src/Ps/Compiler/Service.ps",
+        "bytes": 25240,
+        "sha256": "446c299112585c2c384c09f4d9f96da18af06c99eb166842207b9e749d789028"
+      }
+    },
+    {
+      "before": {
+        "module": "Ps.CompilerUnified.Service",
+        "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.ps",
+        "bytes": 3806,
+        "sha256": "4b6a1c1cb433d483e6172cd528ac45b7cb9d032e7eee056237be2a2c3a59a7f7"
+      },
+      "after": {
+        "module": "Ps.CompilerUnified.Service",
+        "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.ps",
+        "bytes": 3828,
+        "sha256": "b46d9b71d82439dd62379acd858530df2bc4ca12df99dfdf13cda35702296b8d"
+      }
+    }
+  ],
+  "bootstrapAgreement": {
+    "type": "bootstrap-admission-correspondence",
+    "status": "passed",
+    "admissionsSha256": "9ac7a395b3f473fdb0278e3bf220ece76443ee9502a6d16996684f4c2e52619a",
+    "nativeOriginalIrSha256": "a910cc599e67b93077b004d79dc3c042a6d594e4169ea0ef8abafb8980a2415b",
+    "generatedOriginalIrSha256": "a910cc599e67b93077b004d79dc3c042a6d594e4169ea0ef8abafb8980a2415b",
+    "originalIrBytesEqual": true
+  },
+  "frontendCompilerRegressions": [
+    {
+      "type": "frontend-compiler-regressions",
+      "generation": "seed",
+      "aliasSupported": false,
+      "grammarExperiment": "test-only defconst alias in copied compiler sources; installed grammar is unchanged",
+      "observations": [
+        {
+          "case": "existing-const",
+          "label": "seed-existing-const",
+          "buildLabel": "seed-existing-const",
+          "outcome": "accepted-and-executed",
+          "observation": {
+            "answer": "42"
+          },
+          "processLog": "004-seed-existing-const-execute",
+          "sourceClosureDigest": "c765c5c6bd5e774c540f8209216f76b0174479139b77d59f1bdff57f5cb642ab",
+          "admissionsSha256": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1",
+          "compilerSha256": "08bd3a35b77ed5870cef8b3ed30a8b5a50eb9bca20270269ddf44b3a979e0942",
+          "buildReceiptSha256": "e6b19bc60e369eebd6b17da9931153df7ef490c6a0a73bd31bfead0d332ceb42",
+          "checker": {
+            "path": "kernel/checker",
+            "sha256": "d0433c6e187fc0a7b0e165f641eaa8720cdd6b16747237b17cc86ddf01d6052e",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "accepted": true,
+            "executed": true,
+            "admissionsSha256": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1",
+            "elapsedMs": 19,
+            "admissionReceiptSha256": "11cbe8b81429b849c08275cd6d0b7fb98ad993191581612c8ff9ea2acdab8e1e"
+          }
+        },
+        {
+          "case": "new-declaration",
+          "label": "seed-new-declaration",
+          "outcome": "refused",
+          "sourceClosureDigest": "66d241433efdeceec9a753811c2d5b9ef6583d994d443ceff22fb0eb6c9d089d",
+          "response": {
+            "admission": "not-run",
+            "candidateOnly": true,
+            "code": "source-refused",
+            "column": 0,
+            "declaration": "",
+            "line": 0,
+            "module": "Main",
+            "phase": "parse",
+            "protocol": "psc1-compiler-service/1",
+            "requestId": "psc1-independent-66d241433efdeceec9a75381",
+            "sourceClosureDigest": "66d241433efdeceec9a753811c2d5b9ef6583d994d443ceff22fb0eb6c9d089d",
+            "status": "refused",
+            "target": "js"
+          },
+          "processLog": "005-seed-new-declaration"
+        },
+        {
+          "case": "existing-malformed",
+          "label": "seed-existing-malformed",
+          "outcome": "refused",
+          "sourceClosureDigest": "90aad425606bcfa3b5973939f9c0cacbb83a2ab3e52bd62d0f4ae3ed12490500",
+          "response": {
+            "admission": "not-run",
+            "candidateOnly": true,
+            "code": "source-refused",
+            "column": 0,
+            "declaration": "",
+            "line": 0,
+            "module": "Main",
+            "phase": "parse",
+            "protocol": "psc1-compiler-service/1",
+            "requestId": "psc1-independent-90aad425606bcfa3b5973939",
+            "sourceClosureDigest": "90aad425606bcfa3b5973939f9c0cacbb83a2ab3e52bd62d0f4ae3ed12490500",
+            "status": "refused",
+            "target": "js"
+          },
+          "processLog": "006-seed-existing-malformed"
+        },
+        {
+          "case": "new-missing-type",
+          "label": "seed-new-missing-type",
+          "outcome": "refused",
+          "sourceClosureDigest": "2beb03fd44851cf7d256e73ae88dd6915c2467b27b00e0135042a32adac72d5d",
+          "response": {
+            "admission": "not-run",
+            "candidateOnly": true,
+            "code": "source-refused",
+            "column": 0,
+            "declaration": "",
+            "line": 0,
+            "module": "Main",
+            "phase": "parse",
+            "protocol": "psc1-compiler-service/1",
+            "requestId": "psc1-independent-2beb03fd44851cf7d256e73a",
+            "sourceClosureDigest": "2beb03fd44851cf7d256e73ae88dd6915c2467b27b00e0135042a32adac72d5d",
+            "status": "refused",
+            "target": "js"
+          },
+          "processLog": "007-seed-new-missing-type"
+        },
+        {
+          "case": "new-parameters-forbidden",
+          "label": "seed-new-parameters-forbidden",
+          "outcome": "refused",
+          "sourceClosureDigest": "99319724690d532c19d58784216ba1c3e5bdea6cad5609aa22f8cd1a602a8832",
+          "response": {
+            "admission": "not-run",
+            "candidateOnly": true,
+            "code": "source-refused",
+            "column": 0,
+            "declaration": "",
+            "line": 0,
+            "module": "Main",
+            "phase": "parse",
+            "protocol": "psc1-compiler-service/1",
+            "requestId": "psc1-independent-99319724690d532c19d58784",
+            "sourceClosureDigest": "99319724690d532c19d58784216ba1c3e5bdea6cad5609aa22f8cd1a602a8832",
+            "status": "refused",
+            "target": "js"
+          },
+          "processLog": "008-seed-new-parameters-forbidden"
+        },
+        {
+          "case": "new-illtyped",
+          "label": "seed-new-illtyped",
+          "outcome": "refused",
+          "sourceClosureDigest": "0bd88a342dd1be24d27bfce8198a3efc537c9a5a3d2097f788c834843af350f3",
+          "response": {
+            "admission": "not-run",
+            "candidateOnly": true,
+            "code": "source-refused",
+            "column": 0,
+            "declaration": "",
+            "line": 0,
+            "module": "Main",
+            "phase": "parse",
+            "protocol": "psc1-compiler-service/1",
+            "requestId": "psc1-independent-0bd88a342dd1be24d27bfce8",
+            "sourceClosureDigest": "0bd88a342dd1be24d27bfce8198a3efc537c9a5a3d2097f788c834843af350f3",
+            "status": "refused",
+            "target": "js"
+          },
+          "processLog": "009-seed-new-illtyped"
+        }
+      ]
+    },
+    {
+      "type": "frontend-compiler-regressions",
+      "generation": "C1",
+      "aliasSupported": true,
+      "grammarExperiment": "test-only defconst alias in copied compiler sources; installed grammar is unchanged",
+      "observations": [
+        {
+          "case": "existing-const",
+          "label": "c1-existing-const",
+          "buildLabel": "c1-existing-const",
+          "outcome": "accepted-and-executed",
+          "observation": {
+            "answer": "42"
+          },
+          "processLog": "013-c1-existing-const-execute",
+          "sourceClosureDigest": "c765c5c6bd5e774c540f8209216f76b0174479139b77d59f1bdff57f5cb642ab",
+          "admissionsSha256": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1",
+          "compilerSha256": "08bd3a35b77ed5870cef8b3ed30a8b5a50eb9bca20270269ddf44b3a979e0942",
+          "buildReceiptSha256": "6acc7aa7cbbe24f2415a1dbf00814b207372cdb2f004e4638943a82ff79f7831",
+          "checker": {
+            "path": "kernel/checker",
+            "sha256": "d0433c6e187fc0a7b0e165f641eaa8720cdd6b16747237b17cc86ddf01d6052e",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "accepted": true,
+            "executed": true,
+            "admissionsSha256": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1",
+            "elapsedMs": 19,
+            "admissionReceiptSha256": "11cbe8b81429b849c08275cd6d0b7fb98ad993191581612c8ff9ea2acdab8e1e"
+          }
+        },
+        {
+          "case": "new-declaration",
+          "label": "c1-new-declaration",
+          "buildLabel": "c1-new-declaration",
+          "outcome": "accepted-and-executed",
+          "observation": {
+            "answer": "42"
+          },
+          "processLog": "015-c1-new-declaration-execute",
+          "sourceClosureDigest": "66d241433efdeceec9a753811c2d5b9ef6583d994d443ceff22fb0eb6c9d089d",
+          "admissionsSha256": "aa39d7cf516290d74ab6b16a350906d92e62b196a1e2ddda6e4308e71d759534",
+          "compilerSha256": "9b1d25977d66fbf29b4a165d98130bc4c9fb918f4f0dc435e4af0928c5c7f55f",
+          "buildReceiptSha256": "7660d814231738ec750bd10bd979ba26ffd22a501ad4e96a572fde520cc37d85",
+          "checker": {
+            "path": "kernel/checker",
+            "sha256": "d0433c6e187fc0a7b0e165f641eaa8720cdd6b16747237b17cc86ddf01d6052e",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "accepted": true,
+            "executed": true,
+            "admissionsSha256": "aa39d7cf516290d74ab6b16a350906d92e62b196a1e2ddda6e4308e71d759534",
+            "elapsedMs": 19,
+            "admissionReceiptSha256": "e8d12e85a84770704a5831a1a3e626b9099104c84844c9d8469eb91785af5aa4"
+          }
+        },
+        {
+          "case": "existing-malformed",
+          "label": "c1-existing-malformed",
+          "outcome": "refused",
+          "sourceClosureDigest": "90aad425606bcfa3b5973939f9c0cacbb83a2ab3e52bd62d0f4ae3ed12490500",
+          "response": {
+            "admission": "not-run",
+            "candidateOnly": true,
+            "code": "parse-source-refused",
+            "column": 0,
+            "declaration": "",
+            "line": 0,
+            "module": "Main",
+            "phase": "parse",
+            "protocol": "psc1-compiler-service/1",
+            "requestId": "psc1-independent-90aad425606bcfa3b5973939",
+            "sourceClosureDigest": "90aad425606bcfa3b5973939f9c0cacbb83a2ab3e52bd62d0f4ae3ed12490500",
+            "status": "refused",
+            "target": "js"
+          },
+          "processLog": "016-c1-existing-malformed"
+        },
+        {
+          "case": "new-missing-type",
+          "label": "c1-new-missing-type",
+          "outcome": "refused",
+          "sourceClosureDigest": "2beb03fd44851cf7d256e73ae88dd6915c2467b27b00e0135042a32adac72d5d",
+          "response": {
+            "admission": "not-run",
+            "candidateOnly": true,
+            "code": "parse-source-refused",
+            "column": 0,
+            "declaration": "",
+            "line": 0,
+            "module": "Main",
+            "phase": "parse",
+            "protocol": "psc1-compiler-service/1",
+            "requestId": "psc1-independent-2beb03fd44851cf7d256e73a",
+            "sourceClosureDigest": "2beb03fd44851cf7d256e73ae88dd6915c2467b27b00e0135042a32adac72d5d",
+            "status": "refused",
+            "target": "js"
+          },
+          "processLog": "017-c1-new-missing-type"
+        },
+        {
+          "case": "new-parameters-forbidden",
+          "label": "c1-new-parameters-forbidden",
+          "outcome": "refused",
+          "sourceClosureDigest": "99319724690d532c19d58784216ba1c3e5bdea6cad5609aa22f8cd1a602a8832",
+          "response": {
+            "admission": "not-run",
+            "candidateOnly": true,
+            "code": "parse-source-refused",
+            "column": 0,
+            "declaration": "",
+            "line": 0,
+            "module": "Main",
+            "phase": "parse",
+            "protocol": "psc1-compiler-service/1",
+            "requestId": "psc1-independent-99319724690d532c19d58784",
+            "sourceClosureDigest": "99319724690d532c19d58784216ba1c3e5bdea6cad5609aa22f8cd1a602a8832",
+            "status": "refused",
+            "target": "js"
+          },
+          "processLog": "018-c1-new-parameters-forbidden"
+        },
+        {
+          "case": "new-illtyped",
+          "label": "c1-new-illtyped",
+          "outcome": "refused",
+          "sourceClosureDigest": "0bd88a342dd1be24d27bfce8198a3efc537c9a5a3d2097f788c834843af350f3",
+          "response": {
+            "admission": "not-run",
+            "candidateOnly": true,
+            "code": "source-refused",
+            "column": 1,
+            "declaration": "broken",
+            "line": 1,
+            "module": "Main",
+            "phase": "elaboration",
+            "protocol": "psc1-compiler-service/1",
+            "requestId": "psc1-independent-0bd88a342dd1be24d27bfce8",
+            "sourceClosureDigest": "0bd88a342dd1be24d27bfce8198a3efc537c9a5a3d2097f788c834843af350f3",
+            "status": "refused",
+            "target": "js"
+          },
+          "processLog": "019-c1-new-illtyped"
+        }
+      ]
+    },
+    {
+      "type": "frontend-compiler-regressions",
+      "generation": "C2",
+      "aliasSupported": true,
+      "grammarExperiment": "test-only defconst alias in copied compiler sources; installed grammar is unchanged",
+      "observations": [
+        {
+          "case": "existing-const",
+          "label": "c2-existing-const",
+          "buildLabel": "c2-existing-const",
+          "outcome": "accepted-and-executed",
+          "observation": {
+            "answer": "42"
+          },
+          "processLog": "023-c2-existing-const-execute",
+          "sourceClosureDigest": "c765c5c6bd5e774c540f8209216f76b0174479139b77d59f1bdff57f5cb642ab",
+          "admissionsSha256": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1",
+          "compilerSha256": "08bd3a35b77ed5870cef8b3ed30a8b5a50eb9bca20270269ddf44b3a979e0942",
+          "buildReceiptSha256": "8ce8c06d7d07eb2ee45b088c686418c8f0f40d5292f50d41284e4e8b87ee66cc",
+          "checker": {
+            "path": "kernel/checker",
+            "sha256": "d0433c6e187fc0a7b0e165f641eaa8720cdd6b16747237b17cc86ddf01d6052e",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "accepted": true,
+            "executed": true,
+            "admissionsSha256": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1",
+            "elapsedMs": 20,
+            "admissionReceiptSha256": "11cbe8b81429b849c08275cd6d0b7fb98ad993191581612c8ff9ea2acdab8e1e"
+          }
+        },
+        {
+          "case": "new-declaration",
+          "label": "c2-new-declaration",
+          "buildLabel": "c2-new-declaration",
+          "outcome": "accepted-and-executed",
+          "observation": {
+            "answer": "42"
+          },
+          "processLog": "025-c2-new-declaration-execute",
+          "sourceClosureDigest": "66d241433efdeceec9a753811c2d5b9ef6583d994d443ceff22fb0eb6c9d089d",
+          "admissionsSha256": "aa39d7cf516290d74ab6b16a350906d92e62b196a1e2ddda6e4308e71d759534",
+          "compilerSha256": "9b1d25977d66fbf29b4a165d98130bc4c9fb918f4f0dc435e4af0928c5c7f55f",
+          "buildReceiptSha256": "3c1d5ffb88b32fef4598dee21c51a61848ae0b1b1de4d1f66154ba19db098b0d",
+          "checker": {
+            "path": "kernel/checker",
+            "sha256": "d0433c6e187fc0a7b0e165f641eaa8720cdd6b16747237b17cc86ddf01d6052e",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "accepted": true,
+            "executed": true,
+            "admissionsSha256": "aa39d7cf516290d74ab6b16a350906d92e62b196a1e2ddda6e4308e71d759534",
+            "elapsedMs": 18,
+            "admissionReceiptSha256": "e8d12e85a84770704a5831a1a3e626b9099104c84844c9d8469eb91785af5aa4"
+          }
+        },
+        {
+          "case": "existing-malformed",
+          "label": "c2-existing-malformed",
+          "outcome": "refused",
+          "sourceClosureDigest": "90aad425606bcfa3b5973939f9c0cacbb83a2ab3e52bd62d0f4ae3ed12490500",
+          "response": {
+            "admission": "not-run",
+            "candidateOnly": true,
+            "code": "parse-source-refused",
+            "column": 0,
+            "declaration": "",
+            "line": 0,
+            "module": "Main",
+            "phase": "parse",
+            "protocol": "psc1-compiler-service/1",
+            "requestId": "psc1-independent-90aad425606bcfa3b5973939",
+            "sourceClosureDigest": "90aad425606bcfa3b5973939f9c0cacbb83a2ab3e52bd62d0f4ae3ed12490500",
+            "status": "refused",
+            "target": "js"
+          },
+          "processLog": "026-c2-existing-malformed"
+        },
+        {
+          "case": "new-missing-type",
+          "label": "c2-new-missing-type",
+          "outcome": "refused",
+          "sourceClosureDigest": "2beb03fd44851cf7d256e73ae88dd6915c2467b27b00e0135042a32adac72d5d",
+          "response": {
+            "admission": "not-run",
+            "candidateOnly": true,
+            "code": "parse-source-refused",
+            "column": 0,
+            "declaration": "",
+            "line": 0,
+            "module": "Main",
+            "phase": "parse",
+            "protocol": "psc1-compiler-service/1",
+            "requestId": "psc1-independent-2beb03fd44851cf7d256e73a",
+            "sourceClosureDigest": "2beb03fd44851cf7d256e73ae88dd6915c2467b27b00e0135042a32adac72d5d",
+            "status": "refused",
+            "target": "js"
+          },
+          "processLog": "027-c2-new-missing-type"
+        },
+        {
+          "case": "new-parameters-forbidden",
+          "label": "c2-new-parameters-forbidden",
+          "outcome": "refused",
+          "sourceClosureDigest": "99319724690d532c19d58784216ba1c3e5bdea6cad5609aa22f8cd1a602a8832",
+          "response": {
+            "admission": "not-run",
+            "candidateOnly": true,
+            "code": "parse-source-refused",
+            "column": 0,
+            "declaration": "",
+            "line": 0,
+            "module": "Main",
+            "phase": "parse",
+            "protocol": "psc1-compiler-service/1",
+            "requestId": "psc1-independent-99319724690d532c19d58784",
+            "sourceClosureDigest": "99319724690d532c19d58784216ba1c3e5bdea6cad5609aa22f8cd1a602a8832",
+            "status": "refused",
+            "target": "js"
+          },
+          "processLog": "028-c2-new-parameters-forbidden"
+        },
+        {
+          "case": "new-illtyped",
+          "label": "c2-new-illtyped",
+          "outcome": "refused",
+          "sourceClosureDigest": "0bd88a342dd1be24d27bfce8198a3efc537c9a5a3d2097f788c834843af350f3",
+          "response": {
+            "admission": "not-run",
+            "candidateOnly": true,
+            "code": "source-refused",
+            "column": 1,
+            "declaration": "broken",
+            "line": 1,
+            "module": "Main",
+            "phase": "elaboration",
+            "protocol": "psc1-compiler-service/1",
+            "requestId": "psc1-independent-0bd88a342dd1be24d27bfce8",
+            "sourceClosureDigest": "0bd88a342dd1be24d27bfce8198a3efc537c9a5a3d2097f788c834843af350f3",
+            "status": "refused",
+            "target": "js"
+          },
+          "processLog": "029-c2-new-illtyped"
+        }
+      ]
+    }
+  ],
+  "publication": {
+    "relocation": {
+      "type": "relocated-checked-publication",
+      "status": "passed",
+      "buildLabel": "relocated-small-checked-build",
+      "buildReceiptSha256": "815fca569bb8b766121bbb9333a1781c5b000298d3356adbedb5d38e6b43118f",
+      "completionManifestSha256": "77536a656f16de1561d190f37fa30e2b54053d2682adfc2fa3bf1da3996fff22",
+      "observation": {
+        "answer": "42"
+      },
+      "processLog": "013-relocated-application-execute"
+    },
+    "readOnlyParent": {
+      "type": "publication-read-only-parent",
+      "status": "passed",
+      "output": "/work/smoke/read-only-output-parent/unpublished",
+      "processLog": "009-read-only-parent-refused",
+      "acceptedBuildReceiptSha256": "a71e33d52d8eb0a536a331e4bf1e12ac6a65a7632db8d3856571644686265cd5",
+      "acceptedPayloadsSha256": "2ca5a43bd157422bb02e267e58dadfc42bd17b1f2c4423b3661f090ef00f8202"
+    },
+    "hostRefusals": {
+      "type": "host-refusals",
+      "status": "passed",
+      "cases": [
+        "invalid-source",
+        "existing-generation",
+        "read-only-parent",
+        "incomplete-generation",
+        "tampered-engine",
+        "tampered-checker"
+      ],
+      "refusedOutputsUnpublished": true
+    }
+  },
+  "generations": [
+    {
+      "label": "baseline-generation-one",
+      "identities": {
+        "sourceClosureDigest": "424c15ce2cf5bb87a293dd2aad1705fa801c07067c972578aa76111627d590d7",
+        "sourceSha256": "49d851d26008abf116b9f4c680c0833311e835b90d6c58e369ca426f33ecd2e6",
+        "admissionsSha256": "9ac7a395b3f473fdb0278e3bf220ece76443ee9502a6d16996684f4c2e52619a",
+        "originalIrSha256": "a910cc599e67b93077b004d79dc3c042a6d594e4169ea0ef8abafb8980a2415b",
+        "specializedIrSha256": "e3316c7598b48e70daa5e32e32f6c4340f070003cf85abc2fd8d61983af8e2c7"
+      },
+      "compilerElapsedMs": 1895445,
+      "compilerMaxRssKiB": 3443064,
+      "sampledPeakRssKiB": 3443064,
+      "checkerElapsedMs": 2669,
+      "completeProcessElapsedMs": 1904417,
+      "checkerExecuted": true,
+      "buildReceiptSha256": "18604ae923251931c5358613fb3be44db35805cb185714269507fa3d37f32714",
+      "completionManifestSha256": "754a13bf2b9f62f532824c174165d48910279ceaf6abe0f1e90442f45fb94ac1"
+    },
+    {
+      "label": "baseline-generation-two",
+      "identities": {
+        "sourceClosureDigest": "424c15ce2cf5bb87a293dd2aad1705fa801c07067c972578aa76111627d590d7",
+        "sourceSha256": "49d851d26008abf116b9f4c680c0833311e835b90d6c58e369ca426f33ecd2e6",
+        "admissionsSha256": "9ac7a395b3f473fdb0278e3bf220ece76443ee9502a6d16996684f4c2e52619a",
+        "originalIrSha256": "a910cc599e67b93077b004d79dc3c042a6d594e4169ea0ef8abafb8980a2415b",
+        "specializedIrSha256": "e3316c7598b48e70daa5e32e32f6c4340f070003cf85abc2fd8d61983af8e2c7"
+      },
+      "compilerElapsedMs": 1904143,
+      "compilerMaxRssKiB": 3419584,
+      "sampledPeakRssKiB": 3419936,
+      "checkerElapsedMs": 2668,
+      "completeProcessElapsedMs": 1913582,
+      "checkerExecuted": true,
+      "buildReceiptSha256": "c8354f158fef38890c67b319eebeda9b3122657939dfe6070651aa726bdf5e81",
+      "completionManifestSha256": "16aae1d18462ae5a393a34ef4aac23f6ee2e1745a62c4503732ff5c61917b35f"
+    },
+    {
+      "label": "changed-generation-one",
+      "identities": {
+        "sourceClosureDigest": "f4353fdcca3268e69881e99bc7fd8c568acf9a608302f7e0da09bbd79e11c16a",
+        "sourceSha256": "a7e2f2b11a5262d713c96751d0cf37ed0a2998eeb03af5386cc1dd6c5b36182d",
+        "admissionsSha256": "7bba7c3f73f3238dfb822860eaa9f76b29b20d40826ae9554d086464613c8b79",
+        "originalIrSha256": "d227b494f79cc12a9b4c07949970d57095febb8c7cad9a926cfb62f8712346ca",
+        "specializedIrSha256": "f75435a2e0ee88c88e52e14591ae90503bff89858df2e21620ed0a9f4a3305b0"
+      },
+      "compilerElapsedMs": 1828035,
+      "compilerMaxRssKiB": 3422312,
+      "sampledPeakRssKiB": 3422544,
+      "checkerElapsedMs": 2675,
+      "completeProcessElapsedMs": 1836897,
+      "checkerExecuted": true,
+      "buildReceiptSha256": "959f842e660225a5b6ed40432a3a2bc280ac1a5d3e5eceeb381e5b75b73ef2e2",
+      "completionManifestSha256": "101aba555fc4bd6f061c44c6a8ca95f54fa6809b1ebbde360e69c116528cfb3c"
+    },
+    {
+      "label": "changed-generation-two",
+      "identities": {
+        "sourceClosureDigest": "f4353fdcca3268e69881e99bc7fd8c568acf9a608302f7e0da09bbd79e11c16a",
+        "sourceSha256": "a7e2f2b11a5262d713c96751d0cf37ed0a2998eeb03af5386cc1dd6c5b36182d",
+        "admissionsSha256": "7bba7c3f73f3238dfb822860eaa9f76b29b20d40826ae9554d086464613c8b79",
+        "originalIrSha256": "d227b494f79cc12a9b4c07949970d57095febb8c7cad9a926cfb62f8712346ca",
+        "specializedIrSha256": "f75435a2e0ee88c88e52e14591ae90503bff89858df2e21620ed0a9f4a3305b0"
+      },
+      "compilerElapsedMs": 1791360,
+      "compilerMaxRssKiB": 3471932,
+      "sampledPeakRssKiB": 3472352,
+      "checkerElapsedMs": 2657,
+      "completeProcessElapsedMs": 1801134,
+      "checkerExecuted": true,
+      "buildReceiptSha256": "1919b815e6309adfc6b1dc1148138d2a72dac6b789bdc328a42585cbbff8ec58",
+      "completionManifestSha256": "58944dc733589fbe142ec5e8e152c1adacd25018ecf2bee6f9663072e4f03cc4"
+    }
+  ],
+  "phases": {
+    "smoke": {
+      "status": "passed",
+      "elapsedMs": 12126,
+      "checkerExecutions": 4,
+      "traceSha256": "f0981485d14705bd72121fd26f534bd73942e5222e3b3a47ba81efe89ac48320",
+      "environment": {
+        "outside": {
+          "schema": "psc1-independent-environment/1",
+          "platform": "linux",
+          "arch": "arm64",
+          "kernel": {
+            "release": "6.17.0-1022-azure",
+            "version": "#22-Ubuntu SMP Mon Jul 27 17:12:01 UTC 2026"
+          },
+          "runtime": {
+            "version": "v22.23.3",
+            "versions": {
+              "node": "22.23.3",
+              "acorn": "8.16.0",
+              "ada": "2.9.2",
+              "amaro": "1.1.8",
+              "ares": "1.34.8",
+              "brotli": "1.1.0",
+              "cjs_module_lexer": "2.2.0",
+              "cldr": "48.0",
+              "icu": "78.3",
+              "llhttp": "9.4.3",
+              "modules": "127",
+              "napi": "10",
+              "nbytes": "0.1.3",
+              "ncrypto": "0.0.1",
+              "nghttp2": "1.69.0",
+              "openssl": "3.5.8",
+              "simdjson": "4.5.0",
+              "simdutf": "6.4.2",
+              "sqlite": "3.51.3",
+              "tz": "2026c",
+              "undici": "6.28.1",
+              "unicode": "17.0",
+              "uv": "1.51.0",
+              "uvwasi": "0.0.23",
+              "v8": "12.4.254.21-node.57",
+              "zlib": "1.3.1-e00f703",
+              "zstd": "1.5.7"
+            },
+            "glibcVersionRuntime": "2.39",
+            "glibcVersionCompiler": "2.28"
+          },
+          "osRelease": {
+            "bytes": 400,
+            "sha256": "87458b3b1f1ca0e5c693ade771de7007c3783bdc692fa6b39eb6414bf2af2763",
+            "text": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n"
+          },
+          "filesystem": {
+            "type": "61267",
+            "bsize": "4096",
+            "blocks": "37815964",
+            "bfree": "25914270",
+            "bavail": "25910174",
+            "files": "19529728",
+            "ffree": "18811250"
+          },
+          "user": {
+            "uid": 1001,
+            "gid": 1001
+          }
+        },
+        "inside": {
+          "schema": "psc1-independent-environment/1",
+          "platform": "linux",
+          "arch": "arm64",
+          "kernel": {
+            "release": "6.17.0-1022-azure",
+            "version": "#22-Ubuntu SMP Mon Jul 27 17:12:01 UTC 2026"
+          },
+          "runtime": {
+            "version": "v22.23.3",
+            "versions": {
+              "node": "22.23.3",
+              "acorn": "8.16.0",
+              "ada": "2.9.2",
+              "amaro": "1.1.8",
+              "ares": "1.34.8",
+              "brotli": "1.1.0",
+              "cjs_module_lexer": "2.2.0",
+              "cldr": "48.0",
+              "icu": "78.3",
+              "llhttp": "9.4.3",
+              "modules": "127",
+              "napi": "10",
+              "nbytes": "0.1.3",
+              "ncrypto": "0.0.1",
+              "nghttp2": "1.69.0",
+              "openssl": "3.5.8",
+              "simdjson": "4.5.0",
+              "simdutf": "6.4.2",
+              "sqlite": "3.51.3",
+              "tz": "2026c",
+              "undici": "6.28.1",
+              "unicode": "17.0",
+              "uv": "1.51.0",
+              "uvwasi": "0.0.23",
+              "v8": "12.4.254.21-node.57",
+              "zlib": "1.3.1-e00f703",
+              "zstd": "1.5.7"
+            },
+            "glibcVersionRuntime": "2.39",
+            "glibcVersionCompiler": "2.28"
+          },
+          "osRelease": {
+            "bytes": 400,
+            "sha256": "87458b3b1f1ca0e5c693ade771de7007c3783bdc692fa6b39eb6414bf2af2763",
+            "text": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n"
+          },
+          "filesystem": {
+            "type": "61267",
+            "bsize": "4096",
+            "blocks": "37815964",
+            "bfree": "25912881",
+            "bavail": "25908785",
+            "files": "19529728",
+            "ffree": "18811235"
+          },
+          "user": {
+            "uid": 65534,
+            "gid": 65534
+          }
+        }
+      },
+      "systemLibraries": [
+        {
+          "path": "/lib/aarch64-linux-gnu/libdl.so.2",
+          "resolvedPath": "/usr/lib/aarch64-linux-gnu/libdl.so.2",
+          "bytes": 67440,
+          "sha256": "1c16b2692a155191c97d7fdc5ce937d37c242435f05745046a794a9832b16af4"
+        },
+        {
+          "path": "/lib/aarch64-linux-gnu/libstdc++.so.6",
+          "resolvedPath": "/usr/lib/aarch64-linux-gnu/libstdc++.so.6.0.33",
+          "bytes": 2633224,
+          "sha256": "6e3112d35cfc86db7ee85b27e1746f67408e2837ff8628b46386c3eabd5682a4"
+        },
+        {
+          "path": "/lib/aarch64-linux-gnu/libm.so.6",
+          "resolvedPath": "/usr/lib/aarch64-linux-gnu/libm.so.6",
+          "bytes": 591800,
+          "sha256": "5e0391562de36de323fb9cb0f2c1b6bd6d034c840b1dac018499f5fe4ded1b4a"
+        },
+        {
+          "path": "/lib/aarch64-linux-gnu/libgcc_s.so.1",
+          "resolvedPath": "/usr/lib/aarch64-linux-gnu/libgcc_s.so.1",
+          "bytes": 133696,
+          "sha256": "f2d3ad2bf0b61f6bc944cc37d7b6ab7f88d2582b41ff989ca164803f56cc5f20"
+        },
+        {
+          "path": "/lib/aarch64-linux-gnu/libpthread.so.0",
+          "resolvedPath": "/usr/lib/aarch64-linux-gnu/libpthread.so.0",
+          "bytes": 67440,
+          "sha256": "6f1ab9e7d7de142dc5e2feaf6d19faceff0a0f40d5e225c922899f5362b8c353"
+        },
+        {
+          "path": "/lib/aarch64-linux-gnu/libc.so.6",
+          "resolvedPath": "/usr/lib/aarch64-linux-gnu/libc.so.6",
+          "bytes": 1722920,
+          "sha256": "0f1905dc27dbc6715875c70527bc8da846a10084c9c483e9d8ff76dce8d69d0e"
+        },
+        {
+          "path": "/lib/ld-linux-aarch64.so.1",
+          "resolvedPath": "/usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1",
+          "bytes": 203968,
+          "sha256": "390027e5f45f236bd1838bc54bf464c5ff01d260ab9f8b415ea8276641bce505"
+        },
+        {
+          "path": "/lib/aarch64-linux-gnu/librt.so.1",
+          "resolvedPath": "/usr/lib/aarch64-linux-gnu/librt.so.1",
+          "bytes": 67512,
+          "sha256": "93d0d5ab643b50ac1a61c2c7baf670e8aa94973fa5a2584d13db05295d5b5a0e"
+        }
+      ],
+      "shell": {
+        "implementationPath": "/usr/bin/dash",
+        "sha256": "c883d9c27228339580994a1d0ea960645368c7d1b960a712bd0c655860c2d0d7"
+      },
+      "namespaceTool": {
+        "path": "/usr/bin/unshare",
+        "bytes": 67968,
+        "sha256": "e0c145c3d4c06686544b1362ed64da819539166a5e1e6fd96093aea4d2539b6a",
+        "version": "unshare from util-linux 2.39.3"
+      },
+      "qualificationSha256": "e2bd3f6ab4d19573b5bcb8db7e013e5098ab5ea43a80f81bcd25c513dba6eadc"
+    },
+    "baseline": {
+      "status": "passed",
+      "elapsedMs": 3832321,
+      "checkerExecutions": 2,
+      "traceSha256": "006f6fa1c34188701aed2a40ff2bd3bb16724f3be3996bf05898ff719c84d186",
+      "environment": {
+        "outside": {
+          "schema": "psc1-independent-environment/1",
+          "platform": "linux",
+          "arch": "arm64",
+          "kernel": {
+            "release": "6.17.0-1022-azure",
+            "version": "#22-Ubuntu SMP Mon Jul 27 17:12:01 UTC 2026"
+          },
+          "runtime": {
+            "version": "v22.23.3",
+            "versions": {
+              "node": "22.23.3",
+              "acorn": "8.16.0",
+              "ada": "2.9.2",
+              "amaro": "1.1.8",
+              "ares": "1.34.8",
+              "brotli": "1.1.0",
+              "cjs_module_lexer": "2.2.0",
+              "cldr": "48.0",
+              "icu": "78.3",
+              "llhttp": "9.4.3",
+              "modules": "127",
+              "napi": "10",
+              "nbytes": "0.1.3",
+              "ncrypto": "0.0.1",
+              "nghttp2": "1.69.0",
+              "openssl": "3.5.8",
+              "simdjson": "4.5.0",
+              "simdutf": "6.4.2",
+              "sqlite": "3.51.3",
+              "tz": "2026c",
+              "undici": "6.28.1",
+              "unicode": "17.0",
+              "uv": "1.51.0",
+              "uvwasi": "0.0.23",
+              "v8": "12.4.254.21-node.57",
+              "zlib": "1.3.1-e00f703",
+              "zstd": "1.5.7"
+            },
+            "glibcVersionRuntime": "2.39",
+            "glibcVersionCompiler": "2.28"
+          },
+          "osRelease": {
+            "bytes": 400,
+            "sha256": "87458b3b1f1ca0e5c693ade771de7007c3783bdc692fa6b39eb6414bf2af2763",
+            "text": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n"
+          },
+          "filesystem": {
+            "type": "61267",
+            "bsize": "4096",
+            "blocks": "37815964",
+            "bfree": "27096163",
+            "bavail": "27092067",
+            "files": "19529728",
+            "ffree": "18831305"
+          },
+          "user": {
+            "uid": 1001,
+            "gid": 1001
+          }
+        },
+        "inside": {
+          "schema": "psc1-independent-environment/1",
+          "platform": "linux",
+          "arch": "arm64",
+          "kernel": {
+            "release": "6.17.0-1022-azure",
+            "version": "#22-Ubuntu SMP Mon Jul 27 17:12:01 UTC 2026"
+          },
+          "runtime": {
+            "version": "v22.23.3",
+            "versions": {
+              "node": "22.23.3",
+              "acorn": "8.16.0",
+              "ada": "2.9.2",
+              "amaro": "1.1.8",
+              "ares": "1.34.8",
+              "brotli": "1.1.0",
+              "cjs_module_lexer": "2.2.0",
+              "cldr": "48.0",
+              "icu": "78.3",
+              "llhttp": "9.4.3",
+              "modules": "127",
+              "napi": "10",
+              "nbytes": "0.1.3",
+              "ncrypto": "0.0.1",
+              "nghttp2": "1.69.0",
+              "openssl": "3.5.8",
+              "simdjson": "4.5.0",
+              "simdutf": "6.4.2",
+              "sqlite": "3.51.3",
+              "tz": "2026c",
+              "undici": "6.28.1",
+              "unicode": "17.0",
+              "uv": "1.51.0",
+              "uvwasi": "0.0.23",
+              "v8": "12.4.254.21-node.57",
+              "zlib": "1.3.1-e00f703",
+              "zstd": "1.5.7"
+            },
+            "glibcVersionRuntime": "2.39",
+            "glibcVersionCompiler": "2.28"
+          },
+          "osRelease": {
+            "bytes": 400,
+            "sha256": "87458b3b1f1ca0e5c693ade771de7007c3783bdc692fa6b39eb6414bf2af2763",
+            "text": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n"
+          },
+          "filesystem": {
+            "type": "61267",
+            "bsize": "4096",
+            "blocks": "37815964",
+            "bfree": "27094772",
+            "bavail": "27090676",
+            "files": "19529728",
+            "ffree": "18831289"
+          },
+          "user": {
+            "uid": 65534,
+            "gid": 65534
+          }
+        }
+      },
+      "systemLibraries": [
+        {
+          "path": "/lib/aarch64-linux-gnu/libdl.so.2",
+          "resolvedPath": "/usr/lib/aarch64-linux-gnu/libdl.so.2",
+          "bytes": 67440,
+          "sha256": "1c16b2692a155191c97d7fdc5ce937d37c242435f05745046a794a9832b16af4"
+        },
+        {
+          "path": "/lib/aarch64-linux-gnu/libstdc++.so.6",
+          "resolvedPath": "/usr/lib/aarch64-linux-gnu/libstdc++.so.6.0.33",
+          "bytes": 2633224,
+          "sha256": "6e3112d35cfc86db7ee85b27e1746f67408e2837ff8628b46386c3eabd5682a4"
+        },
+        {
+          "path": "/lib/aarch64-linux-gnu/libm.so.6",
+          "resolvedPath": "/usr/lib/aarch64-linux-gnu/libm.so.6",
+          "bytes": 591800,
+          "sha256": "5e0391562de36de323fb9cb0f2c1b6bd6d034c840b1dac018499f5fe4ded1b4a"
+        },
+        {
+          "path": "/lib/aarch64-linux-gnu/libgcc_s.so.1",
+          "resolvedPath": "/usr/lib/aarch64-linux-gnu/libgcc_s.so.1",
+          "bytes": 133696,
+          "sha256": "f2d3ad2bf0b61f6bc944cc37d7b6ab7f88d2582b41ff989ca164803f56cc5f20"
+        },
+        {
+          "path": "/lib/aarch64-linux-gnu/libpthread.so.0",
+          "resolvedPath": "/usr/lib/aarch64-linux-gnu/libpthread.so.0",
+          "bytes": 67440,
+          "sha256": "6f1ab9e7d7de142dc5e2feaf6d19faceff0a0f40d5e225c922899f5362b8c353"
+        },
+        {
+          "path": "/lib/aarch64-linux-gnu/libc.so.6",
+          "resolvedPath": "/usr/lib/aarch64-linux-gnu/libc.so.6",
+          "bytes": 1722920,
+          "sha256": "0f1905dc27dbc6715875c70527bc8da846a10084c9c483e9d8ff76dce8d69d0e"
+        },
+        {
+          "path": "/lib/ld-linux-aarch64.so.1",
+          "resolvedPath": "/usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1",
+          "bytes": 203968,
+          "sha256": "390027e5f45f236bd1838bc54bf464c5ff01d260ab9f8b415ea8276641bce505"
+        },
+        {
+          "path": "/lib/aarch64-linux-gnu/librt.so.1",
+          "resolvedPath": "/usr/lib/aarch64-linux-gnu/librt.so.1",
+          "bytes": 67512,
+          "sha256": "93d0d5ab643b50ac1a61c2c7baf670e8aa94973fa5a2584d13db05295d5b5a0e"
+        }
+      ],
+      "shell": {
+        "implementationPath": "/usr/bin/dash",
+        "sha256": "c883d9c27228339580994a1d0ea960645368c7d1b960a712bd0c655860c2d0d7"
+      },
+      "namespaceTool": {
+        "path": "/usr/bin/unshare",
+        "bytes": 67968,
+        "sha256": "e0c145c3d4c06686544b1362ed64da819539166a5e1e6fd96093aea4d2539b6a",
+        "version": "unshare from util-linux 2.39.3"
+      },
+      "qualificationSha256": "47b6c306cb34b3227bf8f02a7e9c2612ec2771ef78693bd9af278a6b6bc2b97f"
+    },
+    "changed": {
+      "status": "passed",
+      "elapsedMs": 3696968,
+      "checkerExecutions": 7,
+      "traceSha256": "458bf69d841f241484213da24bf04dd265c15458c2fa54eec146944eadf8422e",
+      "environment": {
+        "outside": {
+          "schema": "psc1-independent-environment/1",
+          "platform": "linux",
+          "arch": "arm64",
+          "kernel": {
+            "release": "6.17.0-1022-azure",
+            "version": "#22-Ubuntu SMP Mon Jul 27 17:12:01 UTC 2026"
+          },
+          "runtime": {
+            "version": "v22.23.3",
+            "versions": {
+              "node": "22.23.3",
+              "acorn": "8.16.0",
+              "ada": "2.9.2",
+              "amaro": "1.1.8",
+              "ares": "1.34.8",
+              "brotli": "1.1.0",
+              "cjs_module_lexer": "2.2.0",
+              "cldr": "48.0",
+              "icu": "78.3",
+              "llhttp": "9.4.3",
+              "modules": "127",
+              "napi": "10",
+              "nbytes": "0.1.3",
+              "ncrypto": "0.0.1",
+              "nghttp2": "1.69.0",
+              "openssl": "3.5.8",
+              "simdjson": "4.5.0",
+              "simdutf": "6.4.2",
+              "sqlite": "3.51.3",
+              "tz": "2026c",
+              "undici": "6.28.1",
+              "unicode": "17.0",
+              "uv": "1.51.0",
+              "uvwasi": "0.0.23",
+              "v8": "12.4.254.21-node.57",
+              "zlib": "1.3.1-e00f703",
+              "zstd": "1.5.7"
+            },
+            "glibcVersionRuntime": "2.39",
+            "glibcVersionCompiler": "2.28"
+          },
+          "osRelease": {
+            "bytes": 400,
+            "sha256": "87458b3b1f1ca0e5c693ade771de7007c3783bdc692fa6b39eb6414bf2af2763",
+            "text": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n"
+          },
+          "filesystem": {
+            "type": "61267",
+            "bsize": "4096",
+            "blocks": "37815964",
+            "bfree": "27096186",
+            "bavail": "27092090",
+            "files": "19529728",
+            "ffree": "18831308"
+          },
+          "user": {
+            "uid": 1001,
+            "gid": 1001
+          }
+        },
+        "inside": {
+          "schema": "psc1-independent-environment/1",
+          "platform": "linux",
+          "arch": "arm64",
+          "kernel": {
+            "release": "6.17.0-1022-azure",
+            "version": "#22-Ubuntu SMP Mon Jul 27 17:12:01 UTC 2026"
+          },
+          "runtime": {
+            "version": "v22.23.3",
+            "versions": {
+              "node": "22.23.3",
+              "acorn": "8.16.0",
+              "ada": "2.9.2",
+              "amaro": "1.1.8",
+              "ares": "1.34.8",
+              "brotli": "1.1.0",
+              "cjs_module_lexer": "2.2.0",
+              "cldr": "48.0",
+              "icu": "78.3",
+              "llhttp": "9.4.3",
+              "modules": "127",
+              "napi": "10",
+              "nbytes": "0.1.3",
+              "ncrypto": "0.0.1",
+              "nghttp2": "1.69.0",
+              "openssl": "3.5.8",
+              "simdjson": "4.5.0",
+              "simdutf": "6.4.2",
+              "sqlite": "3.51.3",
+              "tz": "2026c",
+              "undici": "6.28.1",
+              "unicode": "17.0",
+              "uv": "1.51.0",
+              "uvwasi": "0.0.23",
+              "v8": "12.4.254.21-node.57",
+              "zlib": "1.3.1-e00f703",
+              "zstd": "1.5.7"
+            },
+            "glibcVersionRuntime": "2.39",
+            "glibcVersionCompiler": "2.28"
+          },
+          "osRelease": {
+            "bytes": 400,
+            "sha256": "87458b3b1f1ca0e5c693ade771de7007c3783bdc692fa6b39eb6414bf2af2763",
+            "text": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n"
+          },
+          "filesystem": {
+            "type": "61267",
+            "bsize": "4096",
+            "blocks": "37815964",
+            "bfree": "27094794",
+            "bavail": "27090698",
+            "files": "19529728",
+            "ffree": "18831291"
+          },
+          "user": {
+            "uid": 65534,
+            "gid": 65534
+          }
+        }
+      },
+      "systemLibraries": [
+        {
+          "path": "/lib/aarch64-linux-gnu/libdl.so.2",
+          "resolvedPath": "/usr/lib/aarch64-linux-gnu/libdl.so.2",
+          "bytes": 67440,
+          "sha256": "1c16b2692a155191c97d7fdc5ce937d37c242435f05745046a794a9832b16af4"
+        },
+        {
+          "path": "/lib/aarch64-linux-gnu/libstdc++.so.6",
+          "resolvedPath": "/usr/lib/aarch64-linux-gnu/libstdc++.so.6.0.33",
+          "bytes": 2633224,
+          "sha256": "6e3112d35cfc86db7ee85b27e1746f67408e2837ff8628b46386c3eabd5682a4"
+        },
+        {
+          "path": "/lib/aarch64-linux-gnu/libm.so.6",
+          "resolvedPath": "/usr/lib/aarch64-linux-gnu/libm.so.6",
+          "bytes": 591800,
+          "sha256": "5e0391562de36de323fb9cb0f2c1b6bd6d034c840b1dac018499f5fe4ded1b4a"
+        },
+        {
+          "path": "/lib/aarch64-linux-gnu/libgcc_s.so.1",
+          "resolvedPath": "/usr/lib/aarch64-linux-gnu/libgcc_s.so.1",
+          "bytes": 133696,
+          "sha256": "f2d3ad2bf0b61f6bc944cc37d7b6ab7f88d2582b41ff989ca164803f56cc5f20"
+        },
+        {
+          "path": "/lib/aarch64-linux-gnu/libpthread.so.0",
+          "resolvedPath": "/usr/lib/aarch64-linux-gnu/libpthread.so.0",
+          "bytes": 67440,
+          "sha256": "6f1ab9e7d7de142dc5e2feaf6d19faceff0a0f40d5e225c922899f5362b8c353"
+        },
+        {
+          "path": "/lib/aarch64-linux-gnu/libc.so.6",
+          "resolvedPath": "/usr/lib/aarch64-linux-gnu/libc.so.6",
+          "bytes": 1722920,
+          "sha256": "0f1905dc27dbc6715875c70527bc8da846a10084c9c483e9d8ff76dce8d69d0e"
+        },
+        {
+          "path": "/lib/ld-linux-aarch64.so.1",
+          "resolvedPath": "/usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1",
+          "bytes": 203968,
+          "sha256": "390027e5f45f236bd1838bc54bf464c5ff01d260ab9f8b415ea8276641bce505"
+        },
+        {
+          "path": "/lib/aarch64-linux-gnu/librt.so.1",
+          "resolvedPath": "/usr/lib/aarch64-linux-gnu/librt.so.1",
+          "bytes": 67512,
+          "sha256": "93d0d5ab643b50ac1a61c2c7baf670e8aa94973fa5a2584d13db05295d5b5a0e"
+        }
+      ],
+      "shell": {
+        "implementationPath": "/usr/bin/dash",
+        "sha256": "c883d9c27228339580994a1d0ea960645368c7d1b960a712bd0c655860c2d0d7"
+      },
+      "namespaceTool": {
+        "path": "/usr/bin/unshare",
+        "bytes": 67968,
+        "sha256": "e0c145c3d4c06686544b1362ed64da819539166a5e1e6fd96093aea4d2539b6a",
+        "version": "unshare from util-linux 2.39.3"
+      },
+      "qualificationSha256": "05e86d4b233386d75ff5c75576e37e216425da46881416bba126c5b889979fca"
+    }
+  },
+  "independence": {
+    "separateLeanLakeRequired": false,
+    "separateNodeBunRequired": false,
+    "separateTypeScriptRustCCppRequired": false,
+    "privateNodeRuntimeBundled": true,
+    "privateRuntimeVersion": "22.23.3",
+    "proofChecker": "precompiled official Lean4.35.0 native kernel provider",
+    "bootstrapToolsStillRequiredToReassembleDistribution": true
+  },
+  "assurances": {
+    "fullCurrentPsCompilerRebuild": true,
+    "modifiedCompilerRebuild": true,
+    "modifiedBehaviorObservedAfterSelfRebuild": true,
+    "sameSourceFixedPoints": true,
+    "changedSourceModules": 3,
+    "frontendCompilerObservationsPerGeneration": 6,
+    "independentLogicalAdmissionEveryBuild": true,
+    "relocatedCheckedPublication": true,
+    "readOnlyOutputParentRefused": true,
+    "formalCompilerPreservation": false,
+    "performance240sQualified": false,
+    "environmentsBeyondThisReceiptQualified": false
+  }
+}

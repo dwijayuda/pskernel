@@ -7,6 +7,13 @@ and [dated evidence](evidence/README.md).
 
 ## Current change and preserved qualifications
 
+PR #202 records the measured TypeKey rebuild improvement, 164 canonical editable
+ProofScript owners, and full O2 compiler/environment qualification on three Linux
+installations. [Current integration evidence](PSC1_CANONICAL_INTEGRATION_QUALIFICATION_2026-10-28.json)
+and [the environment matrix](PSC1_INDEPENDENT_ENVIRONMENTS_QUALIFICATION_2026-10-28.json)
+retain the exact results. The 240-second full-compiler target remains open.
+The earlier qualifications below retain their original source and package scopes.
+
 PR#193 qualifies runtime/watch and Apache-2.0 package cohort .11 at
 `fdc52207fdf3d809ad99b05a5b738aca21b95139`. Full source run40453128053 passes37/37 finite
 criteria and scoped seven-backend execution. Installed/runtime run40453124171
@@ -46,8 +53,11 @@ while retaining repository Lean bootstrap ownership. The long correctness profil
 from the unqualified 240-second full-compiler performance goal.
 
 The measured TypeKey improvement completes the first latency experiment.
-Canonical sources are promoted; checked O2 reference integration, broader real
-compiler edits and the full additional-environment matrix remain active work.
+Canonical sources, checked O2 reference integration, broader real compiler edits
+and complete O2 installation/publication qualification now pass on Ubuntu 24.04 x64,
+Ubuntu 22.04 x64 and Ubuntu 24.04 ARM64. The
+[environment receipt](PSC1_INDEPENDENT_ENVIRONMENTS_QUALIFICATION_2026-10-28.json)
+binds the exact run, distributions and observations.
 [Architecture/dependency audit](PSC1_INDEPENDENT_DEVELOPMENT.md) and
 [work state](../AI_WORK_STATE.md) record scope and remaining obligations.
 Kernel research, a new runtime/backend and full modular partitioning are separate
@@ -76,11 +86,15 @@ The qualified O2 seed, exact source change and archive identities are recorded i
 and the TypeKey receipt.
 
 The optimized full rebuild still exceeds the original 240-second target and
-uses the separate 3,600-second correctness profile. Expanded O2 installation
-and publication qualification remains pending. The existing
-[ABI receipt](PSC1_ADDITIONAL_PLATFORM_ABI_QUALIFICATION_2026-10-28.json) qualifies
-runtime/checker preflight on Ubuntu 24.04 x64, Ubuntu 22.04 x64 and Ubuntu 24.04
-ARM64. Full compiler and publication qualification require the completed matrix.
+uses the separate 3,600-second correctness profile. The complete O2 installation
+and publication matrix passes
+[run 40655419917](https://github.com/dwijayuda/pskernel/actions/runs/40655419917)
+on Ubuntu 24.04 x64, Ubuntu 22.04 x64 and Ubuntu 24.04 ARM64.
+Its [full receipt](PSC1_INDEPENDENT_ENVIRONMENTS_QUALIFICATION_2026-10-28.json)
+retains exact runtime, checker, library, filesystem, generation and publication
+evidence. The earlier
+[ABI preflight](PSC1_ADDITIONAL_PLATFORM_ABI_QUALIFICATION_2026-10-28.json)
+remains separately scoped historical evidence.
 
 ## Canonical editable sources
 
@@ -91,6 +105,18 @@ checked native references retained. The repository inventory classifies all
 The [ownership guide](CANONICAL_SOURCE_OWNERSHIP.md) and
 [preparation receipt](PSC1_CANONICAL_SOURCE_PREPARATION_2026-10-28.json) define
 the exact boundary and checked canonical-to-reference maintenance workflow.
+The [post-edit transition](PSC1_CANONICAL_SOURCE_QUALIFICATION_2026-10-28.json)
+freshly verifies the measured Specialize edit and its native reference while
+preserving every unchanged reference. An initial Git-ancestral manifest and
+explicit source domains prevent silent promotion of a second editable authority.
+
+The expanded compiler regression changes the protocol, declaration parser and
+parse-diagnostic code in a copied source workspace, then observes six cases at
+seed, C1 and self-rebuilt C2 on each environment. All 54 case observations and
+both same-source fixed points pass. The installed grammar stays unchanged.
+[Package/source/CLI integration](PSC1_CANONICAL_INTEGRATION_QUALIFICATION_2026-10-28.json)
+separately records the canonical PS default consumer, explicit Lean bootstrap
+consumer and exact mixed-grammar refusal, alongside the existing installed gates.
 
 ## Preserved qualification: automatic core package installation
 
@@ -127,7 +153,7 @@ PR #197 implementation 9aefeeb and documentation refresh c5c15582 pass all 42 pa
 | 7 | Full Python/PHP practical applications | Pending: real CLI/JSON/file/multi-module observations against checked reference; retain corpus/Unicode/integer/loop/IO tests. Providers remain optional. |
 | 8 | Automatic source-package capture | Pending: bounded deterministic order, exact identities, cycle/missing/stale refusals, real multi-package applications. Metadata never executes code or grants authority. |
 | 9 | Native publication committed-outcome parity | Pending: retain transaction and explicitly report post-commit uncertainty. No false rollback guarantee. |
-| 10 | Additional platform consumers/publication | Runtime/checker ABI preflight passes on Ubuntu 24.04 x64, Ubuntu 22.04 x64 and Ubuntu 24.04 ARM64: [receipt](PSC1_ADDITIONAL_PLATFORM_ABI_QUALIFICATION_2026-10-28.json). Full O2 installation, compiler-generation and publication qualification remains pending. macOS/Windows durability and SDK/provider consumers require their own native evidence. |
+| 10 | Additional platform consumers/publication | Standalone O2 installation, full B1/B2 and changed C1/C2 compiler chains, real publication/refusal checks and exact runtime/system-library evidence pass on Ubuntu 24.04 x64, Ubuntu 22.04 x64 and Ubuntu 24.04 ARM64: [receipt](PSC1_INDEPENDENT_ENVIRONMENTS_QUALIFICATION_2026-10-28.json). macOS/Windows durability and additional SDK/provider consumers still require their own native evidence. |
 | 11 | Clean reproduction/final universal release | Pending: exact final source/package/platform identities and required generations; authorization before merge/publication. |
 | 12 | Original 240-second self-compilation target | Target unmet: the optimized compiler worker takes 1,485.908 seconds in the [controlled TypeKey comparison](PSC1_TYPE_KEY_LATENCY_QUALIFICATION_2026-10-28.json). Continue measured optimization and repeatability work while preserving fresh admission, strict IR and the separate correctness profiles. |
 | 13 | Broader features/extensions and R4 transformations | Deferred beyond frozen v1 or explicit semantic obligations. Preserve working features; packages cannot acquire checker/host/FFI/publication authority. |

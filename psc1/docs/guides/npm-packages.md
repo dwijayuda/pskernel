@@ -7,11 +7,11 @@ npm name. Full compiler-internal modularization and modular G2/G3 remain deferre
 
 ## Installation and use
 
-Use the [current canonical-source package ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40651614453/artifacts/12799822095),
+Use the [current canonical-source package ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40669496697/artifacts/12807083792),
 qualified by all 55 package cases at source tree
-`64069b969346aaec27ce64c7917080228f0c78ee`. Its root tarball is 4,824,105 bytes,
-SHA-256 `3c795d2a09a74d6c4d1a94fafc2ccf7a03daa70027f65a88d6425f1b37e33e08`.
-[Matching optional packages](https://github.com/dwijayuda/pskernel/actions/runs/40651614453/artifacts/12799842115)
+`5897dfb3b5e25b8dcf4d162fda7f539807fddb8e`. Its root tarball is 4,824,175 bytes,
+SHA-256 `44764d55ae6a12f6c9afa41bcc868b2bb52013e15f4736f9a7b06ef856b2f34b`.
+[Matching optional packages](https://github.com/dwijayuda/pskernel/actions/runs/40669496697/artifacts/12808096900)
 retain their own exact hashes in the integration receipt.
 
 Extract the qualified ZIP, then install only its root tarball:
@@ -166,7 +166,7 @@ optional engines, semantic/tamper/dependency refusals and reproducible builds.
 
 [Current canonical-source package qualification](../PSC1_CANONICAL_INTEGRATION_QUALIFICATION_2026-10-28.json)
 passes all 55 finite cases and 125 advertised exports in
-[run 40651614453](https://github.com/dwijayuda/pskernel/actions/runs/40651614453).
+[run 40667524969](https://github.com/dwijayuda/pskernel/actions/runs/40667524969).
 It includes executed default PS and explicit Lean source consumers plus exact
 mixed-grammar refusal. Its new package archives and hashes are recorded separately
 from the historical .13 delivery below.

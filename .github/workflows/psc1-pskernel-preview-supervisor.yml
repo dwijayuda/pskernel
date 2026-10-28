@@ -1,0 +1,51 @@
+name: PSC1 bounded preview supervised file checking
+on:
+  push:
+    branches: [work/psc1-pskernel-preview-supervisor-20261029]
+    paths:
+      - .github/workflows/psc1-pskernel-preview-supervisor.yml
+      - psc1/scripts/pskernel-preview-*
+      - psc1/scripts/pskernel-check-export.mjs
+      - psc1/test/PsKernelPreviewAxiomSchemas.lean
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned Lean only for deriving actual standard axiom schemas
+        run: bash psc1/scripts/install-lean435-ci.sh
+      - name: Derive schemas from exact Lean constants and preserve production source
+        working-directory: psc1
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          test "$(git rev-parse HEAD:psc1/packages/pskernel-core/src)" = bbe353e649feed5b796adb164dcec36eaca915ab
+          lake env lean --run test/PsKernelPreviewAxiomSchemas.lean > scripts/pskernel-preview-axioms.json
+          python3 -m json.tool scripts/pskernel-preview-axioms.json > "$RUNNER_TEMP/preview-axiom-schemas.pretty.json"
+      - name: Authenticate baseline packages and exercise actual checking and fault controls in empty PATH
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 psc1/scripts/pskernel-preview-qualification.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-preview-supervisor-evidence
+          path: |
+            ${{ runner.temp }}/preview-supervisor/
+            ${{ runner.temp }}/preview-axiom-schemas.pretty.json
+            psc1/scripts/pskernel-preview-axioms.json
+          include-hidden-files: true

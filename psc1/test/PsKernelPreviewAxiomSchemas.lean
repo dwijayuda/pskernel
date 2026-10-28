@@ -1,0 +1,59 @@
+import Lean
+
+open Lean
+
+private def text (s : String) : Json := Json.str s
+private def node (tag : String) (xs : Array Json := #[]) : Json :=
+  Json.arr (#[text tag] ++ xs)
+
+private partial def nameSchema : Name → Json
+  | .anonymous => node "anonymous"
+  | .str p s => node "str" #[nameSchema p, text s]
+  | .num p n => node "num" #[nameSchema p, text (toString n)]
+
+private def parameterIndex (params : List Name) (n : Name) : Except String Nat :=
+  let rec go : List Name → Nat → Except String Nat
+    | [], _ => .error "undeclared universe parameter in standard axiom"
+    | p :: ps, i => if p == n then .ok i else go ps (i + 1)
+  go params 0
+
+private partial def levelSchema (params : List Name) : Level → Except String Json
+  | .zero => .ok (node "zero")
+  | .succ l => do return node "succ" #[← levelSchema params l]
+  | .max a b => do return node "max" #[← levelSchema params a, ← levelSchema params b]
+  | .imax a b => do return node "imax" #[← levelSchema params a, ← levelSchema params b]
+  | .param n => do return node "param" #[text (toString (← parameterIndex params n))]
+  | .mvar _ => .error "metavariable in standard axiom"
+
+private def binderSchema : BinderInfo → String
+  | .default => "default"
+  | .implicit => "implicit"
+  | .strictImplicit => "strictImplicit"
+  | .instImplicit => "instImplicit"
+
+private partial def expressionSchema (params : List Name) : Expr → Except String Json
+  | .bvar n => .ok (node "bvar" #[text (toString n)])
+  | .sort l => do return node "sort" #[← levelSchema params l]
+  | .const n us => do return node "const" #[nameSchema n, Json.arr (← us.toArray.mapM (levelSchema params))]
+  | .app f a => do return node "app" #[← expressionSchema params f, ← expressionSchema params a]
+  | .forallE _ d b bi => do return node "forallE" #[← expressionSchema params d, ← expressionSchema params b, text (binderSchema bi)]
+  | _ => .error "unexpected expression constructor in pinned standard axiom"
+
+def main : IO Unit := do
+  let env ← importModules #[{ module := `Lean }] {}
+  let mut schemas : Array (String × Json) := #[]
+  for n in [`propext, `Classical.choice, `Quot.sound] do
+    let some info := env.find? n | throw (IO.userError "missing pinned standard axiom")
+    unless (match info with | .axiomInfo _ => true | _ => false) do
+      throw (IO.userError "standard axiom is not an axiom declaration")
+    let schema ← match expressionSchema info.levelParams info.type with
+      | .ok v => pure v
+      | .error e => throw (IO.userError e)
+    schemas := schemas.push (n.toString, Json.mkObj [
+      ("universeParameters", text (toString info.levelParams.length)),
+      ("type", schema)])
+  IO.println (Json.mkObj [
+    ("format", text "pskernel-preview-axioms-v1"),
+    ("leanVersion", text "4.35.0"),
+    ("leanCommit", text "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"),
+    ("schemas", Json.mkObj schemas.toList)]).compress

@@ -90,7 +90,7 @@ lean_lib PsCompilerIr where
 
 lean_lib PsBackendCommon where
   srcDir := "packages/backend-common/src"
-  roots := #[`Ps.BackendCommon.ServiceError, `Ps.BackendCommon.Plan, `Ps.BackendCommon.StateExcept, `Ps.BackendCommon.Source, `Ps.BackendCommon.DirectCalls, `Ps.BackendCommon.Modules]
+  roots := #[`Ps.BackendCommon.ServiceError, `Ps.BackendCommon.Plan, `Ps.BackendCommon.StateExcept, `Ps.BackendCommon.Source, `Ps.BackendCommon.DirectCalls, `Ps.BackendCommon.ModuleModel, `Ps.BackendCommon.Modules]
 
 lean_lib PsErasure where
   srcDir := "packages/erasure/src"
@@ -120,7 +120,7 @@ lean_lib PsBackendTs where
     `Ps.BackendTs.Compiler,
     `Ps.BackendTs.Emit,
     `Ps.BackendTs.CompilerService,
-    `Ps.BackendTs.Modules
+    `Ps.BackendTs.ModuleFiles, `Ps.BackendTs.Modules
   ]
 
 -- Target libraries remain outside the portable bootstrap import closure.
@@ -135,6 +135,7 @@ lean_lib PsBackendJs where
     `Ps.BackendJs.Print,
     `Ps.BackendJs.Emit,
     `Ps.BackendJs.CompilerService,
+    `Ps.BackendJs.ModuleFiles,
     `Ps.BackendJs.Modules
   ]
 
@@ -217,6 +218,7 @@ lean_lib PsHost where
     `Ps.Host.ProjectCompiler,
     `Ps.Host.SourceSnapshot,
     `Ps.Host.SourceOwnership,
+    `Ps.Host.SourceModules,
     `Ps.Host.SourceBindings,
     `Ps.Host.ArtifactBundle,
     `Ps.Host.CompilerDriver,

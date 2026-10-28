@@ -7,6 +7,37 @@ It neither admits a graph nor grants publication or reference-replacement author
 
 namespace Ps.NativeReferenceProjection
 
+private def position (p : PsSourcePos) : Lean.Json :=
+  Lean.Json.mkObj [("byteOffset", Lean.toJson p.byteOffset),
+    ("line", Lean.toJson p.line), ("column", Lean.toJson p.column)]
+private def span (s : PsSourceSpan) : Lean.Json :=
+  Lean.Json.mkObj [("start", position s.start), ("stop", position s.stop)]
+private def kind : PsTokenKind → String
+  | .identifier => "identifier"
+  | .natural => "natural"
+  | .string => "string"
+  | .character => "character"
+  | .symbol => "symbol"
+  | .endOfInput => "endOfInput"
+private def parseError : PsParseError → Lean.Json
+  | .fuelExhausted => Lean.Json.mkObj [("code", .str "fuelExhausted")]
+  | .unexpectedEnd expected => Lean.Json.mkObj [
+      ("code", .str "unexpectedEnd"), ("expected", .str expected)]
+  | .expectedText expected actual location => Lean.Json.mkObj [
+      ("code", .str "expectedText"), ("expected", .str expected),
+      ("actual", .str actual), ("span", span location)]
+  | .expectedKind expected actual location => Lean.Json.mkObj [
+      ("code", .str "expectedKind"), ("expected", .str (kind expected)),
+      ("actual", .str (kind actual)), ("span", span location)]
+private def lexError : PsLexError → Lean.Json
+  | .unterminatedBlockComment s => Lean.Json.mkObj [("code", .str "unterminatedBlockComment"), ("span", span s)]
+  | .unterminatedString s => Lean.Json.mkObj [("code", .str "unterminatedString"), ("span", span s)]
+  | .newlineInString s => Lean.Json.mkObj [("code", .str "newlineInString"), ("span", span s)]
+  | .unterminatedCharacter s => Lean.Json.mkObj [("code", .str "unterminatedCharacter"), ("span", span s)]
+  | .fuelExhausted => Lean.Json.mkObj [("code", .str "fuelExhausted")]
+  | .invalidSource reason s => Lean.Json.mkObj [
+      ("code", .str "invalidSource"), ("reason", .str reason), ("span", span s)]
+
 private def patternNames : PsSyntaxPattern → List PsSyntaxName
   | .constructor name _ _ =>
       match name.segments with
@@ -138,10 +169,16 @@ private def insertDots (source : String) (names : List PsSyntaxName) :
 
 def project (moduleName source : String) : Except String Lean.Json := do
   if source.utf8ByteSize > 1048576 then throw "source exceeds 1MiB"
-  let parsed ← (psParseLeanSource source).mapError (fun _ => "input parse refused")
+  let parsed ← (psParseLeanSource source).mapError (fun error =>
+    "input parse refused: " ++ (match error with
+      | .lex failure => (lexError failure).compress
+      | .parse failure => (parseError failure).compress))
   let originalNames := moduleNames parsed
   let (projected, insertions) ← insertDots source originalNames
-  let reparsed ← (psParseLeanSource projected).mapError (fun _ => "projected parse refused")
+  let reparsed ← (psParseLeanSource projected).mapError (fun error =>
+    "projected parse refused: " ++ (match error with
+      | .lex failure => (lexError failure).compress
+      | .parse failure => (parseError failure).compress))
   let newNames := moduleNames reparsed
   if originalNames.map (fun name => name.segments) != newNames.map (fun name => name.segments) then
     throw "constructor identities changed during projection"

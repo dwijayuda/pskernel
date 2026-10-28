@@ -10,8 +10,8 @@ const out=path.join(root,'dist/native-reference-projection-tests');fs.mkdirSync(
 const source=[
  '-- UTF8 before names: façade λ. A comment containing | empty must stay byte-identical.',
  'inductive NativeProjectionSample where',
- '  | empty : NativeProjectionSample',
- '  | item (payload : Nat) : NativeProjectionSample',
+ '  | empty',
+ '  | item (payload : Nat)',
  '',
  'def bare (value : NativeProjectionSample) : Nat :=',
  '  match value with',

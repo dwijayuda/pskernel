@@ -1,0 +1,100 @@
+name: PS0 external proof-linked qualification
+
+on:
+  push:
+    branches: [ci/ps0-proof-linked-runner-20261029]
+    paths: [.github/workflows/ps0-external-proof-linked.yml]
+  pull_request:
+    paths: [.github/workflows/ps0-external-proof-linked.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ps0-external-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PS0_SOURCE_SHA: 86c1c3f8c8c2b14603a0e20b8e4d58b2a48904d5
+
+jobs:
+  host-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: ${{ env.PS0_SOURCE_SHA }}
+          sparse-checkout: experiments/ps0
+          persist-credentials: false
+      - name: Record exact source and run host negatives
+        working-directory: experiments/ps0
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PS0_SOURCE_SHA"
+          python3 tests/test-proof-linked-host.py
+
+  proof-linked:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: experiments/ps0
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: ${{ env.PS0_SOURCE_SHA }}
+          sparse-checkout: experiments/ps0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: experiments/ps0
+          auto-config: false
+          build: false
+          test: false
+          lint: false
+          use-github-cache: false
+      - name: Install replay sandbox and pinned TypeScript
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y bubblewrap
+          mkdir -p "$RUNNER_TEMP/ps0-tsc" build/verified-logs
+          printf '%s\n' '{"private":true,"dependencies":{"typescript":"5.7.3"}}' > "$RUNNER_TEMP/ps0-tsc/package.json"
+          npm install --prefix "$RUNNER_TEMP/ps0-tsc" --package-lock-only --ignore-scripts --no-audit --no-fund
+          npm ci --prefix "$RUNNER_TEMP/ps0-tsc" --ignore-scripts --no-audit --no-fund
+          cp "$RUNNER_TEMP/ps0-tsc/package-lock.json" build/verified-logs/target-package-lock.json
+          echo "PS0_TSC=$RUNNER_TEMP/ps0-tsc/node_modules/typescript/lib/tsc.js" >> "$GITHUB_ENV"
+      - name: Check source and exact Lean identity
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PS0_SOURCE_SHA"
+          printf '%s\n' "$PS0_SOURCE_SHA" > build/verified-logs/source-sha.txt
+          printf '%s\n' "$GITHUB_SHA" > build/verified-logs/runner-sha.txt
+          printf 'import Lean\n#eval Lean.githash\n' > build/verified-logs/Pin.lean
+          lake env lean build/verified-logs/Pin.lean | tee build/verified-logs/pin.log
+          grep -Fx '"eb6cafb7290e8bd5f2937522d8d804f58f02bafc"' build/verified-logs/pin.log
+          test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
+      - name: Build existing PS0 baseline
+        run: |
+          set -euo pipefail
+          lake build PS0 ps0 2>&1 | tee build/verified-logs/baseline-build.log
+      - name: Qualify proof-linked source and JS/TS
+        run: |
+          set -euo pipefail
+          bash tests/run-proof-linked.sh 2>&1 | tee build/verified-logs/qualification.log
+      - name: Retain source-pinned evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ps0-external-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
+          path: |
+            experiments/ps0/build/verified-logs/
+            experiments/ps0/build/proof-linked/
+          if-no-files-found: warn

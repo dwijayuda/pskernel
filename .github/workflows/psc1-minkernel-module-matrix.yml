@@ -1,0 +1,58 @@
+name: PSC1 actual MinKernel compiler module matrix
+on:
+  push:
+    branches: [research/psc1-min-compiler-module-matrix-20261028]
+    paths:
+      - psc1/scripts/minkernel-module-matrix*
+      - .github/workflows/psc1-minkernel-module-matrix.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: psc1-min-module-matrix-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  actual-modules:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        with:
+          path: psc1/.lake
+          key: psc1-min-native-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/packages/**/*.lean', '!psc1/packages/pskernel-min/**', 'psc1/scripts/*.lean') }}
+          restore-keys: |
+            psc1-min-native-v1-${{ runner.os }}-
+            psc1-lake-v2-${{ runner.os }}-
+      - name: Install repository tools without changing verification budgets
+        run: |
+          bash "$GITHUB_WORKSPACE/psc1/scripts/ci/install-pinned-lean.sh"
+          npm install --prefix "$RUNNER_TEMP/min-ts" --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          echo "PSC0_TSC=$RUNNER_TEMP/min-ts/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
+      - name: Build actual source producer and independent official checker
+        run: |
+          node packages/pskernel-lean/host/check-pin.mjs
+          lake build PsBackendTs psc1_source_census_probe psc2_joint_closure_inventory psc1_independent_checker
+      - name: Capture the entire actual compiler graph once
+        run: node scripts/minkernel-closure-audit.mjs
+      - name: Query unchanged public MinKernel API for actual dependency-closed modules
+        run: node --max-old-space-size=256 scripts/minkernel-module-matrix.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-min-actual-module-matrix-${{ github.sha }}
+          path: |
+            psc1/dist/pskernel-min/module-matrix/
+            psc1/dist/pskernel-min/closure/
+          retention-days: 90

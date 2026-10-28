@@ -6,9 +6,15 @@ private def demand (condition : Bool) (code : String) : IO Unit :=
   if condition then pure () else throw (IO.userError ("PSC1_OWNERSHIP_" ++ code))
 
 def main (args : List String) : IO Unit := do
-  let [mode, input, output, admissionsPath, irPath] := args
-    | throw (IO.userError "PSC1_OWNERSHIP_USAGE")
+  let (mode, input, output, admissionsPath, irPath, graphFilesBytes) ←
+    match args with
+    | [mode, input, output, admissionsPath, irPath] =>
+        pure (mode, input, output, admissionsPath, irPath, (33554432 : Nat))
+    | [mode, input, output, admissionsPath, irPath, "canonical-repository-40m"] =>
+        pure (mode, input, output, admissionsPath, irPath, (41943040 : Nat))
+    | _ => throw (IO.userError "PSC1_OWNERSHIP_USAGE")
   demand (["index", "bindings", "reference", "to-lean", "to-ps", "compare-bindings"].contains mode) "MODE"
+  demand (graphFilesBytes == 33554432 || mode == "index") "GRAPH_PROFILE_MODE"
   let bytes ← IO.FS.readBinFile input
   demand (bytes.size ≤ 33554432) "REQUEST_LIMIT"
   let some text := String.fromUTF8? bytes | throw (IO.userError "PSC1_OWNERSHIP_UTF8")
@@ -24,6 +30,7 @@ def main (args : List String) : IO Unit := do
   let request ← match decode text with
     | .ok value => pure value
     | .error error => throw (IO.userError ("PSC1_OWNERSHIP_WIRE:" ++ error.phase ++ ":" ++ error.code))
+  demand (graphFilesBytes == 33554432 || request.entry == "Ps.Canonical.Repository") "GRAPH_PROFILE_SCOPE"
   demand (request.sources.length ≤ 256) "MODULE_LIMIT"
   demand (request.sources.all (fun s => s.text.utf8ByteSize ≤ 1048576)) "SOURCE_LIMIT"
   if mode == "to-lean" || mode == "to-ps" then
@@ -61,7 +68,7 @@ def main (args : List String) : IO Unit := do
       let ir ← match psIrEncodeModule semantic.raw with
         | .ok value => pure value
         | .error _ => throw (IO.userError "PSC1_OWNERSHIP_IR_ENCODING")
-      demand (semantic.admissions.utf8ByteSize ≤ 33554432 && ir.utf8ByteSize ≤ 33554432)
+      demand (semantic.admissions.utf8ByteSize ≤ graphFilesBytes && ir.utf8ByteSize ≤ graphFilesBytes)
         ("GRAPH_LIMIT:admissions=" ++ toString semantic.admissions.utf8ByteSize ++
           ":ir=" ++ toString ir.utf8ByteSize)
       let response := (Lean.Json.mkObj [

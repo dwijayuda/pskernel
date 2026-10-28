@@ -1,0 +1,49 @@
+{
+  "schema": "psc1-canonical-graph-capacity-observation/1",
+  "status": "measured-default-capacity-refusal",
+  "testedCommit": "0f0ebf93b48ab68ce6949b29dec7da65ef90bfdf",
+  "run": 40639435725,
+  "job": 122653871589,
+  "artifact": {
+    "artifact": 12795230740,
+    "bytes": 3953,
+    "zipSha256": "795e0708c9fe5730eb665d79a0f31f45f63553936d097802e99552cf67da5fab"
+  },
+  "workload": {
+    "compilerModules": 151,
+    "syntheticEntry": "Ps.Canonical.Repository",
+    "allCanonicalFilesParseAccepted": 164
+  },
+  "observed": {
+    "admissionsBytes": 34431244,
+    "originalIrBytes": 10029216,
+    "defaultGraphFilesBytes": 33554432,
+    "admissionsExcessBytes": 876812,
+    "elapsedMs": 32823,
+    "maxRssKiB": 425860,
+    "peakTreeRssKiB": 425860,
+    "timeoutMs": 240000,
+    "processStatus": 1,
+    "signal": null,
+    "timeout": false,
+    "stderr": "uncaught exception: PSC1_OWNERSHIP_GRAPH_LIMIT:admissions=34431244:ir=10029216\n"
+  },
+  "selectedQualificationProfile": {
+    "name": "canonical-repository-40m",
+    "graphFilesBytes": 41943040,
+    "admissionsHeadroomBytes": 7511796,
+    "scope": "Explicit canonical repository index only; out-of-band admissions and original IR files"
+  },
+  "unchanged": {
+    "standardGraphFilesBytes": 33554432,
+    "requestBytes": 33554432,
+    "responseBytes": 33554432,
+    "stdoutBytes": 33554432,
+    "sourceBytes": 1048576,
+    "modules": 256,
+    "helperTimeoutMs": 240000,
+    "independentCheckerRequired": true,
+    "strictOriginalIrRequired": true
+  },
+  "receiptGrantsAdmissionAuthority": false
+}

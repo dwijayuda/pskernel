@@ -1,6 +1,6 @@
 # PSC1 AI work state
 
-Updated 2026-10-28 Asia/Jakarta. Active follow-up branch
+Updated 2026-10-28 Asia/Jakarta. Draft PR[202](https://github.com/dwijayuda/pskernel/pull/202). Active follow-up branch
 `feat/psc1-canonical-latency-20261028`, from qualified PR #201 final head
 `29c82adc77cbd1bf271acab75b6f8d51ef0a9ee6`.
 GitHub-connected tools and GitHub Actions/Linux CI only. Non-force expected-head,
@@ -38,15 +38,15 @@ generated declaration locations are the initial views; JavaScript stack ancestry
 is not the logical ProofScript call stack. Existing UTF-8 caches and balanced
 text builders must not be duplicated based on speculation.
 
-## Parallel implementation investigations
+## Canonical ownership and environment progress
 
-Initial all153 compiler-owner preparation40632545333 refused Ps.Syntax.Lossless at parse before promotion. The focused parenthesized-projection refactor now uses a local binding; a diagnostic probe covers all proposed owners before mandatory admission. Additional pure modular planning/rendering and Sh1 surface ports are under review. No source owner has been promoted yet. The ownership audit enumerates every non-kernel package source. The 125-module
-unified compiler is already representable in checked `.ps`; additional portable
-modules and explicit native/bootstrap-only exceptions are being classified.
-Canonical source promotion must retain one authored owner, explicit immutable
-bootstrap references and fresh paired admission/IR correspondence. Reverse
-conversion already exists, but official Lean compatibility of generated
-projections needs an actual CI probe before replacing native bootstrap material.
+The intended canonical ownership inventory is151 portable compiler-package modules plus13 ordinary standard-library modules. All164 pass the actual parser. Native source-port equivalence40639393086 passes13 exact stdout/stderr/status comparisons,4 fresh independent admissions,9 definitional native API/default assertions, the lossless suite,28 modular and29 extended modular qualification cases. See docs/PSC1_NATIVE_PORT_QUALIFICATION_2026-10-28.json.
+
+The fresh all151 repository graph reaches serialization but the ordinary32MiB helper cap refuses34,431,244 admission bytes (originalIR10,029,216 bytes), observed in40639435725. A separately named canonical-repository-40m profile is now limited to out-of-band graph files for the synthetic repository index. Ordinary five-argument helper invocations, requests, response/index/stdout, source/module limits, process limits and genuine kernel checks remain unchanged. The preparation verifies the ordinary32MiB refusal before using the40MiB audit profile. See docs/PSC1_CANONICAL_GRAPH_CAPACITY_2026-10-28.json.
+
+No source owner is promoted until paired fresh admission/IR correspondence passes. Existing125 qualified ProofScript bytes and authored stdlib IO.ps must remain exact at initial promotion. Native Python/PHP optional-argument wrappers remain explicitly classified compatibility adapters pointing to their portable canonical implementations. The initial promotion prepares Git objects only; root reviews and integrates onto the latest branch without ref races. A separate staged refresh workflow permits authored PS edits, requires fresh checked references and native compatibility, and preserves untouched reference bytes. Ordinary source reads remain Git-free. Repository-wide SOURCE_OWNERSHIP.json and the fail-closed tracked.ps inventory are staged for activation with the canonical manifest.
+
+The four-build measured type-key optimization qualification40634776830 remains in progress. It requires oldseed→O1→O2 byte-identical fixed point, followed by oldB2 and O2 compiling the identical old125-source workload on one runner. Every build independently admits and strictly checks original/transformed IR. Do not select O2 or claim an improvement before this run passes.
 
 Broader regressions will modify real frontend and compiler behavior in an
 isolated source workspace, execute positive and negative observations, and require

@@ -279,7 +279,7 @@ export function createLosslessSourceTool({ executable, sha256 }) {
 }
 
 
-function runSourceHelper({ executable, sha256 }, mode, encoded, consume) {
+function runSourceHelper({ executable, sha256, graphFilesProfile }, mode, encoded, consume) {
   pinnedTool(executable, sha256);
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'psc1-ownership-'));
   try {
@@ -290,7 +290,8 @@ function runSourceHelper({ executable, sha256 }, mode, encoded, consume) {
     const control = {
       command: ['prlimit', '--as=' + losslessLimits.addressSpaceBytes,
         '--stack=' + losslessLimits.stackBytes, '--', executable,
-        mode, input, output, admissionsFile, irFile],
+        mode, input, output, admissionsFile, irFile,
+        ...(graphFilesProfile === undefined ? [] : [graphFilesProfile])],
       directory: path.join(directory, 'supervisor'), timeoutMs: limit.timeoutMs,
       timeoutPolicy: limit.timeoutPolicy, maxBuffer: losslessLimits.responseBytes,
     };
@@ -338,8 +339,10 @@ function tokensInSpan(span, row) {
  * Independent admission covers exact logical graph bytes, not refactoring equivalence.
  */
 export function createSourceOwnershipTool({
-  lexicalTool, executable, sha256, checkerExecutable, checkerSha256,
+  lexicalTool, executable, sha256, checkerExecutable, checkerSha256, qualificationGraphProfile,
 }) {
+  if (qualificationGraphProfile !== undefined && qualificationGraphProfile !== 'canonical-repository-40m')
+    refuse('OWNERSHIP_GRAPH_PROFILE');
   const lexical = losslessTools.get(lexicalTool);
   if (!lexical) refuse('OWNERSHIP_LEXICAL_TOOL');
   pinnedTool(executable, sha256);
@@ -395,6 +398,10 @@ export function createSourceOwnershipTool({
           typeof entry !== 'string' || !rows.some(row => row.module === entry) ||
           rows.some(row => row.kind !== rows[0].kind)) refuse('OWNERSHIP_REQUEST');
       const grammar = rows[0].kind;
+      const graphFilesProfile = qualificationGraphProfile !== undefined &&
+        mode === 'index' && entry === 'Ps.Canonical.Repository' ? qualificationGraphProfile : undefined;
+      const graphFilesBytes = graphFilesProfile === 'canonical-repository-40m'
+        ? 41943040 : losslessLimits.responseBytes;
       const sourceClosureDigest = compilerSourceClosureDigest(rows);
       const requestId = hash(JSON.stringify([mode === 'bindings' ? 'psc1-source-bindings/1' : protocol,
         sourceClosureDigest, entry, assurance]));
@@ -402,7 +409,7 @@ export function createSourceOwnershipTool({
         sourceClosureDigest, grammar, assurance, entry, rows.map(row => [row.module, row.text])]);
       if (Buffer.byteLength(encoded) > losslessLimits.responseBytes) refuse('OWNERSHIP_REQUEST_LIMIT');
       pinnedTool(executable, sha256); pinnedTool(checkerExecutable, checkerSha256);
-      return runSourceHelper({ executable, sha256 }, mode, encoded,
+      return runSourceHelper({ executable, sha256, graphFilesProfile }, mode, encoded,
         ({ wire, admissionsFile, irFile, metrics }) => {
           if (wire?.status === 'refused') {
             exactKeys(wire, ['protocol', 'status', 'requestId', 'sourceClosureDigest', 'error']);
@@ -477,8 +484,8 @@ export function createSourceOwnershipTool({
             return result;
           });
           if (members !== wire.sourceCoreDeclarations) refuse('OWNERSHIP_COVERAGE');
-          const admissions = decoder.decode(regularFile(admissionsFile, losslessLimits.responseBytes));
-          const ir = regularFile(irFile, losslessLimits.responseBytes);
+          const admissions = decoder.decode(regularFile(admissionsFile, graphFilesBytes));
+          const ir = regularFile(irFile, graphFilesBytes);
           pinnedTool(checkerExecutable, checkerSha256);
           const checker = runIndependentChecker(checkerExecutable, admissions);
           pinnedTool(checkerExecutable, checkerSha256);
@@ -491,7 +498,11 @@ export function createSourceOwnershipTool({
             partialNames: wire.partialNames, admissionsSha256, originalIrSha256,
             checker: { ...checker, executableSha256: checkerSha256, accepted: true },
             metrics: { elapsedMs: metrics.elapsedMs, maxRssKiB: metrics.maxRssKiB,
-              peakTreeRssKiB: metrics.peakTreeRssKiB, timeoutMs: metrics.timeoutMs },
+              peakTreeRssKiB: metrics.peakTreeRssKiB, timeoutMs: metrics.timeoutMs,
+              ...(graphFilesProfile === undefined ? {} : {
+                graphFilesProfile, graphFilesBytesLimit: graphFilesBytes,
+                admissionsBytes: Buffer.byteLength(admissions), originalIrBytes: ir.length,
+              }) },
             authority: { readOnlyOwnership: true, referenceResolution: mode === 'bindings' ? 'recorded-term-bases' : false,
               semanticEquivalence: 'not-claimed', publication: false } });
           indexes.set(index, { sourceIds: rows.map(r => r.snapshot.sourceId), admissions, ir, encoded, mode });

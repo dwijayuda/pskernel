@@ -38,15 +38,16 @@ function run(exe, argv, options = {}) {
   assert.equal(result.status, 0, String(result.stdout) + String(result.stderr));
   return result.stdout;
 }
-function helpers(base) {
+function helpers(base, qualificationGraphProfile) {
   const executable = name => path.join(base, '.lake/build/bin', name);
   const lexical = createLosslessSourceTool({ executable: executable('psc1_lossless_source'), sha256: sha256(fs.readFileSync(executable('psc1_lossless_source'))) });
   const config = { lexicalTool: lexical, executable: executable('psc1_source_ownership'),
     sha256: sha256(fs.readFileSync(executable('psc1_source_ownership'))),
     checkerExecutable: executable('psc1_independent_checker'),
     checkerSha256: sha256(fs.readFileSync(executable('psc1_independent_checker'))) };
-  const ownership = createSourceOwnershipTool(config);
-  return { lexical, ownership, converter: createCheckedSourceConverter({ ownershipTool: ownership }),
+  const ownership = createSourceOwnershipTool({ ...config, qualificationGraphProfile });
+  const standardOwnership = createSourceOwnershipTool(config);
+  return { lexical, ownership, standardOwnership, converter: createCheckedSourceConverter({ ownershipTool: ownership }),
     hashes: { lexical: sha256(fs.readFileSync(executable('psc1_lossless_source'))), ownership: config.sha256, checker: config.checkerSha256 } };
 }
 const preparedCommit = run('git', ['rev-parse', 'HEAD']).trim();
@@ -130,7 +131,7 @@ const parseProbe = read(parseProbePath);
 assert.equal(parseProbe.schema, 'psc1-canonical-parse-probe/1');
 const parseRefusals = parseProbe.files.filter(row => row.status !== 'accepted-parse-only');
 assert.deepEqual(parseRefusals, [], 'all intended portable owners must pass the actual parser before semantic checking');
-const tools = helpers(root), started = Date.now();
+const tools = helpers(root, 'canonical-repository-40m'), started = Date.now();
 console.log('PSC1_CANONICAL_STAGE: capture-and-native-reference-admission');
 const qualifiedNames = new Set(unified.map(row => row.module));
 const parsedImports = new Map(parseProbe.files.map(row => [row.path, row.imports]));
@@ -138,6 +139,27 @@ const dependencies = new Map(ordered.map(row => [row.module, parsedImports.get(r
 assert.ok([...dependencies.values()].every(Array.isArray), 'every source needs actual parsed imports');
 const capturedByModule = new Map(ordered.map(row => [row.module,
   tools.lexical.capture({ module: row.module, grammar: 'lean', bytes: Buffer.from(row.text) })]));
+// The new audit profile must not change the ordinary five-argument helper cap.
+if (extended) {
+  const standardAudit = tools.lexical.capture({module:syntheticModule,grammar:'lean',bytes:Buffer.from(syntheticText)});
+  let standardRefusal = null;
+  try {
+    tools.standardOwnership.analyze({snapshots:[...ordered.map(row=>capturedByModule.get(row.module)),standardAudit],
+      entry:syntheticModule,assurance:'ordinary-checked'});
+  } catch (error) {
+    const diagnostic = String(error.cause?.stderr ?? '');
+    const sizes = diagnostic.match(/PSC1_OWNERSHIP_GRAPH_LIMIT:admissions=(\d+):ir=(\d+)/);
+    assert.ok(sizes,'Expected measured ordinary graph-capacity refusal: '+diagnostic);
+    const admissionsBytes=Number(sizes[1]),originalIrBytes=Number(sizes[2]);
+    assert.ok(admissionsBytes>33554432&&admissionsBytes<=41943040);
+    assert.ok(originalIrBytes<=41943040);
+    standardRefusal={status:'refused-at-unchanged-ordinary-capacity',admissionsBytes,originalIrBytes,
+      graphFilesBytesLimit:33554432,metrics:error.cause.metrics};
+  }
+  assert.ok(standardRefusal,'Ordinary graph capacity must remain bounded at32MiB.');
+  put(path.join(out,'standard-capacity-refusal.json'),json(standardRefusal));
+  console.log('PSC1_CANONICAL_STANDARD_CAPACITY: '+JSON.stringify(standardRefusal));
+}
 let remainingRows = [...ordered], checkedAll = null;
 const blockers = [];
 for (let attempt = 0; attempt <= ordered.length - unified.length; attempt++) {
@@ -269,7 +291,7 @@ try {
   assert.equal(build.error, undefined, String(build.error));
   assert.equal(build.status, 0, 'native projection build failed; see native-projection-build.log');
   console.log('PSC1_CANONICAL_STAGE: projected-native-helper-correspondence');
-  const rebuilt = helpers(nativeRoot);
+  const rebuilt = helpers(nativeRoot, 'canonical-repository-40m');
   const recaptured = auditRows.map(row => rebuilt.lexical.capture({ module: row.module, grammar: 'ps', bytes: psByModule.get(row.module) }));
   const checked = rebuilt.ownership.analyze({ snapshots: recaptured, entry: syntheticModule, assurance: 'ordinary-checked' });
   assert.equal(checked.admissionsSha256, after.admissionsSha256);

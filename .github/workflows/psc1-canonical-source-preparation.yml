@@ -32,10 +32,13 @@ jobs:
           node-version: '22.23.3'
       - name: Parse the initial promotion observer
         run: node --check scripts/prepare-canonical-sources.mjs
-      - uses: actions/cache@v4
+      - uses: actions/cache/restore@v4
+        id: elan-cache
         with:
           path: ~/.elan
           key: psc1-canonical-elan-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc1/lean-toolchain') }}
+          restore-keys: |
+            psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
       - uses: actions/cache/restore@v4
         id: source-tools-cache
         with:
@@ -55,6 +58,11 @@ jobs:
       - name: Build the existing checked ownership helpers
         timeout-minutes: 20
         run: lake build psc1_lossless_source psc1_source_ownership psc1_independent_checker
+      - uses: actions/cache/save@v4
+        if: steps.elan-cache.outputs.cache-hit != 'true'
+        with:
+          path: ~/.elan
+          key: ${{ steps.elan-cache.outputs.cache-primary-key }}
       - uses: actions/cache/save@v4
         if: steps.source-tools-cache.outputs.cache-hit != 'true'
         with:

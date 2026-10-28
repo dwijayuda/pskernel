@@ -178,21 +178,21 @@ def psDecodeKernelBridgeResponse
               | none =>
                   Except.error
                     (PsKernelBridgeProtocolError.invalidField "ok")
-              | some false =>
-                  match psKernelBridgeRequireString value "error" with
-                  | Except.error error => Except.error error
-                  | Except.ok message =>
-                      Except.error
-                        (PsKernelBridgeProtocolError.remoteError
-                          message)
-              | some true =>
-                  match psJsonGetField value "value" with
-                  | none =>
-                      Except.ok { value := none }
-                  | some PsJsonValue.nullE =>
-                      Except.ok { value := none }
-                  | some responseValue =>
-                      Except.ok { value := some responseValue }
+              | some succeeded =>
+                  if succeeded then
+                    match psJsonGetField value "value" with
+                    | none => Except.ok { value := none }
+                    | some responseValue =>
+                        match responseValue with
+                        | PsJsonValue.nullE => Except.ok { value := none }
+                        | _ => Except.ok { value := some responseValue }
+                  else
+                    match psKernelBridgeRequireString value "error" with
+                    | Except.error error => Except.error error
+                    | Except.ok message =>
+                        Except.error
+                          (PsKernelBridgeProtocolError.remoteError message)
+
 
 def psKernelBridgeResponseExpr
     (response : PsKernelBridgeResponse) :
@@ -211,7 +211,10 @@ def psKernelBridgeResponseBool
     (response : PsKernelBridgeResponse) :
     Except PsKernelBridgeProtocolError Bool :=
   match response.value with
-  | some (PsJsonValue.bool value) => Except.ok value
-  | _ =>
-      Except.error
-        (PsKernelBridgeProtocolError.invalidField "value")
+  | none =>
+      Except.error (PsKernelBridgeProtocolError.invalidField "value")
+  | some value =>
+      match value with
+      | PsJsonValue.bool result => Except.ok result
+      | _ =>
+          Except.error (PsKernelBridgeProtocolError.invalidField "value")

@@ -350,6 +350,14 @@ def psSh1CountTerm
 
 -- Every source term constructor is named here. Typed recursion, inference,
 -- rank-1 runtime use and layouts remain the actual elaborator/checker's work.
+def psSh1SyntaxDoFailure
+    (moduleName owner : String) (span : PsSourceSpan) :
+    Except PsSh1SourceError PsSh1SyntaxState :=
+  Except.error
+    (psSh1SourceFailure "source-do-unsupported"
+      "do semantics are outside the historical SH1 source profile"
+      moduleName owner (Option.some span))
+
 def psSh1SyntaxTermStep
     (moduleName owner : String) (origins : List PsSourceSpan)
     (region : PsSh1SyntaxRegion) (term : PsSyntaxTerm)
@@ -378,22 +386,18 @@ def psSh1SyntaxTermStep
   | PsSyntaxTerm.binary _ left right _ =>
       Except.ok (psSh1SyntaxSchedule state
         [PsSh1SyntaxTask.term owner region left, PsSh1SyntaxTask.term owner region right])
-  | PsSyntaxTerm.doE _ span
-  | PsSyntaxTerm.doBindE _ _ _ _ span
-  | PsSyntaxTerm.doThenE _ _ span
-  | PsSyntaxTerm.doReturnE _ span
-  | PsSyntaxTerm.doLetMutE _ _ _ _ span
-  | PsSyntaxTerm.doAssignE _ _ _ span
-  | PsSyntaxTerm.doIfE _ _ _ _ span
-  | PsSyntaxTerm.doEndE span
-  | PsSyntaxTerm.doForE _ _ _ _ span
-  | PsSyntaxTerm.doForRangeE _ _ _ _ _ span
-  | PsSyntaxTerm.doTryE _ _ _ _ span
-  | PsSyntaxTerm.doWhileE _ _ _ span =>
-      Except.error
-        (psSh1SourceFailure "source-do-unsupported"
-          "do semantics are outside the historical SH1 source profile"
-          moduleName owner (Option.some span))
+  | PsSyntaxTerm.doE _ span => psSh1SyntaxDoFailure moduleName owner span
+  | PsSyntaxTerm.doBindE _ _ _ _ span => psSh1SyntaxDoFailure moduleName owner span
+  | PsSyntaxTerm.doThenE _ _ span => psSh1SyntaxDoFailure moduleName owner span
+  | PsSyntaxTerm.doReturnE _ span => psSh1SyntaxDoFailure moduleName owner span
+  | PsSyntaxTerm.doLetMutE _ _ _ _ span => psSh1SyntaxDoFailure moduleName owner span
+  | PsSyntaxTerm.doAssignE _ _ _ span => psSh1SyntaxDoFailure moduleName owner span
+  | PsSyntaxTerm.doIfE _ _ _ _ span => psSh1SyntaxDoFailure moduleName owner span
+  | PsSyntaxTerm.doEndE span => psSh1SyntaxDoFailure moduleName owner span
+  | PsSyntaxTerm.doForE _ _ _ _ span => psSh1SyntaxDoFailure moduleName owner span
+  | PsSyntaxTerm.doForRangeE _ _ _ _ _ span => psSh1SyntaxDoFailure moduleName owner span
+  | PsSyntaxTerm.doTryE _ _ _ _ span => psSh1SyntaxDoFailure moduleName owner span
+  | PsSyntaxTerm.doWhileE _ _ _ span => psSh1SyntaxDoFailure moduleName owner span
   | PsSyntaxTerm.arrayGetOptionE _ _ span =>
       Except.error
         (psSh1SourceFailure "source-optional-index-unsupported"

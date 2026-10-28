@@ -36,8 +36,17 @@ transforms, orders computed initializers by transitive dependencies, and emits r
 JS/TS files under existing package names. It requires exact external Lean admission
 before emission, strict TypeScript, printed-graph audits and tamper negatives.
 This candidate pipeline is awaiting Linux CI and is not a promoted npm release.
-The first planner build failed because initialize is a reserved Lean command;
-the helper is renamed orderInitializers. No semantic exception or fuel change.
+The planner now passes all eight ordering/negative tests on Linux. Run 40661038464
+(5fa6c4fb) builds all new native tools, executes the retained pilot build and unified
+entry, and passes all ten ownership/body/profile checks and strict emitter consumers.
+Whole-graph Node orchestration then fails before capture: the workflow installed the
+root SDK but omitted the existing locked host-tools @babel/parser dependency. Install
+that existing lockfile too; no new parser or dependency version is introduced.
+
+Iterate on build/psc1-executable-packages-20261028 to avoid restarting the PR's full
+source/package gates for each build fix. PR #205 remains at 5fa6c4fb until a focused
+production graph run passes, then fast-forward its branch non-force after a live
+expected-HEAD check. Current M2 graph/type/consumer gates remain unqualified.
 
 ## Preserved reference and policies
 

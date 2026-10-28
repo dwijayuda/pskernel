@@ -1,7 +1,7 @@
 name: PSC1 production executable package boundaries
 on:
   push:
-    branches: [feat/psc1-executable-packages-20261028]
+    branches: [feat/psc1-executable-packages-20261028, build/psc1-executable-packages-20261028]
   workflow_dispatch:
 permissions:
   contents: read
@@ -42,6 +42,7 @@ jobs:
           curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           npm ci --prefix .. --ignore-scripts --include=optional --no-audit --no-fund
+          npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
           git worktree add --detach "$RUNNER_TEMP/psc1-executable-baseline" b400552324956d9c3a684c9231f60f70066e1629
           echo "PSC1_EXECUTABLE_BASELINE=$RUNNER_TEMP/psc1-executable-baseline/psc1" >> "$GITHUB_ENV"
       - name: Audit real source ownership and preserved bodies

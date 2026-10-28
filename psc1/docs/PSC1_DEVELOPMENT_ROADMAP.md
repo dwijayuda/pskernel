@@ -36,10 +36,16 @@ modules where appropriate. Move misplaced shared contracts down to avoid cycles;
 do not hide them in undeclared runtime loads. Preserve qualified .13 until the
 production graph passes its own finite gates.
 
-This is a documentation/architecture decision. Implementation has not resumed.
-The plan's M0-M5 queue covers source/API ownership, genuine generation, complete
-compiler execution, umbrella/CLI integration and final reproduction/self-hosting
-qualification. Existing pilot tests/evidence remain; expanding experimental pilot
+Implementation has resumed in PR #205. The pure backend/source ownership boundary
+passed focused Linux runs 40658954932 and 40659282400; this does not qualify a
+complete modular compiler. The production builder now implements complete capture,
+strict transforms, external Lean admission, transitive initializer planning,
+source-owned JS/TS package files and finite artifact contracts. Complete graph,
+compiler execution and npm consumer qualification are in progress.
+The dependency-ordered remaining queue is: finish M2 graph/type/integrity gates;
+finish M3 application/backend parity; implement M4 root-only checked umbrella,
+thin CLI/watch and coherent publication; then M5 portable graph reproduction and
+new modular G1/G2/G3/fixed points. The .13 public API remains the default meanwhile. Existing pilot tests/evidence remain; expanding experimental pilot
 profiles is not a prerequisite. The stopped PR #203/prototype branches are
 preserved, not promoted.
 

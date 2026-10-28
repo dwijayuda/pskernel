@@ -1,7 +1,9 @@
 # Fully modular executable compiler plan
 
 Decision date: 2026-10-28 (Asia/Jakarta).
-Status: **planned; not implemented or qualified by this document**.
+Status: **implementation in progress in PR #205; production promotion remains unqualified**.
+The [machine-readable contract](../../EXECUTABLE_PACKAGE_CONTRACT.json) and
+[work state](../../AI_WORK_STATE.md) record exact implemented/tested/pending scope.
 
 Keep `proofscript` as the installation umbrella and `psc` as its thin CLI command.
 Gradually make executable packages follow their existing source responsibilities.

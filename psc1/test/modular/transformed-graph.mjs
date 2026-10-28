@@ -52,13 +52,31 @@ try{
    runtimeEdges:edges.map(e=>[...e].sort((a,b)=>a-b)),recursiveGroups:groups.filter(g=>g.length>1).map(g=>g.map(n=>n===0?'$runtime':sources[n-1].module)),
    maximumRecursiveGroup:Math.max(...groups.map(g=>g.length))};
  }
+ const packageOwner=row=>{
+  const relative=path.relative(process.cwd(),path.resolve(row.path)).replaceAll(path.sep,'/');
+  const match=relative.match(/^packages\/([^/]+)\/src\//);assert.ok(match,'canonical package owner:'+relative);
+  if(match[1]==='compiler-unified')return '@proofscript/bootstrap';
+  return JSON.parse(fs.readFileSync(path.join('packages',match[1],'package.json'))).name;
+ };
+ const packageNames=['@proofscript/backend-common',...rows.map(packageOwner)];
+ const packageGraph={};
+ for(const [stage,sourceGraph]of Object.entries(reports)){
+  const names=[...new Set(packageNames)],edges=new Map(names.map(n=>[n,new Set()]));
+  sourceGraph.runtimeEdges.forEach((refs,i)=>refs.forEach(j=>{if(packageNames[i]!==packageNames[j])edges.get(packageNames[i]).add(packageNames[j]);}));
+  const reach=n=>{const seen=new Set([n]),todo=[n];while(todo.length)for(const d of edges.get(todo.pop()))if(!seen.has(d)){seen.add(d);todo.push(d);}return seen;};
+  const reachable=new Map(names.map(n=>[n,reach(n)])),seen=new Set(),groups=[];
+  for(const n of names)if(!seen.has(n)){const g=names.filter(m=>reachable.get(n).has(m)&&reachable.get(m).has(n));g.forEach(x=>seen.add(x));groups.push(g);}
+  packageGraph[stage]={edges:Object.fromEntries([...edges].map(([n,e])=>[n,[...e].sort()])),recursiveGroups:groups.filter(g=>g.length>1),
+   valueCounts:Object.fromEntries(names.map(n=>[n,sourceGraph.ownerValueCounts.reduce((total,c,i)=>total+(packageNames[i]===n?c:0),0)]))};
+ }
+ console.log('PSC1_COMPILER_PACKAGE_GRAPH '+JSON.stringify(packageGraph));
  const identities=Object.fromEntries(['original-ir.json','specialized-ir.json','fused-ir.json','admissions.json','native-graph.json'].map(file=>{
   const bytes=fs.readFileSync(path.join(root,file));assert.ok(bytes.length<=33554432);return[file,{bytes:bytes.length,sha256:sha256(bytes)}];}));
  verify();assert.equal(fs.readFileSync(input,'utf8'),request);
  rows.forEach(row=>assert.equal(fs.readFileSync(row.path,'utf8'),row.text));
  const report={schema:'psc1-transformed-compiler-graph-measurement/1',testedCommit:process.env.GITHUB_SHA,
   sourceClosureDigest:digest,sourceModules:sources.length,sourceBytes:Buffer.byteLength(JSON.stringify(sources)),entry,
-  assurance:'ordinary-checked',receipt,execution,resources,identities,reports,
+  assurance:'ordinary-checked',receipt,execution,resources,identities,reports,packageGraph,sourcePackages:packageNames,
   specializationOrigins:native.specializationOrigins,workerOrigins:native.workerOrigins,
   scope:'production transformed graph measurement with Core admission; no modular compiler emission or self-hosting claim'};
  fs.writeFileSync(path.join(root,'measurement.json'),JSON.stringify(report,null,2)+'\n');

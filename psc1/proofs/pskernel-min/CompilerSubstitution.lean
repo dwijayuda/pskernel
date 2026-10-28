@@ -6,35 +6,58 @@ import CompilerCaller
 namespace Ps.MinKernel.CompilerSubstitution
 
 inductive Lift (amount : Nat) : Nat → PsExpr → PsExpr → Prop where
-  | below (h : index < cutoff) : Lift amount cutoff (.bvar index) (.bvar index)
-  | above (h : cutoff ≤ index) : Lift amount cutoff (.bvar index) (.bvar (index + amount))
-  | fvar : Lift amount cutoff (.fvar id) (.fvar id)
-  | mvar : Lift amount cutoff (.mvar id) (.mvar id)
-  | sortE : Lift amount cutoff (.sortE level) (.sortE level)
-  | constE : Lift amount cutoff (.constE name levels) (.constE name levels)
-  | lit : Lift amount cutoff (.lit value) (.lit value)
-  | app (hfn : Lift amount cutoff fn fn') (harg : Lift amount cutoff arg arg') : Lift amount cutoff (.app fn arg) (.app fn' arg')
-  | lam (htype : Lift amount cutoff type type') (hbody : Lift amount (Nat.succ cutoff) body body') : Lift amount cutoff (.lam name type body binder) (.lam name type' body' binder)
-  | forallE (htype : Lift amount cutoff type type') (hbody : Lift amount (Nat.succ cutoff) body body') : Lift amount cutoff (.forallE name type body binder) (.forallE name type' body' binder)
-  | letE (htype : Lift amount cutoff type type') (hvalue : Lift amount cutoff value value') (hbody : Lift amount (Nat.succ cutoff) body body') : Lift amount cutoff (.letE name type value body) (.letE name type' value' body')
-  | proj (hvalue : Lift amount cutoff value value') : Lift amount cutoff (.proj name index value) (.proj name index value')
+  | below {index cutoff : Nat} (h : index < cutoff) :
+      Lift amount cutoff (.bvar index) (.bvar index)
+  | above {index cutoff : Nat} (h : cutoff ≤ index) :
+      Lift amount cutoff (.bvar index) (.bvar (Nat.add index amount))
+  | fvar {cutoff identifier : Nat} :
+      Lift amount cutoff (.fvar identifier) (.fvar identifier)
+  | mvar {cutoff identifier : Nat} :
+      Lift amount cutoff (.mvar identifier) (.mvar identifier)
+  | sortE {cutoff : Nat} {level : PsLevel} :
+      Lift amount cutoff (.sortE level) (.sortE level)
+  | constE {cutoff : Nat} {name : PsName} {levels : List PsLevel} :
+      Lift amount cutoff (.constE name levels) (.constE name levels)
+  | lit {cutoff : Nat} {value : PsLiteral} :
+      Lift amount cutoff (.lit value) (.lit value)
+  | app {cutoff : Nat} {fn fn' arg arg' : PsExpr} (hfn : Lift amount cutoff fn fn') (harg : Lift amount cutoff arg arg') :
+      Lift amount cutoff (.app fn arg) (.app fn' arg')
+  | lam {cutoff : Nat} {name : PsName} {type type' body body' : PsExpr} {binder : PsBinderInfo} (htype : Lift amount cutoff type type') (hbody : Lift amount (Nat.succ cutoff) body body') :
+      Lift amount cutoff (.lam name type body binder) (.lam name type' body' binder)
+  | forallE {cutoff : Nat} {name : PsName} {type type' body body' : PsExpr} {binder : PsBinderInfo} (htype : Lift amount cutoff type type') (hbody : Lift amount (Nat.succ cutoff) body body') :
+      Lift amount cutoff (.forallE name type body binder) (.forallE name type' body' binder)
+  | letE {cutoff : Nat} {name : PsName} {type type' value value' body body' : PsExpr} (htype : Lift amount cutoff type type') (hvalue : Lift amount cutoff value value') (hbody : Lift amount (Nat.succ cutoff) body body') :
+      Lift amount cutoff (.letE name type value body) (.letE name type' value' body')
+  | proj {cutoff : Nat} {name : PsName} {index : Nat} {value value' : PsExpr} (hvalue : Lift amount cutoff value value') :
+      Lift amount cutoff (.proj name index value) (.proj name index value')
 
 inductive Substitute (replacement : PsExpr) : Nat → PsExpr → PsExpr → Prop where
-  | below (h : index < depth) : Substitute replacement depth (.bvar index) (.bvar index)
-  | hit (lift : Lift depth 0 replacement result) :
+  | below {index depth : Nat} (h : index < depth) :
+      Substitute replacement depth (.bvar index) (.bvar index)
+  | hit {depth : Nat} {result : PsExpr} (lift : Lift depth 0 replacement result) :
       Substitute replacement depth (.bvar depth) result
-  | above (h : depth < index) :
-      Substitute replacement depth (.bvar index) (.bvar (index - 1))
-  | fvar : Substitute replacement depth (.fvar id) (.fvar id)
-  | mvar : Substitute replacement depth (.mvar id) (.mvar id)
-  | sortE : Substitute replacement depth (.sortE level) (.sortE level)
-  | constE : Substitute replacement depth (.constE name levels) (.constE name levels)
-  | lit : Substitute replacement depth (.lit value) (.lit value)
-  | app (hfn : Substitute replacement depth fn fn') (harg : Substitute replacement depth arg arg') : Substitute replacement depth (.app fn arg) (.app fn' arg')
-  | lam (htype : Substitute replacement depth type type') (hbody : Substitute replacement (Nat.succ depth) body body') : Substitute replacement depth (.lam name type body binder) (.lam name type' body' binder)
-  | forallE (htype : Substitute replacement depth type type') (hbody : Substitute replacement (Nat.succ depth) body body') : Substitute replacement depth (.forallE name type body binder) (.forallE name type' body' binder)
-  | letE (htype : Substitute replacement depth type type') (hvalue : Substitute replacement depth value value') (hbody : Substitute replacement (Nat.succ depth) body body') : Substitute replacement depth (.letE name type value body) (.letE name type' value' body')
-  | proj (hvalue : Substitute replacement depth value value') : Substitute replacement depth (.proj name index value) (.proj name index value')
+  | above {index depth : Nat} (h : depth < index) :
+      Substitute replacement depth (.bvar index) (.bvar (Nat.sub index 1))
+  | fvar {depth identifier : Nat} :
+      Substitute replacement depth (.fvar identifier) (.fvar identifier)
+  | mvar {depth identifier : Nat} :
+      Substitute replacement depth (.mvar identifier) (.mvar identifier)
+  | sortE {depth : Nat} {level : PsLevel} :
+      Substitute replacement depth (.sortE level) (.sortE level)
+  | constE {depth : Nat} {name : PsName} {levels : List PsLevel} :
+      Substitute replacement depth (.constE name levels) (.constE name levels)
+  | lit {depth : Nat} {value : PsLiteral} :
+      Substitute replacement depth (.lit value) (.lit value)
+  | app {depth : Nat} {fn fn' arg arg' : PsExpr} (hfn : Substitute replacement depth fn fn') (harg : Substitute replacement depth arg arg') :
+      Substitute replacement depth (.app fn arg) (.app fn' arg')
+  | lam {depth : Nat} {name : PsName} {type type' body body' : PsExpr} {binder : PsBinderInfo} (htype : Substitute replacement depth type type') (hbody : Substitute replacement (Nat.succ depth) body body') :
+      Substitute replacement depth (.lam name type body binder) (.lam name type' body' binder)
+  | forallE {depth : Nat} {name : PsName} {type type' body body' : PsExpr} {binder : PsBinderInfo} (htype : Substitute replacement depth type type') (hbody : Substitute replacement (Nat.succ depth) body body') :
+      Substitute replacement depth (.forallE name type body binder) (.forallE name type' body' binder)
+  | letE {depth : Nat} {name : PsName} {type type' value value' body body' : PsExpr} (htype : Substitute replacement depth type type') (hvalue : Substitute replacement depth value value') (hbody : Substitute replacement (Nat.succ depth) body body') :
+      Substitute replacement depth (.letE name type value body) (.letE name type' value' body')
+  | proj {depth : Nat} {name : PsName} {index : Nat} {value value' : PsExpr} (hvalue : Substitute replacement depth value value') :
+      Substitute replacement depth (.proj name index value) (.proj name index value')
 
 theorem lift_constructive (expression : PsExpr) (amount cutoff : Nat) :
     Lift amount cutoff expression (psExprLiftBVarsWorker amount expression cutoff) := by
@@ -42,9 +65,9 @@ theorem lift_constructive (expression : PsExpr) (amount cutoff : Nat) :
   | bvar index =>
       by_cases h : cutoff ≤ index
       · have hb : Nat.ble cutoff index = true := by simpa only [Nat.ble_eq] using h
-        simpa only [psExprLiftBVarsWorker, hb, if_true] using (Lift.above h : Lift amount cutoff (.bvar index) _)
+        simpa only [psExprLiftBVarsWorker, hb, ite_true] using (Lift.above h : Lift amount cutoff (.bvar index) _)
       · have hb : ¬ Nat.ble cutoff index = true := by simpa only [Nat.ble_eq] using h
-        simpa only [psExprLiftBVarsWorker, if_neg hb] using
+        simpa only [psExprLiftBVarsWorker, ite_eq_right hb] using
           (Lift.below (Nat.lt_of_not_ge h) : Lift amount cutoff (.bvar index) _)
   | fvar id =>
       exact .fvar
@@ -70,13 +93,13 @@ theorem lift_constructive (expression : PsExpr) (amount cutoff : Nat) :
 theorem lift_correct (h : Lift amount cutoff expression result) :
     psExprLiftBVarsWorker amount expression cutoff = result := by
   induction h with
-  | below h =>
-      have hb : ¬ Nat.ble _ _ = true := by
+  | @below index cutoff h =>
+      have hb : ¬ Nat.ble cutoff index = true := by
         simpa only [Nat.ble_eq] using Nat.not_le_of_gt h
-      simp only [psExprLiftBVarsWorker, if_neg hb]
-  | above h =>
-      have hb : Nat.ble _ _ = true := by simpa only [Nat.ble_eq] using h
-      simp only [psExprLiftBVarsWorker, hb, if_true]
+      simp only [psExprLiftBVarsWorker, ite_eq_right hb]
+  | @above index cutoff h =>
+      have hb : Nat.ble cutoff index = true := by simpa only [Nat.ble_eq] using h
+      simp only [psExprLiftBVarsWorker, hb, ite_true]
   | fvar => rfl
   | mvar => rfl
   | sortE => rfl
@@ -107,19 +130,20 @@ theorem substitution_constructive (expression replacement : PsExpr) (depth : Nat
   | bvar index =>
       by_cases he : index = depth
       · subst index
-        simpa only [psExprInstantiateAtWorker, Nat.beq_self_eq_true, if_true,
+        have heq : Nat.beq depth depth = true := by simpa only [Nat.beq_eq] using (Eq.refl depth)
+        simpa only [psExprInstantiateAtWorker, heq, ite_true,
           psExprLiftBVars] using
           (Substitute.hit (lift_constructive replacement depth 0) :
             Substitute replacement depth (.bvar depth) _)
       · have he' : ¬ Nat.beq index depth = true := by simpa only [Nat.beq_eq] using he
         by_cases hg : depth < index
         · have hg' : Nat.blt depth index = true := by simpa only [Nat.blt_eq] using hg
-          simpa only [psExprInstantiateAtWorker, if_neg he', hg', if_true] using
+          simpa only [psExprInstantiateAtWorker, ite_eq_right he', hg', ite_true] using
             (Substitute.above hg : Substitute replacement depth (.bvar index) _)
         · have hg' : ¬ Nat.blt depth index = true := by simpa only [Nat.blt_eq] using hg
           have hl : index < depth :=
             Nat.lt_of_le_of_ne (Nat.le_of_not_gt hg) he
-          simpa only [psExprInstantiateAtWorker, if_neg he', if_neg hg'] using
+          simpa only [psExprInstantiateAtWorker, ite_eq_right he', ite_eq_right hg'] using
             (Substitute.below hl : Substitute replacement depth (.bvar index) _)
   | fvar id =>
       exact .fvar
@@ -145,17 +169,18 @@ theorem substitution_constructive (expression replacement : PsExpr) (depth : Nat
 theorem substitution_correct (h : Substitute replacement depth expression result) :
     psExprInstantiateAtWorker replacement expression depth = result := by
   induction h with
-  | below h =>
-      have he : ¬ Nat.beq _ _ = true := by simpa only [Nat.beq_eq] using Nat.ne_of_lt h
-      have hg : ¬ Nat.blt _ _ = true := by simpa only [Nat.blt_eq] using Nat.not_lt_of_ge (Nat.le_of_lt h)
-      simp only [psExprInstantiateAtWorker, if_neg he, if_neg hg]
-  | hit lifted =>
-      simpa only [psExprInstantiateAtWorker, Nat.beq_self_eq_true, if_true,
+  | @below index depth h =>
+      have he : ¬ Nat.beq index depth = true := by simpa only [Nat.beq_eq] using Nat.ne_of_lt h
+      have hg : ¬ Nat.blt depth index = true := by simpa only [Nat.blt_eq] using Nat.not_lt_of_ge (Nat.le_of_lt h)
+      simp only [psExprInstantiateAtWorker, ite_eq_right he, ite_eq_right hg]
+  | @hit depth result lifted =>
+      have heq : Nat.beq depth depth = true := by simpa only [Nat.beq_eq] using (Eq.refl depth)
+      simpa only [psExprInstantiateAtWorker, heq, ite_true,
         psExprLiftBVars] using lift_correct lifted
-  | above h =>
-      have he : ¬ Nat.beq _ _ = true := by simpa only [Nat.beq_eq] using (Nat.ne_of_gt h)
-      have hg : Nat.blt _ _ = true := by simpa only [Nat.blt_eq] using h
-      simp only [psExprInstantiateAtWorker, if_neg he, hg, if_true]
+  | @above index depth h =>
+      have he : ¬ Nat.beq index depth = true := by simpa only [Nat.beq_eq] using (Nat.ne_of_gt h)
+      have hg : Nat.blt depth index = true := by simpa only [Nat.blt_eq] using h
+      simp only [psExprInstantiateAtWorker, ite_eq_right he, hg, ite_true]
   | fvar => rfl
   | mvar => rfl
   | sortE => rfl

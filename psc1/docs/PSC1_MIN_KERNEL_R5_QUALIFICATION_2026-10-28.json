@@ -1,0 +1,3423 @@
+{
+  "schema": "psc1-min-kernel-r5-qualification/1",
+  "status": "qualified-scoped-compiler-stage-batch",
+  "dateLocal": "2026-10-28",
+  "timezone": "Asia/Jakarta",
+  "continuationSetting": "User-confirmed GPT-6.1 Sol / High",
+  "repository": "dwijayuda/pskernel",
+  "branch": "research/psc1-minkernel-consistency-selfhost-20261027",
+  "pullRequest": 194,
+  "sourceCommit": "f58a1d8f98d1d438a9697371466e07d1416beec4",
+  "sourceTree": "8e7685693165f6e443979052764373e3fbcadea2",
+  "immutableBase": "94e0c13f6a4b434f73c859cc0c716cb6fb8d1340",
+  "executionBoundary": "All project proofs, builds, compiler execution, tests and measurements ran on GitHub Actions Linux. Local use was text drafting and read-only artifact inspection.",
+  "qualificationScope": "Actual compiler-stage capture wrapping/currying and selected pure binary lowering proofs; exact opaque token construction; finite emitted/native ABI and connected-checker admission evidence.",
+  "notQualified": [
+    "whole frontend/compiler/erasure/emitter/JavaScript preservation",
+    "character laws for opaque bootstrap String.Internal externs and numeral rendering",
+    "upstream capture-name freshness and recursive erasure composition",
+    "general closures/calls/regular-value/generator scheduler semantic preservation",
+    "full Lean conformance",
+    "full compiler minimal admission",
+    "min G1/G2/G3",
+    "production min/dual",
+    "release assurance"
+  ],
+  "proof": {
+    "newTheoremCount": 21,
+    "axiomFree": 5,
+    "propextOnly": 16,
+    "policy": "No axioms or exactly propext; no sorryAx, Classical.choice, Quot.sound; no new model axioms.",
+    "newReports": [
+      {
+        "name": "Ps.MinKernel.CompilerPreservation.wrap_preserves",
+        "report": "'Ps.MinKernel.CompilerPreservation.wrap_preserves' depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CompilerPreservation.wrap_reflects",
+        "report": "'Ps.MinKernel.CompilerPreservation.wrap_reflects' depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CompilerPreservation.wrap_iff",
+        "report": "'Ps.MinKernel.CompilerPreservation.wrap_iff' depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CompilerPreservation.two_captures_order",
+        "report": "'Ps.MinKernel.CompilerPreservation.two_captures_order' does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.CompilerPreservation.shadowing",
+        "report": "'Ps.MinKernel.CompilerPreservation.shadowing' depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CompilerPreservation.curry_iff",
+        "report": "'Ps.MinKernel.CompilerPreservation.curry_iff' depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CompilerPreservation.curry_result_type_nil",
+        "report": "'Ps.MinKernel.CompilerPreservation.curry_result_type_nil' does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.CompilerPreservation.curry_result_type_cons",
+        "report": "'Ps.MinKernel.CompilerPreservation.curry_result_type_cons' does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.CompilerPreservation.wrap_invocation_preserves",
+        "report": "'Ps.MinKernel.CompilerPreservation.wrap_invocation_preserves' depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CompilerPreservation.capture_curry_preservation",
+        "report": "'Ps.MinKernel.CompilerPreservation.capture_curry_preservation' depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CompilerPreservation.mapped_binary",
+        "report": "'Ps.MinKernel.CompilerPreservation.mapped_binary' depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CompilerPreservation.erase_binary",
+        "report": "'Ps.MinKernel.CompilerPreservation.erase_binary' depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CompilerPreservation.erase_binary_empty_refuses",
+        "report": "'Ps.MinKernel.CompilerPreservation.erase_binary_empty_refuses' does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.CompilerPreservation.erase_binary_overapplied_refuses",
+        "report": "'Ps.MinKernel.CompilerPreservation.erase_binary_overapplied_refuses' does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.CompilerPreservation.primitive_stage_preserves",
+        "report": "'Ps.MinKernel.CompilerPreservation.primitive_stage_preserves' depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CompilerPreservation.emit_binary_template",
+        "report": "'Ps.MinKernel.CompilerPreservation.emit_binary_template' depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CompilerPreservation.emit_binary_empty_refuses",
+        "report": "'Ps.MinKernel.CompilerPreservation.emit_binary_empty_refuses' depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CompilerPreservation.emit_binary_overapplied_refuses",
+        "report": "'Ps.MinKernel.CompilerPreservation.emit_binary_overapplied_refuses' depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CompilerPreservation.emit_nat_abi",
+        "report": "'Ps.MinKernel.CompilerPreservation.emit_nat_abi' depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CompilerPreservation.emit_bool_abi",
+        "report": "'Ps.MinKernel.CompilerPreservation.emit_bool_abi' depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CompilerPreservation.emit_unit_abi",
+        "report": "'Ps.MinKernel.CompilerPreservation.emit_unit_abi' depends on axioms: [propext]"
+      }
+    ],
+    "priorTrustReportCount": 204,
+    "priorR4Reports": {
+      "count": 142,
+      "axiomFree": 17,
+      "propextOnly": 125
+    },
+    "proofBoundary": "Mathematical scalar IR semantics with explicit recursive operand premises. Opaque token composition is syntactic; no ECMAScript semantics theorem.",
+    "runtimeImportFence": "Proof-only main Lake roots CompilerPreservation and CompilerPreservationTrust; no runtime or compiler import edge to proofs.",
+    "priorReports": [
+      {
+        "name": "Ps.MinKernel.RegularNames.constructor_injective",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.RegularNames.recursor_injective",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.RegularNames.generated_root_disjoint",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularNames.slot_name_stable",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularNames.slot_name_injective",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularNames.generated_child_disjoint",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.Proofs.tyEq_sound",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.Proofs.inferModel",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.Proofs.checkDeclarationsModel",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.Proofs.minKernel_hasModel",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.Proofs.minKernel_consistent",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularModel.join_split",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularModel.fold_construct",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularModel.constructorValue",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularModel.recursorValue",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularModel.signatures",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreScope.instantiate_lift",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreScope.constant_motive_body",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreScope.constant_motive_argument_irrelevant",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.OperationalProjection.projectionModel",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.OperationalProjection.projection_iota",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.OperationalProjection.actual_projection_iota",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.BinderLowering.lower_sound",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.BinderLowering.lower_instantiate",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.BinderLowering.lower_motive_body",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularProofs.typeEq_sound",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularProofs.inferModel",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularProofs.regular_hasModel",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularProofs.regular_consistent",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularValidation.typeValid_sound",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularValidation.registryValid_sound",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularValidation.registry_hasModel",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularSource.source_instance_checked",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularSource.checked_source_semantics",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularSource.source_iota",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularSource.source_motive_instantiation",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularSource.actual_core_instance_model",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularSource.checked_instance_core_model",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.OperationalFoundation.derived_natPred",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.OperationalFoundation.derived_boolNot",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.OperationalFoundation.derived_boolBeq",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.OperationalFoundation.primitiveType_guards",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.OperationalFoundation.primitiveModel",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.OperationalFoundation.nat_iota_succ",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.OperationalFoundation.list_iota_cons",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.OperationalFoundation.option_iota_some",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.OperationalFoundation.boolEqIte_exact",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.OperationalFoundation.boolEqIte_true",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.OperationalFoundation.boolEqIte_false",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.OperationalSource.actual_ite_declaration",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.OperationalSource.actual_decision_recursor",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.OperationalSource.decisionBody_eq_ite",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.OperationalSource.source_boolEqIte",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressAmbient.lift_zero",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressAmbient.lift_succ",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressAmbient.lift_input",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressAmbient.denote_prefix_lift",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressAmbient.denote_self",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressAmbient.denote_ground",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressAmbient.denote_fields",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressAmbient.denote_branch",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressAmbient.denote_branches",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressAmbient.ambientValue",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressAmbient.recursorModel",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.OperationalProofs.inferModel",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.OperationalProofs.operational_hasModel",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.OperationalProofs.operational_hasBodyHistory",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.OperationalProofs.operational_consistent",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.OperationalProofs.latest_definition_value",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.OperationalProofs.previous_definition_value",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.OperationalProofs.checked_definition_unfold",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.OperationalProofs.conversion_model",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreIngress.lengthAtMost_sound",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "psMinCoreEncode",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.CoreIngress.member_iff",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreIngress.byteEq_sound",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreIngress.nameEq_sound",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreIngress.exprEq_sound",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreIngress.decode_success_is_well_formed",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreIngress.resolve_preserves_identity",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreIngress.fresh_no_shadowing",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreIngress.translate_environment_preserves_identity",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreIngress.canonical_admission_has_model",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressOperationalModel.evaluate_checked",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressOperationalModel.definitions_history",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressOperationalModel.environment_history",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressOperationalModel.environment_has_model",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressOperationalModel.environment_consistent",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressModel.decode_preserves_source",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressModel.checked_entries_has_normalized_model",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressModel.regular_byte_admission_has_normalized_model",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressModel.regular_no_normalized_empty_constant",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressModel.actual_constructor_signatures",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressModel.group_slot_identity",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressWire.digit_bounds",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressWire.timesTen_value",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressWire.readTail_value",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressWire.readNumber_value",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressWire.wire_append",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressWire.literal_prefix",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressWire.recognizes_number",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressWire.recognizes_then",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreTranslation.type_translation",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreTranslation.type_closed",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreTranslation.primitive_translation",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreTranslation.typed_primitive_translation",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreTranslation.conditional_exact",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreTranslation.term_translation",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreTranslation.environment_translation",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressTranslation.all_constructor_fields_translation",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressTranslation.constructor_count_exact",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressTranslation.group_translation",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressTranslation.ordered_member_bound",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressTranslation.ordered_member_spec",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressTranslation.build_plans_order",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressTranslation.actual_plans_order",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressTranslation.liftCode_zero",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressTranslation.liftCode_one",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressTranslation.liftCode_add",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressTranslation.lower_type_restores",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressTranslation.type_translation",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressTranslation.type_closed",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressTranslation.ground_field_translation",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressTranslation.field_translation",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressTranslation.constructor_fields_translation",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreSemantics.infer_evaluates",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreSemantics.primitive_semantics",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreSemantics.translation_preserves_semantics",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreSemantics.checked_source_semantics",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreSemantics.checked_history_preserves_source",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreSemantics.canonical_source_model",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreSemantics.canonical_no_empty_constant",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreSemantics.canonical_no_false_declaration",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressEncoding.quotedNumber_recognizes",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressEncoding.text_recognizes",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressEncoding.name_recognizes",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressEncoding.level_recognizes",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressEncoding.levelsTail_recognizes",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressEncoding.levels_recognizes",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressEncoding.binder_recognizes",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressEncoding.expr_recognizes",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressEncoding.definition_recognizes",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressEncoding.constructor_recognizes",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressEncoding.constructorsTail_recognizes",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressEncoding.constructors_recognizes",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressEncoding.group_recognizes",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressEncoding.entry_recognizes",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressEncoding.entriesTail_recognizes",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressEncoding.entries_recognizes",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressEncoding.packet_recognizes",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressEncoding.decode_has_wire_derivation",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressNames.constructor_reservations",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressNames.reservations_unique",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressNames.actual_group_step",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressNames.group_step_unique",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressNames.build_plans_history",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressNames.history_unique",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressNames.actual_plans_history",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressNames.actual_plans_no_shadowing",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreEncoding.append_assoc_checked",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.CoreEncoding.append_nil_checked",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.CoreEncoding.nil_append_checked",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.CoreEncoding.append_eq",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.CoreEncoding.join_tail_eq",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.CoreEncoding.object_eq",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.CoreEncoding.array_eq",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.CoreEncoding.quote_eq",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreEncoding.commaBytes",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.CoreEncoding.objectBytes",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.CoreEncoding.increment_value",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreEncoding.increment_nonzero",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreEncoding.digits_canonical",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreEncoding.decimal_value",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreEncoding.decimal_symbols",
+        "report": "does not depend on any axioms"
+      },
+      {
+        "name": "Ps.MinKernel.CoreEncoding.name_wire",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreEncoding.number_wire",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreEncoding.safe_text",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreEncoding.expression_wire",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreEncoding.decode_success_has_wire_derivation",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreEncoding.byte_admission_source_model",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.CoreEncoding.byte_admission_consistent",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressTerms.recursor_translation",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressTerms.constructor_index_identity",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressTerms.constructor_binding",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressTerms.recursor_binding",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressTerms.motive_translation",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressTerms.primitive_translation",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressTerms.typed_primitive_translation",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressSource.environment_translation",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressSource.projection_owner_image",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressSource.term_translation",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressSemantics.translation_preserves_semantics",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressSemantics.checked_source_semantics",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressSemantics.normalized_history_head",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressSemantics.history_preserves_source",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressSemantics.checked_entries_source_image",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressSemantics.checked_source_model",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressSemantics.byte_admission_source_model",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressSemantics.false_type_exact",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressSemantics.source_history_no_false",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressSemantics.byte_admission_consistent",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressSemantics.primitive_semantics",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressSemantics.recursor_semantics",
+        "report": "depends on axioms: [propext]"
+      },
+      {
+        "name": "Ps.MinKernel.RegularIngressSemantics.projection_type_domain",
+        "report": "depends on axioms: [propext]"
+      }
+    ],
+    "priorAxiomFree": 33,
+    "priorPropextOnly": 171,
+    "allTrustReports": 225
+  },
+  "sourceChanges": {
+    "sharedRuntimeCompilerHelper": "psEraseBinaryIntrinsicApplication in Ps.Erasure.Expr",
+    "kind": "Extract existing local binary lowering and route actual recognizer through the shared pure helper",
+    "minimalKernelAcceptanceChanged": false,
+    "checkerRuntimeModulesAdded": 0,
+    "testOnlyModule": "Ps.MinKernel.Tests.CompilerScalar"
+  },
+  "runs": {
+    "focused": {
+      "id": 40557438637,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40557438637",
+      "sourceHead": "f58a1d8f98d1d438a9697371466e07d1416beec4",
+      "status": "completed",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 122377151932,
+          "name": "compiler-preservation",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122377152332,
+          "name": "proof",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122378533905,
+          "name": "portability-and-closure",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    "main": {
+      "id": 40557451248,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40557451248",
+      "sourceHead": "f58a1d8f98d1d438a9697371466e07d1416beec4",
+      "status": "completed",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 122377804661,
+          "name": "static",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122378447045,
+          "name": "focused / focused (core)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122378447113,
+          "name": "lossless / lossless",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122378447194,
+          "name": "source-bindings / trace",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122378447195,
+          "name": "focused / focused (applications)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122378447262,
+          "name": "focused / php-application",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122378447348,
+          "name": "native / native",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122378448964,
+          "name": "benchmark",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "id": 122380314180,
+          "name": "source-bindings / integration",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122383315556,
+          "name": "closures / selected-closure (semantic-compiler, checked)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122383315654,
+          "name": "g1 / host-session-boundary",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122383315700,
+          "name": "g1 / generated-js",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122383315745,
+          "name": "closures / selected-closure (directjs-compiler, ordinary-checked)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122383315954,
+          "name": "closures / selected-closure (rust-compiler, ordinary-checked)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122385846634,
+          "name": "full / linux-scoped",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122396946024,
+          "name": "gate",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "testedMerge": {
+        "sha": "85800efb9693944d8e3a32406ac3f8f0b90469eb",
+        "tree": "8e7685693165f6e443979052764373e3fbcadea2",
+        "parents": [
+          "94e0c13f6a4b434f73c859cc0c716cb6fb8d1340",
+          "f58a1d8f98d1d438a9697371466e07d1416beec4"
+        ],
+        "sameTreeAsSource": true
+      },
+      "benchmarkSelected": false
+    },
+    "installed": {
+      "id": 40557438460,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40557438460",
+      "sourceHead": "f58a1d8f98d1d438a9697371466e07d1416beec4",
+      "status": "completed",
+      "conclusion": "success",
+      "jobs": [
+        {
+          "id": 122377512189,
+          "name": "preflight",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122377910156,
+          "name": "installed",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "boundary": "Qualified Linux host layout and installed CLI, preserving frozen compiler/kernel/provider payloads; no current development compiler promotion, min generation, npm publication or release assurance."
+    }
+  },
+  "fixture": {
+    "externalImports": 0,
+    "structures": 1,
+    "structureNames": [
+      "Prod"
+    ],
+    "inductives": 3,
+    "inductiveNames": [
+      "List",
+      "Option",
+      "Except"
+    ],
+    "sourceDeclarations": 6,
+    "stageDeclarations": 4,
+    "sourceBytes": 669,
+    "sourceSha256": "c3e22e722b828427fd37eb747f1688074c4d5576e4a3073ab21b945728b06e51",
+    "originModules": 1,
+    "originBatches": 6,
+    "originMembers": 6,
+    "originalTransportBytes": 8834,
+    "originalTransportSha256": "30d8e992fc131dd8bc993967fa1b164b97af681467ac2df150b39fbb8c61893e",
+    "canonicalBytes": 8833,
+    "canonicalSha256": "3c8bf2db9edd59bc84a43caa4e857504607a8a8a5ad2f680d24ede347d09bcb7",
+    "canonicalAdmissionRecords": 6
+  },
+  "framing": {
+    "originalBytes": 8834,
+    "originalSha256": "30d8e992fc131dd8bc993967fa1b164b97af681467ac2df150b39fbb8c61893e",
+    "canonicalBytes": 8833,
+    "canonicalSha256": "3c8bf2db9edd59bc84a43caa4e857504607a8a8a5ad2f680d24ede347d09bcb7",
+    "singleTerminalLf": true,
+    "originalTransportRefusalStage": "Host public byte-factory ASCII preflight",
+    "originalTransportRefusalCode": "PSC1_MIN_CORE_ASCII_PROFILE",
+    "canonicalPublicAccepted": true,
+    "canonicalPublicCode": "PSC1_MIN_CORE_ACCEPTED"
+  },
+  "production": {
+    "default": "official Lean Wasm",
+    "min": "PSC1_MIN_CANONICAL_BRIDGE_UNPROVED",
+    "dual": "PSC1_MIN_CANONICAL_BRIDGE_UNPROVED",
+    "compilerMinCoverage": "0/124",
+    "practicalCoreMinCoverage": "0/37",
+    "minG1G2G3": "not qualified",
+    "merge": false,
+    "npmPublication": false
+  },
+  "bounds": {
+    "oldProofJobMinutes": 10,
+    "newCompilerPreservationJobMinutes": 10,
+    "portabilityJobMinutes": 20,
+    "v8OldSpaceMiB": 256,
+    "note": "Old-space ceiling is not a total RSS or complexity bound; no decoder/fuel/size guard widened."
+  },
+  "developmentHistory": [
+    {
+      "commit": "ea75838b2c1fbe55421a94de63fcacd60bcc3ec3",
+      "run": 40548894572,
+      "result": "failed",
+      "reason": "Invalid proof reduction across opaque bootstrap strings, match elaboration, and unregistered source fixture; no qualification"
+    },
+    {
+      "commit": "8fc23e47075ab9fe5ff3ad166c30968a14c1e564",
+      "run": 40550314414,
+      "result": "failed",
+      "reason": "One map/match simplification obligation remained; native harness variable shadowing failed; no qualification"
+    },
+    {
+      "commit": "8c19a653258a8d47147a0c64c435318369ab7770",
+      "run": 40551523505,
+      "result": "failed",
+      "reason": "All 21 theorem reports passed; source-module-package correctly refused R5.Scalar"
+    },
+    {
+      "commit": "69b88ea2b4e539451e9072a9e5278e215b50f2a6",
+      "run": 40552238264,
+      "result": "failed",
+      "reason": "Theorems/native source pass; strict TSC refused structural expression output used without its generator/module context"
+    },
+    {
+      "commit": "6e41958136598bad49d79a1ca810c453cb22fad0",
+      "run": 40552750781,
+      "result": "superseded",
+      "reason": "Standalone literal probes added; structural context error superseded by checked module emission"
+    },
+    {
+      "commit": "8af7a3244537d8bffd3c5136f880747df4610e11",
+      "run": 40554046229,
+      "result": "failed",
+      "reason": "Theorems/strict emitted ABI pass; R4B correctly refused source API terminal transport LF; canonical adapter now retains original refusal and exact LF removal"
+    },
+    {
+      "commit": "5ca58cf75dc1f0b5695f5351b4e06e41a1b45b99",
+      "run": 40555735453,
+      "result": "failed",
+      "reason": "Canonical packet accepted and original transport refused as intended; eager JSON.stringify of a success result containing BigInt threw in assertion diagnostics."
+    },
+    {
+      "commit": "f58a1d8f98d1d438a9697371466e07d1416beec4",
+      "result": "success",
+      "reason": "Assertion diagnostics use scalar status code; all admission/evidence rules preserved.",
+      "run": 40557438637
+    }
+  ],
+  "externalSpecifications": [
+    {
+      "url": "https://github.com/leanprover/lean4/blob/eb6cafb7290e8bd5f2937522d8d804f58f02bafc/src/Init/Data/String/Bootstrap.lean",
+      "role": "Pinned opaque extern declarations; no supplied character-law theorem"
+    },
+    {
+      "url": "https://tc39.es/ecma262/multipage/ecmascript-data-types-and-values.html",
+      "role": "External BigInt engine contract, not an imported proof"
+    },
+    {
+      "url": "https://tc39.es/ecma262/multipage/ecmascript-language-expressions.html#sec-binary-logical-operators-runtime-semantics-evaluation",
+      "role": "External short-circuit contract; finite operand observations kept distinct from preservation"
+    }
+  ],
+  "verifiedAtUTC": "2026-10-28 07:16:29 UTC",
+  "execution": {
+    "schema": "psc1-r5-compiler-preservation-execution/1",
+    "head": "f58a1d8f98d1d438a9697371466e07d1416beec4",
+    "platform": "linux",
+    "node": "v22.23.3",
+    "scalarProbes": 400,
+    "wholeSourceCalls": 294,
+    "literalAbiProbes": 3,
+    "checkedStructuralIrDeclarations": 4,
+    "captureProbe": true,
+    "combinedCaptureCurryProbe": true,
+    "curryProbes": 3,
+    "operandTraceProbes": 12,
+    "arityRefusals": 30,
+    "strictIrRefusals": 4,
+    "binaryStageRefusals": 30,
+    "recognizerRefusals": 30,
+    "recognizerCases": 10,
+    "official": {
+      "accepted": true,
+      "version": "4.35.0",
+      "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+    },
+    "originalTransportPacket": {
+      "bytes": 8834,
+      "sha256": "30d8e992fc131dd8bc993967fa1b164b97af681467ac2df150b39fbb8c61893e",
+      "officialAccepted": true,
+      "ownedRefused": true,
+      "code": "PSC1_MIN_CORE_ASCII_PROFILE",
+      "delegated": false
+    },
+    "ownedNewSourcePacket": {
+      "accepted": true,
+      "delegated": false,
+      "bytes": 8833,
+      "sha256": "3c8bf2db9edd59bc84a43caa4e857504607a8a8a5ad2f680d24ede347d09bcb7",
+      "officialAccepted": true,
+      "framing": "Exactly one terminal source-API transport LF removed; all other bytes preserved"
+    },
+    "policy": {
+      "sourceAccepted": true,
+      "targetAccepted": true,
+      "originalIrAccepted": true,
+      "providerChecked": false,
+      "strictSh1Qualified": false,
+      "semanticContractQualified": false,
+      "moduleCount": 1,
+      "originModuleCount": 1
+    },
+    "originalIrAbi": [
+      {
+        "name": "psR5Add",
+        "typeParameters": [],
+        "parameters": [
+          [
+            "a",
+            [
+              "primitive",
+              "nat"
+            ]
+          ],
+          [
+            "b",
+            [
+              "primitive",
+              "nat"
+            ]
+          ]
+        ],
+        "resultType": [
+          "primitive",
+          "nat"
+        ]
+      },
+      {
+        "name": "psR5Sub",
+        "typeParameters": [],
+        "parameters": [
+          [
+            "a",
+            [
+              "primitive",
+              "nat"
+            ]
+          ],
+          [
+            "b",
+            [
+              "primitive",
+              "nat"
+            ]
+          ]
+        ],
+        "resultType": [
+          "primitive",
+          "nat"
+        ]
+      },
+      {
+        "name": "psR5Choose",
+        "typeParameters": [],
+        "parameters": [
+          [
+            "flag",
+            [
+              "primitive",
+              "bool"
+            ]
+          ],
+          [
+            "a",
+            [
+              "primitive",
+              "nat"
+            ]
+          ],
+          [
+            "b",
+            [
+              "primitive",
+              "nat"
+            ]
+          ]
+        ],
+        "resultType": [
+          "primitive",
+          "nat"
+        ]
+      },
+      {
+        "name": "psR5Three",
+        "typeParameters": [],
+        "parameters": [
+          [
+            "a",
+            [
+              "primitive",
+              "nat"
+            ]
+          ],
+          [
+            "b",
+            [
+              "primitive",
+              "nat"
+            ]
+          ],
+          [
+            "c",
+            [
+              "primitive",
+              "nat"
+            ]
+          ]
+        ],
+        "resultType": [
+          "primitive",
+          "nat"
+        ]
+      },
+      {
+        "name": "psR5Capture",
+        "typeParameters": [],
+        "parameters": [
+          [
+            "a",
+            [
+              "primitive",
+              "nat"
+            ]
+          ],
+          [
+            "b",
+            [
+              "primitive",
+              "nat"
+            ]
+          ],
+          [
+            "c",
+            [
+              "primitive",
+              "nat"
+            ]
+          ]
+        ],
+        "resultType": [
+          "primitive",
+          "nat"
+        ]
+      },
+      {
+        "name": "psR5UseClosure",
+        "typeParameters": [],
+        "parameters": [
+          [
+            "seed",
+            [
+              "primitive",
+              "nat"
+            ]
+          ],
+          [
+            "value",
+            [
+              "primitive",
+              "nat"
+            ]
+          ]
+        ],
+        "resultType": [
+          "primitive",
+          "nat"
+        ]
+      }
+    ],
+    "files": [
+      {
+        "file": "direct.ts",
+        "bytes": 36851,
+        "sha256": "cea2e43412111da53b9cdc7524f6c44fff2dc46d598e49d124621dcc08cd1f53"
+      },
+      {
+        "file": "direct.js",
+        "bytes": 35095,
+        "sha256": "09f04008c681e0e9d13afc79cd32f9ea84873d09c08fb06fda1b10deb766554d"
+      },
+      {
+        "file": "stages.ts",
+        "bytes": 6951,
+        "sha256": "0c2d1d0febe799a3b7ccfd7755531c20cfe73b450019c05be2c1ad97cb5213cf"
+      },
+      {
+        "file": "stages.js",
+        "bytes": 5807,
+        "sha256": "c85033aec0f19d6a6a66d0eeee5eaecae40668402997d19b74dcf19b611bec76"
+      },
+      {
+        "file": "stages.ir.json",
+        "bytes": 1573,
+        "sha256": "52c5ab03230cd2958d4fe44caf22e12b29544d50ab1275ccba247c0102f0d2d2"
+      },
+      {
+        "file": "whole.ts",
+        "bytes": 8786,
+        "sha256": "1d003b89963b3488755b06fcda447a6b96247deb1ffb8cdac39f706c58dc64c0"
+      },
+      {
+        "file": "whole.js",
+        "bytes": 7244,
+        "sha256": "397167684134843ed25b431bc24a932fc720a86f4a157a90dee485b6ef980e02"
+      },
+      {
+        "file": "whole.admissions.json",
+        "bytes": 8834,
+        "sha256": "30d8e992fc131dd8bc993967fa1b164b97af681467ac2df150b39fbb8c61893e"
+      },
+      {
+        "file": "whole.canonical.admissions.json",
+        "bytes": 8833,
+        "sha256": "3c8bf2db9edd59bc84a43caa4e857504607a8a8a5ad2f680d24ede347d09bcb7"
+      },
+      {
+        "file": "byte-admission.json",
+        "bytes": 577,
+        "sha256": "3cb59165f381a4af58a05daee1f7381aca1129012a359b5af7381ccefa322029"
+      },
+      {
+        "file": "whole.ir.json",
+        "bytes": 2310,
+        "sha256": "4792127710b6dbf75ece834b538bf4293be33e56866e4d2d639243678c8996a3"
+      },
+      {
+        "file": "origins.json",
+        "bytes": 977,
+        "sha256": "951261aec328ef0000fca1f4d0572bed3749fa0be2266072ee48c8ca2f1540e8"
+      },
+      {
+        "file": "source.lean",
+        "bytes": 669,
+        "sha256": "c3e22e722b828427fd37eb747f1688074c4d5576e4a3073ab21b945728b06e51"
+      },
+      {
+        "file": "native.json",
+        "bytes": 81667,
+        "sha256": "c39f3cf19b9fbfbf5e7c874c36fd52c28b1b9aa7dc54610a709b10b2d87c51fc"
+      }
+    ],
+    "sourceFiles": [
+      {
+        "file": "packages/pskernel-min/src/Ps/MinKernel/Tests/CompilerScalar.lean",
+        "bytes": 669,
+        "sha256": "c3e22e722b828427fd37eb747f1688074c4d5576e4a3073ab21b945728b06e51"
+      },
+      {
+        "file": "proofs/pskernel-min/CompilerPreservation.lean",
+        "bytes": 13925,
+        "sha256": "9b896a44f85a372e81fc032a945ca944c9b318b3557d7b9bac1ebbafce951aea"
+      },
+      {
+        "file": "scripts/MinKernelCompilerPreservation.lean",
+        "bytes": 14583,
+        "sha256": "f20c7c7fde054679fcf1b77138196d52721ac32f4092a75713a948ac8633306d"
+      },
+      {
+        "file": "scripts/minkernel-compiler-preservation.mjs",
+        "bytes": 9936,
+        "sha256": "16ea1bbd234d3b4f4b611ddd2f26ccc5120615c80c40cb13bf02f9ed6f7d0370"
+      },
+      {
+        "file": "scripts/minkernel-compiler-preservation-guard.mjs",
+        "bytes": 1400,
+        "sha256": "082fdb97b09691298d465a58e726dcb8520d54562a79ce9190a2b6ca7ca9fc68"
+      },
+      {
+        "file": "proofs/pskernel-min/CompilerPreservationTrust.lean",
+        "bytes": 1525,
+        "sha256": "a0b9058732f547365259a23793b23c64ee861d611965aed0513e9b62c609263d"
+      },
+      {
+        "file": "packages/erasure/src/Ps/Erasure/Expr.lean",
+        "bytes": 146570,
+        "sha256": "b0f60d2e479cb2c96e5741be86477ae37745dafa98b5cdaa04e4b3d8a4c8128b"
+      },
+      {
+        "file": "packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+        "bytes": 41347,
+        "sha256": "219b52231d4024c93fc4adfc7bf6a0d8e136fbbcce681c5c14354397efd3461b"
+      },
+      {
+        "file": "packages/backend-ts/src/Ps/BackendTs/Type.lean",
+        "bytes": 4202,
+        "sha256": "c231a737470c0d6ef2451f642089e22cebea97da55527500beff82bb610f99cf"
+      },
+      {
+        "file": "packages/backend-ts/src/Ps/BackendTs/RuntimeSupport.lean",
+        "bytes": 6022,
+        "sha256": "9fe321d67fc9f0ee411b02881fc3523986c99d823cdc55dfd9b2ed1897aa3e50"
+      }
+    ],
+    "resourceUsage": {
+      "userCPUTime": 323137,
+      "systemCPUTime": 43747,
+      "maxRSS": 93904,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 14142,
+      "majorPageFault": 0,
+      "swappedOut": 0,
+      "fsRead": 0,
+      "fsWrite": 48,
+      "ipcSent": 0,
+      "ipcReceived": 0,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 220,
+      "involuntaryContextSwitches": 6
+    },
+    "boundary": "Actual sub-stage theorems, template correspondence and finite engine/ABI tests. No full compiler or ECMAScript preservation theorem; no production promotion."
+  },
+  "byteAdmission": {
+    "originalTransport": {
+      "accepted": false,
+      "code": "PSC1_MIN_CORE_ASCII_PROFILE",
+      "delegated": false,
+      "bytes": 8834,
+      "sha256": "30d8e992fc131dd8bc993967fa1b164b97af681467ac2df150b39fbb8c61893e"
+    },
+    "canonical": {
+      "accepted": true,
+      "code": "PSC1_MIN_CORE_ACCEPTED",
+      "delegated": false,
+      "bytes": 8833,
+      "sha256": "3c8bf2db9edd59bc84a43caa4e857504607a8a8a5ad2f680d24ede347d09bcb7"
+    },
+    "transform": "Remove exactly one terminal transport LF; preserve every preceding byte.",
+    "officialOriginal": true,
+    "officialCanonical": true
+  },
+  "installed": {
+    "package": {
+      "version": "0.1.0-psc1.9",
+      "tarball": "proofscript-0.1.0-psc1.9.tgz",
+      "sha256": "a94ab7f2a335187abf3bf8df8295e2e11977007c13498d4b99e1da392a566993",
+      "bytes": 3823974,
+      "preservedPayloadFiles": 120
+    },
+    "installed": {
+      "schema": "psc1-cli-installed/1",
+      "testedCommit": "f58a1d8f98d1d438a9697371466e07d1416beec4",
+      "status": "passed",
+      "rootSha256": "a94ab7f2a335187abf3bf8df8295e2e11977007c13498d4b99e1da392a566993",
+      "version": "0.1.0-psc1.9",
+      "sourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+      "cases": [
+        {
+          "scope": "local",
+          "grammar": "lean",
+          "independentlyChecked": true,
+          "initialValue": 42,
+          "editedValue": 43,
+          "illTypedReplacementPreservedPrior": true
+        },
+        {
+          "scope": "local",
+          "grammar": "ps",
+          "independentlyChecked": true,
+          "initialValue": 42,
+          "editedValue": 43,
+          "illTypedReplacementPreservedPrior": true
+        },
+        {
+          "scope": "global",
+          "grammar": "lean",
+          "independentlyChecked": true,
+          "initialValue": 42,
+          "editedValue": 43,
+          "illTypedReplacementPreservedPrior": true
+        },
+        {
+          "scope": "global",
+          "grammar": "ps",
+          "independentlyChecked": true,
+          "initialValue": 42,
+          "editedValue": 43,
+          "illTypedReplacementPreservedPrior": true
+        }
+      ],
+      "npmRunAndExec": true,
+      "multiModuleFileProject": true,
+      "allThreeAliasesLocalGlobal": true,
+      "optionalFileProjectEngines": [
+        "rust",
+        "wasm-core"
+      ],
+      "changedCliResourceRefused": true,
+      "sourceMetadataCannotSelectOutput": true,
+      "requests": [
+        {
+          "command": "node",
+          "args": [
+            "/opt/hostedtoolcache/node/22.23.3/x64/lib/node_modules/npm/bin/npm-cli.js",
+            "install",
+            "--offline",
+            "--registry",
+            "http://127.0.0.1:9",
+            "--ignore-scripts",
+            "--no-audit",
+            "--no-fund",
+            "--cache",
+            "/tmp/psc1-cli-installed-jvSNPZ/empty-cache",
+            "--prefix",
+            "/tmp/psc1-cli-installed-jvSNPZ/consumer with spaces",
+            "/home/runner/work/pskernel/pskernel/psc1/dist/slim-universal/tarballs/proofscript-0.1.0-psc1.9.tgz"
+          ],
+          "elapsedMs": 1089,
+          "exit": 0
+        },
+        {
+          "command": "node",
+          "args": [
+            "/opt/hostedtoolcache/node/22.23.3/x64/lib/node_modules/npm/bin/npm-cli.js",
+            "install",
+            "--offline",
+            "--registry",
+            "http://127.0.0.1:9",
+            "--ignore-scripts",
+            "--no-audit",
+            "--no-fund",
+            "--cache",
+            "/tmp/psc1-cli-installed-jvSNPZ/global-empty-cache",
+            "--global",
+            "--prefix",
+            "/tmp/psc1-cli-installed-jvSNPZ/global",
+            "/home/runner/work/pskernel/pskernel/psc1/dist/slim-universal/tarballs/proofscript-0.1.0-psc1.9.tgz"
+          ],
+          "elapsedMs": 1012,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "--help"
+          ],
+          "elapsedMs": 35,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "--version"
+          ],
+          "elapsedMs": 32,
+          "exit": 0
+        },
+        {
+          "command": "psc1",
+          "args": [
+            "--help"
+          ],
+          "elapsedMs": 33,
+          "exit": 0
+        },
+        {
+          "command": "psc1",
+          "args": [
+            "--version"
+          ],
+          "elapsedMs": 32,
+          "exit": 0
+        },
+        {
+          "command": "proofscript",
+          "args": [
+            "--help"
+          ],
+          "elapsedMs": 34,
+          "exit": 0
+        },
+        {
+          "command": "proofscript",
+          "args": [
+            "--version"
+          ],
+          "elapsedMs": 31,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "--identity"
+          ],
+          "elapsedMs": 147,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "init",
+            "--kind",
+            "lean"
+          ],
+          "elapsedMs": 31,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "--showConfig"
+          ],
+          "elapsedMs": 32,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "check"
+          ],
+          "elapsedMs": 2079,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "compile",
+            "-p",
+            ".",
+            "--engine=ts"
+          ],
+          "elapsedMs": 2034,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "build",
+            "-o",
+            "/tmp/psc1-cli-installed-jvSNPZ/consumer with spaces/local-lean/output with spaces",
+            "--publication-protocol=portable-file"
+          ],
+          "elapsedMs": 2541,
+          "exit": 0
+        },
+        {
+          "command": "node",
+          "args": [
+            "--input-type=module",
+            "-e",
+            "const m=await import(\"file:///tmp/psc1-cli-installed-jvSNPZ/consumer%20with%20spaces/local-lean/output%20with%20spaces/generations/5a438c0702d0f98d63e7ce9f4c92fce46cc201cb3cb58fa2d4246cd76a688c7d/target.mjs\");console.log(String(m.answer));"
+          ],
+          "elapsedMs": 25,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "build",
+            "-p",
+            "/tmp/psc1-cli-installed-jvSNPZ/consumer with spaces/local-lean",
+            "--out",
+            "/tmp/psc1-cli-installed-jvSNPZ/consumer with spaces/local-lean/output with spaces",
+            "--publication-protocol",
+            "portable-file"
+          ],
+          "elapsedMs": 2492,
+          "exit": 0
+        },
+        {
+          "command": "node",
+          "args": [
+            "--input-type=module",
+            "-e",
+            "const m=await import(\"file:///tmp/psc1-cli-installed-jvSNPZ/consumer%20with%20spaces/local-lean/output%20with%20spaces/generations/5f4c05264c441793247338e9b1c4efc00517262ca8e603248833b207b432c32d/target.mjs\");console.log(String(m.answer));"
+          ],
+          "elapsedMs": 25,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "build",
+            "--out",
+            "/tmp/psc1-cli-installed-jvSNPZ/consumer with spaces/local-lean/output with spaces",
+            "--publication-protocol",
+            "portable-file",
+            "--diagnostics=json"
+          ],
+          "elapsedMs": 1097,
+          "exit": 1
+        },
+        {
+          "command": "psc",
+          "args": [
+            "init",
+            "--kind",
+            "ps"
+          ],
+          "elapsedMs": 31,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "--showConfig"
+          ],
+          "elapsedMs": 34,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "check"
+          ],
+          "elapsedMs": 1921,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "compile",
+            "-p",
+            ".",
+            "--engine=ts"
+          ],
+          "elapsedMs": 2083,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "build",
+            "-o",
+            "/tmp/psc1-cli-installed-jvSNPZ/consumer with spaces/local-ps/output with spaces",
+            "--publication-protocol=portable-file"
+          ],
+          "elapsedMs": 2575,
+          "exit": 0
+        },
+        {
+          "command": "node",
+          "args": [
+            "--input-type=module",
+            "-e",
+            "const m=await import(\"file:///tmp/psc1-cli-installed-jvSNPZ/consumer%20with%20spaces/local-ps/output%20with%20spaces/generations/c7b83e88bdde75c7de21d4ef3ad8e14c6112c05200cc8bae23ecda6b4ce164bc/target.mjs\");console.log(String(m.answer));"
+          ],
+          "elapsedMs": 28,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "build",
+            "-p",
+            "/tmp/psc1-cli-installed-jvSNPZ/consumer with spaces/local-ps",
+            "--out",
+            "/tmp/psc1-cli-installed-jvSNPZ/consumer with spaces/local-ps/output with spaces",
+            "--publication-protocol",
+            "portable-file"
+          ],
+          "elapsedMs": 2494,
+          "exit": 0
+        },
+        {
+          "command": "node",
+          "args": [
+            "--input-type=module",
+            "-e",
+            "const m=await import(\"file:///tmp/psc1-cli-installed-jvSNPZ/consumer%20with%20spaces/local-ps/output%20with%20spaces/generations/c7d05ec5a4c86701fec4c57ed2b4441f284809e51622c11749b9f8821ae0220b/target.mjs\");console.log(String(m.answer));"
+          ],
+          "elapsedMs": 26,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "build",
+            "--out",
+            "/tmp/psc1-cli-installed-jvSNPZ/consumer with spaces/local-ps/output with spaces",
+            "--publication-protocol",
+            "portable-file",
+            "--diagnostics=json"
+          ],
+          "elapsedMs": 1105,
+          "exit": 1
+        },
+        {
+          "command": "psc",
+          "args": [
+            "init",
+            "--kind",
+            "lean"
+          ],
+          "elapsedMs": 31,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "--showConfig"
+          ],
+          "elapsedMs": 31,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "check"
+          ],
+          "elapsedMs": 1934,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "compile",
+            "-p",
+            ".",
+            "--engine=ts"
+          ],
+          "elapsedMs": 2026,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "build",
+            "-o",
+            "/tmp/psc1-cli-installed-jvSNPZ/consumer with spaces/global-lean/output with spaces",
+            "--publication-protocol=portable-file"
+          ],
+          "elapsedMs": 2499,
+          "exit": 0
+        },
+        {
+          "command": "node",
+          "args": [
+            "--input-type=module",
+            "-e",
+            "const m=await import(\"file:///tmp/psc1-cli-installed-jvSNPZ/consumer%20with%20spaces/global-lean/output%20with%20spaces/generations/ed2a0befc6ff25d117cae77eb6afcd0f6da7545384e26400ee57abb4d8da2fd0/target.mjs\");console.log(String(m.answer));"
+          ],
+          "elapsedMs": 23,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "build",
+            "-p",
+            "/tmp/psc1-cli-installed-jvSNPZ/consumer with spaces/global-lean",
+            "--out",
+            "/tmp/psc1-cli-installed-jvSNPZ/consumer with spaces/global-lean/output with spaces",
+            "--publication-protocol",
+            "portable-file"
+          ],
+          "elapsedMs": 2489,
+          "exit": 0
+        },
+        {
+          "command": "node",
+          "args": [
+            "--input-type=module",
+            "-e",
+            "const m=await import(\"file:///tmp/psc1-cli-installed-jvSNPZ/consumer%20with%20spaces/global-lean/output%20with%20spaces/generations/038fd6a76a66d4d910ed78d9aaa404551c42e65b24b6180cf5b8e9708cfde341/target.mjs\");console.log(String(m.answer));"
+          ],
+          "elapsedMs": 25,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "build",
+            "--out",
+            "/tmp/psc1-cli-installed-jvSNPZ/consumer with spaces/global-lean/output with spaces",
+            "--publication-protocol",
+            "portable-file",
+            "--diagnostics=json"
+          ],
+          "elapsedMs": 1109,
+          "exit": 1
+        },
+        {
+          "command": "psc",
+          "args": [
+            "init",
+            "--kind",
+            "ps"
+          ],
+          "elapsedMs": 31,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "--showConfig"
+          ],
+          "elapsedMs": 32,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "check"
+          ],
+          "elapsedMs": 1949,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "compile",
+            "-p",
+            ".",
+            "--engine=ts"
+          ],
+          "elapsedMs": 2057,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "build",
+            "-o",
+            "/tmp/psc1-cli-installed-jvSNPZ/consumer with spaces/global-ps/output with spaces",
+            "--publication-protocol=portable-file"
+          ],
+          "elapsedMs": 2639,
+          "exit": 0
+        },
+        {
+          "command": "node",
+          "args": [
+            "--input-type=module",
+            "-e",
+            "const m=await import(\"file:///tmp/psc1-cli-installed-jvSNPZ/consumer%20with%20spaces/global-ps/output%20with%20spaces/generations/057b9b515056134b9e10bee55d2890351a45c11c0ed7a902b457633f54d6b046/target.mjs\");console.log(String(m.answer));"
+          ],
+          "elapsedMs": 25,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "build",
+            "-p",
+            "/tmp/psc1-cli-installed-jvSNPZ/consumer with spaces/global-ps",
+            "--out",
+            "/tmp/psc1-cli-installed-jvSNPZ/consumer with spaces/global-ps/output with spaces",
+            "--publication-protocol",
+            "portable-file"
+          ],
+          "elapsedMs": 2482,
+          "exit": 0
+        },
+        {
+          "command": "node",
+          "args": [
+            "--input-type=module",
+            "-e",
+            "const m=await import(\"file:///tmp/psc1-cli-installed-jvSNPZ/consumer%20with%20spaces/global-ps/output%20with%20spaces/generations/d0fac41352b75246ceef66dd4a9d5e082512ee79e0d5688cece2160a65b34ba4/target.mjs\");console.log(String(m.answer));"
+          ],
+          "elapsedMs": 25,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "build",
+            "--out",
+            "/tmp/psc1-cli-installed-jvSNPZ/consumer with spaces/global-ps/output with spaces",
+            "--publication-protocol",
+            "portable-file",
+            "--diagnostics=json"
+          ],
+          "elapsedMs": 1142,
+          "exit": 1
+        },
+        {
+          "command": "psc",
+          "args": [
+            "build",
+            "-p",
+            "/tmp/psc1-cli-installed-jvSNPZ/consumer with spaces/multi module",
+            "-o",
+            "/tmp/psc1-cli-installed-jvSNPZ/consumer with spaces/multi module/out"
+          ],
+          "elapsedMs": 2526,
+          "exit": 0
+        },
+        {
+          "command": "node",
+          "args": [
+            "--input-type=module",
+            "-e",
+            "const m=await import(\"file:///tmp/psc1-cli-installed-jvSNPZ/consumer%20with%20spaces/multi%20module/out/generations/0fd3122546538c1d1e5c5407eba07621fd7cb5212c3a58341b73ac5167c9f1af/target.mjs\");console.log(String(m.answer));"
+          ],
+          "elapsedMs": 26,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "init"
+          ],
+          "elapsedMs": 33,
+          "exit": 0
+        },
+        {
+          "command": "node",
+          "args": [
+            "/opt/hostedtoolcache/node/22.23.3/x64/lib/node_modules/npm/bin/npm-cli.js",
+            "run",
+            "check"
+          ],
+          "elapsedMs": 2022,
+          "exit": 0
+        },
+        {
+          "command": "node",
+          "args": [
+            "/opt/hostedtoolcache/node/22.23.3/x64/lib/node_modules/npm/bin/npm-cli.js",
+            "exec",
+            "--offline",
+            "--",
+            "psc",
+            "compile"
+          ],
+          "elapsedMs": 2226,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "check",
+            "--diagnostics=json"
+          ],
+          "elapsedMs": 32,
+          "exit": 1
+        },
+        {
+          "command": "node",
+          "args": [
+            "/opt/hostedtoolcache/node/22.23.3/x64/lib/node_modules/npm/bin/npm-cli.js",
+            "install",
+            "--offline",
+            "--registry",
+            "http://127.0.0.1:9",
+            "--ignore-scripts",
+            "--no-audit",
+            "--no-fund",
+            "--cache",
+            "/tmp/psc1-cli-installed-jvSNPZ/optional-empty-cache",
+            "--prefix",
+            "/tmp/psc1-cli-installed-jvSNPZ/consumer with spaces",
+            "/home/runner/work/pskernel/pskernel/psc1/dist/slim-universal/tarballs/proofscript-compiler-rust-linux-x64-0.1.0-psc1.7.tgz",
+            "/home/runner/work/pskernel/pskernel/psc1/dist/slim-universal/tarballs/proofscript-compiler-wasm-0.1.0-psc1.7.tgz"
+          ],
+          "elapsedMs": 1172,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "check",
+            "-p",
+            "/tmp/psc1-cli-installed-jvSNPZ/consumer with spaces/npm project",
+            "--engine",
+            "rust"
+          ],
+          "elapsedMs": 2452,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "check",
+            "-p",
+            "/tmp/psc1-cli-installed-jvSNPZ/consumer with spaces/npm project",
+            "--engine",
+            "wasm-core"
+          ],
+          "elapsedMs": 1855,
+          "exit": 0
+        },
+        {
+          "command": "psc",
+          "args": [
+            "--identity",
+            "--diagnostics=json"
+          ],
+          "elapsedMs": 75,
+          "exit": 1
+        }
+      ],
+      "humanUsability": "pending-actual-participant",
+      "platform": "linux-x64",
+      "compilerAndKernelPayloads": "unchanged qualified G3 inputs"
+    },
+    "frozen": {
+      "schema": "psc1-cli-frozen-application-source/1",
+      "status": "passed",
+      "testedCommit": "f58a1d8f98d1d438a9697371466e07d1416beec4",
+      "snapshotCommit": "8383c6983e5fa2f2d945b02ba4b349ab64522c64",
+      "compilerSourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+      "testScriptSha256": "9489a149693868a615f77f4600ab431d0706ddc335bc2d25aa6107103125a1ce",
+      "evidenceSha256": "88f5db9fe5d6e9046325bad0e49c87dd627f8a53c4a49dfccf19902c9fb35260",
+      "originalSourceAndCensusAssertions": "unchanged and passed",
+      "currentDevelopmentCompilerPromotion": false
+    },
+    "slim": {
+      "schema": "psc1-slim-universal-installed/1",
+      "sourceCommit": "f58a1d8f98d1d438a9697371466e07d1416beec4",
+      "status": "passed",
+      "tarballSha256": "a94ab7f2a335187abf3bf8df8295e2e11977007c13498d4b99e1da392a566993",
+      "tarballBytes": 3823974,
+      "sizeRatio": 0.06149738498443329,
+      "compilerSourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+      "defaultKernel": "wasm",
+      "defaultEngine": "js",
+      "cases": [
+        {
+          "engine": "js",
+          "scope": "local",
+          "id": "lean-modules",
+          "grammar": "lean",
+          "manifestSha256": "2cddc47ed328a5528fd2245c2de78ea048498e3f98c10a21670bd95dc20f5832",
+          "passed": true
+        },
+        {
+          "engine": "js",
+          "scope": "local",
+          "id": "ps-integer-unicode",
+          "grammar": "ps",
+          "manifestSha256": "80c8e3b21fd0a03c2c5f5f18216129f3201b9f804fa483e94d5bfe333f67f0e1",
+          "passed": true
+        },
+        {
+          "engine": "js",
+          "scope": "local",
+          "id": "ps-list-literal",
+          "grammar": "ps",
+          "manifestSha256": "87406d1c266d6d5393acf6103cc51ea0ac9732754469baca812ee9752a61ef1f",
+          "passed": true
+        },
+        {
+          "engine": "js",
+          "scope": "local",
+          "id": "lean-handler-pattern",
+          "grammar": "lean",
+          "manifestSha256": "9d4f31c967880d8643211a7b9bff97c49222047b6d324c6e6dc9acfe91297d8c",
+          "passed": true
+        },
+        {
+          "engine": "js",
+          "scope": "local",
+          "id": "lean-ordinary-loop",
+          "grammar": "lean",
+          "manifestSha256": "34a41f73f9e86561997527bfb94da95a4de2b1847336c2fd76ca86cffac23850",
+          "passed": true
+        },
+        {
+          "engine": "ts",
+          "scope": "local",
+          "id": "lean-modules",
+          "grammar": "lean",
+          "manifestSha256": "4a878bbbb77e03bcbc731c110d08fe218d4ed6623841b332bbe41e7de6340423",
+          "passed": true
+        },
+        {
+          "engine": "ts",
+          "scope": "local",
+          "id": "ps-integer-unicode",
+          "grammar": "ps",
+          "manifestSha256": "91cd9e815c73124fef80beefa7a0aaec036d5949bb822a32829da0337380a7bc",
+          "passed": true
+        },
+        {
+          "engine": "ts",
+          "scope": "local",
+          "id": "ps-list-literal",
+          "grammar": "ps",
+          "manifestSha256": "6b8b08f7be0d2e647fd868fbd147a2cbf1009a349b364240d776b64393df749d",
+          "passed": true
+        },
+        {
+          "engine": "ts",
+          "scope": "local",
+          "id": "lean-handler-pattern",
+          "grammar": "lean",
+          "manifestSha256": "ee2486cbad4ab3de148377221506729de906f9f539e48e3bb6979a2e3f98f598",
+          "passed": true
+        },
+        {
+          "engine": "ts",
+          "scope": "local",
+          "id": "lean-ordinary-loop",
+          "grammar": "lean",
+          "manifestSha256": "10bed4f839969d9fd900d4d6deb01623520d0a58df93983043b74f561bd89657",
+          "passed": true
+        },
+        {
+          "engine": "rust",
+          "scope": "local",
+          "id": "lean-modules",
+          "grammar": "lean",
+          "manifestSha256": "29b2e4dda032f047837a4157beca9ab440b9cbe839c7cea9554f6dd1c03c1c6c",
+          "passed": true
+        },
+        {
+          "engine": "rust",
+          "scope": "local",
+          "id": "ps-integer-unicode",
+          "grammar": "ps",
+          "manifestSha256": "a78174c0eb938584981ef7a7ae29a7dd5f317aef0897482cf7f54a58126f7304",
+          "passed": true
+        },
+        {
+          "engine": "rust",
+          "scope": "local",
+          "id": "ps-list-literal",
+          "grammar": "ps",
+          "manifestSha256": "320e77aaf21cb2cb0987ade7aed9bb582f5e0197d02acac8cd32274914153dc3",
+          "passed": true
+        },
+        {
+          "engine": "rust",
+          "scope": "local",
+          "id": "lean-handler-pattern",
+          "grammar": "lean",
+          "manifestSha256": "a2f9fbdf82f2e2fad510eb6bfd4f43a238782efe187cfbfb38b762476eafc1c3",
+          "passed": true
+        },
+        {
+          "engine": "rust",
+          "scope": "local",
+          "id": "lean-ordinary-loop",
+          "grammar": "lean",
+          "manifestSha256": "094facd034c7e5fcdf05343ba543e26e4e5de8530fb33ff133189427894e437c",
+          "passed": true
+        },
+        {
+          "engine": "wasm-core",
+          "scope": "local",
+          "id": "lean-modules",
+          "grammar": "lean",
+          "manifestSha256": "6b037e06bfa993a49b9469bfd8225bb43cf2424bea323f67889c53ad70355361",
+          "passed": true
+        },
+        {
+          "engine": "wasm-core",
+          "scope": "local",
+          "id": "ps-integer-unicode",
+          "grammar": "ps",
+          "manifestSha256": "ffe48d150073e71c38442fb9b79c92a5265cc86f0b12db30f1f121677e71aa7d",
+          "passed": true
+        },
+        {
+          "engine": "wasm-core",
+          "scope": "local",
+          "id": "ps-list-literal",
+          "grammar": "ps",
+          "manifestSha256": "78dc58a81d8e8ae4cd704b5287685b13c483178460a0052c62183f6f607d0f4e",
+          "passed": true
+        },
+        {
+          "engine": "wasm-core",
+          "scope": "local",
+          "id": "lean-handler-pattern",
+          "grammar": "lean",
+          "manifestSha256": "86eaabf70c524b57fc2d15215961fe88f938b08e0dc92796334c1995ab7541d4",
+          "passed": true
+        },
+        {
+          "engine": "wasm-core",
+          "scope": "local",
+          "id": "lean-ordinary-loop",
+          "grammar": "lean",
+          "manifestSha256": "28f8385a3a19936e287b2b838da7511964501d5684d0c89b4a0544075b10f365",
+          "passed": true
+        }
+      ],
+      "globalCases": [
+        {
+          "scope": "local",
+          "grammar": "lean",
+          "checkedStdout": true
+        },
+        {
+          "scope": "local",
+          "grammar": "ps",
+          "checkedStdout": true
+        },
+        {
+          "scope": "global",
+          "grammar": "lean",
+          "checkedStdout": true
+        },
+        {
+          "scope": "global",
+          "grammar": "ps",
+          "checkedStdout": true
+        },
+        {
+          "scope": "global",
+          "engine": "js",
+          "grammar": "lean",
+          "optionalDiscovery": true
+        },
+        {
+          "scope": "global",
+          "engine": "js",
+          "grammar": "ps",
+          "optionalDiscovery": true
+        },
+        {
+          "scope": "global",
+          "engine": "ts",
+          "grammar": "lean",
+          "optionalDiscovery": true
+        },
+        {
+          "scope": "global",
+          "engine": "ts",
+          "grammar": "ps",
+          "optionalDiscovery": true
+        },
+        {
+          "scope": "global",
+          "engine": "rust",
+          "grammar": "lean",
+          "optionalDiscovery": true
+        },
+        {
+          "scope": "global",
+          "engine": "rust",
+          "grammar": "ps",
+          "optionalDiscovery": true
+        },
+        {
+          "scope": "global",
+          "engine": "wasm-core",
+          "grammar": "lean",
+          "optionalDiscovery": true
+        },
+        {
+          "scope": "global",
+          "engine": "wasm-core",
+          "grammar": "ps",
+          "optionalDiscovery": true
+        }
+      ],
+      "candidateCases": [
+        {
+          "engine": "js",
+          "target": "js",
+          "grammar": "lean",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "js",
+          "grammar": "ps",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "ts",
+          "grammar": "lean",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "ts",
+          "grammar": "ps",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "rust",
+          "grammar": "lean",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "rust",
+          "grammar": "ps",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "wasm-core",
+          "grammar": "lean",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "wasm-core",
+          "grammar": "ps",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "js",
+          "grammar": "lean",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "js",
+          "grammar": "ps",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "ts",
+          "grammar": "lean",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "ts",
+          "grammar": "ps",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "rust",
+          "grammar": "lean",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "rust",
+          "grammar": "ps",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "wasm-core",
+          "grammar": "lean",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "wasm-core",
+          "grammar": "ps",
+          "optionalPackagesAbsent": true,
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "js",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "js",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "ts",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "ts",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "rust",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "rust",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "wasm-core",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "js",
+          "target": "wasm-core",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "js",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "js",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "ts",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "ts",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "rust",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "rust",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "wasm-core",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "ts",
+          "target": "wasm-core",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "rust",
+          "target": "js",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "rust",
+          "target": "js",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "rust",
+          "target": "ts",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "rust",
+          "target": "ts",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "rust",
+          "target": "rust",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "rust",
+          "target": "rust",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "rust",
+          "target": "wasm-core",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "rust",
+          "target": "wasm-core",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "wasm-core",
+          "target": "js",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "wasm-core",
+          "target": "js",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "wasm-core",
+          "target": "ts",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "wasm-core",
+          "target": "ts",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "wasm-core",
+          "target": "rust",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "wasm-core",
+          "target": "rust",
+          "grammar": "ps",
+          "candidateOnly": true
+        },
+        {
+          "engine": "wasm-core",
+          "target": "wasm-core",
+          "grammar": "lean",
+          "candidateOnly": true
+        },
+        {
+          "engine": "wasm-core",
+          "target": "wasm-core",
+          "grammar": "ps",
+          "candidateOnly": true
+        }
+      ],
+      "kernelCases": [
+        {
+          "id": "nat-accept",
+          "accepted": true,
+          "agreement": true
+        },
+        {
+          "id": "large-nat-accept",
+          "accepted": true,
+          "agreement": true
+        },
+        {
+          "id": "kernel-type-rejection",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "duplicate-declaration-rejection",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "unknown-constant-rejection",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "unsafe-refusal",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "metavariable-refusal",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "height-overflow-refusal",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "malformed-json",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "wrong-format",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "wrong-version",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "string-version",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "unknown-admission",
+          "accepted": false,
+          "agreement": true
+        },
+        {
+          "id": "truncated-structured-name",
+          "accepted": false,
+          "agreement": true
+        }
+      ],
+      "negativeCases": [
+        {
+          "engine": "js",
+          "id": "malformed-list",
+          "priorPreserved": true
+        },
+        {
+          "engine": "js",
+          "id": "wrong-body",
+          "priorPreserved": true
+        },
+        {
+          "engine": "js",
+          "id": "missing-import",
+          "priorPreserved": true
+        },
+        {
+          "engine": "js",
+          "id": "checked-partial",
+          "priorPreserved": true
+        },
+        {
+          "engine": "js",
+          "id": "verified",
+          "priorPreserved": true
+        },
+        {
+          "engine": "ts",
+          "id": "malformed-list",
+          "priorPreserved": true
+        },
+        {
+          "engine": "ts",
+          "id": "wrong-body",
+          "priorPreserved": true
+        },
+        {
+          "engine": "ts",
+          "id": "missing-import",
+          "priorPreserved": true
+        },
+        {
+          "engine": "ts",
+          "id": "checked-partial",
+          "priorPreserved": true
+        },
+        {
+          "engine": "ts",
+          "id": "verified",
+          "priorPreserved": true
+        },
+        {
+          "id": "invalid-utf8-refused"
+        },
+        {
+          "id": "project-cannot-select-out",
+          "priorPreserved": true
+        },
+        {
+          "id": "project-cannot-select-serviceFile",
+          "priorPreserved": true
+        },
+        {
+          "id": "project-cannot-select-checkerExecutable",
+          "priorPreserved": true
+        },
+        {
+          "id": "project-cannot-select-engine",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "malformed-list",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "wrong-body",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "missing-import",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "checked-partial",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "verified",
+          "priorPreserved": true
+        },
+        {
+          "engine": "wasm-core",
+          "id": "malformed-list",
+          "priorPreserved": true
+        },
+        {
+          "engine": "wasm-core",
+          "id": "wrong-body",
+          "priorPreserved": true
+        },
+        {
+          "engine": "wasm-core",
+          "id": "missing-import",
+          "priorPreserved": true
+        },
+        {
+          "engine": "wasm-core",
+          "id": "checked-partial",
+          "priorPreserved": true
+        },
+        {
+          "engine": "wasm-core",
+          "id": "verified",
+          "priorPreserved": true
+        },
+        {
+          "id": "corrupt-default-kernel-with-native-installed",
+          "priorPreserved": true
+        },
+        {
+          "id": "missing-default-kernel-with-native-installed",
+          "priorPreserved": true
+        },
+        {
+          "id": "manifest-policy-corruption",
+          "priorPreserved": true
+        },
+        {
+          "id": "compiler-source-pin-mismatch",
+          "priorPreserved": true
+        },
+        {
+          "id": "missing-root-kernel-policy",
+          "priorPreserved": true
+        },
+        {
+          "id": "before-seal",
+          "priorPreserved": true
+        },
+        {
+          "id": "after-seal",
+          "priorPreserved": true
+        },
+        {
+          "id": "before-commit",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "optional-executor-corruption",
+          "priorPreserved": true
+        },
+        {
+          "engine": "rust",
+          "id": "optional-executor-version-refusal"
+        },
+        {
+          "engine": "wasm-core",
+          "id": "optional-executor-corruption",
+          "priorPreserved": true
+        },
+        {
+          "engine": "wasm-core",
+          "id": "optional-executor-version-refusal"
+        }
+      ],
+      "byteCaptureCases": [
+        {
+          "id": "utf8-bom-preserved-in-captured-source",
+          "compilerAccepted": false,
+          "sourceClosureDigest": "ae2fc62575a4900f2a381a9ea474898e368d888a827d33dfa31ea3c6c32edf2c"
+        }
+      ],
+      "rootOnlyWithoutOptionalPayloads": true,
+      "noCompilerSdkOnExecutionPath": true,
+      "offlineEmptyCache": true,
+      "installScriptsDisabled": true,
+      "optionalBundlesInstalledExplicitly": true,
+      "allFourQualifiedPayloadsPreserved": true,
+      "linuxPublicationQualified": true,
+      "otherPlatformPublicationPolicy": "explicit-runtime-guard; other OS execution not qualified",
+      "actualPlatform": "linux-x64",
+      "fullCrossPlatformRelease": false,
+      "scope": "universal package format and checked compile API, real Linux local/global JS publication; no macOS/Windows release execution claim"
+    },
+    "qualified": {
+      "commit": "f58a1d8f98d1d438a9697371466e07d1416beec4",
+      "sha256": "a94ab7f2a335187abf3bf8df8295e2e11977007c13498d4b99e1da392a566993",
+      "bytes": 3823974,
+      "version": "0.1.0-psc1.9"
+    },
+    "sourceTestReceipt": {
+      "schema": "psc1-cli-source-tests/1",
+      "testedCommit": "f58a1d8f98d1d438a9697371466e07d1416beec4",
+      "status": "passed",
+      "cases": [
+        "help and empty invocation succeed without distribution, compiler or kernel",
+        "version is human readable without verifying/executing a compiler",
+        "unknown command/option, duplicates, aliases and values refuse",
+        "build requires explicit output before touching a project",
+        "missing project is actionable",
+        "init creates editable .ps source and source-only project",
+        "second init preserves exact files; no force/overwrite option",
+        "init Lean variant and existing source refusal",
+        "showConfig captures hashes, never claims admission or creates output",
+        "directory project, aliases, equals and explicit files",
+        "no parent directory discovery",
+        "files resolve from config location, preserve order and source bytes",
+        "source authority injection and unknown schema refuse",
+        "absolute, traversal, backslash and drive source paths refuse",
+        "source and parent symlinks, project symlinks and FIFO refuse",
+        "bounded actual reads, invalid UTF8 and BOM capture",
+        "duplicates, missing entry, extra source fields and module types refuse",
+        "legacy inline project accepted without host-option authority",
+        "malformed JSON and comments refuse with useful project code"
+      ],
+      "noCompilerMock": true,
+      "logicalAdmission": "not-run"
+    }
+  },
+  "compilerCensus": {
+    "sourceModules": 124,
+    "sourceCoreMembers": 4743,
+    "logicalCoreMembers": 4748,
+    "canonicalAdmissionRecords": 3466,
+    "sourceBytes": 2685300,
+    "sourceInventorySha256": "ba6334e20d685e69f2cf188167712850079bb3a861583d1b239860f6cd44f6d9",
+    "preludeDeclarationCount": 115,
+    "foundationalAxioms": 60,
+    "directlyReferencedFoundationalAxioms": 34,
+    "partialNames": [
+      "psBackendPublicTypeSupported",
+      "psJsNeedsUtf8Runtime",
+      "psTsNeedsUtf8Runtime",
+      "Ps.Internal.RustRuntimePlan.typeRequirements",
+      "Ps.Internal.RustRuntimePlan.exprRequirements"
+    ],
+    "minProfile": {
+      "scope": "initial simply typed fragment; no full compiler bridge qualification",
+      "qualifiedCompilerModules": 0,
+      "qualifiedPracticalCoreCriteria": 0,
+      "canonicalCompilerAdmission": "unsupported-current-profile",
+      "blockers": {
+        "inductiveGroups": 308,
+        "projectionOccurrences": 7167,
+        "literalOccurrences": 8737,
+        "quantifiedTypes": 12991,
+        "importedFoundationAxioms": 60,
+        "partialDefinitionsRequiringExactLogicalBodyPairing": 5,
+        "dependentBinderClassification": "not-inferred-from-syntax-counts"
+      },
+      "generatedKernelCheckingClosure": "not-run",
+      "generations": "G1/G2/G3-not-qualified-with-min"
+    },
+    "artifacts": [
+      {
+        "path": "dist/pskernel-min/closure/compiler-qualification.json",
+        "bytes": 589013,
+        "sha256": "d609dae00ac1413b40b9de2b749dccd67789fe7888ce9b356b3bb36497e448c1"
+      },
+      {
+        "path": "dist/pskernel-min/closure/compiler-admissions.json",
+        "bytes": 29889410,
+        "sha256": "8b43acffb3430770574a9a14e83502de49cf3a110ae0e6a4d0f629027e5025b0"
+      },
+      {
+        "path": "dist/pskernel-min/closure/compiler-admissions.json.ir.json",
+        "bytes": 8650054,
+        "sha256": "c57bc830a5664cae944b8f95a55600fc6d34bdb37373021950b796aa9d06180b"
+      },
+      {
+        "path": "dist/pskernel-min/closure/prelude.json",
+        "bytes": 104799,
+        "sha256": "215dec328de51fc09872b3af41f4c00bee26938227bd2af4f063c4c3edae50af"
+      }
+    ],
+    "grammarParity": "not-measured-by-this-audit",
+    "originalStrictIr": "accepted",
+    "officialNativeAdmission": "accepted-exact-retained-bytes-by-production-probe",
+    "compilerCounters": {
+      "expressions": {
+        "app": 230490,
+        "b": 52871,
+        "const": 244721,
+        "forall": 12991,
+        "lam": 43863,
+        "let": 5955,
+        "nat": 2862,
+        "proj": 7167,
+        "sort": 531,
+        "str": 5875
+      },
+      "levels": {
+        "p": 128,
+        "s": 11786,
+        "z": 11786
+      },
+      "declarationKinds": {
+        "definition": 3153,
+        "inductive": 308,
+        "opaque": 5
+      },
+      "inductiveTypes": 308,
+      "constructors": 982,
+      "inductiveGroups": 308
+    },
+    "reportIdentity": {
+      "file": "closure/report.json",
+      "bytes": 233546,
+      "sha256": "e0c8f4a33de6e5ace28d819420736070a53d5f3a0312c72deb0bf4fc6f37c0cc"
+    },
+    "root": "Ps.CompilerUnified.Service"
+  },
+  "connectedRuntime": {
+    "modules": 10,
+    "originMembers": 307,
+    "admissionRecords": 206,
+    "bytes": 1804358,
+    "sha256": "041d55f110471b91b69d134a38daeb94ee555a71e797b48a0c00cc6aa66ee516",
+    "sourceBytes": 103181,
+    "sourceIdentities": [
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularProfile.lean",
+        "bytes": 8569,
+        "sha256": "ebecd7fc1fc49171d0a3fde4faae04f22130c6f112298739cd44a8ffb338df14"
+      },
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularCheck.lean",
+        "bytes": 3699,
+        "sha256": "126b83aa4a22115d6bef29dae079a727e72ebed790ad725aeaeac3235acd23f7"
+      },
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/OperationalProfile.lean",
+        "bytes": 6502,
+        "sha256": "8ec493593c57203ab12d4060256f2fb35a4f0683637629fa5a383d595f3bdd24"
+      },
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/OperationalCheck.lean",
+        "bytes": 3569,
+        "sha256": "316f803f4643aae8eae0c0099870c4151be513f28e33b6f5df57ec6675f08c53"
+      },
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/CoreBytes.lean",
+        "bytes": 15107,
+        "sha256": "216ee8748c027bcb56c8bf9ec745542723ad201b6936bbb84c8a2824f8db931d"
+      },
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/CoreIngress.lean",
+        "bytes": 14341,
+        "sha256": "39fd5f5977e8c44445a7a5a3ef00ec47516658fe3029831452e2b4094fe68d27"
+      },
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularIngressProfile.lean",
+        "bytes": 12918,
+        "sha256": "90df83cbf1ab56c1c6df1f69e426b3cd3d715436a1beb877dfaa920920fb1591"
+      },
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularIngressOperational.lean",
+        "bytes": 5630,
+        "sha256": "d703528e4c157b6f9a9a9b788046278608a0a991211e3c86e37b749adf9f32ba"
+      },
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularIngressCheck.lean",
+        "bytes": 12928,
+        "sha256": "16d3c2e4a4a51615956f86e555439e37edf094cf30c10c331ebc1601c7b63f17"
+      },
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularIngressBytes.lean",
+        "bytes": 19918,
+        "sha256": "ffa574b895122e4a31e2ba2ffaa9c8cd7c591b1e9e1c619f93f95d23cd45844d"
+      }
+    ],
+    "sourceTestModules": 11,
+    "sourceTestGeneratedTsBytes": 591107,
+    "sourceTestGeneratedJsBytes": 703128,
+    "artifactFiles": [
+      {
+        "file": "regular-ingress/vectors.ts",
+        "bytes": 591107,
+        "sha256": "69ae5c4b7ed142c4187abddbaa46dbca5cad3589050587310e40ff61bf7f5a3c"
+      },
+      {
+        "file": "regular-ingress/vectors.js",
+        "bytes": 703128,
+        "sha256": "7489a99af5caecf331705bf34a75e7dff17d488e9dcca9b512a645a344649edf"
+      },
+      {
+        "file": "regular-ingress/runtime.admissions.json",
+        "bytes": 1804358,
+        "sha256": "041d55f110471b91b69d134a38daeb94ee555a71e797b48a0c00cc6aa66ee516"
+      },
+      {
+        "file": "regular-ingress/vectors.admissions.json",
+        "bytes": 2734046,
+        "sha256": "cc1cb8c64793e1d2cfeb8807ac938a52335c6fe49bbca6e41054756df99c3bbd"
+      },
+      {
+        "file": "regular-ingress/vectors.source.json",
+        "bytes": 47042,
+        "sha256": "4db0b8f1531024401105f23bca4aa23fa23749359e0fa03dfdf4a405946d3937"
+      }
+    ],
+    "officialSource": {
+      "protocol": "pskernel-lean/1",
+      "provider": "lean4-cpp",
+      "leanVersion": "4.35.0",
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "profile": "lean4.35-core",
+      "accepted": true
+    },
+    "nativeSelf": true,
+    "generatedSelf": true,
+    "generatedSelfObservation": {
+      "accepted": true,
+      "code": "PSC1_MIN_CORE_ACCEPTED",
+      "delegated": false,
+      "bytes": 1804358,
+      "sha256": "041d55f110471b91b69d134a38daeb94ee555a71e797b48a0c00cc6aa66ee516",
+      "elapsedMs": 45986.309098,
+      "resourceUsage": {
+        "userCPUTime": 65356215,
+        "systemCPUTime": 355485,
+        "maxRSS": 305180,
+        "sharedMemorySize": 0,
+        "unsharedDataSize": 0,
+        "unsharedStackSize": 0,
+        "minorPageFault": 72128,
+        "majorPageFault": 0,
+        "swappedOut": 0,
+        "fsRead": 0,
+        "fsWrite": 8,
+        "ipcSent": 0,
+        "ipcReceived": 0,
+        "signalsCount": 0,
+        "voluntaryContextSwitches": 23009,
+        "involuntaryContextSwitches": 2304
+      }
+    },
+    "resourceProbeCount": 29,
+    "sourceUniverseProbeCount": 9,
+    "resourceObservation": {
+      "userCPUTime": 73725780,
+      "systemCPUTime": 429946,
+      "maxRSS": 154048,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 46329,
+      "majorPageFault": 0,
+      "swappedOut": 0,
+      "fsRead": 0,
+      "fsWrite": 304,
+      "ipcSent": 0,
+      "ipcReceived": 0,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 31841,
+      "involuntaryContextSwitches": 2542
+    },
+    "boundary": "Native source-model proof retained from R4; full connected runtime self-admission is actual finite native/generated execution. Not compiler preservation or compiler self-hosting."
+  },
+  "retainedCorpora": {
+    "A": {
+      "positive": 28,
+      "refusal": 36,
+      "hostile": 14,
+      "universe": 6
+    },
+    "B": {
+      "positive": 20,
+      "refusal": 32,
+      "hostile": 12,
+      "officialPositives": 20
+    },
+    "oldProofReports": 204,
+    "oldReportsAllPolicyValid": true
+  },
+  "artifacts": [
+    {
+      "id": 12758760032,
+      "name": "psc1-minkernel-proof-f58a1d8f98d1d438a9697371466e07d1416beec4",
+      "bytes": 8352,
+      "sha256": "9f1d1ce73531d64f275d623892e3d84add86fbedbba9d0e70ffd122606e62d6d",
+      "digestVerification": "Downloaded ZIP digest and size verified during read-only artifact inspection."
+    },
+    {
+      "id": 12758251140,
+      "name": "psc1-r5-preservation-proof-f58a1d8f98d1d438a9697371466e07d1416beec4",
+      "bytes": 24558,
+      "sha256": "f4a9df2261e9c276a30a5218a1498498bfebefaf553e9b33b598f57c7b8162f6",
+      "digestVerification": "Downloaded ZIP digest and size verified during read-only artifact inspection."
+    },
+    {
+      "id": 12756794448,
+      "name": "psc1-minkernel-portability-closure-f58a1d8f98d1d438a9697371466e07d1416beec4",
+      "bytes": 1997065,
+      "sha256": "9f1a91c1997e045dcba9de26ccbaf7c480dca4fdd7680fc98687f9c048792151",
+      "digestVerification": "Downloaded ZIP digest and size verified during read-only artifact inspection."
+    },
+    {
+      "id": 12757633572,
+      "name": "psc1-cli-source-f58a1d8f98d1d438a9697371466e07d1416beec4",
+      "bytes": 46516,
+      "sha256": "a2196c244d826c471d4ce91daab8a5a89ce4557ecf6a6616b0429171ed1f3ab6",
+      "digestVerification": "Downloaded ZIP digest and size verified during read-only artifact inspection."
+    },
+    {
+      "id": 12760513999,
+      "name": "psc1-cli-toolchain-f58a1d8f98d1d438a9697371466e07d1416beec4",
+      "bytes": 206729103,
+      "sha256": "a9f55ed1bbb6ac75a0a849cd4e78a2c9139de1f4e0ac4e792552f15bbab267f2",
+      "digestVerification": "GitHub artifact metadata; large toolchain archive was not downloaded."
+    }
+  ]
+}

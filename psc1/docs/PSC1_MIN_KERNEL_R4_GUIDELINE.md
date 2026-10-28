@@ -1,6 +1,8 @@
 # PSC1 MinKernel R4 qualification and continuation guideline
 
-Current checkpoint: **R4 qualified**, source commit
+> Current continuation: [R5 qualified guideline](PSC1_MIN_KERNEL_R5_GUIDELINE.md). The R4 results below remain historical qualified evidence; R5's completed batch and next obligations supersede its initial R5 planning instruction.
+
+R4 checkpoint: **qualified**, source commit
 `e6bcb88e16ee42937d474e48ef5f98f5e12fc57a`, on
 `research/psc1-minkernel-consistency-selfhost-20261027`.
 Continue with the user-confirmed **GPT-6.1 Sol / High** setting.

@@ -1,6 +1,35 @@
 # Research guide: choosing the next PSC1 MinKernel architecture
 
-## R4 qualified — current checkpoint
+## R5 qualified — current checkpoint
+
+Source `f58a1d8f98d1d438a9697371466e07d1416beec4` passes
+[focused Linux qualification](https://github.com/dwijayuda/pskernel/actions/runs/40557438637),
+[full repository CI](https://github.com/dwijayuda/pskernel/actions/runs/40557451248)
+and [installed CLI qualification](https://github.com/dwijayuda/pskernel/actions/runs/40557438460).
+The new compiler-stage batch has 21 printed theorem reports: five axiom-free,
+sixteen propext-only. The earlier 204 reports remain within the same policy.
+
+Read [the current R5 guideline](PSC1_MIN_KERNEL_R5_GUIDELINE.md), [R5 profile](PSC1_MIN_KERNEL_R5_PROFILE.md)
+and [dated receipt](PSC1_MIN_KERNEL_R5_QUALIFICATION_2026-10-28.json). Actual capture wrapping/currying and the shared
+pure binary lowering stage have scoped semantic proofs; exact token-construction
+equations retain opaque String.Internal operations. Native/generated tests pass
+400 scalar comparisons and 294 calls from one physical source, with strict TSC,
+checked structural IR, refusal probes and canonical public-byte admission.
+
+The full connected checker still self-admits: ten modules, 206 records,
+1804358 bytes, unchanged packet hash. The fresh compiler graph has 124 modules,
+3466 records and 2685300 source bytes. Compiler min coverage stays 0/124,
+Practical Core 0/37, with no min-qualified G1/G2/G3. Whole-compiler/JavaScript
+preservation, bootstrap text laws, producer freshness and general representation/
+scheduler proofs remain open. Official Lean Wasm stays default; min/dual retain
+PSC1_MIN_CANONICAL_BRIDGE_UNPROVED. The installed CLI retains its frozen payload
+boundary; no merge or npm publication occurred.
+
+Continue with GPT-6.1 Sol / High, using GitHub APIs and GitHub Actions Linux for
+all project execution. Preserve single-parent nonforce expected-HEAD updates.
+The older R4 and earlier sections below retain their historical evidence scopes.
+
+## Historical R4 qualified checkpoint
 
 Source `e6bcb88e16ee42937d474e48ef5f98f5e12fc57a` passes
 [focused Linux qualification](https://github.com/dwijayuda/pskernel/actions/runs/40519651550).

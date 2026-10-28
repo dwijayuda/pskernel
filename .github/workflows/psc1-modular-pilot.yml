@@ -1,5 +1,7 @@
 name: PSC1 genuine modular JS TS compiler package pilot
 on:
+  push:
+    branches: [feat/psc1-modular-partitions-20261027]
   workflow_dispatch:
   workflow_call:
 permissions:
@@ -43,6 +45,13 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
           npm ci --prefix .. --ignore-scripts --include=optional --no-audit --no-fund
+      - name: Check modular host and test source syntax
+        run: |
+          for file in host-tools/modular/*.mjs test/modular/*.mjs; do node --check "$file"; done
+      - name: Capture the exact qualified compiler source without rebuilding it
+        run: |
+          git worktree add --detach "$RUNNER_TEMP/psc1-modular-frozen-source" 4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98
+          PSC1_MODULAR_FROZEN_ROOT="$RUNNER_TEMP/psc1-modular-frozen-source/psc1" node test/modular/frozen-source.mjs
       - name: Prepare immutable PR195 transform baseline
         run: |
           git worktree add --detach "$RUNNER_TEMP/psc1-origin-baseline" cc13ebfabf6763703ee1ec75a663002a9134bc74
@@ -80,7 +89,16 @@ jobs:
         run: |
           set -euo pipefail
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build psc1_modular_pilot psc1_independent_checker
+          lake build psc1_modular_pilot psc1_independent_checker psc1_modular_graph_measure
+      - name: Measure complete transformed compiler ownership and admit exact Core
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: node test/modular/transformed-graph.mjs
+      - name: Recursive-group and type-only partition invariants and refusals
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: lake env lean --run test/modular/Partition.lean
+      - name: Execute grouped strict IR cycle fixture against bundled output
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: node test/modular/partition-cycle.mjs
       - name: Record current owned source-import closure separately from runtime graph
         run: node test/modular/source-closure.mjs
       - name: Transform provenance invariants and ownership refusal tests
@@ -101,6 +119,9 @@ jobs:
       - name: Execute admitted extended compiler packages and consumers
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: node test/modular/extended-packages.test.mjs
+      - name: Execute admitted partitioned compiler packages and consumers
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: node test/modular/extended-packages.test.mjs --partitioned
       - uses: actions/upload-artifact@v4
         if: always()
         with:

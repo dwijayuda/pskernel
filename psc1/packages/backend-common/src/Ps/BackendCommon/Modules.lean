@@ -116,8 +116,9 @@ def psPlanModulesWithPackages (input : PsVerifiedIrModule) (owners : List PsModu
     (packages : List String) (protocol : String) :
     Except String PsModulePlan := do
   let legacy := protocol == "psc1-modular-pilot/1"
-  if !legacy && protocol != "psc1-modular-pilot/2" then throw "PSC1_MODULE_PROFILE"
-  if packages.length < 3 || packages.length > (if legacy then 3 else 9) then
+  let partitioned := protocol == "psc1-modular-pilot/3"
+  if !legacy && !partitioned && protocol != "psc1-modular-pilot/2" then throw "PSC1_MODULE_PROFILE"
+  if packages.length < (if partitioned then 1 else 3) || packages.length > (if legacy then 3 else 9) then
     throw "PSC1_MODULE_UNIT_BOUND"
   if packages.head? != some "@proofscript/modular-pilot-runtime" then throw "PSC1_MODULE_PACKAGE_RUNTIME"
   for package in packages do

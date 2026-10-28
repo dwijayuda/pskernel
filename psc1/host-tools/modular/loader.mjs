@@ -41,15 +41,28 @@ export function createPilotLoader(rootUrl,expectedDigest){
     const bytes=file(root,'cohort.json');
     if(hash(bytes)!==expectedDigest)fail('COHORT_IDENTITY');
     const d=JSON.parse(bytes);
-    const legacy=d.schema==='psc1-modular-installed-cohort/1';
+    const legacy=d.schema==='psc1-modular-installed-cohort/1',partitioned=d.schema==='psc1-modular-installed-cohort/3';
     const names=legacy?['@proofscript/modular-pilot-runtime','@proofscript/modular-pilot-names','@proofscript/modular-pilot-consumer']:d.packageNames;
-    if((!legacy&&d.schema!=='psc1-modular-installed-cohort/2')||!Array.isArray(names)||
-      names.length<3||names.length>(legacy?3:9)||new Set(names).size!==names.length||
+    if((!legacy&&!partitioned&&d.schema!=='psc1-modular-installed-cohort/2')||!Array.isArray(names)||
+      names.length<(partitioned?1:3)||names.length>(legacy?3:9)||new Set(names).size!==names.length||
       names[0]!=='@proofscript/modular-pilot-runtime'||
       names.some(name=>!/^@proofscript\/modular-pilot-[a-z0-9-]{1,114}$/.test(name))||
-      d.packages.length!==names.length||d.protocol!==(legacy?'psc1-modular-pilot/1':'psc1-modular-pilot/2')||
-      d.version!==(legacy?'0.1.0-psc1-modular-pilot.0':'0.1.0-psc1-modular-pilot.1')||d.logicalAdmission!=='accepted'||
+      d.packages.length!==names.length||d.protocol!==(legacy?'psc1-modular-pilot/1':partitioned?'psc1-modular-pilot/3':'psc1-modular-pilot/2')||
+      d.version!==(legacy?'0.1.0-psc1-modular-pilot.0':partitioned?'0.1.0-psc1-modular-pilot.2':'0.1.0-psc1-modular-pilot.1')||d.logicalAdmission!=='accepted'||
       d.checkerCommit!=='eb6cafb7290e8bd5f2937522d8d804f58f02bafc')fail('COHORT_POLICY');
+    if(partitioned){
+      const p=d.partition,sources=d.sourceModules;
+      if(!p||!Array.isArray(sources)||sources.length<2||sources.length>8||
+        new Set(sources).size!==sources.length||
+        !Array.isArray(p.groups)||p.groups.length!==names.length||
+        !Array.isArray(p.sourceToUnit)||p.sourceToUnit.length!==sources.length+1||p.sourceToUnit[0]!==0)
+        fail('PARTITION_LAYOUT');
+      const coverage=p.groups.flat();
+      if(coverage.length!==sources.length+1||new Set(coverage).size!==coverage.length||
+        coverage.some(n=>!Number.isSafeInteger(n)||n<0||n>sources.length)||
+        p.groups.some((g,i)=>!Array.isArray(g)||g.length===0||g.some(n=>p.sourceToUnit[n]!==i))||
+        p.sourceToUnit.some(n=>!Number.isSafeInteger(n)||n<0||n>=names.length))fail('PARTITION_COVERAGE');
+    }
     if(inventory(root).join(',')!==['LICENSE','NOTICE','cohort.json','index.d.mts','index.mjs','loader.mjs','package.json'].sort().join(','))
       fail('ROOT_INVENTORY');
     for(const pin of d.bootstrapFiles){const b=file(root,pin.path);if(b.length!==pin.bytes||hash(b)!==pin.sha256)fail('BOOTSTRAP_IDENTITY');}
@@ -83,7 +96,12 @@ export function createPilotLoader(rootUrl,expectedDigest){
       verify();
       const expected=checked.descriptor.protocol+':'+variant+':'+checked.descriptor.sourceClosureDigest;
       if(modules[0].__ps$cohort!==expected)fail('RUNTIME_COHORT');
-      return Object.freeze({runtime:modules[0],names:modules[checked.names.indexOf('@proofscript/modular-pilot-names')],consumer:modules.at(-1),
+      const d=checked.descriptor,partitioned=d.schema==='psc1-modular-installed-cohort/3';
+      const consumer=partitioned?modules[d.partition.sourceToUnit[d.sourceModules.length]]:modules.at(-1);
+      const nameIndex=partitioned?d.sourceModules.indexOf('Ps.Foundation.Name'):-1;
+      const names=partitioned?(nameIndex<0?undefined:modules[d.partition.sourceToUnit[nameIndex+1]]):
+        modules[checked.names.indexOf('@proofscript/modular-pilot-names')];
+      return Object.freeze({runtime:modules[0],names,consumer,
         modules:Object.freeze(Object.fromEntries(checked.names.map((name,index)=>[name,modules[index]]))),
         sourceClosureDigest:checked.descriptor.sourceClosureDigest,variant});
     }

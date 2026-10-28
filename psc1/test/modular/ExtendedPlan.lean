@@ -34,7 +34,7 @@ def run : IO Unit := do
   | .ok plan => if plan.units.length != 4 then throw (IO.userError "unit coverage")
   | .error error => throw (IO.userError error)
   refuse "legacy-source-bound-preserved" (psPlanModulesWithPackages raw owners packages "psc1-modular-pilot/1")
-  refuse "unknown-profile" (psPlanModulesWithPackages raw owners packages "psc1-modular-pilot/3")
+  refuse "unknown-profile" (psPlanModulesWithPackages raw owners packages "psc1-modular-pilot/99")
   refuse "duplicate-package" (psPlanModulesWithPackages raw owners
     ["@proofscript/modular-pilot-runtime", "@proofscript/modular-pilot-a",
       "@proofscript/modular-pilot-a", "@proofscript/modular-pilot-c"] "psc1-modular-pilot/2")

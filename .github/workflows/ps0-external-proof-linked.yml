@@ -48,7 +48,9 @@ jobs:
           python3 tests/test-proof-linked-host.py
 
   proof-linked:
-    runs-on: ubuntu-24.04
+    # Ubuntu 24.04 rejected bwrap loopback setup before any proof ran.
+    # Use a supported Linux host; retain unshare-all and native comparator isolation.
+    runs-on: ubuntu-22.04
     timeout-minutes: 45
     defaults:
       run:
@@ -103,14 +105,17 @@ jobs:
           test "$(git rev-parse HEAD)" = "$PS0_SOURCE_SHA"
           printf '%s\n' "$PS0_SOURCE_SHA" > build/verified-logs/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > build/verified-logs/runner-sha.txt
+          uname -a > build/verified-logs/system.txt
+          cat /etc/os-release >> build/verified-logs/system.txt
+          bwrap --version >> build/verified-logs/system.txt
           printf 'import Lean\n#eval Lean.githash\n' > build/verified-logs/Pin.lean
           lake env lean build/verified-logs/Pin.lean | tee build/verified-logs/pin.log
           grep -Fx '"eb6cafb7290e8bd5f2937522d8d804f58f02bafc"' build/verified-logs/pin.log
           test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
-      - name: Build existing PS0 baseline
+      - name: Build PS0 baseline and proof-linked components
         run: |
           set -euo pipefail
-          lake build PS0 ps0 2>&1 | tee build/verified-logs/baseline-build.log
+          lake build PS0 ps0 +PS0.Verified.Core +PS0.Verified.Emit +PS0.Verified.Extract 2>&1 | tee build/verified-logs/baseline-build.log
       - name: Qualify proof-linked source and JS/TS
         run: |
           set -euo pipefail

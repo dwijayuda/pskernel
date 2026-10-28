@@ -116,3 +116,7 @@ to feat/psc1-executable-packages-20261028 with a live expected-HEAD non-force
 fast-forward; preserve any concurrent changes rather than overwrite them.
 This receipt/work-state commit follows the tested implementation and changes
 documentation/status only. Query the exact PR HEAD's CI before any later promotion.
+
+Final documentation run40665911767 at8ac2aa72 refuses the new walkthrough's relative
+link outside psc1/. Replace it with the exact qualified GitHub workflow URL; retain
+the layout guard unchanged. No compiler/package implementation bytes change.

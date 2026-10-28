@@ -98,7 +98,7 @@ growth does not relax or expand pilot profiles.
 
 ## Run the Linux qualification
 
-Use the [focused workflow](../../../.github/workflows/psc1-executable-packages.yml)
+Use the [focused workflow](https://github.com/dwijayuda/pskernel/blob/60a0d5cbaa0644215ee21d508d25730b61f2a32c/.github/workflows/psc1-executable-packages.yml)
 on the current implementation/build branch. It provisions the pinned Lean,
 Node22.23.3, TS7.0.2 and locked Rust1.90.0 consumer resources. User Node policy
 remains a minimum; exact versions here identify the qualification environment.

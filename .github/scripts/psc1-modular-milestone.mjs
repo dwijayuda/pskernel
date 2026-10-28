@@ -33,7 +33,9 @@ const groups=[
  [receipt.applications.run,receipt.applications.commit,receipt.applications.artifacts],
  [receipt.delivery.artifacts[0].url.match(/runs\/(\d+)/)[1],receipt.delivery.testedCommit,receipt.delivery.artifacts],
  [receipt.retainedRegressions.source.run,receipt.implementationCommit,[]],
- [receipt.retainedRegressions.legacyCli.run,receipt.implementationCommit,[]]
+ [receipt.retainedRegressions.legacyCli.run,receipt.implementationCommit,[]],
+ [receipt.evidenceCheckpoint.sourceRun,receipt.evidenceCheckpoint.commit,[]],
+ [receipt.evidenceCheckpoint.evidenceRun,receipt.evidenceCheckpoint.commit,[]]
 ];
 for(const [id,commit,artifacts]of groups){
  const run=await get('/actions/runs/'+id);assert.equal(run.status,'completed');assert.equal(run.conclusion,'success');assert.equal(run.head_sha,commit);

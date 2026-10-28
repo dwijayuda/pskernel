@@ -885,5 +885,20 @@
     "Independent human maintainer trial remains pending user-arranged participation.",
     "Final release promotion, merge and registry publication require applicable qualification and authorization."
   ],
-  "interpretation": "Finite checked runtime/source-identity evidence for the Linux developer preview, not a semantic preservation/totality proof, all-platform release, new self-host qualification or immutable retention guarantee. The trusted bootstrap/stable installed file assumptions remain."
+  "interpretation": "Finite checked runtime/source-identity evidence for the Linux developer preview, not a semantic preservation/totality proof, all-platform release, new self-host qualification or immutable retention guarantee. The trusted bootstrap/stable installed file assumptions remain.",
+  "evidenceCheckpoint": {
+    "commit": "821292dfd7dac39a1281a1b51b8e5ec17af63346",
+    "sourceRun": 40728439938,
+    "evidenceRun": 40728430896,
+    "status": "success",
+    "selectedJobs": 16,
+    "benchmark": "intentionally-skipped",
+    "practicalCoreCriteria": 37,
+    "blocked": 0,
+    "scopedTargetBundles": 14,
+    "testedMergeCommit": "ec0dda44f2ec2d77dc0f073965e9dc4fae4293e3",
+    "productionChangesFromImplementation": 0,
+    "verifiedAdoptedControllers": 12,
+    "followup": "Documentation/evidence-only result recording; exact qualified root tarball preserved."
+  }
 }

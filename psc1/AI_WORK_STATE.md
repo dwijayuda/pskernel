@@ -1,6 +1,6 @@
 # PSC1 AI work state
 
-Updated 2026-10-28 Asia/Jakarta. Active M4 branch
+Updated 2026-10-29 Asia/Jakarta. Active M4 branch
 feat/psc1-modular-toolchain-20261028 from verified PR #207 HEAD
 415dbba4b5c1627185fc0ee8cdf29a83b15b6f08.
 Production modularity implementation PR #205,
@@ -9,6 +9,16 @@ GitHub/Linux CI only; expected-HEAD, single-parent/non-force history.
 No merge or registry publication.
 
 ## M4 milestone: qualified installed modular Linux preview
+
+Final full-source checkpoint `821292dfd7dac39a1281a1b51b8e5ec17af63346`
+passes [40728439938](https://github.com/dwijayuda/pskernel/actions/runs/40728439938):
+all 16 selected jobs, 37/37 finite Core criteria, zero blocked and 14 scoped target
+bundles; benchmark intentionally skipped. Tested merge:
+`ec0dda44f2ec2d77dc0f073965e9dc4fae4293e3`.
+[Evidence gate 40728430896](https://github.com/dwijayuda/pskernel/actions/runs/40728430896)
+also passes, verifying exact adopted test-controller bytes, unchanged qualified
+production source and successful job/artifact identities. The following receipt
+update changes only documentation/evidence, not the tested tarball or compiler.
 
 PR #208 implementation `ca92bbdbc7c0f34e1da4076db7300033802eab3e` passes
 [installed qualification 40714983520](https://github.com/dwijayuda/pskernel/actions/runs/40714983520).

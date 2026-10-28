@@ -1,6 +1,6 @@
 # PSC1 development roadmap
 
-Updated 2026-10-28 Asia/Jakarta. This is the authoritative remaining-work queue.
+Updated 2026-10-29 Asia/Jakarta. This is the authoritative remaining-work queue.
 Practical Core v1 remains frozen at14 feature families and 37 finite criteria.
 Completed detail is preserved in [the previous roadmap](history/ROADMAP_BEFORE_LAYOUT_2026-10-26.md)
 and [dated evidence](evidence/README.md).
@@ -100,6 +100,14 @@ The qualified .13 distribution stays the default reference. Pilot expansion
 remains deferred; the stopped PR #203 and prototype history are preserved.
 
 ## M4: qualified installed Linux preview
+
+Final checkpoint `821292dfd7dac39a1281a1b51b8e5ec17af63346` passes full
+[source 40728439938](https://github.com/dwijayuda/pskernel/actions/runs/40728439938):
+16 selected jobs, 37/37 finite Core criteria, zero blocked and 14 scoped target
+bundles (tested merge `ec0dda44f2ec2d77dc0f073965e9dc4fae4293e3`).
+[Evidence gate 40728430896](https://github.com/dwijayuda/pskernel/actions/runs/40728430896)
+passes exact source/adopted-controller/artifact checks. No qualified product bytes
+change in the final evidence update.
 
 PR #208 / `ca92bbdbc7c0f34e1da4076db7300033802eab3e` passes
 [40714983520](https://github.com/dwijayuda/pskernel/actions/runs/40714983520):

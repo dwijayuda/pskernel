@@ -44,16 +44,29 @@ JS/TS/Rust execution, Wasm validation, graph/cohort negatives and offline npm
 package byte/consumer checks. [Exact receipt](PSC1_EXECUTABLE_PACKAGES_QUALIFICATION_2026-10-28.json)
 and [build walkthrough](architecture/executable-package-build.md) state the scope.
 
-PR #206 adds the checked host adapter and retained application execution.
-Linux40677391651 at8dac01c7 passes both Node/Bun:32 checked compiler sessions and
-528 real behavior cases across both engines/grammars and JS/strict TS outputs.
-Native frontends are absent during modular execution; exact native candidate,
-admission/IR/source comparisons and publication/resource negatives pass.
-[Execution walkthrough](architecture/modular-checked-execution.md). Broader M3
-semantic/library and seven-backend qualification is still pending.
+PR #206 qualifies checked application execution through the complete modular
+engines. [Linux run 40679842606](https://github.com/dwijayuda/pskernel/actions/runs/40679842606)
+passes Node 22.23.3 and Bun 1.4.4 at `f433bad0`: 32 checked builds,
+528 retained behavior executions and 20 boundary/resource negatives across both
+engines, both grammars and JS/strict TS output. Each application has 11 source
+modules. Native frontends are absent during modular execution; normalized candidate,
+canonical admission, serialized IR and decoded source comparisons match the native
+references. [Receipt](PSC1_MODULAR_CHECKED_APPLICATION_QUALIFICATION_2026-10-28.json)
+and [execution walkthrough](architecture/modular-checked-execution.md).
 
-The dependency-ordered queue is: finish M3's retained real application/backend
-corpus through the modular engines (including Bun and Wasm execution); M4 checked
+The retained source and installed regressions remain separate evidence from this
+new modular-engine lane. Source run 40681840579 passes all 16 selected jobs at `05ae5cb4`
+(tested merge `e81c3468d68c55719b92198daee658b4972d8d7c`): 37/37 criteria, zero blockers,
+14 scoped target-execution bundles. Installed CLI/runtime run 40679842769 passes
+all nine jobs at `f433bad0` using its retained .11 cohort/frozen compiler. The .13
+npm umbrella retains its separate 53-case reference at PR #205 HEAD `4393ed15`.
+CI setup now shares one bounded, cache-aware Lean launcher across 11 sites in
+eight active workflows. All 14 observed cache-hit invocations complete in 0–1 seconds;
+the previous unconditional setup spent 572 seconds before cancellation. No test,
+compiler/checker budget, semantic fuel or memory/stack policy was relaxed.
+
+The dependency-ordered queue is: finish M3's full retained semantic/library and
+seven-backend corpus through the modular engines; M4 checked
 root-only umbrella/thin CLI/watch and coherent graph publication; portable module
 generation within the same compiler; then M5 new modular G1/G2/G3/fixed points and
 applicable platform/publication gates. M3 has finite partial qualification;

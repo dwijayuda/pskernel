@@ -3,7 +3,7 @@
 Updated 2026-10-29 Asia/Jakarta. Active M5 branch
 feat/psc1-portable-modules-20261029 from verified PR #208 HEAD
 d53b43c271c65635b07a6ffa78fb6b08a5fa55de.
-Production modularity implementation PR #205,
+Initial production modularity implementation PR #205,
 stacked on plan PR #204 / b400552324956d9c3a684c9231f60f70066e1629.
 GitHub/Linux CI only; expected-HEAD, single-parent/non-force history.
 No merge or registry publication.
@@ -60,7 +60,11 @@ corpus execution and exact graph/npm tarball comparisons. It emits45s numeric
 RSS/CPU heartbeats and per-generation producer identities. Preserve both
 correctness-1800s and performance-240s as separate profiles. GitHub hosted
 jobs permit6h: https://docs.github.com/en/actions/reference/limits.
-The retry is running, not qualified. Adopt reviewed controller bytes after results.
+The retry is running, not qualified. Audited controller bytes are now adopted
+into PR #209; compiler source is unchanged. The workflow uses an explicit
+.github/psc1/modular-selfhost-run.json push marker or manual dispatch, so adopting
+already-running request/configuration receipts does not repeat expensive jobs.
+Execution steps/limits are identical to336ab495; only the event path changes.
 
 CPU diagnostics40754131717 at a206c7ee sample this exact graph and full self-source
 request for240s on both engines; they are explicitly not G2 qualification.
@@ -80,6 +84,16 @@ No merge or registry publication.
 
 [Exact partial receipt](docs/PSC1_PORTABLE_MODULAR_QUALIFICATION_2026-10-29.json)
 and [portable architecture](docs/architecture/portable-modular-generation.md).
+
+The retained.11 reference CLI run40749484645 hits its60-minute aggregate job
+deadline during checked publication/Unicode IO cases, after successful prior
+stages and without a test assertion failure. Preserve cancelled job123032520132
+and artifact12847147334 (206767038 bytes; SHA256
+9355312865447134f22fb7e5ec9995ff97d63b03b05d253ff898dc2810f74e2a).
+The installed job budget is now90 minutes; all commands, ordinary240s requests,
+kernel checks, runtime matrix and required final receipts remain unchanged.
+A fresh run must pass; cancellation is not qualification. This is the preserved
+reference CLI scope, separate from the new M5 graph and unchanged M4 preview.
 
 ## M4 milestone: qualified installed modular Linux preview
 

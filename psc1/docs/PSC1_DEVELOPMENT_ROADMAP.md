@@ -122,7 +122,12 @@ The user authorizes a sensible increase: diagnostic336ab495 launches
 40755246954 with3600s G2/G3 wall-clock requests and160-minute Linux jobs,
 restoring the original Node wall policy.1800s correctness and240s performance
 remain separate; G1/corpus240s, checker120s and all memory/stack/fuel/byte bounds
-remain. G2/G3/fixed points are pending. Candidate version.2 does not promote
+remain. The audited controllers are adopted with a dedicated explicit push marker/manual
+dispatch; exact execution steps/limits remain those running in40755246954.
+Retained reference CLI40749484645 reaches its aggregate60-minute deadline during
+passing publication/IO cases. Increase only that job budget to90 minutes and
+rerun all retained commands; cancellation is not qualification.
+G2/G3/fixed points are pending. Candidate version.2 does not promote
 the qualified M4.1 umbrella or replace.13.
 [Exact partial receipt](PSC1_PORTABLE_MODULAR_QUALIFICATION_2026-10-29.json),
 [architecture](architecture/portable-modular-generation.md).

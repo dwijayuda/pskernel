@@ -318,5 +318,28 @@
       "id": 40755976488,
       "commit": "707bd40390d0b673c69961f25151cf5ccd66a457"
     }
-  ]
+  ],
+  "controllerAdoption": {
+    "originCommit": "336ab495df5479a959a071166b7c2c6b24823b26",
+    "sourceCodeUnchanged": true,
+    "executionStepsIdentical": true,
+    "eventPathOnlyChange": {
+      "from": "psc1/scripts/requests/modular-selfhost.json",
+      "to": ".github/psc1/modular-selfhost-run.json"
+    },
+    "reason": "avoid duplicate qualification while already-running exact controllers complete; retain manual dispatch and explicit future request marker"
+  },
+  "referenceCli": {
+    "run": 40749484645,
+    "commit": "77961851d54adb344a87fb32b4472c11b2024519",
+    "status": "cancelled-at-aggregate-job-deadline",
+    "job": 123032520132,
+    "previousJobMinutes": 60,
+    "newJobMinutes": 90,
+    "artifact": 12847147334,
+    "artifactBytes": 206767038,
+    "archiveSha256": "9355312865447134f22fb7e5ec9995ff97d63b03b05d253ff898dc2810f74e2a",
+    "allTestCommandsAndRequestLimitsUnchanged": true,
+    "qualification": false
+  }
 }

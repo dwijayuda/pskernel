@@ -25,6 +25,7 @@ theorem read_sound (h : psMinByteCursorRead size byteAt offset = .ok byte) :
   unfold psMinByteCursorRead at h
   split at h
   next before =>
+    dsimp only at h
     split at h
     next bounded =>
       cases h
@@ -120,7 +121,9 @@ theorem walk_reflect (remaining size : Nat) (byteAt : Nat → Nat)
             (PsMinByteCursorState.mk (Nat.succ start.offset)
               (psMinByteDigestStep start.digest byte))) = .ok finish at success
       cases read : psMinByteCursorRead size byteAt start.offset with
-      | error error => simp only [read] at success
+      | error error =>
+          simp only [read] at success
+          cases success
       | ok byte =>
         simp only [read] at success
         obtain ⟨bytes, count, span, result⟩ := ih _ _ success

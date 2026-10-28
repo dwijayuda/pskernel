@@ -107,7 +107,8 @@ function sessionFor(selected, publicationRoot) {
           : 'unified-bundle',
     ...resolveCheckedTarget(selected.target, d, { rustToolchainRoot: selected.rustToolchainRoot }),
     serviceFile: selected.target === 'js' && !modular ? engine.service.path : engine.candidate.path,
-    serviceSha256: selected.target === 'js' && !modular ? engine.service.sha256 : engine.candidate.sha256,
+    serviceSha256:
+      selected.target === 'js' && !modular ? engine.service.sha256 : engine.candidate.sha256,
     runnerFile: path.join(
       installationRoot,
       selected.target === 'js' && !modular

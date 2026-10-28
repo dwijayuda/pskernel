@@ -1,0 +1,22 @@
+{
+  "schema": "psc1-modular-host-runtime-qualification/1",
+  "status": "qualified-installed-smoke-scope",
+  "featureParent": "415dbba4b5c1627185fc0ee8cdf29a83b15b6f08",
+  "qualifiedCommit": "8ed9e07ab2342a2afb41fdcce637826aa4d06dfc",
+  "run": 40711483603,
+  "job": 122897650990,
+  "scope": "Actual offline root installation, genuine JS/TS modular engines, both input grammars, JS/Wasm-core publication and execution, default official Wasm admission and rejection. Extended M4 acceptance remains pending.",
+  "hostRuntimes": [
+    "node22.23.3",
+    "bun1.4.4"
+  ],
+  "builds": 16,
+  "kernelCases": 28,
+  "corePackages": 20,
+  "sourceGraphManifestSha256": "f0b25fabaa702e949645eeee9adedf52237016b316aaeefb90bf806170c4b389",
+  "compilerSourceClosureDigest": "41eb40437e0df1722128c09c9b9da7cad0ccb1ad61371f23eb6bc2db4e9a1106",
+  "priorAstCorrespondencePreserved": true,
+  "fullModularSelfHosting": false,
+  "noMerge": true,
+  "noPublication": true
+}

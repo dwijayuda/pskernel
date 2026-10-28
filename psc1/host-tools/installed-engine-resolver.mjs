@@ -7,8 +7,8 @@ import os from 'node:os';
 import { createRequire } from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import * as distributionPin from '../DISTRIBUTION_PIN.mjs';
-import {verify as verifyExecutableGraph, readManifestBytes} from './executable/verify.mjs';
-const {expectedDistributionSha256, expectedCompilerSourceClosureDigest} = distributionPin;
+import { verify as verifyExecutableGraph, readManifestBytes } from './executable/verify.mjs';
+const { expectedDistributionSha256, expectedCompilerSourceClosureDigest } = distributionPin;
 
 export const installationRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const compilerRoot = expectedCompilerSourceClosureDigest;
@@ -157,8 +157,10 @@ function packagePins(descriptor) {
   };
 }
 function validGraphPin(descriptor) {
-  return /^[a-f0-9]{64}$/.test(distributionPin.expectedGraphManifestSha256 || '') &&
-    descriptor.sourceGraphManifestSha256 === distributionPin.expectedSourceGraphManifestSha256;
+  return (
+    /^[a-f0-9]{64}$/.test(distributionPin.expectedGraphManifestSha256 || '') &&
+    descriptor.sourceGraphManifestSha256 === distributionPin.expectedSourceGraphManifestSha256
+  );
 }
 export function resolveEngine(engine = 'js', distribution = loadDistribution()) {
   if (!Object.hasOwn(distribution.engines, engine)) fail('UNKNOWN_ENGINE');
@@ -167,25 +169,44 @@ export function resolveEngine(engine = 'js', distribution = loadDistribution()) 
   if (descriptor.kind === 'unqualified-source-cohort') fail('ENGINE_NOT_QUALIFIED_FOR_COHORT');
   if (
     descriptor.compilerSourceClosureDigest !== compilerRoot ||
-    descriptor.qualification !== (descriptor.kind === 'modular-graph' ? 'qualified-checked-execution' : 'qualified')
+    descriptor.qualification !==
+      (descriptor.kind === 'modular-graph' ? 'qualified-checked-execution' : 'qualified')
   )
     fail('ENGINE_SOURCE_IDENTITY');
   if (descriptor.kind === 'modular-graph') {
-    if (!['js', 'ts'].includes(engine) || descriptor.variant !== engine ||
-        validGraphPin(descriptor) === false) fail('MODULAR_ENGINE_DESCRIPTOR');
+    if (
+      !['js', 'ts'].includes(engine) ||
+      descriptor.variant !== engine ||
+      validGraphPin(descriptor) === false
+    )
+      fail('MODULAR_ENGINE_DESCRIPTOR');
     const graphRoot = path.resolve(installationRoot, '../../../..');
     const manifestFile = path.resolve(graphRoot, '../dist/COMPILER_GRAPH.json');
     if (fs.realpathSync(graphRoot) !== graphRoot || fs.realpathSync(manifestFile) !== manifestFile)
       fail('MODULAR_GRAPH_SYMLINK');
-    const graph = verifyExecutableGraph(graphRoot, readManifestBytes(manifestFile),
-      distributionPin.expectedGraphManifestSha256);
+    const graph = verifyExecutableGraph(
+      graphRoot,
+      readManifestBytes(manifestFile),
+      distributionPin.expectedGraphManifestSha256,
+    );
     if (graph.sourceClosureDigest !== compilerRoot) fail('MODULAR_GRAPH_SOURCE');
-    const pins = graph.files.map(row => ({
-      path: path.join(graphRoot, row.path), sha256: row.sha256,
+    const pins = graph.files.map((row) => ({
+      path: path.join(graphRoot, row.path),
+      sha256: row.sha256,
     }));
     const candidate = verifyFile(installationRoot, descriptor.candidate);
-    return {engine, descriptor, service:candidate, candidate, candidateKind:'embedded',
-      pins:[...common, ...pins, {path:manifestFile,sha256:distributionPin.expectedGraphManifestSha256}]};
+    return {
+      engine,
+      descriptor,
+      service: candidate,
+      candidate,
+      candidateKind: 'embedded',
+      pins: [
+        ...common,
+        ...pins,
+        { path: manifestFile, sha256: distributionPin.expectedGraphManifestSha256 },
+      ],
+    };
   }
   if (descriptor.kind === 'unqualified-source-cohort') fail('ENGINE_NOT_QUALIFIED_FOR_COHORT');
   if (descriptor.kind === 'embedded') {
@@ -398,7 +419,12 @@ export function describeInstallation() {
         compilerSourceClosureDigest: compilerRoot,
       };
     } catch (error) {
-      if (!/OPTIONAL_PACKAGE_MISSING|UNSUPPORTED_RUST_PLATFORM|ENGINE_NOT_QUALIFIED_FOR_COHORT/.test(error.message)) throw error;
+      if (
+        !/OPTIONAL_PACKAGE_MISSING|UNSUPPORTED_RUST_PLATFORM|ENGINE_NOT_QUALIFIED_FOR_COHORT/.test(
+          error.message,
+        )
+      )
+        throw error;
       engines[engine] = { installed: false, kind: d.engines[engine].kind, reason: error.message };
     }
   }

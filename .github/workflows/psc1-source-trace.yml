@@ -36,8 +36,7 @@ jobs:
       - name: Install repository-pinned Lean
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          bash "$GITHUB_WORKSPACE/psc1/scripts/ci/install-pinned-lean.sh"
       - name: Build production elaborator and actual source tracing tests
         working-directory: psc1
         run: |
@@ -124,8 +123,7 @@ jobs:
       - name: Install repository-pinned Lean
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          bash "$GITHUB_WORKSPACE/psc1/scripts/ci/install-pinned-lean.sh"
       - name: Install locked host dependencies
         run: npm ci --prefix psc1/host-tools --ignore-scripts
       - name: Install minimum supported Python

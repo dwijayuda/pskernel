@@ -1,0 +1,48 @@
+{
+  "schema": "psc1-min-r7-r8-qualification/1",
+  "date": "2026-10-28",
+  "source": "6a22235dfc235b1707bed3c5d5204b6aa1f01217",
+  "qualifiedScope": "actual recursive literal/zeta caller correspondence and independent syntactic substitution refinement",
+  "reports": {
+    "retainedUnique": 259,
+    "axiomFree": 42,
+    "propextOnly": 217,
+    "r7": {
+      "unique": 10,
+      "axiomFree": 3,
+      "propextOnly": 7
+    },
+    "r8": {
+      "unique": 14,
+      "axiomFree": 0,
+      "propextOnly": 14
+    }
+  },
+  "callerCases": 264,
+  "sourceFocused": {
+    "run": 40680314750,
+    "status": "success"
+  },
+  "ciOnlyCheckpoint": {
+    "source": "0734fa4f209da0df9343de0fbd6657311f1223e6",
+    "focusedRun": 40694473038,
+    "broaderRun": 40694479660,
+    "fullJob": 122843776763,
+    "gateJob": 122860388470,
+    "status": "success"
+  },
+  "installedCli": {
+    "source": "0de2f52b79bfe160a3b978b0fbd22864b45d10a8",
+    "run": 40691028398,
+    "status": "success"
+  },
+  "sourceEquivalence": "6a22235d..0734fa4f changes 10 workflow YAMLs and one CI shell helper; checker/compiler/proof/runtime source blobs unchanged.",
+  "fullCompilerQualified": false,
+  "r9": {
+    "adopted": false,
+    "source": "72f51789f57590aec2978e9cf9c5df5e53bcfef7",
+    "run": 40694997862,
+    "result": "full generated packet traversal exceeded 120 seconds; parked"
+  },
+  "boundary": "No typed substitution, classifier soundness, full compiler preservation, admission or Min-backed self-hosting is implied."
+}

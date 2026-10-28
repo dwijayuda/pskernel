@@ -19,7 +19,7 @@ def psTsJoin (separator : String) (values : List String) : String :=
       match rest with
       | List.nil => value
       | List.cons _ _ =>
-          String.Internal.append value (String.Internal.append separator (psTsJoin separator rest))
+          String.append value (String.append separator (psTsJoin separator rest))
 
 
 def psTsEmitPrimitiveType

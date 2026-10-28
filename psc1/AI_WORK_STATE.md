@@ -1,5 +1,354 @@
 # PSC1 AI work state
 
+## C1 continuation: actual List signature model — 2026-10-29
+
+Module metrics remain **1/124 fresh source closures Min-admitted, 1/124 with
+finite runtime validation, 0/124 fully compiler-qualified**. No Min generations.
+The isolated type layer now handles all 21 actual List signatures: its constructive
+Type / Type 1 model and executable grammar refinement passed, with all 100
+native/generated/source-expectation observations. Candidate: 34fe275f0d5a72fff150aa7b77fca0e97f716456,
+[Linux run 40735903282](https://github.com/dwijayuda/pskernel/actions/runs/40735903282).
+See the [List type guideline](docs/PSC1_MIN_KERNEL_LIST_TYPE_GUIDELINE.md)
+and [scoped receipt](docs/PSC1_MIN_KERNEL_LIST_TYPE_QUALIFICATION_2026-10-29.json).
+
+This layer is not imported by public admission. The same List packet still
+refuses there; Source retains its 525 checks. Type well-formedness is not a
+semantic declaration value. Next: actual typed List bodies, constant-motive
+List.rec, primitive/prelude and reserved-name contracts, and coherent global
+history before public byte integration. Source's actual compiler preservation
+and complete Min-backed self-hosting remain open. R9 stays parked.
+
+The C1 layer adds 13 guarded reports (two axiom-free, eleven propext-only);
+all previous 259 reports remain. Adopted-source regressions retain their own
+source SHA and terminal status; do not infer qualification from a pending run.
+
+
+## Actual compiler module checkpoint — 2026-10-28
+
+**1/124 fresh source closures Min-admitted; 1/124 has finite runtime validation;
+0/124 fully compiler-qualified. No Min-backed G1/G2/G3.**
+The first actual module is Ps.Foundation.Source: all six logical members in its
+fresh complete 1387-byte packet passed public MinKernel and pinned official Lean.
+Its actual source and separate consumers passed 525 native/generated checks and
+a complete 21578-byte public-Min packet. Consumers do not increase the denominator.
+
+Read the [module qualification guideline](docs/PSC1_MIN_KERNEL_MODULE_GUIDELINE.md)
+and [dated machine receipt](docs/PSC1_MIN_KERNEL_MODULE_QUALIFICATION_2026-10-28.json).
+The retained CI artifact has the complete dependency-aware 124-row matrix,
+fresh six-leaf results and exact rejection witnesses. Projections are diagnostic
+and never alone qualify a module.
+
+The first List declaration, psListLengthAcc.$psc0SH.0, requires a quantified
+type and bound type variable absent from the current proved ground model.
+List occurs in 71 source closures. A sound parametric model and actual checker
+refinement are the next C1 obligation; arbitrary Sort/bvar acceptance is unsound.
+Source's general actual compiler preservation is still open, so full coverage
+stays zero. These are explicit unresolved fundamental proof obligations.
+
+[R7/R8 scoped qualification](docs/PSC1_MIN_KERNEL_R8_GUIDELINE.md) passed:
+259 retained unique reports (42 axiom-free, 217 propext-only), with current
+broader and installed Linux regressions green at their recorded source/CI SHAs.
+R9's full-packet timeout remains parked. Subsequent work must resolve an actual
+module blocker. U1 remains usable; C1/C2/C3 remain incomplete.
+The historical sections below retain their separate immutable scopes.
+
+## Usable standalone checker checkpoint
+
+The [usable-checker guide](docs/PSC1_MIN_KERNEL_USABLE_GUIDE.md) and
+[dated qualification](docs/PSC1_MIN_KERNEL_USABILITY_QUALIFICATION_2026-10-28.json)
+describe the private Node tarball, stable byte API, file/stdin CLI and exact
+offline installation checks. Qualified source: eea9306384ab68c220bece18e769fd16d7903f3a.
+All required source workflows pass (main attempt 2 after installer timeout).
+The 42237-byte tarball has SHA-256
+42d7d524d903885f0f7d06b83fa21b9755759ff457d6d24b3df503196ed51929.
+
+This completes U1: usable checking of the proved bounded R4B fragment, with
+explicit compiler/runtime assumptions. The user also requested full compiler
+support; that workstream remains open at 0/124 modules. Its [C1/C2/C3 completion
+contract](docs/PSC1_MIN_KERNEL_USABILITY_PLAN.md) is separate from package
+usability. Production defaults/refusals remain unchanged. The R6 and earlier
+sections below retain their own immutable source/evidence scopes.
+
+## Historical R6 qualified checkpoint
+
+Source `457c542f5f03f6b3f96245b76ad09190cfd4f879` has terminal successful
+[focused Linux qualification](https://github.com/dwijayuda/pskernel/actions/runs/40656742989),
+[full repository CI](https://github.com/dwijayuda/pskernel/actions/runs/40656748193)
+and [installed CLI qualification](https://github.com/dwijayuda/pskernel/actions/runs/40656742940).
+
+Read [the current R6 guideline](docs/PSC1_MIN_KERNEL_R6_GUIDELINE.md),
+[R6 profile](docs/PSC1_MIN_KERNEL_R6_PROFILE.md) and
+[dated receipt](docs/PSC1_MIN_KERNEL_R6_QUALIFICATION_2026-10-28.json).
+The actual psTsJoin now uses constructive append, with general exact UTF-8
+composition and selected actual emitter byte equations. Ten new reports are
+one axiom-free/nine propext-only; the retained combined audit has 235 unique
+reports. Valid native/generated scalar-string paths pass 728 positive checks
+each, with three explicitly excluded JavaScript-surrogate counterexamples.
+The actual Type IR/TypeScript/JavaScript remain byte-identical to the decision
+experiment.
+
+Standalone append and actual emitter fixtures are separate owned source scopes:
+the pinned official checker accepts all exact canonical packets; public R4B
+refuses standalone String Core with delegated=false, separately from the emitter
+packet's ASCII-profile refusal. The complete ten-module runtime still self-admits
+its unchanged 206-record, 1804358-byte packet. All R0–R5 guards remain green.
+
+The fresh compiler has 124 modules, 3466 records, 2685282 source bytes and 35
+direct references to the unchanged 60-axiom foundation. The five partial-body
+pairing obligations, min compiler 0/124, Practical Core 0/37 and unqualified
+min G1/G2/G3 remain explicit. R6 closes one join-composition boundary; whole
+recursive erasure/freshness, representations/scheduling and ECMAScript
+preservation remain open. Official Lean Wasm stays default, and production
+min/dual retain PSC1_MIN_CANONICAL_BRIDGE_UNPROVED.
+
+R5 is complete at its scoped stage boundary, with its source/reporting CI
+rechecked and historical evidence retained below. Continue with GPT-6.1 Sol /
+High and GitHub Actions Linux for all project execution; use nonforce
+single-parent expected-HEAD updates. The R6 guideline defines completion and
+the next actual recursive-erasure proof targets. No merge or npm publication.
+
+## Historical R5 qualified checkpoint
+
+Source `f58a1d8f98d1d438a9697371466e07d1416beec4` passes
+[focused Linux qualification](https://github.com/dwijayuda/pskernel/actions/runs/40557438637),
+[full repository CI](https://github.com/dwijayuda/pskernel/actions/runs/40557451248)
+and [installed CLI qualification](https://github.com/dwijayuda/pskernel/actions/runs/40557438460).
+The new compiler-stage batch has 21 printed theorem reports: five axiom-free,
+sixteen propext-only. The earlier 204 reports remain within the same policy.
+
+Read [the R5 guideline](docs/PSC1_MIN_KERNEL_R5_GUIDELINE.md), [R5 profile](docs/PSC1_MIN_KERNEL_R5_PROFILE.md)
+and [dated receipt](docs/PSC1_MIN_KERNEL_R5_QUALIFICATION_2026-10-28.json). Actual capture wrapping/currying and the shared
+pure binary lowering stage have scoped semantic proofs; exact token-construction
+equations retain opaque String.Internal operations. Native/generated tests pass
+400 scalar comparisons and 294 calls from one physical source, with strict TSC,
+checked structural IR, refusal probes and canonical public-byte admission.
+
+The full connected checker still self-admits: ten modules, 206 records,
+1804358 bytes, unchanged packet hash. The fresh compiler graph has 124 modules,
+3466 records and 2685300 source bytes. Compiler min coverage stays 0/124,
+Practical Core 0/37, with no min-qualified G1/G2/G3. Whole-compiler/JavaScript
+preservation, bootstrap text laws, producer freshness and general representation/
+scheduler proofs remain open. Official Lean Wasm stays default; min/dual retain
+PSC1_MIN_CANONICAL_BRIDGE_UNPROVED. The installed CLI retains its frozen payload
+boundary; no merge or npm publication occurred.
+
+Continue with GPT-6.1 Sol / High, using GitHub APIs and GitHub Actions Linux for
+all project execution. Preserve single-parent nonforce expected-HEAD updates.
+The older R4 and earlier sections below retain their historical evidence scopes.
+
+## Historical R4 qualified checkpoint
+
+Source `e6bcb88e16ee42937d474e48ef5f98f5e12fc57a` passes
+[focused Linux qualification](https://github.com/dwijayuda/pskernel/actions/runs/40519651550).
+All 142 new reports meet the unchanged axiom guard (17 axiom-free, 125 propext only).
+R4B passes 20 accepts / 32 refusals, all positives independently official-checked,
+29 additional boundary probes, and native/actual generated self-admission of the
+complete connected ten-module byte-checker runtime: 307 origin members,
+206 records, 1804358 packet bytes. R4A's 28/36 corpus and 47 reports remain checked.
+
+Read the [current R4 guideline](docs/PSC1_MIN_KERNEL_R4_GUIDELINE.md),
+[R4A profile](docs/PSC1_MIN_KERNEL_R4_PROFILE.md), [R4B profile](docs/PSC1_MIN_KERNEL_R4B_PROFILE.md)
+and [dated receipt](docs/PSC1_MIN_KERNEL_R4_QUALIFICATION_2026-10-27.json).
+The exact-byte capstone now constructs meanings for original source bodies,
+including regular constructors/ambient recursors/projections, with fresh names and
+ordered registry identities. Compiler/generated-code preservation is unproved.
+Production min/dual retain PSC1_MIN_CANONICAL_BRIDGE_UNPROVED; official Wasm is
+the default. Compiler min coverage remains 0/124, Practical Core 0/37 and no
+min-qualified G1/G2/G3. All project execution remains GitHub Actions Linux,
+with the user-confirmed GPT-6.1 Sol / High setting.
+
+Terminal broader regressions pass in
+[main run 40519663163](https://github.com/dwijayuda/pskernel/actions/runs/40519663163):
+full Linux **122252188875**, gate **122269623462**, and every selected dependency
+succeed; the benchmark is deliberately unselected. The tested merge
+`0010ff8fe52d8423f45f693fd7ce6b6256934e6b` has the exact qualified source tree
+`48c15ca4509efd25822045727f6dae78a2e79947`.
+[Installed CLI run 40515328367](https://github.com/dwijayuda/pskernel/actions/runs/40515328367)
+also passes (installed job **122228057662**) at runtime commit
+`68887377c1c6bead518c5aa91832d6b967248859`. A verified comparison shows only
+proofs, qualification workflow and separate host tests changed afterward.
+These broader runs do not qualify compiler min G1/G2/G3.
+
+### Historical R0–R3 checkpoint material
+
+The sections below retain earlier scopes and obligations; use the R4 guideline
+above for the current state.
+
+## Historical R3 operational checkpoint
+
+The normalized R3 operational profile passes standalone Linux
+[40486405765](https://github.com/dwijayuda/pskernel/actions/runs/40486405765) at
+**`695c68701437899b17a39205300cf26988322b15`**:
+proof/native **122129166896**, source/portability/census **122129166670**.
+The user-confirmed continuation setting is GPT-6.1 Sol / High. All project builds,
+proof checks, source compilation and tests ran on GitHub Actions Linux.
+
+Read the [R3 profile and exact boundary](docs/PSC1_MIN_KERNEL_R3_PROFILE.md) and
+[dated R3 receipt](docs/PSC1_MIN_KERNEL_R3_QUALIFICATION_2026-10-27.json).
+The separate operational layer adds annotated lets, descriptor-derived
+single-constructor projections, and closed Nat/List/Option/Bool-decision schemas.
+Every actual inference/admission success has a concrete model and Empty
+consistency proof. R2 source/proofs remain intact.
+
+The actual typed projection-model iota equation is proved for arbitrary supported
+fields. The sequential fold carries DefinitionHistory for actual checked bodies;
+checked_definition_unfold relates real constant interpretation to that body.
+Conversion is structural code equality with a model-soundness theorem. There is
+no general beta/delta type-conversion engine or dependent-alias acceptance.
+
+All **26** new printed reports are no axioms or exactly `[propext]`.
+The actual native/generated corpus passes **36 positives, 40 refusals and two
+out-of-range probes**. Fifteen initial contracts were expanded to **29** exact
+selected foundation declarations, including required types and constructors.
+The actual source-owned ite/Decidable.rec AST equations and constructive
+conditional model are checked. Canonical primitive contract comparisons are CI
+evidence, never fixture/hash admission rules.
+
+The checker closure is four source modules, 518 lines/22339 B; the two added
+modules are 211 lines/10071 B. The five-module source/test graph is independently
+admitted by official Lean 4.35. Its bundle is 134690 B TS/318436 B JS, including the
+test/shared runtime, not an isolated checker payload or performance measurement.
+
+Terminal broader regressions pass: [main 40487236627](https://github.com/dwijayuda/pskernel/actions/runs/40487236627)
+at reporting commit `6113d848b49e68ae968ed970a280a75724b83536`,
+full-job 122138003035 and gate-job 122150263364. Every selected dependency passes;
+the benchmark is deliberately unselected. Existing finite Practical Core criteria
+are 37/37 qualified, zero blocked. This remains official-checker regression scope.
+[Installed 40483267987](https://github.com/dwijayuda/pskernel/actions/runs/40483267987)
+passes preflight 122118837091 and installed 122119116648 at 0898adf5. Only the
+projection proof and documentation changed afterward; executable/test/driver/
+contract bytes match the qualified runtime. Exact separate package/artifact
+identities are in the dated receipt. Verified 2026-10-27 11:01:51 UTC.
+Later documentation-only reporting retains these tested source scopes.
+
+**Next is R4:** bounded exact byte decoding, exact source-name/slot binding and
+profile translation, then the actual generated checker acceptance-to-model path.
+Check matching Eq Bool operands and Bool.decEq operands before constructing
+boolEqIte; no arbitrary proof/decision term may be erased. Recompute the complete
+connected R1/R2/R3/naming/ingress closure and required String/Char semantics.
+The old Check-only 12 records and R2's 37-record view are not this enlarged checker.
+
+R3 does not prove a general raw-Core translator/byte decoder or full foundation
+closure. Generated-code preservation and hostile-input aggregate/heap/stack
+bounds remain open. Canonical min/dual still refuse; full min coverage remains
+0/124 modules, 0/37 Practical Core and no qualified min G1/G2/G3. Preserve official
+Lean Wasm as default. Do not repeat R1/R2/R3 or promote official generations.
+
+
+## Historical checkpoints retained below
+
+## Minimal-kernel research branch, 2026-10-27 Asia/Jakarta
+
+Research work is isolated on `research/psc1-minkernel-consistency-selfhost-20261027`,
+based exactly on qualified layout HEAD94e0c13f6a4b434f73c859cc0c716cb6fb8d1340.
+[Dedicated work state](docs/PSC1_MIN_KERNEL_WORK_STATE.md),
+[architecture](docs/PSC1_MIN_KERNEL_ARCHITECTURE.md),
+[proof status](docs/PSC1_MIN_KERNEL_PROOF_STATUS.md) and
+[measured coverage](docs/PSC1_MIN_KERNEL_COVERAGE.md) own this research scope.
+
+The initial executable Empty/Unit/Nat/arrow fragment has a machine-checked
+acceptance-to-model bridge and consistency theorem (standard propext only).
+Exact source-subset portability/generated16-vector execution and5 finite native
+reference cases pass at d6bebd230bcaadf35a254bfbc5a26a17228db55f, Linux40444275459.
+The checker is1 module/93 lines/3322 bytes. Full existing-regression40444282214 and installed 40444275465 also pass.
+See the [continuation guideline for GPT-6.1 Sol / High](docs/PSC1_MIN_KERNEL_CONTINUATION_GUIDE.md)
+and [exact receipt](docs/PSC1_MIN_KERNEL_QUALIFICATION_2026-10-27.json).
+The current124-module/4747-logical-member graph needs dependent checking,
+308 inductive groups and a115-declaration foundation containing60 axioms.
+The fragment qualifies0 complete compiler modules and0/37 Practical Core criteria.
+Min/dual canonical mode explicitly refuses without fallback; official Lean4.35
+Wasm remains production default and official/native packages are unchanged.
+No new minimal-checker G1/G2/G3, full-compiler consistency or release is claimed.
+No local builds/tests, merge, npm publication or parent-branch writes.
+
+Runtime-only Core/source-origin frontier and exact Core scope laws pass both
+standalone jobs in Linux40455022116 at579642626daa67bd167dd1af626f5b0e0401cb00.
+The3new theorem dependency reports are[propext]. Ledger:12records,54nondependent
+Pis,17no-major-reference motives,23syntactically reached prelude entries/5axioms.
+See [measured runtime profile and next proof batch](docs/PSC1_MIN_KERNEL_RUNTIME_PROFILE.md).
+Next: proved executable binder lowering, then a defined regular-data/closed-type
+profile with exact primitive semantics. No runtime acceptance or production mode
+changes; no foundation pruning, recursor soundness or min self-check is claimed.
+Broader main 40455025111 is terminal success at57964262 (full122030229165,
+gate122038991205;37/37 existing finite Practical Core criteria, zero blocked).
+Installed 40454629955 passes at783718f9, with only the CoreScope proof repair
+intervening before57964262. Exact separate identities are in the dated receipt.
+Next batch R1 uses the user-confirmed GPT-6.1 Sol/High setting.
+
+## R1 syntax-helper batch, standalone qualification passed
+
+The guideline checkpoint is295a7ec828c3db80acae8995ef47c71971f034bc. R1 adds
+experimental Profile/LowerUnusedBinder.lean and proof BinderLowering.lean over
+actual Core operations, plus34 meaningful native/generated transformation cases
+and2 out-of-range probes. Linux40459838298 at8b33b3a17b241d3b264600dd9616cc195933df65 passes both
+proof/native122041556260 and portability/census122041556046. All3 new theorem
+reports are[propext];21positive/13refusal transformations and2out-of-range probes
+pass native/generated execution. New broader main 40459842620 and installed
+40459838431 remain in progress; requery before promotion. Next mathematical
+batch is R2 closed regular-data/type-code recognition and a proved recursor instance.
+There is no new checker acceptance, foundation admission or production mode.
+The helper has4 explicit import-closure modules; the source test input has6.
+
+## R2 normalized regular-data profile — standalone qualified
+
+R2 passes both standalone Linux jobs at
+**`028dcd98fabcb0bf196c0d6f27a80bad3b666745`**, run
+[40469648092](https://github.com/dwijayuda/pskernel/actions/runs/40469648092):
+proof/native **122073398746**, portability/census/source witness **122073398515**.
+The user-confirmed setting is GPT-6.1 Sol / High. All project builds, proof checks,
+source compilation and tests in this batch ran on GitHub Actions Linux.
+
+Read the [R2 profile and precise boundary](docs/PSC1_MIN_KERNEL_R2_PROFILE.md) before
+editing. The isolated executable checks closed Type-0 codes and ordered regular
+datatype descriptors, derives constructor/fixed-result recursor signatures, and
+checks sequential declarations from an empty environment. The generic concrete
+tree model discharges the signature model; actual inference/admission success
+gives a model and Empty consistency. The iota law covers the entire declared
+descriptor family. Stable chronological quotation names are proved injective
+and preserved when relative slots rebase.
+
+All **24** new printed model/validation/name/source bridge reports contain
+no axioms or exactly `[propext]`. The native and actual PSC1-generated corpus
+passes **23 positives, 38 refusals and two out-of-range probes**. The complete
+five-module source/test graph is admitted by official Lean 4.35. Its bundle is
+105087 B TS / 221393 B JS; these include test/shared runtime code. The two-module
+checker source has 307 lines/12268 B; naming adds Foundation.Name and
+RegularNames (four-module checker-plus-naming closure 17081 B). The original
+Check.lean remains 93 lines/3322 B with its original source SHA.
+
+The concrete source-image theorem connects the checked normalized recursor to
+the exact retained PsMinTy.rec spine, with its actual host PsMinTy/Bool model and
+R1 motive-instantiation law. CI locates the native proof witness structurally
+once in the current source-origin-bound psMinTyEq worker. This is a representative
+typed source-image result, not a general decoder, external name resolver or proof
+for all 115 canonical foundation declarations. Internal quotation names do not
+authorize arbitrary canonical source-name binding.
+
+Previous R1 main 40460549124 and installed 40459838431 are terminal success.
+**R2 terminal regressions:** [main 40470311636](https://github.com/dwijayuda/pskernel/actions/runs/40470311636)
+passes at reporting commit `48810244a9d6d449f71bc0d10dcbdbb45f4e2e63`,
+full-job 122080382138 and gate-job 122087862294. Every selected dependency passes;
+the benchmark is deliberately unselected. The tested merge and reporting head
+have the same tree `44291047885b84101167ffa404d3bad059b2fb8a`.
+[Installed 40468550390](https://github.com/dwijayuda/pskernel/actions/runs/40468550390)
+passes preflight 122070225396 and installed 122070428136 at d0810a57. Only three
+proof files and documentation changed afterward; runtime/test/driver bytes match
+the qualified R2 runtime. The dated receipt preserves these separate exact scopes.
+Verified 2026-10-27 08:32:58 UTC. Later documentation-only reports retain these source
+identities; requery live HEAD and checks before starting the next proof batch.
+
+**Next batch is R3:** measured lets, declaration projections and exact pinned
+foundation instance semantics, keeping the real acceptance-to-model bridge.
+Any delta conversion needs a definition-body/evaluation invariant. R4 still
+owns general canonical ingress/name binding/translation and generated execution/
+resource obligations. Canonical min/dual still refuse; full min coverage remains
+0/124 compiler modules, 0/37 Practical Core and no qualified min G1/G2/G3.
+Do not repeat R1/R2 or promote the representative witness to full self-check.
+
+
+## Preserved layout baseline state
+
+
 Updated 2026-10-26 Asia/Jakarta. Active draft [PR #192](https://github.com/dwijayuda/pskernel/pull/192),
 refactor/psc1-layout-20261026, follows PR #191 at b426f9763ed2a576135ed2089671d48e21f1ff32.
 Qualified implementation: 03729a50f1ef352e47fd3d566e1459ffae93c2af.

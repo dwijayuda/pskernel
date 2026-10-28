@@ -1,0 +1,380 @@
+name: PSC1 MinKernel proved fragment
+on:
+  push:
+    branches: [research/psc1-minkernel-consistency-selfhost-20261027, research/psc1-min-compiler-caller-20261028]
+    paths:
+      - psc1/packages/pskernel-min/**/*.lean
+      - psc1/packages/pskernel-min/host/*.mjs
+      - psc1/proofs/pskernel-min/**/*.lean
+      - psc1/scripts/minkernel-*
+      - psc1/packages/pskernel-min/standalone/**
+      - psc1/scripts/MinKernelSourceCompile.lean
+      - psc1/scripts/MinKernelCompilerPreservation.lean
+      - psc1/scripts/MinKernelTextPreservation.lean
+      - psc1/scripts/MinKernelCompilerCaller.lean
+      - .github/workflows/psc1-minkernel.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: psc1-minkernel-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  proof:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - name: Install pinned Lean
+        run: |
+          bash "$GITHUB_WORKSPACE/psc1/scripts/ci/install-pinned-lean.sh"
+      - name: Check exact executable and its complete fragment consistency proof
+        working-directory: psc1/proofs/pskernel-min
+        run: |
+          set -euo pipefail
+          lean --version
+          lake build 2>&1 | tee proof.log
+          ! grep -E 'sorryAx|declaration uses.*sorry' proof.log
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Check theorem trust assumptions and explicit mode refusal
+        working-directory: psc1
+        run: |
+          node scripts/minkernel-mode-tests.mjs
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const text=fs.readFileSync('proofs/pskernel-min/proof.log','utf8');
+          for(const name of ['minKernel_hasModel','minKernel_consistent']) {
+            const line=text.split('\n').find(line=>line.includes("'Ps.MinKernel.Proofs."+name+"'"));
+            assert.ok(line,'missing theorem axiom report '+name);
+            assert.ok(line.includes('does not depend on any axioms') || line.includes('depends on axioms: [propext]'),line);
+          }
+          JS
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const text=fs.readFileSync('proofs/pskernel-min/proof.log','utf8');
+          for(const name of ['instantiate_lift','constant_motive_body','constant_motive_argument_irrelevant']) {
+            const line=text.split('\n').find(line=>line.includes("'Ps.MinKernel.CoreScope."+name+"'"));
+            assert.ok(line,'missing Core scope theorem '+name);
+            assert.ok(line.includes('does not depend on any axioms') || line.includes('depends on axioms: [propext]'),line);
+          }
+          JS
+      - name: Check executable binder-lowering theorem assumptions
+        working-directory: psc1
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const text=fs.readFileSync('proofs/pskernel-min/proof.log','utf8');
+          for(const name of ['lower_sound','lower_instantiate','lower_motive_body']) {
+            const line=text.split('\n').find(line=>line.includes("'Ps.MinKernel.BinderLowering."+name+"'"));
+            assert.ok(line,'missing binder-lowering theorem '+name);
+            assert.ok(line.includes('does not depend on any axioms') || line.includes('depends on axioms: [propext]'),line);
+          }
+          JS
+      - name: Check regular-profile model and exact executable theorem assumptions
+        working-directory: psc1
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const text=fs.readFileSync('proofs/pskernel-min/proof.log','utf8');
+          const theorems={"Ps.MinKernel.RegularModel":["fold_construct","signatures"],"Ps.MinKernel.RegularProofs":["typeEq_sound","regular_hasModel","regular_consistent"],"Ps.MinKernel.RegularValidation":["registryValid_sound","registry_hasModel"],"Ps.MinKernel.RegularNames":["constructor_injective","recursor_injective","generated_root_disjoint","slot_name_stable","slot_name_injective","generated_child_disjoint"],"Ps.MinKernel.RegularSource":["source_instance_checked","checked_source_semantics","source_iota","source_motive_instantiation","actual_core_instance_model","checked_instance_core_model"]};
+          for(const [namespace,names] of Object.entries(theorems)) for(const name of names) {
+            const line=text.split('\n').find(line=>line.includes("'"+namespace+"."+name+"'"));
+            assert.ok(line,'missing regular-profile theorem '+namespace+'.'+name);
+            assert.ok(line.includes('does not depend on any axioms') || line.includes('depends on axioms: [propext]'),line);
+          }
+          JS
+      - name: Check operational projection and foundation theorem assumptions
+        working-directory: psc1
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const text=fs.readFileSync('proofs/pskernel-min/proof.log','utf8');
+          const targets={"Ps.MinKernel.RegularIngressNames":["constructor_reservations","reservations_unique","actual_group_step","group_step_unique","build_plans_history","history_unique","actual_plans_history","actual_plans_no_shadowing"],"Ps.MinKernel.RegularIngressSemantics":["primitive_semantics","recursor_semantics","projection_type_domain","translation_preserves_semantics","checked_source_semantics","normalized_history_head","history_preserves_source","checked_entries_source_image","checked_source_model","byte_admission_source_model","false_type_exact","source_history_no_false","byte_admission_consistent"],"Ps.MinKernel.RegularIngressSource":["projection_owner_image","term_translation","environment_translation"],"Ps.MinKernel.RegularIngressOperationalModel":["evaluate_checked","definitions_history","environment_history","environment_has_model","environment_consistent"],"Ps.MinKernel.RegularIngressAmbient":["lift_zero","lift_succ","lift_input","denote_prefix_lift","denote_self","denote_ground","denote_fields","denote_branch","denote_branches","ambientValue","recursorModel"],"Ps.MinKernel.RegularIngressEncoding":["name_recognizes","expr_recognizes","packet_recognizes","decode_has_wire_derivation"],"Ps.MinKernel.RegularIngressTerms":["constructor_index_identity","constructor_binding","recursor_binding","motive_translation","primitive_translation","typed_primitive_translation","recursor_translation"],"Ps.MinKernel.RegularIngressWire":["digit_bounds","timesTen_value","readTail_value","readNumber_value","wire_append","literal_prefix","recognizes_number","recognizes_then"],"Ps.MinKernel.RegularIngressTranslation":["type_translation","type_closed","ground_field_translation","field_translation","constructor_fields_translation","liftCode_zero","liftCode_one","liftCode_add","lower_type_restores","all_constructor_fields_translation","constructor_count_exact","group_translation","ordered_member_bound","ordered_member_spec","build_plans_order","actual_plans_order"],"Ps.MinKernel.RegularIngressModel":["decode_preserves_source","checked_entries_has_normalized_model","regular_byte_admission_has_normalized_model","regular_no_normalized_empty_constant","actual_constructor_signatures","group_slot_identity"],"Ps.MinKernel.CoreEncoding":["number_wire","safe_text","name_wire","expression_wire","decode_success_has_wire_derivation","byte_admission_source_model","byte_admission_consistent"],"Ps.MinKernel.CoreSemantics":["infer_evaluates","primitive_semantics","translation_preserves_semantics","checked_source_semantics","checked_history_preserves_source","canonical_source_model","canonical_no_empty_constant","canonical_no_false_declaration"],"Ps.MinKernel.CoreTranslation":["type_translation","type_closed","primitive_translation","typed_primitive_translation","conditional_exact","term_translation","environment_translation"],"Ps.MinKernel.CoreIngress":["byteEq_sound","nameEq_sound","exprEq_sound","decode_success_is_well_formed","resolve_preserves_identity","fresh_no_shadowing","translate_environment_preserves_identity","canonical_admission_has_model"],"Ps.MinKernel.OperationalSource":["actual_ite_declaration","actual_decision_recursor","decisionBody_eq_ite","source_boolEqIte"],"Ps.MinKernel.OperationalProofs":["operational_hasModel","operational_hasBodyHistory","operational_consistent","latest_definition_value","previous_definition_value","checked_definition_unfold","conversion_model"],"Ps.MinKernel.OperationalProjection":["projectionModel","projection_iota","actual_projection_iota"],"Ps.MinKernel.OperationalFoundation":["primitiveType_guards","primitiveModel","nat_iota_succ","list_iota_cons","option_iota_some","boolEqIte_exact","boolEqIte_true","boolEqIte_false","derived_natPred","derived_boolNot","derived_boolBeq"]};
+          for(const [namespace,names]of Object.entries(targets))for(const name of names){
+            const line=text.split('\n').find(line=>line.includes("'"+namespace+"."+name+"'"));
+            assert.ok(line,'missing operational theorem '+namespace+'.'+name);
+            assert.ok(line.includes('does not depend on any axioms')||line.includes('depends on axioms: [propext]'),line);
+          }
+          JS
+      - name: Build and run native regular-data exact-byte corpus
+        working-directory: psc1/packages/pskernel-min
+        run: |
+          set -euo pipefail
+          lake build minkernel_regular_ingress_tests
+          .lake/build/bin/minkernel_regular_ingress_tests --cases ../../scripts/minkernel-regular-ingress-cases.json | tee regular-ingress-tests.log
+      - name: Build and run native exact-byte ingress corpus
+        working-directory: psc1/packages/pskernel-min
+        run: |
+          set -euo pipefail
+          lake build minkernel_ingress_tests
+          .lake/build/bin/minkernel_ingress_tests | tee ingress-tests.log
+      - name: Build and run native operational-profile corpus
+        working-directory: psc1/packages/pskernel-min
+        run: |
+          set -euo pipefail
+          lake build minkernel_operational_tests
+          .lake/build/bin/minkernel_operational_tests | tee operational-tests.log
+      - name: Build and run native regular-profile corpus
+        working-directory: psc1/packages/pskernel-min
+        run: |
+          set -euo pipefail
+          lake build minkernel_regular_tests
+          .lake/build/bin/minkernel_regular_tests | tee regular-tests.log
+      - name: Build and run native binder transformation corpus
+        working-directory: psc1/packages/pskernel-min
+        run: |
+          set -euo pipefail
+          lake build minkernel_binder_tests
+          .lake/build/bin/minkernel_binder_tests | tee binder-tests.log
+      - name: Build and run native semantic refusal corpus
+        working-directory: psc1/packages/pskernel-min
+        run: |
+          set -euo pipefail
+          lake build minkernel_tests
+          .lake/build/bin/minkernel_tests | tee native-tests.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-minkernel-proof-${{ github.sha }}
+          path: |
+            psc1/proofs/pskernel-min/proof.log
+            psc1/packages/pskernel-min/native-tests.log
+            psc1/packages/pskernel-min/binder-tests.log
+            psc1/packages/pskernel-min/regular-tests.log
+            psc1/packages/pskernel-min/operational-tests.log
+            psc1/packages/pskernel-min/ingress-tests.log
+            psc1/packages/pskernel-min/regular-ingress-tests.log
+          retention-days: 90
+
+  compiler-preservation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        with:
+          path: psc1/.lake
+          key: psc1-min-native-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/packages/**/*.lean', '!psc1/packages/pskernel-min/**', 'psc1/scripts/*.lean') }}
+          restore-keys: |
+            psc1-min-native-v1-${{ runner.os }}-
+            psc1-lake-v2-${{ runner.os }}-
+      - name: Install pinned Lean
+        run: |
+          bash "$GITHUB_WORKSPACE/psc1/scripts/ci/install-pinned-lean.sh"
+          npm install --prefix "$RUNNER_TEMP/min-ts" --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          echo "PSC0_TSC=$RUNNER_TEMP/min-ts/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
+      - name: Prove actual compiler capture, currying and scalar-stage preservation
+        run: |
+          set -euo pipefail
+          mkdir -p dist/pskernel-min/compiler-preservation
+          lake build PsMinCompilerPreservation PsHost PsMinCompilerScalarFixture 2>&1 | tee dist/pskernel-min/compiler-preservation/build.log
+          lake env lean proofs/pskernel-min/CompilerPreservationTrust.lean 2>&1 | tee dist/pskernel-min/compiler-preservation/proof.log
+          node scripts/minkernel-compiler-preservation-guard.mjs
+      - name: Check strict emitted modules against native scalar and source ABI oracles
+        run: node --max-old-space-size=256 scripts/minkernel-compiler-preservation.mjs --abi-only
+      - name: Prove constructive text bytes and check actual source append compatibility
+        run: |
+          set -euo pipefail
+          mkdir -p dist/pskernel-min/text-preservation
+          lake build PsMinTextPreservation PsMinStringBridgeFixture 2>&1 | tee dist/pskernel-min/text-preservation/build.log
+          lake env lean proofs/pskernel-min/TextCompositionTrust.lean 2>&1 | tee dist/pskernel-min/text-preservation/proof.log
+          node scripts/minkernel-text-preservation-guard.mjs
+          node --max-old-space-size=256 scripts/minkernel-text-preservation.mjs --abi-only
+      - name: Prove actual recursive literal and erased-let caller correspondence
+        run: |
+          set -euo pipefail
+          mkdir -p dist/pskernel-min/compiler-caller
+          lake build PsMinCompilerCaller PsMinCompilerCallerFixture 2>&1 | tee dist/pskernel-min/compiler-caller/build.log
+          lake env lean proofs/pskernel-min/CompilerCallerTrust.lean 2>&1 | tee dist/pskernel-min/compiler-caller/proof.log
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          assert.equal(process.platform,'linux');assert.equal(process.env.GITHUB_ACTIONS,'true');
+          const text=fs.readFileSync('dist/pskernel-min/compiler-caller/proof.log','utf8');
+          const names=["fuel_zero","nested_idempotent","nested_context","nested_names","eligible_positive","eligible_source","eligible_erases","public_preserves","entry_preserves","natural_bridge"];
+          const reports=names.map(name=>{
+           const full='Ps.MinKernel.CompilerCaller.'+name;
+           const rows=text.split('\n').filter(line=>line.includes("'"+full+"'"));
+           assert.equal(rows.length,1,'missing/duplicate report '+full);
+           assert.ok(rows[0].includes('does not depend on any axioms')||rows[0].endsWith('depends on axioms: [propext]'),rows[0]);
+           return {name:full,report:rows[0]};
+          });
+          assert.doesNotMatch(text,/sorryAx|declaration uses.*sorry/);
+          fs.writeFileSync('dist/pskernel-min/compiler-caller/proof-reports.json',JSON.stringify({schema:'psc1-r7-caller-trust/1',reports},null,2)+'\n');
+          console.log('PSC1_R7_CALLER_TRUST_PASS '+reports.length);
+          
+          JS
+          node --max-old-space-size=256 scripts/minkernel-compiler-caller.mjs --abi-only
+      - name: Prove independent Core substitution and recursive caller source semantics
+        run: |
+          set -euo pipefail
+          mkdir -p dist/pskernel-min/compiler-substitution
+          lake build PsMinCompilerSubstitution 2>&1 | tee dist/pskernel-min/compiler-substitution/build.log
+          lake env lean proofs/pskernel-min/CompilerSubstitutionTrust.lean 2>&1 | tee dist/pskernel-min/compiler-substitution/proof.log
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          assert.equal(process.platform,'linux');assert.equal(process.env.GITHUB_ACTIONS,'true');
+          const text=fs.readFileSync('dist/pskernel-min/compiler-substitution/proof.log','utf8');
+          const names=["lift_constructive","lift_correct","lift_iff","lift_unique","substitution_constructive","substitution_correct","substitution_iff","substitution_unique","instantiate1_derives","source_forward","source_reverse","source_iff","public_independent","entry_independent"];
+          const reports=names.map(name=>{
+            const full='Ps.MinKernel.CompilerSubstitution.'+name;
+            const rows=text.split('\n').filter(line=>line.includes("'"+full+"'"));
+            assert.equal(rows.length,1,'missing/duplicate report '+full);
+            assert.ok(rows[0].includes('does not depend on any axioms')||rows[0].endsWith('depends on axioms: [propext]'),rows[0]);
+            return {name:full,report:rows[0]};
+          });
+          assert.doesNotMatch(text,/sorryAx|declaration uses.*sorry/);
+          fs.writeFileSync('dist/pskernel-min/compiler-substitution/proof-reports.json',JSON.stringify({schema:'psc1-r8-substitution-trust/1',reports},null,2)+'\n');
+          console.log('PSC1_R8_SUBSTITUTION_TRUST_PASS '+reports.length);
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-r8-substitution-proof-${{ github.sha }}
+          path: psc1/dist/pskernel-min/compiler-substitution/
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-r7-caller-proof-${{ github.sha }}
+          path: psc1/dist/pskernel-min/compiler-caller/
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-r6-text-proof-${{ github.sha }}
+          path: psc1/dist/pskernel-min/text-preservation/
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-r5-preservation-proof-${{ github.sha }}
+          path: psc1/dist/pskernel-min/compiler-preservation/
+          retention-days: 90
+
+  portability-and-closure:
+    needs: compiler-preservation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        id: native_cache
+        with:
+          path: psc1/.lake
+          key: psc1-min-native-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/packages/**/*.lean', '!psc1/packages/pskernel-min/**', 'psc1/scripts/*.lean') }}
+          restore-keys: |
+            psc1-min-native-v1-${{ runner.os }}-
+            psc1-lake-v2-${{ runner.os }}-
+      - name: Install repository-pinned tools
+        run: |
+          set -euo pipefail
+          bash "$GITHUB_WORKSPACE/psc1/scripts/ci/install-pinned-lean.sh"
+          npm install --prefix "$RUNNER_TEMP/min-ts" --ignore-scripts --no-audit --no-fund typescript@7.0.2
+          echo "PSC0_TSC=$RUNNER_TEMP/min-ts/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
+      - name: Build current PSC1 source seed and official reference checker
+        id: native_build
+        run: |
+          set -euo pipefail
+          node packages/pskernel-lean/host/check-pin.mjs
+          lake build PsBackendTs psc1_independent_checker psc1_source_census_probe psc2_joint_closure_inventory PsMinCompilerScalarFixture PsMinStringBridgeFixture PsMinCompilerCallerFixture
+      - uses: actions/cache/save@v4
+        if: ${{ !cancelled() && steps.native_build.outcome == 'success' && steps.native_cache.outputs.cache-hit != 'true' }}
+        with:
+          path: psc1/.lake
+          key: ${{ steps.native_cache.outputs.cache-primary-key }}
+      - name: Compile and execute checker source through PSC1 and check exact source admissions
+        id: portable
+        run: node scripts/minkernel-portability.mjs
+      - name: Measure complete current compiler admission graph and foundation
+        id: closure_audit
+        if: ${{ !cancelled() }}
+        run: node scripts/minkernel-closure-audit.mjs
+      - name: Attribute the runtime Core graph and classify recursor motives
+        if: ${{ !cancelled() && steps.portable.outcome == 'success' && steps.closure_audit.outcome == 'success' }}
+        run: node scripts/minkernel-runtime-frontier.mjs
+      - name: Qualify actual binder helper source and generated transformation corpus
+        if: ${{ !cancelled() }}
+        run: node scripts/minkernel-binder-portability.mjs
+      - name: Qualify regular-profile executable and compare the current source Core witness
+        if: ${{ !cancelled() }}
+        run: node scripts/minkernel-regular-portability.mjs
+      - name: Qualify actual operational source and native/generated refusal corpus
+        if: ${{ !cancelled() }}
+        run: node scripts/minkernel-operational-portability.mjs
+      - name: Qualify exact-byte ingress and hostile-input refusal
+        if: ${{ !cancelled() }}
+        run: node --max-old-space-size=256 scripts/minkernel-ingress-portability.mjs
+      - name: Qualify regular-data ingress and attempt complete runtime admission
+        id: regular_ingress
+        if: ${{ !cancelled() }}
+        run: node --max-old-space-size=256 scripts/minkernel-regular-ingress-portability.mjs
+      - name: Check regular ingress source universes and resource boundaries
+        if: ${{ !cancelled() && steps.regular_ingress.outcome == 'success' }}
+        run: node --max-old-space-size=256 packages/pskernel-min/test/RegularIngressHostTests.mjs
+      - name: Check actual scalar emitter ABI and source partial-application integration
+        if: ${{ !cancelled() && steps.regular_ingress.outcome == 'success' }}
+        run: node --max-old-space-size=256 scripts/minkernel-compiler-preservation.mjs
+      - name: Check actual text composition source and unchanged String refusal boundary
+        if: ${{ !cancelled() && steps.regular_ingress.outcome == 'success' }}
+        run: node --max-old-space-size=256 scripts/minkernel-text-preservation.mjs
+      - name: Check actual recursive caller source, emitted module and exact source admission
+        if: ${{ !cancelled() && steps.regular_ingress.outcome == 'success' }}
+        run: node --max-old-space-size=256 scripts/minkernel-compiler-caller.mjs
+      - name: Build and qualify exact standalone pskernel-min tarball offline
+        if: ${{ !cancelled() && steps.regular_ingress.outcome == 'success' }}
+        run: |
+          node --max-old-space-size=256 scripts/minkernel-package.mjs
+          node --max-old-space-size=256 scripts/minkernel-package-tests.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-min-usable-${{ github.sha }}
+          path: |
+            psc1/dist/pskernel-min/usable/*.tgz
+            psc1/dist/pskernel-min/usable/qualification.json
+            psc1/dist/pskernel-min/usable/build-receipt.json
+            psc1/dist/pskernel-min/usable/runtime.source.json
+            psc1/dist/pskernel-min/usable/runtime.canonical.admissions.json
+            psc1/dist/pskernel-min/usable/compile.log
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-minkernel-portability-closure-${{ github.sha }}
+          path: psc1/dist/pskernel-min/
+          retention-days: 90

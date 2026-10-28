@@ -39,8 +39,7 @@ jobs:
       - name: Install repository-pinned Lean
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          bash "$GITHUB_WORKSPACE/psc1/scripts/ci/install-pinned-lean.sh"
       - name: Check the generated service controller and manifest reader syntax
         run: |
           set -euo pipefail
@@ -139,8 +138,7 @@ jobs:
       - name: Install repository-pinned Lean
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          bash "$GITHUB_WORKSPACE/psc1/scripts/ci/install-pinned-lean.sh"
       - name: Build separate native fixture preparer and official checker
         run: |
           set -euo pipefail

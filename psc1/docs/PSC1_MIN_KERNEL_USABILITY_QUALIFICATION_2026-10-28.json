@@ -1,0 +1,575 @@
+{
+  "schema": "pskernel-min/usability-milestone/1",
+  "status": "qualified usable bounded checker",
+  "dateLocal": "2026-10-28",
+  "timezone": "Asia/Jakarta",
+  "sourceCommit": "eea9306384ab68c220bece18e769fd16d7903f3a",
+  "sourceTree": "b187c8f91f374bc04de21932aed09ec78ccab164",
+  "scope": "U1 of the user-requested usable-checker then full-compiler workstream",
+  "fullCompilerSupportComplete": false,
+  "proofReportsRetained": 235,
+  "package": {
+    "name": "@proofscript/pskernel-min",
+    "version": "0.1.0-r4b.1",
+    "tarball": "proofscript-pskernel-min-0.1.0-r4b.1.tgz",
+    "bytes": 42237,
+    "sha256": "42d7d524d903885f0f7d06b83fa21b9755759ff457d6d24b3df503196ed51929"
+  },
+  "runs": [
+    {
+      "id": 40667728807,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40667728807",
+      "status": "completed",
+      "conclusion": "success",
+      "head": "eea9306384ab68c220bece18e769fd16d7903f3a",
+      "attempt": 1
+    },
+    {
+      "id": 40667735933,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40667735933",
+      "status": "completed",
+      "conclusion": "success",
+      "head": "eea9306384ab68c220bece18e769fd16d7903f3a",
+      "attempt": 2
+    },
+    {
+      "id": 40667728660,
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40667728660",
+      "status": "completed",
+      "conclusion": "success",
+      "head": "eea9306384ab68c220bece18e769fd16d7903f3a",
+      "attempt": 1
+    }
+  ],
+  "qualification": {
+    "schema": "pskernel-min/usable-qualification/1",
+    "status": "passed",
+    "head": "eea9306384ab68c220bece18e769fd16d7903f3a",
+    "platform": "linux",
+    "node": "v22.23.3",
+    "package": {
+      "name": "@proofscript/pskernel-min",
+      "version": "0.1.0-r4b.1",
+      "tarball": "proofscript-pskernel-min-0.1.0-r4b.1.tgz",
+      "bytes": 42237,
+      "sha256": "42d7d524d903885f0f7d06b83fa21b9755759ff457d6d24b3df503196ed51929"
+    },
+    "sourceModules": 10,
+    "sourceBytes": 103181,
+    "nativeAndOfficialCorpus": "same-source portability job required before this step",
+    "sdkCases": [
+      {
+        "id": "empty",
+        "accepted": true,
+        "code": "PSC1_MIN_CORE_ACCEPTED"
+      },
+      {
+        "id": "nat-definition",
+        "accepted": true,
+        "code": "PSC1_MIN_CORE_ACCEPTED"
+      },
+      {
+        "id": "empty-family",
+        "accepted": true,
+        "code": "PSC1_MIN_CORE_ACCEPTED"
+      },
+      {
+        "id": "enum-constructor",
+        "accepted": true,
+        "code": "PSC1_MIN_CORE_ACCEPTED"
+      },
+      {
+        "id": "regular-tree-constructor",
+        "accepted": true,
+        "code": "PSC1_MIN_CORE_ACCEPTED"
+      },
+      {
+        "id": "regular-tree-fold",
+        "accepted": true,
+        "code": "PSC1_MIN_CORE_ACCEPTED"
+      },
+      {
+        "id": "record-field-zero",
+        "accepted": true,
+        "code": "PSC1_MIN_CORE_ACCEPTED"
+      },
+      {
+        "id": "record-field-one",
+        "accepted": true,
+        "code": "PSC1_MIN_CORE_ACCEPTED"
+      },
+      {
+        "id": "interleaved-older-projection",
+        "accepted": true,
+        "code": "PSC1_MIN_CORE_ACCEPTED"
+      },
+      {
+        "id": "interleaved-older-constant",
+        "accepted": true,
+        "code": "PSC1_MIN_CORE_ACCEPTED"
+      },
+      {
+        "id": "nat-recursor",
+        "accepted": true,
+        "code": "PSC1_MIN_CORE_ACCEPTED"
+      },
+      {
+        "id": "list-recursor",
+        "accepted": true,
+        "code": "PSC1_MIN_CORE_ACCEPTED"
+      },
+      {
+        "id": "option-recursor",
+        "accepted": true,
+        "code": "PSC1_MIN_CORE_ACCEPTED"
+      },
+      {
+        "id": "conditional-carrier",
+        "accepted": true,
+        "code": "PSC1_MIN_CORE_ACCEPTED"
+      },
+      {
+        "id": "empty-carrier-arrow",
+        "accepted": true,
+        "code": "PSC1_MIN_CORE_ACCEPTED"
+      },
+      {
+        "id": "forward-type",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "forward-constructor",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "duplicate-family",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "duplicate-constructor",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "recursor-collision-before",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "recursor-collision-after",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "constructor-collision-with-recursor",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "reserved-family",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "negative-self",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "nested-self",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "constructor-wrong-result",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "constructor-forward-field",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "indexed-family",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "proposition-family",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "projection-multi-constructor",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "projection-wrong-major",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "projection-out-of-range",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "projection-unknown-owner",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "constructor-wrong-universe",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "recursor-wrong-universe",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "recursor-wrong-motive-domain",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "recursor-dependent-motive",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "recursor-missing-minor",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "recursor-swapped-minors",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "group-parameters",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_INDUCTIVE_DOMAIN"
+      },
+      {
+        "id": "group-level-parameters",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_INDUCTIVE_DOMAIN"
+      },
+      {
+        "id": "unknown-group-metadata",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "unknown-constructor-field",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "unknown-expression-field",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "trailing-input",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_Unexpected non-whitespace character after JSON at position 342 (line 1 column 343)"
+      },
+      {
+        "id": "literal-maximum",
+        "accepted": true,
+        "code": "PSC1_MIN_CORE_ACCEPTED"
+      },
+      {
+        "id": "literal-excess",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_NUMBER"
+      },
+      {
+        "id": "duplicate-constructor-name-field",
+        "accepted": false,
+        "code": "PSC1_MIN_CORE_REFUSED"
+      },
+      {
+        "id": "earlier-family-recursor-own-result",
+        "accepted": true,
+        "code": "PSC1_MIN_CORE_ACCEPTED"
+      },
+      {
+        "id": "earlier-family-recursor-list-result",
+        "accepted": true,
+        "code": "PSC1_MIN_CORE_ACCEPTED"
+      },
+      {
+        "id": "earlier-family-recursor-arrow-result",
+        "accepted": true,
+        "code": "PSC1_MIN_CORE_ACCEPTED"
+      },
+      {
+        "id": "earlier-family-recursor-newer-result",
+        "accepted": true,
+        "code": "PSC1_MIN_CORE_ACCEPTED"
+      }
+    ],
+    "hostileCases": 7,
+    "localOfflineInstalled": true,
+    "globalOfflineInstalled": true,
+    "installedFilesIdentical": true,
+    "strictTypeConsumer": true,
+    "noExternalToolsRuntime": true,
+    "cliExitCodes": [
+      0,
+      1,
+      2
+    ],
+    "explicitLfFraming": true,
+    "fifoRefusedWithoutBlocking": true,
+    "completeRuntime": {
+      "cli": {
+        "schema": "pskernel-min/check/1",
+        "profile": "psc1-min-core-regular/1",
+        "accepted": true,
+        "code": "PSC1_MIN_CORE_ACCEPTED",
+        "delegated": false,
+        "byteLength": 1804358,
+        "declarationCount": 206,
+        "input": {
+          "byteLength": 1804358,
+          "sha256": "041d55f110471b91b69d134a38daeb94ee555a71e797b48a0c00cc6aa66ee516"
+        },
+        "checked": {
+          "byteLength": 1804358,
+          "sha256": "041d55f110471b91b69d134a38daeb94ee555a71e797b48a0c00cc6aa66ee516"
+        },
+        "removedTerminalLF": false
+      },
+      "sdk": {
+        "schema": "pskernel-min/check/1",
+        "profile": "psc1-min-core-regular/1",
+        "accepted": true,
+        "code": "PSC1_MIN_CORE_ACCEPTED",
+        "delegated": false,
+        "byteLength": 1804358,
+        "declarationCount": 206,
+        "resourceUsage": {
+          "userCPUTime": 74307624,
+          "systemCPUTime": 559705,
+          "maxRSS": 310820,
+          "sharedMemorySize": 0,
+          "unsharedDataSize": 0,
+          "unsharedStackSize": 0,
+          "minorPageFault": 109737,
+          "majorPageFault": 0,
+          "swappedOut": 0,
+          "fsRead": 0,
+          "fsWrite": 0,
+          "ipcSent": 0,
+          "ipcReceived": 0,
+          "signalsCount": 0,
+          "voluntaryContextSwitches": 30685,
+          "involuntaryContextSwitches": 2881
+        }
+      }
+    },
+    "currentCompiler": {
+      "supported": false,
+      "code": "PSC1_MIN_CORE_BYTE_BUDGET",
+      "qualifiedModules": 0,
+      "totalModules": 124
+    },
+    "generatedCodePreservation": "not-proved",
+    "productionDefault": false,
+    "fullCompilerSupported": false,
+    "boundary": "Usable bounded R4B checker; source consistency proof and finite installed/runtime validation, with compiler/engine assumptions. Full compiler support remains an open workstream."
+  },
+  "manifest": {
+    "schema": "pskernel-min/package-manifest/1",
+    "metadata": {
+      "name": "@proofscript/pskernel-min",
+      "version": "0.1.0-r4b.1",
+      "sourceCommit": "eea9306384ab68c220bece18e769fd16d7903f3a",
+      "profile": "psc1-min-core-regular/1",
+      "fullCompilerSupported": false,
+      "productionDefault": false,
+      "generatedCodePreservation": "not-proved",
+      "sourceConsistency": "R4B proved source fragment; generated execution requires the compiler/runtime assumptions",
+      "linuxQualification": "see exact-tarball qualification.json outside package",
+      "sourceModules": 10,
+      "sourceBytes": 103181,
+      "runtimePacket": {
+        "bytes": 1804358,
+        "sha256": "041d55f110471b91b69d134a38daeb94ee555a71e797b48a0c00cc6aa66ee516"
+      },
+      "upstreamLean": {
+        "version": "4.35.0",
+        "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+      }
+    },
+    "sourceIdentities": [
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularProfile.lean",
+        "bytes": 8569,
+        "sha256": "ebecd7fc1fc49171d0a3fde4faae04f22130c6f112298739cd44a8ffb338df14"
+      },
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularCheck.lean",
+        "bytes": 3699,
+        "sha256": "126b83aa4a22115d6bef29dae079a727e72ebed790ad725aeaeac3235acd23f7"
+      },
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/OperationalProfile.lean",
+        "bytes": 6502,
+        "sha256": "8ec493593c57203ab12d4060256f2fb35a4f0683637629fa5a383d595f3bdd24"
+      },
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/OperationalCheck.lean",
+        "bytes": 3569,
+        "sha256": "316f803f4643aae8eae0c0099870c4151be513f28e33b6f5df57ec6675f08c53"
+      },
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/CoreBytes.lean",
+        "bytes": 15107,
+        "sha256": "216ee8748c027bcb56c8bf9ec745542723ad201b6936bbb84c8a2824f8db931d"
+      },
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/CoreIngress.lean",
+        "bytes": 14341,
+        "sha256": "39fd5f5977e8c44445a7a5a3ef00ec47516658fe3029831452e2b4094fe68d27"
+      },
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularIngressProfile.lean",
+        "bytes": 12918,
+        "sha256": "90df83cbf1ab56c1c6df1f69e426b3cd3d715436a1beb877dfaa920920fb1591"
+      },
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularIngressOperational.lean",
+        "bytes": 5630,
+        "sha256": "d703528e4c157b6f9a9a9b788046278608a0a991211e3c86e37b749adf9f32ba"
+      },
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularIngressCheck.lean",
+        "bytes": 12928,
+        "sha256": "16d3c2e4a4a51615956f86e555439e37edf094cf30c10c331ebc1601c7b63f17"
+      },
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularIngressBytes.lean",
+        "bytes": 19918,
+        "sha256": "ffa574b895122e4a31e2ba2ffaa9c8cd7c591b1e9e1c619f93f95d23cd45844d"
+      }
+    ],
+    "files": [
+      {
+        "path": "index.mjs",
+        "bytes": 704,
+        "sha256": "d7873622961751e9119f9bf4a27901908c2d6b2b3bc5c3851b2c1f87f480dffe"
+      },
+      {
+        "path": "index.d.ts",
+        "bytes": 625,
+        "sha256": "97e2dde4baeae0e6ee43d34f0a48f085e95f7d7b7afeded8e69845bce3217f20"
+      },
+      {
+        "path": "metadata.mjs",
+        "bytes": 792,
+        "sha256": "16a0c6116eda90318ac8af708c4dece679e48baf0340fdb9d32c3bb588e4a7df"
+      },
+      {
+        "path": "cli.mjs",
+        "bytes": 4006,
+        "sha256": "1af6e55254736c5c230c6369f853fc3fc7c9815164f70801849227bd0a24fd2d"
+      },
+      {
+        "path": "worker.mjs",
+        "bytes": 147,
+        "sha256": "a941c956142d80a07cc31bf820f201fd4f4fc917fe285e7baebb18cf18265098"
+      },
+      {
+        "path": "runtime/kernel.js",
+        "bytes": 502739,
+        "sha256": "2cfe8dd6564b7ec6e968841c1ef43b01897d7ca5303095eb2b8c9b48dd27ded3"
+      },
+      {
+        "path": "host/ingress.mjs",
+        "bytes": 9176,
+        "sha256": "7673a6d88ae15af546694157362a89382dd9d07a5b4c7212fe8e22549b4bad21"
+      },
+      {
+        "path": "examples/nat-definition.json",
+        "bytes": 294,
+        "sha256": "262e5fbeb1ac1953161ecd47c60b65e658632dc41239b8cbf6e3451fabba2db2"
+      },
+      {
+        "path": "examples/regular-tree-fold.json",
+        "bytes": 2679,
+        "sha256": "31bea5b731e08b69d17cb455090c5509fb46155fa95e7f66f02c183995b63d0d"
+      },
+      {
+        "path": "examples/negative-self.json",
+        "bytes": 616,
+        "sha256": "0188786664dbc4ba936eb3c4ac6820588e76c61d399aa88897aec6ac27e31eaf"
+      },
+      {
+        "path": "README.md",
+        "bytes": 3987,
+        "sha256": "febfb1ae2760242c5c2d70ee81ecaffcac7e5561adc804d0516446a8fc86a8ac"
+      },
+      {
+        "path": "package.json",
+        "bytes": 602,
+        "sha256": "5054b9198b4a03cb9564bc7d725a0ad32c8d1421a64ed395a2c90f7cdeaf1244"
+      }
+    ],
+    "officialSourceAdmission": {
+      "protocol": "pskernel-lean/1",
+      "provider": "lean4-cpp",
+      "leanVersion": "4.35.0",
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "profile": "lean4.35-core",
+      "accepted": true
+    },
+    "trustBoundary": "Source consistency proof and finite native/generated/installed observations; no full compiler admission or generated-code preservation theorem."
+  },
+  "artifact": {
+    "id": 12807008905,
+    "bytes": 98084,
+    "sha256": "c761af72dfa2f3f8cb2fa8521e61c92ede95819a74466d472bdc5c672a85088c",
+    "verifiedZip": true
+  },
+  "setupRetry": {
+    "job": 122746840850,
+    "firstConclusion": "cancelled",
+    "reason": "Cached Lean was restored; unnecessary elan installer download ran until the unchanged 20-minute job deadline. No source test failed.",
+    "retriedJob": 122763448099,
+    "finalMainRunAttempt": 2,
+    "finalConclusion": "success"
+  },
+  "defaultProvider": "official Lean Wasm",
+  "productionMinDualRefusal": "PSC1_MIN_CANONICAL_BRIDGE_UNPROVED",
+  "fullCompiler": {
+    "supported": false,
+    "qualifiedModules": 0,
+    "totalModules": 124,
+    "remaining": [
+      "scalable exact-byte/parser/state refinement",
+      "complete current compiler graph and foundational model",
+      "actual recursive compiler preservation and fresh-name/type-proof telescope invariants",
+      "closure/carrier/generator/target semantics",
+      "actual min G1/G2/G3 qualification"
+    ]
+  },
+  "continuation": {
+    "branch": "research/psc1-min-compiler-caller-20261028",
+    "proofExperiment": "aab8b66e6bfebfb43a481275ba15a6de5a08085e",
+    "status": "native/generated caller qualification in progress; not adopted or full compiler qualified"
+  },
+  "executionBoundary": "All project proofs, builds and tests ran only on GitHub Actions Linux. Local operations only inspect/hash/export CI artifacts and draft text.",
+  "reportingPolicy": "This source receipt precedes its reporting-only documentation commit; verify that commit's selected gates separately."
+}

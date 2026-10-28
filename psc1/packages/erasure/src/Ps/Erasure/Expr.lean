@@ -689,6 +689,18 @@ def psEraseArrayFoldl
                                             typeArguments (List.cons bridge rest)))
               | List.cons _ _ => Except.error PsErasureError.unsupportedApplication
 
+-- Shared scalar lowering stage. Name dispatch remains in the caller.
+-- This pure helper has no String.Internal or provider premise.
+def psEraseBinaryIntrinsicApplication
+    (erase : PsExpr -> Except PsErasureError PsVerifiedIrExpr)
+    (operation : PsVerifiedIrIntrinsic) (arguments : List PsExpr) :
+    Except PsErasureError (Option PsVerifiedIrExpr) :=
+  if Nat.beq (psListLength arguments) 2 then
+    match psEraseMappedIntrinsic erase operation arguments with
+    | Except.error error => Except.error error
+    | Except.ok result => Except.ok (Option.some result)
+  else Except.error PsErasureError.unsupportedApplication
+
 def psErasePrimitiveApplication
     (environment : PsEnvironment)
     (scope : PsErasureScope)
@@ -701,16 +713,7 @@ def psErasePrimitiveApplication
       let text := psNameToString name;
       let binary : PsVerifiedIrIntrinsic -> Except PsErasureError (Option PsVerifiedIrExpr) :=
         fun (operation : PsVerifiedIrIntrinsic) =>
-          if Nat.beq (psListLength view.args) 2 then
-            match
-                psEraseMappedIntrinsic
-                  erase
-                  operation
-                  view.args with
-            | Except.error error => Except.error error
-            | Except.ok result => Except.ok (Option.some result)
-          else
-            Except.error PsErasureError.unsupportedApplication;
+          psEraseBinaryIntrinsicApplication erase operation view.args;
       let productProjection : Nat -> Except PsErasureError (Option PsVerifiedIrExpr) :=
         fun (index : Nat) =>
           if Nat.beq (psListLength view.args) 3 then

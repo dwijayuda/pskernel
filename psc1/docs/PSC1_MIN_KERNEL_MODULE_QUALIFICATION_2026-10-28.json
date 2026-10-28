@@ -1,0 +1,255 @@
+{
+  "schema": "psc1-min-actual-module-qualification-checkpoint/1",
+  "date": "2026-10-28",
+  "source": "4e0bb6a7ba32f22effd6b814f31de51a5ebb1213",
+  "root": "Ps.CompilerUnified.Service",
+  "totalModules": 124,
+  "counts": {
+    "freshSourceClosuresMinAdmitted": 1,
+    "finiteRuntimeValidatedAdmittedModules": 1,
+    "fullyCompilerQualifiedModules": 0,
+    "minG1": false,
+    "minG2": false,
+    "minG3": false
+  },
+  "evidence": {
+    "run": 40704877559,
+    "job": 122874182518,
+    "status": "success",
+    "artifact": 12823741490,
+    "artifactBytes": 3669884,
+    "artifactSha256": "bc028dd3dcf9c1e2c7186653d713de4d33275e284c93cceb32eca940fadda390",
+    "platform": "GitHub Actions Linux",
+    "projectedClosuresQueried": 124,
+    "freshIndependentSourceClosuresQueried": 6,
+    "matrixPublicApiCalls": 136,
+    "additionalSourceRuntimePublicApiCalls": 1
+  },
+  "firstModule": {
+    "module": "Ps.Foundation.Source",
+    "sourceBytes": 148,
+    "sourceSha256": "33d898574406817537cc0c1a728e50eae2838a47178ad1fe4adba53d54d6c736",
+    "canonicalBytes": 1387,
+    "canonicalSha256": "354322a05552cc8cd8a2285dde51d960e84da990c19b78d4085a3a16ccd3e93d",
+    "records": 2,
+    "logicalMembers": 6,
+    "freshEqualsProjection": true,
+    "missingMembers": [],
+    "extraOwners": [],
+    "partialBodies": [],
+    "minAccepted": true,
+    "delegated": false,
+    "officialAccepted": true,
+    "runtimeCases": 525,
+    "sourceAndConsumerCanonicalBytes": 21578,
+    "sourceAndConsumerCanonicalSha256": "f018cba378ed81641d5fb759db73859a6a8adf19e6edb2d909897664fff5cc52",
+    "compilerPreservation": "not-proved",
+    "fullyCompilerQualified": false
+  },
+  "nextBlocker": {
+    "module": "Ps.Foundation.List",
+    "firstDeclaration": "psListLengthAcc.$psc0SH.0",
+    "prefixCanonicalSha256": "3c43f32a4872d8c730174119043bebf61fd6b9605201ebce84b74f4386ad3835",
+    "freshCanonicalBytes": 57195,
+    "reason": "Sort 1/type-variable carrier and parametric scheme semantics absent from current proved ground translator",
+    "dependentClosures": 71,
+    "actualPacketExternalNames": [
+      "Bool",
+      "Bool.decEq",
+      "Bool.false",
+      "Bool.true",
+      "Eq",
+      "Except",
+      "Except.error",
+      "Except.ok",
+      "Except.rec",
+      "List",
+      "List.cons",
+      "List.nil",
+      "List.rec",
+      "Nat",
+      "Nat.rec",
+      "Nat.succ",
+      "Prod",
+      "Prod.mk",
+      "ite"
+    ]
+  },
+  "policy": {
+    "kernelRulesChanged": false,
+    "limitsRaised": false,
+    "defaultChanged": false,
+    "fallback": false,
+    "npmPublished": false,
+    "protectedBase": "94e0c13f6a4b434f73c859cc0c716cb6fb8d1340"
+  },
+  "boundary": "Admission, finite runtime evidence and full compiler qualification are separate. Polymorphic model/refinement, actual Source compiler preservation and all Min-backed self-host generations remain open.",
+  "adoption": {
+    "source": "f27399e13f187957bb79e7dd20db9ca9a68c77eb",
+    "run": 40708696489,
+    "job": 122887721077,
+    "status": "success",
+    "artifact": 12826040236,
+    "artifactBytes": 3671081,
+    "artifactSha256": "bfecc7ed9cb6dd4ef86911dc4a63137598bfa2293e56a2292423e0f7d4c3abfb",
+    "freshMemberOwnerChecks": true,
+    "closureWidePartialChecks": true,
+    "sourceAndTargetIdentitiesUnchanged": true,
+    "declaredImportEdges": 326,
+    "combinedImportCoreEdges": 827,
+    "dependencyClosuresWithPartialBodies": 12
+  },
+  "fundamentalObligations": {
+    "C1": "Current closed regular Type-valued model lacks type variables, predicative schemes and explicit universe interpretation; actual polymorphic translator/refinement and foundation recursion laws unproved.",
+    "C2": "Current compiler Value/Eval has only Nat/Bool/Unit values and no structure constructor/projection semantics; actual Source erasure/layout/emitted-target preservation unproved.",
+    "C3": "Complete public Min admission and actual Min-backed G1/G2/G3 have not run successfully."
+  },
+  "leafOfficialReplay": {
+    "source": "69abac84449cd550b8f8dc702d5203471b1b9a65",
+    "run": 40711545422,
+    "job": 122897859118,
+    "status": "success",
+    "accepted": 6,
+    "artifact": 12825978772,
+    "artifactBytes": 3672056,
+    "artifactSha256": "772ca0a4027089d855fa6698c682d8097ddcc4b732f235ade89170f0b476e0f1",
+    "diffFromAdoption": "workflow YAML only",
+    "acceptanceAuthority": false
+  },
+  "regressions": {
+    "source": "f27399e13f187957bb79e7dd20db9ca9a68c77eb",
+    "focused": {
+      "run": 40708696485,
+      "status": "success",
+      "jobs": {
+        "proof": 122887721713,
+        "compilerPreservation": 122887721290,
+        "portabilityAndClosure": 122888949386
+      }
+    },
+    "usablePackage": {
+      "bytes": 42240,
+      "sha256": "08931b3a19702ac1938222cda2c3ff0eff3e93357c69c9124ef8e96a0a8c17bd",
+      "originalDeliverableReplaced": false
+    },
+    "broader": {
+      "run": 40708703986,
+      "status": "success",
+      "fullJob": 122895606482,
+      "gateJob": 122910373047,
+      "benchmark": "unselected-skipped",
+      "jobs": [
+        {
+          "id": 122887749329,
+          "name": "static",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122888244354,
+          "name": "native / native",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122888244499,
+          "name": "source-bindings / trace",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122888244592,
+          "name": "lossless / lossless",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122888244649,
+          "name": "focused / focused (applications)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122888244653,
+          "name": "focused / php-application",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122888244864,
+          "name": "focused / focused (core)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122888246803,
+          "name": "benchmark",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "id": 122890856656,
+          "name": "source-bindings / integration",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122893162985,
+          "name": "g1 / generated-js",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122893163174,
+          "name": "closures / selected-closure (rust-compiler, ordinary-checked)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122893163215,
+          "name": "closures / selected-closure (semantic-compiler, checked)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122893163439,
+          "name": "closures / selected-closure (directjs-compiler, ordinary-checked)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122893163454,
+          "name": "g1 / host-session-boundary",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122895606482,
+          "name": "full / linux-scoped",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122910373047,
+          "name": "gate",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    "installedCli": {
+      "run": 40708696445,
+      "status": "success",
+      "preflightJob": 122887721956,
+      "installedJob": 122888099835
+    },
+    "candidateInstalledCli": {
+      "source": "4e0bb6a7ba32f22effd6b814f31de51a5ebb1213",
+      "run": 40704877123,
+      "status": "success"
+    }
+  },
+  "overallStatus": "incomplete",
+  "stoppingBoundary": "Unresolved C1 polymorphic/universe interpretation and actual checker refinement, plus C2 actual Source structure compiler preservation. Full compiler support and all Min-backed self-hosting generations remain unqualified.",
+  "reportingBoundary": "Documentation-only successor of f27399e13f187957bb79e7dd20db9ca9a68c77eb. All project execution was GitHub Actions Linux; artifact parsing/hashing/export only was performed locally. This receipt does not qualify full compiler support."
+}

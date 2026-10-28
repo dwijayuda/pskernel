@@ -670,3 +670,52 @@ lean_exe psc1_source_trace_tests where
 lean_exe psc1_output_abi_probe where
   srcDir := "scripts"
   root := `OutputAbiProbe
+
+-- Proof-only R5 library; excluded from every executable/compiler import graph.
+lean_lib PsMinCompilerPreservation where
+  srcDir := "proofs/pskernel-min"
+  roots := #[`CompilerPreservation, `CompilerPreservationTrust]
+
+-- Registered test fixture for native/reference/source compilation, never a checker root.
+lean_lib PsMinCompilerScalarFixture where
+  srcDir := "packages/pskernel-min/src"
+  roots := #[`Ps.MinKernel.Tests.CompilerScalar]
+
+-- R6 proof-only byte composition; excluded from executable/compiler import graphs.
+lean_lib PsMinTextPreservation where
+  srcDir := "proofs/pskernel-min"
+  roots := #[`TextComposition, `TextCompositionTrust]
+
+-- R6 compatibility fixture; never a connected checker root.
+lean_lib PsMinStringBridgeFixture where
+  srcDir := "packages/pskernel-min/src"
+  roots := #[`Ps.MinKernel.Tests.StringBridge, `Ps.MinKernel.Tests.EmitterBridge]
+
+-- C2 proof-only recursive caller correspondence; not a checker runtime root.
+lean_lib PsMinCompilerCaller where
+  srcDir := "proofs/pskernel-min"
+  roots := #[`CompilerCaller, `CompilerCallerTrust]
+
+-- Native/source-generated caller probes, outside checker runtime roots.
+lean_lib PsMinCompilerCallerFixture where
+  srcDir := "packages/pskernel-min/src"
+  roots := #[`Ps.MinKernel.Tests.CompilerCaller]
+
+
+-- Independent de Bruijn substitution relation and actual worker refinement.
+lean_lib PsMinCompilerSubstitution where
+  srcDir := "proofs/pskernel-min"
+  roots := #[`CompilerSubstitution, `CompilerSubstitutionTrust]
+
+
+-- Actual compiler data-module consumers, excluded from stable checker roots.
+lean_lib PsMinActualSourceProbe where
+  srcDir := "packages/pskernel-min/src"
+  roots := #[`Ps.MinKernel.Tests.SourcePositions]
+
+-- Isolated C1 signature layer; not a public checker or stable runtime root.
+lean_lib PsMinRankOneRuntime where
+  srcDir := "packages/pskernel-min/src"
+  roots := #[`Ps.MinKernel.Profile.RegularProfile, `Ps.MinKernel.Profile.RegularCheck,
+    `Ps.MinKernel.Profile.OperationalProfile, `Ps.MinKernel.Profile.OperationalCheck,
+    `Ps.MinKernel.Profile.CoreBytes, `Ps.MinKernel.Profile.RankOneTypes]

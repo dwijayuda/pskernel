@@ -1,0 +1,6644 @@
+{
+  "schema": "psc1-min-operational-qualification/1",
+  "authority": "Exact safe-Lean normalized-source consistency and finite Linux qualification; not canonical admission",
+  "branch": "research/psc1-minkernel-consistency-selfhost-20261027",
+  "baseBranch": "refactor/psc1-layout-20261026",
+  "baseCommit": "94e0c13f6a4b434f73c859cc0c716cb6fb8d1340",
+  "implementationCommit": "695c68701437899b17a39205300cf26988322b15",
+  "implementationComplete": true,
+  "overallMinimalKernelAssignmentComplete": false,
+  "executionPolicy": "All project proof checks/builds/source compilation/tests/benchmarks run only on GitHub Actions Linux. Local work drafts text and analyzes retained CI data.",
+  "modelSetting": "User-confirmed GPT-6.1 Sol / High",
+  "profile": "PSC1_MIN_KERNEL_R3_PROFILE.md",
+  "runtime": {
+    "modules": 4,
+    "lines": 518,
+    "bytes": 22339,
+    "newModules": 2,
+    "newLines": 211,
+    "newBytes": 10071,
+    "acceptance": [
+      "psMinOpInfer",
+      "psMinOpCheckEnvironment"
+    ],
+    "legacyR2": "Actual unchanged RegularProfile and RegularCheck are imported, not copied",
+    "conversion": "Only actual structural type-code equality; no arbitrary beta/delta type conversion or dependent alias rule",
+    "primitives": "16 normalized direct/derived schemas. NatPred/BoolNot/BoolBeq reduce by proved laws to admitted schema operations; absent canonical heads are not invented.",
+    "conditional": "Proposition Eq Bool left right and Bool.decEq left right share operands by construction; arbitrary raw proof/decision arguments unsupported",
+    "projection": "Signature from actual single-constructor descriptor and field position, including prior-slot lifting; wrong owner/field/type refuses"
+  },
+  "proof": {
+    "sources": [
+      {
+        "file": "OperationalProjection.lean",
+        "bytes": 7724,
+        "lines": 171,
+        "sha256": "f9e98b15ebb3b21f9bd785b2514982cf5351559683b31eddef35072f69d4c238",
+        "path": "psc1/proofs/pskernel-min/OperationalProjection.lean"
+      },
+      {
+        "file": "OperationalFoundation.lean",
+        "bytes": 6321,
+        "lines": 126,
+        "sha256": "9122e19806f6308720e6662aafb79632e027569c3e5077573893face8718a823",
+        "path": "psc1/proofs/pskernel-min/OperationalFoundation.lean"
+      },
+      {
+        "file": "OperationalSoundness.lean",
+        "bytes": 11808,
+        "lines": 197,
+        "sha256": "7a7008f628cc275f141af8f981a1cfde8539471ba7cbabb55b89ae8570c95631",
+        "path": "psc1/proofs/pskernel-min/OperationalSoundness.lean"
+      },
+      {
+        "file": "OperationalSource.lean",
+        "bytes": 5097,
+        "lines": 42,
+        "sha256": "c5e295ce3424d8dee0bc5a9e2b9b828136add9b9318ac2770483f20ff2977366",
+        "path": "psc1/proofs/pskernel-min/OperationalSource.lean"
+      }
+    ],
+    "capstones": [
+      "Ps.MinKernel.OperationalProofs.operational_hasModel",
+      "Ps.MinKernel.OperationalProofs.operational_consistent"
+    ],
+    "bodyInvariant": "Ps.MinKernel.OperationalProofs.operational_hasBodyHistory",
+    "computation": [
+      "Ps.MinKernel.OperationalProjection.actual_projection_iota",
+      "Ps.MinKernel.OperationalProofs.checked_definition_unfold",
+      "Ps.MinKernel.OperationalProofs.conversion_model"
+    ],
+    "actualSource": [
+      "Ps.MinKernel.OperationalSource.actual_ite_declaration",
+      "Ps.MinKernel.OperationalSource.actual_decision_recursor",
+      "Ps.MinKernel.OperationalSource.decisionBody_eq_ite",
+      "Ps.MinKernel.OperationalSource.source_boolEqIte"
+    ],
+    "axiomReports": [
+      "info: OperationalProjection.lean:168:0: 'Ps.MinKernel.OperationalProjection.projectionModel' depends on axioms: [propext]",
+      "info: OperationalProjection.lean:169:0: 'Ps.MinKernel.OperationalProjection.projection_iota' depends on axioms: [propext]",
+      "info: OperationalProjection.lean:170:0: 'Ps.MinKernel.OperationalProjection.actual_projection_iota' depends on axioms: [propext]",
+      "info: OperationalFoundation.lean:115:0: 'Ps.MinKernel.OperationalFoundation.derived_natPred' does not depend on any axioms",
+      "info: OperationalFoundation.lean:116:0: 'Ps.MinKernel.OperationalFoundation.derived_boolNot' does not depend on any axioms",
+      "info: OperationalFoundation.lean:117:0: 'Ps.MinKernel.OperationalFoundation.derived_boolBeq' does not depend on any axioms",
+      "info: OperationalFoundation.lean:118:0: 'Ps.MinKernel.OperationalFoundation.primitiveType_guards' depends on axioms: [propext]",
+      "info: OperationalFoundation.lean:119:0: 'Ps.MinKernel.OperationalFoundation.primitiveModel' depends on axioms: [propext]",
+      "info: OperationalFoundation.lean:120:0: 'Ps.MinKernel.OperationalFoundation.nat_iota_succ' does not depend on any axioms",
+      "info: OperationalFoundation.lean:121:0: 'Ps.MinKernel.OperationalFoundation.list_iota_cons' does not depend on any axioms",
+      "info: OperationalFoundation.lean:122:0: 'Ps.MinKernel.OperationalFoundation.option_iota_some' does not depend on any axioms",
+      "info: OperationalFoundation.lean:123:0: 'Ps.MinKernel.OperationalFoundation.boolEqIte_exact' does not depend on any axioms",
+      "info: OperationalFoundation.lean:124:0: 'Ps.MinKernel.OperationalFoundation.boolEqIte_true' does not depend on any axioms",
+      "info: OperationalFoundation.lean:125:0: 'Ps.MinKernel.OperationalFoundation.boolEqIte_false' does not depend on any axioms",
+      "info: OperationalSource.lean:38:0: 'Ps.MinKernel.OperationalSource.actual_ite_declaration' does not depend on any axioms",
+      "info: OperationalSource.lean:39:0: 'Ps.MinKernel.OperationalSource.actual_decision_recursor' does not depend on any axioms",
+      "info: OperationalSource.lean:40:0: 'Ps.MinKernel.OperationalSource.decisionBody_eq_ite' does not depend on any axioms",
+      "info: OperationalSource.lean:41:0: 'Ps.MinKernel.OperationalSource.source_boolEqIte' does not depend on any axioms",
+      "info: OperationalSoundness.lean:189:0: 'Ps.MinKernel.OperationalProofs.inferModel' depends on axioms: [propext]",
+      "info: OperationalSoundness.lean:190:0: 'Ps.MinKernel.OperationalProofs.operational_hasModel' depends on axioms: [propext]",
+      "info: OperationalSoundness.lean:191:0: 'Ps.MinKernel.OperationalProofs.operational_hasBodyHistory' depends on axioms: [propext]",
+      "info: OperationalSoundness.lean:192:0: 'Ps.MinKernel.OperationalProofs.operational_consistent' depends on axioms: [propext]",
+      "info: OperationalSoundness.lean:193:0: 'Ps.MinKernel.OperationalProofs.latest_definition_value' depends on axioms: [propext]",
+      "info: OperationalSoundness.lean:194:0: 'Ps.MinKernel.OperationalProofs.previous_definition_value' depends on axioms: [propext]",
+      "info: OperationalSoundness.lean:195:0: 'Ps.MinKernel.OperationalProofs.checked_definition_unfold' depends on axioms: [propext]",
+      "info: OperationalSoundness.lean:196:0: 'Ps.MinKernel.OperationalProofs.conversion_model' depends on axioms: [propext]"
+    ],
+    "standardTrust": "Lean4.35.0 kernel/logic. Reports:13 no axioms,13 propext only. No arbitrary foundation model premise in final normalized consistency capstone.",
+    "refinementBoundary": "No general raw-Core translation/decoding, generic Core-AST evaluation or compiler/backend/generated execution preservation theorem. R4 must connect recognized source terms to the operational interpretation."
+  },
+  "sourceIdentities": [
+    {
+      "file": "OperationalProfile.lean",
+      "bytes": 6502,
+      "lines": 137,
+      "sha256": "8ec493593c57203ab12d4060256f2fb35a4f0683637629fa5a383d595f3bdd24",
+      "path": "psc1/packages/pskernel-min/src/Ps/MinKernel/Profile/OperationalProfile.lean"
+    },
+    {
+      "file": "OperationalCheck.lean",
+      "bytes": 3569,
+      "lines": 74,
+      "sha256": "316f803f4643aae8eae0c0099870c4151be513f28e33b6f5df57ec6675f08c53",
+      "path": "psc1/packages/pskernel-min/src/Ps/MinKernel/Profile/OperationalCheck.lean"
+    },
+    {
+      "file": "OperationalVectors.lean",
+      "bytes": 20389,
+      "lines": 104,
+      "sha256": "5fc2a77069dc22bea2cdde60a7988eae6a0cebeb3202ee1aa66e428786485d4c",
+      "path": "psc1/packages/pskernel-min/src/Ps/MinKernel/Tests/OperationalVectors.lean"
+    },
+    {
+      "file": "OperationalTests.lean",
+      "bytes": 992,
+      "lines": 11,
+      "sha256": "6b595060ee6207dc43834caafb9e19289ecab5b38881398d966f7daf07a99a1a",
+      "path": "psc1/packages/pskernel-min/test/OperationalTests.lean"
+    },
+    {
+      "file": "OperationalProjection.lean",
+      "bytes": 7724,
+      "lines": 171,
+      "sha256": "f9e98b15ebb3b21f9bd785b2514982cf5351559683b31eddef35072f69d4c238",
+      "path": "psc1/proofs/pskernel-min/OperationalProjection.lean"
+    },
+    {
+      "file": "OperationalFoundation.lean",
+      "bytes": 6321,
+      "lines": 126,
+      "sha256": "9122e19806f6308720e6662aafb79632e027569c3e5077573893face8718a823",
+      "path": "psc1/proofs/pskernel-min/OperationalFoundation.lean"
+    },
+    {
+      "file": "OperationalSoundness.lean",
+      "bytes": 11808,
+      "lines": 197,
+      "sha256": "7a7008f628cc275f141af8f981a1cfde8539471ba7cbabb55b89ae8570c95631",
+      "path": "psc1/proofs/pskernel-min/OperationalSoundness.lean"
+    },
+    {
+      "file": "OperationalSource.lean",
+      "bytes": 5097,
+      "lines": 42,
+      "sha256": "c5e295ce3424d8dee0bc5a9e2b9b828136add9b9318ac2770483f20ff2977366",
+      "path": "psc1/proofs/pskernel-min/OperationalSource.lean"
+    }
+  ],
+  "portableReceipt": {
+    "schema": "psc1-min-operational-portability/1",
+    "commit": "695c68701437899b17a39205300cf26988322b15",
+    "authoritative": false,
+    "canonicalAdmission": false,
+    "sourceIdentities": [
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularProfile.lean",
+        "sha256": "ebecd7fc1fc49171d0a3fde4faae04f22130c6f112298739cd44a8ffb338df14",
+        "bytes": 8569
+      },
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/RegularCheck.lean",
+        "sha256": "126b83aa4a22115d6bef29dae079a727e72ebed790ad725aeaeac3235acd23f7",
+        "bytes": 3699
+      },
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/OperationalProfile.lean",
+        "sha256": "8ec493593c57203ab12d4060256f2fb35a4f0683637629fa5a383d595f3bdd24",
+        "bytes": 6502
+      },
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Profile/OperationalCheck.lean",
+        "sha256": "316f803f4643aae8eae0c0099870c4151be513f28e33b6f5df57ec6675f08c53",
+        "bytes": 3569
+      },
+      {
+        "path": "packages/pskernel-min/src/Ps/MinKernel/Tests/OperationalVectors.lean",
+        "sha256": "5fc2a77069dc22bea2cdde60a7988eae6a0cebeb3202ee1aa66e428786485d4c",
+        "bytes": 20389
+      }
+    ],
+    "checkerExplicitImportClosureModules": 4,
+    "completeTestClosureModules": 5,
+    "testOnlySourceModules": [
+      "Ps.MinKernel.Tests.OperationalVectors"
+    ],
+    "sourceReport": {
+      "schema": "psc1-min-source-compile/2",
+      "sourceAccepted": true,
+      "targetAccepted": true,
+      "originalIrAccepted": true,
+      "providerChecked": false,
+      "moduleCount": 5,
+      "origins": [
+        {
+          "moduleName": [
+            "Ps",
+            "MinKernel",
+            "Profile",
+            "RegularProfile"
+          ],
+          "coreStart": 0,
+          "batches": [
+            {
+              "sourceIndex": 0,
+              "sourceName": [
+                "PsMinRegTy"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "PsMinRegTy"
+                  },
+                  "role": "inductiveType"
+                },
+                {
+                  "index": 1,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegTy"
+                    },
+                    "v": "empty"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 2,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegTy"
+                    },
+                    "v": "unit"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 3,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegTy"
+                    },
+                    "v": "nat"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 4,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegTy"
+                    },
+                    "v": "boolean"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 5,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegTy"
+                    },
+                    "v": "data"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 6,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegTy"
+                    },
+                    "v": "arr"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 7,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegTy"
+                    },
+                    "v": "list"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 8,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegTy"
+                    },
+                    "v": "option"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 9,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegTy"
+                    },
+                    "v": "rec"
+                  },
+                  "role": "recursor"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 1,
+              "sourceName": [
+                "PsMinRegField"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "PsMinRegField"
+                  },
+                  "role": "inductiveType"
+                },
+                {
+                  "index": 1,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegField"
+                    },
+                    "v": "ground"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 2,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegField"
+                    },
+                    "v": "recursive"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 3,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegField"
+                    },
+                    "v": "rec"
+                  },
+                  "role": "recursor"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 2,
+              "sourceName": [
+                "PsMinRegSpec"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "PsMinRegSpec"
+                  },
+                  "role": "structureType"
+                },
+                {
+                  "index": 1,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegSpec"
+                    },
+                    "v": "mk"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 2,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegSpec"
+                    },
+                    "v": "rec"
+                  },
+                  "role": "recursor"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 3,
+              "sourceName": [
+                "psMinRegTyEq"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "n",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "psMinRegTyEq"
+                      },
+                      "v": "$psc0SH"
+                    },
+                    "v": "0"
+                  },
+                  "role": "normalizedWorker"
+                },
+                {
+                  "index": 1,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinRegTyEq"
+                  },
+                  "role": "publicWrapper"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 4,
+              "sourceName": [
+                "psMinRegTyValid"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "n",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "psMinRegTyValid"
+                      },
+                      "v": "$psc0SH"
+                    },
+                    "v": "0"
+                  },
+                  "role": "normalizedWorker"
+                },
+                {
+                  "index": 1,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinRegTyValid"
+                  },
+                  "role": "publicWrapper"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 5,
+              "sourceName": [
+                "psMinRegLiftTy"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinRegLiftTy"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 6,
+              "sourceName": [
+                "psMinRegFieldCount"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinRegFieldCount"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 7,
+              "sourceName": [
+                "psMinRegSelfCount"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinRegSelfCount"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 8,
+              "sourceName": [
+                "psMinRegCtorCount"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinRegCtorCount"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 9,
+              "sourceName": [
+                "psMinRegSpecCount"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinRegSpecCount"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 10,
+              "sourceName": [
+                "psMinRegFieldsValid"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinRegFieldsValid"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 11,
+              "sourceName": [
+                "psMinRegConstructorsValid"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinRegConstructorsValid"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 12,
+              "sourceName": [
+                "psMinRegSpecValid"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinRegSpecValid"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 13,
+              "sourceName": [
+                "psMinRegRegistryValid"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "n",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "psMinRegRegistryValid"
+                      },
+                      "v": "$psc0SH"
+                    },
+                    "v": "0"
+                  },
+                  "role": "normalizedWorker"
+                },
+                {
+                  "index": 1,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinRegRegistryValid"
+                  },
+                  "role": "publicWrapper"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 14,
+              "sourceName": [
+                "psMinRegCtorAt"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "n",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "psMinRegCtorAt"
+                      },
+                      "v": "$psc0SH"
+                    },
+                    "v": "0"
+                  },
+                  "role": "normalizedWorker"
+                },
+                {
+                  "index": 1,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinRegCtorAt"
+                  },
+                  "role": "publicWrapper"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 15,
+              "sourceName": [
+                "psMinRegFieldArrow"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinRegFieldArrow"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 16,
+              "sourceName": [
+                "psMinRegRepeatArrow"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinRegRepeatArrow"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 17,
+              "sourceName": [
+                "psMinRegMinorTy"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinRegMinorTy"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 18,
+              "sourceName": [
+                "psMinRegRecursorTy"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinRegRecursorTy"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 19,
+              "sourceName": [
+                "psMinRegCtorTypeAt"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "n",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "psMinRegCtorTypeAt"
+                      },
+                      "v": "$psc0SH"
+                    },
+                    "v": "0"
+                  },
+                  "role": "normalizedWorker"
+                },
+                {
+                  "index": 1,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinRegCtorTypeAt"
+                  },
+                  "role": "publicWrapper"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 20,
+              "sourceName": [
+                "psMinRegRecursorAllowed"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinRegRecursorAllowed"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 21,
+              "sourceName": [
+                "psMinRegRecursorTypeAt"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "n",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "psMinRegRecursorTypeAt"
+                      },
+                      "v": "$psc0SH"
+                    },
+                    "v": "0"
+                  },
+                  "role": "normalizedWorker"
+                },
+                {
+                  "index": 1,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinRegRecursorTypeAt"
+                  },
+                  "role": "publicWrapper"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "moduleName": [
+            "Ps",
+            "MinKernel",
+            "Profile",
+            "RegularCheck"
+          ],
+          "coreStart": 42,
+          "batches": [
+            {
+              "sourceIndex": 0,
+              "sourceName": [
+                "PsMinRegTerm"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "PsMinRegTerm"
+                  },
+                  "role": "inductiveType"
+                },
+                {
+                  "index": 1,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegTerm"
+                    },
+                    "v": "var"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 2,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegTerm"
+                    },
+                    "v": "constant"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 3,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegTerm"
+                    },
+                    "v": "unit"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 4,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegTerm"
+                    },
+                    "v": "nat"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 5,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegTerm"
+                    },
+                    "v": "boolean"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 6,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegTerm"
+                    },
+                    "v": "lam"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 7,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegTerm"
+                    },
+                    "v": "app"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 8,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegTerm"
+                    },
+                    "v": "ctor"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 9,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegTerm"
+                    },
+                    "v": "recursor"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 10,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegTerm"
+                    },
+                    "v": "rec"
+                  },
+                  "role": "recursor"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 1,
+              "sourceName": [
+                "PsMinRegDeclaration"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "PsMinRegDeclaration"
+                  },
+                  "role": "structureType"
+                },
+                {
+                  "index": 1,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegDeclaration"
+                    },
+                    "v": "mk"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 2,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinRegDeclaration"
+                    },
+                    "v": "rec"
+                  },
+                  "role": "recursor"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 2,
+              "sourceName": [
+                "psMinRegLookup"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "n",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "psMinRegLookup"
+                      },
+                      "v": "$psc0SH"
+                    },
+                    "v": "0"
+                  },
+                  "role": "normalizedWorker"
+                },
+                {
+                  "index": 1,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinRegLookup"
+                  },
+                  "role": "publicWrapper"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 3,
+              "sourceName": [
+                "psMinRegInfer"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "n",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "psMinRegInfer"
+                      },
+                      "v": "$psc0SH"
+                    },
+                    "v": "0"
+                  },
+                  "role": "normalizedWorker"
+                },
+                {
+                  "index": 1,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinRegInfer"
+                  },
+                  "role": "publicWrapper"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 4,
+              "sourceName": [
+                "psMinRegCheckDeclarations"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "n",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "psMinRegCheckDeclarations"
+                      },
+                      "v": "$psc0SH"
+                    },
+                    "v": "0"
+                  },
+                  "role": "normalizedWorker"
+                },
+                {
+                  "index": 1,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinRegCheckDeclarations"
+                  },
+                  "role": "publicWrapper"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 5,
+              "sourceName": [
+                "psMinRegCheckEnvironment"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinRegCheckEnvironment"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "moduleName": [
+            "Ps",
+            "MinKernel",
+            "Profile",
+            "OperationalProfile"
+          ],
+          "coreStart": 63,
+          "batches": [
+            {
+              "sourceIndex": 0,
+              "sourceName": [
+                "psMinOpFieldType"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "n",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "psMinOpFieldType"
+                      },
+                      "v": "$psc0SH"
+                    },
+                    "v": "0"
+                  },
+                  "role": "normalizedWorker"
+                },
+                {
+                  "index": 1,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinOpFieldType"
+                  },
+                  "role": "publicWrapper"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 1,
+              "sourceName": [
+                "psMinOpProjectionType"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "n",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "psMinOpProjectionType"
+                      },
+                      "v": "$psc0SH"
+                    },
+                    "v": "0"
+                  },
+                  "role": "normalizedWorker"
+                },
+                {
+                  "index": 1,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinOpProjectionType"
+                  },
+                  "role": "publicWrapper"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 2,
+              "sourceName": [
+                "PsMinOpPrimitive"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "PsMinOpPrimitive"
+                  },
+                  "role": "inductiveType"
+                },
+                {
+                  "index": 1,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinOpPrimitive"
+                    },
+                    "v": "natSucc"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 2,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinOpPrimitive"
+                    },
+                    "v": "natPred"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 3,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinOpPrimitive"
+                    },
+                    "v": "natAdd"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 4,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinOpPrimitive"
+                    },
+                    "v": "natSub"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 5,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinOpPrimitive"
+                    },
+                    "v": "natBeq"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 6,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinOpPrimitive"
+                    },
+                    "v": "natBlt"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 7,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinOpPrimitive"
+                    },
+                    "v": "boolNot"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 8,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinOpPrimitive"
+                    },
+                    "v": "boolBeq"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 9,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinOpPrimitive"
+                    },
+                    "v": "natRec"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 10,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinOpPrimitive"
+                    },
+                    "v": "listNil"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 11,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinOpPrimitive"
+                    },
+                    "v": "listCons"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 12,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinOpPrimitive"
+                    },
+                    "v": "listRec"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 13,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinOpPrimitive"
+                    },
+                    "v": "optionNone"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 14,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinOpPrimitive"
+                    },
+                    "v": "optionSome"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 15,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinOpPrimitive"
+                    },
+                    "v": "optionRec"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 16,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinOpPrimitive"
+                    },
+                    "v": "boolEqIte"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 17,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinOpPrimitive"
+                    },
+                    "v": "rec"
+                  },
+                  "role": "recursor"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 3,
+              "sourceName": [
+                "psMinOpPrimitiveSignature"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinOpPrimitiveSignature"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 4,
+              "sourceName": [
+                "psMinOpPrimitiveCodesValid"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinOpPrimitiveCodesValid"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 5,
+              "sourceName": [
+                "psMinOpPrimitiveLevel"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinOpPrimitiveLevel"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 6,
+              "sourceName": [
+                "psMinOpPrimitiveParameters"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinOpPrimitiveParameters"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 7,
+              "sourceName": [
+                "psMinOpPrimitiveMotives"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinOpPrimitiveMotives"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 8,
+              "sourceName": [
+                "psMinOpPrimitiveMinors"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinOpPrimitiveMinors"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 9,
+              "sourceName": [
+                "psMinOpPrimitiveType"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinOpPrimitiveType"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "moduleName": [
+            "Ps",
+            "MinKernel",
+            "Profile",
+            "OperationalCheck"
+          ],
+          "coreStart": 92,
+          "batches": [
+            {
+              "sourceIndex": 0,
+              "sourceName": [
+                "PsMinOpTerm"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "PsMinOpTerm"
+                  },
+                  "role": "inductiveType"
+                },
+                {
+                  "index": 1,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinOpTerm"
+                    },
+                    "v": "base"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 2,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinOpTerm"
+                    },
+                    "v": "lam"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 3,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinOpTerm"
+                    },
+                    "v": "app"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 4,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinOpTerm"
+                    },
+                    "v": "letE"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 5,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinOpTerm"
+                    },
+                    "v": "projection"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 6,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinOpTerm"
+                    },
+                    "v": "primitive"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 7,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinOpTerm"
+                    },
+                    "v": "rec"
+                  },
+                  "role": "recursor"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 1,
+              "sourceName": [
+                "PsMinOpDeclaration"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "PsMinOpDeclaration"
+                  },
+                  "role": "structureType"
+                },
+                {
+                  "index": 1,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinOpDeclaration"
+                    },
+                    "v": "mk"
+                  },
+                  "role": "constructor"
+                },
+                {
+                  "index": 2,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "PsMinOpDeclaration"
+                    },
+                    "v": "rec"
+                  },
+                  "role": "recursor"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 2,
+              "sourceName": [
+                "psMinOpInfer"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "n",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "psMinOpInfer"
+                      },
+                      "v": "$psc0SH"
+                    },
+                    "v": "0"
+                  },
+                  "role": "normalizedWorker"
+                },
+                {
+                  "index": 1,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinOpInfer"
+                  },
+                  "role": "publicWrapper"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 3,
+              "sourceName": [
+                "psMinOpCheckDeclarations"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "n",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "psMinOpCheckDeclarations"
+                      },
+                      "v": "$psc0SH"
+                    },
+                    "v": "0"
+                  },
+                  "role": "normalizedWorker"
+                },
+                {
+                  "index": 1,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinOpCheckDeclarations"
+                  },
+                  "role": "publicWrapper"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 4,
+              "sourceName": [
+                "psMinOpCheckEnvironment"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinOpCheckEnvironment"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "moduleName": [
+            "Ps",
+            "MinKernel",
+            "Tests",
+            "OperationalVectors"
+          ],
+          "coreStart": 108,
+          "batches": [
+            {
+              "sourceIndex": 0,
+              "sourceName": [
+                "psMinOpMakeSpec"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinOpMakeSpec"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 1,
+              "sourceName": [
+                "psMinOpTypeSpec"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinOpTypeSpec"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 2,
+              "sourceName": [
+                "psMinOpFieldSpec"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinOpFieldSpec"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 3,
+              "sourceName": [
+                "psMinOpSpecSpec"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinOpSpecSpec"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 4,
+              "sourceName": [
+                "psMinOpTermSpec"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinOpTermSpec"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 5,
+              "sourceName": [
+                "psMinOpDeclarationSpec"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinOpDeclarationSpec"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 6,
+              "sourceName": [
+                "psMinOpRuntimeRegistry"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinOpRuntimeRegistry"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 7,
+              "sourceName": [
+                "psMinOpAutoPrimitive"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinOpAutoPrimitive"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 8,
+              "sourceName": [
+                "psMinOpAccepted"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinOpAccepted"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 9,
+              "sourceName": [
+                "psMinOpClosedCase"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinOpClosedCase"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            },
+            {
+              "sourceIndex": 10,
+              "sourceName": [
+                "psMinOpVector"
+              ],
+              "members": [
+                {
+                  "index": 0,
+                  "nameWire": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "psMinOpVector"
+                  },
+                  "role": "sourceDeclaration"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "canonicalAdmissionSha256": "c926de2d6ff04426503f5b59f16551d7916000e00a56c33512174cd01f662a3b",
+    "officialSourceAdmission": {
+      "protocol": "pskernel-lean/1",
+      "provider": "lean4-cpp",
+      "leanVersion": "4.35.0",
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "profile": "lean4.35-core",
+      "accepted": true
+    },
+    "officialCheckerSha256": "bfdbea2499837db2dd71de8425bc17f81e380990964568af98cd98ef31cce6b7",
+    "sourceCompileDriverSha256": "c6145a400063128ac176ce308939e84e3eb06ac8f045bb826f3a1a4ce2357d36",
+    "payloadScope": "Entire five-module profile test bundle; not isolated checker payload",
+    "generatedTsBytes": 134690,
+    "generatedJsBytes": 318436,
+    "generatedJsSha256": "48f0437d9d7c52b86d718e79a01e0943075ec1e23b557ef81113af4581e98bc2",
+    "positiveCases": 36,
+    "refusalCases": 40,
+    "outOfRangeProbes": 2,
+    "observations": [
+      {
+        "index": 0,
+        "outcome": "true",
+        "id": "empty-environment",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 1,
+        "outcome": "true",
+        "id": "base-old-checker",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 2,
+        "outcome": "true",
+        "id": "let-local-binding",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 3,
+        "outcome": "true",
+        "id": "let-nested-scope",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 4,
+        "outcome": "true",
+        "id": "lambda-let",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 5,
+        "outcome": "true",
+        "id": "actual-spec-projection-field-0",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 6,
+        "outcome": "true",
+        "id": "actual-spec-projection-field-1",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 7,
+        "outcome": "true",
+        "id": "actual-spec-projection-field-2",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 8,
+        "outcome": "true",
+        "id": "actual-spec-projection-field-3",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 9,
+        "outcome": "true",
+        "id": "actual-spec-projection-field-4",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 10,
+        "outcome": "true",
+        "id": "actual-spec-projection-field-5",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 11,
+        "outcome": "true",
+        "id": "actual-declaration-projection-field-0",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 12,
+        "outcome": "true",
+        "id": "actual-declaration-projection-field-1",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 13,
+        "outcome": "true",
+        "id": "actual-spec-constructed-projected",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 14,
+        "outcome": "true",
+        "id": "actual-declaration-constructed-projected",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 15,
+        "outcome": "true",
+        "id": "let-bound-actual-declaration-projection",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 16,
+        "outcome": "true",
+        "id": "natSucc",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 17,
+        "outcome": "true",
+        "id": "natPred",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 18,
+        "outcome": "true",
+        "id": "natAdd",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 19,
+        "outcome": "true",
+        "id": "natSub",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 20,
+        "outcome": "true",
+        "id": "natBeq",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 21,
+        "outcome": "true",
+        "id": "natBlt",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 22,
+        "outcome": "true",
+        "id": "boolNot",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 23,
+        "outcome": "true",
+        "id": "boolBeq",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 24,
+        "outcome": "true",
+        "id": "nat-add-application",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 25,
+        "outcome": "true",
+        "id": "nat-recursion",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 26,
+        "outcome": "true",
+        "id": "list-nil",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 27,
+        "outcome": "true",
+        "id": "list-cons",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 28,
+        "outcome": "true",
+        "id": "list-recursion",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 29,
+        "outcome": "true",
+        "id": "option-none",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 30,
+        "outcome": "true",
+        "id": "option-some",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 31,
+        "outcome": "true",
+        "id": "option-recursion",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 32,
+        "outcome": "true",
+        "id": "bool-eq-ite-equal",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 33,
+        "outcome": "true",
+        "id": "bool-eq-ite-distinct",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 34,
+        "outcome": "true",
+        "id": "bool-eq-ite-dynamic",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 35,
+        "outcome": "true",
+        "id": "sequential-body-reference",
+        "expected": "true",
+        "generated": "true"
+      },
+      {
+        "index": 36,
+        "outcome": "false",
+        "id": "let-value-cannot-see-new-binder",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 37,
+        "outcome": "false",
+        "id": "let-wrong-annotation",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 38,
+        "outcome": "false",
+        "id": "let-bad-body-scope",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 39,
+        "outcome": "false",
+        "id": "let-invalid-type-code",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 40,
+        "outcome": "false",
+        "id": "let-cannot-forge-empty",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 41,
+        "outcome": "false",
+        "id": "projection-refuses-0-2",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 42,
+        "outcome": "false",
+        "id": "projection-refuses-2-6",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 43,
+        "outcome": "false",
+        "id": "projection-refuses-1-0",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 44,
+        "outcome": "false",
+        "id": "projection-refuses-3-0",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 45,
+        "outcome": "false",
+        "id": "projection-refuses-4-0",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 46,
+        "outcome": "false",
+        "id": "projection-refuses-9-0",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 47,
+        "outcome": "false",
+        "id": "projection-wrong-owner-major",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 48,
+        "outcome": "false",
+        "id": "projection-wrong-field-type",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 49,
+        "outcome": "false",
+        "id": "nat-add-wrong-argument",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 50,
+        "outcome": "false",
+        "id": "list-cons-wrong-tail",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 51,
+        "outcome": "false",
+        "id": "option-some-wrong-value",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 52,
+        "outcome": "false",
+        "id": "list-minor-wrong-field-order",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 53,
+        "outcome": "false",
+        "id": "nat-minor-wrong-result",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 54,
+        "outcome": "false",
+        "id": "option-minor-wrong-domain",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 55,
+        "outcome": "false",
+        "id": "ite-proposition-is-bool-equality",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 56,
+        "outcome": "false",
+        "id": "ite-wrong-branch-type",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 57,
+        "outcome": "false",
+        "id": "bare-proof-cannot-forge-empty",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 58,
+        "outcome": "false",
+        "id": "wrong-nat-level",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 59,
+        "outcome": "false",
+        "id": "wrong-nat-parameters",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 60,
+        "outcome": "false",
+        "id": "forged-indices",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 61,
+        "outcome": "false",
+        "id": "wrong-nat-rec-level",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 62,
+        "outcome": "false",
+        "id": "wrong-nat-rec-motives",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 63,
+        "outcome": "false",
+        "id": "wrong-nat-rec-minors",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 64,
+        "outcome": "false",
+        "id": "wrong-list-type-arity",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 65,
+        "outcome": "false",
+        "id": "wrong-list-rec-type-arity",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 66,
+        "outcome": "false",
+        "id": "wrong-option-minors",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 67,
+        "outcome": "false",
+        "id": "ite-forged-motive",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 68,
+        "outcome": "false",
+        "id": "ite-forged-minors",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 69,
+        "outcome": "false",
+        "id": "ite-wrong-level",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 70,
+        "outcome": "false",
+        "id": "primitive-forward-type-slot",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 71,
+        "outcome": "false",
+        "id": "recursor-forward-result-slot",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 72,
+        "outcome": "false",
+        "id": "forward-constant",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 73,
+        "outcome": "false",
+        "id": "term-fuel-refusal",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 74,
+        "outcome": "false",
+        "id": "declaration-fuel-refusal",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 75,
+        "outcome": "false",
+        "id": "registry-fuel-refusal",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 76,
+        "outcome": "false",
+        "id": "out-of-range-0",
+        "expected": "false",
+        "generated": "false"
+      },
+      {
+        "index": 77,
+        "outcome": "false",
+        "id": "out-of-range-1",
+        "expected": "false",
+        "generated": "false"
+      }
+    ],
+    "foundationContracts": {
+      "authoritative": false,
+      "scope": "Selected exact foundation identities/types/bodies/metadata; no full foundation or canonical decoder qualification",
+      "preludeSha256": "215dec328de51fc09872b3af41f4c00bee26938227bd2af4f063c4c3edae50af",
+      "contracts": [
+        {
+          "kind": "definition",
+          "levelParameterWires": [
+            {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "u"
+            }
+          ],
+          "levelParameters": [
+            "u"
+          ],
+          "metadata": null,
+          "name": "ite",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "a"
+            },
+            "v": "ite"
+          },
+          "type": {
+            "b": {
+              "b": {
+                "b": {
+                  "b": {
+                    "b": {
+                      "i": 4,
+                      "k": "b"
+                    },
+                    "bi": "default",
+                    "k": "forall",
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "e"
+                    },
+                    "t": {
+                      "i": 3,
+                      "k": "b"
+                    }
+                  },
+                  "bi": "default",
+                  "k": "forall",
+                  "n": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "t"
+                  },
+                  "t": {
+                    "i": 2,
+                    "k": "b"
+                  }
+                },
+                "bi": "instImplicit",
+                "k": "forall",
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "h"
+                },
+                "t": {
+                  "a": {
+                    "i": 0,
+                    "k": "b"
+                  },
+                  "f": {
+                    "k": "const",
+                    "ls": [],
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "Decidable"
+                    }
+                  },
+                  "k": "app"
+                }
+              },
+              "bi": "default",
+              "k": "forall",
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "c"
+              },
+              "t": {
+                "k": "sort",
+                "l": {
+                  "k": "z"
+                }
+              }
+            },
+            "bi": "implicit",
+            "k": "forall",
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "α"
+            },
+            "t": {
+              "k": "sort",
+              "l": {
+                "k": "p",
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "u"
+                }
+              }
+            }
+          },
+          "value": {
+            "b": {
+              "b": {
+                "b": {
+                  "b": {
+                    "b": {
+                      "a": {
+                        "i": 2,
+                        "k": "b"
+                      },
+                      "f": {
+                        "a": {
+                          "b": {
+                            "i": 2,
+                            "k": "b"
+                          },
+                          "bi": "default",
+                          "k": "lam",
+                          "n": {
+                            "k": "s",
+                            "p": {
+                              "k": "a"
+                            },
+                            "v": "proof"
+                          },
+                          "t": {
+                            "i": 3,
+                            "k": "b"
+                          }
+                        },
+                        "f": {
+                          "a": {
+                            "b": {
+                              "i": 1,
+                              "k": "b"
+                            },
+                            "bi": "default",
+                            "k": "lam",
+                            "n": {
+                              "k": "s",
+                              "p": {
+                                "k": "a"
+                              },
+                              "v": "proof"
+                            },
+                            "t": {
+                              "b": {
+                                "k": "const",
+                                "ls": [],
+                                "n": {
+                                  "k": "s",
+                                  "p": {
+                                    "k": "a"
+                                  },
+                                  "v": "_psc1OrderFalse"
+                                }
+                              },
+                              "bi": "default",
+                              "k": "forall",
+                              "n": {
+                                "k": "s",
+                                "p": {
+                                  "k": "a"
+                                },
+                                "v": "proof"
+                              },
+                              "t": {
+                                "i": 3,
+                                "k": "b"
+                              }
+                            }
+                          },
+                          "f": {
+                            "a": {
+                              "b": {
+                                "i": 5,
+                                "k": "b"
+                              },
+                              "bi": "default",
+                              "k": "lam",
+                              "n": {
+                                "k": "s",
+                                "p": {
+                                  "k": "a"
+                                },
+                                "v": "major"
+                              },
+                              "t": {
+                                "a": {
+                                  "i": 3,
+                                  "k": "b"
+                                },
+                                "f": {
+                                  "k": "const",
+                                  "ls": [],
+                                  "n": {
+                                    "k": "s",
+                                    "p": {
+                                      "k": "a"
+                                    },
+                                    "v": "Decidable"
+                                  }
+                                },
+                                "k": "app"
+                              }
+                            },
+                            "f": {
+                              "a": {
+                                "i": 3,
+                                "k": "b"
+                              },
+                              "f": {
+                                "k": "const",
+                                "ls": [
+                                  {
+                                    "k": "p",
+                                    "n": {
+                                      "k": "s",
+                                      "p": {
+                                        "k": "a"
+                                      },
+                                      "v": "u"
+                                    }
+                                  }
+                                ],
+                                "n": {
+                                  "k": "s",
+                                  "p": {
+                                    "k": "s",
+                                    "p": {
+                                      "k": "a"
+                                    },
+                                    "v": "Decidable"
+                                  },
+                                  "v": "rec"
+                                }
+                              },
+                              "k": "app"
+                            },
+                            "k": "app"
+                          },
+                          "k": "app"
+                        },
+                        "k": "app"
+                      },
+                      "k": "app"
+                    },
+                    "bi": "default",
+                    "k": "lam",
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "e"
+                    },
+                    "t": {
+                      "i": 3,
+                      "k": "b"
+                    }
+                  },
+                  "bi": "default",
+                  "k": "lam",
+                  "n": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "t"
+                  },
+                  "t": {
+                    "i": 2,
+                    "k": "b"
+                  }
+                },
+                "bi": "default",
+                "k": "lam",
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "h"
+                },
+                "t": {
+                  "a": {
+                    "i": 0,
+                    "k": "b"
+                  },
+                  "f": {
+                    "k": "const",
+                    "ls": [],
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "Decidable"
+                    }
+                  },
+                  "k": "app"
+                }
+              },
+              "bi": "default",
+              "k": "lam",
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "c"
+              },
+              "t": {
+                "k": "sort",
+                "l": {
+                  "k": "z"
+                }
+              }
+            },
+            "bi": "default",
+            "k": "lam",
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "α"
+            },
+            "t": {
+              "k": "sort",
+              "l": {
+                "k": "p",
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "u"
+                }
+              }
+            }
+          }
+        },
+        {
+          "kind": "recursor",
+          "levelParameterWires": [
+            {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "u"
+            }
+          ],
+          "levelParameters": [
+            "u"
+          ],
+          "metadata": {
+            "families": [
+              "Decidable"
+            ],
+            "familyWires": [
+              {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "Decidable"
+              }
+            ],
+            "indices": 0,
+            "minors": 2,
+            "motives": 1,
+            "parameters": 1
+          },
+          "name": "Decidable.rec",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Decidable"
+            },
+            "v": "rec"
+          },
+          "type": {
+            "b": {
+              "b": {
+                "b": {
+                  "b": {
+                    "b": {
+                      "a": {
+                        "i": 0,
+                        "k": "b"
+                      },
+                      "f": {
+                        "i": 3,
+                        "k": "b"
+                      },
+                      "k": "app"
+                    },
+                    "bi": "default",
+                    "k": "forall",
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "major"
+                    },
+                    "t": {
+                      "a": {
+                        "i": 3,
+                        "k": "b"
+                      },
+                      "f": {
+                        "k": "const",
+                        "ls": [],
+                        "n": {
+                          "k": "s",
+                          "p": {
+                            "k": "a"
+                          },
+                          "v": "Decidable"
+                        }
+                      },
+                      "k": "app"
+                    }
+                  },
+                  "bi": "default",
+                  "k": "forall",
+                  "n": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "success"
+                  },
+                  "t": {
+                    "b": {
+                      "a": {
+                        "a": {
+                          "i": 0,
+                          "k": "b"
+                        },
+                        "f": {
+                          "a": {
+                            "i": 3,
+                            "k": "b"
+                          },
+                          "f": {
+                            "k": "const",
+                            "ls": [],
+                            "n": {
+                              "k": "s",
+                              "p": {
+                                "k": "s",
+                                "p": {
+                                  "k": "a"
+                                },
+                                "v": "Decidable"
+                              },
+                              "v": "isTrue"
+                            }
+                          },
+                          "k": "app"
+                        },
+                        "k": "app"
+                      },
+                      "f": {
+                        "i": 2,
+                        "k": "b"
+                      },
+                      "k": "app"
+                    },
+                    "bi": "default",
+                    "k": "forall",
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "proof"
+                    },
+                    "t": {
+                      "i": 2,
+                      "k": "b"
+                    }
+                  }
+                },
+                "bi": "default",
+                "k": "forall",
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "failure"
+                },
+                "t": {
+                  "b": {
+                    "a": {
+                      "a": {
+                        "i": 0,
+                        "k": "b"
+                      },
+                      "f": {
+                        "a": {
+                          "i": 2,
+                          "k": "b"
+                        },
+                        "f": {
+                          "k": "const",
+                          "ls": [],
+                          "n": {
+                            "k": "s",
+                            "p": {
+                              "k": "s",
+                              "p": {
+                                "k": "a"
+                              },
+                              "v": "Decidable"
+                            },
+                            "v": "isFalse"
+                          }
+                        },
+                        "k": "app"
+                      },
+                      "k": "app"
+                    },
+                    "f": {
+                      "i": 1,
+                      "k": "b"
+                    },
+                    "k": "app"
+                  },
+                  "bi": "default",
+                  "k": "forall",
+                  "n": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "proof"
+                  },
+                  "t": {
+                    "b": {
+                      "k": "const",
+                      "ls": [],
+                      "n": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "_psc1OrderFalse"
+                      }
+                    },
+                    "bi": "default",
+                    "k": "forall",
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "proof"
+                    },
+                    "t": {
+                      "i": 1,
+                      "k": "b"
+                    }
+                  }
+                }
+              },
+              "bi": "default",
+              "k": "forall",
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "motive"
+              },
+              "t": {
+                "b": {
+                  "k": "sort",
+                  "l": {
+                    "k": "p",
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "u"
+                    }
+                  }
+                },
+                "bi": "default",
+                "k": "forall",
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "major"
+                },
+                "t": {
+                  "a": {
+                    "i": 0,
+                    "k": "b"
+                  },
+                  "f": {
+                    "k": "const",
+                    "ls": [],
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "Decidable"
+                    }
+                  },
+                  "k": "app"
+                }
+              }
+            },
+            "bi": "default",
+            "k": "forall",
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "proposition"
+            },
+            "t": {
+              "k": "sort",
+              "l": {
+                "k": "z"
+              }
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "constructor",
+          "levelParameterWires": [],
+          "levelParameters": [],
+          "metadata": {
+            "family": "Decidable",
+            "familyWire": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Decidable"
+            },
+            "fields": 1,
+            "index": 1,
+            "parameters": 1,
+            "recursiveFields": []
+          },
+          "name": "Decidable.isTrue",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Decidable"
+            },
+            "v": "isTrue"
+          },
+          "type": {
+            "b": {
+              "b": {
+                "a": {
+                  "i": 1,
+                  "k": "b"
+                },
+                "f": {
+                  "k": "const",
+                  "ls": [],
+                  "n": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "Decidable"
+                  }
+                },
+                "k": "app"
+              },
+              "bi": "default",
+              "k": "forall",
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "proof"
+              },
+              "t": {
+                "i": 0,
+                "k": "b"
+              }
+            },
+            "bi": "default",
+            "k": "forall",
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "proposition"
+            },
+            "t": {
+              "k": "sort",
+              "l": {
+                "k": "z"
+              }
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "constructor",
+          "levelParameterWires": [],
+          "levelParameters": [],
+          "metadata": {
+            "family": "Decidable",
+            "familyWire": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Decidable"
+            },
+            "fields": 1,
+            "index": 0,
+            "parameters": 1,
+            "recursiveFields": []
+          },
+          "name": "Decidable.isFalse",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Decidable"
+            },
+            "v": "isFalse"
+          },
+          "type": {
+            "b": {
+              "b": {
+                "a": {
+                  "i": 1,
+                  "k": "b"
+                },
+                "f": {
+                  "k": "const",
+                  "ls": [],
+                  "n": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "Decidable"
+                  }
+                },
+                "k": "app"
+              },
+              "bi": "default",
+              "k": "forall",
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "proof"
+              },
+              "t": {
+                "b": {
+                  "k": "const",
+                  "ls": [],
+                  "n": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "_psc1OrderFalse"
+                  }
+                },
+                "bi": "default",
+                "k": "forall",
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "proof"
+                },
+                "t": {
+                  "i": 0,
+                  "k": "b"
+                }
+              }
+            },
+            "bi": "default",
+            "k": "forall",
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "proposition"
+            },
+            "t": {
+              "k": "sort",
+              "l": {
+                "k": "z"
+              }
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "inductive",
+          "levelParameterWires": [],
+          "levelParameters": [],
+          "metadata": {
+            "constructorWires": [
+              {
+                "k": "s",
+                "p": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "Decidable"
+                },
+                "v": "isFalse"
+              },
+              {
+                "k": "s",
+                "p": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "Decidable"
+                },
+                "v": "isTrue"
+              }
+            ],
+            "constructors": [
+              "Decidable.isFalse",
+              "Decidable.isTrue"
+            ],
+            "indices": 0,
+            "parameters": 1,
+            "structure": false
+          },
+          "name": "Decidable",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "a"
+            },
+            "v": "Decidable"
+          },
+          "type": {
+            "b": {
+              "k": "sort",
+              "l": {
+                "k": "s",
+                "o": {
+                  "k": "z"
+                }
+              }
+            },
+            "bi": "default",
+            "k": "forall",
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "p"
+            },
+            "t": {
+              "k": "sort",
+              "l": {
+                "k": "z"
+              }
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "inductive",
+          "levelParameterWires": [],
+          "levelParameters": [],
+          "metadata": {
+            "constructorWires": [],
+            "constructors": [],
+            "indices": 0,
+            "parameters": 0,
+            "structure": false
+          },
+          "name": "_psc1OrderFalse",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "a"
+            },
+            "v": "_psc1OrderFalse"
+          },
+          "type": {
+            "k": "sort",
+            "l": {
+              "k": "z"
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "recursor",
+          "levelParameterWires": [
+            {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "u"
+            }
+          ],
+          "levelParameters": [
+            "u"
+          ],
+          "metadata": {
+            "families": [
+              "Option"
+            ],
+            "familyWires": [
+              {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "Option"
+              }
+            ],
+            "indices": 0,
+            "minors": 2,
+            "motives": 1,
+            "parameters": 1
+          },
+          "name": "Option.rec",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Option"
+            },
+            "v": "rec"
+          },
+          "type": {
+            "b": {
+              "b": {
+                "b": {
+                  "b": {
+                    "b": {
+                      "a": {
+                        "i": 0,
+                        "k": "b"
+                      },
+                      "f": {
+                        "i": 3,
+                        "k": "b"
+                      },
+                      "k": "app"
+                    },
+                    "bi": "default",
+                    "k": "forall",
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "_major"
+                    },
+                    "t": {
+                      "a": {
+                        "i": 3,
+                        "k": "b"
+                      },
+                      "f": {
+                        "k": "const",
+                        "ls": [],
+                        "n": {
+                          "k": "s",
+                          "p": {
+                            "k": "a"
+                          },
+                          "v": "Option"
+                        }
+                      },
+                      "k": "app"
+                    }
+                  },
+                  "bi": "default",
+                  "k": "forall",
+                  "n": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "_some"
+                  },
+                  "t": {
+                    "b": {
+                      "a": {
+                        "a": {
+                          "i": 0,
+                          "k": "b"
+                        },
+                        "f": {
+                          "a": {
+                            "i": 3,
+                            "k": "b"
+                          },
+                          "f": {
+                            "k": "const",
+                            "ls": [],
+                            "n": {
+                              "k": "s",
+                              "p": {
+                                "k": "s",
+                                "p": {
+                                  "k": "a"
+                                },
+                                "v": "Option"
+                              },
+                              "v": "some"
+                            }
+                          },
+                          "k": "app"
+                        },
+                        "k": "app"
+                      },
+                      "f": {
+                        "i": 2,
+                        "k": "b"
+                      },
+                      "k": "app"
+                    },
+                    "bi": "default",
+                    "k": "forall",
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "value"
+                    },
+                    "t": {
+                      "i": 2,
+                      "k": "b"
+                    }
+                  }
+                },
+                "bi": "default",
+                "k": "forall",
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "_none"
+                },
+                "t": {
+                  "a": {
+                    "a": {
+                      "i": 1,
+                      "k": "b"
+                    },
+                    "f": {
+                      "k": "const",
+                      "ls": [],
+                      "n": {
+                        "k": "s",
+                        "p": {
+                          "k": "s",
+                          "p": {
+                            "k": "a"
+                          },
+                          "v": "Option"
+                        },
+                        "v": "none"
+                      }
+                    },
+                    "k": "app"
+                  },
+                  "f": {
+                    "i": 0,
+                    "k": "b"
+                  },
+                  "k": "app"
+                }
+              },
+              "bi": "default",
+              "k": "forall",
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "_motive"
+              },
+              "t": {
+                "b": {
+                  "k": "sort",
+                  "l": {
+                    "k": "p",
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "u"
+                    }
+                  }
+                },
+                "bi": "default",
+                "k": "forall",
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "_major"
+                },
+                "t": {
+                  "a": {
+                    "i": 0,
+                    "k": "b"
+                  },
+                  "f": {
+                    "k": "const",
+                    "ls": [],
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "Option"
+                    }
+                  },
+                  "k": "app"
+                }
+              }
+            },
+            "bi": "implicit",
+            "k": "forall",
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "α"
+            },
+            "t": {
+              "k": "sort",
+              "l": {
+                "k": "s",
+                "o": {
+                  "k": "z"
+                }
+              }
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "constructor",
+          "levelParameterWires": [],
+          "levelParameters": [],
+          "metadata": {
+            "family": "Option",
+            "familyWire": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Option"
+            },
+            "fields": 1,
+            "index": 1,
+            "parameters": 1,
+            "recursiveFields": []
+          },
+          "name": "Option.some",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Option"
+            },
+            "v": "some"
+          },
+          "type": {
+            "b": {
+              "b": {
+                "a": {
+                  "i": 1,
+                  "k": "b"
+                },
+                "f": {
+                  "k": "const",
+                  "ls": [],
+                  "n": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "Option"
+                  }
+                },
+                "k": "app"
+              },
+              "bi": "default",
+              "k": "forall",
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "value"
+              },
+              "t": {
+                "i": 0,
+                "k": "b"
+              }
+            },
+            "bi": "implicit",
+            "k": "forall",
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "α"
+            },
+            "t": {
+              "k": "sort",
+              "l": {
+                "k": "s",
+                "o": {
+                  "k": "z"
+                }
+              }
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "constructor",
+          "levelParameterWires": [],
+          "levelParameters": [],
+          "metadata": {
+            "family": "Option",
+            "familyWire": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Option"
+            },
+            "fields": 0,
+            "index": 0,
+            "parameters": 1,
+            "recursiveFields": []
+          },
+          "name": "Option.none",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Option"
+            },
+            "v": "none"
+          },
+          "type": {
+            "b": {
+              "a": {
+                "i": 0,
+                "k": "b"
+              },
+              "f": {
+                "k": "const",
+                "ls": [],
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "Option"
+                }
+              },
+              "k": "app"
+            },
+            "bi": "implicit",
+            "k": "forall",
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "α"
+            },
+            "t": {
+              "k": "sort",
+              "l": {
+                "k": "s",
+                "o": {
+                  "k": "z"
+                }
+              }
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "inductive",
+          "levelParameterWires": [],
+          "levelParameters": [],
+          "metadata": {
+            "constructorWires": [
+              {
+                "k": "s",
+                "p": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "Option"
+                },
+                "v": "none"
+              },
+              {
+                "k": "s",
+                "p": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "Option"
+                },
+                "v": "some"
+              }
+            ],
+            "constructors": [
+              "Option.none",
+              "Option.some"
+            ],
+            "indices": 0,
+            "parameters": 1,
+            "structure": false
+          },
+          "name": "Option",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "a"
+            },
+            "v": "Option"
+          },
+          "type": {
+            "b": {
+              "k": "sort",
+              "l": {
+                "k": "s",
+                "o": {
+                  "k": "z"
+                }
+              }
+            },
+            "bi": "default",
+            "k": "forall",
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "α"
+            },
+            "t": {
+              "k": "sort",
+              "l": {
+                "k": "s",
+                "o": {
+                  "k": "z"
+                }
+              }
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "recursor",
+          "levelParameterWires": [
+            {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "u"
+            }
+          ],
+          "levelParameters": [
+            "u"
+          ],
+          "metadata": {
+            "families": [
+              "List"
+            ],
+            "familyWires": [
+              {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "List"
+              }
+            ],
+            "indices": 0,
+            "minors": 2,
+            "motives": 1,
+            "parameters": 1
+          },
+          "name": "List.rec",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "List"
+            },
+            "v": "rec"
+          },
+          "type": {
+            "b": {
+              "b": {
+                "b": {
+                  "b": {
+                    "b": {
+                      "a": {
+                        "i": 0,
+                        "k": "b"
+                      },
+                      "f": {
+                        "i": 3,
+                        "k": "b"
+                      },
+                      "k": "app"
+                    },
+                    "bi": "default",
+                    "k": "forall",
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "_major"
+                    },
+                    "t": {
+                      "a": {
+                        "i": 3,
+                        "k": "b"
+                      },
+                      "f": {
+                        "k": "const",
+                        "ls": [],
+                        "n": {
+                          "k": "s",
+                          "p": {
+                            "k": "a"
+                          },
+                          "v": "List"
+                        }
+                      },
+                      "k": "app"
+                    }
+                  },
+                  "bi": "default",
+                  "k": "forall",
+                  "n": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "_cons"
+                  },
+                  "t": {
+                    "b": {
+                      "b": {
+                        "b": {
+                          "a": {
+                            "a": {
+                              "i": 1,
+                              "k": "b"
+                            },
+                            "f": {
+                              "a": {
+                                "i": 2,
+                                "k": "b"
+                              },
+                              "f": {
+                                "a": {
+                                  "i": 5,
+                                  "k": "b"
+                                },
+                                "f": {
+                                  "k": "const",
+                                  "ls": [],
+                                  "n": {
+                                    "k": "s",
+                                    "p": {
+                                      "k": "s",
+                                      "p": {
+                                        "k": "a"
+                                      },
+                                      "v": "List"
+                                    },
+                                    "v": "cons"
+                                  }
+                                },
+                                "k": "app"
+                              },
+                              "k": "app"
+                            },
+                            "k": "app"
+                          },
+                          "f": {
+                            "i": 4,
+                            "k": "b"
+                          },
+                          "k": "app"
+                        },
+                        "bi": "default",
+                        "k": "forall",
+                        "n": {
+                          "k": "s",
+                          "p": {
+                            "k": "a"
+                          },
+                          "v": "_ih"
+                        },
+                        "t": {
+                          "a": {
+                            "i": 0,
+                            "k": "b"
+                          },
+                          "f": {
+                            "i": 3,
+                            "k": "b"
+                          },
+                          "k": "app"
+                        }
+                      },
+                      "bi": "default",
+                      "k": "forall",
+                      "n": {
+                        "k": "s",
+                        "p": {
+                          "k": "a"
+                        },
+                        "v": "tail"
+                      },
+                      "t": {
+                        "a": {
+                          "i": 3,
+                          "k": "b"
+                        },
+                        "f": {
+                          "k": "const",
+                          "ls": [],
+                          "n": {
+                            "k": "s",
+                            "p": {
+                              "k": "a"
+                            },
+                            "v": "List"
+                          }
+                        },
+                        "k": "app"
+                      }
+                    },
+                    "bi": "default",
+                    "k": "forall",
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "head"
+                    },
+                    "t": {
+                      "i": 2,
+                      "k": "b"
+                    }
+                  }
+                },
+                "bi": "default",
+                "k": "forall",
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "_nil"
+                },
+                "t": {
+                  "a": {
+                    "a": {
+                      "i": 1,
+                      "k": "b"
+                    },
+                    "f": {
+                      "k": "const",
+                      "ls": [],
+                      "n": {
+                        "k": "s",
+                        "p": {
+                          "k": "s",
+                          "p": {
+                            "k": "a"
+                          },
+                          "v": "List"
+                        },
+                        "v": "nil"
+                      }
+                    },
+                    "k": "app"
+                  },
+                  "f": {
+                    "i": 0,
+                    "k": "b"
+                  },
+                  "k": "app"
+                }
+              },
+              "bi": "default",
+              "k": "forall",
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "_motive"
+              },
+              "t": {
+                "b": {
+                  "k": "sort",
+                  "l": {
+                    "k": "p",
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "u"
+                    }
+                  }
+                },
+                "bi": "default",
+                "k": "forall",
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "_major"
+                },
+                "t": {
+                  "a": {
+                    "i": 0,
+                    "k": "b"
+                  },
+                  "f": {
+                    "k": "const",
+                    "ls": [],
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "List"
+                    }
+                  },
+                  "k": "app"
+                }
+              }
+            },
+            "bi": "implicit",
+            "k": "forall",
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "α"
+            },
+            "t": {
+              "k": "sort",
+              "l": {
+                "k": "s",
+                "o": {
+                  "k": "z"
+                }
+              }
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "constructor",
+          "levelParameterWires": [],
+          "levelParameters": [],
+          "metadata": {
+            "family": "List",
+            "familyWire": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "List"
+            },
+            "fields": 2,
+            "index": 1,
+            "parameters": 1,
+            "recursiveFields": [
+              1
+            ]
+          },
+          "name": "List.cons",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "List"
+            },
+            "v": "cons"
+          },
+          "type": {
+            "b": {
+              "b": {
+                "b": {
+                  "a": {
+                    "i": 2,
+                    "k": "b"
+                  },
+                  "f": {
+                    "k": "const",
+                    "ls": [],
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "List"
+                    }
+                  },
+                  "k": "app"
+                },
+                "bi": "default",
+                "k": "forall",
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "tail"
+                },
+                "t": {
+                  "a": {
+                    "i": 1,
+                    "k": "b"
+                  },
+                  "f": {
+                    "k": "const",
+                    "ls": [],
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "List"
+                    }
+                  },
+                  "k": "app"
+                }
+              },
+              "bi": "default",
+              "k": "forall",
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "head"
+              },
+              "t": {
+                "i": 0,
+                "k": "b"
+              }
+            },
+            "bi": "implicit",
+            "k": "forall",
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "α"
+            },
+            "t": {
+              "k": "sort",
+              "l": {
+                "k": "s",
+                "o": {
+                  "k": "z"
+                }
+              }
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "constructor",
+          "levelParameterWires": [],
+          "levelParameters": [],
+          "metadata": {
+            "family": "List",
+            "familyWire": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "List"
+            },
+            "fields": 0,
+            "index": 0,
+            "parameters": 1,
+            "recursiveFields": []
+          },
+          "name": "List.nil",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "List"
+            },
+            "v": "nil"
+          },
+          "type": {
+            "b": {
+              "a": {
+                "i": 0,
+                "k": "b"
+              },
+              "f": {
+                "k": "const",
+                "ls": [],
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "List"
+                }
+              },
+              "k": "app"
+            },
+            "bi": "implicit",
+            "k": "forall",
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "α"
+            },
+            "t": {
+              "k": "sort",
+              "l": {
+                "k": "s",
+                "o": {
+                  "k": "z"
+                }
+              }
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "inductive",
+          "levelParameterWires": [],
+          "levelParameters": [],
+          "metadata": {
+            "constructorWires": [
+              {
+                "k": "s",
+                "p": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "List"
+                },
+                "v": "nil"
+              },
+              {
+                "k": "s",
+                "p": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "List"
+                },
+                "v": "cons"
+              }
+            ],
+            "constructors": [
+              "List.nil",
+              "List.cons"
+            ],
+            "indices": 0,
+            "parameters": 1,
+            "structure": false
+          },
+          "name": "List",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "a"
+            },
+            "v": "List"
+          },
+          "type": {
+            "b": {
+              "k": "sort",
+              "l": {
+                "k": "s",
+                "o": {
+                  "k": "z"
+                }
+              }
+            },
+            "bi": "default",
+            "k": "forall",
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "α"
+            },
+            "t": {
+              "k": "sort",
+              "l": {
+                "k": "s",
+                "o": {
+                  "k": "z"
+                }
+              }
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "axiom",
+          "levelParameterWires": [],
+          "levelParameters": [],
+          "metadata": null,
+          "name": "Bool.decEq",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Bool"
+            },
+            "v": "decEq"
+          },
+          "type": {
+            "b": {
+              "b": {
+                "a": {
+                  "a": {
+                    "i": 0,
+                    "k": "b"
+                  },
+                  "f": {
+                    "a": {
+                      "i": 1,
+                      "k": "b"
+                    },
+                    "f": {
+                      "a": {
+                        "k": "const",
+                        "ls": [],
+                        "n": {
+                          "k": "s",
+                          "p": {
+                            "k": "a"
+                          },
+                          "v": "Bool"
+                        }
+                      },
+                      "f": {
+                        "k": "const",
+                        "ls": [
+                          {
+                            "k": "s",
+                            "o": {
+                              "k": "z"
+                            }
+                          }
+                        ],
+                        "n": {
+                          "k": "s",
+                          "p": {
+                            "k": "a"
+                          },
+                          "v": "Eq"
+                        }
+                      },
+                      "k": "app"
+                    },
+                    "k": "app"
+                  },
+                  "k": "app"
+                },
+                "f": {
+                  "k": "const",
+                  "ls": [],
+                  "n": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "Decidable"
+                  }
+                },
+                "k": "app"
+              },
+              "bi": "default",
+              "k": "forall",
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "b"
+              },
+              "t": {
+                "k": "const",
+                "ls": [],
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "Bool"
+                }
+              }
+            },
+            "bi": "default",
+            "k": "forall",
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "a"
+            },
+            "t": {
+              "k": "const",
+              "ls": [],
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "Bool"
+              }
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "axiom",
+          "levelParameterWires": [
+            {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "u"
+            }
+          ],
+          "levelParameters": [
+            "u"
+          ],
+          "metadata": null,
+          "name": "Eq",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "a"
+            },
+            "v": "Eq"
+          },
+          "type": {
+            "b": {
+              "b": {
+                "b": {
+                  "k": "sort",
+                  "l": {
+                    "k": "z"
+                  }
+                },
+                "bi": "default",
+                "k": "forall",
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "b"
+                },
+                "t": {
+                  "i": 1,
+                  "k": "b"
+                }
+              },
+              "bi": "default",
+              "k": "forall",
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "a"
+              },
+              "t": {
+                "i": 0,
+                "k": "b"
+              }
+            },
+            "bi": "implicit",
+            "k": "forall",
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "α"
+            },
+            "t": {
+              "k": "sort",
+              "l": {
+                "k": "p",
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "u"
+                }
+              }
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "axiom",
+          "levelParameterWires": [],
+          "levelParameters": [],
+          "metadata": null,
+          "name": "Unit.unit",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Unit"
+            },
+            "v": "unit"
+          },
+          "type": {
+            "k": "const",
+            "ls": [],
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Unit"
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "axiom",
+          "levelParameterWires": [],
+          "levelParameters": [],
+          "metadata": null,
+          "name": "Unit",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "a"
+            },
+            "v": "Unit"
+          },
+          "type": {
+            "k": "sort",
+            "l": {
+              "k": "s",
+              "o": {
+                "k": "z"
+              }
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "axiom",
+          "levelParameterWires": [],
+          "levelParameters": [],
+          "metadata": null,
+          "name": "Bool.false",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Bool"
+            },
+            "v": "false"
+          },
+          "type": {
+            "k": "const",
+            "ls": [],
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Bool"
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "axiom",
+          "levelParameterWires": [],
+          "levelParameters": [],
+          "metadata": null,
+          "name": "Bool.true",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Bool"
+            },
+            "v": "true"
+          },
+          "type": {
+            "k": "const",
+            "ls": [],
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Bool"
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "axiom",
+          "levelParameterWires": [],
+          "levelParameters": [],
+          "metadata": null,
+          "name": "Bool",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "a"
+            },
+            "v": "Bool"
+          },
+          "type": {
+            "k": "sort",
+            "l": {
+              "k": "s",
+              "o": {
+                "k": "z"
+              }
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "axiom",
+          "levelParameterWires": [],
+          "levelParameters": [],
+          "metadata": null,
+          "name": "Nat.blt",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Nat"
+            },
+            "v": "blt"
+          },
+          "type": {
+            "b": {
+              "b": {
+                "k": "const",
+                "ls": [],
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "Bool"
+                }
+              },
+              "bi": "default",
+              "k": "forall",
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "b"
+              },
+              "t": {
+                "k": "const",
+                "ls": [],
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "Nat"
+                }
+              }
+            },
+            "bi": "default",
+            "k": "forall",
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "a"
+            },
+            "t": {
+              "k": "const",
+              "ls": [],
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "Nat"
+              }
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "axiom",
+          "levelParameterWires": [],
+          "levelParameters": [],
+          "metadata": null,
+          "name": "Nat.beq",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Nat"
+            },
+            "v": "beq"
+          },
+          "type": {
+            "b": {
+              "b": {
+                "k": "const",
+                "ls": [],
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "Bool"
+                }
+              },
+              "bi": "default",
+              "k": "forall",
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "b"
+              },
+              "t": {
+                "k": "const",
+                "ls": [],
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "Nat"
+                }
+              }
+            },
+            "bi": "default",
+            "k": "forall",
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "a"
+            },
+            "t": {
+              "k": "const",
+              "ls": [],
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "Nat"
+              }
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "axiom",
+          "levelParameterWires": [],
+          "levelParameters": [],
+          "metadata": null,
+          "name": "Nat.sub",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Nat"
+            },
+            "v": "sub"
+          },
+          "type": {
+            "b": {
+              "b": {
+                "k": "const",
+                "ls": [],
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "Nat"
+                }
+              },
+              "bi": "default",
+              "k": "forall",
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "b"
+              },
+              "t": {
+                "k": "const",
+                "ls": [],
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "Nat"
+                }
+              }
+            },
+            "bi": "default",
+            "k": "forall",
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "a"
+            },
+            "t": {
+              "k": "const",
+              "ls": [],
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "Nat"
+              }
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "axiom",
+          "levelParameterWires": [],
+          "levelParameters": [],
+          "metadata": null,
+          "name": "Nat.add",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Nat"
+            },
+            "v": "add"
+          },
+          "type": {
+            "b": {
+              "b": {
+                "k": "const",
+                "ls": [],
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "Nat"
+                }
+              },
+              "bi": "default",
+              "k": "forall",
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "b"
+              },
+              "t": {
+                "k": "const",
+                "ls": [],
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "Nat"
+                }
+              }
+            },
+            "bi": "default",
+            "k": "forall",
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "a"
+            },
+            "t": {
+              "k": "const",
+              "ls": [],
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "Nat"
+              }
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "recursor",
+          "levelParameterWires": [
+            {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "u"
+            }
+          ],
+          "levelParameters": [
+            "u"
+          ],
+          "metadata": {
+            "families": [
+              "Nat"
+            ],
+            "familyWires": [
+              {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "Nat"
+              }
+            ],
+            "indices": 0,
+            "minors": 2,
+            "motives": 1,
+            "parameters": 0
+          },
+          "name": "Nat.rec",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Nat"
+            },
+            "v": "rec"
+          },
+          "type": {
+            "b": {
+              "b": {
+                "b": {
+                  "b": {
+                    "a": {
+                      "i": 0,
+                      "k": "b"
+                    },
+                    "f": {
+                      "i": 3,
+                      "k": "b"
+                    },
+                    "k": "app"
+                  },
+                  "bi": "default",
+                  "k": "forall",
+                  "n": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "_major"
+                  },
+                  "t": {
+                    "k": "const",
+                    "ls": [],
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "Nat"
+                    }
+                  }
+                },
+                "bi": "default",
+                "k": "forall",
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "_succ"
+                },
+                "t": {
+                  "b": {
+                    "b": {
+                      "a": {
+                        "a": {
+                          "i": 1,
+                          "k": "b"
+                        },
+                        "f": {
+                          "k": "const",
+                          "ls": [],
+                          "n": {
+                            "k": "s",
+                            "p": {
+                              "k": "s",
+                              "p": {
+                                "k": "a"
+                              },
+                              "v": "Nat"
+                            },
+                            "v": "succ"
+                          }
+                        },
+                        "k": "app"
+                      },
+                      "f": {
+                        "i": 3,
+                        "k": "b"
+                      },
+                      "k": "app"
+                    },
+                    "bi": "default",
+                    "k": "forall",
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "_ih"
+                    },
+                    "t": {
+                      "a": {
+                        "i": 0,
+                        "k": "b"
+                      },
+                      "f": {
+                        "i": 2,
+                        "k": "b"
+                      },
+                      "k": "app"
+                    }
+                  },
+                  "bi": "default",
+                  "k": "forall",
+                  "n": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "n"
+                  },
+                  "t": {
+                    "k": "const",
+                    "ls": [],
+                    "n": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "Nat"
+                    }
+                  }
+                }
+              },
+              "bi": "default",
+              "k": "forall",
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "_zero"
+              },
+              "t": {
+                "a": {
+                  "k": "const",
+                  "ls": [],
+                  "n": {
+                    "k": "s",
+                    "p": {
+                      "k": "s",
+                      "p": {
+                        "k": "a"
+                      },
+                      "v": "Nat"
+                    },
+                    "v": "zero"
+                  }
+                },
+                "f": {
+                  "i": 0,
+                  "k": "b"
+                },
+                "k": "app"
+              }
+            },
+            "bi": "default",
+            "k": "forall",
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "_motive"
+            },
+            "t": {
+              "b": {
+                "k": "sort",
+                "l": {
+                  "k": "p",
+                  "n": {
+                    "k": "s",
+                    "p": {
+                      "k": "a"
+                    },
+                    "v": "u"
+                  }
+                }
+              },
+              "bi": "default",
+              "k": "forall",
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "_major"
+              },
+              "t": {
+                "k": "const",
+                "ls": [],
+                "n": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "Nat"
+                }
+              }
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "constructor",
+          "levelParameterWires": [],
+          "levelParameters": [],
+          "metadata": {
+            "family": "Nat",
+            "familyWire": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Nat"
+            },
+            "fields": 1,
+            "index": 1,
+            "parameters": 0,
+            "recursiveFields": [
+              0
+            ]
+          },
+          "name": "Nat.succ",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Nat"
+            },
+            "v": "succ"
+          },
+          "type": {
+            "b": {
+              "k": "const",
+              "ls": [],
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "Nat"
+              }
+            },
+            "bi": "default",
+            "k": "forall",
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "n"
+            },
+            "t": {
+              "k": "const",
+              "ls": [],
+              "n": {
+                "k": "s",
+                "p": {
+                  "k": "a"
+                },
+                "v": "Nat"
+              }
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "constructor",
+          "levelParameterWires": [],
+          "levelParameters": [],
+          "metadata": {
+            "family": "Nat",
+            "familyWire": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Nat"
+            },
+            "fields": 0,
+            "index": 0,
+            "parameters": 0,
+            "recursiveFields": []
+          },
+          "name": "Nat.zero",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Nat"
+            },
+            "v": "zero"
+          },
+          "type": {
+            "k": "const",
+            "ls": [],
+            "n": {
+              "k": "s",
+              "p": {
+                "k": "a"
+              },
+              "v": "Nat"
+            }
+          },
+          "value": null
+        },
+        {
+          "kind": "inductive",
+          "levelParameterWires": [],
+          "levelParameters": [],
+          "metadata": {
+            "constructorWires": [
+              {
+                "k": "s",
+                "p": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "Nat"
+                },
+                "v": "zero"
+              },
+              {
+                "k": "s",
+                "p": {
+                  "k": "s",
+                  "p": {
+                    "k": "a"
+                  },
+                  "v": "Nat"
+                },
+                "v": "succ"
+              }
+            ],
+            "constructors": [
+              "Nat.zero",
+              "Nat.succ"
+            ],
+            "indices": 0,
+            "parameters": 0,
+            "structure": false
+          },
+          "name": "Nat",
+          "nameWire": {
+            "k": "s",
+            "p": {
+              "k": "a"
+            },
+            "v": "Nat"
+          },
+          "type": {
+            "k": "sort",
+            "l": {
+              "k": "s",
+              "o": {
+                "k": "z"
+              }
+            }
+          },
+          "value": null
+        }
+      ]
+    },
+    "comparison": "operational-profile expected acceptance/refusal plus native/generated equality",
+    "theoremBoundary": "Safe Lean normalized-profile inference/admission has a model and consistency proof; generated-code/canonical translation preservation is not formally proved",
+    "resourceBoundary": "Structural recursion on finite Lean values; aggregate size, host stack and hostile JS objects are not qualified",
+    "canonicalMinDual": "still unsupported; this helper grants no checking authority"
+  },
+  "ci": {
+    "runId": 40486405765,
+    "commit": "695c68701437899b17a39205300cf26988322b15",
+    "status": "completed",
+    "conclusion": "success",
+    "proofNativeJob": 122129166896,
+    "portabilityClosureJob": 122129166670,
+    "artifacts": [
+      {
+        "id": 12724978933,
+        "name": "psc1-minkernel-portability-closure-695c68701437899b17a39205300cf26988322b15",
+        "bytes": 1644479,
+        "digest": "sha256:fcbcd1642f50b7f6dfdbca02605eeec2bff75a3e457db8fad1a788f1ea6d6e63"
+      },
+      {
+        "id": 12724778716,
+        "name": "psc1-minkernel-proof-695c68701437899b17a39205300cf26988322b15",
+        "bytes": 3716,
+        "digest": "sha256:ae9e8e3558e36d086ee3b9b74ed41a3e4c6a5bee08c3dfe55cc3d59acecd9c22"
+      }
+    ]
+  },
+  "compilerClosure": {
+    "commit": "695c68701437899b17a39205300cf26988322b15",
+    "sourceModules": 124,
+    "sourceCoreMembers": 4742,
+    "logicalCoreMembers": 4747,
+    "admissionRecords": 3465,
+    "preludeDeclarations": 115,
+    "foundationAxioms": 60,
+    "expressions": {
+      "app": 230478,
+      "b": 52868,
+      "const": 244702,
+      "forall": 12986,
+      "lam": 43860,
+      "let": 5955,
+      "nat": 2862,
+      "proj": 7168,
+      "sort": 531,
+      "str": 5875
+    },
+    "levels": {
+      "p": 128,
+      "s": 11786,
+      "z": 11786
+    },
+    "declarationKinds": {
+      "definition": 3152,
+      "inductive": 308,
+      "opaque": 5
+    },
+    "primitiveReferences": {
+      "Nat": 7953,
+      "Int": 337,
+      "Bool": 23286,
+      "String": 22425,
+      "Array": 0,
+      "List": 29254,
+      "Option": 10004,
+      "Except": 19154,
+      "Prod": 6810,
+      "Quot": 0,
+      "Quotient": 0
+    },
+    "minQualifiedModules": 0,
+    "minQualifiedPracticalCoreCriteria": 0,
+    "report": {
+      "path": "dist/pskernel-min/closure/report.json",
+      "bytes": 233500,
+      "sha256": "023741ba97d842d0381aa5f1b101d5317d4fdaab60724357ed2dca0aa5b16a84"
+    }
+  },
+  "originalCheckOnlyFrontier": {
+    "commit": "695c68701437899b17a39205300cf26988322b15",
+    "canonicalRecords": 12,
+    "inductiveGroups": 3,
+    "definitions": 9,
+    "expressions": {
+      "sort": 3,
+      "const": 396,
+      "forall": 54,
+      "lam": 105,
+      "app": 277,
+      "b": 75,
+      "let": 3,
+      "proj": 3
+    },
+    "piNodes": 54,
+    "dependentPiNodes": 0,
+    "maximalRecursorSpines": 17,
+    "recursorsWithMajor": 17,
+    "noMajorReferenceMotives": 17,
+    "dependentMotives": 0,
+    "otherMotives": 0,
+    "reachedPreludeEntries": 23,
+    "reachedAxioms": 5,
+    "reportSha256": "296b9fb232cf2524018fc359985e712983a4fa9b4c6165ab74dc2d078ff674c3"
+  },
+  "developmentAttempts": [
+    {
+      "runId": 40480651336,
+      "commit": "84fff0bbed896d5530126370e2a99193ee73bf60",
+      "status": "completed",
+      "conclusion": "failure",
+      "runAttempt": 1,
+      "qualification": "superseded-development-scope"
+    },
+    {
+      "runId": 40480910112,
+      "commit": "f829714249eb7243d3b7a3d7732cf6734fb2a03c",
+      "status": "completed",
+      "conclusion": "success",
+      "runAttempt": 1,
+      "qualification": "superseded-development-scope"
+    },
+    {
+      "runId": 40481469308,
+      "commit": "a291bfae4a4c13176457c07bd2b1bdd3cf940143",
+      "status": "completed",
+      "conclusion": "success",
+      "runAttempt": 1,
+      "qualification": "superseded-development-scope"
+    },
+    {
+      "runId": 40482087864,
+      "commit": "2bf8002488dbf770813a45457e3cab50831cac19",
+      "status": "completed",
+      "conclusion": "success",
+      "runAttempt": 1,
+      "qualification": "superseded-development-scope"
+    },
+    {
+      "runId": 40482788793,
+      "commit": "36895d712992b50e92ae89e7f29a783f39b8ed4c",
+      "status": "completed",
+      "conclusion": "failure",
+      "runAttempt": 1,
+      "qualification": "superseded-development-scope"
+    },
+    {
+      "runId": 40483268017,
+      "commit": "0898adf5b1ca6017a741049f35e59404e12ae228",
+      "status": "completed",
+      "conclusion": "failure",
+      "runAttempt": 1,
+      "qualification": "superseded-development-scope"
+    },
+    {
+      "runId": 40483630713,
+      "commit": "8e2a17c535ed0c5b70f989f3bb1c5f08fe86cd6f",
+      "status": "completed",
+      "conclusion": "failure",
+      "runAttempt": 1,
+      "qualification": "superseded-development-scope"
+    },
+    {
+      "runId": 40483941192,
+      "commit": "4e26c3cd12d1ce4f192a80624ce307948dc9c6ec",
+      "status": "completed",
+      "conclusion": "failure",
+      "runAttempt": 1,
+      "qualification": "superseded-development-scope"
+    },
+    {
+      "runId": 40484668341,
+      "commit": "185cd907b5985c1815464cfc37eae3b396736c2a",
+      "status": "completed",
+      "conclusion": "failure",
+      "runAttempt": 1,
+      "qualification": "superseded-development-scope"
+    },
+    {
+      "runId": 40485051517,
+      "commit": "7752685dc18a8d0eeb86cabd714e4f1e287a4311",
+      "status": "completed",
+      "conclusion": "failure",
+      "runAttempt": 1,
+      "qualification": "superseded-development-scope"
+    },
+    {
+      "runId": 40485435456,
+      "commit": "c3d68542c06106025704e2f0e53c32952218ea19",
+      "status": "completed",
+      "conclusion": "failure",
+      "runAttempt": 1,
+      "qualification": "superseded-development-scope"
+    },
+    {
+      "runId": 40486049753,
+      "commit": "d223ea7bdd876a78cb6538cf405432eb6e0a8add",
+      "status": "completed",
+      "conclusion": "failure",
+      "runAttempt": 1,
+      "qualification": "superseded-development-scope"
+    },
+    {
+      "runId": 40486405765,
+      "commit": "695c68701437899b17a39205300cf26988322b15",
+      "status": "completed",
+      "conclusion": "success",
+      "runAttempt": 1,
+      "qualification": "final-standalone-qualification"
+    }
+  ],
+  "broaderRegressionSnapshot": {
+    "checkedAtUtc": "2026-10-27 11:01:51 UTC",
+    "main": {
+      "runId": 40487236627,
+      "commit": "6113d848b49e68ae968ed970a280a75724b83536",
+      "testedMerge": "62e47c3fb94ffeaa6d339e55e858c6e86b3b3494",
+      "tree": "f4ed26e4b0ee69ad1f7d18b5126e2035871583d5",
+      "status": "completed",
+      "conclusion": "success",
+      "fullJob": 122138003035,
+      "gateJob": 122150263364,
+      "selection": {
+        "schema": "psc1-ci-selection/1",
+        "testedCommit": "62e47c3fb94ffeaa6d339e55e858c6e86b3b3494",
+        "headCommit": "6113d848b49e68ae968ed970a280a75724b83536",
+        "beforeCommit": "56635f12dccef564719bb7c6867edc0f46627685",
+        "eventBeforeCommit": "695c68701437899b17a39205300cf26988322b15",
+        "baselineRunId": 40474325037,
+        "baselineError": null,
+        "static": true,
+        "focused": true,
+        "integration": true,
+        "release": true,
+        "benchmark": false,
+        "paths": [
+          ".github/workflows/psc1-minkernel.yml",
+          "psc1/AI_WORK_STATE.md",
+          "psc1/docs/PSC1_MIN_KERNEL_ARCHITECTURE.md",
+          "psc1/docs/PSC1_MIN_KERNEL_CONTINUATION_GUIDE.md",
+          "psc1/docs/PSC1_MIN_KERNEL_CONTINUATION_PROOFS.md",
+          "psc1/docs/PSC1_MIN_KERNEL_CONTINUATION_REPO.md",
+          "psc1/docs/PSC1_MIN_KERNEL_CONTINUATION_RESEARCH.md",
+          "psc1/docs/PSC1_MIN_KERNEL_COVERAGE.md",
+          "psc1/docs/PSC1_MIN_KERNEL_PROOF_STATUS.md",
+          "psc1/docs/PSC1_MIN_KERNEL_QUALIFICATION_2026-10-27.json",
+          "psc1/docs/PSC1_MIN_KERNEL_R3_PROFILE.md",
+          "psc1/docs/PSC1_MIN_KERNEL_R3_QUALIFICATION_2026-10-27.json",
+          "psc1/docs/PSC1_MIN_KERNEL_RUNTIME_PROFILE.md",
+          "psc1/docs/PSC1_MIN_KERNEL_WORK_STATE.md",
+          "psc1/packages/pskernel-min/README.md",
+          "psc1/packages/pskernel-min/lakefile.lean",
+          "psc1/packages/pskernel-min/src/Ps/MinKernel/Profile/OperationalCheck.lean",
+          "psc1/packages/pskernel-min/src/Ps/MinKernel/Profile/OperationalProfile.lean",
+          "psc1/packages/pskernel-min/src/Ps/MinKernel/Tests/OperationalVectors.lean",
+          "psc1/packages/pskernel-min/test/OperationalTests.lean",
+          "psc1/proofs/pskernel-min/OperationalFoundation.lean",
+          "psc1/proofs/pskernel-min/OperationalProjection.lean",
+          "psc1/proofs/pskernel-min/OperationalSoundness.lean",
+          "psc1/proofs/pskernel-min/OperationalSource.lean",
+          "psc1/proofs/pskernel-min/lakefile.lean",
+          "psc1/scripts/MinKernelSourceCompile.lean",
+          "psc1/scripts/minkernel-operational-portability.mjs"
+        ],
+        "reasons": [
+          "build-or-ci-policy:.github/workflows/psc1-minkernel.yml",
+          "compiler-source-or-library:psc1/packages/pskernel-min/lakefile.lean",
+          "compiler-source-or-library:psc1/packages/pskernel-min/src/Ps/MinKernel/Profile/OperationalCheck.lean",
+          "compiler-source-or-library:psc1/packages/pskernel-min/src/Ps/MinKernel/Profile/OperationalProfile.lean",
+          "compiler-source-or-library:psc1/packages/pskernel-min/src/Ps/MinKernel/Tests/OperationalVectors.lean",
+          "compiler-source-or-library:psc1/packages/pskernel-min/test/OperationalTests.lean",
+          "unknown-compiler-dependency:psc1/proofs/pskernel-min/OperationalFoundation.lean",
+          "unknown-compiler-dependency:psc1/proofs/pskernel-min/OperationalProjection.lean",
+          "unknown-compiler-dependency:psc1/proofs/pskernel-min/OperationalSoundness.lean",
+          "unknown-compiler-dependency:psc1/proofs/pskernel-min/OperationalSource.lean",
+          "unknown-compiler-dependency:psc1/proofs/pskernel-min/lakefile.lean",
+          "test-or-qualification-controller:psc1/scripts/MinKernelSourceCompile.lean",
+          "test-controller:psc1/scripts/MinKernelSourceCompile.lean",
+          "test-or-qualification-controller:psc1/scripts/minkernel-operational-portability.mjs",
+          "test-controller:psc1/scripts/minkernel-operational-portability.mjs"
+        ]
+      },
+      "jobs": [
+        {
+          "id": 122132633495,
+          "name": "static",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122132974422,
+          "name": "lossless / lossless",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122132974480,
+          "name": "native / native",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122132974537,
+          "name": "focused / focused (applications)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122132974589,
+          "name": "focused / focused (core)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122132974597,
+          "name": "focused / php-application",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122132974685,
+          "name": "source-bindings / trace",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122132976492,
+          "name": "benchmark",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "id": 122134204798,
+          "name": "source-bindings / integration",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122136205795,
+          "name": "closures / selected-closure (semantic-compiler, checked)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122136205800,
+          "name": "closures / selected-closure (directjs-compiler, ordinary-checked)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122136205845,
+          "name": "closures / selected-closure (rust-compiler, ordinary-checked)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122136205876,
+          "name": "g1 / generated-js",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122136205896,
+          "name": "g1 / host-session-boundary",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122138003035,
+          "name": "full / linux-scoped",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122150263364,
+          "name": "gate",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ],
+      "existingOfficialPracticalCore": {
+        "counts": {
+          "implemented": 0,
+          "tested": 0,
+          "qualified": 37,
+          "blocked": 0
+        },
+        "releaseReady": true
+      },
+      "artifacts": [
+        {
+          "id": 12728764358,
+          "name": "psc1-scoped-correctness-62e47c3fb94ffeaa6d339e55e858c6e86b3b3494",
+          "bytes": 121480744,
+          "digest": "sha256:c96d8f0ede2ad62d7f21430b9db0b695c1c419b3ce0ae95ab88856d9fbd43443"
+        },
+        {
+          "id": 12728370520,
+          "name": "psc1-source-binding-integration-62e47c3fb94ffeaa6d339e55e858c6e86b3b3494",
+          "bytes": 25569,
+          "digest": "sha256:b62c8d3515e3eb47a465838ec877e88927761b564096c15c9d387c9b53954449"
+        },
+        {
+          "id": 12726676366,
+          "name": "psc1-compiler-closure-semantic-compiler-checked-62e47c3fb94ffeaa6d339e55e858c6e86b3b3494",
+          "bytes": 2013558,
+          "digest": "sha256:f57b50244903ff3ed20cb5183b015710eb0a5f4d14fccd13d9f83696bd7650c1"
+        },
+        {
+          "id": 12726381809,
+          "name": "psc1-generated-compiler-62e47c3fb94ffeaa6d339e55e858c6e86b3b3494",
+          "bytes": 5651152,
+          "digest": "sha256:fd2a5b9227b0fa884769958457314ceab4aca57a8d30ebb36333070b19bc417e"
+        },
+        {
+          "id": 12726341280,
+          "name": "psc1-practical-compiler-m-applications-62e47c3fb94ffeaa6d339e55e858c6e86b3b3494-attempt-1",
+          "bytes": 1750241,
+          "digest": "sha256:8e6b74e6202d5f94a25def0883d5eeca4b50a62c9a9d2ff53b32ab3c4a112b2f"
+        },
+        {
+          "id": 12726260443,
+          "name": "psc1-php-applications-62e47c3fb94ffeaa6d339e55e858c6e86b3b3494-attempt-1",
+          "bytes": 360275,
+          "digest": "sha256:ada312dad6ac1debca5b1d209cc5fa46e523fb425172bcc54d67fac013657683"
+        },
+        {
+          "id": 12726077497,
+          "name": "psc1-lossless-62e47c3fb94ffeaa6d339e55e858c6e86b3b3494",
+          "bytes": 35695,
+          "digest": "sha256:57747424a39cc35e0ff7449f45e33dab529574907344c6a6d5e0314de1f36687"
+        },
+        {
+          "id": 12725848096,
+          "name": "psc1-compiler-closure-directjs-compiler-ordinary-checked-62e47c3fb94ffeaa6d339e55e858c6e86b3b3494",
+          "bytes": 2792693,
+          "digest": "sha256:dbda5c4156fb9c716d9a6d031b64956ff1702fda2ffb087c0c0b498452deff61"
+        },
+        {
+          "id": 12725783907,
+          "name": "psc1-generated-session-boundary-62e47c3fb94ffeaa6d339e55e858c6e86b3b3494",
+          "bytes": 239874,
+          "digest": "sha256:81aad9f1c9568a5f76d6f029be3c47759e4a1856240a68a054d1d325d72008a4"
+        },
+        {
+          "id": 12725623408,
+          "name": "psc1-source-trace-62e47c3fb94ffeaa6d339e55e858c6e86b3b3494",
+          "bytes": 302433,
+          "digest": "sha256:db2c037431b25edef1c34f9ae31d8b628e51c00719149607165c3c31e8151d91"
+        },
+        {
+          "id": 12725498615,
+          "name": "psc1-architecture-native-62e47c3fb94ffeaa6d339e55e858c6e86b3b3494",
+          "bytes": 322683,
+          "digest": "sha256:bba6a802207c11c2b2f28dd134b7d6e5b68b5a4120fdac584c56e8a316670282"
+        },
+        {
+          "id": 12725494800,
+          "name": "psc1-compiler-closure-rust-compiler-ordinary-checked-62e47c3fb94ffeaa6d339e55e858c6e86b3b3494",
+          "bytes": 2499814,
+          "digest": "sha256:ac17726dc2bc324f80741ed498b7bd0ef2e0223503b235d55b6852ab641cc91b"
+        },
+        {
+          "id": 12725483958,
+          "name": "psc1-practical-compiler-m-core-62e47c3fb94ffeaa6d339e55e858c6e86b3b3494-attempt-1",
+          "bytes": 3019676,
+          "digest": "sha256:d50404e22a677c90a05e5a040d4b41c7c1fc5f904b4f7cb4d5f4e493af458e8c"
+        },
+        {
+          "id": 12724714406,
+          "name": "psc1-development-62e47c3fb94ffeaa6d339e55e858c6e86b3b3494",
+          "bytes": 47213,
+          "digest": "sha256:9daa2c28f273f6761466fa2d8ed763ce6d1ee4c915eaa847aa888d4bca82687b"
+        }
+      ]
+    },
+    "installed": {
+      "runId": 40483267987,
+      "commit": "0898adf5b1ca6017a741049f35e59404e12ae228",
+      "status": "completed",
+      "conclusion": "success",
+      "preflightJob": 122118837091,
+      "installedJob": 122119116648,
+      "package": {
+        "commit": "0898adf5b1ca6017a741049f35e59404e12ae228",
+        "sha256": "0ebac8c6db551f374a5ae74c3db938ecfd5a561ab85c6c0ebe8106f4f191ea2e",
+        "bytes": 3823976,
+        "version": "0.1.0-psc1.9"
+      },
+      "artifacts": [
+        {
+          "id": 12725748803,
+          "name": "psc1-cli-toolchain-0898adf5b1ca6017a741049f35e59404e12ae228",
+          "bytes": 206727166,
+          "digest": "sha256:53c461d992b4508ae1e44e287f40666996843851bd4439f508797e722150f6ec"
+        },
+        {
+          "id": 12722844884,
+          "name": "psc1-cli-source-0898adf5b1ca6017a741049f35e59404e12ae228",
+          "bytes": 45813,
+          "digest": "sha256:d4cd0becdf8ad847bf284919cad29db4993ce6d230b19cf3e4dd0d5afeb63872"
+        }
+      ],
+      "laterDelta": "Only OperationalProjection.lean proof and Markdown/JSON changed; executable/test/driver/contract/workflow bytes match qualification."
+    },
+    "qualification": "All selected branch regressions terminal success; benchmark deliberately unselected. Existing official-checker release criteria37/37. Full min remains0/124,0/37 and no min G1/G2/G3."
+  },
+  "remaining": [
+    "R4 exact bounded bytes-to-AST decoder and source-name/slot/generation binding",
+    "R4 proved profile recognition/translation preserving typing and semantics",
+    "R4 exact compound Eq/Bool.decEq/ite source shape before normalized schema construction",
+    "Connected R1/R2/R3/naming/ingress source remeasurement and String/Char semantics",
+    "Generated execution refinement/explicit trust and hostile-object/aggregate/stack/heap bounds",
+    "Complete runtime min self-check, then whole compiler min checking and genuine min G1/G2/G3"
+  ],
+  "minCoverage": {
+    "compilerModules": 0,
+    "compilerTotal": 124,
+    "practicalCore": 0,
+    "totalPracticalCore": 37,
+    "generationsQualified": []
+  },
+  "canonicalMinDual": "PSC1_MIN_CANONICAL_BRIDGE_UNPROVED",
+  "officialDefault": "Lean4.35 Wasm preserved",
+  "next": "R4 canonical ingress/profile translation and exact expanded self-check closure. No merge/publication or parent writes.",
+  "runtimeSourceOriginDiagnostic": {
+    "authoritative": false,
+    "qualification": false,
+    "scope": "Derived source-only view from exact retained origins. No min admission, source pruning, complete foundation or self-check proof.",
+    "archiveVerifiedSha256": "fcbcd1642f50b7f6dfdbca02605eeec2bff75a3e457db8fad1a788f1ea6d6e63",
+    "sourceOriginsSha256": "42be1b39805eae7a2dbe9a4a2b5ca5224ca4ee08e876c65307a6306de2110ff2",
+    "admissionsSha256": "c926de2d6ff04426503f5b59f16551d7916000e00a56c33512174cd01f662a3b",
+    "runtimeModules": [
+      [
+        "Ps",
+        "MinKernel",
+        "Profile",
+        "RegularProfile"
+      ],
+      [
+        "Ps",
+        "MinKernel",
+        "Profile",
+        "RegularCheck"
+      ],
+      [
+        "Ps",
+        "MinKernel",
+        "Profile",
+        "OperationalProfile"
+      ],
+      [
+        "Ps",
+        "MinKernel",
+        "Profile",
+        "OperationalCheck"
+      ]
+    ],
+    "sourceOriginMembers": 108,
+    "completeTestBundleRecords": 67,
+    "runtimeRecords": 56,
+    "runtimeRecordIndices": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55
+    ],
+    "kinds": {
+      "inductive": 8,
+      "constant": 48
+    },
+    "syntax": {
+      "lam": 565,
+      "const": 2202,
+      "app": 1747,
+      "let": 36,
+      "b": 489,
+      "forall": 249,
+      "proj": 19,
+      "sort": 8,
+      "nat": 82
+    },
+    "projections": {
+      "[[\"s\",\"PsMinOpDeclaration\"]] field 0": 3,
+      "[[\"s\",\"PsMinOpDeclaration\"]] field 1": 1,
+      "[[\"s\",\"PsMinRegSpec\"]] field 5": 6,
+      "[[\"s\",\"PsMinRegDeclaration\"]] field 0": 3,
+      "[[\"s\",\"PsMinRegDeclaration\"]] field 1": 1,
+      "[[\"s\",\"PsMinRegSpec\"]] field 0": 1,
+      "[[\"s\",\"PsMinRegSpec\"]] field 1": 1,
+      "[[\"s\",\"PsMinRegSpec\"]] field 2": 1,
+      "[[\"s\",\"PsMinRegSpec\"]] field 3": 1,
+      "[[\"s\",\"PsMinRegSpec\"]] field 4": 1
+    }
+  },
+  "selectedCanonicalContractKinds": {
+    "definition": 1,
+    "recursor": 4,
+    "constructor": 8,
+    "inductive": 5,
+    "axiom": 11
+  },
+  "runtimeSourceAudit": [
+    {
+      "path": "psc1/packages/pskernel-min/src/Ps/MinKernel/Profile/OperationalProfile.lean",
+      "imports": [
+        "import Ps.MinKernel.Profile.RegularCheck"
+      ],
+      "escapes": []
+    },
+    {
+      "path": "psc1/packages/pskernel-min/src/Ps/MinKernel/Profile/OperationalCheck.lean",
+      "imports": [
+        "import Ps.MinKernel.Profile.OperationalProfile"
+      ],
+      "escapes": []
+    }
+  ]
+}

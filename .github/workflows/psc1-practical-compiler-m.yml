@@ -64,8 +64,7 @@ jobs:
       - name: Install repository-pinned Lean
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          bash "$GITHUB_WORKSPACE/psc1/scripts/ci/install-pinned-lean.sh"
       - name: Install pinned Rust and locked host dependencies
         run: |
           set -euo pipefail
@@ -208,8 +207,7 @@ jobs:
       - name: Install repository-pinned Lean and locked host dependencies
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          bash "$GITHUB_WORKSPACE/psc1/scripts/ci/install-pinned-lean.sh"
           npm --prefix host-tools --workspaces=false ci --ignore-scripts --no-audit --no-fund
       - name: Build production compiler and UTF8 boundary regression
         run: |

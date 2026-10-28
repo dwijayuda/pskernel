@@ -6,7 +6,7 @@ import CompilerCaller
 namespace Ps.MinKernel.CompilerSubstitution
 
 inductive Lift (amount : Nat) : Nat → PsExpr → PsExpr → Prop where
-  | below {index cutoff : Nat} (h : index < cutoff) :
+  | bound {index cutoff : Nat} (h : index < cutoff) :
       Lift amount cutoff (.bvar index) (.bvar index)
   | above {index cutoff : Nat} (h : cutoff ≤ index) :
       Lift amount cutoff (.bvar index) (.bvar (Nat.add index amount))
@@ -32,7 +32,7 @@ inductive Lift (amount : Nat) : Nat → PsExpr → PsExpr → Prop where
       Lift amount cutoff (.proj name index value) (.proj name index value')
 
 inductive Substitute (replacement : PsExpr) : Nat → PsExpr → PsExpr → Prop where
-  | below {index depth : Nat} (h : index < depth) :
+  | bound {index depth : Nat} (h : index < depth) :
       Substitute replacement depth (.bvar index) (.bvar index)
   | hit {depth : Nat} {result : PsExpr} (lift : Lift depth 0 replacement result) :
       Substitute replacement depth (.bvar depth) result
@@ -68,7 +68,7 @@ theorem lift_constructive (expression : PsExpr) (amount cutoff : Nat) :
         simpa only [psExprLiftBVarsWorker, hb, ite_true] using (Lift.above h : Lift amount cutoff (.bvar index) _)
       · have hb : ¬ Nat.ble cutoff index = true := by simpa only [Nat.ble_eq] using h
         simpa only [psExprLiftBVarsWorker, ite_eq_right hb] using
-          (Lift.below (Nat.lt_of_not_ge h) : Lift amount cutoff (.bvar index) _)
+          (Lift.bound (Nat.lt_of_not_ge h) : Lift amount cutoff (.bvar index) _)
   | fvar id =>
       exact .fvar
   | mvar id =>
@@ -93,7 +93,7 @@ theorem lift_constructive (expression : PsExpr) (amount cutoff : Nat) :
 theorem lift_correct (h : Lift amount cutoff expression result) :
     psExprLiftBVarsWorker amount expression cutoff = result := by
   induction h with
-  | @below index cutoff h =>
+  | @bound index cutoff h =>
       have hb : ¬ Nat.ble cutoff index = true := by
         simpa only [Nat.ble_eq] using Nat.not_le_of_gt h
       simp only [psExprLiftBVarsWorker, ite_eq_right hb]
@@ -144,7 +144,7 @@ theorem substitution_constructive (expression replacement : PsExpr) (depth : Nat
           have hl : index < depth :=
             Nat.lt_of_le_of_ne (Nat.le_of_not_gt hg) he
           simpa only [psExprInstantiateAtWorker, ite_eq_right he', ite_eq_right hg'] using
-            (Substitute.below hl : Substitute replacement depth (.bvar index) _)
+            (Substitute.bound hl : Substitute replacement depth (.bvar index) _)
   | fvar id =>
       exact .fvar
   | mvar id =>
@@ -169,7 +169,7 @@ theorem substitution_constructive (expression replacement : PsExpr) (depth : Nat
 theorem substitution_correct (h : Substitute replacement depth expression result) :
     psExprInstantiateAtWorker replacement expression depth = result := by
   induction h with
-  | @below index depth h =>
+  | @bound index depth h =>
       have he : ¬ Nat.beq index depth = true := by simpa only [Nat.beq_eq] using Nat.ne_of_lt h
       have hg : ¬ Nat.blt depth index = true := by simpa only [Nat.blt_eq] using Nat.not_lt_of_ge (Nat.le_of_lt h)
       simp only [psExprInstantiateAtWorker, ite_eq_right he, ite_eq_right hg]

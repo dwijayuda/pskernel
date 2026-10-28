@@ -1,7 +1,7 @@
 name: PSC1 MinKernel proved fragment
 on:
   push:
-    branches: [research/psc1-minkernel-consistency-selfhost-20261027]
+    branches: [research/psc1-minkernel-consistency-selfhost-20261027, research/psc1-min-compiler-caller-20261028]
     paths:
       - psc1/packages/pskernel-min/**/*.lean
       - psc1/packages/pskernel-min/host/*.mjs
@@ -11,6 +11,7 @@ on:
       - psc1/scripts/MinKernelSourceCompile.lean
       - psc1/scripts/MinKernelCompilerPreservation.lean
       - psc1/scripts/MinKernelTextPreservation.lean
+      - psc1/scripts/MinKernelCompilerCaller.lean
       - .github/workflows/psc1-minkernel.yml
   workflow_dispatch:
 permissions:
@@ -30,7 +31,18 @@ jobs:
           key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
       - name: Install pinned Lean
         run: |
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          if [ ! -x "$HOME/.elan/bin/elan" ]; then
+            for elan_attempt in 1 2 3; do
+              if curl --fail --show-error --location --connect-timeout 15 --max-time 60 \
+                  https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+                  -o "$RUNNER_TEMP/psc1-elan-init.sh" &&
+                  timeout 180 sh "$RUNNER_TEMP/psc1-elan-init.sh" -y; then
+                break
+              fi
+            done
+            test -x "$HOME/.elan/bin/elan"
+          fi
+          "$HOME/.elan/bin/elan" --version
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: Check exact executable and its complete fragment consistency proof
         working-directory: psc1/proofs/pskernel-min
@@ -182,7 +194,18 @@ jobs:
             psc1-lake-v2-${{ runner.os }}-
       - name: Install pinned Lean
         run: |
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          if [ ! -x "$HOME/.elan/bin/elan" ]; then
+            for elan_attempt in 1 2 3; do
+              if curl --fail --show-error --location --connect-timeout 15 --max-time 60 \
+                  https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+                  -o "$RUNNER_TEMP/psc1-elan-init.sh" &&
+                  timeout 180 sh "$RUNNER_TEMP/psc1-elan-init.sh" -y; then
+                break
+              fi
+            done
+            test -x "$HOME/.elan/bin/elan"
+          fi
+          "$HOME/.elan/bin/elan" --version
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           npm install --prefix "$RUNNER_TEMP/min-ts" --ignore-scripts --no-audit --no-fund typescript@7.0.2
           echo "PSC0_TSC=$RUNNER_TEMP/min-ts/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
@@ -203,6 +226,37 @@ jobs:
           lake env lean proofs/pskernel-min/TextCompositionTrust.lean 2>&1 | tee dist/pskernel-min/text-preservation/proof.log
           node scripts/minkernel-text-preservation-guard.mjs
           node --max-old-space-size=256 scripts/minkernel-text-preservation.mjs --abi-only
+      - name: Prove actual recursive literal and erased-let caller correspondence
+        run: |
+          set -euo pipefail
+          mkdir -p dist/pskernel-min/compiler-caller
+          lake build PsMinCompilerCaller PsMinCompilerCallerFixture 2>&1 | tee dist/pskernel-min/compiler-caller/build.log
+          lake env lean proofs/pskernel-min/CompilerCallerTrust.lean 2>&1 | tee dist/pskernel-min/compiler-caller/proof.log
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          assert.equal(process.platform,'linux');assert.equal(process.env.GITHUB_ACTIONS,'true');
+          const text=fs.readFileSync('dist/pskernel-min/compiler-caller/proof.log','utf8');
+          const names=["fuel_zero","nested_idempotent","nested_context","nested_names","eligible_positive","eligible_source","eligible_erases","public_preserves","entry_preserves","natural_bridge"];
+          const reports=names.map(name=>{
+           const full='Ps.MinKernel.CompilerCaller.'+name;
+           const rows=text.split('\n').filter(line=>line.includes("'"+full+"'"));
+           assert.equal(rows.length,1,'missing/duplicate report '+full);
+           assert.ok(rows[0].includes('does not depend on any axioms')||rows[0].endsWith('depends on axioms: [propext]'),rows[0]);
+           return {name:full,report:rows[0]};
+          });
+          assert.doesNotMatch(text,/sorryAx|declaration uses.*sorry/);
+          fs.writeFileSync('dist/pskernel-min/compiler-caller/proof-reports.json',JSON.stringify({schema:'psc1-r7-caller-trust/1',reports},null,2)+'\n');
+          console.log('PSC1_R7_CALLER_TRUST_PASS '+reports.length);
+          
+          JS
+          node --max-old-space-size=256 scripts/minkernel-compiler-caller.mjs --abi-only
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-r7-caller-proof-${{ github.sha }}
+          path: psc1/dist/pskernel-min/compiler-caller/
+          retention-days: 90
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -244,7 +298,18 @@ jobs:
       - name: Install repository-pinned tools
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          if [ ! -x "$HOME/.elan/bin/elan" ]; then
+            for elan_attempt in 1 2 3; do
+              if curl --fail --show-error --location --connect-timeout 15 --max-time 60 \
+                  https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+                  -o "$RUNNER_TEMP/psc1-elan-init.sh" &&
+                  timeout 180 sh "$RUNNER_TEMP/psc1-elan-init.sh" -y; then
+                break
+              fi
+            done
+            test -x "$HOME/.elan/bin/elan"
+          fi
+          "$HOME/.elan/bin/elan" --version
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           npm install --prefix "$RUNNER_TEMP/min-ts" --ignore-scripts --no-audit --no-fund typescript@7.0.2
           echo "PSC0_TSC=$RUNNER_TEMP/min-ts/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
@@ -253,7 +318,7 @@ jobs:
         run: |
           set -euo pipefail
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build PsBackendTs psc1_independent_checker psc1_source_census_probe psc2_joint_closure_inventory PsMinCompilerScalarFixture PsMinStringBridgeFixture
+          lake build PsBackendTs psc1_independent_checker psc1_source_census_probe psc2_joint_closure_inventory PsMinCompilerScalarFixture PsMinStringBridgeFixture PsMinCompilerCallerFixture
       - uses: actions/cache/save@v4
         if: ${{ !cancelled() && steps.native_build.outcome == 'success' && steps.native_cache.outputs.cache-hit != 'true' }}
         with:
@@ -294,6 +359,9 @@ jobs:
       - name: Check actual text composition source and unchanged String refusal boundary
         if: ${{ !cancelled() && steps.regular_ingress.outcome == 'success' }}
         run: node --max-old-space-size=256 scripts/minkernel-text-preservation.mjs
+      - name: Check actual recursive caller source, emitted module and exact source admission
+        if: ${{ !cancelled() && steps.regular_ingress.outcome == 'success' }}
+        run: node --max-old-space-size=256 scripts/minkernel-compiler-caller.mjs
       - name: Build and qualify exact standalone pskernel-min tarball offline
         if: ${{ !cancelled() && steps.regular_ingress.outcome == 'success' }}
         run: |

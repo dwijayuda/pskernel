@@ -262,7 +262,7 @@ jobs:
           import assert from 'node:assert/strict';
           assert.equal(process.platform,'linux');assert.equal(process.env.GITHUB_ACTIONS,'true');
           const text=fs.readFileSync('dist/pskernel-min/byte-cursor/proof.log','utf8');
-          const names=["read_sound","read_complete","read_iff","read_eof","read_range","walk_span","span_valid","span_length","digest_empty","digest_cons","walk_reflect","walk_iff","digest_bounded"];
+          const names=["read_sound","read_complete","read_iff","read_eof","read_range","walk_span","span_valid","span_length","digest_empty","digest_cons","walk_reflect","walk_iff","digest_bounded","walk_legacy"];
           const reports=names.map(name=>{
             const full='Ps.MinKernel.ByteCursor.'+name;
             const rows=text.split('\n').filter(line=>line.includes("'"+full+"'"));

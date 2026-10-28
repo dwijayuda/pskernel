@@ -148,4 +148,39 @@ theorem digest_bounded (bytes : List Nat) (initial : Nat) (bounded : initial < 6
   | cons byte rest ih =>
     exact ih _ (Nat.mod_lt _ (by decide))
 
+-- Proof-only equations of the first eager partial-application experiment.
+def legacyWalk
+    (remaining : Nat) (size : Nat) (byteAt : Nat -> Nat) :
+    PsMinByteCursorState -> Except PsMinByteCursorError PsMinByteCursorState :=
+  match remaining with
+  | Nat.zero =>
+      fun (state : PsMinByteCursorState) =>
+        if Nat.beq state.offset size then Except.ok state
+        else Except.error PsMinByteCursorError.incomplete
+  | Nat.succ rest =>
+      let smaller : PsMinByteCursorState -> Except PsMinByteCursorError PsMinByteCursorState :=
+        legacyWalk rest size byteAt;
+      fun (state : PsMinByteCursorState) =>
+        match psMinByteCursorRead size byteAt state.offset with
+        | Except.error error => Except.error error
+        | Except.ok byte =>
+            smaller (PsMinByteCursorState.mk (Nat.succ state.offset)
+              (psMinByteDigestStep state.digest byte))
+
+
+theorem walk_legacy (remaining size : Nat) (byteAt : Nat → Nat)
+    (state : PsMinByteCursorState) :
+    psMinByteCursorWalk remaining size byteAt state =
+      legacyWalk remaining size byteAt state := by
+  induction remaining generalizing state with
+  | zero => rfl
+  | succ remaining ih =>
+      cases ready : psMinByteCursorRead size byteAt state.offset with
+      | error error => simp only [psMinByteCursorWalk, legacyWalk, ready]
+      | ok byte =>
+          simpa only [psMinByteCursorWalk, legacyWalk, ready] using
+            ih (PsMinByteCursorState.mk (Nat.succ state.offset)
+              (psMinByteDigestStep state.digest byte))
+
+
 end Ps.MinKernel.ByteCursor

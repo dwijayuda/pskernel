@@ -13,3 +13,4 @@ import ByteCursor
 #print axioms Ps.MinKernel.ByteCursor.walk_reflect
 #print axioms Ps.MinKernel.ByteCursor.walk_iff
 #print axioms Ps.MinKernel.ByteCursor.digest_bounded
+#print axioms Ps.MinKernel.ByteCursor.walk_legacy

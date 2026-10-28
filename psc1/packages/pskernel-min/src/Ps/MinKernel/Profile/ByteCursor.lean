@@ -21,22 +21,21 @@ def psMinByteCursorRead (size : Nat) (byteAt : Nat -> Nat) (offset : Nat) :
   else Except.error PsMinByteCursorError.endOfInput
 
 def psMinByteCursorWalk
-    (remaining : Nat) (size : Nat) (byteAt : Nat -> Nat) :
-    PsMinByteCursorState -> Except PsMinByteCursorError PsMinByteCursorState :=
+    (remaining : Nat) (size : Nat) (byteAt : Nat -> Nat)
+    (state : PsMinByteCursorState) :
+    Except PsMinByteCursorError PsMinByteCursorState :=
   match remaining with
   | Nat.zero =>
-      fun (state : PsMinByteCursorState) =>
-        if Nat.beq state.offset size then Except.ok state
-        else Except.error PsMinByteCursorError.incomplete
+      if Nat.beq state.offset size then Except.ok state
+      else Except.error PsMinByteCursorError.incomplete
   | Nat.succ rest =>
-      let smaller : PsMinByteCursorState -> Except PsMinByteCursorError PsMinByteCursorState :=
-        psMinByteCursorWalk rest size byteAt;
-      fun (state : PsMinByteCursorState) =>
-        match psMinByteCursorRead size byteAt state.offset with
-        | Except.error error => Except.error error
-        | Except.ok byte =>
-            smaller (PsMinByteCursorState.mk (Nat.succ state.offset)
+      match psMinByteCursorRead size byteAt state.offset with
+      | Except.error error => Except.error error
+      | Except.ok byte =>
+          psMinByteCursorWalk rest size byteAt
+            (PsMinByteCursorState.mk (Nat.succ state.offset)
               (psMinByteDigestStep state.digest byte))
+
 
 -- Scalar bridge for native/generated experiments. 65521 is outside the residue
 -- range and denotes refusal. A digest is not an admission verdict.

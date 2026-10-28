@@ -35,3 +35,19 @@ Repeated selected CI jobs have stalled in unconditional elan installer downloads
 A shared Linux-Actions-only cache-aware helper preserves pins/test bodies/job
 budgets and caps cold download/installer attempts. Its callers require Linux
 qualification before adoption.
+
+## First allocation failure and source repair
+
+At d81480b8, native/generated compilation and thirteen proof reports passed,
+but generated traversal exhausted the unchanged 256 MiB heap on the 1 MiB
+probe. Native transport/execution/source compilation observed 1663764 KiB RSS
+in its separate measured process. The generated artifact shows the recursive
+partial application is constructed before state is supplied, building a
+linear continuation chain. This candidate supplies no traversal qualification.
+
+Make state an explicit fourth recursive parameter and recurse only after the
+checked byte read. Retain the original equations in a proof-only legacy worker
+and prove equality for arbitrary fuel, size, byte source and state. Add a
+fourteenth dependency report. Keep all input sizes, deadlines and memory limits.
+No memory bound is claimed from the equivalence theorem; rerun the unchanged
+native/generated and complete-packet probes after the repair.

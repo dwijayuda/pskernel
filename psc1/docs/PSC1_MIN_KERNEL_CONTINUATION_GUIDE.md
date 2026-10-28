@@ -1,5 +1,34 @@
 # PSC1 MinKernel — continuation guideline for GPT-6.1 Sol / High
 
+## Actual compiler module checkpoint — 2026-10-28
+
+**1/124 fresh source closures Min-admitted; 1/124 has finite runtime validation;
+0/124 fully compiler-qualified. No Min-backed G1/G2/G3.**
+The first actual module is Ps.Foundation.Source: all six logical members in its
+fresh complete 1387-byte packet passed public MinKernel and pinned official Lean.
+Its actual source and separate consumers passed 525 native/generated checks and
+a complete 21578-byte public-Min packet. Consumers do not increase the denominator.
+
+Read the [module qualification guideline](PSC1_MIN_KERNEL_MODULE_GUIDELINE.md)
+and [dated machine receipt](PSC1_MIN_KERNEL_MODULE_QUALIFICATION_2026-10-28.json).
+The retained CI artifact has the complete dependency-aware 124-row matrix,
+fresh six-leaf results and exact rejection witnesses. Projections are diagnostic
+and never alone qualify a module.
+
+The first List declaration, psListLengthAcc.$psc0SH.0, requires a quantified
+type and bound type variable absent from the current proved ground model.
+List occurs in 71 source closures. A sound parametric model and actual checker
+refinement are the next C1 obligation; arbitrary Sort/bvar acceptance is unsound.
+Source's general actual compiler preservation is still open, so full coverage
+stays zero. These are explicit unresolved fundamental proof obligations.
+
+[R7/R8 scoped qualification](PSC1_MIN_KERNEL_R8_GUIDELINE.md) passed:
+259 retained unique reports (42 axiom-free, 217 propext-only), with current
+broader and installed Linux regressions green at their recorded source/CI SHAs.
+R9's full-packet timeout remains parked. Subsequent work must resolve an actual
+module blocker. U1 remains usable; C1/C2/C3 remain incomplete.
+The historical sections below retain their separate immutable scopes.
+
 ## Usable standalone checker checkpoint
 
 The [usable-checker guide](PSC1_MIN_KERNEL_USABLE_GUIDE.md) and

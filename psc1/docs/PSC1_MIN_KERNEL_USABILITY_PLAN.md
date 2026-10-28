@@ -9,6 +9,10 @@ is unchanged. Preserve the [R6 guideline](PSC1_MIN_KERNEL_R6_GUIDELINE.md).
 U1 is qualified at eea9306384ab68c220bece18e769fd16d7903f3a; see the [usage guide](PSC1_MIN_KERNEL_USABLE_GUIDE.md)
 and [dated receipt](PSC1_MIN_KERNEL_USABILITY_QUALIFICATION_2026-10-28.json).
 C1/C2/C3 remain open; the overall full-compiler goal is not complete.
+The [actual module guideline](PSC1_MIN_KERNEL_MODULE_GUIDELINE.md) supersedes
+milestone-driven work order: 1/124 fresh Min-admitted closures and finite Source
+runtime evidence, 0/124 fully compiler-qualified. Prioritize actual rejected
+declarations and dependency impact; R9 remains parked after a full-packet timeout.
 
 ## U1: usable bounded checker
 
@@ -70,8 +74,10 @@ dual continue PSC1_MIN_CANONICAL_BRIDGE_UNPROVED until qualification.
 
 ## Work order and evidence rule
 
-Complete U1, then continue C1/C2 as explicit proof/implementation batches,
-measuring the entire newly connected graph each time. Every new theorem needs
+U1 is complete. Continue from the dependency-aware matrix and unchanged actual
+Source/List packets. Only start C1/C2 proof/implementation batches that discharge
+an actual rejected declaration or a required actual-module preservation gate;
+measure the entire newly connected graph each time. Every new theorem needs
 an explicit root and fresh dependency report (axiom-free or exactly propext-only).
 Keep failed/superseded and source-qualified/report-qualified evidence separate.
 Full compiler support is complete only after C1, C2 and C3 are all satisfied;

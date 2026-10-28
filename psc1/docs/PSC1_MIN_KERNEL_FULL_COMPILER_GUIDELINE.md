@@ -1,5 +1,15 @@
 # Full compiler support: C1 architecture and evidence guideline
 
+Current operational priority: [actual module qualification](PSC1_MIN_KERNEL_MODULE_GUIDELINE.md).
+The fresh matrix establishes 1/124 source closures Min-admitted and finite
+Source runtime validation, with 0/124 fully compiler-qualified and no Min generations.
+The first List declaration exposes absent parametric type semantics; prove that
+model/refinement before enabling acceptance. R7/R8 are scoped-qualified and R9
+is parked after the full generated packet timeout. The architecture research
+below remains applicable, but its earlier inventory-only work order/counts
+are superseded by the actual-module checkpoint.
+
+
 Research snapshot: 2026-10-28. User target: usable checker, then full compiler
 support. U1 is delivered. R7 is adopted at d356da768db4a7f31c3dc3293dab8dfe6dff41d5;
 its candidate cff0d8f9fc02662ccff8fd74fa56492a2d2044ee passed

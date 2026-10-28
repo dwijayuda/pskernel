@@ -4,8 +4,10 @@ Status: fourteen unique propext-only reports passed in the Linux candidate
 cf9477455526f83069468bb3e24b8705affa5049
 ([run 40679750632](https://github.com/dwijayuda/pskernel/actions/runs/40679750632)).
 The earlier candidates 739bc695/e9d8afef failed elaboration; their results are
-retained and do not qualify the batch. Adopted-source broader/portability
-qualification is still pending.
+retained and do not qualify the batch. Adopted-source focused qualification passed at 6a22235d, and broader/installed
+Linux checks passed at recorded source-equivalent CI checkpoints. See the
+[R7/R8 guideline](PSC1_MIN_KERNEL_R8_GUIDELINE.md) and dated receipt. This plan's
+sequence is historical; actual module blockers now select the work order.
 Parent candidate: cff0d8f9fc02662ccff8fd74fa56492a2d2044ee (R7).
 This is one component of C2 in [the usability contract](PSC1_MIN_KERNEL_USABILITY_PLAN.md).
 Full compiler support remains open.

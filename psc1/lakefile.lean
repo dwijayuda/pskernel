@@ -706,3 +706,9 @@ lean_lib PsMinCompilerCallerFixture where
 lean_lib PsMinCompilerSubstitution where
   srcDir := "proofs/pskernel-min"
   roots := #[`CompilerSubstitution, `CompilerSubstitutionTrust]
+
+
+-- Actual compiler data-module consumers, excluded from stable checker roots.
+lean_lib PsMinActualSourceProbe where
+  srcDir := "packages/pskernel-min/src"
+  roots := #[`Ps.MinKernel.Tests.SourcePositions]

@@ -41,7 +41,7 @@ jobs:
               if curl --fail --show-error --location --connect-timeout 15 --max-time 60 \
                   https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
                   -o "$RUNNER_TEMP/psc1-elan-init.sh" &&
-                  timeout 180 sh "$RUNNER_TEMP/psc1-elan-init.sh" -y; then
+                  timeout 60 sh "$RUNNER_TEMP/psc1-elan-init.sh" -y; then
                 break
               fi
             done

@@ -37,7 +37,18 @@ jobs:
       - name: Install repository-pinned Lean
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          if [ ! -x "$HOME/.elan/bin/elan" ]; then
+            for elan_attempt in 1 2 3; do
+              if curl --fail --show-error --location --connect-timeout 15 --max-time 60 \
+                  https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+                  -o "$RUNNER_TEMP/psc1-elan-init.sh" &&
+                  timeout 60 sh "$RUNNER_TEMP/psc1-elan-init.sh" -y; then
+                break
+              fi
+            done
+            test -x "$HOME/.elan/bin/elan"
+          fi
+          "$HOME/.elan/bin/elan" --version
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: Build checked native control regressions
         run: |

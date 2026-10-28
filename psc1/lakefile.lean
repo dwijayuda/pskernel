@@ -700,3 +700,9 @@ lean_lib PsMinCompilerCaller where
 lean_lib PsMinCompilerCallerFixture where
   srcDir := "packages/pskernel-min/src"
   roots := #[`Ps.MinKernel.Tests.CompilerCaller]
+
+
+-- Independent de Bruijn substitution relation and actual worker refinement.
+lean_lib PsMinCompilerSubstitution where
+  srcDir := "proofs/pskernel-min"
+  roots := #[`CompilerSubstitution, `CompilerSubstitutionTrust]

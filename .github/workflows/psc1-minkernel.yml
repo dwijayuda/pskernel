@@ -36,7 +36,7 @@ jobs:
               if curl --fail --show-error --location --connect-timeout 15 --max-time 60 \
                   https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
                   -o "$RUNNER_TEMP/psc1-elan-init.sh" &&
-                  timeout 180 sh "$RUNNER_TEMP/psc1-elan-init.sh" -y; then
+                  timeout 60 sh "$RUNNER_TEMP/psc1-elan-init.sh" -y; then
                 break
               fi
             done
@@ -199,7 +199,7 @@ jobs:
               if curl --fail --show-error --location --connect-timeout 15 --max-time 60 \
                   https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
                   -o "$RUNNER_TEMP/psc1-elan-init.sh" &&
-                  timeout 180 sh "$RUNNER_TEMP/psc1-elan-init.sh" -y; then
+                  timeout 60 sh "$RUNNER_TEMP/psc1-elan-init.sh" -y; then
                 break
               fi
             done
@@ -251,6 +251,35 @@ jobs:
           
           JS
           node --max-old-space-size=256 scripts/minkernel-compiler-caller.mjs --abi-only
+      - name: Prove independent Core substitution and recursive caller source semantics
+        run: |
+          set -euo pipefail
+          mkdir -p dist/pskernel-min/compiler-substitution
+          lake build PsMinCompilerSubstitution 2>&1 | tee dist/pskernel-min/compiler-substitution/build.log
+          lake env lean proofs/pskernel-min/CompilerSubstitutionTrust.lean 2>&1 | tee dist/pskernel-min/compiler-substitution/proof.log
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          assert.equal(process.platform,'linux');assert.equal(process.env.GITHUB_ACTIONS,'true');
+          const text=fs.readFileSync('dist/pskernel-min/compiler-substitution/proof.log','utf8');
+          const names=["lift_constructive","lift_correct","lift_iff","lift_unique","substitution_constructive","substitution_correct","substitution_iff","substitution_unique","instantiate1_derives","source_forward","source_reverse","source_iff","public_independent","entry_independent"];
+          const reports=names.map(name=>{
+            const full='Ps.MinKernel.CompilerSubstitution.'+name;
+            const rows=text.split('\n').filter(line=>line.includes("'"+full+"'"));
+            assert.equal(rows.length,1,'missing/duplicate report '+full);
+            assert.ok(rows[0].includes('does not depend on any axioms')||rows[0].endsWith('depends on axioms: [propext]'),rows[0]);
+            return {name:full,report:rows[0]};
+          });
+          assert.doesNotMatch(text,/sorryAx|declaration uses.*sorry/);
+          fs.writeFileSync('dist/pskernel-min/compiler-substitution/proof-reports.json',JSON.stringify({schema:'psc1-r8-substitution-trust/1',reports},null,2)+'\n');
+          console.log('PSC1_R8_SUBSTITUTION_TRUST_PASS '+reports.length);
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-r8-substitution-proof-${{ github.sha }}
+          path: psc1/dist/pskernel-min/compiler-substitution/
+          retention-days: 90
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -303,7 +332,7 @@ jobs:
               if curl --fail --show-error --location --connect-timeout 15 --max-time 60 \
                   https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
                   -o "$RUNNER_TEMP/psc1-elan-init.sh" &&
-                  timeout 180 sh "$RUNNER_TEMP/psc1-elan-init.sh" -y; then
+                  timeout 60 sh "$RUNNER_TEMP/psc1-elan-init.sh" -y; then
                 break
               fi
             done

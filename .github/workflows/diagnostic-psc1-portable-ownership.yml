@@ -1,0 +1,51 @@
+name: PSC1 portable ownership and profile policy audit
+on:
+  push:
+    branches: [diagnostic/psc1-modular-cpu-20261029]
+    paths: ['.github/workflows/diagnostic-psc1-portable-ownership.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    defaults:
+      run:
+        working-directory: psc1
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Audit immutable historical extraction and current portable source
+        run: |
+          git worktree add --detach "$RUNNER_TEMP/psc1-executable-baseline" b400552324956d9c3a684c9231f60f70066e1629
+          PSC1_EXECUTABLE_BASELINE="$RUNNER_TEMP/psc1-executable-baseline/psc1" node scripts/executable-package-ownership.mjs
+          node host-tools/executable/quarantine.test.mjs
+          node scripts/ci/repository-layout.mjs
+          for file in host-tools/executable/*.mjs scripts/restore-portable-g1.mjs; do node --check "$file"; done
+      - name: Preserve all three wall-clock profiles and unchanged ordinary requests
+        run: |
+          node --input-type=module <<'JS'
+          import assert from 'node:assert/strict';
+          import {compilerRequestLimit,qualificationProfile} from './host-tools/process/resource-profiles.mjs';
+          for(const [profile,seconds]of [['performance-240s',240],['correctness-1800s',1800],['correctness-3600s',3600]]){
+            assert.equal(qualificationProfile(profile).g1TimeoutMs,240000);
+            for(const request of ['G1','corpus','unknown'])assert.equal(compilerRequestLimit(profile,request).timeoutMs,240000);
+            for(const request of ['G2-self','G3-self'])assert.equal(compilerRequestLimit(profile,request).timeoutMs,seconds*1000);
+          }
+          assert.throws(()=>qualificationProfile('unknown'));
+          console.log('PSC1_M5_PROFILE_POLICY_PASS all original and extended wall-clock profiles');
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-portable-source-ownership-${{ github.sha }}
+          path: |
+            psc1/dist/executable-packages/ownership.json
+            psc1/dist/readability/
+          retention-days: 90

@@ -140,7 +140,14 @@
     "publicApi": "Candidate generated subpaths only; .13 checked umbrella/direct API compatibility is not promoted or silently changed.",
     "compilerSourceAssurance": "ordinary-checked",
     "applicationFixtureAssurance": "checked",
-    "partialPolicy": "Reuse the existing compiler logical/runtime body-pairing and strict IR path; record exact partial names. No totality or admitted-partial-body claim."
+    "partialPolicy": "Reuse the existing compiler logical/runtime body-pairing and strict IR path; record exact partial names. No totality or admitted-partial-body claim.",
+    "dependencyAwareCI": {
+      "candidate": "psc1-executable-packages.yml",
+      "defaultCLI": "psc1-cli.yml",
+      "candidateBuilderOutsideInstalledCLI": true,
+      "sharedHostChangesStillRunCLI": true,
+      "M4RequiresRemovingCandidateBuilderExclusion": true
+    }
   },
   "qualificationReceipt": "docs/PSC1_EXECUTABLE_PACKAGES_QUALIFICATION_2026-10-28.json"
 }

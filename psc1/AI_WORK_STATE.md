@@ -120,3 +120,10 @@ documentation/status only. Query the exact PR HEAD's CI before any later promoti
 Final documentation run40665911767 at8ac2aa72 refuses the new walkthrough's relative
 link outside psc1/. Replace it with the exact qualified GitHub workflow URL; retain
 the layout guard unchanged. No compiler/package implementation bytes change.
+
+CI selection now gives the not-yet-integrated production builder its own complete
+qualification workflow, alongside the retained pilot exclusion; shared host files
+and CLI changes still run the installed-CLI gate. Remove the candidate-builder
+exclusion during M4 integration. Successful native compilation is cached before
+candidate execution so test failures do not force identical rebuilds. The workflow
+edit also reruns the existing CLI at the corrected documentation HEAD.

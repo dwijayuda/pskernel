@@ -35,6 +35,7 @@ jobs:
           path: ~/.elan
           key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
       - uses: actions/cache@v4
+        id: executable_native_cache
         with:
           path: psc1/.lake
           key: psc1-executable-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/**/*.lean') }}
@@ -67,6 +68,12 @@ jobs:
         run: node scripts/executable-package-ownership.mjs
       - name: Build pure production emitters and retained unified entry
         run: lake build psc1_emitter_boundary_tests psc1_unified_service_tests psc1_executable_plan_tests psc1_executable_packages psc1_modular_pilot psc1_independent_checker
+      - name: Preserve successful compilation before executing candidate tests
+        if: steps.executable_native_cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: psc1/.lake
+          key: psc1-executable-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/**/*.lean') }}
       - name: Execute strict IR emission and original unified service regressions
         run: |
           lake exe psc1_emitter_boundary_tests

@@ -10,6 +10,10 @@ on:
       # Additive pilot has its own admitted package/consumer workflow and is not
       # imported by the production CLI. Shared host changes still run this gate.
       - '!psc1/host-tools/modular/**'
+      # The production graph builder is still a candidate outside the installed
+      # CLI. Its complete admitted graph/consumer workflow runs separately.
+      # Remove this exclusion when M4 integrates it into the checked CLI.
+      - '!psc1/host-tools/executable/**'
       - psc1/scripts/**/*.mjs
       - psc1/test/host/**
       - psc1/test/installed/**

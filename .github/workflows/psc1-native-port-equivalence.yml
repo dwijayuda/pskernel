@@ -1,0 +1,116 @@
+name: PSC1 native portability equivalence
+on:
+  push:
+    branches: [feat/psc1-canonical-latency-20261028]
+    paths:
+      - psc1/standalone/compare-native-ports.mjs
+      - psc1/standalone/native-*-observer.lean
+      - psc1/packages/backend-common/src/Ps/BackendCommon/Modules.lean
+      - psc1/packages/backend-js/src/Ps/BackendJs/Modules.lean
+      - psc1/packages/backend-ts/src/Ps/BackendTs/Modules.lean
+      - psc1/packages/backend-js/src/Ps/BackendJs/Encode.lean
+      - psc1/packages/backend-wasm/src/Ps/BackendWasm/Encode.lean
+      - psc1/packages/bridge/src/Ps/Bridge/Codec.lean
+      - psc1/packages/bridge/src/Ps/Bridge/Protocol.lean
+      - psc1/packages/compiler/src/Ps/Compiler/Sh1.lean
+      - .github/workflows/psc1-native-port-equivalence.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: psc1-native-port-equivalence-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  compare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Parse the comparison observer
+        run: node --check standalone/compare-native-ports.mjs
+      - uses: actions/cache/restore@v4
+        id: elan-cache
+        with:
+          path: ~/.elan
+          key: psc1-canonical-elan-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc1/lean-toolchain') }}
+          restore-keys: |
+            psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - name: Install the pinned native bootstrap compiler
+        run: |
+          set -euo pipefail
+          if [ ! -x "$HOME/.elan/bin/elan" ]; then
+            curl --connect-timeout 20 --max-time 120 --retry 2 -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o "$RUNNER_TEMP/psc1-elan-init.sh"
+            timeout 180 sh "$RUNNER_TEMP/psc1-elan-init.sh" -y --default-toolchain none
+          fi
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Prepare the exact unchanged baseline
+        run: |
+          git worktree add --detach "$RUNNER_TEMP/psc1-native-baseline" 29c82adc77cbd1bf271acab75b6f8d51ef0a9ee6
+          echo "PSC1_NATIVE_BASELINE=$RUNNER_TEMP/psc1-native-baseline/psc1" >> "$GITHUB_ENV"
+      - uses: actions/cache/restore@v4
+        id: baseline-cache
+        with:
+          path: ${{ runner.temp }}/psc1-native-baseline/psc1/.lake/build
+          key: psc1-native-port-baseline-v1-${{ runner.os }}-${{ runner.arch }}-29c82adc77cbd1bf271acab75b6f8d51ef0a9ee6
+          restore-keys: |
+            psc1-canonical-source-tools-v1-${{ runner.os }}-${{ runner.arch }}-
+      - uses: actions/cache/restore@v4
+        id: current-cache
+        with:
+          path: psc1/.lake/build
+          key: psc1-native-port-current-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc1/packages/**/*.lean', 'psc1/host/**/*.lean', 'psc1/test/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
+          restore-keys: |
+            psc1-native-port-current-v1-${{ runner.os }}-${{ runner.arch }}-
+            psc1-canonical-source-tools-v1-${{ runner.os }}-${{ runner.arch }}-
+      - name: Build unchanged baseline native tools
+        timeout-minutes: 20
+        working-directory: ${{ env.PSC1_NATIVE_BASELINE }}
+        run: lake build psc1_modular_pilot psc1_independent_checker psc1_bridge_tests psc1_script_ir_tests
+      - uses: actions/cache/save@v4
+        if: steps.baseline-cache.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/psc1-native-baseline/psc1/.lake/build
+          key: ${{ steps.baseline-cache.outputs.cache-primary-key }}
+      - uses: actions/cache/save@v4
+        if: steps.elan-cache.outputs.cache-hit != 'true'
+        with:
+          path: ~/.elan
+          key: ${{ steps.elan-cache.outputs.cache-primary-key }}
+      - name: Build ported native tools
+        timeout-minutes: 15
+        run: lake build psc1_modular_pilot psc1_independent_checker psc1_bridge_tests psc1_script_ir_tests
+      - uses: actions/cache/save@v4
+        if: steps.current-cache.outputs.cache-hit != 'true'
+        with:
+          path: psc1/.lake/build
+          key: ${{ steps.current-cache.outputs.cache-primary-key }}
+      - name: Compare exact producer bytes, fresh admissions, refusal order and native APIs
+        run: node standalone/compare-native-ports.mjs --baseline "$PSC1_NATIVE_BASELINE" --current "$PWD" --out "$PWD/dist/native-port-equivalence"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-native-port-equivalence-${{ github.sha }}
+          path: psc1/dist/native-port-equivalence/
+          if-no-files-found: warn
+          retention-days: 90
+  modular:
+    uses: ./.github/workflows/psc1-modular-pilot.yml
+  qualified:
+    needs: [compare, modular]
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require native equivalence and actual admitted modular package execution
+        env:
+          NATIVE: ${{ needs.compare.result }}
+          MODULAR: ${{ needs.modular.result }}
+        run: test "$NATIVE" = success && test "$MODULAR" = success

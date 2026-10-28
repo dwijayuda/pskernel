@@ -7,6 +7,7 @@ on:
       - psc1/packages/pskernel-min/host/*.mjs
       - psc1/proofs/pskernel-min/**/*.lean
       - psc1/scripts/minkernel-*
+      - psc1/packages/pskernel-min/standalone/**
       - psc1/scripts/MinKernelSourceCompile.lean
       - psc1/scripts/MinKernelCompilerPreservation.lean
       - psc1/scripts/MinKernelTextPreservation.lean
@@ -293,6 +294,23 @@ jobs:
       - name: Check actual text composition source and unchanged String refusal boundary
         if: ${{ !cancelled() && steps.regular_ingress.outcome == 'success' }}
         run: node --max-old-space-size=256 scripts/minkernel-text-preservation.mjs
+      - name: Build and qualify exact standalone pskernel-min tarball offline
+        if: ${{ !cancelled() && steps.regular_ingress.outcome == 'success' }}
+        run: |
+          node --max-old-space-size=256 scripts/minkernel-package.mjs
+          node --max-old-space-size=256 scripts/minkernel-package-tests.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-min-usable-${{ github.sha }}
+          path: |
+            psc1/dist/pskernel-min/usable/*.tgz
+            psc1/dist/pskernel-min/usable/qualification.json
+            psc1/dist/pskernel-min/usable/build-receipt.json
+            psc1/dist/pskernel-min/usable/runtime.source.json
+            psc1/dist/pskernel-min/usable/runtime.canonical.admissions.json
+            psc1/dist/pskernel-min/usable/compile.log
+          retention-days: 90
       - uses: actions/upload-artifact@v4
         if: always()
         with:

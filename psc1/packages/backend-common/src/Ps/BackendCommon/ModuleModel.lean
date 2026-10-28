@@ -42,12 +42,13 @@ def owner (owners : List PsModuleOwner) (name : String) : Except String PsModule
     else Except.error (String.Internal.append "PSC1_MODULE_OWNER_COVERAGE:" name)
   | [] => Except.error (String.Internal.append "PSC1_MODULE_OWNER_COVERAGE:" name)
 
-def references (fuel : Nat) (locals : List String) :
-    PsVerifiedIrExpr -> Except String (List String) :=
+def references (fuel : Nat) (locals : List String) (expression : PsVerifiedIrExpr) :
+    Except String (List String) :=
   match fuel with
-  | Nat.zero => fun (_expression : PsVerifiedIrExpr) => Except.error "PSC1_MODULE_REFERENCE_FUEL"
-  | Nat.succ remaining => fun (expression : PsVerifiedIrExpr) => do
-    let visit := references remaining locals
+  | Nat.zero => Except.error "PSC1_MODULE_REFERENCE_FUEL"
+  | Nat.succ remaining => do
+    let visit : PsVerifiedIrExpr -> Except String (List String) :=
+      fun (child : PsVerifiedIrExpr) => references remaining locals child
     match expression with
     | PsVerifiedIrExpr.literal _ => do return []
     | PsVerifiedIrExpr.var name => do
@@ -93,10 +94,10 @@ def references (fuel : Nat) (locals : List String) :
       let target ← visit value
       return psListAppend target (psListFlatten branches)
 
-def staticInitializer (fuel : Nat) : PsVerifiedIrExpr -> Bool :=
+def staticInitializer (fuel : Nat) (expression : PsVerifiedIrExpr) : Bool :=
   match fuel with
-  | Nat.zero => fun (_expression : PsVerifiedIrExpr) => false
-  | Nat.succ remaining => fun (expression : PsVerifiedIrExpr) =>
+  | Nat.zero => false
+  | Nat.succ remaining =>
     match expression with
     | PsVerifiedIrExpr.literal _ => true
     | PsVerifiedIrExpr.lambda _ _ _ => true

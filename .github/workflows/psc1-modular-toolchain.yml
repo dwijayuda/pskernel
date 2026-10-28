@@ -37,6 +37,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: node scripts/modular-toolchain-package.mjs build
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.4'
+      - name: Real installed root, both engines and default independent Wasm kernel
+        run: |
+          node scripts/modular-toolchain-installed.mjs
+          node scripts/modular-toolchain-installed.mjs "$(command -v bun)"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -44,5 +51,6 @@ jobs:
           path: |
             psc1/dist/modular-toolchain/inspection.json
             psc1/dist/modular-toolchain/package-receipt.json
+            psc1/dist/modular-toolchain/smoke-*.json
             psc1/dist/modular-toolchain/tarballs
           retention-days: 90

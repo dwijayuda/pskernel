@@ -161,7 +161,7 @@ export function verify(root, manifestBytes, expectedHash) {
       assert.ok(!metadata.scripts || !['preinstall','install','postinstall'].some(k => k in metadata.scripts));
       assert.ok(!Object.hasOwn(p.dependencies, 'proofscript'));
     }
-    assert.deepEqual(metadata.dependencies, p.dependencies);
+    assert.deepEqual(installed && metadata.dependencies === undefined ? {} : metadata.dependencies, p.dependencies);
   }
   const owners = manifest.owners.map((row) => row[0]);
   assert.equal(new Set(owners).size, owners.length, 'PSC1_EXECUTABLE_DUPLICATE_OWNER');

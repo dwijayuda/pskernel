@@ -1,0 +1,35 @@
+{
+  "schema": "psc1-modular-boundary-input/1",
+  "package": {
+    "run": 40714983520,
+    "job": 122910099618,
+    "artifact": 12827338983,
+    "commit": "ca92bbdbc7c0f34e1da4076db7300033802eab3e",
+    "zipSha256": "12d990baf69371ef3dc78aa23b61a12d354c3037d9de827a6eb3e230454f2e33"
+  },
+  "targets": {
+    "run": 40714983520,
+    "job": 122910099618,
+    "artifact": 12827921799,
+    "commit": "ca92bbdbc7c0f34e1da4076db7300033802eab3e",
+    "zipSha256": "ccda47d0a10bcfd52e58f2dd2f0875669580aa09b5f9138d05bfd97101248b7b"
+  },
+  "diagnostics": {
+    "node": {
+      "run": 40722004088,
+      "job": 122935104823,
+      "artifact": 12831771641,
+      "commit": "103172427f10bd088606ef88967bd0b93388c25c",
+      "zipSha256": "2eb43eb35c346bf85001d6ee1b8313dc3de7f264ca35a233474c8d44320438dc"
+    },
+    "bun": {
+      "run": 40722004088,
+      "job": 122935104686,
+      "artifact": 12831057351,
+      "commit": "103172427f10bd088606ef88967bd0b93388c25c",
+      "zipSha256": "cc2e7b7a7f3079a4223a0ec729c9c7c170f9ab9b426a0fdd408817179f2748e5"
+    }
+  },
+  "source": "ca92bbdbc7c0f34e1da4076db7300033802eab3e",
+  "qualificationRun": 40714983520
+}

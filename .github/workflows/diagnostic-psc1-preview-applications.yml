@@ -1,0 +1,61 @@
+name: PSC1 installed modular practical applications
+on:
+  push:
+    branches: [build/psc1-modular-boundaries-20261028]
+    paths:
+      - .github/workflows/diagnostic-psc1-preview-applications.yml
+      - .github/scripts/psc1-preview-application*
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  applications:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime: [node,bun]
+    env:
+      PSC1_MODULAR_INPUT_COMMIT: ca92bbdbc7c0f34e1da4076db7300033802eab3e
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.4'
+      - name: Record exact host and installer runtime
+        run: |
+          echo "PSC1_TEST_NODE=$(command -v node)" >> "$GITHUB_ENV"
+          if [ '${{ matrix.runtime }}' = bun ]; then
+            echo "PSC1_TEST_RUNTIME=$(command -v bun)" >> "$GITHUB_ENV"
+          else
+            echo "PSC1_TEST_RUNTIME=$(command -v node)" >> "$GITHUB_ENV"
+          fi
+      - name: Read the qualified unchanged modular package and target resources
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node ../.github/scripts/psc1-modular-prepare.mjs
+      - name: Install exact official Rust SDK for unchanged resource verification
+        run: |
+          rustup toolchain uninstall 1.90.0
+          rustup toolchain install 1.90.0 --profile minimal
+      - name: Verify exact SDK resources
+        run: node scripts/modular-toolchain-resources.mjs
+      - name: Retained CLI JSON file and compiler-like applications through installed code
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ${{ matrix.runtime }} ../.github/scripts/psc1-preview-applications.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-modular-installed-applications-${{ matrix.runtime }}-${{ github.sha }}
+          path: psc1/dist/modular-toolchain/installed-applications-*.json
+          retention-days: 90

@@ -13,6 +13,10 @@ const {parse} = require('@babel/parser');
 const baseline = '3089cbc369bc8a11f540c13140c7003c9dadf4a8';
 const layoutCheckpoint = '94e0c13f6a4b434f73c859cc0c716cb6fb8d1340';
 const runtimeFeatureBaseline = '91bcbd107f375eea5cf5f87f15a9be9fe561b7c4';
+const modularFeatureBaseline = '8ed9e07ab2342a2afb41fdcce637826aa4d06dfc';
+const modularFeatureParent = '415dbba4b5c1627185fc0ee8cdf29a83b15b6f08';
+const modularFeatureFiles = new Set(['host-tools/installed-engine-resolver.mjs','npm-cli/universal.mjs']);
+const modularFeatureQualification = 'docs/PSC1_MODULAR_HOST_RUNTIME_QUALIFICATION_2026-10-28.json';
 function readAt(commit, file) {
   const r = spawnSync('git', ['show', commit + ':psc1/' + file], {
     cwd: root, encoding: 'utf8', timeout: 10000, maxBuffer: 1024 * 1024,
@@ -85,8 +89,13 @@ for (const file of files) {
   const layoutSource = readAt(layoutCheckpoint, canonicalFiles[file] ?? file);
   assert.deepEqual(executableAst(layoutSource), executableAst(relocated(feature.stdout)),
     file + ': executable AST changed from the explicit feature baseline');
-  assert.deepEqual(executableAst(source), executableAst(readAt(runtimeFeatureBaseline, canonicalFiles[file] ?? file)),
-    file + ': current runtime/watch host differs from its separately tested feature baseline');
+  const currentFeatureBaseline = modularFeatureFiles.has(file) ? modularFeatureBaseline : runtimeFeatureBaseline;
+  if (modularFeatureFiles.has(file))
+    assert.deepEqual(executableAst(readAt(modularFeatureParent, canonicalFiles[file] ?? file)),
+      executableAst(readAt(runtimeFeatureBaseline, canonicalFiles[file] ?? file)),
+      file + ': historical runtime/watch correspondence changed');
+  assert.deepEqual(executableAst(source), executableAst(readAt(currentFeatureBaseline, canonicalFiles[file] ?? file)),
+    file + ': host differs from its separately tested feature baseline');
   const formatted = await prettier.format(source, formatOptions);
   assert.deepEqual(executableAst(formatted), executableAst(source),
     file + ': formatter changed executable AST');
@@ -131,7 +140,7 @@ const out = path.join(root, 'dist/readability');
 fs.mkdirSync(out, {recursive: true});
 fs.writeFileSync(path.join(out, 'host.json'), JSON.stringify({
   schema: 'psc1-readability-host/1', commit: process.env.GITHUB_SHA,
-  baseline, cleanupCommit, featureBaselines, featureQualification, layoutCheckpoint, runtimeFeatureBaseline,
+  baseline, cleanupCommit, featureBaselines, featureQualification, layoutCheckpoint, runtimeFeatureBaseline, modularFeatureBaseline, modularFeatureParent, modularFeatureQualification,
   mode: propose ? 'proposal-not-qualification' : 'check',
   formatter: 'prettier@3.6.2', parser: '@babel/parser@7.28.0', results,
 }, null, 2) + '\n');

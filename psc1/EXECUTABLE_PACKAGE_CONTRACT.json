@@ -66,12 +66,12 @@
     {
       "id": "M3",
       "work": "checked execution through complete JS/TS graphs",
-      "status": "partially-qualified"
+      "status": "qualified-finite-application-semantic-backend-scope"
     },
     {
       "id": "M4",
       "work": "thin CLI and installable umbrella integration",
-      "status": "not-implemented"
+      "status": "qualified-finite-linux-installed-preview"
     },
     {
       "id": "M5",
@@ -146,7 +146,8 @@
       "defaultCLI": "psc1-cli.yml",
       "candidateBuilderOutsideInstalledCLI": true,
       "sharedHostChangesStillRunCLI": true,
-      "M4RequiresRemovingCandidateBuilderExclusion": true
+      "M4RequiresRemovingCandidateBuilderExclusion": false,
+      "installedExecutableHelpersTriggerReferenceCLI": true
     }
   },
   "qualificationReceipt": "docs/PSC1_EXECUTABLE_PACKAGES_QUALIFICATION_2026-10-28.json",
@@ -177,10 +178,41 @@
     "nativeFrontendsRemoved": true,
     "sourceGraphInput": "scripts/modular-checked-input.json",
     "remaining": [
-      "retained-semantic-library-corpus",
-      "seven-backend-execution-and-refusals",
-      "M4-checked-install-and-CLI",
-      "M5-generation-and-fixed-points"
+      "actual-non-JS-host-IO-applications",
+      "M5-portable-generation-reproduction-and-fixed-points"
     ]
+  },
+  "installedPreview": {
+    "version": "0.1.0-psc1-modular.1",
+    "workflow": "psc1-modular-toolchain.yml",
+    "architecture": "docs/architecture/installed-modular-toolchain.md",
+    "smokeRun": 40711483603,
+    "smokeCommit": "8ed9e07ab2342a2afb41fdcce637826aa4d06dfc",
+    "checkedBuilds": 128,
+    "kernelCases": 28,
+    "profile": "psc1-installed-executable-npm-graph/1",
+    "corePackages": 20,
+    "compilerEngines": [
+      "js",
+      "ts"
+    ],
+    "defaultKernel": "official Lean 4.35.0 C++/Emscripten linear-memory Wasm",
+    "optionalProviderLeaves": [
+      "python",
+      "php"
+    ],
+    "fullModularSelfHosting": false,
+    "defaultReferenceReplaced": false,
+    "standaloneCheckedHostQualified": false,
+    "extendedQualification": "qualified-finite-linux-preview",
+    "qualifiedRun": 40714983520,
+    "qualifiedCommit": "ca92bbdbc7c0f34e1da4076db7300033802eab3e",
+    "qualificationReceipt": "docs/PSC1_MODULAR_INSTALLED_QUALIFICATION_2026-10-28.json",
+    "applicationBuilds": 32,
+    "applicationBehaviorCases": 528,
+    "resourceRefusals": 46,
+    "unicodeIoBuilds": 16,
+    "ioDispatcherRefusals": 8,
+    "watchCases": 20
   }
 }

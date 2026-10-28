@@ -39,6 +39,21 @@ jobs:
           run-id: 40618697529
           github-token: ${{ github.token }}
           path: psc1/dist/next/baseline
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-rebuild-profile-bce64f121625f4387e5f0b09613b92961dd0ef42
+          run-id: 40630905618
+          github-token: ${{ github.token }}
+          path: psc1/dist/next/inspector-preflight
+      - name: Retain the failed Inspector preflight diagnosis
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          for (const file of ['preflight-stderr.log','preflight-stdout.log','failure.json']) {
+            const value=fs.readFileSync('dist/next/inspector-preflight/'+file,'utf8');
+            console.log('PSC1_PRIOR_PROFILE_DIAGNOSIS '+file+': '+value.slice(-16384));
+          }
+          JS
       - name: Verify the exact qualified distribution before extraction
         run: |
           set -euo pipefail

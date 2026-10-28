@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import crypto from 'node:crypto';
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 const sha=x=>crypto.createHash('sha256').update(x).digest('hex');
 const json=x=>JSON.stringify(x,null,2)+'\n';
@@ -67,13 +67,13 @@ function processIdentity(pid){
 async function profiledWorker(label,job,runtime,runner){
   const jobFile=path.join(out,label+'-job.json');
   const jobBytes=Buffer.from(json(job));fs.writeFileSync(jobFile,jobBytes,{flag:'wx',mode:0o600});
-  const profileFile=path.join(out,label+'.cpuprofile');
+  const profileFile=path.join(out,label+'.v8.log');
   const reads=[runner,jobFile,job.compiler,...(job.request?[job.request]:[])];
   const args=['--max-old-space-size=4096','--permission',
     ...reads.map(file=>'--allow-fs-read='+file),
     ...(job.output?['--allow-fs-write='+job.output]:[]),
-    '--allow-fs-write='+profileFile,'--cpu-prof','--cpu-prof-interval=5000',
-    '--cpu-prof-dir='+out,'--cpu-prof-name='+path.basename(profileFile),
+    '--allow-fs-write='+profileFile,'--prof','--prof-sampling-interval=5000',
+    '--logfile='+profileFile,'--no-logfile-per-isolate',
     runner,'execute',jobFile,sha(jobBytes)];
   const started=Date.now();
   const child=spawn(runtime,args,{cwd:out,env:cleanEnvironment(),detached:true,stdio:['ignore','pipe','pipe']});
@@ -110,6 +110,8 @@ async function profiledWorker(label,job,runtime,runner){
       child.once('error',e=>{failure='spawn: '+e.message;resolve({code:null,signal:null});});
       child.once('close',(code,signal)=>resolve({code,signal}));
     });
+    const workerProcessElapsedMs=Date.now()-started;
+    clearInterval(timer);
     const stdout=Buffer.concat(buffers.stdout),stderr=Buffer.concat(buffers.stderr);
     fs.writeFileSync(path.join(out,label+'-stdout.log'),stdout);
     fs.writeFileSync(path.join(out,label+'-stderr.log'),stderr);
@@ -118,28 +120,101 @@ async function profiledWorker(label,job,runtime,runner){
     const event=JSON.parse(stdout.toString('utf8').trim());
     assert.equal(event.protocol,'psc1-independent-worker/1');assert.equal(event.operation,job.operation);
     assert.equal(event.compilerSha256,PINS.compiler);
-    const bytes=read(profileFile,512*1024*1024),profile=JSON.parse(decoded(bytes));
-    assert.ok(Array.isArray(profile.nodes)&&profile.nodes.length>0&&Array.isArray(profile.samples));
-    assert.ok(profile.samples.length>0,'CPU profile must contain samples');
-    return{event,processElapsedMs:Date.now()-started,peakRssKiB:Math.max(peakRssKiB,event.maxRssKiB||0),
-      profile,profileIdentity:{path:path.basename(profileFile),bytes:bytes.length,sha256:sha(bytes)}};
+    if(!fs.existsSync(profileFile)){
+      process.stderr.write('PSC1_PROFILE_WORKER_STDERR: '+stderr.toString('utf8').slice(-8192)+'\n');
+      throw new Error('V8 tick profile missing: '+profileFile);
+    }
+    const bytes=read(profileFile,512*1024*1024),processed=await processTickLog(label,runtime,profileFile);
+    const profile=processed.profile;
+    assert.ok(Array.isArray(profile.code)&&profile.code.length>0);
+    assert.ok(Array.isArray(profile.ticks)&&profile.ticks.length>0,'V8 profile must contain samples');
+    return{event,processElapsedMs:workerProcessElapsedMs,peakRssKiB:Math.max(peakRssKiB,event.maxRssKiB||0),
+      profile,profileIdentity:{path:path.basename(profileFile),bytes:bytes.length,sha256:sha(bytes)},
+      processedProfileIdentity:processed.identity,observationTools:processed.tools,
+      preprocessingElapsedMs:processed.elapsedMs,preprocessingStderrBytes:processed.stderrBytes};
   }finally{
     clearInterval(timer);for(const[signal,f]of listeners)process.removeListener(signal,f);kill();
   }
 }
+async function processTickLog(label,runtime,logFile){
+  const tools=['/usr/bin/nm','/usr/bin/objdump'].map(requestedPath=>{
+    const resolvedPath=fs.realpathSync(requestedPath),bytes=read(resolvedPath,64*1024*1024);
+    const v=spawnSync(resolvedPath,['--version'],{encoding:'utf8',timeout:10000,maxBuffer:1024*1024,env:cleanEnvironment()});
+    assert.equal(v.status,0,'observation tool identity');
+    return{requestedPath,resolvedPath,bytes:bytes.length,sha256:sha(bytes),version:(v.stdout||'').split('\n')[0]};
+  });
+  const file=path.join(out,label+'-ticks.json'),stderrFile=path.join(out,label+'-process-stderr.log');
+  const fd=fs.openSync(file,'wx',0o600),started=Date.now();
+  const child=spawn(runtime,['--max-old-space-size=4096','--prof-process','--preprocess',
+    '--nm=/usr/bin/nm','--objdump=/usr/bin/objdump',logFile],
+    {cwd:out,env:cleanEnvironment(),detached:true,stdio:['ignore','pipe','pipe']});
+  const childIdentity=child.pid?processIdentity(child.pid):null;
+  let stdoutBytes=0,stderrBytes=0,failure=null;const stderr=[];
+  const kill=()=>{
+    if(!child.pid)return;
+    const current=processIdentity(child.pid);
+    if(childIdentity&&current&&current!==childIdentity)return;
+    try{process.kill(-child.pid,'SIGKILL');}catch(e){if(e.code!=='ESRCH')throw e;}
+  };
+  const stop=reason=>{failure||=reason;kill();};
+  child.stdout.on('data',chunk=>{
+    stdoutBytes+=chunk.length;
+    if(stdoutBytes>512*1024*1024){stop('preprocessed tick output limit');return;}
+    fs.writeSync(fd,chunk);
+  });
+  child.stderr.on('data',chunk=>{
+    const take=Math.min(chunk.length,Math.max(0,LOG_MAX-stderrBytes));
+    if(take)stderr.push(chunk.subarray(0,take));stderrBytes+=take;
+    if(take!==chunk.length)stop('tick preprocessing log limit');
+  });
+  const timeout=setTimeout(()=>stop('tick preprocessing deadline'),240000);
+  const listeners=new Map();
+  for(const signal of ['SIGINT','SIGTERM','SIGHUP']){
+    const f=()=>stop('observer signal '+signal);listeners.set(signal,f);process.on(signal,f);
+  }
+  try{
+    const result=await new Promise(resolve=>{
+      child.once('error',e=>{failure='preprocess spawn: '+e.message;resolve({code:null});});
+      child.once('close',(code,signal)=>resolve({code,signal}));
+    });
+    fs.closeSync(fd);
+    const err=Buffer.concat(stderr);fs.writeFileSync(stderrFile,err);
+    assert.equal(failure,null,failure||'preprocessing failure');
+    assert.equal(result.code,0,err.toString('utf8').slice(-8192));
+    const bytes=read(file,512*1024*1024),profile=JSON.parse(decoded(bytes));
+    return{profile,identity:{path:path.basename(file),bytes:bytes.length,sha256:sha(bytes)},
+      elapsedMs:Date.now()-started,stderrBytes,tools};
+  }finally{
+    clearTimeout(timeout);for(const[signal,f]of listeners)process.removeListener(signal,f);
+    try{fs.closeSync(fd);}catch(e){if(e.code!=='EBADF')throw e;}
+    kill();
+  }
+}
 function summarizeProfile(profile,compilerFile,compilerText){
-  const byId=new Map(profile.nodes.map(node=>[node.id,node]));
-  assert.equal(profile.samples.length,profile.timeDeltas.length);
-  const compilerUrl=pathToFileURL(compilerFile).href,lines=compilerText.split('\n'),ownerAtLine=[];
+  assert.ok(Array.isArray(profile.code)&&Array.isArray(profile.ticks));
+  const compilerUrl=pathToFileURL(compilerFile).href,lines=compilerText.split('\n'),ownersAtLine=[];
   let owner='(module initialization)';
   for(let i=0;i<lines.length;i++){
     const m=/^(?:export\s+)?function\*?\s+([A-Za-z_$][\w$]*)\s*\(/.exec(lines[i]);
-    if(m)owner=m[1];ownerAtLine[i]=owner;
+    if(m)owner=m[1];ownersAtLine[i]=owner;
   }
-  const frames=new Map(),owners=new Map(),categories=new Map();let totalUs=0;
-  function category(name){
-    if(name==='(garbage collector)')return'sampled garbage collection';
-    if(name==='(idle)')return'sampled idle';
+  const metadata=profile.code.map(entry=>{
+    if(!entry)return{name:'(unaccounted)',type:'UNKNOWN',generatedCompiler:false};
+    const fullName=entry.name||'(anonymous)';
+    let location=-1,needle='';
+    for(const n of [compilerUrl,compilerFile]){
+      const at=fullName.lastIndexOf(n+':');if(at>=0){location=at;needle=n;break;}
+    }
+    const suffix=location>=0?fullName.slice(location+needle.length+1):'';
+    const match=/^(\d+):(\d+)/.exec(suffix),line=match?Number(match[1]):null;
+    const functionName=location>=0?fullName.slice(0,location).trim():fullName;
+    const sourceOwner=line?ownersAtLine[line-1]:null;
+    return{name:fullName,functionName,type:entry.type||'UNKNOWN',kind:entry.kind||null,
+      generatedCompiler:location>=0,line,owner:(sourceOwner||functionName).replace(/^__ps\$impl\$/,'')};
+  });
+  const frames=new Map(),owners=new Map(),nearestOwners=new Map(),categories=new Map(),vmStates=new Map();
+  const stateNames={0:'JS',1:'GC',2:'PARSER',3:'BYTECODE_COMPILER',4:'COMPILER',5:'OTHER',6:'EXTERNAL',7:'IDLE'};
+  function category(name,type){
     if(/^__ps\$(run|wrap|invoke|tailInvoke)$/.test(name))return'generator execution driver';
     if(/utf8|string(Get|Next|Extract|Utf8)/i.test(name))return'UTF-8 runtime helpers';
     if(/psJson/i.test(name))return'JSON codec names';
@@ -148,28 +223,34 @@ function summarizeProfile(profile,compilerFile,compilerText){
     if(/ps.*(Js|Ts|Rust|Wasm)/i.test(name))return'backend names';
     if(/ps.*(Ir|Erasure|Specializ|WorkerFusion)/i.test(name))return'IR/erasure names';
     if(/ps.*(List|Text|String|Name)/i.test(name))return'foundation names';
-    return'other';
+    return type==='CPP'?'native symbols':type==='SHARED_LIB'?'shared-library attribution':'other';
   }
-  function add(map,key,row,us){const old=map.get(key)||{...row,selfUs:0,samples:0};old.selfUs+=us;old.samples++;map.set(key,old);}
-  for(let i=0;i<profile.samples.length;i++){
-    const node=byId.get(profile.samples[i]);assert.ok(node);
-    const us=profile.timeDeltas[i];assert.ok(Number.isFinite(us)&&us>=0);
-    totalUs+=us;const f=node.callFrame,name=f.functionName||'(anonymous)';
-    const owned=f.url===compilerUrl||f.url===compilerFile;
-    const sourceOwner=owned?(ownerAtLine[f.lineNumber]||name):name;
-    const normalizedOwner=sourceOwner.replace(/^__ps\$impl\$/,'');
-    const key=JSON.stringify([name,f.url,f.lineNumber,f.columnNumber]);
-    add(frames,key,{name,url:f.url,line:f.lineNumber+1,column:f.columnNumber+1,generatedOwner:owned?sourceOwner:null},us);
-    add(owners,JSON.stringify([owned,normalizedOwner]),{name:normalizedOwner,generatedCompiler:owned},us);
-    const cat=category(owned?normalizedOwner:name);add(categories,cat,{name:cat},us);
+  function add(map,key,row){const old=map.get(key)||{...row,ticks:0};old.ticks++;map.set(key,old);}
+  let unknown=0;
+  for(const tick of profile.ticks){
+    assert.ok(Array.isArray(tick.s)&&Number.isFinite(tick.tm)&&Number.isInteger(tick.vm));
+    const first=metadata[tick.s[0]]||{name:'(unaccounted)',owner:'(unaccounted)',type:'UNKNOWN',generatedCompiler:false};
+    if(first.type==='UNKNOWN')unknown++;
+    add(frames,JSON.stringify([first.name,first.type]),first);
+    if(first.generatedCompiler)add(owners,first.owner,{name:first.owner});
+    const vm=stateNames[tick.vm]||'STATE_'+tick.vm;add(vmStates,vm,{name:vm});
+    const cat=tick.vm===1?'sampled GC':tick.vm===7?'sampled idle':category(first.owner||first.name,first.type);
+    add(categories,cat,{name:cat});
+    if(tick.vm!==1&&tick.vm!==7)for(let i=0;i<tick.s.length;i+=2){
+      const frame=metadata[tick.s[i]];
+      if(frame?.generatedCompiler){add(nearestOwners,frame.owner,{name:frame.owner});break;}
+    }
   }
-  const ranked=map=>[...map.values()].sort((a,b)=>b.selfUs-a.selfUs).map(row=>({...row,selfMs:row.selfUs/1000,weightedShare:totalUs?row.selfUs/totalUs:0}));
-  const allCategories=ranked(categories);
-  return{samplingIntervalUs:5000,samples:profile.samples.length,nodes:profile.nodes.length,
-    profileDurationMs:(profile.endTime-profile.startTime)/1000,weightedSampleMs:totalUs/1000,
-    attribution:'timeDeltas weighted sampled self-time; categories are name heuristics, not stopwatch phase timings; generator trampoline stacks are not logical ProofScript caller stacks',
-    gc:allCategories.find(row=>row.name==='sampled garbage collection')||{name:'sampled garbage collection',samples:0,selfUs:0,selfMs:0,weightedShare:0},
-    categories:allCategories,topFrames:ranked(frames).slice(0,100),topGeneratedOwners:ranked(owners).filter(x=>x.generatedCompiler).slice(0,100)};
+  const total=profile.ticks.length;
+  const ranked=map=>[...map.values()].sort((a,b)=>b.ticks-a.ticks).map(x=>({...x,share:total?x.ticks/total:0}));
+  const states=ranked(vmStates);
+  let min=Infinity,max=-Infinity;for(const tick of profile.ticks){min=Math.min(min,tick.tm);max=Math.max(max,tick.tm);}
+  return{profiler:'V8 --prof statistical tick logger',samplingIntervalUs:5000,ticks:total,codeEntries:profile.code.length,
+    observedTickSpanMs:total?(max-min)/1000:0,unknownTopTicks:unknown,
+    attribution:'tick counts and sampled shares; categories are name heuristics, not wall-clock phase timing; physical generator stacks are not logical ProofScript caller stacks',
+    gc:states.find(x=>x.name==='GC')||{name:'GC',ticks:0,share:0},vmStates:states,categories:ranked(categories),
+    topFrames:ranked(frames).slice(0,100),topGeneratedOwners:ranked(owners).slice(0,100),
+    nearestGeneratedFrameAttribution:ranked(nearestOwners).slice(0,100)};
 }
 let phase='inputs';
 try{
@@ -204,7 +285,7 @@ try{
     sourceCommit:'5484a04df34de1bbcfa46a248b6a93ce510035d6',observerCommit:process.env.GITHUB_SHA||null,sourceModules:sources.length,sourceUtf8Bytes:2382708,
     toolchainSha256:PINS.toolchain,compilerSha256:PINS.compiler,sourceClosureDigest:digest,requestSha256:sha(request),projectSha256:sha(projectBytes),
     machine:{platform:process.platform,arch:process.arch,release:os.release(),cpuModels:[...new Set(os.cpus().map(x=>x.model))],logicalCpus:os.cpus().length,totalMemoryBytes:os.totalmem()},
-    samplingIntervalUs:5000,timeoutMs:3600000,oldSpaceMiB:4096,ordinaryRunnerUnchanged:true,productionAcceptanceUnchanged:true});
+    profiler:'V8 --prof statistical tick logger',observationOnlyDependencies:['nm','objdump'],samplingIntervalUs:5000,timeoutMs:3600000,oldSpaceMiB:4096,ordinaryRunnerUnchanged:true,productionAcceptanceUnchanged:true});
   const verifyInputs=()=>{
     for(const pin of sourcePins)assert.equal(sha(read(pin.file)),pin.sha256);
     assert.equal(sha(read(projectFile,1024*1024)),sha(projectBytes));
@@ -213,8 +294,8 @@ try{
   const common={schema:'psc1-independent-worker-job/1',root,compiler,compilerSha256:PINS.compiler,exportName:'psCompilerServiceCandidate'};
   phase='permission/profile preflight';
   const preflight=await profiledWorker('preflight',{...common,operation:'inspect',publicNames:['psCompilerServiceCandidate'],timeoutMs:240000},runtime,runner);
-  save('preflight.json',{status:'passed',event:preflight.event,profile:preflight.profileIdentity,samples:preflight.profile.samples.length});
-  console.log('PSC1_REBUILD_PROFILE_PREFLIGHT: '+JSON.stringify({status:'passed',samples:preflight.profile.samples.length,profile:preflight.profileIdentity}));
+  save('preflight.json',{status:'passed',event:preflight.event,profile:preflight.profileIdentity,ticks:preflight.profile.ticks.length});
+  console.log('PSC1_REBUILD_PROFILE_PREFLIGHT: '+JSON.stringify({status:'passed',ticks:preflight.profile.ticks.length,profile:preflight.profileIdentity}));
   phase='full compilation';
   const full=await profiledWorker('compile',{...common,operation:'compile',request:requestFile,requestSha256:sha(request),output:responseFile,timeoutMs:3600000},runtime,runner);
   const candidateBytes=read(responseFile);assert.equal(full.event.requestSha256,sha(request));assert.equal(full.event.responseSha256,sha(candidateBytes));
@@ -234,10 +315,12 @@ try{
   const profile=summarizeProfile(full.profile,compiler,decoded(compilerBytes));
   const summary={schema:'psc1-rebuild-profile/1',status:'passed',observerCommit:process.env.GITHUB_SHA||null,identities,completeCandidateBytesEqual:true,
     worker:full.event,processElapsedMs:full.processElapsedMs,sampledPeakRssKiB:full.peakRssKiB,profileIdentity:full.profileIdentity,
+    processedProfileIdentity:full.processedProfileIdentity,observationTools:full.observationTools,
+    preprocessingElapsedMs:full.preprocessingElapsedMs,preprocessingStderrBytes:full.preprocessingStderrBytes,
     checker:{executed:true,accepted:true,leanCommit:accepted.checkerCommit,sha256:manifest.checker.sha256,admissionsSha256:accepted.admissionsDigest,elapsedMs:checkerElapsedMs,receiptSha256:sha(JSON.stringify(accepted))},
     strictIr:'unchanged generated compiler pipeline; original/transformed IR and complete candidate bytes equal qualified B2',profile};
   save('summary.json',summary);save('checker-receipt.json',accepted);
-  console.log('PSC1_REBUILD_PROFILE_RESULT: '+JSON.stringify({...summary,profile:{...profile,topFrames:profile.topFrames.slice(0,30),topGeneratedOwners:profile.topGeneratedOwners.slice(0,30)}}));
+  console.log('PSC1_REBUILD_PROFILE_RESULT: '+JSON.stringify({...summary,profile:{...profile,topFrames:profile.topFrames.slice(0,30),topGeneratedOwners:profile.topGeneratedOwners.slice(0,30),nearestGeneratedFrameAttribution:profile.nearestGeneratedFrameAttribution.slice(0,30)}}));
 }catch(error){
   const failure={schema:'psc1-rebuild-profile-failure/1',status:'failed',phase,message:error.message,stack:error.stack};
   fs.writeFileSync(path.join(out,'failure.json'),json(failure));console.error('PSC1_REBUILD_PROFILE_FAILED: '+JSON.stringify(failure));process.exitCode=1;

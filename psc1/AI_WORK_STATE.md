@@ -17,13 +17,20 @@ admission and strict original/transformed IR checks must remain.
 
 The first measurement reuses exact qualified sources and the current B2 compiler
 from run [40618697529](https://github.com/dwijayuda/pskernel/actions/runs/40618697529).
-The CI-only profile harness adds Node CPU sampling at 5,000 microseconds while
+The CI-only profile harness adds V8 statistical tick sampling at 5,000 microseconds while
 retaining the private runtime, unchanged worker implementation, exact-file
 permission restrictions, 4,096 MiB old-space setting and 3,600-second limit.
 It first performs a small permission/profile compatibility probe, then compiles
 all 125 modules, requires exact candidate/JS/admission/IR correspondence with B2,
 and invokes the genuine independent checker freshly. Profiling artifacts are
 observations, not selectable compiler generations.
+
+The first Inspector CPU-profile preflight in run40630905618 failed because no
+profile was produced, although the unchanged worker exited successfully. Pinned
+Node22.23.3 source disables Inspector under permission mode. The correction uses
+V8's tick logger with the same worker restrictions, and records native symbol
+analysis tools (nm/objdump) as CI observation-only dependencies. No ordinary
+runner or compiler acceptance policy is changed.
 
 No optimization or latency reduction is claimed before that profile passes.
 Generated JS uses a generator trampoline, so weighted sampled self-time and

@@ -1,3 +1,33 @@
+## Current implementation checkpoint — 29 October 2026 (Asia/Jakarta)
+
+The supervised file interface is implemented, qualified and available in runnable **development candidates**. **Bounded Independent Checker Preview 1 remains incomplete: P5 is BLOCKED; P6 and full P7/P8 closeout remain OPEN.** See [implementation and complete evidence](docs/evidence/2026-10-29-preview-supervisor-checkpoint.md) and [the runtime contract and test map](docs/PREVIEW_RUNTIME_2026-10-29.md). The original acceptance criteria below are unchanged.
+
+- **Interface qualification:** source `8043c820`, [run 40759412487](https://github.com/dwijayuda/pskernel/actions/runs/40759412487), SUCCESS. Both emitted routes pass 67 supervision/ingress controls plus all retained adapter controls. Actual nonempty valid/invalid files and standard-axiom inputs use the real public empty-session/V1RunDag checker. The parent supervises deadlines, cancellation, output and process cleanup and validates the identified complete receipt. Native-derived standard axiom schemas and their required primitive declarations are checked; a familiar axiom name supplies no authority.
+- **Candidate delivery:** producer `1e744380`, [run 40763702135](https://github.com/dwijayuda/pskernel/actions/runs/40763702135), SUCCESS for development candidates only. Both packages pass all five detached empty-PATH examples on Linux/Node 22.23.4. Manifests, source/Git bindings, raw receipts and nested evidence were independently inspected. Current source preserves all 814 retained axiom reports and 61 proof modules. Generated artifact `12849556440`, canonical `12848044294`, evidence `12849316798`; all explicitly retain `fullPreviewQualified:false`.
+- **Full workloads remain blocked:** [campaign 40757332144](https://github.com/dwijayuda/pskernel/actions/runs/40757332144) (Node 22.23.4) completed canonical 8,400/generated 7,000 String assertions; generated sample 5 timed out at 1,500 seconds. [Diagnostic replication 40761853427](https://github.com/dwijayuda/pskernel/actions/runs/40761853427) (Node 22.23.3) completed generated 8,400/canonical 7,000; canonical sample 5 timed out at the same deadline. Both campaigns are terminal FAILURE. There are 22 complete and two censored samples out of 24. All four emitted programs are byte-identical (10,824,302 bytes, SHA-256 `1e6f22ae728c20306755c7be10118ccc40cd449e2c7e08872a153b5aa7a7f968`). No passing pair, passing median, Node-regression diagnosis or stable speedup follows from these observations.
+- **Both complete 193-case Arena comparisons** preserve every classification and all 176 completed raw semantic envelopes: 174 strict passes, 17 timeouts and two safety-contract differences. The original comparator retains its failed exit status. Neither censored String result nor an Arena failure is excluded.
+
+| Preview gate | Current checkpoint |
+|---|---|
+| P1/P2/P3 | Implemented contract and real independent file checking; 67 finite controls per route plus retained controls |
+| P4 | Production source and 814 reports / 61 proof modules preserved and authenticated |
+| P5 | **BLOCKED**: no fresh campaign passes both complete String routes |
+| P6 | Arena unchanged; unresolved String deadline variability remains **OPEN** |
+| P7 | Audited development candidates available; full product qualification OPEN |
+| P8 | This implementation checkpoint recorded; full Preview 1 closeout OPEN |
+
+**Original global status remains B OPEN / C FAIL / D OPEN.** Production source remains `bbe353e649feed5b796adb164dcec36eaca915ab`; integration remains `d746fb8cdcb47f2031ac6db483cf63b7debbcbef`. No kernel/compiler/toolchain/original harness/workload/oracle/proof-statement changes are introduced. The emitter/cache experiment remains isolated. Fetch both live refs before writes.
+
+**Next task:** investigate actual mixed-Unicode sample 5 on Node 22.23.4 in a separately labelled GitHub Linux diagnostic using existing `PSC1_T01F_TRACE=1`. Keep the full 1,400-assertion sample, fixture, oracle, fuel 4,096, deadline 1,500 seconds and old-space 2,048 MiB. In the first failed log, admission (294), metadata (377) and the singleton marker all completed. Locate the exact blocking call among the following negative-input/distinct-string checks before choosing a fix. A traced diagnostic is not qualification. Preserve all complete/censored results, then requalify unchanged full gates for any changed program. Never splice passing routes across campaigns or use the old-patch diagnostic as a downgrade fix.
+
+Candidate use on Linux/Node 22.23.4: `node check-export.mjs valid-example.ndjson`. The supervisor reports typed outcomes and host causes; timeout/crash/partial receipts/unknown assumptions cannot become acceptance. Fuel remains recursive depth, heap is not a total RSS cap, and JS embedding remains trusted integration. Global logical soundness, the 17 Arena timeouts/two safety differences, compiler replay, fixed points and backend preservation remain unfinished.
+
+All compiler/kernel execution, tests, benchmarks and package generation ran in GitHub Linux Actions. Local work is source editing, static inspection and byte-identical artifact copying only. No main merge, force push, npm publication or subagents.
+
+## Historical evidence retained verbatim
+
+This checkpoint supersedes earlier pending statuses and execution order. All previous evidence, failures, censoring and original criteria remain append-only below.
+
 ## Active goal revision — 29 October 2026 (Asia/Jakarta)
 
 The user's requested research and goal revision makes **PSKernel-Core Bounded Independent Checker Preview 1** the next finite delivery milestone. The normative contract is [the preview goal](docs/PSKERNEL_CORE_BOUNDED_PREVIEW_GOAL_2026-10-29.md), supported by [primary-source research](docs/PSKERNEL_CORE_RESEARCH_GOAL_REVISION_2026-10-29.md) and the [source/CI audit](docs/evidence/2026-10-29-goal-revision-source-audit.md). This leading entry supersedes earlier execution order and pending statuses for the next milestone; the old evidence and original full-goal gates below remain unchanged.

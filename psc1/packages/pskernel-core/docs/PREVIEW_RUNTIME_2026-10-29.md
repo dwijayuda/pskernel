@@ -1,10 +1,10 @@
 # PSKernel-Core Bounded Independent Checker Preview 1
 
-The supervised interface described here is under qualification. A successful library test or package upload does not by itself complete the eight preview gates. Original strict Arena compatibility remains separately reported.
+The supervised interface is qualified as a development candidate. Full Preview 1 is incomplete: P5 is BLOCKED by fresh full-workload String timeouts and P6 remains OPEN. Candidate delivery and passing interface controls do not complete the eight preview gates. See [the implementation checkpoint and complete failure ledger](evidence/2026-10-29-preview-supervisor-checkpoint.md). Original strict Arena compatibility remains FAIL at 174/193, with 17 timeouts and two safety-contract differences.
 
 ## Run
 
-Qualified host: Linux and Node 22. Unpack the generated or canonical preview package and run:
+Candidate-tested host: Linux and Node 22.23.4. Unpack the generated or canonical development candidate and run:
 
 ```sh
 node check-export.mjs valid-example.ndjson
@@ -54,6 +54,40 @@ The three-axiom audit of PSKernel's own native proof modules is a separate bound
 
 The baseline emitted kernel is exactly 10,824,302 bytes, SHA-256 `1e6f22ae728c20306755c7be10118ccc40cd449e2c7e08872a153b5aa7a7f968`, generated from the previously qualified nested producer. Its Lean source tree is `bbe353e649feed5b796adb164dcec36eaca915ab`. The wrapper adds no production Lean or compiler changes.
 
-The final package must carry its actual current supervisor/control/workload receipts, manifest, source provenance and complete limitation ledger. The original full gates are unchanged: both String routes require all 8,400 assertions, and the strict Arena gate requires all 193 cases to pass. The retained baseline has 174 strict passes, 17 timeouts and two safety-contract differences. A no-regression ledger does not convert that strict failure into success.
+Each candidate carries its actual supervisor/control/workload receipts, manifest, source provenance and limitation ledger, and explicitly records `fullPreviewQualified:false`. Both original String routes require all 8,400 assertions; neither fresh campaign passed both routes. The strict Arena gate requires all 193 cases to pass. Preview P5 requires retaining every Arena case and its actual result; it does not require concealing the retained strict failure. The retained baseline has 174 strict passes, 17 timeouts and two safety-contract differences. A no-regression ledger does not convert that strict failure into success.
 
 Global soundness, whole-kernel speedup, compiler declaration acceptance, compiler fixed points and backend preservation remain unfinished. No package publication or main merge is performed by this preview delivery.
+
+## Implementation and test mapping
+
+| Contract surface | Implementation | Required observed controls/evidence |
+|---|---|---|
+| CLI syntax and exit codes 0–4 | `check-export.mjs`, `exitCodeFor` in supervisor | Actual valid/invalid file invocations; five outcome exit-code controls; alternate-worker option rejected |
+| Input snapshot, program/policy hashes and request identity | Supervisor input reader/digest and worker rehash; `validateWorkerResult` | Actual identity receipt; altered input/policy identity faults; source and manifest audit |
+| Target identity and public checking authority | Policy `TARGET`; retained adapter's default-policy/provider preflight and V1RunDag | Target mismatch; actual nonempty valid definition and ill-typed body; retained adapter controls |
+| Standard input assumptions and primitive binding | `scanAssumptions`; native schema generator and committed pins | Three independently admitted standard-axiom files; alpha-renamed universe schemas; all-three inventory; fourth unknown axiom; altered type; missing/shadowed primitive; dotted-name spoof |
+| No receipt/session authority from input | Unchanged stream decoder plus public empty-session construction | Fake receipt and fake session records never accept |
+| Regular input and byte budget | `boundedInput`, `LIMITS.inputLimitBytes` | Invalid UTF-8; FIFO nonblocking rejection; absent file; 64-MiB-plus-one resource result |
+| Kernel outcome categories | Worker outcome mapping and retained constructor-aware `kernelErrorVerdict` | Actual valid/invalid declarations and unsupported input; retained real V1 unsupported/resource controls; separately labelled trusted protocol fixtures for resource/internal results |
+| Acceptance receipt discipline | `validateWorkerResult`, child exit/close handling | Missing/duplicate/invalid JSON; duplicate keys; absent core/metadata/policy evidence; unknown assumption; success/nonzero-exit conflict; signal |
+| Deadlines, cancellation and cleanup | Detached worker group, parent timer, SIGKILL and child close | CPU-bound and idle deadlines; inflight/prelaunch cancellation; descendant cannot survive; child reaped |
+| Output and host failures | Bounded stdout/stderr collection, launch/error handling | Both output caps; missing executable; heap-diagnostic fixture; abnormal child termination |
+| Resource and trust claims | Supervisor result fields and this guide | Original 4096-fuel/2048-MiB-old-space policies retained; old-space is not total RSS; no hard real-time, OS-isolation or global logical-soundness claim |
+
+The 67 controls are finite supervision/ingress tests, including explicitly trusted fault fixtures. They are not 67 formal soundness theorems or a replacement for the original 193-case comparison. The 814 preserved proof reports and 61 proof sources are authenticated separately; they do not close global checker soundness.
+
+## Reproduce in GitHub Linux Actions
+
+For the original kernel source build, use `SOURCE_BUILD.md` in the package (the repository source is `QUALIFIED_RUNTIME_2026-10-27.md`). It names the exact producer source, Lean commit, compiler routes and retained full build workflow. Keep compiler/kernel execution in GitHub Linux Actions.
+
+For the new interface, use `.github/workflows/psc1-pskernel-preview-supervisor.yml` from the qualified wrapper source. It installs exact Lean only to derive the standard schemas, compares regenerated pins against the committed file, authenticates both original runtime artifacts, and runs all interface/retained adapter controls in detached empty-PATH processes. The native derivation command, from `psc1/`, is:
+
+```sh
+test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+lake env lean --run test/PsKernelPreviewAxiomSchemas.lean > "$RUNNER_TEMP/preview-axioms.json"
+cmp scripts/pskernel-preview-axioms.json "$RUNNER_TEMP/preview-axioms.json"
+```
+
+The qualification script is `psc1/scripts/pskernel-preview-qualification.py`; candidate packaging is `psc1/scripts/pskernel-preview-candidate-delivery.py` with its exact committed artifact input manifest and candidate workflow. Run these only in Linux Actions with the job's read-only repository/actions token. Source snapshots of the qualified interface and native generator are included under `preview-source/` in the candidate.
+
+Artifact IDs are evidence for exact prior runs, not interchangeable dependencies. When a referenced artifact expires or a producer changes, regenerate and independently qualify its evidence and update the pins explicitly. Do not substitute an unchecked binary, update expected digests silently, or mutate old qualification runs to look like new source qualification.

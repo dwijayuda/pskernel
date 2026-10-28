@@ -57,7 +57,7 @@ def main : IO Unit := do
       fun refs => refs.insert "computed" ["reader"] |>
       fun refs => refs.insert "reader" ["aliasValue"] |>
       fun refs => refs.insert "answer" []
-  rejects (initialize circular.declarations circularRefs) "transitive-initializer-cycle"
+  rejects (orderInitializers circular.declarations circularRefs) "transitive-initializer-cycle"
   let dependenciesAcross := { raw with declarations := [computed, reader, aliasValue, answer] }
   let acrossOwners := [{ name := "computed", unit := 1 }, { name := "reader", unit := 2 },
     { name := "aliasValue", unit := 1 }, { name := "answer", unit := 1 }]

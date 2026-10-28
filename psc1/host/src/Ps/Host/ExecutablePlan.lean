@@ -39,7 +39,7 @@ def dependencies (start : String) (references : Std.HashMap String (List String)
   ensure pending.isEmpty "PSC1_EXECUTABLE_INITIALIZER_EDGE_BOUND"
   return result
 
-def initialize (declarations : List PsVerifiedIrDeclaration)
+def orderInitializers (declarations : List PsVerifiedIrDeclaration)
     (references : Std.HashMap String (List String)) :
     Except String (List PsVerifiedIrDeclaration) := do
   let ready := declarations.filter early
@@ -128,7 +128,7 @@ def plan (raw : PsVerifiedIrModule) (owners : List PsModuleOwner)
       if !seen.contains ref.name then
         seen := seen.insert ref.name
         imports := { ref with unit := assigned } :: imports
-    let declarations ← initialize buckets[source]!.reverse byName
+    let declarations ← orderInitializers buckets[source]!.reverse byName
     return PsModuleUnit.mk unit declarations imports.reverse
   return (PsModulePlan.mk raw remapped units
     (ordered.map (fun source => specifiers[source]!)) "psc1-executable-compiler/1", mapped.toList)

@@ -23,8 +23,11 @@ def readJson (file : String) : IO Lean.Json := do
   if text.utf8ByteSize > 33554432 then throw (IO.userError "PSC1_EXECUTABLE_INPUT_BOUND")
   liftResult (Lean.Json.parse text)
 
-def write (file text : String) : IO Unit := do
+def write (budget : IO.Ref Nat) (file text : String) : IO Unit := do
   if text.utf8ByteSize > 33554432 then throw (IO.userError "PSC1_EXECUTABLE_FILE_BOUND")
+  let total := (← budget.get) + text.utf8ByteSize
+  if total > 134217728 then throw (IO.userError "PSC1_EXECUTABLE_STAGE_AGGREGATE_BOUND")
+  budget.set total
   IO.FS.writeFile file text
 
 def phase (name : String) : IO Unit := do
@@ -46,6 +49,7 @@ def artifactJson (kind : String) (artifact : PsModuleArtifact) : Lean.Json :=
     ("exports", Lean.toJson artifact.exports)]
 
 def capture (input directory : String) : IO Unit := do
+  let budget ← IO.mkRef (0 : Nat)
   let text ← IO.FS.readFile input
   if text.utf8ByteSize > 33554432 then throw (IO.userError "PSC1_EXECUTABLE_REQUEST_BOUND")
   let request ← match decode text with
@@ -73,14 +77,14 @@ def capture (input directory : String) : IO Unit := do
   let fused ← liftResult (psFuseClosedWorkersWithOrigins (.mk specialized.raw))
   let fusedOwners ← liftResult (psModuleCarryOwners specialized.raw specializedOwners fused)
   IO.FS.createDirAll directory
-  write (directory ++ "/original-ir.json") (← liftResult
+  write budget (directory ++ "/original-ir.json") (← liftResult
     ((psIrEncodeModule original.raw).mapError (fun _ => "PSC1_EXECUTABLE_ENCODE_ORIGINAL")))
-  write (directory ++ "/specialized-ir.json") (← liftResult
+  write budget (directory ++ "/specialized-ir.json") (← liftResult
     ((psIrEncodeModule specialized.raw).mapError (fun _ => "PSC1_EXECUTABLE_ENCODE_SPECIALIZED")))
-  write (directory ++ "/fused-ir.json") (← liftResult
+  write budget (directory ++ "/fused-ir.json") (← liftResult
     ((psIrEncodeModule fused.raw).mapError (fun _ => "PSC1_EXECUTABLE_ENCODE_FUSED")))
-  write (directory ++ "/admissions.json") semantic.admissions
-  write (directory ++ "/capture.json") (Lean.Json.mkObj [
+  write budget (directory ++ "/admissions.json") semantic.admissions
+  write budget (directory ++ "/capture.json") (Lean.Json.mkObj [
     ("schema", .str "psc1-executable-capture/1"), ("requestId", .str request.requestId),
     ("sourceClosureDigest", .str request.sourceClosureDigest),
     ("grammar", .str request.grammar), ("entry", .str request.entry),
@@ -96,6 +100,7 @@ def capture (input directory : String) : IO Unit := do
   phase "captured"
 
 def emit (directory specifierFile digest : String) : IO Unit := do
+  let budget ← IO.mkRef (0 : Nat)
   phase "decode"
   let raw ← liftResult (PortableIr.decode (← readJson (directory ++ "/fused-ir.json")))
   let captured ← readJson (directory ++ "/capture.json")
@@ -141,20 +146,20 @@ def emit (directory specifierFile digest : String) : IO Unit := do
       { lowered with declarations := ordered } digest unit)
     let ts ← liftResult (Ps.Internal.ModularTs.renderUnit selected digest brands tags unit)
     let suffix := "/unit-" ++ toString unit.index
-    write (directory ++ "/js" ++ suffix ++ ".mjs") js.source
-    write (directory ++ "/js" ++ suffix ++ ".d.mts") js.declarations
-    write (directory ++ "/ts" ++ suffix ++ ".mts") ts.source
+    write budget (directory ++ "/js" ++ suffix ++ ".mjs") js.source
+    write budget (directory ++ "/js" ++ suffix ++ ".d.mts") js.declarations
+    write budget (directory ++ "/ts" ++ suffix ++ ".mts") ts.source
     jsRows := artifactJson "js" js :: jsRows
     tsRows := artifactJson "ts" ts :: tsRows
-  write (directory ++ "/js-runtime.mjs") (psJsStringRuntimeSupport ++ psJsStackRuntimeSupport ++
+  write budget (directory ++ "/js-runtime.mjs") (psJsStringRuntimeSupport ++ psJsStackRuntimeSupport ++
     "\nexport { " ++ String.intercalate ", "
       (Ps.Internal.ModularJs.helpers.filter (fun name => name != "__ps$cohort")) ++ " };\n")
   phase "reference"
-  write (directory ++ "/reference.mjs") (← liftResult
+  write budget (directory ++ "/reference.mjs") (← liftResult
     ((psJsPrintModuleStackSafe lowered).mapError (fun _ => "PSC1_EXECUTABLE_REFERENCE_JS")))
-  write (directory ++ "/reference.mts") (← liftResult
+  write budget (directory ++ "/reference.mts") (← liftResult
     ((psTsEmitModule selected.raw).mapError (fun _ => "PSC1_EXECUTABLE_REFERENCE_TS")))
-  write (directory ++ "/modules.json") (Lean.Json.mkObj [
+  write budget (directory ++ "/modules.json") (Lean.Json.mkObj [
     ("schema", .str "psc1-executable-compiler-emission/1"),
     ("sourceClosureDigest", .str digest), ("protocol", .str selected.protocol),
     ("packages", Lean.toJson selected.packages),

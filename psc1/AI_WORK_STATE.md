@@ -25,11 +25,19 @@ ownership. Native tests build pure emitters without importing the frontend drive
 emit a strict-IR fixture, exercise actual JS/TS outputs and validate Wasm bytes.
 Existing unified/compiler/kernel/backend gates remain.
 
-Implementation is not yet qualified. Linux focused workflow
+The source/emitter boundary passed focused Linux runs 40658954932 (ec4218b5) and
+40659282400 (a8e22de3). This is source-layer/emitter evidence only. Linux focused workflow
 psc1-executable-packages.yml will record actual results. This is real source-layer
 work, not completion of the complete executable graph, npm integration or new
-G1/G2/G3/fixed points. Continue M2 after the boundary slice passes; do not stop
-merely at a contract or plan.
+G1/G2/G3/fixed points. Production M2 implementation is now in progress: shared structured model/renderers
+are extracted with pilot profiles unchanged; a host-only production builder captures
+all 126 current compiler source modules, carries owners through the existing checked
+transforms, orders computed initializers by transitive dependencies, and emits real
+JS/TS files under existing package names. It requires exact external Lean admission
+before emission, strict TypeScript, printed-graph audits and tamper negatives.
+This candidate pipeline is awaiting Linux CI and is not a promoted npm release.
+The first planner build failed because initialize is a reserved Lean command;
+the helper is renamed orderInitializers. No semantic exception or fuel change.
 
 ## Preserved reference and policies
 

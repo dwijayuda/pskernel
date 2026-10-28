@@ -1,0 +1,156 @@
+name: PSC1 preview exact prior Node22.23.3 replication
+on:
+  push:
+    branches: [work/psc1-pskernel-preview-supervisor-20261029]
+    paths:
+      - .github/workflows/psc1-pskernel-preview-node223-replication.yml
+      - psc1/scripts/pskernel-preview-workloads.py
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Preserve production code and original adapters
+        run: |
+          test "$(git rev-parse HEAD:psc1/packages/pskernel-core/src)" = bbe353e649feed5b796adb164dcec36eaca915ab
+          git diff --exit-code 664441240c317891e44bf86a041f6ab214cdc747 HEAD -- psc1/scripts/pskernel-arena-replay.mjs psc1/scripts/pskernel-arena435-compare.py psc1/scripts/pskernel-expr-v2-string-environment-smoke.mjs psc1/scripts/pskernel-cohort-qualification.py
+      - name: Authenticate exact runtime programs and unchanged full String fixture
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 psc1/scripts/pskernel-preview-workloads.py prepare
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pskernel-preview-original-inputs
+          path: ${{ runner.temp }}/qualified-cohorts/inputs.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pskernel-preview-original-generated
+          path: ${{ runner.temp }}/qualified-cohorts/nested-generated/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pskernel-preview-original-canonical
+          path: ${{ runner.temp }}/qualified-cohorts/nested-canonical/
+  string:
+    needs: prepare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        route: [generated, canonical]
+        sample: [0, 1, 2, 3, 4, 5]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@v4
+        with:
+          name: pskernel-preview-original-${{ matrix.route }}
+          path: ${{ runner.temp }}/qualified-cohorts/nested-${{ matrix.route }}
+      - name: All original 1400 assertions with original 1500-second budget
+        run: python3 psc1/scripts/pskernel-preview-workloads.py string ${{ matrix.route }} ${{ matrix.sample }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-preview-string-${{ matrix.route }}-${{ matrix.sample }}
+          path: |
+            ${{ runner.temp }}/qualified-cohorts/nested-${{ matrix.route }}/qualification.json
+            ${{ runner.temp }}/qualified-cohorts/nested-${{ matrix.route }}/generated.log
+            ${{ runner.temp }}/qualified-cohorts/nested-${{ matrix.route }}/generated.memory
+  official:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - run: bash psc1/scripts/install-lean435-ci.sh
+      - name: Recheck every original body against pinned official Lean
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          export PATH="$HOME/.elan/bin:$PATH"
+          test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          curl -fL --retry 3 -o "$RUNNER_TEMP/arena.tar.gz" https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
+          echo "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d  $RUNNER_TEMP/arena.tar.gz" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/preview-official"
+          python3 scripts/pskernel-arena435-oracle.py --archive "$RUNNER_TEMP/arena.tar.gz" --official-project . --out "$RUNNER_TEMP/preview-official/report.json" --timeout 300 --workers 2 | tee "$RUNNER_TEMP/preview-official/run.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-preview-official193
+          path: ${{ runner.temp }}/preview-official/
+  arena:
+    needs: [prepare, official]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@v4
+        with:
+          name: pskernel-preview-original-generated
+          path: ${{ runner.temp }}/qualified-cohorts/nested-generated
+      - uses: actions/download-artifact@v4
+        with:
+          name: pskernel-preview-official193
+          path: ${{ runner.temp }}/preview-official
+      - name: Original strict 193-case gate retains its failing exit status
+        working-directory: psc1
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/preview-arena"
+          curl -fL --retry 3 -o "$RUNNER_TEMP/arena.tar.gz" https://github.com/leanprover/lean-kernel-arena/releases/download/round-2026-09/lean-arena-round-2026-09-tests.tar.gz
+          echo "98a69742b538296c5f413d0527dfeef8c4d1815fe64b12c8623cd33de63bee0d  $RUNNER_TEMP/arena.tar.gz" | sha256sum -c -
+          python3 scripts/pskernel-arena435-compare.py --archive "$RUNNER_TEMP/arena.tar.gz" --oracle-report "$RUNNER_TEMP/preview-official/report.json" --kernel "$RUNNER_TEMP/qualified-cohorts/nested-generated/kernel.mjs" --out "$RUNNER_TEMP/preview-arena/report.json" --timeout 60 --workers 2 | tee "$RUNNER_TEMP/preview-arena/run.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-preview-arena193
+          path: ${{ runner.temp }}/preview-arena/
+  ledger:
+    needs: [prepare, string, arena]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: pskernel-preview-string-*
+          path: ${{ runner.temp }}/preview-workload-results
+      - uses: actions/download-artifact@v4
+        with:
+          name: pskernel-preview-arena193
+          path: ${{ runner.temp }}/preview-workload-results/pskernel-preview-arena193
+      - name: Separate no-regression ledger from original strict failure
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 psc1/scripts/pskernel-preview-workloads.py ledger
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-preview-original-workload-ledger
+          path: ${{ runner.temp }}/preview-workload-ledger/

@@ -93,44 +93,95 @@ Installed CLI [40695323349](https://github.com/dwijayuda/pskernel/actions/runs/4
 passes all nine retained .11-cohort jobs. These scopes remain distinct from both
 the new modular graph and the separate .13 reference.
 
-M4 now qualifies the finite installed Linux preview described below. The next
-dependency is M5: portable module planning/emission in the same compiler, exact
-graph/package reproduction, then genuine new modular G1/G2/G3/fixed points.
+M4 qualifies the finite installed Linux preview described below. M5 now qualifies
+portable planning/emission, exact graph/package reproduction and genuine separate
+JS/TS G1/G2/G3/fixed points in its finite Linux scope.
 The qualified .13 distribution stays the default reference. Pilot expansion
 remains deferred; the stopped PR #203 and prototype history are preserved.
 
-## M5: portable G1/source qualified; new generations pending
+## M5: JS/TS G1/G2/G3 and exact modular fixed points qualified
 
-PR #209 continues from PR #208/d53b43c2. At canonical source17ce1991
-and tested controller77961851, the133-module closure is
+PR #209 continues from PR #208 / d53b43c271c65635b07a6ffa78fb6b08a5fa55de.
+[Linux qualification 40755246954](https://github.com/dwijayuda/pskernel/actions/runs/40755246954)
+passes both genuine JS and TypeScript chains at controller
+336ab495df5479a959a071166b7c2c6b24823b26. Adopted controller checkpoint:
+0a4cbba5c38327290f0c309c507cdaf583dc9b15. Canonical implementation source:
+17ce19919175b60be06050188e2a546a8a72e689; exact 133-module source closure:
 1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb.
-Native/pure G1 runs40748275409/40749484426 independently admit4905 logical
-members and reproduce134 actual units/15 packages, exact original/transformed IR,
-ownership and all immutable renderer bytes. The1131-file graph is103951941 bytes.
-Native G1 takes112.798s/1210604KiB RSS (repeat123.453s/1207588KiB), under240s.
 
-Full source40749527957 passes all16 selected jobs,37/37 finite criteria,
-zero blocked and14 scoped target bundles at77961851 (merge3c78e1c1).
-Ownership/policy40755976488 passes all11 historical/current identity cases and
-the unchanged ordinary/1800s/3600s profile rules. Existing.13 npm qualification
-40749527892 passes separately. These results do not establish new fixed points.
+The same frontend/elaborator, strict original/transformed IR, bounded planner and
+structured source-owned renderers produce 134 units in 15 executable packages.
+All 4905 logical declarations are independently checked using official Lean
+4.35.0 / eb6cafb7290e8bd5f2937522d8d804f58f02bafc at every generation.
+Admission digest: cff6304aef7b3e7c69ac7c4941d275a685b945af2fdc79bf9dfee7ebfd1513f4.
+G1/G2/G3 manifest: 74e14f5650931ccc3de2a4a7ed6829f54197bb8100466bcb2eb0ad90d7b14a85.
+Complete graphs, all 1131 files / 103951941 bytes, exact IR/rendered references,
+and all 15 actual npm tarballs reproduce byte-for-byte across both chains.
+Native frontend executables are quarantined; nativeFrontendCalls=0.
 
-Initial generated G2 run40749484847 fails after1557–1566s at the introduced
-1800 CPU-second guard, before the defined1800s wall deadline. Actual CPU
-diagnostics40754131717 retain the exact whole-compiler source workload.
-The user authorizes a sensible increase: diagnostic336ab495 launches
-40755246954 with3600s G2/G3 wall-clock requests and160-minute Linux jobs,
-restoring the original Node wall policy.1800s correctness and240s performance
-remain separate; G1/corpus240s, checker120s and all memory/stack/fuel/byte bounds
-remain. The audited controllers are adopted with a dedicated explicit push marker/manual
-dispatch; exact execution steps/limits remain those running in40755246954.
-Retained reference CLI40749484645 reaches its aggregate60-minute deadline during
-passing publication/IO cases. Increase only that job budget to90 minutes and
-rerun all retained commands; cancellation is not qualification.
-G2/G3/fixed points are pending. Candidate version.2 does not promote
-the qualified M4.1 umbrella or replace.13.
-[Exact partial receipt](PSC1_PORTABLE_MODULAR_QUALIFICATION_2026-10-29.json),
-[architecture](architecture/portable-modular-generation.md).
+| Producer | G2 wall | G3 wall | G2 maxRSS | G3 maxRSS |
+| --- | ---: | ---: | ---: | ---: |
+| JS | 2930.381 s | 2907.843 s | 4024528 KiB | 4017160 KiB |
+| TypeScript | 2914.908 s | 3078.368 s | 3895680 KiB | 3977884 KiB |
+
+Each request succeeds within the explicit correctness-3600s wall profile.
+The user's authorized increase applies only to G2-self/G3-self; retain the
+correctness-1800s and performance-240s profiles unchanged. G1/corpus/tools remain
+240s; checker remains 120s. V8 heap 4096 MiB / stack 8 MiB, native 4 GiB AS and CPU
+guards, semantic fuel, 32 MiB files/streams, 128 MiB graph/stage/wire, 8192
+values/files, 257 units, 4096 reference depth and 131072 initializer edges remain.
+MaxRSS is measured process memory, not a changed V8 heap allowance.
+The 160-minute Linux jobs cover both requests, checking, corpus and packaging.
+
+[G1 seed 40748275409](https://github.com/dwijayuda/pskernel/actions/runs/40748275409)
+passes at17ce1991: 112798 ms / 1210604 KiB; repeat40749484426 passes at77961851:
+123453 ms /1207588 KiB. [Adopted G1 40759089971](https://github.com/dwijayuda/pskernel/actions/runs/40759089971)
+passes at0a4cbba5:115849 ms /1208424 KiB, same native ELF and source closure.
+All six raw-JSON/native byte round trips pass. The efdb1385/40746744949 transient
+wire overflow is preserved and fixed by removing duplicate escaping, not raising bounds.
+
+Each generated G2/G3 graph also passes the retained small corpus: 26 exact response
+observations, 16 independently admitted positives and 10 refusals across the two
+grammars/variants; actual JS/strict TS/Rust execution, Wasm validation, wrong-cohort
+refusals and offline installation/repacking of all 15 packages. Nested corpus
+receipts retain their original conservative local-scope wording; the enclosing
+generation receipts supply the actual G2/G3/fixed-point evidence.
+
+[Full source 40759096464](https://github.com/dwijayuda/pskernel/actions/runs/40759096464)
+passes all16 selected jobs at0a4cbba5:37/37 finite Practical Core criteria,
+zero blockers and14 scoped target bundles. Earlier40749527957 at77961851 passes
+the same scope. [Ownership/policy40755976488](https://github.com/dwijayuda/pskernel/actions/runs/40755976488)
+passes all11 retained/current cases and wire/profile refusals.
+[Retained CLI40759090079](https://github.com/dwijayuda/pskernel/actions/runs/40759090079)
+passes all9 jobs at0a4cbba5, including supported Node/Bun and older-runtime
+refusals. Its frozen.11 reference cohort is separate from M5. The prior
+40749484645 cancellation at the60-minute aggregate deadline remains recorded;
+the90-minute job retry changes no commands or per-request limits.
+[Existing.13 npm40759096440](https://github.com/dwijayuda/pskernel/actions/runs/40759096440)
+passes separately.
+
+Download qualified graphs, IR, manifests, npm tarballs and full receipts:
+[JS artifact12852666295](https://github.com/dwijayuda/pskernel/actions/runs/40755246954/artifacts/12852666295)
+(115817158 bytes; SHA256 ea16cfb3d4c597d3b37fb22b1b1cffa2940f7075a0d17197140ca6d9e4825194),
+[TS artifact12851274486](https://github.com/dwijayuda/pskernel/actions/runs/40755246954/artifacts/12851274486)
+(115817233 bytes; SHA256 b49445fe4c4c5626f5a718b619024a6abbcfb3975b5f7f5e080ea1338f221715).
+
+Initial40749484847 G2 failures hit an introduced CPU=wall cap before the defined
+wall deadline; correcting Node supervision preserves the canonical wall policy and
+native CPU guards. Diagnostics40754131717/40759841635 preserve the exact workload,
+CPU profiles and measurements; they are not generation qualification.
+The type-key experiment at20e6fa1a remains isolated/unadopted and unqualified.
+
+This completes finite Linux modular JS/TS reproduction, not universal release,
+240-second performance, a semantic preservation theorem or totality.
+New.2 packages are candidates, not a promoted proofscript root. M4.1 root/.13,
+thin psc, default genuine C++/Emscripten linear-memory Wasm kernel, optional
+Python/PHP and qualified frozen Rust/Wasm stay preserved. New-cohort Bun/full
+M3/M4 application matrices, standalone checked host, other platforms and final
+root promotion remain unqualified. No merge or registry publication.
+
+[Exact qualification receipt](PSC1_PORTABLE_MODULAR_QUALIFICATION_2026-10-29.json)
+and [portable architecture](architecture/portable-modular-generation.md).
 
 ## M4: qualified installed Linux preview
 
@@ -201,7 +252,7 @@ PR #197 implementation 9aefeeb and documentation refresh c5c15582 pass all 42 pa
 | 2 | Independent maintainer trial | Pending human participation; the user can arrange a maintainer. Record commit, navigation mistakes, elapsed time, assistance and a real small change. No AI/CI comprehension claim. |
 | 3 | Compiler-origin structured diagnostics/editor integration | Pending: actual spans/provenance, both grammars, machine/human consumers and malformed-input refusals. |
 | 4 | Runtime compatibility, checked watch and licensing | Qualified Linux milestone, PR#193 /fdc52207fdf3d809ad99b05a5b738aca21b95139: Node>=22.23.3, Bun>=1.4.4; actual Node22.23.3/24.21.0/26.12.1 and Bun1.4.4; older Node/Bun refusals;55 CLI requests,11 full watch cases,16 applications/264 observations,32 publications/143 refusals; all61 SDK pins unchanged. Apache-2.0 source/cohort, vendor notices retained. [Receipt](PSC1_RUNTIME_WATCH_QUALIFICATION_2026-10-27.json). Semantic incremental caching remains deferred. |
-| 5 | Fully modular executable compiler | M1/M2 candidate graph and finite M3 application/semantic/seven-target execution are qualified in PR #205–#207; see the [current plan](architecture/executable-package-modularity.md) and [M3 receipt](PSC1_MODULAR_SEMANTIC_QUALIFICATION_2026-10-28.json). M4 finite Linux installed umbrella/thin CLI/watch is qualified in PR #208 ([receipt](PSC1_MODULAR_INSTALLED_QUALIFICATION_2026-10-28.json)); M5 portable reproduction/new generations remain incomplete. Preserve .13, existing package names, independent checking and resource policies. Pilot expansion stays deferred. No new modular fixed-point/release claim. |
+| 5 | Fully modular executable compiler | M1/M2 candidate graph and finite M3 application/semantic/seven-target execution are qualified in PR #205–#207; see the [current plan](architecture/executable-package-modularity.md) and [M3 receipt](PSC1_MODULAR_SEMANTIC_QUALIFICATION_2026-10-28.json). M4 finite Linux installed umbrella/thin CLI/watch is qualified in PR #208 ([receipt](PSC1_MODULAR_INSTALLED_QUALIFICATION_2026-10-28.json)); M5 finite Linux modular JS/TS G1/G2/G3, full graphs and all15 npm tarballs qualify in40755246954 ([receipt](PSC1_PORTABLE_MODULAR_QUALIFICATION_2026-10-29.json)). Preserve .13, existing package names, independent checking and resource policies. Pilot expansion stays deferred. New-cohort installed/application/platform gates,240s performance and final root promotion remain pending. |
 | 6 | Component String/IO and export selection | Pending: reuse shared/native ABI; both grammars/four engines, actual validation/execution, exact exports and refusals. Public component ABI currently Bool only. |
 | 7 | Full Python/PHP practical applications | Pending: real CLI/JSON/file/multi-module observations against checked reference; retain corpus/Unicode/integer/loop/IO tests. Providers remain optional. |
 | 8 | Automatic source-package capture | Pending: bounded deterministic order, exact identities, cycle/missing/stale refusals, real multi-package applications. Metadata never executes code or grants authority. |

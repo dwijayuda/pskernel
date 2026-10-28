@@ -1,7 +1,8 @@
 # Portable modular generation (M5)
 
-Status: implementation under qualification. Native differential and small-candidate
-tests and the 133-module two-grammar census pass. The native G0 graph matches all immutable renderer bytes. Portable G1 passes Linux40748275409 with exact native IR and rendered-byte identity. JS/TS G2/G3 and fixed points remain pending.
+Status: finite Linux JS/TS G1/G2/G3 and exact graph/npm fixed points qualified in
+[40755246954](https://github.com/dwijayuda/pskernel/actions/runs/40755246954).
+Source17ce1991 / controller336ab495; [exact receipt](../PSC1_PORTABLE_MODULAR_QUALIFICATION_2026-10-29.json).
 The [roadmap](../PSC1_DEVELOPMENT_ROADMAP.md) remains the overall queue.
 
 The compiler owns module generation in
@@ -87,8 +88,9 @@ source maps remain shipped; maps refer to actual in-package sources rather than
 embedding duplicate sourcesContent. No original-Lean line map is invented.
 
 G1, corpus and tools retain 240-second requests; checking retains 120 seconds.
-Only G2-self/G3-self may use the explicit 1800-second correctness profile. The
-separate performance-240s profile is preserved. Heap/stack/fuel, 32 MiB files,
+Only G2-self/G3-self may select correctness-1800s or the user-authorized
+correctness-3600s profile. Both successful chains used3600s wall requests within
+160-minute jobs. The separate performance-240s profile is preserved. Heap/stack/fuel, 32 MiB files,
 128 MiB stage/graph bounds, 8192 values/files, 257 units, 4096 reference depth and
 131072 initializer edges remain. The existing loader also bounds transient
 candidate strings at 128 MiB; supervision stdout/stderr remains 32 MiB.
@@ -103,3 +105,23 @@ kernel, optional Python/PHP and frozen .13 executors stay preserved. New root
 promotion/platform qualification and authorization to merge or publish are separate
 release gates. PSKernel-Core research is independent.
 
+
+## Measured qualified milestone
+
+| Producer | G2 wall | G3 wall | G2 maxRSS | G3 maxRSS |
+| --- | ---: | ---: | ---: | ---: |
+| JS | 2930.381 s | 2907.843 s | 4024528 KiB | 4017160 KiB |
+| TypeScript | 2914.908 s | 3078.368 s | 3895680 KiB | 3977884 KiB |
+
+Both producers generate the exact same134-unit/15-package graph:1131 files,
+103951941 bytes. G1/G2/G3 manifest74e14f5650931ccc3de2a4a7ed6829f54197bb8100466bcb2eb0ad90d7b14a85;
+source closure1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb.
+Each generation has official independent admission and all15 npm tarballs match
+exactly. No native frontend call occurs. The retained corpus additionally tests
+26 response observations,16 admitted positives and10 refusals, emitted outputs,
+strict TS, offline installation and repacking for each generation.
+
+The original240-second target remains unqualified. Replacing the installed M4
+root requires applicable new-cohort installed/app/runtime gates; this receipt does
+not inherit old Bun or full M3/M4 application results onto the changed source.
+Other platforms, standalone checked host and universal release remain pending.

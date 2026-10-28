@@ -1,7 +1,8 @@
-import Ps.BackendJs.CompilerService
-import Ps.BackendTs.CompilerService
-import Ps.BackendRust.CompilerService
-import Ps.BackendWasm.CompilerService
+import Ps.Compiler.Service
+import Ps.BackendJs.Emit
+import Ps.BackendTs.Emit
+import Ps.BackendRust.Emit
+import Ps.BackendWasm.Emit
 
 -- One owned compiler source closure. Execution engine and output target are
 -- independent; optional Python/PHP emitters are deliberately outside this root.

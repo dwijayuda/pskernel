@@ -1,3 +1,4 @@
+import Ps.BackendCommon.ServiceError
 import Ps.Compiler.Api
 import Ps.Compiler.Ordinary
 import Ps.CompilerIr.Encode
@@ -7,17 +8,6 @@ import Ps.BackendCommon.Plan
 -- Scalar candidate transport. All semantic work remains in production compiler
 -- APIs; independent admission and publication belong to the external host.
 namespace Ps.Internal.CompilerService
-
-structure Error where
-  phase : String
-  code : String
-  moduleName : String
-  declaration : String
-  line : Nat
-  column : Nat
-
-def failure (phase code : String) : Error :=
-  Error.mk phase code "" "" 0 0
 
 structure Source where
   moduleName : String

@@ -1,0 +1,109 @@
+{
+  "schema": "psc1-executable-package-contract/1",
+  "plan": "docs/architecture/executable-package-modularity.md",
+  "baselineCommit": "b400552324956d9c3a684c9231f60f70066e1629",
+  "baselinePackageVersion": "0.1.0-psc1.13",
+  "target": {
+    "umbrella": "proofscript",
+    "command": "psc",
+    "compilerOwner": "@proofscript/compiler",
+    "existingNamesOnly": true,
+    "pythonPhpOptional": true
+  },
+  "sourceEntries": {
+    "unified": "Ps.CompilerUnified.Service",
+    "logicalOwnerOverrides": {
+      "compiler-unified": "@proofscript/compiler"
+    },
+    "pureEmitters": [
+      "Ps.BackendJs.Emit",
+      "Ps.BackendTs.Emit",
+      "Ps.BackendRust.Emit",
+      "Ps.BackendWasm.Emit"
+    ],
+    "sharedError": "Ps.BackendCommon.ServiceError"
+  },
+  "boundaries": {
+    "pureEmitterForbiddenOwners": [
+      "compiler",
+      "compiler-unified",
+      "elab",
+      "syntax",
+      "erasure"
+    ],
+    "legacyWrappersAreCompatibilityOnly": true,
+    "noUndeclaredRuntimeImports": true,
+    "noCoreToUmbrellaOrCli": true
+  },
+  "requiredOwnershipCases": [
+    "baseline-is-exact-and-read-only",
+    "error-contract-body-preserved",
+    "all-four-emitter-bodies-preserved",
+    "legacy-service-entry-points-preserved",
+    "pure-emitter-closures-have-no-frontend-driver",
+    "complete-source-package-graph-acyclic",
+    "unified-entry-uses-pure-emitters",
+    "new-source-identity-distinct-from-frozen-g3"
+  ],
+  "stages": [
+    {
+      "id": "M0",
+      "work": "ownership/API/production artifact contract",
+      "status": "in-progress"
+    },
+    {
+      "id": "M1",
+      "work": "production lower-level executable ownership",
+      "status": "in-progress"
+    },
+    {
+      "id": "M2",
+      "work": "complete genuine compiler module graph",
+      "status": "not-implemented"
+    },
+    {
+      "id": "M3",
+      "work": "checked execution through complete JS/TS graphs",
+      "status": "not-qualified"
+    },
+    {
+      "id": "M4",
+      "work": "thin CLI and installable umbrella integration",
+      "status": "not-implemented"
+    },
+    {
+      "id": "M5",
+      "work": "reproduction and final modular generation qualification",
+      "status": "not-qualified"
+    }
+  ],
+  "productionAcceptance": [
+    "unique complete transformed ownership",
+    "actual generated bodies per executable package",
+    "acyclic declared dependency graph",
+    "one shared runtime per engine graph",
+    "both source grammars",
+    "official independent Lean admission",
+    "strict original/transformed IR",
+    "seven-backend behavior/refusals",
+    "accurate ESM/types/source provenance",
+    "root-only local/global installation and checked CLI/watch",
+    "missing/tampered/cohort/path/initialization refusals",
+    "atomic complete-graph publication outcomes",
+    "exact reproduction and measured resource use",
+    "new modular G1/G2/G3/fixed points before self-hosted release claim"
+  ],
+  "preservation": {
+    "leanVersion": "4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "compilerSeconds": 240,
+    "checkerSeconds": 120,
+    "semanticFuel": "unchanged",
+    "memoryStackPolicies": "unchanged",
+    "kernelWasm": "official C++/Emscripten linear memory",
+    "pilotExpansion": "deferred"
+  },
+  "noNewModularCompilerQualification": true,
+  "noRegistryPublication": true,
+  "noMerge": true
+}

@@ -1,0 +1,59 @@
+name: PSC1 production executable package boundaries
+on:
+  push:
+    branches: [feat/psc1-executable-packages-20261028]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: psc1-executable-boundaries-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  boundaries:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache@v4
+        with:
+          path: psc1/.lake
+          key: psc1-executable-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/**/*.lean') }}
+          restore-keys: |
+            psc1-lake-v2-${{ runner.os }}-native-
+            psc1-modular-native-v1-${{ runner.os }}-
+      - name: Prepare exact read-only baseline and locked build consumers
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          npm ci --prefix .. --ignore-scripts --include=optional --no-audit --no-fund
+          git worktree add --detach "$RUNNER_TEMP/psc1-executable-baseline" b400552324956d9c3a684c9231f60f70066e1629
+          echo "PSC1_EXECUTABLE_BASELINE=$RUNNER_TEMP/psc1-executable-baseline/psc1" >> "$GITHUB_ENV"
+      - name: Audit real source ownership and preserved bodies
+        run: node scripts/executable-package-ownership.mjs
+      - name: Build pure production emitters and retained unified entry
+        run: lake build psc1_emitter_boundary_tests psc1_unified_service_tests
+      - name: Execute strict IR emission and original unified service regressions
+        run: |
+          lake exe psc1_emitter_boundary_tests
+          lake exe psc1_unified_service_tests
+      - name: Execute real JS and TS outputs and validate the Wasm bytes
+        run: node scripts/executable-emitter-consumers.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-production-boundaries-${{ github.sha }}
+          path: psc1/dist/executable-packages/
+          retention-days: 90

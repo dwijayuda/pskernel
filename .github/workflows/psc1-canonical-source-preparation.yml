@@ -5,6 +5,7 @@ on:
     paths:
       - psc1/packages/**/*.lean
       - psc1/scripts/prepare-canonical-sources.mjs
+      - psc1/scripts/prepare-source-git-tree.mjs
       - psc1/scripts/CanonicalSourceProbe.lean
       - psc1/scripts/SourceOwnershipMain.lean
       - psc1/host-tools/source-refactoring.mjs
@@ -18,6 +19,41 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  diagnose-prior-projection:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 40640056572
+          name: psc1-canonical-source-preparation-259b0ff09e7e1321884b2603b77765c2b98c2e8a
+          path: retained-preparation
+      - name: Inspect the retained projection failure and already checked owner metadata
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          root = Path('retained-preparation')
+          manifest = json.loads((root / 'CANONICAL_SOURCES.json').read_text())
+          print('PSC1_RETAINED_CANONICAL_METADATA: ' + json.dumps({
+              key: manifest[key] for key in ['preparedCommit', 'ownerCount', 'compilerOwnerCount', 'libraryOwnerCount', 'bootstrapFileCount']
+          }))
+          for key in ['correspondence', 'libraryCorrespondence']:
+              value = manifest[key]
+              print(key + ': ' + json.dumps({k: value[k] for k in ['status', 'admissionsSha256', 'originalIrSha256']}))
+          content = (root / 'native-projection-build.log').read_text()
+          lines = content.splitlines()
+          selected = set()
+          for index, line in enumerate(lines):
+              if 'error:' in line.lower() or 'failed' in line.lower():
+                  selected.update(range(max(0, index - 1), min(len(lines), index + 8)))
+          print('PSC1_RETAINED_NATIVE_PROJECTION_DIAGNOSTIC:')
+          print('\n'.join(lines[i] for i in sorted(selected))[:60000])
+          runtime = root / 'owners/packages/backend-ts/src/Ps/BackendTs/RuntimeSupport.ps'
+          text = runtime.read_text()
+          print('PSC1_RETAINED_RUNTIME_PS_PREFIX: ' + repr(text[:1200]))
+          PY
   prepare:
     runs-on: ubuntu-24.04
     timeout-minutes: 110
@@ -34,7 +70,9 @@ jobs:
         with:
           node-version: '22.23.3'
       - name: Parse the initial promotion observer
-        run: node --check scripts/prepare-canonical-sources.mjs
+        run: |
+          node --check scripts/prepare-canonical-sources.mjs
+          node --check scripts/prepare-source-git-tree.mjs
       - uses: actions/cache/restore@v4
         id: elan-cache
         with:

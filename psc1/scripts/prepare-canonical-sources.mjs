@@ -9,6 +9,7 @@ import { readQualifiedArtifact, sha256 } from './kernel435-qualified-artifact.mj
 import { readOwnedCompilerSources } from '../host-tools/compiler-source-inputs.mjs';
 import { createLosslessSourceTool, createSourceOwnershipTool, createCheckedSourceConverter } from '../host-tools/source-refactoring.mjs';
 import { compilerSourceClosureDigest } from '../host-tools/compiler-host-protocol.mjs';
+import { uploadPreparedSourceTree } from './prepare-source-git-tree.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 process.chdir(root);
@@ -428,27 +429,33 @@ const entries = [...sources].map(([file, content]) => {
     sha: crypto.createHash('sha1').update(header).update(value).digest('hex'),
     bytes: value.length, sha256: sha256(value), content };
 });
-let treeSha = null;
-if (process.env.PSC1_CREATE_SOURCE_TREE === '1') {
-  assert.equal(process.env.GITHUB_REPOSITORY, 'dwijayuda/pskernel');
-  assert.ok(process.env.GH_TOKEN, 'GitHub Actions token required');
-  const response = await fetch('https://api.github.com/repos/dwijayuda/pskernel/git/trees', {
-    method: 'POST', headers: { Authorization: 'Bearer ' + process.env.GH_TOKEN,
-      Accept: 'application/vnd.github+json', 'Content-Type': 'application/json', 'X-GitHub-Api-Version': '2022-11-28' },
-    body: JSON.stringify({ base_tree: baseTree, tree: entries.map(({ path, mode, type, content }) => ({ path, mode, type, content })) }),
-    signal: AbortSignal.timeout(120000),
-  });
-  const result = await response.json();
-  assert.equal(response.status, 201, 'Git tree object preparation failed: ' + JSON.stringify(result));
-  assert.match(result.sha, /^[0-9a-f]{40}$/); treeSha = result.sha;
-}
 const result = { schema: 'psc1-canonical-source-preparation/1', status: 'prepared-checked-canonical-owners',
-  preparedCommit, baseTree, treeSha, canonicalOwners: owners.length,
+  preparedCommit, baseTree, treeSha: null, canonicalOwners: owners.length,
   compilerOwners: ordered.length, libraryOwners: libraryRows.length,
   classifiedRemainder: remainder.length + compositions.length,
   unifiedModules: unified.length, sourceClosureDigest: compilerSourceClosureDigest(unifiedPs),
   admissionsSha256: after.admissionsSha256, originalIrSha256: after.originalIrSha256,
   libraryCorrespondence, nativeProjectionProbe, commitsCreated: false, refsChanged: false,
+  objectUploadStatus: process.env.PSC1_CREATE_SOURCE_TREE === '1' ? 'pending' : 'not-requested',
   entries: entries.map(({ content, ...entry }) => entry) };
+const preparedFilesText = json({ schema: 'psc1-canonical-prepared-files/1',
+  preparedCommit, baseTree, preparedRunId: process.env.GITHUB_RUN_ID ?? null,
+  contentEncoding: 'utf8', commitsCreated: false, refsChanged: false, entries });
+put(path.join(out, 'prepared-files.json'), preparedFilesText);
+result.preparedFiles = { path: 'prepared-files.json', bytes: Buffer.byteLength(preparedFilesText),
+  sha256: sha256(Buffer.from(preparedFilesText)) };
+put(path.join(out, 'preparation.json'), json(result));
+console.log('PSC1_CANONICAL_CHECKS_PREPARED: ' + JSON.stringify({
+  preparedCommit, canonicalOwners: owners.length, entries: entries.length,
+  preparedFiles: result.preparedFiles, admissionsSha256: after.admissionsSha256,
+  originalIrSha256: after.originalIrSha256, nativeProjectionProbe, commitsCreated: false, refsChanged: false }));
+try {
+  const uploaded = await uploadPreparedSourceTree({entries,baseTree,preparedCommit,out});
+  result.treeSha = uploaded.treeSha; result.objectUploadStatus = uploaded.upload.status;
+} catch (error) {
+  result.objectUploadStatus = 'failed';
+  result.objectUploadFailure = {message:String(error.message),code:String(error.cause?.code??error.code??error.name)};
+  put(path.join(out, 'preparation.json'), json(result)); throw error;
+}
 put(path.join(out, 'preparation.json'), json(result));
 console.log('PSC1_CANONICAL_PREPARATION: ' + JSON.stringify(result));

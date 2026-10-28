@@ -32,7 +32,7 @@ const targets=(targetSelection||contract.targets.join(',')).split(',');
 assert.equal(new Set(targets).size,targets.length);
 assert.ok(targets.length&&targets.every(t=>contract.targets.includes(t)));
 const names=[...contract.cases.map(c=>c.id),'semantic'];
-const records=[],failures=[];
+const records=[],failures=[],retainedInputs=[];
 const env={...process.env,...(inferenceControl?{PSC1_TRACE_PHASES:'1'}:{}),PSC1_HOST_TOOLS:path.join(root,'host-tools/artifacts.mjs')};
 const read=file=>fs.readFileSync(file,'utf8');
 const sha=bytes=>crypto.createHash('sha256').update(bytes).digest('hex');
@@ -299,6 +299,26 @@ try {
     assert.equal(manifest.behaviorallyVerified,false);
     assert.equal(manifest.runtimeContract,'psc1-runtime-semantics/1');
     execute(target,output);
+    if(process.env.PSC1_RETAIN_CORPUS_INPUTS==='1'&&target==='js'){
+     const directory=path.dirname(fs.realpathSync(output+'.bundle.json'));
+     const pin=manifest.files.find(row=>row.path==='psc1-input.json');
+     assert.ok(pin,'sealed source snapshot is required');
+     const bytes=fs.readFileSync(path.join(directory,pin.path));
+     assert.equal(bytes.length,pin.bytes);assert.equal(sha(bytes),pin.sha256);
+     const snapshot=JSON.parse(bytes),admissions=read(path.join(directory,'admissions.json'));
+     assert.equal(sha(admissions),manifest.kernelAdmissionSha256);
+     for(const source of snapshot.sources){
+      assert.equal(Buffer.byteLength(source.text),source.bytes);
+      assert.equal(sha(source.text),source.sha256);
+     }
+     retainedInputs.push({syntax,contractFile,contract,oracle,publicNames:manifest.publicNames,
+      assurance:manifest.assurance==='ordinary-checked'?'ordinary-checked':'checked',
+      sources:snapshot.sources,admissionsSha256:manifest.kernelAdmissionSha256,
+      negativeCases:[...negativeCases.map(row=>({id:row.id,text:row[syntax]})),
+       {id:'duplicate-prelude',text:read(path.join(folder,'duplicate-prelude.'+syntax))}],
+      nativeBundleManifestSha256:hash(output+'.bundle.json'),
+      nativeSourceSnapshotSha256:pin.sha256});
+    }
     const before=hash(output+'.bundle.json'),published=fs.realpathSync(output+'.bundle.json');
     const verifiedArgs=[...args],assuranceIndex=verifiedArgs.indexOf('--assurance');
     if(assuranceIndex<0)verifiedArgs.push('--assurance','verified');
@@ -347,6 +367,6 @@ try {
 }finally{
  write(path.join(evidence,'results.json'),JSON.stringify({schema:'psc1-language-backend-execution/1',
   contract:contract.id,testedCommit:process.env.GITHUB_SHA||null,branchHeadCommit:process.env.PSC1_HEAD_SHA||null,
-  checkerCommit:oracle.leanCommit,targets,records,failures,passed:failures.length===0&&records.length===contract.cases.length*2*targets.length},null,2)+'\n');
+  checkerCommit:oracle.leanCommit,targets,records,failures,...(process.env.PSC1_RETAIN_CORPUS_INPUTS==='1'?{retainedInputs}:{}),passed:failures.length===0&&records.length===contract.cases.length*2*targets.length},null,2)+'\n');
  fs.rmSync(work,{recursive:true,force:true});
 }

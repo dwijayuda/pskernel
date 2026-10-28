@@ -1,0 +1,22 @@
+{
+  "schema": "psc1-modular-corpus-input/1",
+  "graph": {
+    "schema": "psc1-modular-checked-input/1",
+    "artifact": {
+      "run": 40666692730,
+      "job": 122743152998,
+      "artifact": 12805544463,
+      "commit": "4393ed1551aef8b6e5799b3a611cf084739618d8",
+      "zipSha256": "01eb8af4d455e41c919ad523355aa1e238485fe84fa7f2ea70ea3891ae366e38"
+    },
+    "manifestSha256": "f0b25fabaa702e949645eeee9adedf52237016b316aaeefb90bf806170c4b389",
+    "compilerSourceClosureDigest": "41eb40437e0df1722128c09c9b9da7cad0ccb1ad61371f23eb6bc2db4e9a1106"
+  },
+  "targetResources": {
+    "run": 40679842769,
+    "job": 122787767498,
+    "artifact": 12812257634,
+    "commit": "f433bad08a5b53992030d4f6ad043bfd0839d68f",
+    "zipSha256": "68eeea0589dd359ba0949786ba3a9c0f298ce9e9008666b10efe13efc0c200a6"
+  }
+}

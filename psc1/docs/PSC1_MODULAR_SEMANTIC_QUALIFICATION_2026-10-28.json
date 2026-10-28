@@ -1,0 +1,944 @@
+{
+  "schema": "psc1-modular-semantic-qualification/1",
+  "date": "2026-10-28",
+  "status": "qualified-finite-M3-application-semantic-backend-scope",
+  "pullRequest": 207,
+  "baselineCommit": "7da52af9c21e5676e50ed06199ee614b9c69d03c",
+  "testedImplementationCommit": "308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+  "semantic": {
+    "run": 40695323668,
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/40695323668",
+    "status": "success",
+    "jobs": [
+      {
+        "id": 122840446526,
+        "name": "prepare",
+        "conclusion": "success"
+      },
+      {
+        "id": 122842053569,
+        "name": "execute (bun, control)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122842053638,
+        "name": "execute (node, effects)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122842053678,
+        "name": "execute (bun, effects)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122842053692,
+        "name": "execute (node, io)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122842053706,
+        "name": "execute (node, data)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122842053745,
+        "name": "execute (node, control)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122842053782,
+        "name": "execute (bun, io)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122842053795,
+        "name": "execute (bun, data)",
+        "conclusion": "success"
+      }
+    ],
+    "builds": 448,
+    "negatives": 552,
+    "calls": 6944,
+    "caseFlagObservations": 6048,
+    "authoredCaseIds": 54,
+    "fixtures": 16,
+    "sourceModulesRange": [
+      2,
+      9
+    ],
+    "hostRuntimes": [
+      "node22.23.3",
+      "bun1.4.4"
+    ],
+    "compilerEngines": [
+      "js",
+      "ts"
+    ],
+    "grammars": [
+      "lean",
+      "ps"
+    ],
+    "targets": [
+      "js",
+      "ts",
+      "rust",
+      "wasm-core",
+      "wasm-component",
+      "python",
+      "php"
+    ],
+    "batches": [
+      {
+        "runtime": "node",
+        "batch": "effects",
+        "builds": 84,
+        "negatives": 84,
+        "calls": 1176
+      },
+      {
+        "runtime": "node",
+        "batch": "data",
+        "builds": 56,
+        "negatives": 40,
+        "calls": 784
+      },
+      {
+        "runtime": "node",
+        "batch": "control",
+        "builds": 28,
+        "negatives": 116,
+        "calls": 1064
+      },
+      {
+        "runtime": "node",
+        "batch": "io",
+        "builds": 56,
+        "negatives": 36,
+        "calls": 448
+      },
+      {
+        "runtime": "bun",
+        "batch": "effects",
+        "builds": 84,
+        "negatives": 84,
+        "calls": 1176
+      },
+      {
+        "runtime": "bun",
+        "batch": "data",
+        "builds": 56,
+        "negatives": 40,
+        "calls": 784
+      },
+      {
+        "runtime": "bun",
+        "batch": "control",
+        "builds": 28,
+        "negatives": 116,
+        "calls": 1064
+      },
+      {
+        "runtime": "bun",
+        "batch": "io",
+        "builds": 56,
+        "negatives": 36,
+        "calls": 448
+      }
+    ],
+    "performance": [
+      {
+        "runtime": "node",
+        "compilations": 224,
+        "compilerChildMs": {
+          "min": 1685,
+          "max": 178608,
+          "total": 2321935
+        },
+        "consumerMaxRssKiB": 189964,
+        "consumerMs": {
+          "min": 6,
+          "max": 915
+        }
+      },
+      {
+        "runtime": "bun",
+        "compilations": 224,
+        "compilerChildMs": {
+          "min": 2083,
+          "max": 17614,
+          "total": 1634294
+        },
+        "consumerMaxRssKiB": 49480,
+        "consumerMs": {
+          "min": 7,
+          "max": 391
+        }
+      }
+    ],
+    "artifacts": [
+      {
+        "id": 12821520935,
+        "name": "psc1-modular-corpus-node-io-308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+        "sizeBytes": 26184024,
+        "zipDigest": "sha256:dbbc085c0a4e6a0ead8b70fd7e7704c882f8ccd86d88ce48bf3f948e888c03bc"
+      },
+      {
+        "id": 12821355171,
+        "name": "psc1-modular-corpus-node-data-308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+        "sizeBytes": 20366263,
+        "zipDigest": "sha256:9b5129efd6bf3d72a7110b5362070e3012ed982eede9c7eed3e6eb7bfd999b7f"
+      },
+      {
+        "id": 12821131793,
+        "name": "psc1-modular-corpus-node-effects-308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+        "sizeBytes": 27150987,
+        "zipDigest": "sha256:318c8010758eda0a11e8d1d947ee211db97be203a6b0868aedc78a68eb9f26c9"
+      },
+      {
+        "id": 12820812475,
+        "name": "psc1-modular-corpus-node-control-308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+        "sizeBytes": 12224579,
+        "zipDigest": "sha256:8208c72ed2c1859a65879e3564e66d4fad2b0fd71b8650b30cccf69a9aa1da67"
+      },
+      {
+        "id": 12820811454,
+        "name": "psc1-modular-corpus-bun-control-308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+        "sizeBytes": 12226766,
+        "zipDigest": "sha256:68716b5c32f9975259e57b1e2f36a73c78bbd3074022296c2b107d8564663a57"
+      },
+      {
+        "id": 12820555970,
+        "name": "psc1-modular-corpus-bun-data-308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+        "sizeBytes": 20242045,
+        "zipDigest": "sha256:a8ed177db38f1776dd71afc8490a524cd7246296a7ec1fc244c6ae70887d5c30"
+      },
+      {
+        "id": 12820421804,
+        "name": "psc1-modular-corpus-bun-effects-308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+        "sizeBytes": 27366032,
+        "zipDigest": "sha256:fd84f4d3bd50217e683bf3580117d68d588bd4d0ec9f6876dca10c971bebbae7"
+      },
+      {
+        "id": 12820118014,
+        "name": "psc1-modular-corpus-bun-io-308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+        "sizeBytes": 26177593,
+        "zipDigest": "sha256:d731805abb6df8d6736a51698e7d22b56ad2caf9953bf86c19f021931bd2e652"
+      },
+      {
+        "id": 12819212547,
+        "name": "psc1-modular-corpus-native-evidence-308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+        "sizeBytes": 3374660,
+        "zipDigest": "sha256:5cd36a7a430d796b0841fdc3a14017f80b9e10f3dd46ebdd07a333b377e6714f"
+      },
+      {
+        "id": 12819087803,
+        "name": "psc1-modular-corpus-reference-308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+        "sizeBytes": 80677,
+        "zipDigest": "sha256:8edefb0ccb54d81285b8b8d159ac0c00d31961ff856056766bae84d69334c30b"
+      }
+    ],
+    "coverage": "All cartesian engine/grammar/target/runtime tuples over the eight retained families; Bool wrappers compare authored semantic results with existing independent native Lean oracles. Finite tests, not a preservation proof.",
+    "families": [
+      {
+        "fixture": "compiler-m-lean",
+        "contract": "compiler-m-selected-v1",
+        "authoredCases": [
+          "stateCase",
+          "earlyCase",
+          "failureCase",
+          "recoveryCase",
+          "readerCase",
+          "unitCase",
+          "callbackCase",
+          "handlerCase",
+          "handlerEarlyCase"
+        ],
+        "oracleLeanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "oracleLeanVersion": "4.35.0"
+      },
+      {
+        "fixture": "checked-order-lean",
+        "contract": "checked-nat-int-order-v1",
+        "authoredCases": [
+          "natOrderCase",
+          "intOrderCase",
+          "largeOrderCase",
+          "controlOrderCase",
+          "numericCase",
+          "shortCircuitCase",
+          "intEqualityCase"
+        ],
+        "oracleLeanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "oracleLeanVersion": "4.35.0"
+      },
+      {
+        "fixture": "library-application-lean",
+        "contract": "multi-module-library-application-v1",
+        "authoredCases": [
+          "persistentLibraryCase",
+          "optionalLibraryCase"
+        ],
+        "oracleLeanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "oracleLeanVersion": "4.35.0"
+      },
+      {
+        "fixture": "stdlib-collections-lean",
+        "contract": "stdlib-collections-selected-v1",
+        "authoredCases": [
+          "listCase",
+          "arrayCase",
+          "exceptCase",
+          "arrayOperationsCase"
+        ],
+        "oracleLeanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "oracleLeanVersion": "4.35.0"
+      },
+      {
+        "fixture": "json-application-lean",
+        "contract": "json-record-application-core-v1",
+        "authoredCases": [
+          "pairCase",
+          "scalarCase",
+          "loneCase",
+          "badPairCase",
+          "truncatedCase",
+          "mixedCase",
+          "scalarDecoderCase",
+          "separatorCase"
+        ],
+        "oracleLeanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "oracleLeanVersion": "4.35.0"
+      },
+      {
+        "fixture": "inference-control-lean",
+        "contract": "bounded-inference-control-v1",
+        "authoredCases": [
+          "contextsCase",
+          "telescopeCase",
+          "ownerCase",
+          "loopCase",
+          "scopeCase",
+          "rollbackCase",
+          "callCase",
+          "ownerLambdaCase",
+          "joinsCase",
+          "handlerScopeCase",
+          "collectionControllerCase",
+          "rangeControllerCase",
+          "streamingControllerCase",
+          "directRecursionCase",
+          "nonTailRecursionCase",
+          "higherOrderRecursionCase",
+          "tupleProductsCase",
+          "namespaceCoreCase"
+        ],
+        "oracleLeanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "oracleLeanVersion": "4.35.0"
+      },
+      {
+        "fixture": "typed-io-protocol-lean",
+        "contract": "typed-io-protocol-v1",
+        "authoredCases": [
+          "requestCase",
+          "responseCase",
+          "errorCase",
+          "shapeCase"
+        ],
+        "oracleLeanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "oracleLeanVersion": "4.35.0"
+      },
+      {
+        "fixture": "typed-io-sequencing-lean",
+        "contract": "typed-io-sequencing-v1",
+        "authoredCases": [
+          "sequenceCase",
+          "recoveryCase"
+        ],
+        "oracleLeanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "oracleLeanVersion": "4.35.0"
+      }
+    ]
+  },
+  "input": {
+    "schema": "psc1-modular-corpus-input/1",
+    "graph": {
+      "schema": "psc1-modular-checked-input/1",
+      "artifact": {
+        "run": 40666692730,
+        "job": 122743152998,
+        "artifact": 12805544463,
+        "commit": "4393ed1551aef8b6e5799b3a611cf084739618d8",
+        "zipSha256": "01eb8af4d455e41c919ad523355aa1e238485fe84fa7f2ea70ea3891ae366e38"
+      },
+      "manifestSha256": "f0b25fabaa702e949645eeee9adedf52237016b316aaeefb90bf806170c4b389",
+      "compilerSourceClosureDigest": "41eb40437e0df1722128c09c9b9da7cad0ccb1ad61371f23eb6bc2db4e9a1106"
+    },
+    "targetResources": {
+      "run": 40679842769,
+      "job": 122787767498,
+      "artifact": 12812257634,
+      "commit": "f433bad08a5b53992030d4f6ad043bfd0839d68f",
+      "zipSha256": "68eeea0589dd359ba0949786ba3a9c0f298ce9e9008666b10efe13efc0c200a6"
+    }
+  },
+  "verification": {
+    "leanVersion": "4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "sourceClosureDigest": "41eb40437e0df1722128c09c9b9da7cad0ccb1ad61371f23eb6bc2db4e9a1106",
+    "independentAdmission": true,
+    "strictOriginalAndTransformedIr": true,
+    "candidateComparison": "Normalized parsed candidate JSON; identical decoded canonical admission/target source and serialized IR hashes. Raw JSON whitespace is not compared.",
+    "nativeFrontendDisabledDuringGeneratedExecution": true,
+    "legacyCompilerExecutorsDisabled": true,
+    "nativeReference": "Existing eight native conformance oracles; sealed pre-admission source capture. Only library sources are independently checked-converted to PS for homogeneous wire requests; authored fixture bodies are unchanged and original native admission bytes must match.",
+    "targetResources": "Qualified retained .11 SDK/provider resources only; its frozen compiler semantics are moved aside and never selected."
+  },
+  "limits": {
+    "compilerSeconds": 240,
+    "checkerSeconds": 120,
+    "nativeAddressSpaceBytes": 4294967296,
+    "nativeStackBytes": 8388608,
+    "semanticFuel": "unchanged",
+    "memoryStackPolicies": "unchanged",
+    "separateSelfHostPerformanceProfile": "preserved"
+  },
+  "scope": {
+    "defaultDistributionChanged": false,
+    "rootCliPromoted": false,
+    "newModularG2G3FixedPoints": false,
+    "previousQualificationsInherited": false,
+    "merge": false,
+    "npmPublication": false,
+    "otherPlatformsQualified": false,
+    "modularReplacementReleaseReady": false
+  },
+  "remaining": [
+    "M4 checked root-only proofscript installation and thin psc CLI/watch with compatible public APIs and default independent Wasm kernel",
+    "portable module planning/emission in the same canonical compiler",
+    "M5 new modular G1/G2/G3 and exact fixed points",
+    "remaining non-JS practical host-IO application and platform qualification",
+    "user-arranged independent human maintainer trial"
+  ],
+  "publicAbi": {
+    "run": 40700728090,
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/40700728090",
+    "status": "success",
+    "isolatedValidationCommit": "85f61b4b41546070f5605df884f0c63bfc1a9306",
+    "compilerControllerCommit": "308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+    "files": [
+      ".github/scripts/psc1-modular-public-abi.mjs",
+      ".github/workflows/diagnostic-psc1-modular-public-abi.yml"
+    ],
+    "productionCompilerDiffFromMain": "none",
+    "builds": 120,
+    "negatives": 20,
+    "targets": [
+      "js",
+      "ts",
+      "rust",
+      "wasm-core",
+      "python",
+      "php"
+    ],
+    "cases": [
+      {
+        "id": "lean-modules",
+        "actual": {
+          "answer": "42",
+          "exports": [
+            "answer"
+          ]
+        }
+      },
+      {
+        "id": "ps-integer-unicode",
+        "actual": {
+          "huge": "-9007199254740993123456789",
+          "text": "λ🙂"
+        }
+      },
+      {
+        "id": "ps-list-literal",
+        "actual": {
+          "empty": "0",
+          "first": "7"
+        }
+      },
+      {
+        "id": "lean-handler-pattern",
+        "actual": {
+          "normal": "3",
+          "caught": "8"
+        }
+      },
+      {
+        "id": "lean-ordinary-loop",
+        "actual": {
+          "zero": "0",
+          "five": "5"
+        }
+      }
+    ],
+    "comparison": "Canonical source/admission/IR/target source and observed values match across both engines and host runtimes. Compiled Rust rlib digests differ between execution directories; native artifact reproduction is not qualified.",
+    "jobs": [
+      {
+        "id": 122859500877,
+        "name": "abi (node)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122859501288,
+        "name": "abi (bun)",
+        "conclusion": "success"
+      }
+    ],
+    "artifacts": [
+      {
+        "id": 12821912095,
+        "name": "psc1-modular-public-abi-bun-85f61b4b41546070f5605df884f0c63bfc1a9306",
+        "sizeBytes": 16685649,
+        "zipDigest": "sha256:75622eec1e1560cdb18e42fc0c3736a2b646a09a083f2832ed43e1c9a09bb43e"
+      },
+      {
+        "id": 12821229355,
+        "name": "psc1-modular-public-abi-node-85f61b4b41546070f5605df884f0c63bfc1a9306",
+        "sizeBytes": 16692816,
+        "zipDigest": "sha256:0a291e66670c5e6a5ced335550cd0958d7e7f7e3584ba55a9a7b842c6fb9c95b"
+      }
+    ],
+    "performance": [
+      {
+        "runtime": "node",
+        "compilerRequests": 60,
+        "compilerChildMs": {
+          "min": 1155,
+          "max": 3153,
+          "total": 113839
+        }
+      },
+      {
+        "runtime": "bun",
+        "compilerRequests": 60,
+        "compilerChildMs": {
+          "min": 698,
+          "max": 2223,
+          "total": 76349
+        }
+      }
+    ],
+    "adoptedFiles": [
+      {
+        "path": ".github/scripts/psc1-modular-public-abi.mjs",
+        "blobSha": "92766a2685d4808a7262ddcfdad37575d0ea324e",
+        "sizeBytes": 9117,
+        "byteIdenticalAdoption": true
+      },
+      {
+        "path": ".github/workflows/diagnostic-psc1-modular-public-abi.yml",
+        "blobSha": "d943c880b327fc7f49881d5912b90b9055bb3ea3",
+        "sizeBytes": 3340,
+        "byteIdenticalAdoption": true
+      }
+    ],
+    "comparisonBase": "308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+    "onlyDiagnosticFilesDiffer": true
+  },
+  "attempts": [
+    {
+      "commit": "754d97b1aade7b9b1951de7fc2294997bb0ce5aa",
+      "run": 40693502551,
+      "result": "failed",
+      "diagnosis": "Shallow checkout omitted historical objects required by the unchanged repository guard.",
+      "fix": "Use full checkout history; no guard relaxation."
+    },
+    {
+      "commit": "c122a46c4dc0feae19a3b38aea47fb53a30745c0",
+      "run": 40693811688,
+      "result": "preparation-passed-resource-resolution-failed",
+      "diagnosis": "Root receipt uses sha256; SDK/provider archive descriptors use tarballSha256.",
+      "fix": "Read the correct existing receipt fields; preserve exact archive validation."
+    }
+  ],
+  "retainedCli": {
+    "run": 40695323349,
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/40695323349",
+    "status": "success",
+    "testedCommit": "308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+    "jobs": [
+      {
+        "id": 122841107428,
+        "name": "preflight",
+        "conclusion": "success"
+      },
+      {
+        "id": 122841442161,
+        "name": "installed",
+        "conclusion": "success"
+      },
+      {
+        "id": 122868750415,
+        "name": "runtime (node26, 26)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122868750518,
+        "name": "runtime (bun-older-refusal, 22.23.3, 1.4.0, 1)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122868750647,
+        "name": "runtime (node24, 24)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122868750656,
+        "name": "runtime (node20-refusal, 20, 1)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122868750689,
+        "name": "runtime (node-minimum, 22.23.3)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122868750701,
+        "name": "runtime (node22-older-refusal, 22.0.0, 1)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122869794531,
+        "name": "installable",
+        "conclusion": "success"
+      }
+    ],
+    "markers": [
+      {
+        "marker": "PSC1_INSTALLED_IO_APPLICATIONS:",
+        "data": {
+          "status": "passed",
+          "applications": 16,
+          "cases": 264,
+          "globalCases": 8
+        }
+      },
+      {
+        "marker": "PSC1_INSTALLED_CHECKED_PUBLICATION: PASS",
+        "data": {
+          "cases": 32,
+          "negatives": 143
+        }
+      },
+      {
+        "marker": "PSC1_INSTALLED_IO_CANDIDATES: PASS",
+        "data": {
+          "executed": 24,
+          "refused": 8
+        }
+      },
+      {
+        "marker": "PSC1_CLI_QUALIFIED",
+        "data": {
+          "commit": "308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+          "sha256": "8f7c4fbddcbbc49f656bf781c15353f97b7ef5bc3d14d5a04769cc4ce32da1fb",
+          "bytes": 3831380,
+          "version": "0.1.0-psc1.11"
+        }
+      }
+    ],
+    "artifactCohort": "0.1.0-psc1.11",
+    "frozenCompilerClosure": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9",
+    "scope": "Retained installed/watch/runtime/publication regression test cohort. Not the new modular root and not a new .13 umbrella promotion.",
+    "artifacts": [
+      {
+        "id": 12823815633,
+        "name": "psc1-runtime-evidence-node22-older-refusal-308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+        "sizeBytes": 808,
+        "zipDigest": "sha256:63b56a132d74e65f59d91d6224ccab64d407d8198a0c1bcd080d2645bd9c8307"
+      },
+      {
+        "id": 12823690084,
+        "name": "proofscript-installable-0.1.0-psc1.11-308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+        "sizeBytes": 3909628,
+        "zipDigest": "sha256:63199b549e3d18038e0b205d46a48f50f4adf08433c22093cf9e8355e2447b1f"
+      },
+      {
+        "id": 12823106159,
+        "name": "psc1-runtime-evidence-node26-308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+        "sizeBytes": 932,
+        "zipDigest": "sha256:4a268c7b70aa6581a65fae66f26331c5af9a29618d801e8ef1557198e1eec8f8"
+      },
+      {
+        "id": 12822721846,
+        "name": "psc1-cli-toolchain-308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+        "sizeBytes": 206782750,
+        "zipDigest": "sha256:e464dd777cf0678ce3c53a920e9253fff380c306f84344439cf0b1e5b03126be"
+      },
+      {
+        "id": 12822642539,
+        "name": "psc1-runtime-evidence-node20-refusal-308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+        "sizeBytes": 771,
+        "zipDigest": "sha256:632343ddbcb92446fcebf9c49d5eb568e43e86dbc3ba2e140a8e7ef15668d222"
+      },
+      {
+        "id": 12822472569,
+        "name": "psc1-runtime-evidence-bun-older-refusal-308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+        "sizeBytes": 1125,
+        "zipDigest": "sha256:5dc56ac9706485617de8022fb9dddd30a2a57ffb84ed4f96effc29525cd931e6"
+      },
+      {
+        "id": 12821828829,
+        "name": "psc1-runtime-evidence-node-minimum-308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+        "sizeBytes": 905,
+        "zipDigest": "sha256:c8cf22f3a78c47f2e979d1be16a1be0cb224bd5c93dd7ad4234573b2a25004dc"
+      },
+      {
+        "id": 12821679119,
+        "name": "psc1-runtime-evidence-node24-308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+        "sizeBytes": 919,
+        "zipDigest": "sha256:6ff916aeb67fb5af44c09f2a728174a2051ed7571fe6d75b487f5221d0867cf8"
+      },
+      {
+        "id": 12820130152,
+        "name": "psc1-runtime-evidence-bun-current-308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+        "sizeBytes": 1220,
+        "zipDigest": "sha256:16fb00a87fba66dd42172e3804e85ba816a50742bbba3b67292afe82c3024a0f"
+      },
+      {
+        "id": 12818518512,
+        "name": "psc1-cli-source-308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+        "sizeBytes": 49483,
+        "zipDigest": "sha256:9f8bd67aa000dfcda642c7f83219305dc6c33019bc2edda786d479f4417bbc2c"
+      },
+      {
+        "id": 12818159687,
+        "name": "psc1-cli-runtime-inputs-308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+        "sizeBytes": 203045873,
+        "zipDigest": "sha256:60114dd3ab116008f4f23fad0df6c924350bfc4ab1b73da154232611d7d6dfeb"
+      }
+    ]
+  },
+  "retainedSource": {
+    "run": 40698796765,
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/40698796765",
+    "status": "success",
+    "branchHeadCommit": "308f2fd988428d30be7c5fd9cfe0c8ace9242447",
+    "testedMergeCommit": "5a48846d97cbeb30c5167ed22d2c9529873d4035",
+    "selectedJobsPassed": 16,
+    "unselectedBenchmark": "skipped",
+    "jobs": [
+      {
+        "id": 122852651994,
+        "name": "static",
+        "conclusion": "success"
+      },
+      {
+        "id": 122853061488,
+        "name": "lossless / lossless",
+        "conclusion": "success"
+      },
+      {
+        "id": 122853061729,
+        "name": "source-bindings / trace",
+        "conclusion": "success"
+      },
+      {
+        "id": 122853061735,
+        "name": "native / native",
+        "conclusion": "success"
+      },
+      {
+        "id": 122853061807,
+        "name": "focused / focused (applications)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122853061850,
+        "name": "focused / php-application",
+        "conclusion": "success"
+      },
+      {
+        "id": 122853061874,
+        "name": "focused / focused (core)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122853061934,
+        "name": "modular / pilot",
+        "conclusion": "success"
+      },
+      {
+        "id": 122853063562,
+        "name": "benchmark",
+        "conclusion": "skipped"
+      },
+      {
+        "id": 122855336504,
+        "name": "source-bindings / integration",
+        "conclusion": "success"
+      },
+      {
+        "id": 122857471459,
+        "name": "g1 / host-session-boundary",
+        "conclusion": "success"
+      },
+      {
+        "id": 122857471547,
+        "name": "g1 / generated-js",
+        "conclusion": "success"
+      },
+      {
+        "id": 122857471597,
+        "name": "closures / selected-closure (semantic-compiler, checked)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122857471599,
+        "name": "closures / selected-closure (rust-compiler, ordinary-checked)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122857471829,
+        "name": "closures / selected-closure (directjs-compiler, ordinary-checked)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122859995693,
+        "name": "full / linux-scoped",
+        "conclusion": "success"
+      },
+      {
+        "id": 122877328616,
+        "name": "gate",
+        "conclusion": "success"
+      }
+    ],
+    "existingPracticalCoreV1": {
+      "counts": {
+        "implemented": 0,
+        "tested": 0,
+        "qualified": 37,
+        "blocked": 0
+      },
+      "releaseReady": true
+    },
+    "targetExecutionBundles": 14,
+    "logicalChecker": {
+      "version": "4.35.0",
+      "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+    },
+    "toolVersions": {
+      "lean": "Lean (version 4.35.0, x86_64-unknown-linux-gnu, commit eb6cafb7290e8bd5f2937522d8d804f58f02bafc, Release)",
+      "node": "v22.23.3",
+      "npm": "10.9.9",
+      "typescriptConsumer": "Version 7.0.2",
+      "rust": "rustc 1.90.0 (1159e78c4 2025-09-14)",
+      "cargo": "cargo 1.90.0 (840b83a10 2025-07-30)",
+      "wasmTools": "wasm-tools 1.254.0 (bb58fdf91 2026-07-20)",
+      "wasmtime": "wasmtime 49.0.4 (2c2970205 2026-10-19)",
+      "python": "Python 3.15.0",
+      "pythonMinimum": "Python 3.14.8",
+      "php": "PHP 8.5.12 (cli) (built: Oct 24 2026 12:34:32) (NTS)"
+    },
+    "scope": "Existing native/source/G1 and full retained regressions. Practical Core contract readiness does not imply modular release or new G2/G3/fixed points.",
+    "artifacts": [
+      {
+        "id": 12822668445,
+        "name": "psc1-scoped-correctness-5a48846d97cbeb30c5167ed22d2c9529873d4035",
+        "sizeBytes": 121486060,
+        "zipDigest": "sha256:9a7f28eb07c2536e2a0a0b6f7f300b9c0c25f9dff245bfe2b29086a37e522726"
+      },
+      {
+        "id": 12822360356,
+        "name": "psc1-source-binding-integration-5a48846d97cbeb30c5167ed22d2c9529873d4035",
+        "sizeBytes": 25613,
+        "zipDigest": "sha256:7f9f932bfb3707148616d5a4bf69cc57955bf9dada59f6c67ebed3a3f0b3b5c4"
+      },
+      {
+        "id": 12821636709,
+        "name": "psc1-compiler-closure-rust-compiler-ordinary-checked-5a48846d97cbeb30c5167ed22d2c9529873d4035",
+        "sizeBytes": 2511717,
+        "zipDigest": "sha256:f625a7dab0dbe4272066fcfc044d5636886d0ce4c6bd79679877dea533e0a64f"
+      },
+      {
+        "id": 12821515931,
+        "name": "psc1-source-trace-5a48846d97cbeb30c5167ed22d2c9529873d4035",
+        "sizeBytes": 303494,
+        "zipDigest": "sha256:963557e3756db2e5025247e8f48155066f535444335268ff00485a4866fbb2b8"
+      },
+      {
+        "id": 12821431275,
+        "name": "psc1-php-applications-5a48846d97cbeb30c5167ed22d2c9529873d4035-attempt-1",
+        "sizeBytes": 360278,
+        "zipDigest": "sha256:2a1819a7411b4f692c4cf8683486a5ee05cdbf1b2b41aca23f4503cf350864b9"
+      },
+      {
+        "id": 12821205750,
+        "name": "psc1-development-5a48846d97cbeb30c5167ed22d2c9529873d4035",
+        "sizeBytes": 49461,
+        "zipDigest": "sha256:2b1dce3dcb7236c7f2af957fa98f68f22e68c112ce6442a693ad6c66d28de0be"
+      },
+      {
+        "id": 12821171370,
+        "name": "psc1-architecture-native-5a48846d97cbeb30c5167ed22d2c9529873d4035",
+        "sizeBytes": 325222,
+        "zipDigest": "sha256:f207e7a0fe46ee69499095b449e9795cf211b2421705fc6bdddd0ccfad7726a9"
+      },
+      {
+        "id": 12821166693,
+        "name": "psc1-practical-compiler-m-core-5a48846d97cbeb30c5167ed22d2c9529873d4035-attempt-1",
+        "sizeBytes": 3019681,
+        "zipDigest": "sha256:6790f4c22b666d600b1d255a73fae70d3412cb878127df3eec53057a57399f21"
+      },
+      {
+        "id": 12821078314,
+        "name": "psc1-generated-compiler-5a48846d97cbeb30c5167ed22d2c9529873d4035",
+        "sizeBytes": 5677407,
+        "zipDigest": "sha256:84f270fac1bf2c28ea7226fd4351e1f7dd37b5096f868a12aba66d656ef8d5d4"
+      },
+      {
+        "id": 12821033517,
+        "name": "psc1-lossless-5a48846d97cbeb30c5167ed22d2c9529873d4035",
+        "sizeBytes": 36061,
+        "zipDigest": "sha256:b718e6c18b66d96b7832cc7bff8a6024b26a5ac8383a06af308182db7c2de8b4"
+      },
+      {
+        "id": 12820912576,
+        "name": "psc1-compiler-closure-directjs-compiler-ordinary-checked-5a48846d97cbeb30c5167ed22d2c9529873d4035",
+        "sizeBytes": 2808790,
+        "zipDigest": "sha256:dc5d417c796fee2e13dcdf7cac070234c278510bdf80be0cb893359eda1a06c2"
+      },
+      {
+        "id": 12820898130,
+        "name": "psc1-practical-compiler-m-applications-5a48846d97cbeb30c5167ed22d2c9529873d4035-attempt-1",
+        "sizeBytes": 1750251,
+        "zipDigest": "sha256:d53b0d06e941e0e4a382d5aa853f2f82bd51f689e7dc6bddb232b18f31a122e9"
+      },
+      {
+        "id": 12820479588,
+        "name": "psc1-compiler-closure-semantic-compiler-checked-5a48846d97cbeb30c5167ed22d2c9529873d4035",
+        "sizeBytes": 2016098,
+        "zipDigest": "sha256:988f4e14076c596102ad1ae108100259a980b658e4bdb020494548766a1f77e7"
+      },
+      {
+        "id": 12820443383,
+        "name": "psc1-modular-pilot-5a48846d97cbeb30c5167ed22d2c9529873d4035",
+        "sizeBytes": 3380343,
+        "zipDigest": "sha256:e069323f953294ef9aa059eb379d9fc54aa4e1ed74234d1ab39d70a84887908a"
+      },
+      {
+        "id": 12820279781,
+        "name": "psc1-generated-session-boundary-5a48846d97cbeb30c5167ed22d2c9529873d4035",
+        "sizeBytes": 239869,
+        "zipDigest": "sha256:38b695d303700f24c5c2d49a7b7241596e50dd6e507361184f90d597c49d6b81"
+      }
+    ]
+  },
+  "priorModularApplicationQualification": {
+    "run": 40679842606,
+    "commit": "f433bad08a5b53992030d4f6ad043bfd0839d68f",
+    "builds": 32,
+    "behaviorExecutions": 528,
+    "negatives": 20,
+    "receipt": "PSC1_MODULAR_CHECKED_APPLICATION_QUALIFICATION_2026-10-28.json"
+  }
+}

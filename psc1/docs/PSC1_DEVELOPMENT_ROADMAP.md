@@ -65,15 +65,44 @@ eight active workflows. All 14 observed cache-hit invocations complete in 0–1 
 the previous unconditional setup spent 572 seconds before cancellation. No test,
 compiler/checker budget, semantic fuel or memory/stack policy was relaxed.
 
-The dependency-ordered queue is: finish M3's full retained semantic/library and
-seven-backend corpus through the modular engines; M4 checked
-root-only umbrella/thin CLI/watch and coherent graph publication; portable module
-generation within the same compiler; then M5 new modular G1/G2/G3/fixed points and
-applicable platform/publication gates. M3 has finite partial qualification;
-M4/M5 remain incomplete. The .13 API/distribution stays the default reference.
-Existing pilot tests/evidence remain; expanding experimental pilot
-profiles is not a prerequisite. The stopped PR #203/prototype branches are
-preserved, not promoted.
+PR #207 extends M3 with the retained semantic/library corpus and genuine checked
+execution of all seven target adapters. [Run 40695323668](https://github.com/dwijayuda/pskernel/actions/runs/40695323668)
+passes at `308f2fd988428d30be7c5fd9cfe0c8ace9242447`: **448 checked builds,
+552 refusals and 6,944 published function calls**, including 6,048 individual
+authored case/flag observations. The complete matrix is eight semantic families,
+both source grammars, both complete modular engines and Node/Bun. Existing native
+oracles and sealed authored fixtures are reused; only imported libraries undergo
+checked grammar conversion, preserving the original native admission bytes.
+
+Additional public-value [run 40700728090](https://github.com/dwijayuda/pskernel/actions/runs/40700728090)
+passes 120 builds and 20 refusals at CI-only `85f61b4b`, with identical
+compiler/controller sources to `308f2fd9`. JS/TS/Rust/Wasm-core and optional
+Python/PHP return the retained Nat, large negative Int, Unicode String, list-result,
+handler and ordinary-loop observations. Wasm-component execution is covered in
+the semantic matrix using its supported Bool ABI. Richer component ABI and real
+non-JS host-IO application qualification remain separate queue items.
+Compiled Rust rlib digests vary between execution directories; source/admission/IR
+and behavior match. Native binary reproduction is not qualified by this milestone.
+[Exact receipt](PSC1_MODULAR_SEMANTIC_QUALIFICATION_2026-10-28.json) and
+[extended execution walkthrough](architecture/modular-checked-execution.md).
+
+Retained source [40698796765](https://github.com/dwijayuda/pskernel/actions/runs/40698796765)
+passes all 16 selected jobs, 37/37 finite criteria/zero blockers and 14 scoped target
+bundles at `308f2fd9` (tested merge `5a48846d97cbeb30c5167ed22d2c9529873d4035`).
+Installed CLI [40695323349](https://github.com/dwijayuda/pskernel/actions/runs/40695323349)
+passes all nine retained .11-cohort jobs. These scopes remain distinct from both
+the new modular graph and the separate .13 reference.
+
+The next dependency is M4: version the direct low-level API transition, integrate
+checked root-only proofscript installation and thin psc CLI/watch with the genuine
+graph, then qualify default independent Wasm-kernel use and coherent publication.
+M3 now has the finite application/semantic/backend evidence above, without a
+replacement release claim. Portable module generation within the same compiler
+and M5 new modular G1/G2/G3/fixed points remain incomplete. The qualified .13
+API/distribution remains the default reference. Existing pilot tests/evidence
+remain; expanding the deferred pilot is not a prerequisite. The stopped PR #203
+and prototype branches are preserved.
+
 
 ## Qualified automatic core package installation (.13)
 
@@ -105,7 +134,7 @@ PR #197 implementation 9aefeeb and documentation refresh c5c15582 pass all 42 pa
 | 2 | Independent maintainer trial | Pending human participation; the user can arrange a maintainer. Record commit, navigation mistakes, elapsed time, assistance and a real small change. No AI/CI comprehension claim. |
 | 3 | Compiler-origin structured diagnostics/editor integration | Pending: actual spans/provenance, both grammars, machine/human consumers and malformed-input refusals. |
 | 4 | Runtime compatibility, checked watch and licensing | Qualified Linux milestone, PR#193 /fdc52207fdf3d809ad99b05a5b738aca21b95139: Node>=22.23.3, Bun>=1.4.4; actual Node22.23.3/24.21.0/26.12.1 and Bun1.4.4; older Node/Bun refusals;55 CLI requests,11 full watch cases,16 applications/264 observations,32 publications/143 refusals; all61 SDK pins unchanged. Apache-2.0 source/cohort, vendor notices retained. [Receipt](PSC1_RUNTIME_WATCH_QUALIFICATION_2026-10-27.json). Semantic incremental caching remains deferred. |
-| 5 | Fully modular executable compiler | Planned, not implemented/qualified: [current production plan](architecture/executable-package-modularity.md), finite M0-M5 stages and acceptance. Preserve proofscript umbrella/thin psc CLI, existing package names, acyclic source-responsible implementations and all checking/resource policies. Qualified .13 remains the release reference. Pilot expansion and PR #203's prototype are deferred. Prior [v1 qualification](PSC1_MODULAR_PILOT_QUALIFICATION_2026-10-27.json) and [v2 ownership qualification](PSC1_TRANSFORM_OWNERSHIP_QUALIFICATION_2026-10-27.json) retain only their stated component scopes; no complete modular compiler or new fixed-point claim. |
+| 5 | Fully modular executable compiler | M1/M2 candidate graph and finite M3 application/semantic/seven-target execution are qualified in PR #205–#207; see the [current plan](architecture/executable-package-modularity.md) and [M3 receipt](PSC1_MODULAR_SEMANTIC_QUALIFICATION_2026-10-28.json). M4 checked umbrella/thin CLI/watch and M5 portable reproduction/new generations remain incomplete. Preserve .13, existing package names, independent checking and resource policies. Pilot expansion stays deferred. No new modular fixed-point/release claim. |
 | 6 | Component String/IO and export selection | Pending: reuse shared/native ABI; both grammars/four engines, actual validation/execution, exact exports and refusals. Public component ABI currently Bool only. |
 | 7 | Full Python/PHP practical applications | Pending: real CLI/JSON/file/multi-module observations against checked reference; retain corpus/Unicode/integer/loop/IO tests. Providers remain optional. |
 | 8 | Automatic source-package capture | Pending: bounded deterministic order, exact identities, cycle/missing/stale refusals, real multi-package applications. Metadata never executes code or grants authority. |

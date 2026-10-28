@@ -680,3 +680,13 @@ lean_lib PsMinCompilerPreservation where
 lean_lib PsMinCompilerScalarFixture where
   srcDir := "packages/pskernel-min/src"
   roots := #[`Ps.MinKernel.Tests.CompilerScalar]
+
+-- R6 proof-only byte composition; excluded from executable/compiler import graphs.
+lean_lib PsMinTextPreservation where
+  srcDir := "proofs/pskernel-min"
+  roots := #[`TextComposition, `TextCompositionTrust]
+
+-- R6 compatibility fixture; never a connected checker root.
+lean_lib PsMinStringBridgeFixture where
+  srcDir := "packages/pskernel-min/src"
+  roots := #[`Ps.MinKernel.Tests.StringBridge]

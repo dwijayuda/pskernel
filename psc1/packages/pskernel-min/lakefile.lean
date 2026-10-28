@@ -71,3 +71,8 @@ lean_exe minkernel_regular_ingress_tests where
 lean_lib PsMinCompilerScalarFixture where
   srcDir := "src"
   roots := #[`Ps.MinKernel.Tests.CompilerScalar]
+
+-- R6 test-only compatibility fixture; not in the connected checker.
+lean_lib PsMinStringBridgeFixture where
+  srcDir := "src"
+  roots := #[`Ps.MinKernel.Tests.StringBridge]

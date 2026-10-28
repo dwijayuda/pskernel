@@ -9,6 +9,7 @@ on:
       - psc1/scripts/minkernel-*
       - psc1/scripts/MinKernelSourceCompile.lean
       - psc1/scripts/MinKernelCompilerPreservation.lean
+      - psc1/scripts/MinKernelTextPreservation.lean
       - .github/workflows/psc1-minkernel.yml
   workflow_dispatch:
 permissions:
@@ -193,6 +194,20 @@ jobs:
           node scripts/minkernel-compiler-preservation-guard.mjs
       - name: Check strict emitted modules against native scalar and source ABI oracles
         run: node --max-old-space-size=256 scripts/minkernel-compiler-preservation.mjs --abi-only
+      - name: Prove constructive text bytes and check actual source append compatibility
+        run: |
+          set -euo pipefail
+          mkdir -p dist/pskernel-min/text-preservation
+          lake build PsMinTextPreservation PsMinStringBridgeFixture 2>&1 | tee dist/pskernel-min/text-preservation/build.log
+          lake env lean proofs/pskernel-min/TextCompositionTrust.lean 2>&1 | tee dist/pskernel-min/text-preservation/proof.log
+          node scripts/minkernel-text-preservation-guard.mjs
+          node --max-old-space-size=256 scripts/minkernel-text-preservation.mjs --abi-only
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-r6-text-proof-${{ github.sha }}
+          path: psc1/dist/pskernel-min/text-preservation/
+          retention-days: 90
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -237,7 +252,7 @@ jobs:
         run: |
           set -euo pipefail
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build PsBackendTs psc1_independent_checker psc1_source_census_probe psc2_joint_closure_inventory PsMinCompilerScalarFixture
+          lake build PsBackendTs psc1_independent_checker psc1_source_census_probe psc2_joint_closure_inventory PsMinCompilerScalarFixture PsMinStringBridgeFixture
       - uses: actions/cache/save@v4
         if: ${{ !cancelled() && steps.native_build.outcome == 'success' && steps.native_cache.outputs.cache-hit != 'true' }}
         with:
@@ -275,6 +290,9 @@ jobs:
       - name: Check actual scalar emitter ABI and source partial-application integration
         if: ${{ !cancelled() && steps.regular_ingress.outcome == 'success' }}
         run: node --max-old-space-size=256 scripts/minkernel-compiler-preservation.mjs
+      - name: Check actual text composition source and unchanged String refusal boundary
+        if: ${{ !cancelled() && steps.regular_ingress.outcome == 'success' }}
+        run: node --max-old-space-size=256 scripts/minkernel-text-preservation.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

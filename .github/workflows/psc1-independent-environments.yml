@@ -1,0 +1,70 @@
+name: PSC1 canonical compiler environments
+on:
+  push:
+    branches: [feat/psc1-canonical-latency-20261028]
+    paths:
+      - psc1/standalone/host.mjs
+      - psc1/standalone/runner.mjs
+      - psc1/standalone/bootstrap.mjs
+      - psc1/standalone/qualification.mjs
+      - psc1/standalone/verify-evidence.mjs
+      - psc1/standalone/compiler-seed.json
+      - psc1/CANONICAL_SOURCES.json
+      - psc1/compiler.project.json
+      - psc1/packages/**/*.ps
+      - .github/workflows/psc1-independent-environment.yml
+      - .github/workflows/psc1-independent-environments.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: psc1-canonical-compiler-environments-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  environment:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: ubuntu-24.04-x64
+            runner: ubuntu-24.04
+            platform: linux-x64
+          - id: ubuntu-22.04-x64
+            runner: ubuntu-22.04
+            platform: linux-x64
+          - id: ubuntu-24.04-arm64
+            runner: ubuntu-24.04-arm
+            platform: linux-arm64
+    uses: ./.github/workflows/psc1-independent-environment.yml
+    with:
+      environment_id: ${{ matrix.id }}
+      runner: ${{ matrix.runner }}
+      platform: ${{ matrix.platform }}
+  environments-gate:
+    if: always()
+    needs: environment
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require all supported environment qualifications
+        env:
+          RESULT: ${{ needs.environment.result }}
+        run: test "$RESULT" = success
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: psc1-independent-qualified-*-${{ github.run_id }}-${{ github.sha }}
+          path: psc1/dist/independent-environments
+          merge-multiple: false
+      - name: Bind each independent environment receipt and compare common compiler outputs
+        working-directory: psc1
+        run: node standalone/verify-environments.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-independent-environments-qualified-${{ github.run_id }}-${{ github.sha }}
+          path: psc1/dist/independent-environments/environments.json
+          if-no-files-found: error
+          retention-days: 90

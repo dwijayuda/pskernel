@@ -77,26 +77,30 @@ API/default equalities, lossless tests, 28 modular and 29 extended cases. Python
 optional-argument wrappers remain explicitly classified native adapters pointing to
 portable canonical implementations.
 
-## Active integration and remaining qualification
+## Checked reference integration and active environment qualification
 
-The exact passed type-key source edit is committed as canonical `Specialize.ps`
-at `0575b1a39a09c4253fd5691eec9fbc270fac6f5b`. The checked reference refresh is running
-in [40646380001](https://github.com/dwijayuda/pskernel/actions/runs/40646380001)
-against initial manifest commit `109e404586504cfe5f20352d1804d0cf0ac83310`. That workflow
-freshly checks both grammars, preserves untouched references, natively builds changed
-references and repeats correspondence with rebuilt helpers before preparing Git objects.
-The host-only native projection adapter uses parser-owned constructor-pattern spans
-and independently verified literal-dot insertions. It grants no admission authority.
+The exact measured TypeKey source edit at `0575b1a39a09c4253fd5691eec9fbc270fac6f5b`
+passed [checked reference refresh 40646380001](https://github.com/dwijayuda/pskernel/actions/runs/40646380001).
+Only `Ps.CompilerIr.Specialize` and its paired native reference changed. All 150 other
+compiler references and all 13 library references retain their bytes. The hybrid
+native compiler built, and rebuilt helpers freshly confirmed both ownership graphs.
+The resulting 125-module closure exactly matches qualified O2.
+See [the complete refresh receipt](docs/PSC1_CANONICAL_REFERENCE_REFRESH_2026-10-28.json).
 
-The O2 bootstrap, broader frontend/compiler/protocol regression chain, environment
-verifiers and reusable environment workflow are committed for review. The matrix
-trigger remains staged until the checked source/reference refresh is integrated. The intended
-matrix is Ubuntu 24.04 x64, Ubuntu 22.04 x64 and Ubuntu 24.04 ARM64. ABI probes already
-passed in [40633426535](https://github.com/dwijayuda/pskernel/actions/runs/40633426535),
-with exact private Node 22.23.3, official Lean 4.35 checker and eight linked system
-libraries per environment. Full compiler/self-rebuild/publication qualification
-remains pending actual execution. Retain exact runtime, OS, filesystem, linked-library,
-archive and publication evidence for each environment.
+The O2 assembly and full three-environment matrix are now activated: Ubuntu 24.04 x64,
+Ubuntu 22.04 x64 and Ubuntu 24.04 ARM64. Each assembles the exact measured O2 seed,
+checks current source correspondence freshly, then runs isolated smoke/publication
+checks and parallel baseline B1/B2 and changed C1/C2 compiler chains. Three real
+source modules change in the regression workspace; six cases execute at seed, C1
+and C2, including parser syntax, compiler diagnostics, positive execution and refusal.
+
+ABI preflight already passed in
+[40633426535](https://github.com/dwijayuda/pskernel/actions/runs/40633426535), with exact
+private Node 22.23.3, genuine Lean 4.35 checker and eight linked libraries per environment.
+Full installation/compiler/publication qualification is still pending actual matrix
+completion. Retain exact runtime, OS, filesystem, resolved library, execution, generation
+and publication evidence for each environment. Final broad package and source gates
+must pass on the integrated tree.
 
 ## Preserved boundaries
 

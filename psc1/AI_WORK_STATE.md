@@ -1,6 +1,23 @@
 # PSC1 AI work state
 
-## R6 qualified — current checkpoint
+## Usable standalone checker checkpoint
+
+The [usable-checker guide](docs/PSC1_MIN_KERNEL_USABLE_GUIDE.md) and
+[dated qualification](docs/PSC1_MIN_KERNEL_USABILITY_QUALIFICATION_2026-10-28.json)
+describe the private Node tarball, stable byte API, file/stdin CLI and exact
+offline installation checks. Qualified source: eea9306384ab68c220bece18e769fd16d7903f3a.
+All required source workflows pass (main attempt 2 after installer timeout).
+The 42237-byte tarball has SHA-256
+42d7d524d903885f0f7d06b83fa21b9755759ff457d6d24b3df503196ed51929.
+
+This completes U1: usable checking of the proved bounded R4B fragment, with
+explicit compiler/runtime assumptions. The user also requested full compiler
+support; that workstream remains open at 0/124 modules. Its [C1/C2/C3 completion
+contract](docs/PSC1_MIN_KERNEL_USABILITY_PLAN.md) is separate from package
+usability. Production defaults/refusals remain unchanged. The R6 and earlier
+sections below retain their own immutable source/evidence scopes.
+
+## Historical R6 qualified checkpoint
 
 Source `457c542f5f03f6b3f96245b76ad09190cfd4f879` has terminal successful
 [focused Linux qualification](https://github.com/dwijayuda/pskernel/actions/runs/40656742989),

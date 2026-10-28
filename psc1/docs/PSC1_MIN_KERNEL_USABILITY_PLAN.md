@@ -6,6 +6,10 @@ All project execution stays on GitHub Actions Linux. Continue with the user's
 GPT-6.1 Sol / High setting. Protected base 94e0c13f6a4b434f73c859cc0c716cb6fb8d1340
 is unchanged. Preserve the [R6 guideline](PSC1_MIN_KERNEL_R6_GUIDELINE.md).
 
+U1 is qualified at eea9306384ab68c220bece18e769fd16d7903f3a; see the [usage guide](PSC1_MIN_KERNEL_USABLE_GUIDE.md)
+and [dated receipt](PSC1_MIN_KERNEL_USABILITY_QUALIFICATION_2026-10-28.json).
+C1/C2/C3 remain open; the overall full-compiler goal is not complete.
+
 ## U1: usable bounded checker
 
 Completion requires an immutable, privately packed standalone Node tarball,

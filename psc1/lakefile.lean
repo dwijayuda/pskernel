@@ -690,3 +690,8 @@ lean_lib PsMinTextPreservation where
 lean_lib PsMinStringBridgeFixture where
   srcDir := "packages/pskernel-min/src"
   roots := #[`Ps.MinKernel.Tests.StringBridge, `Ps.MinKernel.Tests.EmitterBridge]
+
+-- C2 proof-only recursive caller correspondence; not a checker runtime root.
+lean_lib PsMinCompilerCaller where
+  srcDir := "proofs/pskernel-min"
+  roots := #[`CompilerCaller, `CompilerCallerTrust]

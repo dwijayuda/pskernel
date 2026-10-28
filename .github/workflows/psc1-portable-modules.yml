@@ -2,6 +2,16 @@ name: PSC1 portable production modules
 on:
   push:
     branches: [feat/psc1-portable-modules-20261029]
+    paths:
+      - '.github/workflows/psc1-portable-modules.yml'
+      - 'psc1/packages/**/*.lean'
+      - 'psc1/host/src/**/*.lean'
+      - 'psc1/scripts/Portable*.lean'
+      - 'psc1/lakefile.lean'
+      - 'psc1/host-tools/executable/**'
+      - 'psc1/scripts/check-portable-renderer-reference.mjs'
+      - 'psc1/scripts/executable-package-ownership.mjs'
+      - 'psc1/EXECUTABLE_PACKAGE_CONTRACT.json'
   workflow_dispatch:
 permissions:
   contents: read
@@ -67,6 +77,7 @@ jobs:
           npm ci --prefix .. --ignore-scripts --include=optional --no-audit --no-fund --fetch-retries=2 --fetch-timeout=30000
           npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund --fetch-retries=2 --fetch-timeout=30000
           for file in host-tools/executable/*.mjs; do node --check "$file"; done
+          node host-tools/executable/quarantine.test.mjs
       - name: Native oracle and immutable renderer comparison on the complete compiler
         run: node host-tools/executable/build.mjs
       - name: Portable native G1 generation, independent admission and exact renderer/IR comparison

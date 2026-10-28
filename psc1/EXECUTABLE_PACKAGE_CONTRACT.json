@@ -45,7 +45,8 @@
     "unified-entry-uses-pure-emitters",
     "new-source-identity-distinct-from-frozen-g3",
     "shared-module-renderer-bodies-preserved",
-    "retained-pilot-profiles-unchanged"
+    "retained-pilot-profiles-unchanged",
+    "portable-normalization-source-baseline-and-immutable-renderers"
   ],
   "stages": [
     {
@@ -76,7 +77,7 @@
     {
       "id": "M5",
       "work": "reproduction and final modular generation qualification",
-      "status": "not-qualified"
+      "status": "implemented-under-qualification"
     }
   ],
   "productionAcceptance": [
@@ -214,5 +215,16 @@
     "unicodeIoBuilds": 16,
     "ioDispatcherRefusals": 8,
     "watchCases": 20
+  },
+  "portableNormalization": {
+    "historicalBodyCommit": "d53b43c271c65635b07a6ffa78fb6b08a5fa55de",
+    "implementationBaselineCommit": "17ce19919175b60be06050188e2a546a8a72e689",
+    "files": [
+      "packages/backend-common/src/Ps/BackendCommon/ModuleModel.lean",
+      "packages/backend-js/src/Ps/BackendJs/ModuleFiles.lean",
+      "packages/backend-ts/src/Ps/BackendTs/ModuleFiles.lean"
+    ],
+    "reason": "M5 explicit portable collection, recursion, record and match spelling; immutable native references and actual complete-compiler rendered-byte equality remain required.",
+    "qualification": "under-qualification; source identity checks are not semantic preservation proofs"
   }
 }

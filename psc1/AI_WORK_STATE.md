@@ -14,34 +14,52 @@ Continues from PR #208 / d53b43c271c65635b07a6ffa78fb6b08a5fa55de,
 whose final static/evidence runs 40735281270/40735269495 are verified green.
 The native M4 source/graph/executors and exact installed tarball remain preserved.
 
-Native differential evidence now passes 49 plans/eight refusal classes, real hash
-collisions and immutable snapshots, plus candidate generation for both grammars.
-Runs 40741529276/40742163314/40742936110/40743397930 preserve successful native
-test evidence and diagnosed census failures. All 133 modules now parse in both
-grammars. The current census blocker is bounded match-result inference after
-normalizing the curried traversal; source elaboration/IR/full G1 are not qualified.
-Earlier fca207e2/40737031132 and 43888983/40737545849 failed only native harness
-imports/instances; fd3b66c3/40738171658 identified the full syntax classes.
+Native differential tests pass 49 plans/eight refusal classes, exact hash
+collisions, immutable snapshots and ten short/Unicode/reserved-name cases.
+At efdb1385550ff7a4b875dbd08cdf6598a1b98cef, Linux run40746744949
+passes all133 modules in both grammars and the whole native G0 graph:
+4903 logical declarations independently admitted, counts3250/4287/4942,
+134 units/15 owners,356 computed initializers,1131 graph files/103941524 bytes.
+Every unit matches the immutable pre-M5 renderer; strict TS, graph inspection and
+nine integrity-negative classes pass. Closure a450dfeaa3f751c59af71b6f11352bd1f17718c150f09d83706b4303d2eb7320.
+Artifact12842013274 retains the complete native evidence.
 
-The implementation also adds compiler-owned module generation, tagged source
-ownership, the unchanged specialization/worker provenance path and quarantined
-candidate file transport. The native pre-M5 JS/TS renderers are test-only oracles,
-checked against their exact original bodies with only namespace/default-field
-materialization. Full-compiler emitted-byte comparisons are required before G1.
-New package version 0.1.0-psc1-modular.2 is a candidate, not a promoted umbrella.
-Source maps retain their real readable TS targets while avoiding duplicate
-sourcesContent; file/graph limits remain fixed.
+The actual next failure is G1's transient candidate JSON exceeding128MiB after
+42.637s/1105732KiB maximum RSS. It is duplicate escaping of JSON file contents,
+not a source census, IR, checker or graph-size failure. Commit17ce1991 sends fixed
+JSON files as raw values with an enforced suffix and canonical byte round-trip
+checks; all original wire/file/stage bounds stay fixed. Qualification is running.
+G1/G2/G3 and reproducible npm fixed points remain unqualified until terminal
+successful Linux evidence exists. The separate240-second performance target stays.
 
-First implementation ports the bounded production planner into backend-common,
-using an exact-key persistent compiler lookup instead of host Std containers.
-Native reference ordering/refusals are compared before generation. Subsequent work
-must carry actual elaborator member ownership, reuse the existing structured JS/TS
-renderers, independently admit every generation, compare original/transformed IR,
-then reproduce complete module graphs and npm bytes. G2/G3 correctness profiles
-remain separate from the original 240-second performance target. No M5 success,
-new source qualification or fixed point is claimed before actual Linux CI.
-The 128 MiB graph/stage, 32 MiB/file, 8,192 values/files, 257 units, 4,096
-reference depth and 131,072 initializer-edge bounds remain unchanged.
+The canonical implementation reuses the existing frontend, tagged actual batch
+ownership, strict original/transformed IR, specialization/worker provenance,
+portable production planner and structured JS/TS renderers. Native pre-M5
+renderers are immutable test-only oracles, not generation producers. Whole
+compiler reference bundles remain corpus oracles outside the executable graph.
+Candidate version0.1.0-psc1-modular.2 does not promote or replace the M4 umbrella.
+Readable TS/source maps refer to real package files without duplicate
+sourcesContent. No official kernel, source/logical-body pairing, semantic fuel,
+memory/stack policy, negative or ABI refusal has been weakened.
+
+The128MiB graph/stage/wire,32MiB file/streams,8192 values/files,257 units,
+4096 reference depth and131072 initializer-edge bounds remain unchanged.
+G1/corpus/tools240s and independent checker120s remain; only explicit G2/G3
+correctness requests use1800s. No merge or registry publication.
+
+Portable G1 is now independently admitted and packaged at17ce19919175b60be06050188e2a546a8a72e689.
+Linux40748275409 passes all stages:133 source modules/both grammars,134 units,
+15 packages,1131 graph files/103951941 bytes. Closure
+1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb;
+manifest74e14f5650931ccc3de2a4a7ed6829f54197bb8100466bcb2eb0ad90d7b14a85.
+G1 takes112798ms/maxRSS1210604KiB under240s; official admission takes3047ms.
+All six JSON byte round trips and exact native IR/rendered-file identities pass.
+Artifact12842054234/51913188 bytes, ZIP SHA256
+8d98483df656c5d490e2648c2f00da04a6b13f00a60f93bb7c3acfa8e2b6e834.
+JS/TS G2/G3 chains use this pinned artifact independently; fixed points remain
+pending their actual results. The retained CLI layout failure in40748274725
+is fixed by importing the canonical host resource profiles directly, not its
+development-script compatibility re-export. No test or policy is waived.
 
 ## M4 milestone: qualified installed modular Linux preview
 

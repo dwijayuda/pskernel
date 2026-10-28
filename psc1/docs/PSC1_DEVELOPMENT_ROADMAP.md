@@ -99,6 +99,23 @@ graph/package reproduction, then genuine new modular G1/G2/G3/fixed points.
 The qualified .13 distribution stays the default reference. Pilot expansion
 remains deferred; the stopped PR #203 and prototype history are preserved.
 
+## M5: active portable generation and reproduction
+
+Continues from PR #208/d53b43c2. Native whole-compiler run40746744949 at
+efdb1385 passes133/133 modules in both grammars,4903 independently admitted
+logical declarations, strict original/transformed IR,134 genuine units/15 owners,
+complete immutable renderer-byte comparisons and strict TS/graph negatives.
+The graph is103941524 bytes within the unchanged128MiB bound.
+
+G1 exposed duplicate escaping at the existing128MiB wire boundary;17ce1991
+implements raw JSON candidate rows and requires exact native JSON byte round trips.
+Portable G1 passes40748275409 at17ce1991:134 units/15 packages,
+103951941 graph bytes;112.798s/maxRSS1210604KiB under240s.
+Independent JS/TS G2/G3/fixed points are now under qualification. Candidate npm version.2 and its receipts stay separate from
+the qualified M4.1 umbrella and .13 reference. See the
+[portable architecture](architecture/portable-modular-generation.md).
+No new release/fixed-point claim follows from native-only evidence.
+
 ## M4: qualified installed Linux preview
 
 Final checkpoint `821292dfd7dac39a1281a1b51b8e5ec17af63346` passes full

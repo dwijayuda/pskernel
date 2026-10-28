@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
-import {compilerRequestLimit} from '../../scripts/selfhost-qualification-profiles.mjs';
+import {compilerRequestLimit} from '../process/resource-profiles.mjs';
 import {createCompilerHostSession} from '../compiler-host-protocol.mjs';
 import {packageGraph} from './package.mjs';
 import {verify} from './verify.mjs';

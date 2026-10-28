@@ -1,0 +1,8 @@
+{
+  "schema": "psc1-modular-selfhost-request/1",
+  "seedCommit": "17ce19919175b60be06050188e2a546a8a72e689",
+  "runId": 40748275409,
+  "artifactId": 12842054234,
+  "archiveSha256": "8d98483df656c5d490e2648c2f00da04a6b13f00a60f93bb7c3acfa8e2b6e834",
+  "profile": "correctness-1800s"
+}

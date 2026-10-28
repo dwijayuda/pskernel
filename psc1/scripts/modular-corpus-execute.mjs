@@ -33,7 +33,7 @@ function assertBoundary() {
 }
 let serial=0;
 function session(variant,fixture,target,publicationRoot,overrides={}) {
-  const adapterFile = path.join(evidence,'adapters',variant+'-'+serial+++'.mjs');
+  const adapterFile = path.join(evidence,'adapters',variant+'-'+serial++ + '.mjs');
   fs.mkdirSync(path.dirname(adapterFile),{recursive:true});
   return createExecutableCompilerSession({
     ...resources.graph,variant,adapterFile,

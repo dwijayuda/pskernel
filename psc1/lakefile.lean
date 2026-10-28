@@ -90,7 +90,7 @@ lean_lib PsCompilerIr where
 
 lean_lib PsBackendCommon where
   srcDir := "packages/backend-common/src"
-  roots := #[`Ps.BackendCommon.Plan, `Ps.BackendCommon.StateExcept, `Ps.BackendCommon.Source, `Ps.BackendCommon.DirectCalls, `Ps.BackendCommon.Modules]
+  roots := #[`Ps.BackendCommon.Plan, `Ps.BackendCommon.StateExcept, `Ps.BackendCommon.Source, `Ps.BackendCommon.DirectCalls, `Ps.BackendCommon.Modules, `Ps.BackendCommon.Partition]
 
 lean_lib PsErasure where
   srcDir := "packages/erasure/src"
@@ -678,3 +678,8 @@ lean_exe psc1_output_abi_probe where
 lean_exe psc1_modular_pilot where
   srcDir := "scripts"
   root := `ModularPilotMain
+
+-- Read-only transformed graph diagnostic; outside the portable source closure.
+lean_exe psc1_modular_graph_measure where
+  srcDir := "scripts"
+  root := `ModularGraphMeasure

@@ -1,4 +1,5 @@
 import Ps.Host.SourceOwnership
+import Ps.BackendCommon.Partition
 import Ps.BackendJs.Modules
 import Ps.BackendTs.Modules
 import Ps.CompilerIr.WorkerFusion
@@ -84,7 +85,9 @@ def packageForModule (name : String) : String :=
   else if name == "Pilot.Consumer" then "@proofscript/modular-pilot-consumer"
   else "@proofscript/modular-pilot-" ++ ((name.replace "." "-").replace "_" "-").toLower
 
-def compileWithMode (request : Request) (extended : Bool) : IO Lean.Json := do
+def compileWithProfile (request : Request) (protocol : String) : IO Lean.Json := do
+  let extended := protocol != "psc1-modular-pilot/1"
+  let partitioned := protocol == "psc1-modular-pilot/3"
   let sourceCount := request.sources.length
   if request.assurance != "checked" || sourceCount < 2 ||
       sourceCount > (if extended then 8 else 2) then
@@ -116,10 +119,15 @@ def compileWithMode (request : Request) (extended : Bool) : IO Lean.Json := do
   let finalOwners ← if extended then
       liftResult (psModuleCarryOwners specialized.raw selectedOwners transformed)
     else pure selectedOwners
-  let protocol := if extended then "psc1-modular-pilot/2" else "psc1-modular-pilot/1"
   let packages := "@proofscript/modular-pilot-runtime" ::
     request.sources.map (fun source => packageForModule source.moduleName)
-  let plan ← liftResult (psPlanModulesWithPackages transformed.raw finalOwners packages protocol)
+  let partition ← if partitioned then
+      liftResult (psPartitionModules transformed.raw finalOwners packages)
+    else do
+      let plan ← liftResult (psPlanModulesWithPackages transformed.raw finalOwners packages protocol)
+      pure (PsModulePartition.mk plan (List.range packages.length)
+        ((List.range packages.length).map (fun index => [index])))
+  let plan := partition.plan
   let js ← liftResult (psEmitJsModules plan request.sourceClosureDigest)
   let ts ← liftResult (psEmitTsModules plan request.sourceClosureDigest)
   let lowered ← liftResult ((psJsLowerSpecializedModule plan.raw).mapError
@@ -133,7 +141,8 @@ def compileWithMode (request : Request) (extended : Bool) : IO Lean.Json := do
   let transformedIr ← liftResult ((psIrEncodeModule plan.raw).mapError
     (fun _ => "PSC1_MODULE_TRANSFORMED_ENCODING"))
   let fields : List (String × Lean.Json) := [
-    ("protocol", .str (if extended then "psc1-modular-pilot-candidate/2" else "psc1-modular-pilot-candidate/1")),
+    ("protocol", .str (if partitioned then "psc1-modular-pilot-candidate/3"
+      else if extended then "psc1-modular-pilot-candidate/2" else "psc1-modular-pilot-candidate/1")),
     ("requestId", .str request.requestId),
     ("sourceClosureDigest", .str request.sourceClosureDigest),
     ("grammar", .str request.grammar),
@@ -152,7 +161,8 @@ def compileWithMode (request : Request) (extended : Bool) : IO Lean.Json := do
     ("js", Lean.toJson (js.map artifactJson)), ("ts", Lean.toJson (ts.map artifactJson)),
     ("referenceJs", .str referenceJs), ("referenceTs", .str referenceTs),
     ("behaviorallyVerified", Lean.toJson false),
-    ("profile", .str (if extended then "closed-specialization/explicit-origins/worker-fusion/dag/2"
+    ("profile", .str (if partitioned then "closed-specialization/explicit-origins/worker-fusion/scc/3"
+      else if extended then "closed-specialization/explicit-origins/worker-fusion/dag/2"
       else "closed-specialization/exact-owners/dag/1"))]
   let extra ← if extended then do
       let specializedIr ← liftResult ((psIrEncodeModule specialized.raw).mapError
@@ -160,7 +170,7 @@ def compileWithMode (request : Request) (extended : Bool) : IO Lean.Json := do
       let specialization ← liftResult (specialized.origins.mapM transformOriginJson)
       let fusion ← liftResult (transformed.origins.mapM transformOriginJson)
       pure [
-        ("packages", Lean.toJson packages),
+        ("packages", Lean.toJson plan.packages),
         ("sourceModules", Lean.toJson (request.sources.map (fun source => source.moduleName))),
         ("originalOwners", Lean.toJson (owners.map ownerJson)),
         ("specializedOwners", Lean.toJson (selectedOwners.map ownerJson)),
@@ -168,7 +178,16 @@ def compileWithMode (request : Request) (extended : Bool) : IO Lean.Json := do
         ("transformOrigins", Lean.Json.mkObj [
           ("specialization", Lean.toJson specialization), ("workerFusion", Lean.toJson fusion)])]
     else pure []
-  return .mkObj (fields ++ extra)
+  let partitionFields := if partitioned then [
+      ("partition", Lean.Json.mkObj [
+        ("sourceToUnit", Lean.toJson partition.sourceToUnit),
+        ("groups", Lean.toJson partition.groups),
+        ("logicalPackages", Lean.toJson packages)]),
+      ("unpartitionedOwners", Lean.toJson (finalOwners.map ownerJson))] else []
+  return .mkObj (fields ++ extra ++ partitionFields)
+
+def compileWithMode (request : Request) (extended : Bool) : IO Lean.Json :=
+  compileWithProfile request (if extended then "psc1-modular-pilot/2" else "psc1-modular-pilot/1")
 
 def compile (request : Request) : IO Lean.Json :=
   compileWithMode request false
@@ -192,7 +211,8 @@ def main (args : List String) : IO UInt32 := do
           | some value => pure value
           | none => throw "PSC1_MODULE_WIRE_PROTOCOL"
         cell.getStr?
-      if protocol != "psc1-modular-pilot/1" && protocol != "psc1-modular-pilot/2" then
+      if protocol != "psc1-modular-pilot/1" && protocol != "psc1-modular-pilot/2" &&
+          protocol != "psc1-modular-pilot/3" then
         throw (IO.userError "PSC1_MODULE_WIRE_PROTOCOL")
       let fields ← liftResult do
         -- Existing portable decoder owns grammar/assurance/source request syntax.
@@ -200,7 +220,7 @@ def main (args : List String) : IO UInt32 := do
         let .array values := portable | throw "PSC1_MODULE_WIRE_ARRAY"
         (decodeRequestFieldsForProtocol protocol 7 values).mapError
           (fun error => "PSC1_MODULE_WIRE:" ++ error.code)
-      let candidate ← compileWithMode fields (protocol == "psc1-modular-pilot/2")
+      let candidate ← compileWithProfile fields protocol
       let output := candidate.compress
       if output.utf8ByteSize > 32 * 1024 * 1024 then throw (IO.userError "PSC1_MODULE_RESPONSE_BOUND")
       IO.println output

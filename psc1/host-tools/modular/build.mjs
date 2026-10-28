@@ -75,15 +75,17 @@ export function buildPilot({sources,out,producer,checker,sourceVariants,profile=
       put(root,'dist/js/index.mjs',candidate.js[index].source);
       put(root,'src/ts/index.mts',candidate.ts[index].source);
       // Own sources are data, never imports, plugins, or an authority selector.
-      const selected=index===0?[]:[sources[index-1]];
+      const selected=profile==='partitioned'?sources.filter((_,i)=>settings.sourceToUnit[i+1]===index):index===0?[]:[sources[index-1]];
       for(const source of selected){
-        put(root,'sources/'+source.module.split('.').at(-1)+'.'+source.kind,source.text);
+        const sourceStem=profile==='partitioned'?source.module:source.module.split('.').at(-1);
+        put(root,'sources/'+sourceStem+'.'+source.kind,source.text);
         const alternate=sourceVariants?.[source.module];
-        if(alternate&&alternate.kind!==source.kind)put(root,'sources/'+source.module.split('.').at(-1)+'.'+alternate.kind,alternate.text);
+        if(alternate&&alternate.kind!==source.kind)put(root,'sources/'+sourceStem+'.'+alternate.kind,alternate.text);
       }
       put(root,'PROVENANCE.json',json({schema:'psc1-modular-unit-provenance/1',unit:index,
         sourceClosureDigest:candidate.sourceClosureDigest,candidateSha256:admitted.candidateSha256,
         ownerNames:candidate.units[index].names,origins:candidate.origins,profile:candidate.profile,
+        sourceModules:selected.map(s=>s.module),partition:candidate.partition??null,
         transformOrigins:candidate.transformOrigins??null,
         generatedTypeScriptMap:'dist/ts/index.mjs.map maps to src/ts/index.mts',
         originalSourceMapping:'declaration origins only; no fabricated Lean line sourcemap',
@@ -124,15 +126,17 @@ export function buildPilot({sources,out,producer,checker,sourceVariants,profile=
     put(umbrella,'loader.mjs',fs.readFileSync(new URL('./loader.mjs',import.meta.url)));
     const graphType=variant=>{
       const suffix=variant==='ts'?'/ts':'';
+      const consumerUnit=profile==='partitioned'?settings.sourceToUnit[sources.length]:packageNames.length-1;
+      const nameUnit=profile==='partitioned'?settings.sourceToUnit[sources.findIndex(s=>s.module==='Ps.Foundation.Name')+1]:packageNames.indexOf('@proofscript/modular-pilot-names');
       const typeFor=name=>'typeof import('+JSON.stringify(name+suffix)+')';
       const fields=[
         "readonly variant:"+JSON.stringify(variant), "readonly sourceClosureDigest:string",
         "readonly runtime:"+typeFor(packageNames[0]),
-        "readonly consumer:"+typeFor(packageNames.at(-1)),
+        "readonly consumer:"+typeFor(packageNames[consumerUnit]),
         "readonly modules:{"+packageNames.map(name=>"readonly "+JSON.stringify(name)+":"+typeFor(name)).join(';')+"}"
       ];
-      if(packageNames.includes('@proofscript/modular-pilot-names'))
-        fields.push("readonly names:"+typeFor('@proofscript/modular-pilot-names'));
+      if(sources.some(s=>s.module==='Ps.Foundation.Name'))
+        fields.push("readonly names:"+typeFor(packageNames[nameUnit]));
       return "{"+fields.join(';')+"}";
     };
     put(umbrella,'index.d.mts',[
@@ -142,6 +146,7 @@ export function buildPilot({sources,out,producer,checker,sourceVariants,profile=
       "export declare function loadPilot(options:{variant:'ts'}):Promise<"+graphType('ts')+">;"
     ].join('\n')+'\n');
     const cohort={schema:settings.schema,version:packageVersion,protocol:settings.protocol,packageNames,
+      ...(profile==='partitioned'?{partition:candidate.partition,sourceModules:candidate.sourceModules}:{}),
       sourceClosureDigest:candidate.sourceClosureDigest,grammar:candidate.grammar,
       compilerCommit:process.env.GITHUB_SHA,producerSha256:admitted.resources[0].sha256,
       checkerCommit:admitted.receipt.checkerCommit,admissionsSha256:admitted.receipt.admissionsDigest,
@@ -166,7 +171,7 @@ export function buildPilot({sources,out,producer,checker,sourceVariants,profile=
       put(stage,'transform-origins.json',json(candidate.transformOrigins));
       put(stage,'specialized-ir.json',json(candidate.specializedIr));
     }
-    put(stage,'qualification-input.json',json({schema:profile==='extended'?'psc1-modular-pilot-input/2':'psc1-modular-pilot-input/1',testedCommit:process.env.GITHUB_SHA,
+    put(stage,'qualification-input.json',json({schema:profile==='partitioned'?'psc1-modular-pilot-input/3':profile==='extended'?'psc1-modular-pilot-input/2':'psc1-modular-pilot-input/1',testedCommit:process.env.GITHUB_SHA,
       cohortSha256,rootTar,packages:records.map(({files,...rest})=>rest),
       admission:admitted.receipt,execution:admitted.execution,typescriptResourcesSha256:typescript.resourcesSha256,
       candidateSha256:admitted.candidateSha256,profile:candidate.profile,scope:'additive pilot; existing qualified compiler untouched'}));

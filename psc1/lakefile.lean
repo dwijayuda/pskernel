@@ -716,4 +716,6 @@ lean_lib PsMinActualSourceProbe where
 -- Isolated C1 signature layer; not a public checker or stable runtime root.
 lean_lib PsMinRankOneRuntime where
   srcDir := "packages/pskernel-min/src"
-  roots := #[`Ps.MinKernel.Profile.RankOneTypes]
+  roots := #[`Ps.MinKernel.Profile.RegularProfile, `Ps.MinKernel.Profile.RegularCheck,
+    `Ps.MinKernel.Profile.OperationalProfile, `Ps.MinKernel.Profile.OperationalCheck,
+    `Ps.MinKernel.Profile.CoreBytes, `Ps.MinKernel.Profile.RankOneTypes]

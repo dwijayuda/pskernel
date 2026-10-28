@@ -1,5 +1,7 @@
 # Modular JS/TS compiler-component package pilot
 
+> **2026-10-28 decision:** Further pilot development/expansion is deferred. This page retains historical scope and evidence; it is not the current production migration plan. See [the fully modular executable compiler plan](../architecture/executable-package-modularity.md). Existing qualified regressions and history are preserved.
+
 This experimental, unpublished cohort contains real generated compiler code:
 the existing [Foundation.Name](../../packages/foundation/src/Ps/Foundation/Name.lean)
 module and a [dependent consumer](../../test/modular/Consumer.lean). It does not

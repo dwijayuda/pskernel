@@ -1,5 +1,7 @@
 # Genuine modular generated compiler distribution
 
+> **2026-10-28 decision:** Further pilot development/expansion is deferred. This page retains historical scope and evidence; it is not the current production migration plan. See [the fully modular executable compiler plan](executable-package-modularity.md). Existing qualified regressions and history are preserved.
+
 Decision, 2026-10-27: target real generated JS/TS modules grouped by source
 responsibility for the final npm compiler distribution. Keep the current qualified
 bundled executors as the release reference until the modular artifact graph has

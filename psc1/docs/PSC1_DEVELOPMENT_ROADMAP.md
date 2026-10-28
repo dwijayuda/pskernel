@@ -1,6 +1,6 @@
 # PSC1 development roadmap
 
-Updated 2026-10-27 Asia/Jakarta. This is the authoritative remaining-work queue.
+Updated 2026-10-28 Asia/Jakarta. This is the authoritative remaining-work queue.
 Practical Core v1 remains frozen at14 feature families and 37 finite criteria.
 Completed detail is preserved in [the previous roadmap](history/ROADMAP_BEFORE_LAYOUT_2026-10-26.md)
 and [dated evidence](evidence/README.md).
@@ -26,7 +26,24 @@ retain122 modules/4742 members and closure
 Current source qualification and frozen executor qualification remain distinct.
 Repository organization remains qualified at PR#192 /94e0c13f6a4b434f73c859cc0c716cb6fb8d1340.
 
-## Immediate priority: automatic core package installation
+## Current direction: fully modular executable compiler plan
+
+The 2026-10-28 user decision defers further pilot development and selects
+[the production executable-package plan](architecture/executable-package-modularity.md).
+Keep proofscript as the installation umbrella and psc as its thin CLI. Gradually
+replace source-only/checked-API facades with real source-responsible executable
+modules where appropriate. Move misplaced shared contracts down to avoid cycles;
+do not hide them in undeclared runtime loads. Preserve qualified .13 until the
+production graph passes its own finite gates.
+
+This is a documentation/architecture decision. Implementation has not resumed.
+The plan's M0-M5 queue covers source/API ownership, genuine generation, complete
+compiler execution, umbrella/CLI integration and final reproduction/self-hosting
+qualification. Existing pilot tests/evidence remain; expanding experimental pilot
+profiles is not a prerequisite. The stopped PR #203/prototype branches are
+preserved, not promoted.
+
+## Qualified automatic core package installation (.13)
 
 PR #198 continues from qualified PR #197 HEAD9d0e23c3. Cohort .13 makes proofscript
 an umbrella over the20 existing core packages and moves the shared implementation
@@ -39,7 +56,7 @@ unchanged; no new compiler-internal modularization or fixed point is claimed.
 
 ## Preserved simple npm distribution (.12)
 
-The latest user assignment supersedes further internal compiler partition work.
+The earlier .12 packaging assignment deferred internal compiler partitioning. That historical scope is preserved; the current production-modularity direction is above.
 The conventional builds/installable interfaces for all 24 existing named
 packages are complete in the documented Linux scope; the unnamed compiler-unified source directory is retained. Reuse one
 qualified proofscript implementation and transparent adapters. Source-only APIs
@@ -56,7 +73,7 @@ PR #197 implementation 9aefeeb and documentation refresh c5c15582 pass all 42 pa
 | 2 | Independent maintainer trial | Pending human participation; the user can arrange a maintainer. Record commit, navigation mistakes, elapsed time, assistance and a real small change. No AI/CI comprehension claim. |
 | 3 | Compiler-origin structured diagnostics/editor integration | Pending: actual spans/provenance, both grammars, machine/human consumers and malformed-input refusals. |
 | 4 | Runtime compatibility, checked watch and licensing | Qualified Linux milestone, PR#193 /fdc52207fdf3d809ad99b05a5b738aca21b95139: Node>=22.23.3, Bun>=1.4.4; actual Node22.23.3/24.21.0/26.12.1 and Bun1.4.4; older Node/Bun refusals;55 CLI requests,11 full watch cases,16 applications/264 observations,32 publications/143 refusals; all61 SDK pins unchanged. Apache-2.0 source/cohort, vendor notices retained. [Receipt](PSC1_RUNTIME_WATCH_QUALIFICATION_2026-10-27.json). Semantic incremental caching remains deferred. |
-| 5 | Genuine modular JS/TS compiler packages | PR#195 v1 remains qualified. Explicit specialization/worker provenance and v2 five-source graph are qualified in PR#196 by [full40481560025](https://github.com/dwijayuda/pskernel/actions/runs/40481560025) at7d7ada7ad7d5f5ca1504527342888d929e1b9959:124 original/129 specialized/160 fused values,57 specialization origins,31 workers/eight specialized-worker chains,seven installable packages,29 v2 cases plus all28 v1 cases. Both grammars/JS/TS/Node/Bun, strict declarations, exact transform/admission/bundled-output comparison to immutable PR#195 and transaction/tamper checks pass. [Architecture](architecture/transform-provenance.md), [finite v2 contract](../test/modular/extended-contract.json). Full source passes16 selected jobs/37 Core criteria; generated JS service G1 passes ten selected cases. [Exact receipt](PSC1_TRANSFORM_OWNERSHIP_QUALIFICATION_2026-10-27.json). Further whole-compiler internal linking and modular G1/G2/G3/fixed points are deferred beyond the completed simple npm milestone. Separate actual graph measurement passes40488488194; intermediate partition implementation b9461a3c remains unqualified on its separate branch. No complete modular compiler claim. |
+| 5 | Fully modular executable compiler | Planned, not implemented/qualified: [current production plan](architecture/executable-package-modularity.md), finite M0-M5 stages and acceptance. Preserve proofscript umbrella/thin psc CLI, existing package names, acyclic source-responsible implementations and all checking/resource policies. Qualified .13 remains the release reference. Pilot expansion and PR #203's prototype are deferred. Prior [v1 qualification](PSC1_MODULAR_PILOT_QUALIFICATION_2026-10-27.json) and [v2 ownership qualification](PSC1_TRANSFORM_OWNERSHIP_QUALIFICATION_2026-10-27.json) retain only their stated component scopes; no complete modular compiler or new fixed-point claim. |
 | 6 | Component String/IO and export selection | Pending: reuse shared/native ABI; both grammars/four engines, actual validation/execution, exact exports and refusals. Public component ABI currently Bool only. |
 | 7 | Full Python/PHP practical applications | Pending: real CLI/JSON/file/multi-module observations against checked reference; retain corpus/Unicode/integer/loop/IO tests. Providers remain optional. |
 | 8 | Automatic source-package capture | Pending: bounded deterministic order, exact identities, cycle/missing/stale refusals, real multi-package applications. Metadata never executes code or grants authority. |

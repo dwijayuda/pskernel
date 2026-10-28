@@ -44,11 +44,12 @@ jobs:
       - name: Audit real source ownership and preserved bodies
         run: node scripts/executable-package-ownership.mjs
       - name: Build pure production emitters and retained unified entry
-        run: lake build psc1_emitter_boundary_tests psc1_unified_service_tests
+        run: lake build psc1_emitter_boundary_tests psc1_unified_service_tests psc1_executable_plan_tests psc1_executable_packages psc1_modular_pilot psc1_independent_checker
       - name: Execute strict IR emission and original unified service regressions
         run: |
           lake exe psc1_emitter_boundary_tests
           lake exe psc1_unified_service_tests
+          lake exe psc1_executable_plan_tests
       - name: Execute real JS and TS outputs and validate the Wasm bytes
         run: node scripts/executable-emitter-consumers.mjs
       - uses: actions/upload-artifact@v4

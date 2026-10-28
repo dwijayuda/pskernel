@@ -219,6 +219,7 @@ lean_lib PsHost where
     `Ps.Host.SourceSnapshot,
     `Ps.Host.SourceOwnership,
     `Ps.Host.SourceModules,
+    `Ps.Host.ExecutablePlan,
     `Ps.Host.SourceBindings,
     `Ps.Host.ArtifactBundle,
     `Ps.Host.CompilerDriver,
@@ -689,3 +690,11 @@ lean_exe psc1_modular_pilot where
 lean_exe psc1_emitter_boundary_tests where
   srcDir := "test"
   root := `EmitterBoundaryTests
+
+lean_exe psc1_executable_plan_tests where
+  srcDir := "test"
+  root := `ExecutablePlanTests
+
+lean_exe psc1_executable_packages where
+  srcDir := "scripts"
+  root := `ExecutablePackagesMain

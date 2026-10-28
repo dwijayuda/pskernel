@@ -7,6 +7,9 @@ on:
       - .github/workflows/psc1-cli.yml
       - psc1/npm-cli/**
       - psc1/host-tools/**
+      - psc1/CANONICAL_SOURCES.json
+      - psc1/compiler.project.json
+      - psc1/packages/**/*.ps
       # Additive pilot has its own admitted package/consumer workflow and is not
       # imported by the production CLI. Shared host changes still run this gate.
       - '!psc1/host-tools/modular/**'

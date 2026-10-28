@@ -93,6 +93,11 @@ for (const phase of ['smoke', 'baseline', 'changed']) {
   const isolation = read(path.join(directory, 'isolation.json'));
   const input = read(path.join(directory, 'isolation-input.json'));
   assert.equal(input.schema, 'psc1-independent-isolation-input/1');
+  assert.equal(input.namespaceTool.path, '/usr/bin/unshare');
+  assert.ok(Number.isSafeInteger(input.namespaceTool.bytes) &&
+    input.namespaceTool.bytes > 0 && input.namespaceTool.bytes <= 10 * 1024 * 1024);
+  assert.match(input.namespaceTool.sha256, hashPattern);
+  assert.match(input.namespaceTool.version, /^unshare from util-linux [^\r\n]{1,128}$/);
   assert.equal(input.phase, phase);
   assert.equal(input.platform, bootstrap.platform);
   assert.equal(input.distributionSha256, bootstrap.toolchainSha256);
@@ -102,6 +107,7 @@ for (const phase of ['smoke', 'baseline', 'changed']) {
   assert.equal(isolation.phase, phase);
   assert.equal(isolation.exitStatus, 0);
   assert.equal(isolation.processError, null);
+  assert.equal(isolation.namespaceToolUnchanged, true);
   assert.deepEqual(isolation.unexpectedExecutions, []);
   const trace = fs.readFileSync(path.join(directory, 'execve.log'), 'utf8');
   assert.equal(sha(trace), isolation.traceSha256);
@@ -529,6 +535,7 @@ const summary = {
     checkerExecutions: item.checks, traceSha256: item.isolation.traceSha256,
     environment: { outside: item.input.environment, inside: item.qualification.environment.details },
     systemLibraries: item.input.systemLibraries, shell: item.input.shell,
+    namespaceTool: item.input.namespaceTool,
     qualificationSha256: sha(fs.readFileSync(path.join(item.directory, name, 'qualification.json')))
   }])),
   independence: {

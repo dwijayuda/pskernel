@@ -442,8 +442,16 @@ function isolate() {
     'wasm-tools', 'wat2wasm', 'wasm-opt', 'deno'];
   const before = files(jail);
   assert.ok(before.every(row => !forbidden.includes(path.basename(row.path))), 'forbidden development tool in isolated image');
+  const namespacePath = '/usr/bin/unshare', namespaceStat = fs.lstatSync(namespacePath);
+  assert.ok(namespaceStat.isFile() && !namespaceStat.isSymbolicLink() &&
+    namespaceStat.size > 0 && namespaceStat.size <= 10 * 1024 * 1024);
+  const namespaceBytes = fs.readFileSync(namespacePath);
+  const namespaceTool = { path: namespacePath, bytes: namespaceBytes.length,
+    sha256: sha256(namespaceBytes), version: run(namespacePath, ['--version']).trim() };
+  assert.equal(namespaceTool.bytes, namespaceStat.size);
+  assert.match(namespaceTool.version, /^unshare from util-linux [^\r\n]{1,128}$/);
   const inventory = { schema: 'psc1-independent-isolation-input/1', phase,
-    platform: manifest.platform, environment,
+    platform: manifest.platform, environment, namespaceTool,
     distributionSha256: sha256(fs.readFileSync(path.join(distribution, 'toolchain.json'))),
     systemLibraries: [...dependencies.values()], shell: { implementationPath: shell,
       sha256: sha256(fs.readFileSync(shell)) }, forbiddenTools: forbidden,
@@ -464,8 +472,8 @@ function isolate() {
     '/usr/bin/timeout', '--signal=TERM', '--kill-after=10s', '168m',
     '/usr/bin/strace', '-f', '-qq', '-s', '4096', '-e', 'trace=execve,execveat', '-o', trace,
     '/usr/bin/unshare', '--mount', '--pid', '--fork', '--kill-child=KILL',
-    '--mount-proc=' + path.join(jail, 'proc'), '--net',
-    '/usr/sbin/chroot', '--userspec=65534:65534', jail,
+    '--propagation=private', '--net', '--root=' + jail,
+    '--mount-proc=/proc', '--setgid=65534', '--setuid=65534',
     '/toolchain/libexec/psc-runtime', '--max-old-space-size=4096',
     '/toolchain/standalone/qualification.mjs', '--phase', phase, '--out', '/work/' + phase];
   const processResult = spawnSync('sudo', argv, {
@@ -484,13 +492,14 @@ function isolate() {
   const unexpectedExecutions = executions.filter(executable => !permitted(executable));
   const qualificationFile = path.join(output, phase, 'qualification.json');
   const qualification = fs.existsSync(qualificationFile) ? read(qualificationFile) : null;
-  const passed = processResult.error === undefined && processResult.status === 0 &&
+  const namespaceToolUnchanged = sha256(fs.readFileSync(namespacePath)) === namespaceTool.sha256;
+  const passed = namespaceToolUnchanged && processResult.error === undefined && processResult.status === 0 &&
     traceText.length > 0 && !traceText.includes('execveat(') && unexpectedExecutions.length === 0 &&
     qualification?.status === 'passed' && qualification?.phase === phase;
   const result = { schema: 'psc1-independent-isolation-result/1', phase, status: passed ? 'passed' : 'failed',
     exitStatus: processResult.status, signal: processResult.signal,
     processError: processResult.error ? String(processResult.error) : null,
-    elapsedMs: Date.now() - started, executions, unexpectedExecutions,
+    elapsedMs: Date.now() - started, executions, unexpectedExecutions, namespaceToolUnchanged,
     traceSha256: sha256(traceText), qualification,
     scope: 'Observed real commands in an isolated Linux development environment; not a formal sandbox or compiler-correctness proof.' };
   put(path.join(output, 'isolation.json'), encoded(result));

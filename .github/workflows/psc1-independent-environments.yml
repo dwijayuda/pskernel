@@ -20,7 +20,8 @@ permissions:
   actions: read
 concurrency:
   group: psc1-canonical-compiler-environments-${{ github.ref }}
-  cancel-in-progress: false
+  # A changed source or harness revision requires its own same-run evidence.
+  cancel-in-progress: true
 jobs:
   environment:
     strategy:

@@ -1,0 +1,35 @@
+name: PSC1 qualified modular preview ZIP
+on:
+  push:
+    branches: [build/psc1-modular-boundaries-20261028]
+    paths:
+      - .github/workflows/diagnostic-psc1-preview-delivery.yml
+      - .github/scripts/psc1-preview-delivery*
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  delivery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Deliver the exact successfully installed and checked root
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node ../.github/scripts/psc1-preview-delivery.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: proofscript-modular-preview-installable-${{ github.sha }}
+          path: |
+            psc1/dist/modular-preview-delivery/*-installable.zip
+            psc1/dist/modular-preview-delivery/delivery.json
+          retention-days: 90

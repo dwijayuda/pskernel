@@ -34,12 +34,12 @@ jobs:
           export PATH="$HOME/.elan/bin:$PATH"
           test "$(lean --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
           test "$(git rev-parse HEAD:psc1/packages/pskernel-core/src)" = bbe353e649feed5b796adb164dcec36eaca915ab
-          lake env lean --run test/PsKernelPreviewAxiomSchemas.lean > scripts/pskernel-preview-axioms.json
+          mkdir -p "$RUNNER_TEMP/preview-supervisor"
+          lake env lean --run test/PsKernelPreviewAxiomSchemas.lean | tee scripts/pskernel-preview-axioms.json
           python3 -m json.tool scripts/pskernel-preview-axioms.json > "$RUNNER_TEMP/preview-axiom-schemas.pretty.json"
           if git show HEAD:psc1/scripts/pskernel-preview-axioms.json > "$RUNNER_TEMP/committed-preview-axioms.json" 2>/dev/null; then
             cmp "$RUNNER_TEMP/committed-preview-axioms.json" scripts/pskernel-preview-axioms.json
           fi
-          mkdir -p "$RUNNER_TEMP/preview-supervisor"
           cp "$RUNNER_TEMP/preview-axiom-schemas.pretty.json" "$RUNNER_TEMP/preview-supervisor/"
       - name: Authenticate baseline packages and exercise actual checking and fault controls in empty PATH
         env:

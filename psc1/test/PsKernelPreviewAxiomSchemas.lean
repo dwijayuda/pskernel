@@ -36,9 +36,9 @@ private partial def expressionSchema (params : List Name) (fixture : Bool) : Exp
   | .sort l => do return node "sort" #[← levelSchema params l]
   | .const n us => do return node "const" #[nameSchema n, Json.arr (← us.toArray.mapM (levelSchema params))]
   | .app f a => do return node "app" #[← expressionSchema params fixture f, ← expressionSchema params fixture a]
-  | .forallE n d b bi => do return node "forallE"
-      (#[← expressionSchema params fixture d, ← expressionSchema params fixture b, text (binderSchema bi)] ++
-        if fixture then #[nameSchema n] else #[])
+  | .forallE n d b bi => do
+      let xs := #[← expressionSchema params fixture d, ← expressionSchema params fixture b, text (binderSchema bi)]
+      return node "forallE" (xs ++ (if fixture then #[nameSchema n] else #[]))
   | _ => .error "unexpected expression constructor in pinned standard axiom"
 
 def main : IO Unit := do

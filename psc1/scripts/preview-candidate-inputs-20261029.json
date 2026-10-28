@@ -1,0 +1,225 @@
+{
+  "mode": "development-candidate",
+  "supervisor": {
+    "name": "pskernel-preview-supervisor-evidence",
+    "id": 12848355088,
+    "run": 40759412487,
+    "source": "8043c820bb670ae7a01249de7fd60112f21be2b5",
+    "conclusion": "success",
+    "archive": {
+      "bytes": 3106055,
+      "sha256": "8d58977ce176697c614c66a53ec8f3d1654d71ddb3b0ba6ed5e1ffdafa7ab1c1"
+    }
+  },
+  "native": {
+    "name": "native-814",
+    "id": 12706268210,
+    "run": 40441811683,
+    "source": "619d865cde228ad479c63c97ccbaf8b3e5b77c83",
+    "conclusion": "success",
+    "archive": {
+      "bytes": 182978,
+      "sha256": "1e53b134501d6fa1d0d828375b874bdcb7d554a33bb11364945626f4fd7aa930"
+    }
+  },
+  "baselineArena": {
+    "name": "prior-nested-arena",
+    "id": 12705990238,
+    "run": 40436829581,
+    "source": "7e69c90895acf3b0a83ade94d594a368f788a3c5",
+    "conclusion": "failure",
+    "archive": {
+      "bytes": 388845,
+      "sha256": "c662e8c5be5b6ecc3b718002be62545cbed85d55d7f50b7ad7275c65ed24f049"
+    }
+  },
+  "failedCampaignArtifacts": [
+    {
+      "name": "pskernel-preview-string-canonical-5",
+      "id": 12848545521,
+      "run": 40757332144,
+      "source": "d983fa740721eb67cd498e15dfc19c7768b5aa06",
+      "conclusion": "failure",
+      "archive": {
+        "bytes": 4154,
+        "sha256": "93ffba393d9143e595e81797ffdead8a39480e1e8eb9979eac61eeaa47520a32"
+      }
+    },
+    {
+      "name": "pskernel-preview-string-canonical-3",
+      "id": 12847995080,
+      "run": 40757332144,
+      "source": "d983fa740721eb67cd498e15dfc19c7768b5aa06",
+      "conclusion": "failure",
+      "archive": {
+        "bytes": 4111,
+        "sha256": "448c5be42207f830e1119dfb42e13a47ddb3055f35dfe9c12277fc230b42a920"
+      }
+    },
+    {
+      "name": "pskernel-preview-string-generated-5",
+      "id": 12847824734,
+      "run": 40757332144,
+      "source": "d983fa740721eb67cd498e15dfc19c7768b5aa06",
+      "conclusion": "failure",
+      "archive": {
+        "bytes": 3201,
+        "sha256": "fc70befc2f469c43fb9b9108eb6c74cdcfde683364796548770e81d784d0b367"
+      }
+    },
+    {
+      "name": "pskernel-preview-official193",
+      "id": 12847690061,
+      "run": 40757332144,
+      "source": "d983fa740721eb67cd498e15dfc19c7768b5aa06",
+      "conclusion": "failure",
+      "archive": {
+        "bytes": 77403,
+        "sha256": "975c34e15db4c05f73b9988012103b304731cf010784f4fb48870fe36d6489b8"
+      }
+    },
+    {
+      "name": "pskernel-preview-string-canonical-2",
+      "id": 12847526176,
+      "run": 40757332144,
+      "source": "d983fa740721eb67cd498e15dfc19c7768b5aa06",
+      "conclusion": "failure",
+      "archive": {
+        "bytes": 4102,
+        "sha256": "766192dc8635e1d4ee28bc44b4488c8adb6da6de06766abec8169f2ac9e779be"
+      }
+    },
+    {
+      "name": "pskernel-preview-string-canonical-4",
+      "id": 12847516615,
+      "run": 40757332144,
+      "source": "d983fa740721eb67cd498e15dfc19c7768b5aa06",
+      "conclusion": "failure",
+      "archive": {
+        "bytes": 4115,
+        "sha256": "abbb5a4fb9196e0916417a30ac8385ed2b33496d1f088ad5bb9c8a95b50adef1"
+      }
+    },
+    {
+      "name": "pskernel-preview-string-generated-0",
+      "id": 12847361632,
+      "run": 40757332144,
+      "source": "d983fa740721eb67cd498e15dfc19c7768b5aa06",
+      "conclusion": "failure",
+      "archive": {
+        "bytes": 4083,
+        "sha256": "9d07ebe095bcb6b7ec20bc454c40bdd1344420fe6d8035fb0cdb598e1a2a542e"
+      }
+    },
+    {
+      "name": "pskernel-preview-string-canonical-1",
+      "id": 12847208426,
+      "run": 40757332144,
+      "source": "d983fa740721eb67cd498e15dfc19c7768b5aa06",
+      "conclusion": "failure",
+      "archive": {
+        "bytes": 4102,
+        "sha256": "f81bb80999d798c33adf4768699c43f85916ac318d93c2716de76fa617445ed8"
+      }
+    },
+    {
+      "name": "pskernel-preview-original-generated",
+      "id": 12847136929,
+      "run": 40757332144,
+      "source": "d983fa740721eb67cd498e15dfc19c7768b5aa06",
+      "conclusion": "failure",
+      "archive": {
+        "bytes": 521099,
+        "sha256": "30caf01011ab84748df61e154420165410347843154f1cb1a0283da6f2d9fe99"
+      }
+    },
+    {
+      "name": "pskernel-preview-arena193",
+      "id": 12847067873,
+      "run": 40757332144,
+      "source": "d983fa740721eb67cd498e15dfc19c7768b5aa06",
+      "conclusion": "failure",
+      "archive": {
+        "bytes": 386365,
+        "sha256": "fef68dabe0fcb1531b517569c53a61b00073e21f1ddcc78199751ce7255dc31b"
+      }
+    },
+    {
+      "name": "pskernel-preview-string-canonical-0",
+      "id": 12846942288,
+      "run": 40757332144,
+      "source": "d983fa740721eb67cd498e15dfc19c7768b5aa06",
+      "conclusion": "failure",
+      "archive": {
+        "bytes": 4098,
+        "sha256": "67d2e1e96568fc18a901e7179cc464fb40da1419744b2a766a3b341c9e62d74c"
+      }
+    },
+    {
+      "name": "pskernel-preview-string-generated-4",
+      "id": 12846924434,
+      "run": 40757332144,
+      "source": "d983fa740721eb67cd498e15dfc19c7768b5aa06",
+      "conclusion": "failure",
+      "archive": {
+        "bytes": 4118,
+        "sha256": "72ffe0d2322bd27c91f4263e8455b515737090a2c5748ec417018d2d007def71"
+      }
+    },
+    {
+      "name": "pskernel-preview-string-generated-2",
+      "id": 12846617995,
+      "run": 40757332144,
+      "source": "d983fa740721eb67cd498e15dfc19c7768b5aa06",
+      "conclusion": "failure",
+      "archive": {
+        "bytes": 4101,
+        "sha256": "bdf4d699b325f774264a2240991f6117a2ad34c022b40e5d138dcc650bf8a9a0"
+      }
+    },
+    {
+      "name": "pskernel-preview-string-generated-3",
+      "id": 12846428176,
+      "run": 40757332144,
+      "source": "d983fa740721eb67cd498e15dfc19c7768b5aa06",
+      "conclusion": "failure",
+      "archive": {
+        "bytes": 4118,
+        "sha256": "aa023f5a5239c5d0a50751d60c4541be527f46732ff90da103ffcf131529336d"
+      }
+    },
+    {
+      "name": "pskernel-preview-original-inputs",
+      "id": 12846282018,
+      "run": 40757332144,
+      "source": "d983fa740721eb67cd498e15dfc19c7768b5aa06",
+      "conclusion": "failure",
+      "archive": {
+        "bytes": 769,
+        "sha256": "ba76fa60b13d27ee1cbb43a1c59d5093d219b41c3800ecff0df7d038e05ef42e"
+      }
+    },
+    {
+      "name": "pskernel-preview-string-generated-1",
+      "id": 12846004809,
+      "run": 40757332144,
+      "source": "d983fa740721eb67cd498e15dfc19c7768b5aa06",
+      "conclusion": "failure",
+      "archive": {
+        "bytes": 4093,
+        "sha256": "5749d4365e93b71e35de46d312d067c9301c320af2fd0ddb935433476315f1f4"
+      }
+    },
+    {
+      "name": "pskernel-preview-original-canonical",
+      "id": 12845064880,
+      "run": 40757332144,
+      "source": "d983fa740721eb67cd498e15dfc19c7768b5aa06",
+      "conclusion": "failure",
+      "archive": {
+        "bytes": 521100,
+        "sha256": "0133cc66f2339c1a7f0963e449411f38c6c0b232c89648f46d748596c09b943b"
+      }
+    }
+  ]
+}

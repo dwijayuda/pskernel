@@ -1,0 +1,44 @@
+name: PSC1 supervised checker candidate with blocked full preview
+on:
+  push:
+    branches: [work/psc1-pskernel-preview-supervisor-20261029]
+    paths:
+      - .github/workflows/psc1-pskernel-preview-candidate.yml
+      - psc1/scripts/pskernel-preview-candidate-delivery.py
+      - psc1/test/preview-candidate-inputs-20261029.json
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  deliver:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.4'
+      - name: Authenticate qualified interface, retained proofs and complete failed workload evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 psc1/scripts/pskernel-preview-candidate-delivery.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pskernel-supervised-candidate-evidence
+          path: ${{ runner.temp }}/preview-candidate/evidence/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pskernel-supervised-candidate-generated
+          path: ${{ runner.temp }}/preview-candidate/generated/
+          include-hidden-files: true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pskernel-supervised-candidate-canonical
+          path: ${{ runner.temp }}/preview-candidate/canonical/
+          include-hidden-files: true

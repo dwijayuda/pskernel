@@ -1,0 +1,21 @@
+name: PSC1 cached Lean launcher
+description: Reuse the pinned toolchain cache and bound launcher download retries.
+runs:
+  using: composite
+  steps:
+    - name: Prepare launcher without fetching an unrelated default toolchain
+      shell: bash
+      run: |
+        set -euo pipefail
+        test -s "$GITHUB_WORKSPACE/psc1/lean-toolchain"
+        # Existing workflow caches bind ~/.elan to this exact toolchain file.
+        # Compiler and checker tests still verify Lean 4.35.0 and its commit.
+        if [ ! -x "$HOME/.elan/bin/lake" ]; then
+          curl --fail --location --retry 2 --connect-timeout 20 --max-time 90 https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o "$RUNNER_TEMP/psc1-elan-init.sh"
+          for attempt in 1 2 3; do
+            if timeout --kill-after=5s 120s sh "$RUNNER_TEMP/psc1-elan-init.sh" -y --default-toolchain none; then break; fi
+            [ "$attempt" -lt 3 ] || exit 1
+          done
+          test -x "$HOME/.elan/bin/lake"
+        fi
+        echo "$HOME/.elan/bin" >> "$GITHUB_PATH"

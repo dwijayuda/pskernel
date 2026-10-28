@@ -149,5 +149,38 @@
       "M4RequiresRemovingCandidateBuilderExclusion": true
     }
   },
-  "qualificationReceipt": "docs/PSC1_EXECUTABLE_PACKAGES_QUALIFICATION_2026-10-28.json"
+  "qualificationReceipt": "docs/PSC1_EXECUTABLE_PACKAGES_QUALIFICATION_2026-10-28.json",
+  "checkedExecution": {
+    "workflow": "psc1-modular-checked.yml",
+    "walkthrough": "docs/architecture/modular-checked-execution.md",
+    "qualifiedRun": 40677391651,
+    "qualifiedCommit": "8dac01c767ccd09959dbb7fde56b92f1fd7727e5",
+    "scope": "retained-cli-json-and-compiler-like-applications",
+    "hostRuntimes": [
+      "node22.23.3",
+      "bun1.4.4"
+    ],
+    "compilerEngines": [
+      "js",
+      "ts"
+    ],
+    "grammars": [
+      "lean",
+      "ps"
+    ],
+    "applicationTargets": [
+      "js",
+      "ts"
+    ],
+    "checkedSessions": 32,
+    "executedBehaviorCases": 528,
+    "nativeFrontendsRemoved": true,
+    "sourceGraphInput": "scripts/modular-checked-input.json",
+    "remaining": [
+      "retained-semantic-library-corpus",
+      "seven-backend-execution-and-refusals",
+      "M4-checked-install-and-CLI",
+      "M5-generation-and-fixed-points"
+    ]
+  }
 }

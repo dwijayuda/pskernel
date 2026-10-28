@@ -1,0 +1,133 @@
+name: PSC1 modular compiler checked applications
+on:
+  push:
+    branches: [feat/psc1-modular-checked-host-20261028]
+    # Documentation receipts do not repeat unchanged compiler workloads.
+    paths:
+      - .github/workflows/psc1-modular-checked.yml
+      - package.json
+      - package-lock.json
+      - psc1/host-tools/**
+      - psc1/packages/**
+      - psc1/stdlib/**
+      - psc1/test/**
+      - psc1/scripts/**
+      - psc1/lakefile.lean
+      - psc1/lean-toolchain
+      - psc1/*.json
+      - psc1/docs/*CONTRACT.json
+      - psc1/docs/architecture/modular-checked-execution.md
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: psc1-modular-checked-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  applications:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime: [node, bun]
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            psc1/host-tools/package-lock.json
+      - uses: oven-sh/setup-bun@v2
+        if: matrix.runtime == 'bun'
+        with:
+          bun-version: '1.4.4'
+      - name: Fast syntax and repository checks
+        run: |
+          node scripts/ci/repository-layout.mjs
+          for file in host-tools/executable/*.mjs scripts/modular-checked-*.mjs; do node --check "$file"; done
+          ${{ matrix.runtime }} scripts/modular-checked-preflight.mjs
+      - name: Locked host and TypeScript resources
+        timeout-minutes: 5
+        run: |
+          npm ci --prefix .. --ignore-scripts --include=optional --no-audit --no-fund --fetch-timeout=30000
+          npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund --fetch-timeout=30000
+      - name: Produce pinned host-format proposals without changing tested files
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import path from 'node:path';import {createRequire} from 'node:module';
+          import assert from 'node:assert/strict';
+          const require=createRequire(path.resolve('host-tools/package.json')),prettier=require('prettier');
+          assert.equal(require('prettier/package.json').version,'3.6.2');
+          for(const file of [...['loader','session','verify'].map(n=>'host-tools/executable/'+n+'.mjs'),'scripts/modular-checked-prepare.mjs','scripts/modular-checked-applications.mjs']){
+            const formatted=await prettier.format(fs.readFileSync(file,'utf8'),{parser:'babel',singleQuote:true,printWidth:100});
+            console.log('PSC1_MODULAR_HOST_FORMAT '+JSON.stringify({file,formatted}));
+          }
+          JS
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        id: native-cache
+        with:
+          path: psc1/.lake
+          key: psc1-modular-checked-v1-${{ runner.os }}-${{ hashFiles('psc1/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
+          restore-keys: |
+            psc1-modular-checked-v1-${{ runner.os }}-
+            psc1-executable-v1-${{ runner.os }}-
+      - name: Prepare Lean launcher with bounded download retries
+        timeout-minutes: 7
+        run: |
+          if [ ! -x "$HOME/.elan/bin/lake" ]; then
+            curl --fail --location --retry 2 --connect-timeout 20 --max-time 90 https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o "$RUNNER_TEMP/psc1-elan-init.sh"
+            for attempt in 1 2 3; do
+              if timeout --kill-after=5s 120s sh "$RUNNER_TEMP/psc1-elan-init.sh" -y; then break; fi
+              [ "$attempt" -lt 3 ] || exit 1
+            done
+          fi
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build real native reference tools and independent checker
+        run: |
+          node packages/pskernel-lean/host/check-pin.mjs
+          lake build psc1_output_abi_probe psc1_source_ownership psc1_lossless_source psc1_independent_checker
+      - uses: actions/cache/save@v4
+        if: steps.native-cache.outputs.cache-hit != 'true'
+        with:
+          path: psc1/.lake
+          key: psc1-modular-checked-v1-${{ runner.os }}-${{ hashFiles('psc1/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
+      - name: Native oracle and existing host-boundary regressions
+        run: |
+          node scripts/output-abi-native-tests.mjs
+          node scripts/output-abi-host-tests.mjs
+          node scripts/typed-io-policy-tests.mjs
+      - name: Verify exact qualified graph input and prepare target references
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/modular-checked-prepare.mjs
+      - name: Execute retained application cases through checked modular engines
+        run: ${{ matrix.runtime }} scripts/modular-checked-applications.mjs
+      - name: Archive arbitrary valid fixture paths and complete evidence
+        if: always()
+        run: |
+          if [ -d dist/modular-checked ]; then
+            tar --exclude='modular-checked/input' -czf dist/modular-checked-evidence.tar.gz -C dist modular-checked
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-modular-checked-${{ matrix.runtime }}-${{ github.sha }}
+          path: |
+            psc1/dist/modular-checked-evidence.tar.gz
+            psc1/dist/modular-checked/qualification-*.json
+            psc1/dist/output-abi/native-reference.json
+          retention-days: 90

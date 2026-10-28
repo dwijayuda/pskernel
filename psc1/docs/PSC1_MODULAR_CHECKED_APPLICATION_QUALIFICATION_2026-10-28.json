@@ -1,0 +1,617 @@
+{
+  "schema": "psc1-modular-checked-application-qualification/1",
+  "date": "2026-10-28",
+  "pullRequest": 206,
+  "testedCommit": "f433bad08a5b53992030d4f6ad043bfd0839d68f",
+  "status": "qualified-application-scope",
+  "scope": "complete-modular-engines-checked-retained-applications",
+  "productionDefaultChanged": false,
+  "modularG2G3Qualified": false,
+  "graph": {
+    "sourceCommit": "4393ed1551aef8b6e5799b3a611cf084739618d8",
+    "compilerSourceClosureDigest": "41eb40437e0df1722128c09c9b9da7cad0ccb1ad61371f23eb6bc2db4e9a1106",
+    "canonicalAdmissionsSha256": "97041042ece09003a253c1f4a038921ff89517a702a96da48bb631de930d1107",
+    "originalIrSha256": "95dcabab3915a70ce1d1755befecbe3fb448629dcf7203ad3a4a6e63f67861a6",
+    "fusedIrSha256": "4e973b29d13220693174b7761a6df8bb848c5a2b5414c5d658d492ceba31ba82",
+    "manifestSha256": "f0b25fabaa702e949645eeee9adedf52237016b316aaeefb90bf806170c4b389",
+    "input": "scripts/modular-checked-input.json",
+    "sourceModules": 126,
+    "generatedUnits": 127,
+    "packageOwners": 15,
+    "logicalDeclarations": 4781,
+    "uniqueFusedValues": 4516,
+    "files": 1075,
+    "aggregateBytes": 119711529,
+    "compilerAssurance": "ordinary-checked",
+    "partialPolicy": "existing exact logical/runtime body pairing; five compiler partial declarations; no totality claim"
+  },
+  "verification": {
+    "checker": "official Lean",
+    "leanVersion": "4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "independentCanonicalAdmission": true,
+    "strictOriginalTransformedIr": "existing pinned generated compiler",
+    "nativeFrontendsRemovedBeforeModularExecution": true,
+    "publication": "existing admitted checked session; portable-file",
+    "semanticFuel": "unchanged",
+    "compilerToolSeconds": 240,
+    "checkerSeconds": 120,
+    "applicationDeadlineSeconds": 120,
+    "applicationMemory": "unchanged retained contracts",
+    "graphFileBytes": 33554432,
+    "graphAggregateBytes": 134217728,
+    "graphFiles": 8192,
+    "preservationProof": "not-provided",
+    "nativeReferenceComparison": "SHA256(JSON.stringify(parsed candidate)); exact decoded canonical admission/source UTF-8; JSON-serialized original and specialized IR identities"
+  },
+  "applications": {
+    "compilerEngines": [
+      "js",
+      "ts"
+    ],
+    "grammars": [
+      "lean",
+      "ps"
+    ],
+    "outputTargets": [
+      "js",
+      "ts"
+    ],
+    "hostRuntimes": [
+      "node22.23.3",
+      "bun1.4.4"
+    ],
+    "applicationsPerEngineTargetRuntime": 4,
+    "checkedSessionsPerRuntime": 16,
+    "casesPerRuntime": 264,
+    "totalCheckedSessions": 32,
+    "totalExecutedCases": 528,
+    "contracts": [
+      "docs/PSC1_APPLICATION_EXECUTION_CONTRACT.json",
+      "docs/PSC1_COMPILER_APPLICATION_CONTRACT.json"
+    ],
+    "largestInput": "100000-statement compiler-like application"
+  },
+  "retainedDefault": "qualified .13; default official C++/Emscripten linear-memory Wasm kernel; optional Python/PHP; existing Rust/Wasm engines",
+  "remaining": [
+    "full retained semantic/library corpus through modular engines",
+    "seven-backend execution/refusals through modular engines",
+    "M4 checked umbrella and thin CLI/watch integration",
+    "M5 portable module reproduction and new modular G1/G2/G3/fixed points",
+    "applicable platform and release qualification"
+  ],
+  "diagnosedAttempts": [
+    {
+      "commit": "aedd06d26f452dc9e06cfd68f009bbac13dbd3fc",
+      "run": 40677096400,
+      "issue": "development harness placed under production host imports; moved to scripts without relaxing repository guard"
+    },
+    {
+      "commit": "0489dc6832daf1e4991322c01fb65cbafab8ae2a",
+      "run": 40679116731,
+      "issue": "new documentation link escaped PSC1 documentation root; replaced by exact GitHub source link"
+    },
+    {
+      "commit": "13c9eda712fae752a988a383540bacb74dc0e738",
+      "run": 40679353626,
+      "issue": "filesystem import mistakenly removed during cleanup; restored and added early real-loader preflight"
+    }
+  ],
+  "priorPassingApplicationRun": {
+    "run": 40677391651,
+    "commit": "8dac01c767ccd09959dbb7fde56b92f1fd7727e5",
+    "cases": 528,
+    "negativesPerRuntime": 6
+  },
+  "noMerge": true,
+  "noRegistryPublication": true,
+  "applicationRun": 40679842606,
+  "hostResults": [
+    {
+      "runtime": {
+        "name": "node",
+        "version": "22.23.3",
+        "minimum": "22.23.3",
+        "label": "node22.23.3"
+      },
+      "status": "passed",
+      "applicationBuilds": 16,
+      "executedCases": 264,
+      "negatives": [
+        {
+          "case": "wrong-manifest-refused-before-import"
+        },
+        {
+          "case": "unsupported-engine-refused-before-import"
+        },
+        {
+          "case": "reserved-tool-override-refused"
+        },
+        {
+          "case": "mutable-adapter-inside-graph-refused"
+        },
+        {
+          "variant": "js",
+          "case": "typing-refusal-preserves-generation"
+        },
+        {
+          "variant": "js",
+          "case": "graph-change-prevents-publication"
+        },
+        {
+          "variant": "ts",
+          "case": "typing-refusal-preserves-generation"
+        },
+        {
+          "variant": "ts",
+          "case": "graph-change-prevents-publication"
+        },
+        {
+          "case": "oversized-file-refused-before-reading"
+        },
+        {
+          "case": "unexpected-directory-refused"
+        }
+      ],
+      "compilerChildElapsedMs": {
+        "samples": 16,
+        "min": 9646,
+        "max": 17367,
+        "mean": 13232.4375
+      },
+      "compilerTimingScope": "one CI workload; includes loader/import/hash verification and compilation; not a universal benchmark",
+      "largeApplicationElapsedMs": {
+        "samples": 8,
+        "min": 4015,
+        "max": 7703,
+        "mean": 5749.625
+      },
+      "largeApplicationPeakRssKiB": {
+        "samples": 8,
+        "min": 154124,
+        "max": 170248,
+        "mean": 163895.5
+      },
+      "memoryScope": "retained compiler-like application processes, not compiler child RSS",
+      "exactReferenceChecks": "normalized candidate JSON, canonical admission, serialized original/specialized IR and decoded source identities; every retained behavior observation"
+    },
+    {
+      "runtime": {
+        "name": "bun",
+        "version": "1.4.4",
+        "minimum": "1.4.4",
+        "label": "bun1.4.4"
+      },
+      "status": "passed",
+      "applicationBuilds": 16,
+      "executedCases": 264,
+      "negatives": [
+        {
+          "case": "wrong-manifest-refused-before-import"
+        },
+        {
+          "case": "unsupported-engine-refused-before-import"
+        },
+        {
+          "case": "reserved-tool-override-refused"
+        },
+        {
+          "case": "mutable-adapter-inside-graph-refused"
+        },
+        {
+          "variant": "js",
+          "case": "typing-refusal-preserves-generation"
+        },
+        {
+          "variant": "js",
+          "case": "graph-change-prevents-publication"
+        },
+        {
+          "variant": "ts",
+          "case": "typing-refusal-preserves-generation"
+        },
+        {
+          "variant": "ts",
+          "case": "graph-change-prevents-publication"
+        },
+        {
+          "case": "oversized-file-refused-before-reading"
+        },
+        {
+          "case": "unexpected-directory-refused"
+        }
+      ],
+      "compilerChildElapsedMs": {
+        "samples": 16,
+        "min": 8891,
+        "max": 17538,
+        "mean": 12810.1875
+      },
+      "compilerTimingScope": "one CI workload; includes loader/import/hash verification and compilation; not a universal benchmark",
+      "largeApplicationElapsedMs": {
+        "samples": 8,
+        "min": 2517,
+        "max": 4518,
+        "mean": 3488.75
+      },
+      "largeApplicationPeakRssKiB": {
+        "samples": 8,
+        "min": 99548,
+        "max": 107372,
+        "mean": 104758
+      },
+      "memoryScope": "retained compiler-like application processes, not compiler child RSS",
+      "exactReferenceChecks": "normalized candidate JSON, canonical admission, serialized original/specialized IR and decoded source identities; every retained behavior observation"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 12812871458,
+      "name": "psc1-modular-checked-node-f433bad08a5b53992030d4f6ad043bfd0839d68f",
+      "bytes": 4678193,
+      "sha256": "88252afc343ffc964c115f6e2bcdc4d529223c6f83e6290ad7724deafef19c92",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40679842606/artifacts/12812871458"
+    },
+    {
+      "id": 12811649188,
+      "name": "psc1-modular-checked-bun-f433bad08a5b53992030d4f6ad043bfd0839d68f",
+      "bytes": 4687089,
+      "sha256": "d49283a090e1883b20fc58757219a73bff69d7972393b7ebfab6d4c2ea2840d5",
+      "url": "https://github.com/dwijayuda/pskernel/actions/runs/40679842606/artifacts/12811649188"
+    }
+  ],
+  "preflight": "one real-loader early refusal on each host runtime, before native build/artifact download",
+  "totalBoundaryNegatives": 20,
+  "setupMaintenance": {
+    "commit": "05ae5cb47c677357a2eb9e82b0987f1280efffb9",
+    "scope": "eleven setup sites across eight active regression workflows; matrix expansion produced fourteen measured invocations",
+    "policy": "Reuse the exact existing Lean cache; three bounded 120-second launcher attempts within a seven-minute setup step; do not fetch an unrelated default Lean toolchain. Compiler/checker/resource policies and every regression command remain unchanged.",
+    "validation": "all-14-observed-cache-hit-invocations-passed",
+    "priorObservedSetup": {
+      "run": 40679852399,
+      "job": 122788191292,
+      "name": "Install repository-pinned Lean",
+      "status": "completed",
+      "conclusion": "cancelled",
+      "number": 6,
+      "started_at": "2026-10-28T11:27:52Z",
+      "completed_at": "2026-10-28T11:37:24Z",
+      "elapsedMs": 572000
+    },
+    "measuredCachedInvocations": [
+      {
+        "job": "lossless / lossless",
+        "jobId": 122794955727,
+        "status": "success",
+        "elapsedSeconds": 1
+      },
+      {
+        "job": "native / native",
+        "jobId": 122794955768,
+        "status": "success",
+        "elapsedSeconds": 0
+      },
+      {
+        "job": "focused / focused (applications)",
+        "jobId": 122794955771,
+        "status": "success",
+        "elapsedSeconds": 1
+      },
+      {
+        "job": "focused / php-application",
+        "jobId": 122794955780,
+        "status": "success",
+        "elapsedSeconds": 0
+      },
+      {
+        "job": "source-bindings / trace",
+        "jobId": 122794955787,
+        "status": "success",
+        "elapsedSeconds": 1
+      },
+      {
+        "job": "focused / focused (core)",
+        "jobId": 122794955887,
+        "status": "success",
+        "elapsedSeconds": 0
+      },
+      {
+        "job": "modular / pilot",
+        "jobId": 122794956004,
+        "status": "success",
+        "elapsedSeconds": 0
+      },
+      {
+        "job": "source-bindings / integration",
+        "jobId": 122796759458,
+        "status": "success",
+        "elapsedSeconds": 0
+      },
+      {
+        "job": "closures / selected-closure (semantic-compiler, checked)",
+        "jobId": 122798210687,
+        "status": "success",
+        "elapsedSeconds": 0
+      },
+      {
+        "job": "g1 / generated-js",
+        "jobId": 122798210716,
+        "status": "success",
+        "elapsedSeconds": 0
+      },
+      {
+        "job": "closures / selected-closure (rust-compiler, ordinary-checked)",
+        "jobId": 122798210849,
+        "status": "success",
+        "elapsedSeconds": 0
+      },
+      {
+        "job": "closures / selected-closure (directjs-compiler, ordinary-checked)",
+        "jobId": 122798210981,
+        "status": "success",
+        "elapsedSeconds": 0
+      },
+      {
+        "job": "g1 / host-session-boundary",
+        "jobId": 122798211662,
+        "status": "success",
+        "elapsedSeconds": 0
+      },
+      {
+        "job": "full / linux-scoped",
+        "jobId": 122800101567,
+        "status": "success",
+        "elapsedSeconds": 0
+      }
+    ],
+    "measuredPath": "cache-hit"
+  },
+  "applicationFixtures": [
+    {
+      "id": "lean-cli-json",
+      "outputTarget": "js",
+      "sourceModules": 11,
+      "sourceClosureDigest": "d0ff83526c431e9839a37a497aaf10d60df7e119213471cb029172353e77be84",
+      "admissionsSha256": "e3d2565456e90f2949a8b331d2e0060342e78ea5be1af8d83fc1842898d57eb9",
+      "originalIrSha256": "bfbb9498508fa84f362ab0c9e1ee1e3ee08f376490507ae7d7337b0d20b04eff",
+      "sourceSha256": "e28074069144414e37401006510a8e2531c564dad0bc39fbdc404d3ac93eacfa"
+    },
+    {
+      "id": "lean-cli-json",
+      "outputTarget": "ts",
+      "sourceModules": 11,
+      "sourceClosureDigest": "d0ff83526c431e9839a37a497aaf10d60df7e119213471cb029172353e77be84",
+      "admissionsSha256": "e3d2565456e90f2949a8b331d2e0060342e78ea5be1af8d83fc1842898d57eb9",
+      "originalIrSha256": "bfbb9498508fa84f362ab0c9e1ee1e3ee08f376490507ae7d7337b0d20b04eff",
+      "sourceSha256": "0de46c09a1c0a72b9f4903ffff2177e5f4e74652a235368b692ae9f787926480"
+    },
+    {
+      "id": "lean-compiler-like",
+      "outputTarget": "js",
+      "sourceModules": 11,
+      "sourceClosureDigest": "d6147a2ea3909b4d40044fc2f174093d56a76cf88eae8e05e37c100c176dd79b",
+      "admissionsSha256": "3dbd4d492c0afc4be1a77e488a81635cecfb5c2ba7e0f06595cde4e6c6996dfc",
+      "originalIrSha256": "bd84b2cb315b083cd57152463718e7814f211b1e0186ab9f1961bb3bb0832d3e",
+      "sourceSha256": "09ea685323017da80c2ca679afdc24520ac119d5e2c94238c33f361eeb788bb0"
+    },
+    {
+      "id": "lean-compiler-like",
+      "outputTarget": "ts",
+      "sourceModules": 11,
+      "sourceClosureDigest": "d6147a2ea3909b4d40044fc2f174093d56a76cf88eae8e05e37c100c176dd79b",
+      "admissionsSha256": "3dbd4d492c0afc4be1a77e488a81635cecfb5c2ba7e0f06595cde4e6c6996dfc",
+      "originalIrSha256": "bd84b2cb315b083cd57152463718e7814f211b1e0186ab9f1961bb3bb0832d3e",
+      "sourceSha256": "77709354a95dd692a2f3d106302a78cf465833d39276a2144705a13d992afa98"
+    },
+    {
+      "id": "ps-cli-json",
+      "outputTarget": "js",
+      "sourceModules": 11,
+      "sourceClosureDigest": "2c78829afc24c4f6a1ba80f2de2f3a4dcb80172defcff0477b024e001274fa00",
+      "admissionsSha256": "e3d2565456e90f2949a8b331d2e0060342e78ea5be1af8d83fc1842898d57eb9",
+      "originalIrSha256": "bfbb9498508fa84f362ab0c9e1ee1e3ee08f376490507ae7d7337b0d20b04eff",
+      "sourceSha256": "e28074069144414e37401006510a8e2531c564dad0bc39fbdc404d3ac93eacfa"
+    },
+    {
+      "id": "ps-cli-json",
+      "outputTarget": "ts",
+      "sourceModules": 11,
+      "sourceClosureDigest": "2c78829afc24c4f6a1ba80f2de2f3a4dcb80172defcff0477b024e001274fa00",
+      "admissionsSha256": "e3d2565456e90f2949a8b331d2e0060342e78ea5be1af8d83fc1842898d57eb9",
+      "originalIrSha256": "bfbb9498508fa84f362ab0c9e1ee1e3ee08f376490507ae7d7337b0d20b04eff",
+      "sourceSha256": "0de46c09a1c0a72b9f4903ffff2177e5f4e74652a235368b692ae9f787926480"
+    },
+    {
+      "id": "ps-compiler-like",
+      "outputTarget": "js",
+      "sourceModules": 11,
+      "sourceClosureDigest": "c410a69b4a830bec9b0b97fac02dedbc22ae33f83820e0c302db106b0e10f518",
+      "admissionsSha256": "3dbd4d492c0afc4be1a77e488a81635cecfb5c2ba7e0f06595cde4e6c6996dfc",
+      "originalIrSha256": "bd84b2cb315b083cd57152463718e7814f211b1e0186ab9f1961bb3bb0832d3e",
+      "sourceSha256": "09ea685323017da80c2ca679afdc24520ac119d5e2c94238c33f361eeb788bb0"
+    },
+    {
+      "id": "ps-compiler-like",
+      "outputTarget": "ts",
+      "sourceModules": 11,
+      "sourceClosureDigest": "c410a69b4a830bec9b0b97fac02dedbc22ae33f83820e0c302db106b0e10f518",
+      "admissionsSha256": "3dbd4d492c0afc4be1a77e488a81635cecfb5c2ba7e0f06595cde4e6c6996dfc",
+      "originalIrSha256": "bd84b2cb315b083cd57152463718e7814f211b1e0186ab9f1961bb3bb0832d3e",
+      "sourceSha256": "77709354a95dd692a2f3d106302a78cf465833d39276a2144705a13d992afa98"
+    }
+  ],
+  "retainedInstalledRegression": {
+    "run": 40679842769,
+    "commit": "f433bad08a5b53992030d4f6ad043bfd0839d68f",
+    "jobs": [
+      {
+        "id": 122787448123,
+        "name": "preflight",
+        "conclusion": "success"
+      },
+      {
+        "id": 122787767498,
+        "name": "installed",
+        "conclusion": "success"
+      },
+      {
+        "id": 122807496029,
+        "name": "runtime (node26, 26)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122807496048,
+        "name": "runtime (node24, 24)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122807496073,
+        "name": "runtime (node20-refusal, 20, 1)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122807496080,
+        "name": "runtime (node22-older-refusal, 22.0.0, 1)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122807496103,
+        "name": "runtime (bun-older-refusal, 22.23.3, 1.4.0, 1)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122807496233,
+        "name": "runtime (node-minimum, 22.23.3)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122808301864,
+        "name": "installable",
+        "conclusion": "success"
+      }
+    ],
+    "scope": "existing installed CLI/runtime/watch/publication corpus and its own frozen compiler inputs; separate from modular-engine application evidence and the .13 npm qualification",
+    "packageVersion": "0.1.0-psc1.11",
+    "frozenCompilerSourceClosureDigest": "073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9"
+  },
+  "retainedNpmUmbrellaReference": {
+    "packageVersion": "0.1.0-psc1.13",
+    "run": 40666699859,
+    "commit": "4393ed1551aef8b6e5799b3a611cf084739618d8",
+    "cases": 53,
+    "status": "preserved-qualified-reference; no modular default promotion"
+  },
+  "retainedSourceRegression": {
+    "run": 40681840579,
+    "attempt": 1,
+    "headCommit": "05ae5cb47c677357a2eb9e82b0987f1280efffb9",
+    "testedMerge": "e81c3468d68c55719b92198daee658b4972d8d7c",
+    "passedJobs": 16,
+    "benchmark": "intentionally-skipped",
+    "practicalCore": {
+      "counts": {
+        "implemented": 0,
+        "tested": 0,
+        "qualified": 37,
+        "blocked": 0
+      },
+      "releaseReady": true
+    },
+    "sevenBackend": {
+      "qualification": "passed-scoped-execution",
+      "targetExecutionBundles": 14,
+      "logicalChecker": {
+        "version": "4.35.0",
+        "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+      }
+    },
+    "scope": "retained native/source/G1 corpus; distinct from the new modular-engine application lane",
+    "jobs": [
+      {
+        "id": 122794619803,
+        "name": "static",
+        "conclusion": "success"
+      },
+      {
+        "id": 122794955727,
+        "name": "lossless / lossless",
+        "conclusion": "success"
+      },
+      {
+        "id": 122794955768,
+        "name": "native / native",
+        "conclusion": "success"
+      },
+      {
+        "id": 122794955771,
+        "name": "focused / focused (applications)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122794955780,
+        "name": "focused / php-application",
+        "conclusion": "success"
+      },
+      {
+        "id": 122794955787,
+        "name": "source-bindings / trace",
+        "conclusion": "success"
+      },
+      {
+        "id": 122794955887,
+        "name": "focused / focused (core)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122794956004,
+        "name": "modular / pilot",
+        "conclusion": "success"
+      },
+      {
+        "id": 122794957923,
+        "name": "benchmark",
+        "conclusion": "skipped"
+      },
+      {
+        "id": 122796759458,
+        "name": "source-bindings / integration",
+        "conclusion": "success"
+      },
+      {
+        "id": 122798210687,
+        "name": "closures / selected-closure (semantic-compiler, checked)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122798210716,
+        "name": "g1 / generated-js",
+        "conclusion": "success"
+      },
+      {
+        "id": 122798210849,
+        "name": "closures / selected-closure (rust-compiler, ordinary-checked)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122798210981,
+        "name": "closures / selected-closure (directjs-compiler, ordinary-checked)",
+        "conclusion": "success"
+      },
+      {
+        "id": 122798211662,
+        "name": "g1 / host-session-boundary",
+        "conclusion": "success"
+      },
+      {
+        "id": 122800101567,
+        "name": "full / linux-scoped",
+        "conclusion": "success"
+      },
+      {
+        "id": 122813241620,
+        "name": "gate",
+        "conclusion": "success"
+      }
+    ]
+  }
+}

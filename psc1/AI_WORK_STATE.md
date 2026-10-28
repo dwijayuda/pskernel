@@ -1,9 +1,89 @@
 # PSC1 AI work state
 
-Updated 2026-10-28 Asia/Jakarta. Production modularity implementation PR #205,
+Updated 2026-10-28 Asia/Jakarta. Active continuation branch
+feat/psc1-modular-checked-host-20261028 from verified PR #205 HEAD4393ed15.
+ Production modularity implementation PR #205,
 stacked on plan PR #204 / b400552324956d9c3a684c9231f60f70066e1629.
 GitHub/Linux CI only; expected-HEAD, single-parent/non-force history.
 No merge or registry publication.
+
+## M3 application milestone: qualified checked modular execution
+
+Linux [40679842606](https://github.com/dwijayuda/pskernel/actions/runs/40679842606)
+passes both Node 22.23.3 and Bun 1.4.4 lanes at
+`f433bad08a5b53992030d4f6ad043bfd0839d68f`. Both complete generated JS/TS engines
+compile four retained 11-module applications, covering .lean/.ps and JS/strict TS
+output: **32 checked application builds, 528 behavior executions and 20 boundary
+negatives**. Native compiler executables are removed before modular execution.
+Normalized candidate JSON, canonical admission, serialized original/specialized IR
+and decoded target-source identities match the independently checked native references.
+
+The unchanged CLI/JSON/file and compiler-like contracts include Unicode, invalid
+input, permission/capability denials, prior-file preservation and 100,000 statements.
+Typing refusals and changed graph resources preserve the prior portable generation.
+Oversized files refuse before reading; unexpected directories, wrong manifests,
+unsupported engines, reserved tool overrides and adapters inside the graph refuse.
+A real-loader preflight runs before build/download on both host runtimes.
+
+[Qualification receipt](docs/PSC1_MODULAR_CHECKED_APPLICATION_QUALIFICATION_2026-10-28.json)
+records exact source/artifact identities, results and measured process timings.
+[Execution walkthrough](docs/architecture/modular-checked-execution.md) links the
+loader, session, checker, target consumers and publication path. The adapter reuses
+the existing checked host and compiler; it does not duplicate frontend semantics,
+grant authority to candidate data or claim a preservation proof.
+
+Input graph artifact 12805544463 from run 40666692730 / job 122743152998, ZIP SHA256
+`01eb8af4d455e41c919ad523355aa1e238485fe84fa7f2ea70ea3891ae366e38`,
+is pinned in scripts/modular-checked-input.json. Source closure remains
+`41eb40437e0df1722128c09c9b9da7cad0ccb1ad61371f23eb6bc2db4e9a1106`.
+Application evidence: Node artifact 12812871458
+(`88252afc343ffc964c115f6e2bcdc4d529223c6f83e6290ad7724deafef19c92`);
+Bun artifact 12811649188
+(`d49283a090e1883b20fc58757219a73bff69d7972393b7ebfab6d4c2ea2840d5`).
+
+Measured compiler-child time, including import/hash verification and compilation:
+Node 9,646–17,367 ms; Bun 8,891–17,538 ms across 16 application builds per runtime.
+Generated 100,000-statement application execution is measured separately: Node
+4,015–7,703 ms / maximum 170,248 KiB RSS; Bun 2,517–4,518 ms / maximum 107,372 KiB RSS.
+These are one CI workload's observations, not a general performance claim.
+
+## Retained regression and development-process evidence
+
+Source [40681840579](https://github.com/dwijayuda/pskernel/actions/runs/40681840579)
+passes all 16 selected jobs (benchmark intentionally skipped) at branch
+`05ae5cb47c677357a2eb9e82b0987f1280efffb9`, tested merge
+`e81c3468d68c55719b92198daee658b4972d8d7c`: 37/37 Practical Core criteria, zero blockers,
+and scoped seven-backend execution with 14 target bundles. This retained
+native/source/G1 evidence is distinct from the new modular-engine application lane.
+
+Installed CLI/runtime [40679842769](https://github.com/dwijayuda/pskernel/actions/runs/40679842769)
+passes all nine jobs at `f433bad0`, including watch, publication and runtime
+acceptance/refusals. This workflow uses its retained .11 test cohort and frozen
+compiler closure `073e5156...`; it does not promote the modular candidate.
+The separate .13 npm umbrella reference remains qualified by 40666699859 at
+PR #205 HEAD `4393ed15` with all 53 cases passing.
+
+CI-only commit `05ae5cb47c677357a2eb9e82b0987f1280efffb9` replaces 11
+unconditional installer sites across eight active workflows with the shared
+.github/actions/psc1-lean-launcher action. It respects the existing exact toolchain
+cache, bounds downloads/retries and avoids fetching an unrelated default Lean.
+The observed old setup spent 572 seconds before cancellation; cached shared setup
+takes 0–1 seconds in the measured lanes. All test commands, official Lean 4.35.0,
+compiler/checker limits and semantic/memory/stack/fuel policies remain unchanged.
+
+Diagnosed attempts are preserved in the receipt: the development harness moved
+from production host code into scripts/ after the repository guard refused it;
+a documentation link was corrected without relaxing that guard; a mistakenly
+removed filesystem import was restored and covered by the new fast preflight.
+The first application qualification, 40677391651 at `8dac01c7`, also passed all
+528 cases before the four additional boundary cases were added per runtime.
+
+Remaining M3: full retained semantic/library and seven-backend corpus through the
+modular engines, including genuine Wasm/component and optional-provider dispatch.
+M4 checked umbrella/thin CLI/watch integration and default independent Wasm-kernel
+qualification remain unpromoted. M5 modular generation/fixed points are unqualified.
+Qualified .13, default linear-memory C++/Emscripten kernel, existing Rust/Wasm
+executors, optional Python/PHP and deferred pilot remain preserved.
 
 ## Verified milestone: complete source-owned JS/TS compiler candidates
 
@@ -74,9 +154,10 @@ Apache-2.0 and upstream notices, semantic fuel,240s ordinary compiler/tool reque
 
 ## Dependency-ordered continuation
 
-1. Finish M3: run the retained CLI/JSON/library/compiler-like and seven-backend
-   corpora through these modular JS/TS engines; add supported Bun and genuine Wasm
-   execution/adapters. Current finite examples do not replace that corpus.
+1. Finish M3: run the full retained semantic/library and seven-backend corpus
+   through these modular JS/TS engines, including genuine Wasm/component and
+   optional-provider execution/refusals. The real CLI/JSON/compiler-like application
+   lane on Node/Bun with JS/strict TS output is qualified separately above.
 2. M4: version the direct low-level API transition and integrate verified graph
    loading/coherent transactional publication with checked @proofscript/compiler,
    thin @proofscript/cli, root-only local/global proofscript install and watch.

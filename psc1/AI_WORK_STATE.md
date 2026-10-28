@@ -7,22 +7,48 @@ stacked on plan PR #204 / b400552324956d9c3a684c9231f60f70066e1629.
 GitHub/Linux CI only; expected-HEAD, single-parent/non-force history.
 No merge or registry publication.
 
-## Active: M3 checked execution through the modular graph
+## M3: checked real applications through complete modular engines
 
-The final PR #205 HEAD4393ed1551aef8b6e5799b3a611cf084739618d8 is verified live:
-production40666692730, npm40666699859, installed CLI40666692776 and source40666699904
-all pass. Source attempt2 retries two installer-only timeouts. Full source37/37,
-zero blocked; all nine CLI jobs pass. Final graph artifact12805544463 / ZIP
-01eb8af4d455e41c919ad523355aa1e238485fe84fa7f2ea70ea3891ae366e38 is the M3 input.
+[PR #206](https://github.com/dwijayuda/pskernel/pull/206) continues from verified
+PR #205 HEAD4393ed1551aef8b6e5799b3a611cf084739618d8. Final #205 production40666692730,
+npm40666699859, installed CLI40666692776 and source40666699904 all pass.
+Source attempt2 retried two installer-only timeouts; full source37/37, zero blocked.
 
-Implement loadExecutableCompiler and createExecutableCompilerSession as host-only
-adapters. Complete graph verification precedes import and brackets each request;
-all graph/helper bytes bind the existing generated checked host session. The
-existing independent admission, target validation and transactional publication
-remain the only path to publishing application output. The next Linux lane reuses
-the retained CLI/JSON/compiler-like fixtures and native references, then removes
-native compiler executables before exercising both modular engines. Qualification
-is pending. Default .13 and the deferred pilot remain unchanged.
+Linux [40677391651](https://github.com/dwijayuda/pskernel/actions/runs/40677391651)
+passes both Node22.23.3 and Bun1.4.4 lanes at8dac01c767ccd09959dbb7fde56b92f1fd7727e5.
+Each runs both complete generated engines, both source grammars and JS/strict TS
+outputs:16 independently checked sessions and264 retained behavior cases per runtime,
+528 total. Native compiler executables are removed before modular execution.
+Exact candidate/admission/original+specialized IR/source hashes match the native
+references. Real CLI/JSON/files and100000-statement compiler-like workloads execute.
+Typing refusals and graph changes preserve prior portable generations. Oversized
+files refuse before reading; extra directories refuse. Six negatives pass per lane.
+
+The host loader verifies the complete pinned graph before import and around each
+request. Its adapter pins all graph/helper resources and delegates independent
+official Lean admission, target checks and publication to the existing checked
+session. No frontend or verification pipeline is duplicated.
+[Execution walkthrough](docs/architecture/modular-checked-execution.md).
+
+Input graph artifact12805544463 / ZIP SHA256
+01eb8af4d455e41c919ad523355aa1e238485fe84fa7f2ea70ea3891ae366e38
+from production40666692730 / job122743152998 is pinned in
+scripts/modular-checked-input.json. It retains source closure41eb4043... and all
+prior M1/M2 evidence. Application evidence artifacts: Node12811652107
+(46ec26db406be86b808b4aea6c5b62dd8cb5bb827fdd7d422646087196f0f5f4),
+Bun12811318450 (74d655faa84c105c5e211944e07f09bd3e9a3057a3b7cab90e6edd17fed73baf).
+
+Follow-up in this commit adopts CI-generated readable formatting, records process
+timings and adds four direct loader/session boundary cases; terminal requalification
+of those additions is pending. The development harness lives under scripts/,
+following the repository guard; its first misplaced-host attempt40677096400 failed
+before compiler execution and was corrected without changing that guard.
+
+Remaining M3: complete retained semantic/library and seven-backend corpus, including
+genuine Wasm/component and optional-provider execution/refusals. M4 checked umbrella,
+thin CLI/watch and default independent Wasm-kernel integration remain unpromoted.
+M5 modular generation/fixed points remain unqualified. Default .13, existing budgets
+and deferred pilot are preserved. No merge or registry publication.
 
 ## Verified milestone: complete source-owned JS/TS compiler candidates
 

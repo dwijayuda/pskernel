@@ -1,20 +1,23 @@
 // Candidate loading only. Source/project data never selects this graph or tools.
-import fs from 'node:fs';
 import path from 'node:path';
-import {pathToFileURL} from 'node:url';
-import {requireSupportedRuntime} from '../runtime-policy.mjs';
-import {readManifestBytes, verify} from './verify.mjs';
+import { pathToFileURL } from 'node:url';
+import { requireSupportedRuntime } from '../runtime-policy.mjs';
+import { readManifestBytes, verify } from './verify.mjs';
 
 const MAX_BYTES = 128 * 1024 * 1024;
-const refuse = code => { throw Error('PSC1_EXECUTABLE_' + code); };
+const refuse = (code) => {
+  throw Error('PSC1_EXECUTABLE_' + code);
+};
 
-export async function loadExecutableCompiler({
-  root, manifestFile, manifestSha256, variant,
-}) {
+export async function loadExecutableCompiler({ root, manifestFile, manifestSha256, variant }) {
   requireSupportedRuntime();
-  if (!['js', 'ts'].includes(variant) ||
-      !path.isAbsolute(root || '') || !path.isAbsolute(manifestFile || '') ||
-      !/^[a-f0-9]{64}$/.test(manifestSha256 || '')) refuse('LOAD_ARGUMENTS');
+  if (
+    !['js', 'ts'].includes(variant) ||
+    !path.isAbsolute(root || '') ||
+    !path.isAbsolute(manifestFile || '') ||
+    !/^[a-f0-9]{64}$/.test(manifestSha256 || '')
+  )
+    refuse('LOAD_ARGUMENTS');
   if (fs.realpathSync(root) !== root || fs.realpathSync(manifestFile) !== manifestFile)
     refuse('LOAD_SYMLINK');
   const check = () => {
@@ -34,8 +37,7 @@ export async function loadExecutableCompiler({
     }),
     verify: check,
     candidate(input) {
-      if (typeof input !== 'string' || Buffer.byteLength(input) > MAX_BYTES)
-        refuse('INPUT_BOUND');
+      if (typeof input !== 'string' || Buffer.byteLength(input) > MAX_BYTES) refuse('INPUT_BOUND');
       check();
       const output = module.psCompilerServiceCandidate(input);
       if (typeof output !== 'string' || Buffer.byteLength(output) > MAX_BYTES)

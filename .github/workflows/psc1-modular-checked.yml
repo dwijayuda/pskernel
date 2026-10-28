@@ -2,6 +2,20 @@ name: PSC1 modular compiler checked applications
 on:
   push:
     branches: [feat/psc1-modular-checked-host-20261028]
+    # Documentation receipts do not repeat unchanged compiler workloads.
+    paths:
+      - .github/workflows/psc1-modular-checked.yml
+      - package.json
+      - package-lock.json
+      - psc1/host-tools/**
+      - psc1/packages/**
+      - psc1/stdlib/**
+      - psc1/test/**
+      - psc1/scripts/**
+      - psc1/lakefile.lean
+      - psc1/lean-toolchain
+      - psc1/*.json
+      - psc1/docs/*CONTRACT.json
   workflow_dispatch:
 permissions:
   contents: read

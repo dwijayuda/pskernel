@@ -44,6 +44,14 @@ JS/TS/Rust execution, Wasm validation, graph/cohort negatives and offline npm
 package byte/consumer checks. [Exact receipt](PSC1_EXECUTABLE_PACKAGES_QUALIFICATION_2026-10-28.json)
 and [build walkthrough](architecture/executable-package-build.md) state the scope.
 
+PR #206 adds the checked host adapter and retained application execution.
+Linux40677391651 at8dac01c7 passes both Node/Bun:32 checked compiler sessions and
+528 real behavior cases across both engines/grammars and JS/strict TS outputs.
+Native frontends are absent during modular execution; exact native candidate,
+admission/IR/source comparisons and publication/resource negatives pass.
+[Execution walkthrough](architecture/modular-checked-execution.md). Broader M3
+semantic/library and seven-backend qualification is still pending.
+
 The dependency-ordered queue is: finish M3's retained real application/backend
 corpus through the modular engines (including Bun and Wasm execution); M4 checked
 root-only umbrella/thin CLI/watch and coherent graph publication; portable module

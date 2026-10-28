@@ -75,4 +75,4 @@ lean_lib PsMinCompilerScalarFixture where
 -- R6 test-only compatibility fixture; not in the connected checker.
 lean_lib PsMinStringBridgeFixture where
   srcDir := "src"
-  roots := #[`Ps.MinKernel.Tests.StringBridge]
+  roots := #[`Ps.MinKernel.Tests.StringBridge, `Ps.MinKernel.Tests.EmitterBridge]

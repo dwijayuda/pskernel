@@ -79,3 +79,13 @@ append/join checks passed. Independent official checks accepted the exact
 Public R4B refused the fixture with PSC1_MIN_CORE_REFUSED and delegated=false.
 R5 source and reporting workflows were separately rechecked terminal-success.
 This satisfies the decision gate; final R6 source qualification is still pending.
+
+## Separate refusal witnesses
+
+Keep standalone Ps.MinKernel.Tests.StringBridge as its exact two-definition,
+one-module append fixture. Register Ps.MinKernel.Tests.EmitterBridge separately;
+its actual emitter dependency graph is independently captured and checked.
+The expanded emitter packet may fail the ASCII wire profile before Core rules
+are reached. That refusal is recorded separately and cannot substitute for
+the standalone fixture's PSC1_MIN_CORE_REFUSED result after valid ASCII framing.
+Neither witness grants String admission or changes a checker rule.

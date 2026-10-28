@@ -2,6 +2,7 @@ import Ps.BackendTs.Sh1
 import Ps.Host.ProjectCompiler
 import Ps.CompilerIr.Encode
 import Ps.MinKernel.Tests.StringBridge
+import Ps.MinKernel.Tests.EmitterBridge
 import Lean
 
 -- Linux Actions host-only harness. Source inputs are exact owned files.
@@ -144,4 +145,6 @@ def main : IO Unit := do
   let fixture ← r6CheckInputs (dir ++ "/fixture.inputs.json")
   r6Compile actual (dir ++ "/actual")
   r6Compile fixture (dir ++ "/fixture")
+  let emitter ← r6CheckInputs (dir ++ "/emitter.inputs.json")
+  r6Compile emitter (dir ++ "/emitter")
   IO.println "PSC1_R6_NATIVE_TEXT_PASS"

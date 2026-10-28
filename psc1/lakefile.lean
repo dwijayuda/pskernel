@@ -689,4 +689,4 @@ lean_lib PsMinTextPreservation where
 -- R6 compatibility fixture; never a connected checker root.
 lean_lib PsMinStringBridgeFixture where
   srcDir := "packages/pskernel-min/src"
-  roots := #[`Ps.MinKernel.Tests.StringBridge]
+  roots := #[`Ps.MinKernel.Tests.StringBridge, `Ps.MinKernel.Tests.EmitterBridge]

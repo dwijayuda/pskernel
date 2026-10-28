@@ -11,7 +11,7 @@ concurrency:
 jobs:
   portable:
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    timeout-minutes: 60
     defaults:
       run:
         shell: bash
@@ -48,7 +48,7 @@ jobs:
       - name: Build portable planner, immutable reference and source census
         run: |
           node scripts/check-portable-renderer-reference.mjs
-          lake build psc1_portable_plan_tests psc1_executable_plan_tests psc1_source_census_probe psc1_portable_module_seed psc1_portable_module_tests
+          lake build psc1_portable_plan_tests psc1_executable_plan_tests psc1_source_census_probe psc1_portable_module_seed psc1_portable_module_tests psc1_executable_packages psc1_independent_checker
       - uses: actions/cache/save@v4
         if: always() && steps.native.outputs.cache-hit != 'true'
         with:
@@ -61,9 +61,22 @@ jobs:
           .lake/build/bin/psc1_portable_module_tests
       - name: Census actual enlarged compiler source in both grammars
         run: node scripts/generated-target-source-audit.mjs js unified
+      - name: Install locked package consumers after the source census
+        timeout-minutes: 5
+        run: |
+          npm ci --prefix .. --ignore-scripts --include=optional --no-audit --no-fund --fetch-retries=2 --fetch-timeout=30000
+          npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund --fetch-retries=2 --fetch-timeout=30000
+          for file in host-tools/executable/*.mjs; do node --check "$file"; done
+      - name: Native oracle and immutable renderer comparison on the complete compiler
+        run: node host-tools/executable/build.mjs
+      - name: Portable native G1 generation, independent admission and exact renderer/IR comparison
+        run: node host-tools/executable/prepare-generation.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: psc1-portable-modules-${{ github.sha }}
-          path: psc1/dist/generated-unified-js-compiler/source-audit/
+          path: |
+            psc1/dist/generated-unified-js-compiler/source-audit/
+            psc1/dist/executable-packages/compiler/
+            psc1/dist/portable-modules/
           retention-days: 90

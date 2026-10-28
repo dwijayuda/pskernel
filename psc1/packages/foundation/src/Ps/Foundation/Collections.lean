@@ -76,8 +76,8 @@ def psListFilterExceptAcc {alpha error : Type} (predicate : alpha -> Except erro
   | List.cons value rest =>
       match predicate value with
       | Except.error reason => Except.error reason
-      | Except.ok include =>
-          psListFilterExceptAcc predicate rest (if include then List.cons value acc else acc)
+      | Except.ok keep =>
+          psListFilterExceptAcc predicate rest (if keep then List.cons value acc else acc)
 
 def psListFilterExcept {alpha error : Type} (predicate : alpha -> Except error Bool)
     (values : List alpha) : Except error (List alpha) :=

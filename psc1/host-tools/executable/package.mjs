@@ -4,10 +4,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import {inspectModule} from '../module-graph-inspection.mjs';
-import {put,files,inventory,sha256,json,run,bounded,output} from './tools.mjs';
-const version='0.1.0-psc1-modular.0';
+import {put,files,inventory,sha256,json,run,bounded,output as defaultOutput} from './tools.mjs';
+const defaultVersion='0.1.0-psc1-modular.0';
 const nodeFlags=['--max-old-space-size=4096','--stack-size=8192'];
-export function packageGraph(emission,sourceRows,receipt,captured){
+export function packageGraph(emission,sourceRows,receipt,captured,options={}){
+ const output=options.output??defaultOutput,version=options.version??defaultVersion;
+ const labelPrefix=options.labelPrefix??'';
  const root=path.join(output,'candidate'),packageRows=new Map(),sources=new Map();
  const directory=specifier=>path.join(root,'node_modules',...specifier.split('/').slice(0,2));
  const names=emission.packages.map(s=>s.split('/').slice(0,2).join('/'));
@@ -52,7 +54,7 @@ export function packageGraph(emission,sourceRows,receipt,captured){
  const verifySdk=()=>{for(const row of sdk)assert.equal(sha256(fs.readFileSync(row.file)),row.sha256);};
  const compile=(label,config)=>{
   const file=path.join(output,label+'.json');put(file,json(config));verifySdk();
-  bounded(label,[process.execPath,...nodeFlags,tsc,'--project',file],{addressSpace:false});verifySdk();
+  bounded(labelPrefix+label,[process.execPath,...nodeFlags,tsc,'--project',file],{addressSpace:false});verifySdk();
  };
  // Infer only the common JS helper declarations. IR-owned declarations come
  // from the same checked IR and must not be duplicated by JS inference.
@@ -117,7 +119,7 @@ export function packageGraph(emission,sourceRows,receipt,captured){
   console.log('PSC1_EXECUTABLE_GRAPH '+variant+' '+JSON.stringify({units:emission.units.length,weakMaps,symbols}));
  }
  const manifest={schema:'psc1-executable-npm-graph/1',protocol:emission.protocol,version,
-  compilerCommit:process.env.GITHUB_SHA,sourceClosureDigest:emission.sourceClosureDigest,
+  compilerCommit:options.compilerCommit??process.env.GITHUB_SHA,sourceClosureDigest:emission.sourceClosureDigest,
   compilerAssurance:captured.assurance,partialNames:captured.partialNames,
   runtimeOwner:'@proofscript/foundation',logicalAdmission:'accepted',checkerCommit:receipt.checkerCommit,
   admissionsDigest:receipt.admissionsDigest,entry,packages:ordered.map(name=>packageRows.get(name)),

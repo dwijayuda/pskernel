@@ -248,3 +248,101 @@ Do not add more type-only milestones unless an actual body-checker obligation
 requires them. The next batch must construct typed source/body witnesses and
 actual checker refinement for the retained List.rec path, then cover all 21
 declarations and their primitive interfaces before connecting public admission.
+
+## Efficient reuse of existing models
+
+[RegularModel.Denote](../proofs/pskernel-min/RegularModel.lean) already interprets
+type codes under a list of Type-valued carriers, and
+[RegularSoundness](../proofs/pskernel-min/RegularSoundness.lean) provides typed
+local/global models. Reuse those proof patterns and the actual-success-equation
+construction of [OperationalSoundness.DefinitionHistory](../proofs/pskernel-min/OperationalSoundness.lean),
+which records checked bodies rather than arbitrary inhabitants.
+
+The operational entry currently fixes its world to dataModel specs, and
+SignatureModel supplies constructor/recursor meanings for registered specs.
+A rigid type parameter is not such a registered inductive family.
+Keep the opaque parameter world separate from nominal data declarations and
+prove any indexing/embedding/offset laws explicitly when generalizing the model.
+
+Do not introduce a zero-constructor dummy group for each type variable.
+That interprets a variable as an empty carrier instead of an arbitrary type.
+Giving an arbitrary parameter the corresponding empty-family eliminator would
+require elimination from arbitrary A into every result type; choosing Unit and
+Empty shows why that cannot be supplied. Source parameters have no invented
+constructors or recursors.
+
+For the first List profile, a separate parametric term model over the existing
+monotypes and explicit constructive List/Except/Prod/Nat/Bool interfaces is
+smaller than immediately rebuilding the entire dependent/universe kernel.
+Preserve source/core/term roles and the exact prelude bindings. Generalize the
+regular nominal registry only when an actual subsequent module requires it.
+A code-level type interpretation is not enough to justify that generalization.
+
+## Recursor motives are not ordinary rank-one term parameters
+
+The captured List.rec call supplies a type-valued lambda,
+fun (_ : List alpha) => Nat -> Nat, as its motive.
+That is a family of types; it is not an ordinary monotype arrow whose codomain
+can be filled with a fictitious code for Type in the same universe.
+
+For the next body checker, recognize the actual constant-motive application
+spine, reconstruct the element/result monotypes, validate the motive annotation
+and binder scope, and prove the nil/cons/major rules and fold meaning.
+Do not pretend the full dependent recursor is an ordinary first-class value of
+the new rank-one signature grammar. Bare/partial or genuinely dependent
+recursor use needs its own explicitly proved scope.
+
+Apply the same discipline to the captured Nat.rec and Except.rec instances.
+The header model does not authorize erasing motive/proof arguments or supplying
+unproved source interfaces. Existing constant-motive proof patterns may be
+generalized only with the actual parameter and term-role contexts preserved.
+
+## Terminal adopted-source checkpoint
+
+All selected workflows are terminal success at adopted source
+`8df57b4f35f9873909e0d1fc3b9ca41dbba6441a`:
+
+- [C1 model/signatures 40738340034](https://github.com/dwijayuda/pskernel/actions/runs/40738340034):
+  model 122992856531 and actual-signatures 122994557515 passed.
+- [Module matrix 40738340020](https://github.com/dwijayuda/pskernel/actions/runs/40738340020):
+  the actual graph/frontier and unchanged counts passed.
+- [Focused proof/runtime/package 40738339912](https://github.com/dwijayuda/pskernel/actions/runs/40738339912):
+  proof 122992857366, preservation 122992856879 and portability 122994499625 passed.
+- [Broader Linux 40738349461](https://github.com/dwijayuda/pskernel/actions/runs/40738349461):
+  full/linux-scoped 123001504503 and final gate 123017955237 passed;
+  benchmark was unselected/skipped.
+- [Installed CLI 40738340085](https://github.com/dwijayuda/pskernel/actions/runs/40738340085):
+  preflight 122992857313 and installed 122993712809 passed.
+
+Adopted type artifact 12839201321 is 3760942 bytes, SHA-256
+`0032418a311394bdf5dc9bc411e6986358a926d00da39eb161729bcec98aad49`.
+Adopted model artifact 12838412097 is 4983 bytes, SHA-256
+`aadc8077e24305edf7fc368123daa6f3015b9ce09513caa07ff0e01ea68edb2a`.
+Their type-runtime TS/JS/canonical/input/observation identities exactly match
+the qualified candidate. All 21 signatures / 100 observations pass again.
+
+The complete adopted focused artifacts were hash-verified and their reports
+deduplicated, including the global psMinCoreEncode report: 272 unique printed
+reports, 44 axiom-free and 228 propext-only; no prior report is missing and no
+other assumptions appear. This audit retains declarations as well as theorems;
+it is not a proof-count measure of compiler qualification.
+
+The private U1 regression package passes all 52 SDK cases, seven hostile
+controls, offline installs and complete-runtime API/CLI checks. It still has
+ten source modules / 103181 source bytes, and kernel.js is byte-identical:
+SHA-256 `2cfe8dd6564b7ec6e968841c1ef43b01897d7ca5303095eb2b8c9b48dd27ded3`.
+The current metadata-bearing tarball is 42242 bytes, SHA-256
+`e9be81ba4c35701fa432aa1477dbabcbe538762dc0a5d812d4043d131201e47a`.
+It does not replace or relabel the original U1 deliverable; no npm publication
+occurred.
+
+The [dated receipt](PSC1_MIN_KERNEL_LIST_TYPE_QUALIFICATION_2026-10-29.json)
+retains source/run/artifact identities and the incomplete overall-goal status.
+This final reporting update changes Markdown/JSON only. Project proofs,
+compilation, tests and measurements ran exclusively on GitHub Actions Linux;
+local operations were read-only artifact parsing, hashing and deliverable export.
+
+**No additional compiler module is admitted by this component.** The stopping
+boundary is the unresolved typed body/recursor/history model and its actual
+checker refinement, followed by public-byte integration. Source C2 and all
+Min-backed self-hosting generations remain unqualified.

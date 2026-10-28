@@ -97,7 +97,8 @@
     "Nat.rec, Except.rec, Prod.mk, Bool.decEq/Eq/ite contracts and exact instantiations",
     "Except/Prod reserved-name and prelude binding laws for a separate connected profile",
     "Exact-byte and state/history composition before declaration admission",
-    "Actual compiler preservation and Min-backed generations"
+    "Actual compiler preservation and Min-backed generations",
+    "Opaque type parameters must not be fabricated as registered empty inductive groups; preserve separate parameter/nominal interfaces."
   ],
   "policy": {
     "projectExecution": "GitHub Actions Linux only",
@@ -124,5 +125,203 @@
       "reason": "Owned PSC1 frontend refused leading-dot constructor terms; explicit constructors preserve behavior"
     }
   ],
-  "boundary": "No newly admitted compiler module. Type-signature success is not declaration/body soundness, compiler preservation or self-hosting."
+  "boundary": "No newly admitted compiler module. Type-signature success is not declaration/body soundness, compiler preservation or self-hosting.",
+  "adoption": {
+    "source": "8df57b4f35f9873909e0d1fc3b9ca41dbba6441a",
+    "run": 40738340034,
+    "status": "success",
+    "modelJob": 122992856531,
+    "actualSignaturesJob": 122994557515,
+    "proofArtifact": {
+      "id": 12838412097,
+      "bytes": 4983,
+      "sha256": "aadc8077e24305edf7fc368123daa6f3015b9ce09513caa07ff0e01ea68edb2a"
+    },
+    "actualArtifact": {
+      "id": 12839201321,
+      "bytes": 3760942,
+      "sha256": "0032418a311394bdf5dc9bc411e6986358a926d00da39eb161729bcec98aad49"
+    },
+    "candidateCodeAndObservationIdentitiesEqual": true
+  },
+  "adoptedTrustAudit": {
+    "source": "8df57b4f35f9873909e0d1fc3b9ca41dbba6441a",
+    "uniquePrintedReports": 272,
+    "axiomFree": 44,
+    "propextOnly": 228,
+    "missingPriorReports": [],
+    "otherAssumptions": [],
+    "artifacts": [
+      {
+        "id": 12838392003,
+        "bytes": 226314,
+        "sha256": "32e352ddedda460c8eaa3110e00bef65d1d748ae255be52c05d4b72fe443db9c"
+      },
+      {
+        "id": 12838172460,
+        "bytes": 2092,
+        "sha256": "03a858582a5ccea43561e0cec12e848186acd839ecfc85918030ea4ee4bcf43e"
+      },
+      {
+        "id": 12837583429,
+        "bytes": 8549,
+        "sha256": "938336bb6fa78aed7dc99c18e846940ebf636b5148183272b72c1b464d2c20a8"
+      },
+      {
+        "id": 12837548973,
+        "bytes": 24539,
+        "sha256": "7c26a892079841a106b3f3c5004036bc92856f53f7ade6b7678d8878018cc24e"
+      },
+      {
+        "id": 12837384598,
+        "bytes": 449462,
+        "sha256": "124cd2e5411341782ccdcdb9a94b494b571b0e04744b4a02a3e7ab25da341b32"
+      }
+    ]
+  },
+  "usableRegression": {
+    "run": 40738339912,
+    "status": "success",
+    "packageArtifact": 12838393008,
+    "tarballBytes": 42242,
+    "tarballSha256": "e9be81ba4c35701fa432aa1477dbabcbe538762dc0a5d812d4043d131201e47a",
+    "sourceModules": 10,
+    "sourceBytes": 103181,
+    "kernelJsSha256": "2cfe8dd6564b7ec6e968841c1ef43b01897d7ca5303095eb2b8c9b48dd27ded3",
+    "sdkCases": 52,
+    "hostileCases": 7,
+    "originalU1DeliverableReplaced": false
+  },
+  "adoptedRegressions": {
+    "source": "8df57b4f35f9873909e0d1fc3b9ca41dbba6441a",
+    "focused": {
+      "run": 40738339912,
+      "status": "success",
+      "proofJob": 122992857366,
+      "preservationJob": 122992856879,
+      "portabilityJob": 122994499625
+    },
+    "matrix": {
+      "run": 40738340020,
+      "status": "success"
+    },
+    "c1": {
+      "run": 40738340034,
+      "status": "success"
+    },
+    "broader": {
+      "run": 40738349461,
+      "status": "success",
+      "fullJob": 123001504503,
+      "gateJob": 123017955237,
+      "benchmark": "unselected-skipped",
+      "jobs": [
+        {
+          "id": 122992891197,
+          "name": "static",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122993523061,
+          "name": "focused / focused (core)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122993523062,
+          "name": "focused / php-application",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122993523224,
+          "name": "focused / focused (applications)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122993523409,
+          "name": "source-bindings / trace",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122993523547,
+          "name": "native / native",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122993523645,
+          "name": "lossless / lossless",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122993524866,
+          "name": "benchmark",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "id": 122997055760,
+          "name": "source-bindings / integration",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122998777428,
+          "name": "closures / selected-closure (semantic-compiler, checked)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122998777454,
+          "name": "closures / selected-closure (rust-compiler, ordinary-checked)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122998777456,
+          "name": "closures / selected-closure (directjs-compiler, ordinary-checked)",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122998777473,
+          "name": "g1 / host-session-boundary",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 122998777868,
+          "name": "g1 / generated-js",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 123001504503,
+          "name": "full / linux-scoped",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "id": 123017955237,
+          "name": "gate",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    },
+    "installedCli": {
+      "run": 40738340085,
+      "status": "success",
+      "preflightJob": 122992857313,
+      "installedJob": 122993712809
+    }
+  },
+  "overallGoalStatus": "incomplete",
+  "stoppingBoundary": "C1 needs typed actual List body/recursor/global-history semantics and implementation-to-model refinement before public admission. Source C2 preservation and complete Min-backed self-hosting also remain open.",
+  "reportingBoundary": "Documentation-only successor of 8df57b4f35f9873909e0d1fc3b9ca41dbba6441a. No new source/proof/driver/profile changes. Local work was artifact parsing/hashing/export only; all project execution was GitHub Actions Linux."
 }

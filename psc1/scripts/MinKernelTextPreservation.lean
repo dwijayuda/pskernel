@@ -7,7 +7,7 @@ import Lean
 -- Linux Actions host-only harness. Source inputs are exact owned files.
 def r6Json (fields : List (String × Lean.Json)) : Lean.Json := Lean.Json.mkObj fields
 def r6String (s : String) : Lean.Json := Lean.Json.str s
-def r6Nat (n : Nat) : Lean.Json := toJson n
+def r6Nat (n : Nat) : Lean.Json := Lean.toJson n
 def r6Bytes (s : String) : List Nat := s.toByteArray.data.toList.map UInt8.toNat
 
 -- Independent chronological byte fold: no string append or psTsJoin in the oracle.
@@ -47,12 +47,12 @@ def r6Compile (inputs : List PsSh1SourceInput) (stem : String) : IO Unit := do
     | .error _ => throw (IO.userError "R6_IR_ENCODING_REFUSED")
     | .ok ir => IO.FS.writeFile (stem ++ ".ir.json") ir
     IO.FS.writeFile (stem ++ ".policy.json")
-      (r6Json [("sourceAccepted", toJson result.sourcePolicy.accepted),
-        ("targetAccepted", toJson result.targetPolicy.accepted),
-        ("originalIrAccepted", toJson result.checkReport.accepted),
-        ("providerChecked", toJson result.providerChecked),
-        ("semanticContractQualified", toJson result.semanticContractQualified),
-        ("strictSh1Qualified", toJson result.strictSh1Qualified),
+      (r6Json [("sourceAccepted", Lean.toJson result.sourcePolicy.accepted),
+        ("targetAccepted", Lean.toJson result.targetPolicy.accepted),
+        ("originalIrAccepted", Lean.toJson result.checkReport.accepted),
+        ("providerChecked", Lean.toJson result.providerChecked),
+        ("semanticContractQualified", Lean.toJson result.semanticContractQualified),
+        ("strictSh1Qualified", Lean.toJson result.strictSh1Qualified),
         ("moduleCount", r6Nat result.sourcePolicy.moduleCount),
         ("originModuleCount", r6Nat result.origins.length)]).compress
 
@@ -72,7 +72,7 @@ def main : IO Unit := do
           r6Bytes (psR6LegacyAppend left right) == expected do
         throw (IO.userError "R6_NATIVE_APPEND_MISMATCH")
       appendRows := appendRows ++ [r6Json [
-        ("left", r6String left), ("right", r6String right), ("bytes", toJson expected)]]
+        ("left", r6String left), ("right", r6String right), ("bytes", Lean.toJson expected)]]
   let fragmentLists : List (List String) := [[], [""], ["a"], ["",""], ["a","b"],
     ["λ","🙂","é"], [nul,"\n","\"\\"], strings,
     List.replicate 64 "", List.replicate 256 "λ"]
@@ -84,11 +84,11 @@ def main : IO Unit := do
       unless r6Bytes (psTsJoin separator fragments) == expected do
         throw (IO.userError "R6_NATIVE_ACTUAL_JOIN_MISMATCH")
       joinRows := joinRows ++ [r6Json [
-        ("separator", r6String separator), ("fragments", toJson fragments),
-        ("bytes", toJson expected)]]
+        ("separator", r6String separator), ("fragments", Lean.toJson fragments),
+        ("bytes", Lean.toJson expected)]]
   IO.FS.writeFile (dir ++ "/native.json")
     (r6Json [("schema",r6String "psc1-r6-text-native/1"),
-      ("append",toJson appendRows),("join",toJson joinRows)]).compress
+      ("append",Lean.toJson appendRows),("join",Lean.toJson joinRows)]).compress
   let actual ← r6CheckInputs (dir ++ "/actual.inputs.json")
   let fixture ← r6CheckInputs (dir ++ "/fixture.inputs.json")
   r6Compile actual (dir ++ "/actual")

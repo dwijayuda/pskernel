@@ -1,6 +1,10 @@
 # R9 C1 indexed byte-source decision
 
-Status: experimental; proofs and native/generated qualification are pending.
+Status: thirteen theorem reports passed in the Linux candidate
+b852e57e12df03b0ca4517372c5725f0d337e11d
+([run 40693341901](https://github.com/dwijayuda/pskernel/actions/runs/40693341901)).
+The earlier 7978fa8f candidate failed two proof-script elaboration steps.
+Native/generated qualification is pending; the full experiment remains open.
 The stable U1/R4B checker remains unchanged. No parser/admission entry is added.
 
 The complete compiler packet is 29889352 bytes. A linked Nat byte per input byte

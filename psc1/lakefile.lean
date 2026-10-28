@@ -716,3 +716,9 @@ lean_lib PsMinByteCursor where
 lean_lib PsMinByteCursorProof where
   srcDir := "proofs/pskernel-min"
   roots := #[`ByteCursor, `ByteCursorTrust]
+
+
+-- Scalar bridges for native/source-generated indexed byte-source decisions.
+lean_lib PsMinByteCursorFixture where
+  srcDir := "packages/pskernel-min/src"
+  roots := #[`Ps.MinKernel.Tests.ByteCursor]

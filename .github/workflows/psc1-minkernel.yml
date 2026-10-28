@@ -12,6 +12,7 @@ on:
       - psc1/scripts/MinKernelCompilerPreservation.lean
       - psc1/scripts/MinKernelTextPreservation.lean
       - psc1/scripts/MinKernelCompilerCaller.lean
+      - psc1/scripts/MinKernelByteCursor.lean
       - .github/workflows/psc1-minkernel.yml
   workflow_dispatch:
 permissions:
@@ -254,7 +255,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist/pskernel-min/byte-cursor
-          lake build PsMinByteCursor PsMinByteCursorProof 2>&1 | tee dist/pskernel-min/byte-cursor/build.log
+          lake build PsMinByteCursor PsMinByteCursorProof PsMinByteCursorFixture 2>&1 | tee dist/pskernel-min/byte-cursor/build.log
           lake env lean proofs/pskernel-min/ByteCursorTrust.lean 2>&1 | tee dist/pskernel-min/byte-cursor/proof.log
           node --input-type=module <<'JS'
           import fs from 'node:fs';
@@ -273,6 +274,7 @@ jobs:
           fs.writeFileSync('dist/pskernel-min/byte-cursor/proof-reports.json',JSON.stringify({schema:'psc1-r9-byte-cursor-trust/1',reports},null,2)+'\n');
           console.log('PSC1_R9_BYTE_CURSOR_TRUST_PASS '+reports.length);
           JS
+          node --max-old-space-size=256 scripts/minkernel-byte-cursor.mjs --abi-only
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -340,7 +342,7 @@ jobs:
         run: |
           set -euo pipefail
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build PsBackendTs psc1_independent_checker psc1_source_census_probe psc2_joint_closure_inventory PsMinCompilerScalarFixture PsMinStringBridgeFixture PsMinCompilerCallerFixture
+          lake build PsBackendTs psc1_independent_checker psc1_source_census_probe psc2_joint_closure_inventory PsMinCompilerScalarFixture PsMinStringBridgeFixture PsMinCompilerCallerFixture PsMinByteCursorFixture
       - uses: actions/cache/save@v4
         if: ${{ !cancelled() && steps.native_build.outcome == 'success' && steps.native_cache.outputs.cache-hit != 'true' }}
         with:
@@ -384,6 +386,9 @@ jobs:
       - name: Check actual recursive caller source, emitted module and exact source admission
         if: ${{ !cancelled() && steps.regular_ingress.outcome == 'success' }}
         run: node --max-old-space-size=256 scripts/minkernel-compiler-caller.mjs
+      - name: Qualify indexed byte traversal including complete compiler transport
+        if: ${{ !cancelled() && steps.regular_ingress.outcome == 'success' }}
+        run: node --max-old-space-size=256 scripts/minkernel-byte-cursor.mjs
       - name: Build and qualify exact standalone pskernel-min tarball offline
         if: ${{ !cancelled() && steps.regular_ingress.outcome == 'success' }}
         run: |

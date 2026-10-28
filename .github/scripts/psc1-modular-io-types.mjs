@@ -1,13 +1,17 @@
 // Public typing and genuine callback transport through the qualified installed root.
 import fs from'node:fs';import path from'node:path';import assert from'node:assert/strict';
-import{spawnSync}from'node:child_process';import{pathToFileURL}from'node:url';
+import{spawn,spawnSync}from'node:child_process';import{pathToFileURL}from'node:url';
 import{fixture}from'./psc1-modular-fixture.mjs';
 const f=fixture({allProviders:true}),records=[],negatives=[],typeConsumers=[];
 const inputCommit=process.env.PSC1_MODULAR_INPUT_COMMIT;
 const runtime=path.basename(f.runtime).startsWith('bun')?'bun':'node';
 const out=path.resolve('dist/modular-toolchain');
+let live;
+const report={schema:'psc1-modular-installed-io-types/1',status:'running',testedCommit:process.env.GITHUB_SHA,inputCommit,
+ runtime,records,negatives,typeConsumers,defaultKernel:'wasm',fullModularSelfHosting:false};
+
 const run=path.join(f.directory,'io-build.mjs');
-fs.writeFileSync(run,"import{build}from'proofscript';console.log(JSON.stringify(build(JSON.parse(process.argv[2]))));");
+fs.writeFileSync(run,"import{build,compileCandidate}from'proofscript';const options=JSON.parse(process.argv[2]);console.log(JSON.stringify(process.argv[3]==='candidate'?compileCandidate(options):build(options))); ");
 try{
  for(const engine of['js','ts'])for(const kind of['lean','ps'])for(const target of['js','ts']){
   const text=kind==='lean'?'def run (input : String) (dispatch : String -> String) : String := dispatch input\n':
@@ -26,7 +30,12 @@ try{
   const pointer=fs.readFileSync(path.join(options.out,'current.json'));
   if(target==='js'){
    const rejected=f.run(f.runtime,[...f.flags,run,JSON.stringify({...options,target:'wasm-core'})]);
-   assert.notEqual(rejected.status,0);assert.match(rejected.stderr,/PSC1_IO_DISPATCHER_ABI_TARGET_UNSUPPORTED/);
+   assert.notEqual(rejected.status,0);assert.match(rejected.stderr,/PSC1_SERVICE_COMPILER_REFUSED:public-api/);
+   const candidate=JSON.parse(f.ok(f.runtime,[...f.flags,run,JSON.stringify({...options,target:'wasm-core'}),'candidate']));
+   assert.equal(candidate.logicalAdmission,'not-run');assert.equal(candidate.publicationAuthority,false);
+   assert.equal(candidate.candidate.status,'refused');assert.equal(candidate.candidate.phase,'public-api');
+   assert.equal(candidate.candidate.code,'PSC1_IO_DISPATCHER_ABI_TARGET_UNSUPPORTED');
+   assert.equal(candidate.candidate.source,undefined);
    assert.deepEqual(fs.readFileSync(path.join(options.out,'current.json')),pointer);
    negatives.push({engine,kind,target:'wasm-core',priorPreserved:true});
   }
@@ -52,8 +61,38 @@ try{
   assert.equal(result.error,undefined);assert.equal(result.status,0,result.stdout+result.stderr);typeConsumers.push(mode);
  }
  assert.equal(records.length,8);assert.equal(negatives.length,4);
- const report={schema:'psc1-modular-installed-io-types/1',status:'passed',testedCommit:process.env.GITHUB_SHA,inputCommit,
-  runtime,records,negatives,typeConsumers,defaultKernel:'wasm',fullModularSelfHosting:false};
+ const watchFile=path.join(f.directory,'Watch.ps'),watchOut=path.join(f.directory,'watch-ts');
+ fs.writeFileSync(watchFile,'def answer : Nat := 42\n');
+ const receipts=[];let stdout='',stderr='',exit;
+ live=spawn(f.runtime,[...f.flags,f.cli,'build',watchFile,'--engine','ts','--out',watchOut,
+  '--publication-protocol','portable-file','--watch','--diagnostics=json'],{cwd:f.directory,env:f.env,stdio:['ignore','pipe','pipe']});
+ live.stdout.on('data',chunk=>{stdout+=chunk;assert.ok(stdout.length<33554432);for(;;){
+  const end=stdout.indexOf('\n');if(end<0)break;const line=stdout.slice(0,end);stdout=stdout.slice(end+1);
+  if(line)receipts.push(JSON.parse(line));}});
+ live.stderr.on('data',chunk=>{stderr+=chunk;assert.ok(stderr.length<33554432);});
+ live.on('close',(code,signal)=>{exit={code,signal};});
+ async function until(predicate){
+  const start=Date.now();while(!predicate()){
+   if(exit)throw Error('TS watch exited: '+stderr);
+   if(Date.now()-start>240000)throw Error('TS watch timeout: '+stderr);
+   await new Promise(resolve=>setTimeout(resolve,20));
+  }
+ }
+ await until(()=>receipts.length>=1);assert.equal(f.observe(receipts[0]),'42');
+ fs.writeFileSync(watchFile,'def answer : Nat := 43\n');
+ await until(()=>receipts.length>=2);assert.equal(f.observe(receipts[1]),'43');
+ const pointer=fs.readFileSync(path.join(watchOut,'current.json'));
+ fs.writeFileSync(watchFile,'def answer : Nat := true\n');
+ await until(()=>stderr.includes('failed; waiting for changes'));
+ assert.deepEqual(fs.readFileSync(path.join(watchOut,'current.json')),pointer);
+ const stopped=Date.now();live.kill('SIGTERM');await until(()=>exit!==undefined);
+ assert.equal(exit.code,143);assert.ok(Date.now()-stopped<6000);
+ report.tsWatch={engine:'ts',builds:2,editedValue:'43',typingRefusalPreservedPointer:true,exit:143,stopMs:Date.now()-stopped};
+ live=undefined;report.status='passed';
+}catch(error){report.status='failed';report.failure=error.message;throw error;}
+finally{
+ if(live)live.kill('SIGTERM');
  fs.writeFileSync(path.join(out,'io-types-'+runtime+'.json'),JSON.stringify(report,null,2)+'\n');
  console.log('PSC1_MODULAR_IO_TYPES '+JSON.stringify(report));
-}finally{fs.rmSync(f.directory,{recursive:true,force:true});}
+ fs.rmSync(f.directory,{recursive:true,force:true});
+}

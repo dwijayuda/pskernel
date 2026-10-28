@@ -318,7 +318,7 @@ jobs:
         run: |
           set -euo pipefail
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build PsBackendTs psc1_independent_checker psc1_source_census_probe psc2_joint_closure_inventory PsMinCompilerScalarFixture PsMinStringBridgeFixture
+          lake build PsBackendTs psc1_independent_checker psc1_source_census_probe psc2_joint_closure_inventory PsMinCompilerScalarFixture PsMinStringBridgeFixture PsMinCompilerCallerFixture
       - uses: actions/cache/save@v4
         if: ${{ !cancelled() && steps.native_build.outcome == 'success' && steps.native_cache.outputs.cache-hit != 'true' }}
         with:

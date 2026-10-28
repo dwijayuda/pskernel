@@ -1,6 +1,6 @@
 # PSC1 development roadmap
 
-Updated 2026-10-27 Asia/Jakarta. This is the authoritative remaining-work queue.
+Updated 2026-10-28 Asia/Jakarta. This is the authoritative remaining-work queue.
 Practical Core v1 remains frozen at14 feature families and 37 finite criteria.
 Completed detail is preserved in [the previous roadmap](history/ROADMAP_BEFORE_LAYOUT_2026-10-26.md)
 and [dated evidence](evidence/README.md).
@@ -26,7 +26,20 @@ retain122 modules/4742 members and closure
 Current source qualification and frozen executor qualification remain distinct.
 Repository organization remains qualified at PR#192 /94e0c13f6a4b434f73c859cc0c716cb6fb8d1340.
 
-## Immediate priority: automatic core package installation
+## Immediate priority: independent compiler development
+
+The current assignment selects a small standalone profile over the qualified
+PR #198 source/package checkpoint. Package a private runtime and genuine native
+checker, reuse checked conversion for an editable complete `.ps` compiler
+workspace, and demonstrate current plus genuinely modified compiler rebuilds
+without external development tools. The explicit long correctness profile is
+separate from ordinary-request performance. Do not infer success from packaging
+or historical frozen fixed points. [Architecture/dependency audit](PSC1_INDEPENDENT_DEVELOPMENT.md)
+and [work state](../AI_WORK_STATE.md) own the current implementation/evidence.
+Kernel research, a new runtime/backend and full modular partitioning are not
+prerequisites for this milestone.
+
+## Preserved qualification: automatic core package installation
 
 PR #198 continues from qualified PR #197 HEAD9d0e23c3. Cohort .13 makes proofscript
 an umbrella over the20 existing core packages and moves the shared implementation

@@ -1,0 +1,187 @@
+name: PSC1 independent compiler development
+on:
+  push:
+    branches: [feat/psc1-independent-development-20261028]
+    paths:
+      - psc1/standalone/*.mjs
+      - .github/workflows/psc1-independent-development.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: psc1-independent-development-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: psc1
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Parse the independent host and qualification harness
+        run: |
+          set -euo pipefail
+          for source in standalone/*.mjs; do node --check "$source"; done
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache@v4
+        with:
+          path: psc1/.lake/build
+          key: psc1-independent-source-tools-v1-${{ runner.os }}-${{ hashFiles('psc1/packages/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
+      - name: Install the repository-pinned bootstrap Lean compiler
+        run: |
+          set -euo pipefail
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build only the existing checked source-conversion helpers
+        run: lake build psc1_lossless_source psc1_source_ownership psc1_independent_checker
+      - name: Assemble qualified seed and kernel with an editable checked .ps compiler
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node --max-old-space-size=4096 standalone/bootstrap.mjs assemble
+      - name: Prepare isolated execution tracing
+        run: |
+          set -euo pipefail
+          if ! command -v strace >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends strace
+          fi
+      - name: Require real acceptance, refusal and tamper boundaries without installed toolchains
+        run: >-
+          node standalone/bootstrap.mjs isolate
+          --toolchain dist/independent-development/toolchain
+          --phase smoke
+          --output dist/independent-development/evidence-smoke
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-independent-bootstrap-${{ github.sha }}
+          path: |
+            psc1/dist/independent-development/psc1-independent-linux-x64.tar.gz
+            psc1/dist/independent-development/bootstrap.json
+          if-no-files-found: warn
+          compression-level: 0
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-independent-smoke-${{ github.sha }}
+          path: |
+            psc1/dist/independent-development/evidence-smoke/*.json
+            psc1/dist/independent-development/evidence-smoke/*.log
+            psc1/dist/independent-development/evidence-smoke/smoke/
+          if-no-files-found: warn
+          retention-days: 90
+
+  self-development:
+    needs: bootstrap
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        phase: [baseline, changed]
+    defaults:
+      run:
+        working-directory: psc1
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-independent-bootstrap-${{ github.sha }}
+          path: psc1/dist/independent-development
+      - name: Verify and unpack the exact tested bootstrap distribution
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          import crypto from 'node:crypto';
+          const dir = 'dist/independent-development';
+          const receipt = JSON.parse(fs.readFileSync(dir + '/bootstrap.json', 'utf8'));
+          assert.equal(receipt.sourceCommit, process.env.GITHUB_SHA);
+          assert.equal(receipt.tarball, 'psc1-independent-linux-x64.tar.gz');
+          const bytes = fs.readFileSync(dir + '/' + receipt.tarball);
+          assert.equal(bytes.length, receipt.bytes);
+          assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'), receipt.sha256);
+          JS
+          tar xzf dist/independent-development/psc1-independent-linux-x64.tar.gz -C dist/independent-development
+          if ! command -v strace >/dev/null; then
+            sudo apt-get update
+            sudo apt-get install -y --no-install-recommends strace
+          fi
+      - name: Compile, execute and recompile the actual compiler in a fresh isolated development environment
+        env:
+          PSC1_PHASE: ${{ matrix.phase }}
+        run: >-
+          node standalone/bootstrap.mjs isolate
+          --toolchain dist/independent-development/toolchain
+          --phase "$PSC1_PHASE"
+          --output "dist/independent-development/evidence-$PSC1_PHASE"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-independent-${{ matrix.phase }}-${{ github.sha }}
+          path: |
+            psc1/dist/independent-development/evidence-${{ matrix.phase }}/*.json
+            psc1/dist/independent-development/evidence-${{ matrix.phase }}/*.log
+            psc1/dist/independent-development/evidence-${{ matrix.phase }}/${{ matrix.phase }}/
+          if-no-files-found: warn
+          retention-days: 90
+
+  independent-development-gate:
+    if: always()
+    needs: [bootstrap, self-development]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Require both complete development cycles and isolated boundary checks
+        env:
+          BOOTSTRAP_RESULT: ${{ needs.bootstrap.result }}
+          SELF_DEVELOPMENT_RESULT: ${{ needs.self-development.result }}
+        run: |
+          test "$BOOTSTRAP_RESULT" = success
+          test "$SELF_DEVELOPMENT_RESULT" = success
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-independent-bootstrap-${{ github.sha }}
+          path: psc1/dist/independent-development/gate/bootstrap
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-independent-smoke-${{ github.sha }}
+          path: psc1/dist/independent-development/gate/smoke
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-independent-baseline-${{ github.sha }}
+          path: psc1/dist/independent-development/gate/baseline
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-independent-changed-${{ github.sha }}
+          path: psc1/dist/independent-development/gate/changed
+      - name: Verify actual same-run source, kernel, executable and fixed-point evidence
+        working-directory: psc1
+        run: node standalone/verify-evidence.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-independent-qualified-linux-x64-${{ github.sha }}
+          path: psc1/dist/independent-development/gate/delivery/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 90

@@ -23,7 +23,7 @@ const sourceRows=rows.map(row=>{
 });
 const sources=sourceRows.map(row=>({module:row.module,kind:'lean',text:row.text}));
 const digest=compilerSourceClosureDigest(sources),requestId='production-executable-compiler-build';
-const request=['psc1-compiler-service/1',requestId,digest,'lean','checked',
+const request=['psc1-compiler-service/1',requestId,digest,'lean','ordinary-checked',
  'Ps.CompilerUnified.Service',sources.map(s=>[s.module,s.text])];
 const requestFile=path.join(output,'request.json'),specifiersFile=path.join(output,'specifiers.json');
 put(requestFile,JSON.stringify(request));
@@ -45,7 +45,7 @@ const receipt=session.admit(JSON.stringify({protocol:'psc1-compiler-host/1',op:'
  sourceClosureDigest:digest,admissions:canonicalAdmissions}));
 pinCheck();put(path.join(output,'admission-receipt.json'),json({...receipt,elapsedMs:Math.round(performance.now()-started)}));
 const captured=JSON.parse(fs.readFileSync(path.join(output,'capture.json')));
-assert.equal(captured.sourceClosureDigest,digest);
+assert.equal(captured.sourceClosureDigest,digest);assert.equal(captured.assurance,'ordinary-checked');
 assert.equal(captured.leanVersion,'4.35.0');assert.equal(captured.leanCommit,receipt.checkerCommit);
 assert.deepEqual(captured.sourceModules,sources.map(s=>s.module));
 const emit=bounded('emit',[producer,'emit',output,specifiersFile,digest]);pinCheck();
@@ -55,7 +55,7 @@ assert.equal(emission.units.length,sources.length+1);assert.equal(emission.sourc
 assert.equal(new Set(emission.sourceToUnit).size,specifiers.length);
 const owned=emission.units.flatMap(u=>u.names);
 assert.equal(owned.length,captured.counts[2]);assert.equal(new Set(owned).size,owned.length);
-const packaged=packageGraph(emission,sourceRows,receipt);
+const packaged=packageGraph(emission,sourceRows,receipt,captured);
 verify(packaged.root,packaged.manifestBytes,packaged.manifestHash);
 // These failures are checked before any graph import or candidate execution.
 const negative=[];
@@ -82,7 +82,7 @@ for(const [name,change]of [
 }
 verify(packaged.root,packaged.manifestBytes,packaged.manifestHash);pinCheck();
 const summary={schema:'psc1-executable-production-build/1',testedCommit:process.env.GITHUB_SHA,
- sourceClosureDigest:digest,sourceModules:sources.length,counts:captured.counts,
+ sourceClosureDigest:digest,sourceModules:sources.length,compilerAssurance:captured.assurance,partialNames:captured.partialNames,counts:captured.counts,
  generatedUnits:emission.units.length,packages:packaged.manifest.packages.map(p=>p.name),
  computedInitializers:emission.units.flatMap(u=>u.computedInitializers).length,
  manifestSha256:packaged.manifestHash,logicalAdmission:receipt,

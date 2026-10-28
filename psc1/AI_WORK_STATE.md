@@ -62,3 +62,15 @@ tests, semantic fuels, memory/stack policies and 240s compiler/120s checker limi
 remain. No kernel, runtime representation or language semantic rewrite. Apache-2.0
 owned code and upstream notices retained. Prototype branches/PR #203 remain
 preserved and deferred; no source/history reset.
+
+## Production capture profile correction
+
+Run40661568068 at7616e75d passes all ten ownership checks and eight planner tests,
+then refuses checked-preparation. Inspection of the existing source-ownership
+qualification confirms that the full compiler is captured with ordinary-checked,
+not the total-only checked profile: its existing partial declarations require the
+retained logical/runtime pairing. The production builder now requests exactly
+that existing profile and records assurance/partial names explicitly. It still uses
+psCompilerPrepareOrdinary and psCompilerOrdinaryIr, including canonical logical
+admission and exact runtime-body binding; there is no fallback, erased guard or
+weakened checker. Application fixtures continue to require checked preparation.

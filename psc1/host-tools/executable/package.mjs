@@ -7,7 +7,7 @@ import {inspectModule} from '../module-graph-inspection.mjs';
 import {put,files,inventory,sha256,json,run,bounded,output} from './tools.mjs';
 const version='0.1.0-psc1-modular.0';
 const nodeFlags=['--max-old-space-size=4096','--stack-size=8192'];
-export function packageGraph(emission,sourceRows,receipt){
+export function packageGraph(emission,sourceRows,receipt,captured){
  const root=path.join(output,'candidate'),packageRows=new Map(),sources=new Map();
  const directory=specifier=>path.join(root,'node_modules',...specifier.split('/').slice(0,2));
  const names=emission.packages.map(s=>s.split('/').slice(0,2).join('/'));
@@ -118,6 +118,7 @@ export function packageGraph(emission,sourceRows,receipt){
  }
  const manifest={schema:'psc1-executable-npm-graph/1',protocol:emission.protocol,version,
   compilerCommit:process.env.GITHUB_SHA,sourceClosureDigest:emission.sourceClosureDigest,
+  compilerAssurance:captured.assurance,partialNames:captured.partialNames,
   runtimeOwner:'@proofscript/foundation',logicalAdmission:'accepted',checkerCommit:receipt.checkerCommit,
   admissionsDigest:receipt.admissionsDigest,entry,packages:ordered.map(name=>packageRows.get(name)),
   owners:emission.owners,units:emission.units,graphEvidence,files:inventory(root),

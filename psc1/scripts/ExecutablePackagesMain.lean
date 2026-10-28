@@ -55,7 +55,7 @@ def capture (input directory : String) : IO Unit := do
   let request ← match decode text with
     | .ok value => pure value
     | .error error => throw (IO.userError ("PSC1_EXECUTABLE_DECODE:" ++ error.code))
-  if request.assurance != "checked" || request.sources.length > 256 ||
+  if request.assurance != "ordinary-checked" || request.sources.length > 256 ||
       request.sources.any (fun source => source.text.utf8ByteSize > 1048576) then
     throw (IO.userError "PSC1_EXECUTABLE_SOURCE_BOUND")
   phase "capture"
@@ -88,6 +88,8 @@ def capture (input directory : String) : IO Unit := do
     ("schema", .str "psc1-executable-capture/1"), ("requestId", .str request.requestId),
     ("sourceClosureDigest", .str request.sourceClosureDigest),
     ("grammar", .str request.grammar), ("entry", .str request.entry),
+    ("assurance", .str request.assurance),
+    ("partialNames", Lean.toJson (semantic.partialNames.map psNameToString)),
     ("leanVersion", .str Lean.versionString), ("leanCommit", .str Lean.githash),
     ("sourceModules", Lean.toJson (request.sources.map (fun s => s.moduleName))),
     ("owners", Lean.toJson (fusedOwners.map ownerJson)),

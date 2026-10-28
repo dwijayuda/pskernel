@@ -10,6 +10,8 @@ export function verify(root,manifestBytes,expectedHash){
  assert.equal(manifest.schema,'psc1-executable-npm-graph/1');
  assert.equal(manifest.protocol,'psc1-executable-compiler/1');
  assert.equal(manifest.logicalAdmission,'accepted');
+ assert.equal(manifest.compilerAssurance,'ordinary-checked');
+ assert.ok(Array.isArray(manifest.partialNames));
  assert.equal(manifest.checkerCommit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
  assert.match(manifest.sourceClosureDigest,/^[0-9a-f]{64}$/);
  assert.equal(manifest.runtimeOwner,'@proofscript/foundation');

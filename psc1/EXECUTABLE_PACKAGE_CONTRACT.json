@@ -137,6 +137,9 @@
       "focusedLinuxJobMinutes": 30
     },
     "buildStagePolicy": "Capture/transform and emission are separately supervised 240s build stages; ordinary compiler requests remain 240s. Native stages keep 4GiB AS/8MiB stack. Node qualification uses the existing 4096MiB V8 heap/8MiB stack and a 240s process-tree supervisor; V8 reserves virtual memory so AS is not applied to Node. No pilot limits changed.",
-    "publicApi": "Candidate generated subpaths only; .13 checked umbrella/direct API compatibility is not promoted or silently changed."
+    "publicApi": "Candidate generated subpaths only; .13 checked umbrella/direct API compatibility is not promoted or silently changed.",
+    "compilerSourceAssurance": "ordinary-checked",
+    "applicationFixtureAssurance": "checked",
+    "partialPolicy": "Reuse the existing compiler logical/runtime body-pairing and strict IR path; record exact partial names. No totality or admitted-partial-body claim."
   }
 }

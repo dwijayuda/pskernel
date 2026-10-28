@@ -683,3 +683,8 @@ lean_exe psc1_modular_pilot where
 lean_exe psc1_modular_graph_measure where
   srcDir := "scripts"
   root := `ModularGraphMeasure
+
+-- Full graph emitter; outside the portable compiler source closure.
+lean_exe psc1_modular_compiler_emit where
+  srcDir := "scripts"
+  root := `ModularCompilerEmit

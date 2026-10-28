@@ -60,8 +60,9 @@ def unitImports (plan : PsModulePlan) (unit : PsModuleUnit) : List PsModuleImpor
 
 def renderUnit (plan : PsModulePlan) (lowered : PsJsIrModule)
     (digest : String) (unit : PsModuleUnit) : Except String PsModuleArtifact := do
-  let selected ← lowered.declarations.filterM fun declaration => do
-    return (← Ps.Internal.ModuleGraph.owner plan.owners declaration.name).unit == unit.index
+  -- Keep the checked unit's exact names and original lowered declaration order.
+  let names := unit.declarations.map (fun declaration => declaration.name)
+  let selected := lowered.declarations.filter (fun declaration => names.contains declaration.name)
   let printed ← selected.mapM fun declaration =>
     (psJsPrintDeclarationStackSafeWithVisibility true declaration).mapError
       (fun _ => "PSC1_MODULE_JS_PRINT:" ++ declaration.name)

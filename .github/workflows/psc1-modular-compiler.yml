@@ -1,0 +1,58 @@
+name: PSC1 full modular compiler
+on:
+  push:
+    branches: [feat/psc1-real-modular-build-20261028]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: psc1-full-modular-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  compiler:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.4'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache@v4
+        with:
+          path: psc1/.lake
+          key: psc1-full-modular-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/**/*.lean') }}
+          restore-keys: |
+            psc1-modular-native-v1-${{ runner.os }}-
+            psc1-lake-v2-${{ runner.os }}-native-
+      - name: Prepare locked build tools and exact reference source
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
+          npm ci --prefix .. --ignore-scripts --include=optional --no-audit --no-fund
+          git worktree add --detach "$RUNNER_TEMP/psc1-modular-frozen-source" 4b0fa00ac1132d8f44e9db984d8fb7a3a02a1a98
+          PSC1_MODULAR_FROZEN_ROOT="$RUNNER_TEMP/psc1-modular-frozen-source/psc1" node test/modular/frozen-source.mjs
+      - name: Build existing capture pipeline, module emitters and independent checker
+        run: lake build psc1_modular_graph_measure psc1_modular_compiler_emit psc1_independent_checker
+      - name: Admit exact compiler Core and emit the full module graph
+        run: node test/modular/full-native.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-full-modular-${{ github.sha }}
+          path: psc1/dist/modular-compiler/
+          retention-days: 90

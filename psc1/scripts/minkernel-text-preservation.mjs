@@ -29,8 +29,14 @@ run(process.execPath,[resolveTypeScriptCli(),...typeScriptProfileArgs([
 const G=await import(pathToFileURL(path.resolve(dir,'actual.js')).href);
 const F=await import(pathToFileURL(path.resolve(dir,'fixture.js')).href);
 const oracle=JSON.parse(fs.readFileSync(path.join(dir,'native.json')));
+assert.equal(oracle.schema,'psc1-r6-text-native/1');
 assert.equal(oracle.append.length,324);assert.equal(oracle.join.length,50);assert.equal(oracle.emitter.length,30);
 const bytes=s=>Array.from(Buffer.from(s,'utf8'));
+const scalarString=s=>assert.equal(Buffer.from(s,'utf8').toString('utf8'),s,'positive inputs are valid Unicode scalar strings');
+for(const row of oracle.append){scalarString(row.left);scalarString(row.right);}
+for(const row of oracle.join){scalarString(row.separator);row.fragments.forEach(scalarString);}
+for(const row of oracle.emitter){scalarString(row.left);scalarString(row.right);}
+assert.deepEqual([...new Set(oracle.emitter.map(row=>row.name))],['psR6EmitAdd','psR6EmitAnd','psR6EmitSub']);
 let appendCalls=0;
 for(const row of oracle.append){
  for(const name of ['psR6ModernAppend','psR6LegacyAppend']){

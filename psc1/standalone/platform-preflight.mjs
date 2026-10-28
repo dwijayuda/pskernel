@@ -107,7 +107,11 @@ const sum=sums.toString().split('\n').find(line=>line.trim().endsWith('  '+runti
 const archiveSha256=sum.split(/\s+/)[0];assert.match(archiveSha256,/^[0-9a-f]{64}$/);
 const downloaded=await fetchBytes(upstream+runtimeArchive);assert.equal(sha256(downloaded),archiveSha256);
 const runtimeTar=path.join(out,runtimeArchive);put(runtimeTar,downloaded);
-const runtimeBytes=run('runtime-archive-extract','tar',['xOf',runtimeTar,prefix+'/bin/node'],{encoding:null});
+const runtimeExtract=path.join(out,'runtime-extract');fs.mkdirSync(runtimeExtract);
+run('runtime-archive-extract','tar',['xf',runtimeTar,'--no-same-owner','-C',runtimeExtract,prefix+'/bin/node']);
+const runtimeFile=path.join(runtimeExtract,prefix,'bin/node'),runtimeStat=fs.lstatSync(runtimeFile);
+assert.ok(runtimeStat.isFile()&&!runtimeStat.isSymbolicLink()&&runtimeStat.size>0&&runtimeStat.size<256*1024*1024);
+const runtimeBytes=fs.readFileSync(runtimeFile);
 assert.equal(sha256(runtimeBytes),sha256(fs.readFileSync(process.execPath)));
 const runtime=path.join(out,'psc-runtime');put(runtime,runtimeBytes);fs.chmodSync(runtime,0o755);
 report.native={input:pin,manifestSha256:sha256(fs.readFileSync(path.join(nativeRoot,'PREBUILT_MANIFEST.json'))),target};

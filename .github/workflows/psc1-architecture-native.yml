@@ -34,11 +34,9 @@ jobs:
         with:
           path: psc1/.lake
           key: psc1-lake-v2-${{ runner.os }}-${{ github.job }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/lake-manifest.json', 'psc1/**/*.lean') }}
-      - name: Install repository-pinned Lean
-        run: |
-          set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Prepare cached repository-pinned Lean launcher
+        timeout-minutes: 7
+        uses: ./.github/actions/psc1-lean-launcher
       - name: Build checked native control regressions
         run: |
           set -euo pipefail

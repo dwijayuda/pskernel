@@ -68,21 +68,9 @@ jobs:
         with:
           path: psc1/.lake
           key: psc1-lake-v2-${{ runner.os }}-${{ github.job }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/lake-manifest.json', 'psc1/**/*.lean') }}
-      - name: Use cached Lean launcher or install with bounded retries
+      - name: Prepare cached repository-pinned Lean launcher
         timeout-minutes: 7
-        run: |
-          set -euo pipefail
-          # The exact toolchain is selected by psc1/lean-toolchain and checked
-          # by the unchanged compiler/kernel tests. Do not fetch a default Lean.
-          if [ ! -x "$HOME/.elan/bin/lake" ]; then
-            curl --fail --location --retry 2 --connect-timeout 20 --max-time 90 https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o "$RUNNER_TEMP/psc1-elan-init.sh"
-            for attempt in 1 2 3; do
-              if timeout --kill-after=5s 120s sh "$RUNNER_TEMP/psc1-elan-init.sh" -y --default-toolchain none; then break; fi
-              [ "$attempt" -lt 3 ] || exit 1
-            done
-            test -x "$HOME/.elan/bin/lake"
-          fi
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+        uses: ./.github/actions/psc1-lean-launcher
       - name: Install locked host formatting dependencies and run host regressions
         working-directory: psc1/host-tools
         run: |

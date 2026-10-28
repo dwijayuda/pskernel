@@ -36,11 +36,12 @@ jobs:
           restore-keys: |
             psc1-modular-native-v1-${{ runner.os }}-
             psc1-lake-v2-${{ runner.os }}-native-
-      - name: Install pinned Lean and locked development consumers
+      - name: Prepare cached repository-pinned Lean launcher
+        timeout-minutes: 7
+        uses: ./.github/actions/psc1-lean-launcher
+      - name: Install locked development consumers
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
           npm ci --prefix .. --ignore-scripts --include=optional --no-audit --no-fund
       - name: Prepare immutable PR195 transform baseline

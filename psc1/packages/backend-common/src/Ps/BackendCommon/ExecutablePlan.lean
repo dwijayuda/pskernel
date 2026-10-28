@@ -172,7 +172,7 @@ def buildUnits (ordered : List Nat) (unit : Nat)
     (references : PsStringMap (List PsModuleOwner))
     (buckets : PsStringMap (List PsVerifiedIrDeclaration))
     (byName : PsStringMap (List String)) (mapping : List (Prod Nat Nat)) :
-    Except String (List PsModuleUnit) := do
+    Except String (List PsModuleUnit) :=
   match ordered with
   | [] => do return []
   | source :: rest => do

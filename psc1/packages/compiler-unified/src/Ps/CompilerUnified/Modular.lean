@@ -21,7 +21,7 @@ def nameKey : PsName -> String
 
 def captureModules (sources : List Ps.Internal.CompilerService.Source)
     (request : Ps.Internal.CompilerService.Request) (unit : Nat)
-    (current : CapturedModules) : Except String CapturedModules := do
+    (current : CapturedModules) : Except String CapturedModules :=
   match sources with
   | [] => do return current
   | source :: rest => do
@@ -101,7 +101,7 @@ def artifactJson (kind : String) (artifact : PsModuleArtifact) : String :=
     ("imports", psJsonArray (psListMap importJson artifact.imports)),
     ("exports", psJsonArray (psListMap psJsonQuote artifact.exports))]
 
-def checkedFileBytes (files : List (Prod String String)) (total : Nat) : Except String Unit := do
+def checkedFileBytes (files : List (Prod String String)) (total : Nat) : Except String Unit :=
   match files with
   | [] => do return ()
   | item :: rest => do

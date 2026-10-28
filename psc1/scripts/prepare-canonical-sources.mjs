@@ -19,6 +19,15 @@ const extended = args.length === 0;
 const out = path.resolve('dist/canonical-source-preparation');
 assert.ok(!fs.existsSync(out), 'fresh preparation output required');
 fs.mkdirSync(out, { recursive: true });
+process.on('uncaughtExceptionMonitor', error => {
+  fs.writeFileSync(path.join(out, 'failure.json'), JSON.stringify({
+    schema: 'psc1-canonical-source-preparation-failure/1', status: 'refused',
+    testedCommit: process.env.GITHUB_SHA ?? null, runId: process.env.GITHUB_RUN_ID ?? null,
+    message: String(error.message), cause: error.cause ?? null,
+    stack: String(error.stack ?? '').slice(0, 16384), refsChanged: false,
+  }, null, 2) + '\n');
+});
+
 const json = value => JSON.stringify(value, null, 2) + '\n';
 const put = (file, value) => { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, value); };
 const read = file => JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -105,6 +114,14 @@ assert.equal(remainder.length, extended ? 13 : 41);
 const syntheticModule = 'Ps.Canonical.Repository';
 const syntheticText = ordered.map(row => 'import ' + row.module).join('\n') + '\n';
 const auditRows = [...ordered, { module: syntheticModule, text: syntheticText }];
+const parseProbePath = path.join(out, 'parse-probe.json');
+const libraryProbeFiles = run('git', ['ls-files', '-z', '--', 'stdlib/ProofScript']).split('\0').filter(file => file.endsWith('.lean')).sort();
+console.log(run('lake', ['env', 'lean', '--run', 'scripts/CanonicalSourceProbe.lean', parseProbePath,
+  ...ordered.map(row => row.path), ...libraryProbeFiles]));
+const parseProbe = read(parseProbePath);
+assert.equal(parseProbe.schema, 'psc1-canonical-parse-probe/1');
+const parseRefusals = parseProbe.files.filter(row => row.status !== 'accepted-parse-only');
+assert.deepEqual(parseRefusals, [], 'all intended portable owners must pass the actual parser before semantic checking');
 const tools = helpers(root), started = Date.now();
 console.log('PSC1_CANONICAL_STAGE: capture-and-native-reference-admission');
 const snapshots = auditRows.map(row => tools.lexical.capture({ module: row.module, grammar: 'lean', bytes: Buffer.from(row.text) }));

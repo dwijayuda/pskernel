@@ -159,9 +159,10 @@ def psLosslessCaptureWorker (fuel : Nat) (inputBound pieceLimit : Nat) (source :
                   else
                     match rest with
                     | List.nil =>
-                        Except.ok (psListReverse
-                          (psLosslessAppend source state PsSourcePieceKind.token
-                            state.cursor (Option.some token)).reversed)
+                        let appended : PsLosslessState :=
+                          psLosslessAppend source state PsSourcePieceKind.token
+                            state.cursor (Option.some token);
+                        Except.ok (psListReverse appended.reversed)
                     | List.cons _ _ => Except.error PsLosslessError.invalidSpan
                 else Except.error PsLosslessError.invalidSpan
               else

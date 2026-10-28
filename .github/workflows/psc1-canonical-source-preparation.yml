@@ -4,6 +4,7 @@ on:
     branches: [feat/psc1-canonical-latency-20261028]
     paths:
       - psc1/scripts/prepare-canonical-sources.mjs
+      - psc1/scripts/CanonicalSourceProbe.lean
       - .github/workflows/psc1-canonical-source-preparation.yml
   workflow_dispatch:
 permissions:

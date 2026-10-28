@@ -43,7 +43,9 @@
     "pure-emitter-closures-have-no-frontend-driver",
     "complete-source-package-graph-acyclic",
     "unified-entry-uses-pure-emitters",
-    "new-source-identity-distinct-from-frozen-g3"
+    "new-source-identity-distinct-from-frozen-g3",
+    "shared-module-renderer-bodies-preserved",
+    "retained-pilot-profiles-unchanged"
   ],
   "stages": [
     {

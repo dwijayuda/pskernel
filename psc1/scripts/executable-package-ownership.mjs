@@ -57,6 +57,32 @@ const entry=rows.at(-1).text;
 for(const name of contract.sourceEntries.pureEmitters)assert.ok(entry.includes('import '+name+'\n'));
 assert.ok(!/^import Ps[.]Backend\w+[.]CompilerService$/m.test(entry));
 record('unified-entry-uses-pure-emitters');
+// Shared extraction must preserve the retained bounded profiles and printer
+// bodies exactly; production growth is implemented in a separate host planner.
+const commonPath='packages/backend-common/src/Ps/BackendCommon/Modules.lean';
+const oldCommon=read(baseline,commonPath),model=read('.','packages/backend-common/src/Ps/BackendCommon/ModuleModel.lean');
+const markers=['structure PsModuleOwner','def psModulePackageSafe','structure PsModuleImport','def psModulePackage (',
+ 'def psModuleTypeNames','def psModuleCohort (','/-! Carry value'];
+const positions=markers.map(marker=>{const i=oldCommon.indexOf(marker);assert.ok(i>=0);return i;});
+for(const [start,end]of [[0,1],[2,3],[4,5],[6,null]])
+ assert.ok(model.includes(oldCommon.slice(positions[start],end===null?undefined:positions[end])),'shared model exact body');
+const retained=read('.',commonPath);
+for(const [start,end]of [[1,2],[3,4],[5,6]])
+ assert.ok(retained.includes(oldCommon.slice(positions[start],positions[end])),'retained pilot policy unchanged');
+for(const [dir,ns]of [['js','Js'],['ts','Ts']]){
+ const modulePath='packages/backend-'+dir+'/src/Ps/Backend'+ns+'/Modules.lean';
+ const old=read(baseline,modulePath),cut=old.indexOf('def psEmit'+ns+'Modules');
+ assert.ok(cut>0);
+ const common=read('.',modulePath.replace('Modules.lean','ModuleFiles.lean'));
+ assert.equal(common.replace('import Ps.BackendCommon.ModuleModel','import Ps.BackendCommon.Modules'),old.slice(0,cut));
+ assert.ok(read('.',modulePath).endsWith(old.slice(cut)),'retained module API exact body');
+}
+const oldPilot=read(baseline,'host/src/Ps/Host/ModularPilot.lean');
+const sourceOwnership=oldPilot.slice(oldPilot.indexOf('def sourceOwners'),oldPilot.indexOf('def ownerJson'));
+assert.ok(read('.','host/src/Ps/Host/SourceModules.lean').includes(sourceOwnership),'source ownership body preserved');
+record('shared-module-renderer-bodies-preserved');
+record('retained-pilot-profiles-unchanged');
+
 const sources=rows.map(row=>({module:row.module,kind:'lean',text:row.text})),digest=compilerSourceClosureDigest(sources);
 assert.notEqual(digest,'073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9');
 record('new-source-identity-distinct-from-frozen-g3');clean();

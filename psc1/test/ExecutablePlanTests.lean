@@ -15,7 +15,9 @@ def aliasValue : PsVerifiedIrDeclaration :=
   { answer with name := "aliasValue", body := .var "answer" }
 
 def reader : PsVerifiedIrDeclaration :=
-  { answer with name := "reader", parameters := [{ name := "x", type := nat }],
+  { answer with
+    name := "reader"
+    parameters := [{ name := "x", type := nat }]
     body := .var "aliasValue" }
 
 def computed : PsVerifiedIrDeclaration :=

@@ -140,9 +140,9 @@ def emit (directory specifierFile digest : String) : IO Unit := do
       | none => .error ("PSC1_EXECUTABLE_JS_DECLARATION:" ++ item.name))
     -- Feed the unchanged structured renderer only the selected, ordered unit.
     -- This avoids a full-program owner scan for every generated file.
-    let local := { selected with owners := unit.declarations.map
-      (fun declaration => PsModuleOwner.mk declaration.name unit.index) }
-    let js ← liftResult (Ps.Internal.ModularJs.renderUnit local
+    let unitPlan : PsModulePlan := { selected with
+      owners := unit.declarations.map (fun declaration => PsModuleOwner.mk declaration.name unit.index) }
+    let js ← liftResult (Ps.Internal.ModularJs.renderUnit unitPlan
       { lowered with declarations := ordered } digest unit)
     let ts ← liftResult (Ps.Internal.ModularTs.renderUnit selected digest brands tags unit)
     let suffix := "/unit-" ++ toString unit.index

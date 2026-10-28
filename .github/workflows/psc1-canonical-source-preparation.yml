@@ -12,7 +12,7 @@ permissions:
   actions: read
 concurrency:
   group: psc1-canonical-source-preparation-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   prepare:
@@ -46,9 +46,13 @@ jobs:
       - name: Install the pinned native bootstrap compiler
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          if [ ! -x "$HOME/.elan/bin/elan" ]; then
+            curl --connect-timeout 20 --max-time 120 --retry 2 -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o "$RUNNER_TEMP/psc1-elan-init.sh"
+            timeout 180 sh "$RUNNER_TEMP/psc1-elan-init.sh" -y --default-toolchain none
+          fi
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: Build the existing checked ownership helpers
+        timeout-minutes: 20
         run: lake build psc1_lossless_source psc1_source_ownership psc1_independent_checker
       - uses: actions/cache/save@v4
         if: steps.source-tools-cache.outputs.cache-hit != 'true'

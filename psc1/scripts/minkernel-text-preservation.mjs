@@ -86,7 +86,7 @@ for(const stem of ['actual','fixture','emitter']){
 }
 const receipt={schema:'psc1-r6-text-composition/1',head:process.env.GITHUB_SHA,platform:process.platform,node:process.version,
  phase:fs.readFileSync('proofs/pskernel-min/TextComposition.lean','utf8').includes('theorem join_utf8')?'composition':'decision',
- decisionBaseline,sourcePolicies,excludedSurrogateBoundary,appendPairs:324,appendNativeCalls:648,appendGeneratedCalls:appendCalls,actualJoinCases:50,actualEmitterByteCases:30,positiveNativeCalls:728,positiveGeneratedCalls:728,actualSources:identities(actualSources),
+ decisionBaseline,sourcePolicies,fixtureRoles:{actual:'actual six-module Type join closure',fixture:'standalone append Core-refusal witness',emitter:'actual connected emitter source closure'},excludedSurrogateBoundary,appendPairs:324,appendNativeCalls:648,appendGeneratedCalls:appendCalls,actualJoinCases:50,actualEmitterByteCases:30,positiveNativeCalls:728,positiveGeneratedCalls:728,actualSources:identities(actualSources),
  fixtureSources:identities(fixtureSources),emitterSources:identities(emitterSources),files,byteOracle:'Independent chronological List Nat byte concatenation; no String.append or psTsJoin in the expected fold.',
  boundary:'Native constructive byte theorem and finite generated compatibility; no complete compiler/ECMAScript or opaque-string theorem.'};
 if(!abiOnly){

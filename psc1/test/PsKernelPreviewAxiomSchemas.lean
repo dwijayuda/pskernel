@@ -31,12 +31,14 @@ private def binderSchema : BinderInfo → String
   | .strictImplicit => "strictImplicit"
   | .instImplicit => "instImplicit"
 
-private partial def expressionSchema (params : List Name) : Expr → Except String Json
+private partial def expressionSchema (params : List Name) (fixture : Bool) : Expr → Except String Json
   | .bvar n => .ok (node "bvar" #[text (toString n)])
   | .sort l => do return node "sort" #[← levelSchema params l]
   | .const n us => do return node "const" #[nameSchema n, Json.arr (← us.toArray.mapM (levelSchema params))]
-  | .app f a => do return node "app" #[← expressionSchema params f, ← expressionSchema params a]
-  | .forallE _ d b bi => do return node "forallE" #[← expressionSchema params d, ← expressionSchema params b, text (binderSchema bi)]
+  | .app f a => do return node "app" #[← expressionSchema params fixture f, ← expressionSchema params fixture a]
+  | .forallE n d b bi => do return node "forallE"
+      (#[← expressionSchema params fixture d, ← expressionSchema params fixture b, text (binderSchema bi)] ++
+        if fixture then #[nameSchema n] else #[])
   | _ => .error "unexpected expression constructor in pinned standard axiom"
 
 def main : IO Unit := do
@@ -47,7 +49,7 @@ def main : IO Unit := do
     let some info := env.find? n | throw (IO.userError "missing pinned standard axiom")
     unless (match info with | .axiomInfo _ => true | _ => false) do
       throw (IO.userError "standard axiom is not an axiom declaration")
-    let schema ← match expressionSchema info.levelParams info.type with
+    let schema ← match expressionSchema info.levelParams false info.type with
       | .ok v => pure v
       | .error e => throw (IO.userError e)
     schemas := schemas.push (n.toString, Json.mkObj [
@@ -56,7 +58,7 @@ def main : IO Unit := do
   for n in [`Eq, `Eq.refl, `Iff, `Iff.intro, `Nonempty, `Nonempty.intro,
       `Quot, `Quot.mk, `Quot.lift, `Quot.ind] do
     let some info := env.find? n | throw (IO.userError "missing standard axiom dependency")
-    let schema ← match expressionSchema info.levelParams info.type with
+    let schema ← match expressionSchema info.levelParams false info.type with
       | .ok v => pure v
       | .error e => throw (IO.userError e)
     let extra ← match info with
@@ -70,8 +72,12 @@ def main : IO Unit := do
           ("numParams", text (toString v.numParams)), ("numFields", text (toString v.numFields)), ("isUnsafe", Json.bool v.isUnsafe)]
       | .quotInfo _ => pure [("kind", text "quotient")]
       | _ => throw (IO.userError "unexpected dependency kind")
+    let fixtureType ← match expressionSchema info.levelParams true info.type with
+      | .ok v => pure v
+      | .error e => throw (IO.userError e)
     primitives := primitives.push (n.toString, Json.mkObj
-      ([("universeParameters", text (toString info.levelParams.length)), ("type", schema)] ++ extra))
+      ([("universeParameters", text (toString info.levelParams.length)), ("type", schema),
+        ("fixtureType", fixtureType), ("fixtureLevelParams", Json.arr (info.levelParams.toArray.map nameSchema))] ++ extra))
   IO.println (Json.mkObj [
     ("format", text "pskernel-preview-axioms-v1"),
     ("leanVersion", text "4.35.0"),

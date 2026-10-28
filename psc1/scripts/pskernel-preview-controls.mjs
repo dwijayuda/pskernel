@@ -48,9 +48,10 @@ function axiomStream(label,schema,{includePrelude=true,shadowEquality=false}={})
     if(e[0]==='bvar')row={bvar:Number(e[1])};else if(e[0]==='sort')row={sort:level(e[1])};
     else if(e[0]==='const')row={const:{name:name(e[1]),us:e[2].map(level)}};
     else if(e[0]==='app')row={app:{fn:expr(e[1]),arg:expr(e[2])}};
-    else if(e[0]==='forallE')row={forallE:{name:0,type:expr(e[1]),body:expr(e[2]),binderInfo:e[3]}};
+    else if(e[0]==='forallE')row={forallE:{name:e[4]?name(e[4]):0,type:expr(e[1]),body:expr(e[2]),binderInfo:e[3]}};
     else throw Error('unsupported control schema');const id=ne++;rows.push({ie:id,...row});return id;}
-  function base(label,s){params=parameters(s);const n=name(label.split('.').reduce((p,c)=>['str',p,c],['anonymous'])),type=expr(s.type);return {name:n,levelParams:params,type};}
+  function base(label,s){params=s.fixtureLevelParams?s.fixtureLevelParams.map(name):parameters(s);
+    const n=name(label.split('.').reduce((p,c)=>['str',p,c],['anonymous'])),type=expr(s.fixtureType??s.type);return {name:n,levelParams:params,type};}
   if(includePrelude){
     for(const label of ['Eq','Iff','Nonempty']){
       const p=pins.primitives[label],type={...base(label,p),numParams:Number(p.numParams),numIndices:Number(p.numIndices),
@@ -94,7 +95,8 @@ const [kernel,requestId,inputSha256,programSha256,policySha256]=process.argv.sli
 let r={format:'pskernel-preview-worker-v1',requestId,inputSha256,programSha256,policySha256,
   fuel:'4096',outcome:'accepted',stage:'complete',reason:null,assumptions:[],assumptionPolicyValidated:true,
   coreInvoked:true,metadataValidated:true,admissionCommands:1,exportedDeclarations:1,arenaNodes:'2'};
-if(mode==='hang'){setInterval(()=>{},1000);}
+  if(mode==='busy'){while(true){}}
+  else if(mode==='hang'){setInterval(()=>{},1000);}
 else if(mode==='descendant'){const c=spawn(process.execPath,['-e','setInterval(()=>{},1000)'],{stdio:'inherit'});writeFileSync(new URL('./descendant.pid',import.meta.url),String(c.pid));setInterval(()=>{},1000);}
 else if(mode==='stdout'){writeSync(1,Buffer.alloc(300000,120));setInterval(()=>{},1000);}
 else if(mode==='stderr'){writeSync(2,Buffer.alloc(1100000,120));setInterval(()=>{},1000);}
@@ -119,7 +121,7 @@ for(const mode of ['missing','invalid','duplicate','duplicate-key','identity','p
   const workerPath=path.join(scratch,mode+'.mjs');await writeFile(workerPath,fixture(mode));const r=await run(definition(true),{workerPath});
   record('protocol fault '+mode+' cannot accept',r.outcome==='internalError'&&r.host.workerReaped);
 }
-for(const [mode,cause]of [['hang','wall-deadline'],['descendant','wall-deadline'],['stdout','stdout-limit'],['stderr','stderr-limit']]){
+for(const [mode,cause]of [['busy','wall-deadline'],['hang','wall-deadline'],['descendant','wall-deadline'],['stdout','stdout-limit'],['stderr','stderr-limit']]){
   const workerPath=path.join(scratch,mode+'.mjs');await writeFile(workerPath,fixture(mode));
   const r=await run(definition(true),{workerPath,timeoutMilliseconds:1000});
   record(mode+' supervised resource outcome and reaping',r.outcome==='resourceExhausted'&&r.host.cause===cause&&r.host.workerReaped&&r.host.wallMilliseconds<5000);

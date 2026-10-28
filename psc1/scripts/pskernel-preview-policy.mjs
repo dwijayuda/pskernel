@@ -124,7 +124,7 @@ export function scanAssumptions(text,pins,onProgress=()=>{}){
       if(actual.universeParameters!==p.universeParameters||encode(actual.type)!==encode(p.type))
         throw new PolicyFailure('declinedUnsupported','assumption-policy','altered standard dependency type: '+label,assumptions);
       for(const [key,value]of Object.entries(p)){
-        if(['kind','type','universeParameters'].includes(key))continue;
+        if(['kind','type','universeParameters','fixtureType','fixtureLevelParams'].includes(key))continue;
         const observed=key==='all'||key==='ctors'?array(r.raw[key]).map(x=>reference(names,x)):
           key==='induct'?reference(names,r.raw[key]):typeof value==='string'?natural(r.raw[key]).toString():r.raw[key];
         if(encode(observed)!==encode(value))throw new PolicyFailure('declinedUnsupported','assumption-policy','altered standard dependency metadata: '+label+'.'+key,assumptions);

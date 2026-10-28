@@ -81,8 +81,10 @@ const literalMoves={
 const read=file=>fs.readFileSync(file,'utf8');
 // Original move evidence remains reproducible at its qualified checkpoint.
 // Runtime/watch behavior has a distinct installed/runtime qualification, not an exact-move claim.
+// The source-ownership audit profile is checked by canonical preparation and host tests;
+// its original relocation correspondence remains pinned to the same historical checkpoint.
 const layoutCheckpoint='94e0c13f6a4b434f73c859cc0c716cb6fb8d1340';
-const changedOwners=new Set(['npm-cli/compiler-api.mjs','host-tools/generated-compiler-session.mjs','test/installed/cli.test.mjs','test/host/cli.test.mjs']);
+const changedOwners=new Set(['npm-cli/compiler-api.mjs','host-tools/generated-compiler-session.mjs','host-tools/source-refactoring.mjs','test/installed/cli.test.mjs','test/host/cli.test.mjs']);
 function migrationRead(file){
  if(!changedOwners.has(file))return read(file);
  const r=spawnSync('git',['show',layoutCheckpoint+':psc1/'+file],{encoding:'utf8',timeout:10000,maxBuffer:2*1024*1024});
@@ -127,7 +129,7 @@ for(const file of ['host-tools/source-refactoring.mjs','host-tools/generated-tar
   .replace("import {pathToFileURL} from 'node:url';","import {fileURLToPath,pathToFileURL} from 'node:url';")
   .replace("path.resolve('host-tools/process/bounded-process.py')","fileURLToPath(new URL('./process/bounded-process.py',import.meta.url))");
  assert.equal(migrationRead(file),expected,'host relocation changed non-path bytes: '+file);
- compared.push({from:file,to:file,relation:file==='host-tools/generated-target-tools.mjs'?'enumerated-paths-and-module-relative-supervisor-resolution':'only-enumerated-runtime-path-literals'});
+ compared.push({from:file,to:file,relation:file==='host-tools/generated-target-tools.mjs'?'enumerated-paths-and-module-relative-supervisor-resolution':'only-enumerated-runtime-path-literals',checkpoint:changedOwners.has(file)?layoutCheckpoint:'current'});
 }
 for(const name of ['STATUS','NPM_PACKAGE_WORK_STATE'])
  assert.equal(read('docs/history/'+name+'_BEFORE_LAYOUT_2026-10-26.md'),historical(name+'.md'));

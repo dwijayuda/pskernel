@@ -1,0 +1,153 @@
+{
+  "schema": "psc1-executable-package-contract/1",
+  "plan": "docs/architecture/executable-package-modularity.md",
+  "baselineCommit": "b400552324956d9c3a684c9231f60f70066e1629",
+  "baselinePackageVersion": "0.1.0-psc1.13",
+  "target": {
+    "umbrella": "proofscript",
+    "command": "psc",
+    "compilerOwner": "@proofscript/compiler",
+    "existingNamesOnly": true,
+    "pythonPhpOptional": true
+  },
+  "sourceEntries": {
+    "unified": "Ps.CompilerUnified.Service",
+    "logicalOwnerOverrides": {
+      "compiler-unified": "@proofscript/compiler"
+    },
+    "pureEmitters": [
+      "Ps.BackendJs.Emit",
+      "Ps.BackendTs.Emit",
+      "Ps.BackendRust.Emit",
+      "Ps.BackendWasm.Emit"
+    ],
+    "sharedError": "Ps.BackendCommon.ServiceError"
+  },
+  "boundaries": {
+    "pureEmitterForbiddenOwners": [
+      "compiler",
+      "compiler-unified",
+      "elab",
+      "syntax",
+      "erasure"
+    ],
+    "legacyWrappersAreCompatibilityOnly": true,
+    "noUndeclaredRuntimeImports": true,
+    "noCoreToUmbrellaOrCli": true
+  },
+  "requiredOwnershipCases": [
+    "baseline-is-exact-and-read-only",
+    "error-contract-body-preserved",
+    "all-four-emitter-bodies-preserved",
+    "legacy-service-entry-points-preserved",
+    "pure-emitter-closures-have-no-frontend-driver",
+    "complete-source-package-graph-acyclic",
+    "unified-entry-uses-pure-emitters",
+    "new-source-identity-distinct-from-frozen-g3",
+    "shared-module-renderer-bodies-preserved",
+    "retained-pilot-profiles-unchanged"
+  ],
+  "stages": [
+    {
+      "id": "M0",
+      "work": "ownership/API/production artifact contract",
+      "status": "candidate-contract-and-ownership-implemented"
+    },
+    {
+      "id": "M1",
+      "work": "production lower-level executable ownership",
+      "status": "qualified-candidate-scope"
+    },
+    {
+      "id": "M2",
+      "work": "complete genuine compiler module graph",
+      "status": "qualified-candidate-scope"
+    },
+    {
+      "id": "M3",
+      "work": "checked execution through complete JS/TS graphs",
+      "status": "partially-qualified"
+    },
+    {
+      "id": "M4",
+      "work": "thin CLI and installable umbrella integration",
+      "status": "not-implemented"
+    },
+    {
+      "id": "M5",
+      "work": "reproduction and final modular generation qualification",
+      "status": "not-qualified"
+    }
+  ],
+  "productionAcceptance": [
+    "unique complete transformed ownership",
+    "actual generated bodies per executable package",
+    "acyclic declared dependency graph",
+    "one shared runtime per engine graph",
+    "both source grammars",
+    "official independent Lean admission",
+    "strict original/transformed IR",
+    "seven-backend behavior/refusals",
+    "accurate ESM/types/source provenance",
+    "root-only local/global installation and checked CLI/watch",
+    "missing/tampered/cohort/path/initialization refusals",
+    "atomic complete-graph publication outcomes",
+    "exact reproduction and measured resource use",
+    "new modular G1/G2/G3/fixed points before self-hosted release claim"
+  ],
+  "preservation": {
+    "leanVersion": "4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "compilerSeconds": 240,
+    "checkerSeconds": 120,
+    "semanticFuel": "unchanged",
+    "memoryStackPolicies": "unchanged",
+    "kernelWasm": "official C++/Emscripten linear memory",
+    "pilotExpansion": "deferred"
+  },
+  "noNewModularCompilerQualification": true,
+  "noRegistryPublication": true,
+  "noMerge": true,
+  "artifact": {
+    "schema": "psc1-executable-npm-graph/1",
+    "protocol": "psc1-executable-compiler/1",
+    "status": "qualified-candidate-scope",
+    "fields": [
+      "exact source closure",
+      "official admission digest",
+      "source-owned units and declarations",
+      "runtime/value/type dependency edges",
+      "existing package names and versions",
+      "JS/TS entry points",
+      "exact file bytes and hashes"
+    ],
+    "bounds": {
+      "sourceModules": 256,
+      "units": 257,
+      "values": 8192,
+      "nominalTypes": 2048,
+      "expressionReferenceFuel": 4096,
+      "initializerEdgesPerWalk": 131072,
+      "fileBytes": 33554432,
+      "nativeStageAggregateBytes": 134217728,
+      "candidateGraphAggregateBytes": 134217728,
+      "candidateGraphFiles": 8192,
+      "compilerSeconds": 240,
+      "checkerSeconds": 120,
+      "focusedLinuxJobMinutes": 30
+    },
+    "buildStagePolicy": "Capture/transform and emission are separately supervised 240s build stages; ordinary compiler requests remain 240s. Native stages keep 4GiB AS/8MiB stack. Node qualification uses the existing 4096MiB V8 heap/8MiB stack and a 240s process-tree supervisor; V8 reserves virtual memory so AS is not applied to Node. No pilot limits changed.",
+    "publicApi": "Candidate generated subpaths only; .13 checked umbrella/direct API compatibility is not promoted or silently changed.",
+    "compilerSourceAssurance": "ordinary-checked",
+    "applicationFixtureAssurance": "checked",
+    "partialPolicy": "Reuse the existing compiler logical/runtime body-pairing and strict IR path; record exact partial names. No totality or admitted-partial-body claim.",
+    "dependencyAwareCI": {
+      "candidate": "psc1-executable-packages.yml",
+      "defaultCLI": "psc1-cli.yml",
+      "candidateBuilderOutsideInstalledCLI": true,
+      "sharedHostChangesStillRunCLI": true,
+      "M4RequiresRemovingCandidateBuilderExclusion": true
+    }
+  },
+  "qualificationReceipt": "docs/PSC1_EXECUTABLE_PACKAGES_QUALIFICATION_2026-10-28.json"
+}

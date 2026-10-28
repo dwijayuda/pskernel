@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {pathToFileURL} from 'node:url';
+import {verify} from './verify.mjs';
+const [directory,manifestFile,expectedHash,variant,requestFile]=process.argv.slice(2);
+if(!['js','ts'].includes(variant))throw Error('PSC1_EXECUTABLE_VARIANT');
+const manifest=verify(directory,fs.readFileSync(manifestFile),expectedHash);
+const compiler=await import(pathToFileURL(path.join(directory,manifest.entry[variant])));
+if(typeof compiler.psCompilerServiceCandidate!=='function')throw Error('PSC1_EXECUTABLE_ENTRY_EXPORT');
+process.stdout.write(compiler.psCompilerServiceCandidate(fs.readFileSync(requestFile,'utf8')));

@@ -36,10 +36,21 @@ modules where appropriate. Move misplaced shared contracts down to avoid cycles;
 do not hide them in undeclared runtime loads. Preserve qualified .13 until the
 production graph passes its own finite gates.
 
-This is a documentation/architecture decision. Implementation has not resumed.
-The plan's M0-M5 queue covers source/API ownership, genuine generation, complete
-compiler execution, umbrella/CLI integration and final reproduction/self-hosting
-qualification. Existing pilot tests/evidence remain; expanding experimental pilot
+PR #205 reaches a verified candidate M1/M2 milestone. Linux run40664681150 at
+60a0d5cb passes complete126-source capture,4781 logical declarations independently
+admitted,4516 uniquely owned transformed values in127 units/15 existing packages,
+all strict TS checks,26 exact modular-compiler response observations, emitted
+JS/TS/Rust execution, Wasm validation, graph/cohort negatives and offline npm
+package byte/consumer checks. [Exact receipt](PSC1_EXECUTABLE_PACKAGES_QUALIFICATION_2026-10-28.json)
+and [build walkthrough](architecture/executable-package-build.md) state the scope.
+
+The dependency-ordered queue is: finish M3's retained real application/backend
+corpus through the modular engines (including Bun and Wasm execution); M4 checked
+root-only umbrella/thin CLI/watch and coherent graph publication; portable module
+generation within the same compiler; then M5 new modular G1/G2/G3/fixed points and
+applicable platform/publication gates. M3 has finite partial qualification;
+M4/M5 remain incomplete. The .13 API/distribution stays the default reference.
+Existing pilot tests/evidence remain; expanding experimental pilot
 profiles is not a prerequisite. The stopped PR #203/prototype branches are
 preserved, not promoted.
 

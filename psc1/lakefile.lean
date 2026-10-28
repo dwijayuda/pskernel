@@ -90,7 +90,7 @@ lean_lib PsCompilerIr where
 
 lean_lib PsBackendCommon where
   srcDir := "packages/backend-common/src"
-  roots := #[`Ps.BackendCommon.Plan, `Ps.BackendCommon.StateExcept, `Ps.BackendCommon.Source, `Ps.BackendCommon.DirectCalls, `Ps.BackendCommon.Modules]
+  roots := #[`Ps.BackendCommon.ServiceError, `Ps.BackendCommon.Plan, `Ps.BackendCommon.StateExcept, `Ps.BackendCommon.Source, `Ps.BackendCommon.DirectCalls, `Ps.BackendCommon.ModuleModel, `Ps.BackendCommon.Modules]
 
 lean_lib PsErasure where
   srcDir := "packages/erasure/src"
@@ -118,8 +118,9 @@ lean_lib PsBackendTs where
     `Ps.BackendTs.Sh1Target,
     `Ps.BackendTs.Sh1,
     `Ps.BackendTs.Compiler,
+    `Ps.BackendTs.Emit,
     `Ps.BackendTs.CompilerService,
-    `Ps.BackendTs.Modules
+    `Ps.BackendTs.ModuleFiles, `Ps.BackendTs.Modules
   ]
 
 -- Target libraries remain outside the portable bootstrap import closure.
@@ -132,7 +133,9 @@ lean_lib PsBackendJs where
     `Ps.BackendJs.Lower,
     `Ps.BackendJs.Validate,
     `Ps.BackendJs.Print,
+    `Ps.BackendJs.Emit,
     `Ps.BackendJs.CompilerService,
+    `Ps.BackendJs.ModuleFiles,
     `Ps.BackendJs.Modules
   ]
 
@@ -149,6 +152,7 @@ lean_lib PsBackendRust where
     `Ps.BackendRust.Runtime,
     `Ps.BackendRust.RuntimePlan,
     `Ps.BackendRust.Module,
+    `Ps.BackendRust.Emit,
     `Ps.BackendRust.CompilerService
   ]
 
@@ -179,6 +183,7 @@ lean_lib PsBackendWasm where
     `Ps.BackendWasm.StringAbi,
     `Ps.BackendWasm.StringComponent,
     `Ps.BackendWasm.ServiceAbi,
+    `Ps.BackendWasm.Emit,
     `Ps.BackendWasm.CompilerService
   ]
 
@@ -213,6 +218,8 @@ lean_lib PsHost where
     `Ps.Host.ProjectCompiler,
     `Ps.Host.SourceSnapshot,
     `Ps.Host.SourceOwnership,
+    `Ps.Host.SourceModules,
+    `Ps.Host.ExecutablePlan,
     `Ps.Host.SourceBindings,
     `Ps.Host.ArtifactBundle,
     `Ps.Host.CompilerDriver,
@@ -678,3 +685,16 @@ lean_exe psc1_output_abi_probe where
 lean_exe psc1_modular_pilot where
   srcDir := "scripts"
   root := `ModularPilotMain
+
+-- Production lower-level emitter ownership; no compiler driver import.
+lean_exe psc1_emitter_boundary_tests where
+  srcDir := "test"
+  root := `EmitterBoundaryTests
+
+lean_exe psc1_executable_plan_tests where
+  srcDir := "test"
+  root := `ExecutablePlanTests
+
+lean_exe psc1_executable_packages where
+  srcDir := "scripts"
+  root := `ExecutablePackagesMain

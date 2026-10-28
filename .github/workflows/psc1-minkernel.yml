@@ -31,19 +31,7 @@ jobs:
           key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
       - name: Install pinned Lean
         run: |
-          if [ ! -x "$HOME/.elan/bin/elan" ]; then
-            for elan_attempt in 1 2 3; do
-              if curl --fail --show-error --location --connect-timeout 15 --max-time 60 \
-                  https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
-                  -o "$RUNNER_TEMP/psc1-elan-init.sh" &&
-                  timeout 180 sh "$RUNNER_TEMP/psc1-elan-init.sh" -y; then
-                break
-              fi
-            done
-            test -x "$HOME/.elan/bin/elan"
-          fi
-          "$HOME/.elan/bin/elan" --version
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          bash "$GITHUB_WORKSPACE/psc1/scripts/ci/install-pinned-lean.sh"
       - name: Check exact executable and its complete fragment consistency proof
         working-directory: psc1/proofs/pskernel-min
         run: |
@@ -194,19 +182,7 @@ jobs:
             psc1-lake-v2-${{ runner.os }}-
       - name: Install pinned Lean
         run: |
-          if [ ! -x "$HOME/.elan/bin/elan" ]; then
-            for elan_attempt in 1 2 3; do
-              if curl --fail --show-error --location --connect-timeout 15 --max-time 60 \
-                  https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
-                  -o "$RUNNER_TEMP/psc1-elan-init.sh" &&
-                  timeout 180 sh "$RUNNER_TEMP/psc1-elan-init.sh" -y; then
-                break
-              fi
-            done
-            test -x "$HOME/.elan/bin/elan"
-          fi
-          "$HOME/.elan/bin/elan" --version
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          bash "$GITHUB_WORKSPACE/psc1/scripts/ci/install-pinned-lean.sh"
           npm install --prefix "$RUNNER_TEMP/min-ts" --ignore-scripts --no-audit --no-fund typescript@7.0.2
           echo "PSC0_TSC=$RUNNER_TEMP/min-ts/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
       - name: Prove actual compiler capture, currying and scalar-stage preservation
@@ -274,6 +250,35 @@ jobs:
           fs.writeFileSync('dist/pskernel-min/compiler-substitution/proof-reports.json',JSON.stringify({schema:'psc1-r8-substitution-trust/1',reports},null,2)+'\n');
           console.log('PSC1_R8_SUBSTITUTION_TRUST_PASS '+reports.length);
           JS
+      - name: Prove indexed byte cursor traversal against its reference event relation
+        run: |
+          set -euo pipefail
+          mkdir -p dist/pskernel-min/byte-cursor
+          lake build PsMinByteCursor PsMinByteCursorProof 2>&1 | tee dist/pskernel-min/byte-cursor/build.log
+          lake env lean proofs/pskernel-min/ByteCursorTrust.lean 2>&1 | tee dist/pskernel-min/byte-cursor/proof.log
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          assert.equal(process.platform,'linux');assert.equal(process.env.GITHUB_ACTIONS,'true');
+          const text=fs.readFileSync('dist/pskernel-min/byte-cursor/proof.log','utf8');
+          const names=["read_sound","read_complete","read_iff","read_eof","read_range","walk_span","span_valid","span_length","digest_empty","digest_cons","walk_reflect","walk_iff","digest_bounded"];
+          const reports=names.map(name=>{
+            const full='Ps.MinKernel.ByteCursor.'+name;
+            const rows=text.split('\n').filter(line=>line.includes("'"+full+"'"));
+            assert.equal(rows.length,1,'missing/duplicate report '+full);
+            assert.ok(rows[0].includes('does not depend on any axioms')||rows[0].endsWith('depends on axioms: [propext]'),rows[0]);
+            return {name:full,report:rows[0]};
+          });
+          assert.doesNotMatch(text,/sorryAx|declaration uses.*sorry/);
+          fs.writeFileSync('dist/pskernel-min/byte-cursor/proof-reports.json',JSON.stringify({schema:'psc1-r9-byte-cursor-trust/1',reports},null,2)+'\n');
+          console.log('PSC1_R9_BYTE_CURSOR_TRUST_PASS '+reports.length);
+          JS
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-r9-byte-cursor-proof-${{ github.sha }}
+          path: psc1/dist/pskernel-min/byte-cursor/
+          retention-days: 90
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -327,19 +332,7 @@ jobs:
       - name: Install repository-pinned tools
         run: |
           set -euo pipefail
-          if [ ! -x "$HOME/.elan/bin/elan" ]; then
-            for elan_attempt in 1 2 3; do
-              if curl --fail --show-error --location --connect-timeout 15 --max-time 60 \
-                  https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
-                  -o "$RUNNER_TEMP/psc1-elan-init.sh" &&
-                  timeout 180 sh "$RUNNER_TEMP/psc1-elan-init.sh" -y; then
-                break
-              fi
-            done
-            test -x "$HOME/.elan/bin/elan"
-          fi
-          "$HOME/.elan/bin/elan" --version
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          bash "$GITHUB_WORKSPACE/psc1/scripts/ci/install-pinned-lean.sh"
           npm install --prefix "$RUNNER_TEMP/min-ts" --ignore-scripts --no-audit --no-fund typescript@7.0.2
           echo "PSC0_TSC=$RUNNER_TEMP/min-ts/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
       - name: Build current PSC1 source seed and official reference checker

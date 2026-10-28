@@ -706,3 +706,13 @@ lean_lib PsMinCompilerCallerFixture where
 lean_lib PsMinCompilerSubstitution where
   srcDir := "proofs/pskernel-min"
   roots := #[`CompilerSubstitution, `CompilerSubstitutionTrust]
+
+
+-- C1 byte-source representation decision, outside stable checker runtime roots.
+lean_lib PsMinByteCursor where
+  srcDir := "packages/pskernel-min/src"
+  roots := #[`Ps.MinKernel.Profile.ByteCursor]
+
+lean_lib PsMinByteCursorProof where
+  srcDir := "proofs/pskernel-min"
+  roots := #[`ByteCursor, `ByteCursorTrust]

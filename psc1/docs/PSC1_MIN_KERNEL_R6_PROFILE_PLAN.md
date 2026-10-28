@@ -1,6 +1,8 @@
 # PSC1 MinKernel R6: constructive text composition
 
-Status: implementation in progress; decision gate qualified at `d28aa13a6560554256698fcb3536c1bdaefff64d`. Base: R5 reporting head `8d156294cb4632f50abd09d19a9d1e701194cbde`.
+Status: completed plan; final source `457c542f5f03f6b3f96245b76ad09190cfd4f879` is qualified.
+Read the [result profile](PSC1_MIN_KERNEL_R6_PROFILE.md), [current guideline](PSC1_MIN_KERNEL_R6_GUIDELINE.md)
+and [dated receipt](PSC1_MIN_KERNEL_R6_QUALIFICATION_2026-10-28.json). Base: R5 reporting head `8d156294cb4632f50abd09d19a9d1e701194cbde`.
 Protected base `94e0c13f6a4b434f73c859cc0c716cb6fb8d1340` remains immutable.
 Follow [R5 guideline](PSC1_MIN_KERNEL_R5_GUIDELINE.md).
 
@@ -78,7 +80,7 @@ append/join checks passed. Independent official checks accepted the exact
 734619-byte actual Type closure packet and 1979-byte test fixture packet.
 Public R4B refused the fixture with PSC1_MIN_CORE_REFUSED and delegated=false.
 R5 source and reporting workflows were separately rechecked terminal-success.
-This satisfies the decision gate; final R6 source qualification is still pending.
+This satisfies the decision gate; final R6 source qualification is now recorded in the result profile and dated receipt.
 
 ## Separate refusal witnesses
 
@@ -89,3 +91,13 @@ The expanded emitter packet may fail the ASCII wire profile before Core rules
 are reached. That refusal is recorded separately and cannot substitute for
 the standalone fixture's PSC1_MIN_CORE_REFUSED result after valid ASCII framing.
 Neither witness grants String admission or changes a checker rule.
+
+## Completion result
+
+The final source passes focused 40656742989, main 40656748193 and installed
+40656742940. All ten theorem reports, three exact source bundles, native/generated
+byte checks, separate Core/ASCII refusal witnesses, retained runtime/census and
+R0–R5 gates are checked. R5's scoped source/reporting batch is reconciled complete.
+The reporting-only follow-up must pass its selected documentation gates before
+the chat reports completion. The result profile and guideline state the remaining
+whole-compiler and engine obligations separately.

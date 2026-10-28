@@ -1,5 +1,19 @@
 # PSC1 MinKernel R5 compiler-stage preservation profile
 
+## Completion and successor checkpoint
+
+The R5 scoped stage-preservation batch is complete. Source
+`f58a1d8f98d1d438a9697371466e07d1416beec4` has successful focused
+40557438637, main 40557451248 and installed 40557438460 workflows; reporting
+commit `8d156294cb4632f50abd09d19a9d1e701194cbde` has successful selected
+workflow 40649323666. These states were rechecked on 2026-10-28.
+The qualified R6 successor resolves actual join UTF-8 composition; use the
+[current R6 guideline](PSC1_MIN_KERNEL_R6_GUIDELINE.md),
+[R6 profile](PSC1_MIN_KERNEL_R6_PROFILE.md) and
+[dated R6 receipt](PSC1_MIN_KERNEL_R6_QUALIFICATION_2026-10-28.json)
+for further work. The original R5 scope and handoff below are historical;
+its whole-compiler, freshness and representation gaps are not relabeled as proved.
+
 Status: **qualified scoped batch**, source `f58a1d8f98d1d438a9697371466e07d1416beec4`.
 Continue with GPT-6.1 Sol / High. All project execution ran on GitHub Actions Linux.
 Read the [current guideline](PSC1_MIN_KERNEL_R5_GUIDELINE.md) and

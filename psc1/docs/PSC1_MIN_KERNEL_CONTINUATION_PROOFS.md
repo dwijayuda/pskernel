@@ -1,6 +1,44 @@
 # PSC1 MinKernel proof-first continuation guide
 
-## R5 qualified — current checkpoint
+## R6 qualified — current checkpoint
+
+Source `457c542f5f03f6b3f96245b76ad09190cfd4f879` has terminal successful
+[focused Linux qualification](https://github.com/dwijayuda/pskernel/actions/runs/40656742989),
+[full repository CI](https://github.com/dwijayuda/pskernel/actions/runs/40656748193)
+and [installed CLI qualification](https://github.com/dwijayuda/pskernel/actions/runs/40656742940).
+
+Read [the current R6 guideline](PSC1_MIN_KERNEL_R6_GUIDELINE.md),
+[R6 profile](PSC1_MIN_KERNEL_R6_PROFILE.md) and
+[dated receipt](PSC1_MIN_KERNEL_R6_QUALIFICATION_2026-10-28.json).
+The actual psTsJoin now uses constructive append, with general exact UTF-8
+composition and selected actual emitter byte equations. Ten new reports are
+one axiom-free/nine propext-only; the retained combined audit has 235 unique
+reports. Valid native/generated scalar-string paths pass 728 positive checks
+each, with three explicitly excluded JavaScript-surrogate counterexamples.
+The actual Type IR/TypeScript/JavaScript remain byte-identical to the decision
+experiment.
+
+Standalone append and actual emitter fixtures are separate owned source scopes:
+the pinned official checker accepts all exact canonical packets; public R4B
+refuses standalone String Core with delegated=false, separately from the emitter
+packet's ASCII-profile refusal. The complete ten-module runtime still self-admits
+its unchanged 206-record, 1804358-byte packet. All R0–R5 guards remain green.
+
+The fresh compiler has 124 modules, 3466 records, 2685282 source bytes and 35
+direct references to the unchanged 60-axiom foundation. The five partial-body
+pairing obligations, min compiler 0/124, Practical Core 0/37 and unqualified
+min G1/G2/G3 remain explicit. R6 closes one join-composition boundary; whole
+recursive erasure/freshness, representations/scheduling and ECMAScript
+preservation remain open. Official Lean Wasm stays default, and production
+min/dual retain PSC1_MIN_CANONICAL_BRIDGE_UNPROVED.
+
+R5 is complete at its scoped stage boundary, with its source/reporting CI
+rechecked and historical evidence retained below. Continue with GPT-6.1 Sol /
+High and GitHub Actions Linux for all project execution; use nonforce
+single-parent expected-HEAD updates. The R6 guideline defines completion and
+the next actual recursive-erasure proof targets. No merge or npm publication.
+
+## Historical R5 qualified checkpoint
 
 Source `f58a1d8f98d1d438a9697371466e07d1416beec4` passes
 [focused Linux qualification](https://github.com/dwijayuda/pskernel/actions/runs/40557438637),
@@ -9,7 +47,7 @@ and [installed CLI qualification](https://github.com/dwijayuda/pskernel/actions/
 The new compiler-stage batch has 21 printed theorem reports: five axiom-free,
 sixteen propext-only. The earlier 204 reports remain within the same policy.
 
-Read [the current R5 guideline](PSC1_MIN_KERNEL_R5_GUIDELINE.md), [R5 profile](PSC1_MIN_KERNEL_R5_PROFILE.md)
+Read [the R5 guideline](PSC1_MIN_KERNEL_R5_GUIDELINE.md), [R5 profile](PSC1_MIN_KERNEL_R5_PROFILE.md)
 and [dated receipt](PSC1_MIN_KERNEL_R5_QUALIFICATION_2026-10-28.json). Actual capture wrapping/currying and the shared
 pure binary lowering stage have scoped semantic proofs; exact token-construction
 equations retain opaque String.Internal operations. Native/generated tests pass

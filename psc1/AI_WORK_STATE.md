@@ -1,11 +1,30 @@
 # PSC1 AI work state
 
 Updated 2026-10-28 Asia/Jakarta. Active continuation branch
-feat/psc1-modular-checked-host-20261028 from verified PR #205 HEAD4393ed15.
+feat/psc1-modular-semantic-corpus-20261028 from verified PR #206 HEAD 7da52af9.
  Production modularity implementation PR #205,
 stacked on plan PR #204 / b400552324956d9c3a684c9231f60f70066e1629.
 GitHub/Linux CI only; expected-HEAD, single-parent/non-force history.
 No merge or registry publication.
+
+## Active M3 extension: retained semantic and seven-target corpus
+
+PR #206 HEAD 7da52af9 and documentation gate 40687774639 pass. Its modular
+application run 40679842606, full source 40681840579 and retained CLI 40679842769
+remain the qualified reference scopes below.
+
+The new opt-in retained-input export preserves the existing native conformance
+commands/oracles and sealed pre-admission source snapshots. Preparation covers all
+eight retained semantic families. Only captured libraries are converted to PS
+using the existing independently checked converter; authored Lean/PS fixtures stay
+unchanged. Their original native admission bytes must still match.
+
+The dedicated Linux workflow tests both complete modular engines, both grammars,
+and all seven checked target adapters on Node/Bun. Target SDKs/providers come from
+the exact qualified CLI resource artifact; reference compiler executors and native
+frontends are disabled before execution. No default distribution promotion,
+modular G2/G3 claim, resource relaxation, merge or registry publication.
+Qualification is pending; this is implementation, not a passing-result claim.
 
 ## M3 application milestone: qualified checked modular execution
 

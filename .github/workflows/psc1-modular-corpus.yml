@@ -1,0 +1,169 @@
+name: PSC1 modular compiler retained semantic corpus
+on:
+  push:
+    branches: [feat/psc1-modular-semantic-corpus-20261028]
+    paths:
+      - .github/workflows/psc1-modular-corpus.yml
+      - .github/actions/psc1-lean-launcher/**
+      - psc1/scripts/modular-corpus-*
+      - psc1/scripts/compiler-m-conformance-tests.mjs
+      - psc1/host-tools/**
+      - psc1/packages/**
+      - psc1/stdlib/**
+      - psc1/test/**
+      - psc1/lakefile.lean
+      - psc1/lean-toolchain
+      - package-lock.json
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: psc1-modular-corpus-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+          cache: npm
+          cache-dependency-path: psc1/host-tools/package-lock.json
+      - name: Syntax and repository boundaries
+        run: |
+          node scripts/ci/repository-layout.mjs
+          for file in scripts/modular-corpus-*.mjs scripts/compiler-m-conformance-tests.mjs; do node --check "$file"; done
+          node scripts/modular-checked-preflight.mjs
+      - run: npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
+      - name: Retain pinned format proposals for the new development adapters
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import path from 'node:path';import {createRequire} from 'node:module';
+          const require=createRequire(path.resolve('host-tools/package.json')),prettier=require('prettier');
+          for(const name of ['common','prepare','resources','execute']){
+            const file='scripts/modular-corpus-'+name+'.mjs';
+            const formatted=await prettier.format(fs.readFileSync(file,'utf8'),{parser:'babel',singleQuote:true,printWidth:100});
+            console.log('PSC1_MODULAR_CORPUS_FORMAT '+JSON.stringify({file,formatted}));
+          }
+          JS
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        id: native
+        with:
+          path: psc1/.lake
+          key: psc1-modular-corpus-v1-${{ runner.os }}-${{ hashFiles('psc1/**/*.lean','psc1/lakefile.lean','psc1/lean-toolchain') }}
+          restore-keys: |
+            psc1-modular-checked-v1-${{ runner.os }}-
+            psc1-lake-v2-${{ runner.os }}-linux-scoped-
+      - name: Prepare cached repository-pinned Lean launcher
+        timeout-minutes: 7
+        uses: ./.github/actions/psc1-lean-launcher
+      - name: Build native corpus reference tools and independent checker
+        run: |
+          node packages/pskernel-lean/host/check-pin.mjs
+          lake build psc1 psc1_output_abi_probe psc1_source_ownership psc1_lossless_source psc1_independent_checker
+      - uses: actions/cache/save@v4
+        if: steps.native.outputs.cache-hit != 'true'
+        with:
+          path: psc1/.lake
+          key: psc1-modular-corpus-v1-${{ runner.os }}-${{ hashFiles('psc1/**/*.lean','psc1/lakefile.lean','psc1/lean-toolchain') }}
+      - name: Execute unchanged native oracles and retain sealed authored inputs
+        run: node scripts/modular-corpus-prepare.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-modular-corpus-reference-${{ github.sha }}
+          path: psc1/dist/modular-corpus/prepared.json
+          retention-days: 90
+      - name: Preserve complete preparation evidence
+        if: always()
+        run: |
+          if [ -d dist/modular-corpus ]; then
+            tar -czf dist/modular-corpus-reference.tar.gz -C dist modular-corpus scoped-correctness
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-modular-corpus-native-evidence-${{ github.sha }}
+          path: psc1/dist/modular-corpus-reference.tar.gz
+          retention-days: 90
+
+  execute:
+    needs: prepare
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime: [node,bun]
+        group: [core,optional]
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: oven-sh/setup-bun@v2
+        if: matrix.runtime == 'bun'
+        with:
+          bun-version: '1.4.4'
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        with:
+          path: psc1/.lake
+          key: psc1-modular-corpus-v1-${{ runner.os }}-${{ hashFiles('psc1/**/*.lean','psc1/lakefile.lean','psc1/lean-toolchain') }}
+      - name: Prepare cached repository-pinned Lean launcher
+        timeout-minutes: 7
+        uses: ./.github/actions/psc1-lean-launcher
+      - run: lake build psc1_independent_checker
+      - name: Install the exact official Rust SDK
+        if: matrix.group == 'core'
+        run: |
+          rustup toolchain uninstall 1.90.0
+          rustup toolchain install 1.90.0 --profile minimal
+      - name: Install SHA-256-pinned component execution runtime
+        if: matrix.group == 'optional'
+        run: |
+          mkdir -p "$RUNNER_TEMP/psc1-wasmtime" "$RUNNER_TEMP/psc1-bin"
+          curl --fail --location --retry 3 --connect-timeout 20 --max-time 120 https://github.com/bytecodealliance/wasmtime/releases/download/v49.0.4/wasmtime-v49.0.4-x86_64-linux.tar.xz -o "$RUNNER_TEMP/psc1-wasmtime.tar.xz"
+          echo "6561abd54bdf941b6519cce883e0857cc9bce94d92c65287ed838d895a27f5a9  $RUNNER_TEMP/psc1-wasmtime.tar.xz" | sha256sum -c -
+          tar xJf "$RUNNER_TEMP/psc1-wasmtime.tar.xz" -C "$RUNNER_TEMP/psc1-wasmtime"
+          install -m 755 "$(find "$RUNNER_TEMP/psc1-wasmtime" -type f -name wasmtime -print -quit)" "$RUNNER_TEMP/psc1-bin/wasmtime"
+          echo "$RUNNER_TEMP/psc1-bin" >> "$GITHUB_PATH"
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-modular-corpus-reference-${{ github.sha }}
+          path: psc1/dist/modular-corpus
+      - name: Resolve exact graph and target-only SDK/provider resources
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/modular-corpus-resources.mjs ${{ matrix.group }}
+      - name: Run genuine modular compilation, admission, publication and consumers
+        run: ${{ matrix.runtime }} scripts/modular-corpus-execute.mjs
+      - name: Preserve all execution evidence without copying qualified inputs
+        if: always()
+        run: |
+          tar --exclude='modular-corpus/graph-input' --exclude='modular-corpus/target-input' --exclude='modular-corpus/target-resources' --exclude='modular-corpus/disabled-reference-executors' --exclude='modular-corpus/empty-npm-cache' -czf dist/modular-corpus-execution.tar.gz -C dist modular-corpus
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-modular-corpus-${{ matrix.runtime }}-${{ matrix.group }}-${{ github.sha }}
+          path: |
+            psc1/dist/modular-corpus-execution.tar.gz
+            psc1/dist/modular-corpus/execution-*/qualification.json
+          retention-days: 90

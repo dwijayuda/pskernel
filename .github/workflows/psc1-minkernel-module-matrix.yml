@@ -1,7 +1,7 @@
 name: PSC1 actual MinKernel compiler module matrix
 on:
   push:
-    branches: [research/psc1-min-compiler-module-matrix-20261028, research/psc1-minkernel-consistency-selfhost-20261027]
+    branches: [research/psc1-min-compiler-module-matrix-20261028, research/psc1-minkernel-consistency-selfhost-20261027, research/psc1-min-leaf-oracle-20261028]
     paths:
       - psc1/packages/**
       - psc1/proofs/pskernel-min/**
@@ -57,6 +57,42 @@ jobs:
         run: node --max-old-space-size=256 scripts/minkernel-module-diagnostics.mjs
       - name: Qualify actual Source constructors and projections on native and generated paths
         run: node --max-old-space-size=256 scripts/minkernel-actual-source-module.mjs
+      - name: Independently replay every fresh actual leaf, including Min refusals
+        run: |
+          node --max-old-space-size=256 --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          import crypto from 'node:crypto';
+          import {spawnSync} from 'node:child_process';
+          assert.equal(process.platform,'linux');
+          assert.equal(process.env.GITHUB_ACTIONS,'true');
+          const root='dist/pskernel-min/module-matrix';
+          const matrix=JSON.parse(fs.readFileSync(root+'/matrix.json'));
+          const rows=matrix.rows.filter(row=>row.standalone?.producer==='accepted');
+          assert.equal(rows.length,6);
+          const results=[];
+          for(const row of rows){
+            const bytes=fs.readFileSync(row.standalone.packet.file);
+            const hash=crypto.createHash('sha256').update(bytes).digest('hex');
+            assert.equal(hash,row.standalone.packet.checkedSha256);
+            const run=spawnSync('.lake/build/bin/psc1_independent_checker',['--check'],
+              {input:bytes,encoding:'utf8',timeout:120000,maxBuffer:1024*1024});
+            assert.equal(run.error,undefined,String(run.error));
+            const official=JSON.parse(run.stdout);
+            results.push({module:row.module,bytes:bytes.length,sha256:hash,
+              minAccepted:row.standalone.min.accepted,official,status:run.status});
+            fs.writeFileSync(root+'/leaf-official-replay.json',JSON.stringify({
+              schema:'psc1-fresh-leaf-official-replay/1',head:process.env.GITHUB_SHA,
+              acceptanceAuthority:false,results},null,2)+'\n');
+            assert.equal(run.status,0,run.stderr);
+            assert.equal(official.accepted,true,row.module+' fresh canonical source replay');
+            assert.equal(official.leanVersion,'4.35.0');
+            assert.equal(official.leanCommit,'eb6cafb7290e8bd5f2937522d8d804f58f02bafc');
+            row.standalone.official=official;
+          }
+          fs.writeFileSync(root+'/matrix.json',JSON.stringify(matrix,null,2)+'\n');
+          console.log('PSC1_FRESH_LEAF_OFFICIAL_REPLAY_PASS '+results.length);
+          JS
       - uses: actions/upload-artifact@v4
         if: always()
         with:

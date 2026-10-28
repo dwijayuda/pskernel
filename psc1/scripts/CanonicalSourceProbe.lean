@@ -1,4 +1,5 @@
 import Ps.Syntax.ParseLean
+import Ps.Syntax.ParseProofScript
 import Lean.Data.Json
 
 namespace Ps.CanonicalSourceProbe
@@ -42,6 +43,15 @@ def inspect (file source : String) : Lean.Json :=
       ("status", .str "refused"), ("phase", .str "lex"), ("error", lexError error)]
   | .error (.parse error) => Lean.Json.mkObj [("path", .str file),
       ("status", .str "refused"), ("phase", .str "parse"), ("error", parseError error)]
+def inspectPs (file source : String) : Lean.Json :=
+  match psParseProofScriptSource source with
+  | .ok parsed => Lean.Json.mkObj [("path", .str file), ("status", .str "accepted-parse-only"),
+      ("declarations", Lean.toJson parsed.declarations.length),
+      ("imports", Lean.toJson (parsed.imports.map (fun i => String.intercalate "." i.moduleName.segments)))]
+  | .error (.lex error) => Lean.Json.mkObj [("path", .str file),
+      ("status", .str "refused"), ("phase", .str "lex"), ("error", lexError error)]
+  | .error (.parse error) => Lean.Json.mkObj [("path", .str file),
+      ("status", .str "refused"), ("phase", .str "parse"), ("error", parseError error)]
 end Ps.CanonicalSourceProbe
 
 def main (args : List String) : IO Unit := do
@@ -51,7 +61,8 @@ def main (args : List String) : IO Unit := do
     let bytes ← IO.FS.readBinFile file
     if bytes.size > 1048576 then throw (IO.userError ("source too large: " ++ file))
     let some source := String.fromUTF8? bytes | throw (IO.userError ("invalid UTF8: " ++ file))
-    rows := rows.push (Ps.CanonicalSourceProbe.inspect file source)
+    rows := rows.push (if file.endsWith ".ps" then Ps.CanonicalSourceProbe.inspectPs file source
+      else Ps.CanonicalSourceProbe.inspect file source)
   let result := Lean.Json.mkObj [("schema", .str "psc1-canonical-parse-probe/1"),
     ("admissionAuthority", .bool false), ("files", .arr rows)]
   IO.FS.writeFile output result.compress

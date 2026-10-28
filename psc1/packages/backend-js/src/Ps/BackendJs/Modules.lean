@@ -16,84 +16,159 @@ def helpers : List String := [
 ]
 
 def importText (item : PsModuleImport) : String :=
-  "import " ++ (if item.typeOnly then "type " else "") ++ "{ " ++
-    String.intercalate ", " item.names ++ " } from " ++ psJsonQuote item.source ++ ";\n"
+  psTextJoin "" ["import ", (if item.typeOnly then "type " else ""), "{ ",
+    psTextJoin ", " item.names, " } from ", psJsonQuote item.source, ";\n"]
 
-def typeFields (fields : List (String × PsVerifiedIrType)) : Except String String := do
-  let printed ← fields.mapM fun field => do
-    let type ← (psTsEmitType field.2).mapError (fun _ => "PSC1_MODULE_JS_DECLARATION_TYPE")
-    return "readonly " ++ psJsonQuote field.1 ++ ": " ++ type ++ ";"
-  return String.intercalate " " printed
+def typeFields (fields : List (String × PsVerifiedIrType)) : Except String String :=
+  let printField : Prod String PsVerifiedIrType -> Except String String :=
+    fun (field : Prod String PsVerifiedIrType) =>
+      match psTsEmitType field.snd with
+      | Except.error _ => Except.error "PSC1_MODULE_JS_DECLARATION_TYPE"
+      | Except.ok type =>
+          Except.ok (psTextJoin "" ["readonly ", psJsonQuote field.fst, ": ", type, ";"]);
+  match psListMapExcept printField fields with
+  | Except.error error => Except.error error
+  | Except.ok printed => Except.ok (psTextJoin " " printed)
 
-def nominalTypes (raw : PsVerifiedIrModule) : Except String String := do
-  let structures ← raw.structures.mapM fun info => do
-    if !info.typeParameters.isEmpty then throw "PSC1_MODULE_OPEN_TYPE_UNQUALIFIED"
-    let fields ← typeFields (info.fields.map (fun field => (field.name, field.type)))
-    return "export interface " ++ info.name ++ " { " ++ fields ++ " }\n"
-  let inductives ← raw.inductives.mapM fun info => do
-    if !info.typeParameters.isEmpty then throw "PSC1_MODULE_OPEN_TYPE_UNQUALIFIED"
-    let variants ← info.constructors.mapM fun ctor => do
-      let fields ← typeFields (ctor.fields.map (fun field => (field.name, field.type)))
-      return "{ readonly \"$ps$tag\": " ++ psJsonQuote ctor.name ++ "; " ++ fields ++ " }"
-    return "export type " ++ info.name ++ " = " ++
-      (if variants.isEmpty then "never" else String.intercalate " | " variants) ++ ";\n"
-  return String.join structures ++ String.join inductives
+def structureType (info : PsVerifiedIrStructure) : Except String String :=
+  if psListIsEmpty info.typeParameters then
+    let fields := psListMap
+      (fun (field : PsVerifiedIrStructureField) => Prod.mk field.name field.type) info.fields;
+    match typeFields fields with
+    | Except.error error => Except.error error
+    | Except.ok printed =>
+        Except.ok (psTextJoin "" ["export interface ", info.name, " { ", printed, " }\n"])
+  else Except.error "PSC1_MODULE_OPEN_TYPE_UNQUALIFIED"
 
-def declarationType (declaration : PsVerifiedIrDeclaration) : Except String String := do
-  let result ← (psTsEmitType declaration.resultType).mapError (fun _ => "PSC1_MODULE_JS_DECLARATION_TYPE")
-  if declaration.parameters.isEmpty then
-    return "export declare const " ++ declaration.name ++ ": " ++ result ++ ";\n"
-  let parameters ← declaration.parameters.mapM fun parameter => do
-    let type ← (psTsEmitType parameter.type).mapError (fun _ => "PSC1_MODULE_JS_DECLARATION_TYPE")
-    return parameter.name ++ ": " ++ type
-  return "export declare function " ++ declaration.name ++ "(" ++
-    String.intercalate ", " parameters ++ "): " ++ result ++ ";\n"
+def constructorType (ctor : PsVerifiedIrConstructor) : Except String String :=
+  let fields := psListMap
+    (fun (field : PsVerifiedIrConstructorField) => Prod.mk field.name field.type) ctor.fields;
+  match typeFields fields with
+  | Except.error error => Except.error error
+  | Except.ok printed =>
+      Except.ok (psTextJoin "" ["{ readonly \"$ps$tag\": ", psJsonQuote ctor.name, "; ", printed, " }"])
+
+def inductiveType (info : PsVerifiedIrInductive) : Except String String :=
+  if psListIsEmpty info.typeParameters then
+    match psListMapExcept constructorType info.constructors with
+    | Except.error error => Except.error error
+    | Except.ok variants =>
+        Except.ok (psTextJoin "" ["export type ", info.name, " = ",
+          (if psListIsEmpty variants then "never" else psTextJoin " | " variants), ";\n"])
+  else Except.error "PSC1_MODULE_OPEN_TYPE_UNQUALIFIED"
+
+def nominalTypes (raw : PsVerifiedIrModule) : Except String String :=
+  match psListMapExcept structureType raw.structures with
+  | Except.error error => Except.error error
+  | Except.ok structures =>
+      match psListMapExcept inductiveType raw.inductives with
+      | Except.error error => Except.error error
+      | Except.ok inductives =>
+          Except.ok (psTextJoin "" [psTextJoin "" structures, psTextJoin "" inductives])
+
+def parameterType (parameter : PsVerifiedIrParameter) : Except String String :=
+  match psTsEmitType parameter.type with
+  | Except.error _ => Except.error "PSC1_MODULE_JS_DECLARATION_TYPE"
+  | Except.ok type => Except.ok (psTextJoin "" [parameter.name, ": ", type])
+
+def declarationType (declaration : PsVerifiedIrDeclaration) : Except String String :=
+  match psTsEmitType declaration.resultType with
+  | Except.error _ => Except.error "PSC1_MODULE_JS_DECLARATION_TYPE"
+  | Except.ok result =>
+      if psListIsEmpty declaration.parameters then
+        Except.ok (psTextJoin "" ["export declare const ", declaration.name, ": ", result, ";\n"])
+      else
+        match psListMapExcept parameterType declaration.parameters with
+        | Except.error error => Except.error error
+        | Except.ok parameters =>
+            Except.ok (psTextJoin "" ["export declare function ", declaration.name, "(",
+              psTextJoin ", " parameters, "): ", result, ";\n"])
+
+def importedNames (imports : List PsModuleOwner) (index : Nat) : List String :=
+  psListMap (fun (item : PsModuleOwner) => item.name)
+    (Ps.Internal.ModuleGraph.filter
+      (fun (item : PsModuleOwner) => Nat.beq item.unit index) imports)
 
 def unitImports (plan : PsModulePlan) (unit : PsModuleUnit) : List PsModuleImport :=
-  if unit.index == 0 then []
+  if Nat.beq unit.index 0 then []
   else
-    let runtimeValues := helpers ++ (unit.imports.filter (fun item => item.unit == 0)).map (fun item => item.name)
-    let values : List PsModuleImport := [{ source := psModuleSpecifierFor plan 0 false, names := runtimeValues }]
-    values ++ ((psModuleSourceIndices plan).filterMap fun index =>
-      let names := (unit.imports.filter (fun item => item.unit == index)).map (fun item => item.name)
-      if names.isEmpty then none else some { source := psModuleSpecifierFor plan index false, names })
+    let runtimeValues := psListAppend helpers (importedNames unit.imports 0);
+    let values : List PsModuleImport :=
+      [PsModuleImport.mk (psModuleSpecifierFor plan 0 false) runtimeValues false];
+    let sourceImport : Nat -> Option PsModuleImport := fun (index : Nat) =>
+      let names := importedNames unit.imports index;
+      if psListIsEmpty names then Option.none
+      else Option.some (PsModuleImport.mk (psModuleSpecifierFor plan index false) names false);
+    psListAppend values (Ps.Internal.ModuleGraph.filterMap sourceImport (psModuleSourceIndices plan))
+
+def selectedDeclarations (owners : List PsModuleOwner) (index : Nat)
+    (declarations : List PsJsIrDeclaration) : Except String (List PsJsIrDeclaration) :=
+  match declarations with
+  | List.nil => Except.ok []
+  | List.cons declaration rest =>
+      match Ps.Internal.ModuleGraph.owner owners declaration.name with
+      | Except.error error => Except.error error
+      | Except.ok assigned =>
+          match selectedDeclarations owners index rest with
+          | Except.error error => Except.error error
+          | Except.ok others =>
+              Except.ok (if Nat.beq assigned.unit index then List.cons declaration others else others)
+
+def printedDeclaration (declaration : PsJsIrDeclaration) : Except String String :=
+  match psJsPrintDeclarationStackSafeWithVisibility true declaration with
+  | Except.error _ => Except.error (String.Internal.append "PSC1_MODULE_JS_PRINT:" declaration.name)
+  | Except.ok printed => Except.ok printed
 
 def renderUnit (plan : PsModulePlan) (lowered : PsJsIrModule)
-    (digest : String) (unit : PsModuleUnit) : Except String PsModuleArtifact := do
-  let selected ← lowered.declarations.filterM fun declaration => do
-    return (← Ps.Internal.ModuleGraph.owner plan.owners declaration.name).unit == unit.index
-  let printed ← selected.mapM fun declaration =>
-    (psJsPrintDeclarationStackSafeWithVisibility true declaration).mapError
-      (fun _ => "PSC1_MODULE_JS_PRINT:" ++ declaration.name)
-  let imports := unitImports plan unit
-  let header := if unit.index == 0 then
-      psJsStringRuntimeSupport ++ psJsStackRuntimeSupport ++
-      "export const __ps$cohort = " ++ psJsonQuote (psModuleCohortFor plan digest false) ++ ";\n" ++
-      "export { " ++ String.intercalate ", " (helpers.filter (fun name => name != "__ps$cohort")) ++ " };\n"
-    else
-      String.join (imports.map importText) ++
-      "if (__ps$cohort !== " ++ psJsonQuote (psModuleCohortFor plan digest false) ++
-      ") throw new Error(\"PSC1_MODULE_RUNTIME_COHORT\");\n"
-  let types := psModuleTypeNames plan.raw
-  let typeHeader := if unit.index == 0 || types.isEmpty then "" else
-    "import type { " ++ String.intercalate ", " types ++ " } from " ++
-      psJsonQuote (psModuleSpecifierFor plan 0 false) ++ ";\nexport type { " ++
-      String.intercalate ", " types ++ " } from " ++ psJsonQuote (psModuleSpecifierFor plan 0 false) ++ ";\n"
-  let declarations ← unit.declarations.mapM declarationType
-  let nominal ← if unit.index == 0 then nominalTypes plan.raw else pure ""
-  return {
-    unit := unit.index
-    source := header ++ String.join printed
-    declarations := typeHeader ++ nominal ++ String.join declarations
-    imports := imports
-    exports := (if unit.index == 0 then helpers else []) ++ selected.map (fun d => d.name)
-  }
+    (digest : String) (unit : PsModuleUnit) : Except String PsModuleArtifact :=
+  match selectedDeclarations plan.owners unit.index lowered.declarations with
+  | Except.error error => Except.error error
+  | Except.ok selected =>
+      match psListMapExcept printedDeclaration selected with
+      | Except.error error => Except.error error
+      | Except.ok printed =>
+          let imports := unitImports plan unit;
+          let ordinaryHelpers := Ps.Internal.ModuleGraph.filter
+            (fun (name : String) => if psStringEq name "__ps$cohort" then false else true) helpers;
+          let header := if Nat.beq unit.index 0 then
+              psTextJoin "" [psJsStringRuntimeSupport, psJsStackRuntimeSupport,
+                "export const __ps$cohort = ", psJsonQuote (psModuleCohortFor plan digest false), ";\n",
+                "export { ", psTextJoin ", " ordinaryHelpers, " };\n"]
+            else
+              psTextJoin "" [psTextJoin "" (psListMap importText imports),
+                "if (__ps$cohort !== ", psJsonQuote (psModuleCohortFor plan digest false),
+                ") throw new Error(\"PSC1_MODULE_RUNTIME_COHORT\");\n"];
+          let types := psModuleTypeNames plan.raw;
+          let typeHeader := if Nat.beq unit.index 0 then "" else if psListIsEmpty types then "" else
+            psTextJoin "" ["import type { ", psTextJoin ", " types, " } from ",
+              psJsonQuote (psModuleSpecifierFor plan 0 false), ";\nexport type { ",
+              psTextJoin ", " types, " } from ", psJsonQuote (psModuleSpecifierFor plan 0 false), ";\n"];
+          match psListMapExcept declarationType unit.declarations with
+          | Except.error error => Except.error error
+          | Except.ok declarations =>
+              let nominal : Except String String :=
+                if Nat.beq unit.index 0 then nominalTypes plan.raw else Except.ok "";
+              match nominal with
+              | Except.error error => Except.error error
+              | Except.ok types =>
+                  Except.ok (PsModuleArtifact.mk unit.index
+                    (psTextJoin "" [header, psTextJoin "" printed])
+                    (psTextJoin "" [typeHeader, types, psTextJoin "" declarations])
+                    imports
+                    (psListAppend (if Nat.beq unit.index 0 then helpers else [])
+                      (psListMap (fun (declaration : PsJsIrDeclaration) => declaration.name) selected)))
 
 end Ps.Internal.ModularJs
 
 def psEmitJsModules (plan : PsModulePlan) (digest : String) :
-    Except String (List PsModuleArtifact) := do
-  let rechecked ← psPlanModulesWithPackages plan.raw plan.owners plan.packages plan.protocol
-  let lowered ← (psJsLowerSpecializedModule rechecked.raw).mapError (fun _ => "PSC1_MODULE_JS_LOWER")
-  let _ ← (psJsValidateModule lowered).mapError (fun _ => "PSC1_MODULE_JS_VALIDATE")
-  rechecked.units.mapM (Ps.Internal.ModularJs.renderUnit rechecked lowered digest)
+    Except String (List PsModuleArtifact) :=
+  match psPlanModulesWithPackages plan.raw plan.owners plan.packages plan.protocol with
+  | Except.error error => Except.error error
+  | Except.ok rechecked =>
+      match psJsLowerSpecializedModule rechecked.raw with
+      | Except.error _ => Except.error "PSC1_MODULE_JS_LOWER"
+      | Except.ok lowered =>
+          match psJsValidateModule lowered with
+          | Except.error _ => Except.error "PSC1_MODULE_JS_VALIDATE"
+          | Except.ok _ =>
+              psListMapExcept (Ps.Internal.ModularJs.renderUnit rechecked lowered digest) rechecked.units

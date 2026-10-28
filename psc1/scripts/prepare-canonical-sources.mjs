@@ -84,6 +84,14 @@ const classified = new Map();
 for (const file of nativeAdapters) classified.set(file, { role: 'native-byte-carrier-adapter', reason: 'Native UInt8 carrier/component boundary; portable Nat-byte encoding and semantics have separate canonical owners.' });
 for (const file of retainedAdapters) classified.set(file, { role: 'retained-unselected-adapter', reason: 'Not declared by the current Lake libraries or imported by the qualified unified compiler; retained explicit reference, not promoted source.' });
 for (const file of processEntries) classified.set(file, { role: 'native-process-entry', reason: 'Native IO/process entry at the host boundary, outside the self-hosted semantic compiler.' });
+for (const backend of ['python', 'php']) {
+  const namespace = backend === 'python' ? 'BackendPython' : 'BackendPhp';
+  classified.set('packages/backend-' + backend + '/src/Ps/' + namespace + '/Module.lean', {
+    role: 'native-compatibility-default-adapter',
+    reason: 'Native optional arguments and record defaults only; emitter semantics have one portable implementation.',
+    canonicalImplementation: 'packages/backend-' + backend + '/src/Ps/' + namespace + '/Portable.ps',
+  });
+}
 const lake = fs.readFileSync('lakefile.lean', 'utf8'), declared = [];
 for (const block of lake.matchAll(/lean_lib\s+(\w+)\s+where\n([\s\S]*?)(?=\n(?:lean_|@)|$)/g)) {
   const directory = block[2].match(/srcDir\s*:=\s*"([^"]+)"/)?.[1];
@@ -99,7 +107,7 @@ if (extended) for (const declaration of declared) {
     if (!seen.has(row.module)) { seen.add(row.module); ordered.push(row); }
   }
 }
-assert.equal(ordered.length, extended ? 153 : 125);
+assert.equal(ordered.length, extended ? 151 : 125);
 const sourceFiles = run('git', ['ls-files', '-z', '--', 'packages']).split('\0')
   .filter(file => /^packages\/[^/]+\/src\/.*\.lean$/.test(file) && !file.startsWith('packages/pskernel-')).sort();
 assert.equal(sourceFiles.length, 166);
@@ -110,7 +118,7 @@ const remainder = sourceFiles.filter(file => !selectedPaths.has(file)).map(file 
   const bytes = fs.readFileSync(file);
   return { path: file, ...role, bytes: bytes.length, sha256: sha256(bytes) };
 });
-assert.equal(remainder.length, extended ? 13 : 41);
+assert.equal(remainder.length, extended ? 15 : 41);
 const syntheticModule = 'Ps.Canonical.Repository';
 const syntheticText = ordered.map(row => 'import ' + row.module).join('\n') + '\n';
 const auditRows = [...ordered, { module: syntheticModule, text: syntheticText }];
@@ -124,8 +132,56 @@ const parseRefusals = parseProbe.files.filter(row => row.status !== 'accepted-pa
 assert.deepEqual(parseRefusals, [], 'all intended portable owners must pass the actual parser before semantic checking');
 const tools = helpers(root), started = Date.now();
 console.log('PSC1_CANONICAL_STAGE: capture-and-native-reference-admission');
-const snapshots = auditRows.map(row => tools.lexical.capture({ module: row.module, grammar: 'lean', bytes: Buffer.from(row.text) }));
-const before = tools.ownership.analyze({ snapshots, entry: syntheticModule, assurance: 'ordinary-checked' });
+const qualifiedNames = new Set(unified.map(row => row.module));
+const parsedImports = new Map(parseProbe.files.map(row => [row.path, row.imports]));
+const dependencies = new Map(ordered.map(row => [row.module, parsedImports.get(row.path)]));
+assert.ok([...dependencies.values()].every(Array.isArray), 'every source needs actual parsed imports');
+const capturedByModule = new Map(ordered.map(row => [row.module,
+  tools.lexical.capture({ module: row.module, grammar: 'lean', bytes: Buffer.from(row.text) })]));
+let remainingRows = [...ordered], checkedAll = null;
+const blockers = [];
+for (let attempt = 0; attempt <= ordered.length - unified.length; attempt++) {
+  console.log('PSC1_CANONICAL_CLOSURE_PROBE: ' + JSON.stringify({ attempt, modules: remainingRows.length }));
+  const auditText = remainingRows.map(row => 'import ' + row.module).join('\n') + '\n';
+  const auditSnapshot = tools.lexical.capture({ module: syntheticModule, grammar: 'lean', bytes: Buffer.from(auditText) });
+  try {
+    const index = tools.ownership.analyze({
+      snapshots: [...remainingRows.map(row => capturedByModule.get(row.module)), auditSnapshot],
+      entry: syntheticModule, assurance: 'ordinary-checked',
+    });
+    put(path.join(out, 'portable-closure-probe.json'), json({
+      status: blockers.length ? 'blocked' : 'passed', blockers,
+      checkedModules: remainingRows.map(row => row.module),
+      admissionsSha256: index.admissionsSha256, originalIrSha256: index.originalIrSha256,
+      checker: index.checker, admissionAuthority: false, diagnosticRemovalIsNotPromotion: true,
+    }));
+    if (blockers.length === 0) checkedAll = index;
+    break;
+  } catch (error) {
+    const detail = error.cause, failed = detail?.module;
+    if (error.message !== 'PSC1_LOSSLESS_OWNERSHIP_REFUSED' || typeof failed !== 'string' ||
+        qualifiedNames.has(failed) || !remainingRows.some(row => row.module === failed)) throw error;
+    const removed = new Set([failed]);
+    for (;;) {
+      const size = removed.size;
+      for (const row of remainingRows)
+        if (dependencies.get(row.module).some(name => removed.has(name))) removed.add(row.module);
+      if (removed.size === size) break;
+    }
+    assert.ok([...removed].every(name => !qualifiedNames.has(name)), 'Diagnostic cannot remove a qualified compiler owner');
+    blockers.push({ module: failed, detail, affectedModules: [...removed] });
+    console.error('PSC1_CANONICAL_CLOSURE_BLOCKER: ' + JSON.stringify(blockers.at(-1)));
+    remainingRows = remainingRows.filter(row => !removed.has(row.module));
+    put(path.join(out, 'portable-closure-probe.json'), json({
+      status: 'probing', blockers, remainingModules: remainingRows.map(row => row.module),
+      admissionAuthority: false, diagnosticRemovalIsNotPromotion: true,
+    }));
+  }
+}
+assert.ok(checkedAll && blockers.length === 0, 'Additional portable-owner blockers recorded; no source promotion permitted.');
+const before = checkedAll;
+const snapshots = [...ordered.map(row => capturedByModule.get(row.module)),
+  tools.lexical.capture({ module: syntheticModule, grammar: 'lean', bytes: Buffer.from(syntheticText) })];
 console.log('PSC1_CANONICAL_STAGE: checked-proofscript-conversion');
 const conversion = tools.converter.convert({ index: before, snapshots, targetGrammar: 'ps', commentPolicy: 'owner-notes' });
 const after = tools.converter.candidateIndex(conversion), psSnapshots = tools.converter.candidateSnapshots(conversion);

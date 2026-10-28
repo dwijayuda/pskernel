@@ -202,15 +202,20 @@ def psSh1FindOrigin (origins : List PsSourceSpan) (offset : Nat) : Option PsSour
 
 def psSh1IsCompilerDoName (segments : List String) : Bool :=
   match segments with
-  | [name] =>
-      if psStringEq name "compilerPure" then true
-      else psStringEq name "compilerBind"
-  | [rootName, name] =>
-      if psStringEq rootName "_root_" then
-        if psStringEq name "compilerPure" then true
-        else psStringEq name "compilerBind"
-      else false
-  | _ => false
+  | List.nil => false
+  | List.cons first rest =>
+      match rest with
+      | List.nil =>
+          if psStringEq first "compilerPure" then true
+          else psStringEq first "compilerBind"
+      | List.cons second tail =>
+          match tail with
+          | List.nil =>
+              if psStringEq first "_root_" then
+                if psStringEq second "compilerPure" then true
+                else psStringEq second "compilerBind"
+              else false
+          | List.cons _ _ => false
 
 -- The owned Lean parser gives a lowered do reference its originating do span.
 -- Match that provenance, not arbitrary occurrences of the word or helper name.
@@ -511,10 +516,11 @@ def psSh1SyntaxDeclarationBodyStep
     Except PsSh1SourceError PsSh1SyntaxState :=
   match source with
   | PsSyntaxDeclaration.scopedDecl _ _ =>
+      let sourceName : PsSyntaxName := psSh1SourceDeclarationName source;
       Except.error
         (psSh1SourceFailure "source-namespace-unsupported"
           "namespace commands are outside the historical SH1 source profile"
-          moduleName (psSh1NameText (psSh1SourceDeclarationName source).segments)
+          moduleName (psSh1NameText sourceName.segments)
           (Option.some (psSyntaxDeclarationSpan source)))
   | PsSyntaxDeclaration.definition name binders type value _ =>
       Except.ok (psSh1SyntaxSchedule (psSh1CountDeclaration state false)

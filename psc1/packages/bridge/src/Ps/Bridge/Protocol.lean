@@ -44,7 +44,7 @@ def psKernelBridgeEnvelope
     ("op", psJsonQuote op),
     ("payload", payload),
     ("protocol", psJsonQuote psKernelBridgeProtocol),
-    ("version", toString psKernelBridgeVersion)
+    ("version", psCheckedAdmissionNatToString psKernelBridgeVersion)
   ]
 
 def psEncodeKernelBridgeRequest
@@ -75,21 +75,19 @@ def psEncodeKernelBridgeRequest
                 ("expr", encoded)
               ]))
   | .defeq left right =>
-      match
-          psEncodeCodecExpr left,
-          psEncodeCodecExpr right with
-      | Except.ok encodedLeft, Except.ok encodedRight =>
-          Except.ok
-            (psKernelBridgeEnvelope
-              "defeq"
-              (psJsonObject [
-                ("left", encodedLeft),
-                ("right", encodedRight)
-              ]))
-      | Except.error error, _ =>
-          Except.error (PsKernelBridgeProtocolError.encode error)
-      | _, Except.error error =>
-          Except.error (PsKernelBridgeProtocolError.encode error)
+      match psEncodeCodecExpr left with
+      | Except.error error => Except.error (PsKernelBridgeProtocolError.encode error)
+      | Except.ok encodedLeft =>
+          match psEncodeCodecExpr right with
+          | Except.error error => Except.error (PsKernelBridgeProtocolError.encode error)
+          | Except.ok encodedRight =>
+              Except.ok
+                (psKernelBridgeEnvelope
+                  "defeq"
+                  (psJsonObject [
+                    ("left", encodedLeft),
+                    ("right", encodedRight)
+                  ]))
   | .replayAdmissions declarations =>
       match psEncodeCheckedAdmissionsCanonical declarations with
       | Except.error error =>
@@ -139,32 +137,30 @@ def psKernelBridgeRequireNumberText
 def psKernelBridgeValidateEnvelope
     (value : PsJsonValue) :
     Except PsKernelBridgeProtocolError Unit :=
-  match
-      psKernelBridgeRequireString value "protocol",
-      psKernelBridgeRequireNumberText value "version",
-      psKernelBridgeRequireString value "kernel",
-      psKernelBridgeRequireString value "foundation" with
-  | Except.ok protocol,
-    Except.ok version,
-    Except.ok kernel,
-    Except.ok foundation =>
-      if protocol != psKernelBridgeProtocol then
-        Except.error PsKernelBridgeProtocolError.protocolMismatch
-      else if version != toString psKernelBridgeVersion then
-        Except.error PsKernelBridgeProtocolError.versionMismatch
-      else if kernel != psKernelBridgeKernelFingerprint then
-        Except.error
-          PsKernelBridgeProtocolError.kernelFingerprintMismatch
-      else if foundation != psKernelBridgeFoundationFingerprint then
-        Except.error
-          PsKernelBridgeProtocolError.foundationFingerprintMismatch
-      else
-        Except.ok ()
-  | Except.error error, _, _, _ => Except.error error
-  | _, Except.error error, _, _ => Except.error error
-  | _, _, Except.error error, _ => Except.error error
-  | _, _, _, Except.error error => Except.error error
-
+  match psKernelBridgeRequireString value "protocol" with
+  | Except.error error => Except.error error
+  | Except.ok protocol =>
+      match psKernelBridgeRequireNumberText value "version" with
+      | Except.error error => Except.error error
+      | Except.ok version =>
+          match psKernelBridgeRequireString value "kernel" with
+          | Except.error error => Except.error error
+          | Except.ok kernel =>
+              match psKernelBridgeRequireString value "foundation" with
+              | Except.error error => Except.error error
+              | Except.ok foundation =>
+                  if !psStringEq protocol psKernelBridgeProtocol then
+                    Except.error PsKernelBridgeProtocolError.protocolMismatch
+                  else if !psStringEq version (psCheckedAdmissionNatToString psKernelBridgeVersion) then
+                    Except.error PsKernelBridgeProtocolError.versionMismatch
+                  else if !psStringEq kernel psKernelBridgeKernelFingerprint then
+                    Except.error
+                      PsKernelBridgeProtocolError.kernelFingerprintMismatch
+                  else if !psStringEq foundation psKernelBridgeFoundationFingerprint then
+                    Except.error
+                      PsKernelBridgeProtocolError.foundationFingerprintMismatch
+                  else
+                    Except.ok ()
 def psDecodeKernelBridgeResponse
     (source : String) :
     Except PsKernelBridgeProtocolError PsKernelBridgeResponse :=

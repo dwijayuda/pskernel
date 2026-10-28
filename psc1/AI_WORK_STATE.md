@@ -1,9 +1,28 @@
 # PSC1 AI work state
 
-Updated 2026-10-28 Asia/Jakarta. Production modularity implementation PR #205,
+Updated 2026-10-28 Asia/Jakarta. Active continuation branch
+feat/psc1-modular-checked-host-20261028 from verified PR #205 HEAD4393ed15.
+ Production modularity implementation PR #205,
 stacked on plan PR #204 / b400552324956d9c3a684c9231f60f70066e1629.
 GitHub/Linux CI only; expected-HEAD, single-parent/non-force history.
 No merge or registry publication.
+
+## Active: M3 checked execution through the modular graph
+
+The final PR #205 HEAD4393ed1551aef8b6e5799b3a611cf084739618d8 is verified live:
+production40666692730, npm40666699859, installed CLI40666692776 and source40666699904
+all pass. Source attempt2 retries two installer-only timeouts. Full source37/37,
+zero blocked; all nine CLI jobs pass. Final graph artifact12805544463 / ZIP
+01eb8af4d455e41c919ad523355aa1e238485fe84fa7f2ea70ea3891ae366e38 is the M3 input.
+
+Implement loadExecutableCompiler and createExecutableCompilerSession as host-only
+adapters. Complete graph verification precedes import and brackets each request;
+all graph/helper bytes bind the existing generated checked host session. The
+existing independent admission, target validation and transactional publication
+remain the only path to publishing application output. The next Linux lane reuses
+the retained CLI/JSON/compiler-like fixtures and native references, then removes
+native compiler executables before exercising both modular engines. Qualification
+is pending. Default .13 and the deferred pilot remain unchanged.
 
 ## Verified milestone: complete source-owned JS/TS compiler candidates
 

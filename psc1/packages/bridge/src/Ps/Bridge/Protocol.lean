@@ -103,10 +103,10 @@ def psKernelBridgeRequireField
     (name : String) :
     Except PsKernelBridgeProtocolError PsJsonValue :=
   match psJsonGetField value name with
-  | none =>
+  | Option.none =>
       Except.error
         (PsKernelBridgeProtocolError.missingField name)
-  | some field => Except.ok field
+  | Option.some field => Except.ok field
 
 def psKernelBridgeRequireString
     (value : PsJsonValue)
@@ -116,10 +116,10 @@ def psKernelBridgeRequireString
   | Except.error error => Except.error error
   | Except.ok field =>
       match psJsonAsString field with
-      | none =>
+      | Option.none =>
           Except.error
             (PsKernelBridgeProtocolError.invalidField name)
-      | some text => Except.ok text
+      | Option.some text => Except.ok text
 
 def psKernelBridgeRequireNumberText
     (value : PsJsonValue)
@@ -129,10 +129,10 @@ def psKernelBridgeRequireNumberText
   | Except.error error => Except.error error
   | Except.ok field =>
       match psJsonAsNumberText field with
-      | none =>
+      | Option.none =>
           Except.error
             (PsKernelBridgeProtocolError.invalidField name)
-      | some text => Except.ok text
+      | Option.some text => Except.ok text
 
 def psKernelBridgeValidateEnvelope
     (value : PsJsonValue) :
@@ -175,17 +175,17 @@ def psDecodeKernelBridgeResponse
           | Except.error error => Except.error error
           | Except.ok okValue =>
               match psJsonAsBool okValue with
-              | none =>
+              | Option.none =>
                   Except.error
                     (PsKernelBridgeProtocolError.invalidField "ok")
-              | some succeeded =>
+              | Option.some succeeded =>
                   if succeeded then
                     match psJsonGetField value "value" with
-                    | none => Except.ok { value := none }
-                    | some responseValue =>
+                    | Option.none => Except.ok { value := Option.none }
+                    | Option.some responseValue =>
                         match responseValue with
-                        | PsJsonValue.nullE => Except.ok { value := none }
-                        | _ => Except.ok { value := some responseValue }
+                        | PsJsonValue.nullE => Except.ok { value := Option.none }
+                        | _ => Except.ok { value := Option.some responseValue }
                   else
                     match psKernelBridgeRequireString value "error" with
                     | Except.error error => Except.error error
@@ -198,10 +198,10 @@ def psKernelBridgeResponseExpr
     (response : PsKernelBridgeResponse) :
     Except PsKernelBridgeProtocolError PsExpr :=
   match response.value with
-  | none =>
+  | Option.none =>
       Except.error
         (PsKernelBridgeProtocolError.missingField "value")
-  | some value =>
+  | Option.some value =>
       match psDecodeCodecExpr value with
       | Except.error error =>
           Except.error (PsKernelBridgeProtocolError.codec error)
@@ -211,9 +211,9 @@ def psKernelBridgeResponseBool
     (response : PsKernelBridgeResponse) :
     Except PsKernelBridgeProtocolError Bool :=
   match response.value with
-  | none =>
+  | Option.none =>
       Except.error (PsKernelBridgeProtocolError.invalidField "value")
-  | some value =>
+  | Option.some value =>
       match value with
       | PsJsonValue.bool result => Except.ok result
       | _ =>

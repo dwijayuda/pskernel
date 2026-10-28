@@ -13,6 +13,7 @@ on:
       - psc1/packages/bridge/src/Ps/Bridge/Codec.lean
       - psc1/packages/bridge/src/Ps/Bridge/Protocol.lean
       - psc1/packages/compiler/src/Ps/Compiler/Sh1.lean
+      - psc1/packages/syntax/src/Ps/Syntax/Lossless.lean
       - .github/workflows/psc1-native-port-equivalence.yml
   workflow_dispatch:
 permissions:
@@ -21,6 +22,30 @@ concurrency:
   group: psc1-native-port-equivalence-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  diagnose-retained-observer:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 40638049023
+          name: psc1-native-port-equivalence-a33bc53adc85a3ffe730932e9b4771de0db30ce9
+          path: retained-diagnostic
+      - name: Print the retained baseline observer failure without executing it
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          for name in ['native-api-observer-baseline.stdout', 'native-api-observer-baseline.stderr']:
+              target = Path('retained-diagnostic/logs') / name
+              data = target.read_bytes()
+              assert len(data) <= 32 * 1024 * 1024
+              print(name + ':')
+              print(data[-16000:].decode('utf-8'))
+          PY
   compare:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
@@ -74,7 +99,7 @@ jobs:
       - name: Build unchanged baseline native tools
         timeout-minutes: 20
         working-directory: ${{ env.PSC1_NATIVE_BASELINE }}
-        run: lake build psc1_modular_pilot psc1_independent_checker psc1_bridge_tests psc1_script_ir_tests
+        run: lake build psc1_modular_pilot psc1_independent_checker psc1_bridge_tests psc1_script_ir_tests psc1_lossless_tests
       - uses: actions/cache/save@v4
         if: steps.baseline-cache.outputs.cache-hit != 'true'
         with:
@@ -87,7 +112,7 @@ jobs:
           key: ${{ steps.elan-cache.outputs.cache-primary-key }}
       - name: Build ported native tools
         timeout-minutes: 15
-        run: lake build psc1_modular_pilot psc1_independent_checker psc1_bridge_tests psc1_script_ir_tests
+        run: lake build psc1_modular_pilot psc1_independent_checker psc1_bridge_tests psc1_script_ir_tests psc1_lossless_tests
       - uses: actions/cache/save@v4
         if: steps.current-cache.outputs.cache-hit != 'true'
         with:

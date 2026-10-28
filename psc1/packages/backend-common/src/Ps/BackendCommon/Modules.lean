@@ -189,7 +189,7 @@ def references (fuel : Nat) (locals : List String) : PsVerifiedIrExpr -> Except 
           | Except.ok names => Except.ok (flatten names)
       | PsVerifiedIrExpr.matchE _ _ value alternatives =>
           -- The former do block traversed branches before the scrutinee.
-          let branch := fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>
+          let branch : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr) -> Except String (List String) := fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>
             match forEach (fun (binding : PsVerifiedIrMatchBinding) => safeName binding.name) alternative.snd.fst with
             | Except.error error => Except.error error
             | Except.ok _ =>
@@ -225,14 +225,14 @@ def distinctImports (values : List PsModuleOwner) : List PsModuleOwner :=
     else psListAppend acc [item]) List.nil values
 
 def unit (raw : PsVerifiedIrModule) (owners : List PsModuleOwner) (index : Nat) : Except String PsModuleUnit :=
-  let assigned := fun (declaration : PsVerifiedIrDeclaration) =>
+  let assigned : PsVerifiedIrDeclaration -> Except String Bool := fun (declaration : PsVerifiedIrDeclaration) =>
     match owner owners declaration.name with
     | Except.error error => Except.error error
     | Except.ok value => Except.ok (Nat.beq value.unit index);
   match filterExcept assigned raw.declarations with
   | Except.error error => Except.error error
   | Except.ok declarations =>
-      let referenced := fun (declaration : PsVerifiedIrDeclaration) =>
+      let referenced : PsVerifiedIrDeclaration -> Except String (List PsModuleOwner) := fun (declaration : PsVerifiedIrDeclaration) =>
         match references 4096 (psListMap (fun (parameter : PsVerifiedIrParameter) => parameter.name) declaration.parameters) declaration.body with
         | Except.error error => Except.error error
         | Except.ok names => psListMapExcept (owner owners) names;
@@ -331,7 +331,7 @@ def psPlanModulesWithPackages (input : PsVerifiedIrModule) (owners : List PsModu
       Nat.blt (if legacy then 3 else 9) (psListLength packages) then
     Except.error "PSC1_MODULE_UNIT_BOUND"
   else
-    let runtime := match packages with
+    let runtime : Bool := match packages with
       | List.nil => false
       | List.cons value _ => psStringEq value "@proofscript/modular-pilot-runtime";
     if !runtime then Except.error "PSC1_MODULE_PACKAGE_RUNTIME"
@@ -399,7 +399,7 @@ def psModuleOriginKindEqual (left right : PsIrOriginKind) : Bool :=
       | _ => false
 
 def psModuleEntityArity (raw : PsVerifiedIrModule) (kind : PsIrOriginKind) (name : String) : Except String Nat :=
-  let entries := match kind with
+  let entries : List Nat := match kind with
     | PsIrOriginKind.structure => Ps.Internal.ModuleGraph.filterMap (fun (item : PsVerifiedIrStructure) =>
         if psStringEq item.name name then Option.some (psListLength item.typeParameters) else Option.none) raw.structures
     | PsIrOriginKind.inductive => Ps.Internal.ModuleGraph.filterMap (fun (item : PsVerifiedIrInductive) =>

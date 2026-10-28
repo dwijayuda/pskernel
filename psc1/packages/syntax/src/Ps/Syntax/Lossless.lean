@@ -197,7 +197,7 @@ def psCaptureLosslessWithLimit (pieceLimit : Nat) (grammar : PsLosslessGrammar)
   let initial := psLosslessInitial grammar source;
   let bytes := String.utf8ByteSize source;
   let bound := Nat.succ bytes;
-  let lexical :=
+  let lexical : Except PsLexError (List PsToken) :=
     match grammar with
     | PsLosslessGrammar.lean => psLex source
     | PsLosslessGrammar.proofScript => psLexProofScript source;

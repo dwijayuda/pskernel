@@ -30,7 +30,7 @@ function run(label,cwd,executable,commandArgs,expectedFailure=false){
   report.observations.push(row);save();
   assert.equal(r.error,undefined,label+': '+String(r.error));assert.equal(r.signal,null,label);
   if(expectedFailure)assert.notEqual(r.status,0,label+' unexpectedly accepted');
-  else assert.equal(r.status,0,label+': '+stderr);
+  else assert.equal(r.status,0,label+':\nstdout:\n'+stdout.slice(-16000)+'\nstderr:\n'+stderr.slice(-16000));
   return{stdout,stderr,row};
 }
 function fixture(label,relative){
@@ -55,7 +55,8 @@ try{
   const tools=Object.fromEntries([['baseline',baseline],['current',current]].map(([name,root])=>[name,{
     producer:path.join(root,'.lake/build/bin/psc1_modular_pilot'),
     checker:path.join(root,'.lake/build/bin/psc1_independent_checker'),
-    bridge:path.join(root,'.lake/build/bin/psc1_bridge_tests')
+    bridge:path.join(root,'.lake/build/bin/psc1_bridge_tests'),
+    lossless:path.join(root,'.lake/build/bin/psc1_lossless_tests')
   }]));
   for(const[name,roles]of Object.entries(tools))for(const[role,file]of Object.entries(roles)){
     const stat=fs.lstatSync(file);assert.ok(stat.isFile()&&!stat.isSymbolicLink());
@@ -134,6 +135,10 @@ try{
     sha(fs.readFileSync(path.join(current,'test/BridgeTests.lean'))),'bridge suite fixture changed');
   compare('bridge-suite',run('bridge-baseline',baseline,tools.baseline.bridge,[]),
     run('bridge-current',current,tools.current.bridge,[]));
+  assert.equal(sha(fs.readFileSync(path.join(baseline,'test/LosslessSourceTests.lean'))),
+    sha(fs.readFileSync(path.join(current,'test/LosslessSourceTests.lean'))),'lossless suite fixture changed');
+  compare('lossless-suite',run('lossless-baseline',baseline,tools.baseline.lossless,[]),
+    run('lossless-current',current,tools.current.lossless,[]));
   for(const name of ['native-bridge-observer.lean','native-api-observer.lean']){
     const bytes=fs.readFileSync(path.join(current,'standalone',name)),file=path.join(output,'fixtures',name);
     fs.writeFileSync(file,bytes);report.fixturePins.push({path:'standalone/'+name,origin:'current-shared-observer',

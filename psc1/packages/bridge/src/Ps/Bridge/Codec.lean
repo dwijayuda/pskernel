@@ -16,23 +16,23 @@ def psCodecField
     (name : String) :
     Except PsCodecDecodeError PsJsonValue :=
   match psJsonGetField value name with
-  | none =>
+  | Option.none =>
       Except.error (PsCodecDecodeError.missingField name)
-  | some field => Except.ok field
+  | Option.some field => Except.ok field
 
 def psCodecString
     (value : PsJsonValue) :
     Except PsCodecDecodeError String :=
   match psJsonAsString value with
-  | some text => Except.ok text
-  | none => Except.error PsCodecDecodeError.expectedString
+  | Option.some text => Except.ok text
+  | Option.none => Except.error PsCodecDecodeError.expectedString
 
 def psCodecArray
     (value : PsJsonValue) :
     Except PsCodecDecodeError (List PsJsonValue) :=
   match psJsonAsArray value with
-  | some values => Except.ok values
-  | none => Except.error PsCodecDecodeError.expectedArray
+  | Option.some values => Except.ok values
+  | Option.none => Except.error PsCodecDecodeError.expectedArray
 
 def psCodecNaturalDigits
     (chars : List Char) (value : Nat) : Option Nat :=
@@ -47,24 +47,24 @@ def psCodecNaturalDigits
 def psCodecNaturalText
     (text : String) : Option Nat :=
   match psJsonStringToChars text with
-  | List.nil => none
+  | List.nil => Option.none
   | List.cons first rest =>
       let code : Nat := Char.toNat first;
       if Nat.beq code 48 then
-        if psListIsEmpty rest then some 0 else none
+        if psListIsEmpty rest then Option.some 0 else Option.none
       else if Nat.ble 49 code && Nat.ble code 57 then
         psCodecNaturalDigits rest (code - 48)
-      else none
+      else Option.none
 
 def psCodecNat
     (value : PsJsonValue) :
     Except PsCodecDecodeError Nat :=
   match psJsonAsNumberText value with
-  | none => Except.error PsCodecDecodeError.expectedNumber
-  | some text =>
+  | Option.none => Except.error PsCodecDecodeError.expectedNumber
+  | Option.some text =>
       match psCodecNaturalText text with
-      | none => Except.error PsCodecDecodeError.invalidNatural
-      | some natural => Except.ok natural
+      | Option.none => Except.error PsCodecDecodeError.invalidNatural
+      | Option.some natural => Except.ok natural
 
 def psDecodeCodecNameWithFuel
     (fuelBudget : Nat) (value : PsJsonValue) :
@@ -108,10 +108,10 @@ def psDecodeCodecNameWithFuel
                             | Except.error error => Except.error error
                             | Except.ok text =>
                                 match psCodecNaturalText text with
-                                | none =>
+                                | Option.none =>
                                     Except.error
                                       PsCodecDecodeError.invalidNatural
-                                | some number =>
+                                | Option.some number =>
                                     Except.ok (psNameAppendNum parent number)
               else
                 Except.error (PsCodecDecodeError.invalidTag tag)
@@ -342,10 +342,10 @@ def psDecodeCodecExprWithFuel
                               (PsLiteral.string text))
                         else
                           match psCodecNaturalText text with
-                          | none =>
+                          | Option.none =>
                               Except.error
                                 PsCodecDecodeError.invalidNatural
-                          | some natural =>
+                          | Option.some natural =>
                               Except.ok
                                 (PsExpr.lit
                                   (PsLiteral.natural natural))

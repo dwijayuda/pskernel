@@ -55,6 +55,7 @@ jobs:
         run: |
           node scripts/ci/repository-layout.mjs
           for file in host-tools/executable/*.mjs scripts/modular-checked-*.mjs; do node --check "$file"; done
+          ${{ matrix.runtime }} scripts/modular-checked-preflight.mjs
       - name: Locked host and TypeScript resources
         timeout-minutes: 5
         run: |

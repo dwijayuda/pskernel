@@ -127,19 +127,23 @@ try {
   );
   negatives.push({ case: 'unsupported-engine-refused-before-import' });
   assert.throws(
-    () => createExecutableCompilerSession({
-      ...graph, variant: 'js',
-      adapterFile: path.join(out, 'reserved.mjs'),
-      serviceKind: 'unified-embedded',
-    }),
+    () =>
+      createExecutableCompilerSession({
+        ...graph,
+        variant: 'js',
+        adapterFile: path.join(out, 'reserved.mjs'),
+        serviceKind: 'unified-embedded',
+      }),
     /PSC1_EXECUTABLE_SESSION_TOOL_OVERRIDE/,
   );
   negatives.push({ case: 'reserved-tool-override-refused' });
   assert.throws(
-    () => createExecutableCompilerSession({
-      ...graph, variant: 'js',
-      adapterFile: path.join(graph.graphRoot, 'adapter.mjs'),
-    }),
+    () =>
+      createExecutableCompilerSession({
+        ...graph,
+        variant: 'js',
+        adapterFile: path.join(graph.graphRoot, 'adapter.mjs'),
+      }),
     /PSC1_EXECUTABLE_ADAPTER_INSIDE_GRAPH/,
   );
   negatives.push({ case: 'mutable-adapter-inside-graph-refused' });

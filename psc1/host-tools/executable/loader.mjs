@@ -1,4 +1,5 @@
 // Candidate loading only. Source/project data never selects this graph or tools.
+import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { requireSupportedRuntime } from '../runtime-policy.mjs';

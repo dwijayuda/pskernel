@@ -5,6 +5,13 @@ import assert from 'node:assert/strict';
 import {readOwnedCompilerSources} from '../compiler-source-inputs.mjs';
 import {sha256,json,put,files,output} from './tools.mjs';
 import {supervised,admitAndPackage,packGraph} from './generation-tools.mjs';
+import {canonicalJson} from './quarantine.mjs';
+for(const file of ['original-ir.json','specialized-ir.json','fused-ir.json','admissions.json','capture.json','modules.json']){
+ const source=fs.readFileSync(path.join(output,file),'utf8');
+ const suffix=file==='admissions.json'?'\n':'';
+ assert.equal(canonicalJson(JSON.parse(source))+suffix,source,'PSC1_MODULAR_JSON_BYTE_ROUNDTRIP:'+file);
+}
+console.log('PSC1_MODULAR_JSON_BYTE_ROUNDTRIP_PASS all six candidate JSON files');
 const base=path.resolve('dist/portable-modules');
 assert.ok(!fs.existsSync(base));fs.mkdirSync(base,{recursive:true});
 const sourceRows=readOwnedCompilerSources('Ps.CompilerUnified.Service').map(row=>{

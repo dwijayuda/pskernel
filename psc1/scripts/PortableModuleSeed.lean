@@ -8,7 +8,7 @@ def main (args : List String) : IO Unit := do
   let request ← IO.FS.readFile input
   if request.utf8ByteSize > 33554432 then throw (IO.userError "PSC1_EXECUTABLE_REQUEST_BOUND")
   let response := psCompilerServiceCandidate request
-  if response.utf8ByteSize > 134217728 then throw (IO.userError "PSC1_EXECUTABLE_OUTPUT_BOUND")
+  if response.utf8ByteSize > 134217728 then throw (IO.userError ("PSC1_EXECUTABLE_OUTPUT_BOUND:" ++ toString response.utf8ByteSize))
   let parsed ← match Lean.Json.parse response with
     | .ok value => pure value
     | .error reason => throw (IO.userError reason)
@@ -30,7 +30,19 @@ def main (args : List String) : IO Unit := do
   IO.FS.createDirAll (directory ++ "/ts")
   for row in rows do
     let (name, text) ← match row.getArr? with
-      | .ok #[.str name, .str text] => pure (name, text)
+      | .ok #[.str name, .str format, value, .str suffix] => do
+        let isJson := ["original-ir.json", "specialized-ir.json", "fused-ir.json",
+          "admissions.json", "capture.json", "modules.json"].contains name
+        let expectedSuffix := if name == "admissions.json" then "\n" else ""
+        if suffix != expectedSuffix then throw (IO.userError "PSC1_EXECUTABLE_FILE_SUFFIX")
+        if isJson then
+          if format != "json" then throw (IO.userError "PSC1_EXECUTABLE_FILE_FORMAT")
+          pure (name, value.compress ++ suffix)
+        else
+          if format != "text" then throw (IO.userError "PSC1_EXECUTABLE_FILE_FORMAT")
+          match value.getStr? with
+          | .ok text => pure (name, text)
+          | .error reason => throw (IO.userError reason)
       | _ => throw (IO.userError "PSC1_EXECUTABLE_FILE_ROW")
     if !allowed.contains name || seen.contains name then
       throw (IO.userError "PSC1_EXECUTABLE_OUTPUT_PATH")

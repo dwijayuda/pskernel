@@ -233,6 +233,17 @@ def refused (reason : String) : String :=
 def wireError (error : Ps.Internal.CompilerService.Error) : String :=
   String.Internal.append "PSC1_EXECUTABLE_REQUEST:" error.code
 
+def jsonFile (name : String) : Bool :=
+  psListAny (fun (item : String) => psStringEq name item)
+    ["original-ir.json", "specialized-ir.json", "fused-ir.json",
+      "admissions.json", "capture.json", "modules.json"]
+
+def fileJson (file : Prod String String) : String :=
+  if jsonFile file.fst then
+    psJsonArray [psJsonQuote file.fst, psJsonQuote "json", file.snd,
+      psJsonQuote (if psStringEq file.fst "admissions.json" then "\n" else "")]
+  else psJsonArray [psJsonQuote file.fst, psJsonQuote "text", psJsonQuote file.snd, psJsonQuote ""]
+
 def decodeBuild (fields : List PsJsonValue) : Except String String := do
   if !(Nat.beq (psListLength fields) 3) then throw "PSC1_EXECUTABLE_REQUEST_ARITY"
   let protocol ← psExceptMapError wireError (Ps.Internal.CompilerService.stringAt fields 0)
@@ -251,8 +262,7 @@ def decodeBuild (fields : List PsJsonValue) : Except String String := do
     ("status", psJsonQuote "candidate"), ("candidateOnly", "true"),
     ("admission", psJsonQuote "not-run"), ("requestId", psJsonQuote request.requestId),
     ("sourceClosureDigest", psJsonQuote request.sourceClosureDigest),
-    ("files", psJsonArray (psListMap (fun (file : Prod String String) =>
-      psJsonArray [psJsonQuote file.fst, psJsonQuote file.snd]) files))]
+    ("files", psJsonArray (psListMap fileJson files))]
 
 def candidate (input : String) : String :=
   match psJsonParse input with

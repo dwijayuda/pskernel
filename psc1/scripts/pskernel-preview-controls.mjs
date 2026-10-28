@@ -71,7 +71,9 @@ for(const [label,schema]of Object.entries(pins.schemas)){
   const name=label.split('.').reduce((p,s)=>['str',p,s],['anonymous']),text=axiomStream(name,schema);
   const r=scanAssumptions(text,pins);record('pinned '+label+' schema accepts alpha-renamed universe parameters',r.validated&&r.assumptions[0].standardSchema);
   await writeFile(path.join(scratch,'schema-'+label+'.ndjson'),text);
-  const actual=await run(text);record(label+' with actual standard prelude is independently admitted',actual.outcome==='accepted'&&actual.checking.coreInvoked&&actual.checking.metadataValidated);
+  const actual=await run(text);await writeFile(path.join(root,'schema-'+label+'-result.json'),JSON.stringify(actual,null,2)+'\n');
+  console.log('PSKERNEL_PREVIEW_SCHEMA_RESULT '+label+' '+JSON.stringify(actual));
+  record(label+' with actual standard prelude is independently admitted',actual.outcome==='accepted'&&actual.checking.coreInvoked&&actual.checking.metadataValidated);
   const changed=axiomStream(name,{...schema,type:['sort',['zero']]});const mismatch=await run(changed);
   record('changed '+label+' type is unsupported',mismatch.outcome==='declinedUnsupported'&&!mismatch.checking.coreInvoked);
 }

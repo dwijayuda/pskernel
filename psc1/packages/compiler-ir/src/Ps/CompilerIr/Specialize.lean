@@ -195,11 +195,14 @@ def psIrSpecializePrimitiveKey (primitive : PsVerifiedIrPrimitiveType) : String 
   | PsVerifiedIrPrimitiveType.string => "String"
   | PsVerifiedIrPrimitiveType.unit => "Unit"
 
+/-! Keep recursive calls fully applied. This avoids constructing a chain of
+smaller-fuel function values before the actual type is inspected. -/
 def psIrSpecializeTypeKeyWithFuel (fuel : Nat) (type : PsVerifiedIrType) : Option String :=
   match fuel with
   | 0 => Option.none
   | remaining + 1 =>
-      let smaller : PsVerifiedIrType -> Option String := psIrSpecializeTypeKeyWithFuel remaining;
+      let smaller : PsVerifiedIrType -> Option String :=
+        fun (child : PsVerifiedIrType) => psIrSpecializeTypeKeyWithFuel remaining child;
       match type with
       | PsVerifiedIrType.unknown => Option.none
       | PsVerifiedIrType.typeParameter _ => Option.none

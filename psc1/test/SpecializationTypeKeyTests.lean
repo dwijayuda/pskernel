@@ -39,7 +39,7 @@ theorem saturated_eq_reference (fuel : Nat) :
   | zero => rfl
   | succ remaining same =>
       funext type
-      simpa only [psIrSpecializeTypeKeyWithFuel, referenceTypeKeyWithFuel, same]
+      cases type <;> simp only [psIrSpecializeTypeKeyWithFuel, referenceTypeKeyWithFuel, same]
 
 def nested : Nat → PsVerifiedIrType
   | 0 => PsVerifiedIrType.primitive PsVerifiedIrPrimitiveType.nat

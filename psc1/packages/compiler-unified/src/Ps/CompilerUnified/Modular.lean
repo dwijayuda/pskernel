@@ -35,7 +35,10 @@ def captureModules (sources : List Ps.Internal.CompilerService.Source)
     if psListAny (fun (name : String) => !psBackendNameSeen name captured.seen) imports then
       throw "PSC1_EXECUTABLE_SOURCE_IMPORT_ORDER"
     let next ← psExceptMapError
-      (fun _ => String.Internal.append "PSC1_EXECUTABLE_SOURCE_ELABORATION:" source.moduleName)
+      (fun (error : PsElabOriginError) => psTextJoin "" [
+        "PSC1_EXECUTABLE_SOURCE_ELABORATION:", source.moduleName, ":",
+        psParseNamespaceText error.sourceName.segments, ":",
+        psNatToString error.span.start.line, ":", psNatToString error.span.start.column])
       (psCompilerPreparationStepParsedWithOrigins captured.state parsed)
     let names := psListFlatMap (fun (origin : PsElabBatchOrigin) =>
       psListMap (fun (member : PsElabMemberOrigin) => member.name) origin.members) next.origins

@@ -162,7 +162,7 @@ def orderUnits (fuel : Nat) (pending ordered : List Nat)
         psListAll (fun (dependency : PsModuleOwner) => natSeen dependency.unit ordered)
           (getDefault references (psNatToString source) [])) pending
       match found with
-      | Option.none => throw "PSC1_EXECUTABLE_CROSS_SOURCE_CYCLE"
+      | Option.none => do throw "PSC1_EXECUTABLE_CROSS_SOURCE_CYCLE"
       | Option.some source =>
         orderUnits remaining (psListFilter (fun (item : Nat) => !(Nat.beq item source)) pending)
           (psListAppend ordered [source]) references

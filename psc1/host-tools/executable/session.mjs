@@ -6,7 +6,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {fileURLToPath, pathToFileURL} from 'node:url';
 import {createGeneratedJsCompilerSession} from '../generated-compiler-session.mjs';
-import {verify} from './verify.mjs';
+import {readManifestBytes, verify} from './verify.mjs';
 
 const hash = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 const refuse = code => { throw Error('PSC1_EXECUTABLE_' + code); };
@@ -35,7 +35,7 @@ export function createExecutableCompilerSession({
   const relative = path.relative(graphRoot, adapterFile);
   if (relative === '' || (!relative.startsWith('..' + path.sep) && !path.isAbsolute(relative)))
     refuse('ADAPTER_INSIDE_GRAPH');
-  const manifest = verify(graphRoot, fs.readFileSync(manifestFile), manifestSha256);
+  const manifest = verify(graphRoot, readManifestBytes(manifestFile), manifestSha256);
   const config = {root: graphRoot, manifestFile, manifestSha256, variant};
   const adapter = 'import {loadExecutableCompiler} from ' +
     JSON.stringify(pathToFileURL(helperFiles[0]).href) + ';\n' +

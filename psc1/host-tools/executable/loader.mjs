@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {requireSupportedRuntime} from '../runtime-policy.mjs';
-import {verify} from './verify.mjs';
+import {readManifestBytes, verify} from './verify.mjs';
 
 const MAX_BYTES = 128 * 1024 * 1024;
 const refuse = code => { throw Error('PSC1_EXECUTABLE_' + code); };
@@ -18,10 +18,7 @@ export async function loadExecutableCompiler({
   if (fs.realpathSync(root) !== root || fs.realpathSync(manifestFile) !== manifestFile)
     refuse('LOAD_SYMLINK');
   const check = () => {
-    const stat = fs.lstatSync(manifestFile);
-    if (!stat.isFile() || stat.size === 0 || stat.size > 33554432)
-      refuse('MANIFEST_FILE_BOUND');
-    return verify(root, fs.readFileSync(manifestFile), manifestSha256);
+    return verify(root, readManifestBytes(manifestFile), manifestSha256);
   };
   const manifest = check();
   const module = await import(pathToFileURL(path.join(root, manifest.entry[variant])).href);

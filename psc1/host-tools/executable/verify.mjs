@@ -3,7 +3,39 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
-import {files,sha256} from './tools.mjs';
+import {sha256} from './tools.mjs';
+
+export function readManifestBytes(file) {
+ const stat=fs.lstatSync(file);
+ assert.ok(stat.isFile()&&!stat.isSymbolicLink()&&stat.size>0&&stat.size<=33554432,
+  'PSC1_EXECUTABLE_MANIFEST_FILE_BOUND');
+ return fs.readFileSync(file);
+}
+
+// Reject unexpected paths and oversized files before reading their bytes.
+function checkedInventory(root,records) {
+ const expected=new Map(records.map(row=>[row.path,row])),directories=new Set(['']);
+ for(const row of records){const parts=row.path.split('/');
+  for(let i=1;i<parts.length;i++)directories.add(parts.slice(0,i).join('/'));
+ }
+ const observed=[];
+ const visit=relative=>{
+  for(const name of fs.readdirSync(path.join(root,relative)).sort()){
+   const file=relative?relative+'/'+name:name,absolute=path.join(root,file),stat=fs.lstatSync(absolute);
+   assert.ok(!stat.isSymbolicLink(),'PSC1_EXECUTABLE_SYMLINK');
+   if(stat.isDirectory()){
+    assert.ok(directories.has(file),'PSC1_EXECUTABLE_UNEXPECTED_DIRECTORY');visit(file);
+   }else{
+    const row=expected.get(file);
+    assert.ok(stat.isFile()&&row,'PSC1_EXECUTABLE_UNEXPECTED_FILE');
+    assert.equal(stat.size,row.bytes,'PSC1_EXECUTABLE_FILE_SIZE');
+    const bytes=fs.readFileSync(absolute);
+    observed.push({path:file,bytes:bytes.length,sha256:sha256(bytes)});
+   }
+  }
+ };
+ visit('');return observed;
+}
 export function verify(root,manifestBytes,expectedHash){
  assert.equal(sha256(manifestBytes),expectedHash,'PSC1_EXECUTABLE_MANIFEST_HASH');
  const manifest=JSON.parse(manifestBytes);
@@ -19,13 +51,18 @@ export function verify(root,manifestBytes,expectedHash){
  const seen=new Set();let total=0;
  for(const row of manifest.files){
   assert.equal(typeof row.path,'string');
+  assert.ok(Buffer.byteLength(row.path)<=1024&&row.path.split('/').length<=16,
+   'PSC1_EXECUTABLE_PATH_BOUND');
   assert.ok(!row.path.includes('\\')&&!path.posix.isAbsolute(row.path)&&
    row.path.split('/').every(p=>p&&p!=='.'&&p!=='..'),'PSC1_EXECUTABLE_UNSAFE_PATH');
   assert.ok(!seen.has(row.path),'PSC1_EXECUTABLE_DUPLICATE_PATH');seen.add(row.path);
   assert.ok(Number.isSafeInteger(row.bytes)&&row.bytes>=0&&row.bytes<=33554432);
   total+=row.bytes;assert.ok(total<=134217728);
  }
- assert.deepEqual(files(root),manifest.files,'PSC1_EXECUTABLE_GRAPH_INVENTORY');
+ assert.deepEqual(checkedInventory(root,manifest.files),manifest.files,'PSC1_EXECUTABLE_GRAPH_INVENTORY');
+ assert.ok(Array.isArray(manifest.units)&&manifest.units.length>=2&&manifest.units.length<=257);
+ assert.ok(Array.isArray(manifest.packages)&&manifest.packages.length>=1&&manifest.packages.length<=257);
+ assert.ok(Array.isArray(manifest.owners)&&manifest.owners.length<=8192);
  const names=new Set(manifest.packages.map(p=>p.name));
  assert.equal(names.size,manifest.packages.length,'PSC1_EXECUTABLE_DUPLICATE_PACKAGE');
  const graph=new Map(manifest.packages.map(p=>[p.name,Object.keys(p.dependencies)]));

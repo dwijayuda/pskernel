@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
-          fetch-depth: 0
+          fetch-depth: 1
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -36,6 +36,11 @@ jobs:
           test "$(git rev-parse HEAD:psc1/packages/pskernel-core/src)" = bbe353e649feed5b796adb164dcec36eaca915ab
           lake env lean --run test/PsKernelPreviewAxiomSchemas.lean > scripts/pskernel-preview-axioms.json
           python3 -m json.tool scripts/pskernel-preview-axioms.json > "$RUNNER_TEMP/preview-axiom-schemas.pretty.json"
+          if git show HEAD:psc1/scripts/pskernel-preview-axioms.json > "$RUNNER_TEMP/committed-preview-axioms.json" 2>/dev/null; then
+            cmp "$RUNNER_TEMP/committed-preview-axioms.json" scripts/pskernel-preview-axioms.json
+          fi
+          mkdir -p "$RUNNER_TEMP/preview-supervisor"
+          cp "$RUNNER_TEMP/preview-axiom-schemas.pretty.json" "$RUNNER_TEMP/preview-supervisor/"
       - name: Authenticate baseline packages and exercise actual checking and fault controls in empty PATH
         env:
           GH_TOKEN: ${{ github.token }}
@@ -44,8 +49,5 @@ jobs:
         if: always()
         with:
           name: pskernel-preview-supervisor-evidence
-          path: |
-            ${{ runner.temp }}/preview-supervisor/
-            ${{ runner.temp }}/preview-axiom-schemas.pretty.json
-            psc1/scripts/pskernel-preview-axioms.json
+          path: ${{ runner.temp }}/preview-supervisor/
           include-hidden-files: true

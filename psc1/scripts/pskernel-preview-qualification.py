@@ -23,7 +23,7 @@ def archive(aid,size,sha):
  for name,pin in files.items():assert digest(z.read(name))==pin
  return z
 def main():
- OUT.mkdir()
+ OUT.mkdir(exist_ok=True)
  pins=(ROOT/'scripts/pskernel-preview-axioms.json').read_bytes();obj=json.loads(pins)
  assert obj['format']=='pskernel-preview-axioms-v1' and set(obj['schemas'])=={'propext','Classical.choice','Quot.sound'}
  assert obj['leanCommit']=='eb6cafb7290e8bd5f2937522d8d804f58f02bafc'
@@ -31,6 +31,12 @@ def main():
  sources={}
  for filename in ['pskernel-preview-supervisor.mjs','pskernel-preview-worker.mjs','pskernel-preview-policy.mjs','pskernel-check-export.mjs','pskernel-preview-controls.mjs','pskernel-arena-replay.mjs','pskernel-arena-replay-controls.mjs']:
   b=(ROOT/'scripts'/filename).read_bytes();sources['psc1/scripts/'+filename]=digest(b)
+ for p in ['psc1/scripts/pskernel-preview-qualification.py','psc1/test/PsKernelPreviewAxiomSchemas.lean','.github/workflows/psc1-pskernel-preview-supervisor.yml']:
+  sources[p]=digest((ROOT.parent/p).read_bytes())
+ for p,pin in sources.items():
+  actual=subprocess.check_output(['git','show',os.environ['GITHUB_SHA']+':'+p],cwd=ROOT.parent)
+  assert digest(actual)==pin
+  snapshot=OUT/'sources'/p;snapshot.parent.mkdir(parents=True,exist_ok=True);snapshot.write_bytes(actual)
  receipt={'format':'pskernel-preview-supervisor-qualification-v1','source':os.environ['GITHUB_SHA'],'run':os.environ['GITHUB_RUN_ID'],
   'pins':digest(pins),'sources':sources,'routes':[],'productionSourceTree':'bbe353e649feed5b796adb164dcec36eaca915ab',
   'globalStatus':'B OPEN / C FAIL / D OPEN','strictArenaPass':False,'fullPreviewQualified':False}

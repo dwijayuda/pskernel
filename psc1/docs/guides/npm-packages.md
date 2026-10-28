@@ -7,6 +7,13 @@ npm name. Full compiler-internal modularization and modular G2/G3 remain deferre
 
 ## Installation and use
 
+Use the [current canonical-source package ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40651614453/artifacts/12799822095),
+qualified by all 55 package cases at source tree
+`64069b969346aaec27ce64c7917080228f0c78ee`. Its root tarball is 4,824,105 bytes,
+SHA-256 `3c795d2a09a74d6c4d1a94fafc2ccf7a03daa70027f65a88d6425f1b37e33e08`.
+[Matching optional packages](https://github.com/dwijayuda/pskernel/actions/runs/40651614453/artifacts/12799842115)
+retain their own exact hashes in the integration receipt.
+
 Extract the qualified ZIP, then install only its root tarball:
 
     npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1.13.tgz
@@ -60,10 +67,18 @@ Missing tools refuse; no command downloads or substitutes a tool.
 Offline optional installation must supply its exact dependencies as matching tarballs.
 Existing optional engine/SDK archives retain their original versions and hashes.
 
-Both .lean/.ps compiler inputs remain supported. Source packages expose only
-variants actually present in their canonical sources. They do not translate Lean
-to PS, register external libraries, or expose private low-level compiler functions.
-The existing reserved namespace and admission/publication authority policies remain.
+Both `.lean` and `.ps` compiler inputs remain supported. Current portable compiler
+and standard-library source packages default to canonical editable ProofScript:
+`readSources()` returns `kind: "ps"`. Use `readSources({kind: "lean"})` explicitly
+for the paired checked bootstrap references. The independent kernel packages keep
+their separate source authority. Each compile request must use one homogeneous
+grammar; a PS source closure with a Lean entry is refused.
+
+Source readers return exact files already present in the package and retain
+the ownership role and repository path. They do not translate grammars, register
+external libraries, or expose private low-level compiler functions. The [canonical ownership guide](../CANONICAL_SOURCE_OWNERSHIP.md)
+defines the editable owners and checked reference workflow. Existing reserved
+namespace and admission/publication authority policies remain.
 
 ## Existing packages
 
@@ -132,10 +147,14 @@ compiled with Emscripten to linear-memory Wasm; compiler Wasm retains GC.
 The sealed service retains its proofscript logical identity while the physical
 npm implementation owner is @proofscript/compiler.
 
-Only package/seal metadata is regenerated. No canonical .lean/.ps/compiler/kernel/
-production host body changes. Original/transformed IR validation, independent
-admission, source/logical-body pairing, semantic fuel, process limits, memory/stack
-policies, negative tests, unsupported-ABI refusals and safe publication remain.
+The dated .13 qualification linked below regenerated package/seal metadata while
+preserving its exact canonical compiler/kernel and production-host payloads.
+Current development snapshots now include the separately qualified canonical PS
+promotion and checked reference refresh. The frozen packaged executors keep their
+own recorded source and fixed-point identities; current source snapshots do not
+silently replace them. Original/transformed IR validation, independent admission,
+source/logical-body pairing, semantic fuel, process limits, memory/stack policies,
+negative tests, unsupported-ABI refusals and safe publication remain.
 Installation is not a proof of semantic preservation or a new fixed point.
 
 The finite [package contract](../../NPM_PACKAGE_CONTRACT.json) covers root-only
@@ -144,7 +163,17 @@ scopes, one default executor pair, exact standalone bytes, both source grammars,
 seven checked targets, genuine native/Wasm acceptance/refusal, accurate types,
 optional engines, semantic/tamper/dependency refusals and reproducible builds.
 
-[Exact .13 qualification](../PSC1_NPM_UMBRELLA_QUALIFICATION_2026-10-27.json)
+
+[Current canonical-source package qualification](../PSC1_CANONICAL_INTEGRATION_QUALIFICATION_2026-10-28.json)
+passes all 55 finite cases and 125 advertised exports in
+[run 40651614453](https://github.com/dwijayuda/pskernel/actions/runs/40651614453).
+It includes executed default PS and explicit Lean source consumers plus exact
+mixed-grammar refusal. Its new package archives and hashes are recorded separately
+from the historical .13 delivery below.
+
+### Historical .13 delivery
+
+[Exact initial .13 qualification](../PSC1_NPM_UMBRELLA_QUALIFICATION_2026-10-27.json)
 records all 53 cases/125 exports at892e1895, [run40509034127](https://github.com/dwijayuda/pskernel/actions/runs/40509034127).
 [Default ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40509034127/artifacts/12736333322) is 8917501 bytes; its root tarball is 4455215 bytes.
 [Optional ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40509034127/artifacts/12736781848) is 198623191 bytes.

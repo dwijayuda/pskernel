@@ -1,6 +1,6 @@
 # backend-rust
 
-Rust types, ownership, lowering and emission. Start at [src/Ps/BackendRust/Module.lean](src/Ps/BackendRust/Module.ps).
+Rust types, ownership, lowering and emission. Start at [src/Ps/BackendRust/Module.ps](src/Ps/BackendRust/Module.ps).
 
 - Representation: Checked IR/plan → Rust candidate.
 - Boundary: Preserve target ownership/lifetime/resource policies.

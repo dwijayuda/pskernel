@@ -1,6 +1,6 @@
 # foundation
 
-Positions, names, lists, text and diagnostics. Start at [src/Ps/Foundation/List.lean](src/Ps/Foundation/List.ps).
+Positions, names, lists, text and diagnostics. Start at [src/Ps/Foundation/List.ps](src/Ps/Foundation/List.ps).
 
 - Representation: Portable primitive data → portable helpers.
 - Boundary: Remain below semantic and backend layers.

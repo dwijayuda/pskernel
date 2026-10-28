@@ -1,6 +1,6 @@
 # elab
 
-Shared elaboration and actual source ownership. Start at [src/Ps/Elab/Declaration.lean](src/Ps/Elab/Declaration.ps).
+Shared elaboration and actual source ownership. Start at [src/Ps/Elab/Declaration.ps](src/Ps/Elab/Declaration.ps).
 
 - Representation: Shared syntax/environment → typed Core and origins.
 - Boundary: Both grammars share meaning; preserve recursion/refusal/fuel order.

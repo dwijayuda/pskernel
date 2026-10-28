@@ -8,7 +8,8 @@ on:
       - psc1/standalone/bootstrap.mjs
       - psc1/standalone/qualification.mjs
       - psc1/standalone/verify-evidence.mjs
-      - psc1/standalone/compiler-seed.json
+      - psc1/standalone/verify-environments.mjs
+      - psc1/docs/PSC1_TYPE_KEY_LATENCY_QUALIFICATION_2026-10-28.json
       - psc1/CANONICAL_SOURCES.json
       - psc1/compiler.project.json
       - psc1/packages/**/*.ps

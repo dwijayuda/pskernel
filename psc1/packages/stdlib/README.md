@@ -5,13 +5,16 @@ Verified source snapshots of the existing canonical
 `src/ProofScript` without translating or rewriting them.
 
     import {sourcePackage, readSources} from '@proofscript/stdlib';
-    const sources = readSources(); // existing Lean snapshots
+    const sources = readSources(); // canonical ProofScript snapshots
+    const bootstrap = readSources({kind:'lean'}); // checked bootstrap references
 
 The default API exposes source data, not a separately compiled JavaScript
 standard library. The ./compiler subpath transparently exposes the existing
 checked ProofScript API. Callers supply an explicit, complete source closure.
-A listed source variant means that files of that kind exist; it does not claim
-that every module has a .ps counterpart.
+All 13 modules have one canonical editable `.ps` owner and a paired, pinned
+`.lean` bootstrap reference. The generated package view copies those exact
+files; edit the owners under `psc1/stdlib/ProofScript`. See the
+[canonical ownership guide](../../docs/CANONICAL_SOURCE_OWNERSHIP.md).
 
 This package does not automatically register a portable external library.
 Existing reserved namespace, independent admission, strict IR and ABI refusal

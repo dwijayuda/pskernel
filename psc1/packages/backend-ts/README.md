@@ -1,6 +1,6 @@
 # backend-ts
 
-TypeScript emission and runtime support. Start at [src/Ps/BackendTs/Module.lean](src/Ps/BackendTs/Module.ps).
+TypeScript emission and runtime support. Start at [src/Ps/BackendTs/Module.ps](src/Ps/BackendTs/Module.ps).
 
 - Representation: Checked IR → readable typed candidate plus existing runtime.
 - Boundary: RuntimeSupport.lean owns stack/UTF-8 strings; no changed semantics.

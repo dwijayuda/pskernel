@@ -26,5 +26,34 @@
     "psc1ManifestSha256": "941c23fc7bd63b6168f4baea54ccdf26252761cdfa43e3a1a84eb157884c049f"
   },
   "scope": "Every tracked .ps file has exactly one explicit owner or retained/generated origin; full file identities are retained in the artifact inventory.",
-  "receiptGrantsAdmissionAuthority": false
+  "receiptGrantsAdmissionAuthority": false,
+  "integratedTransition": {
+    "headCommit": "52e0fea66b5e7cb16d7402e387992833f0d9ba65",
+    "testedMergeCommit": "37b016a1a9f0b9e41afdd0f7d7c91bb0a7d5bdc3",
+    "run": 40651614441,
+    "job": 122692758248,
+    "artifact": {
+      "id": 12799489835,
+      "name": "proofscript-source-ownership-37b016a1a9f0b9e41afdd0f7d7c91bb0a7d5bdc3",
+      "bytes": 25713,
+      "zipSha256": "42122d356452134a92424fface98bf325dae74c4db9c751b28d688d68503ce65",
+      "expiresAt": "2027-01-26T07:40:35Z"
+    },
+    "result": {
+      "status": "passed",
+      "trackedProofScriptFiles": 275,
+      "counts": {
+        "authored-language-and-policy-fixture": 53,
+        "retained-bootstrap-correspondence-fixture": 1,
+        "retained-generated-kernel-artifact": 6,
+        "authored-test-fixture": 3,
+        "canonical-editable-proofscript": 164,
+        "authored-test-and-reference-oracles": 26,
+        "editable-project-source": 10,
+        "vendored-study-reference": 12
+      },
+      "registrySha256": "4acd2c04571ca35b83ea57a05d2fa63251a5461d645f9a912abc08c9a96935ce",
+      "psc1ManifestSha256": "7042d360216751f8736ec9188285e1300ae65508b97b3895fd99d7dad52b9d96"
+    }
+  }
 }

@@ -1,6 +1,6 @@
 # compiler-ir
 
-Executable IR, validation and transformations. Start at [src/Ps/CompilerIr/Validate.lean](src/Ps/CompilerIr/Validate.ps).
+Executable IR, validation and transformations. Start at [src/Ps/CompilerIr/Validate.ps](src/Ps/CompilerIr/Validate.ps).
 
 - Representation: Original/transformed IR → strict verdict.
 - Boundary: Data wrappers are not certificates; validate both stages.

@@ -1,5 +1,16 @@
 # Actual compiler-module qualification plan
 
+Implemented checkpoint: f27399e13f187957bb79e7dd20db9ca9a68c77eb.
+All 124 dependency projections and six fresh actual leaves were queried.
+Ps.Foundation.Source has fresh Min admission and 525 native/generated runtime
+observations; full compiler qualification remains 0/124. The separate pinned
+official replay accepts all six fresh leaves. Read the [current module
+guideline](PSC1_MIN_KERNEL_MODULE_GUIDELINE.md) and dated receipt for exact
+counts, CI identities and the unresolved List model / Source preservation
+obligations. The capture sequence below is implemented; future work must
+resolve an actual module blocker before advancing a qualification count.
+
+
 User priority: qualify the first actual module, then progress dependency-aware
 toward 124/124 and a real public-MinKernel-backed self-hosting cycle.
 Do not advance counts for isolated proofs, synthetic programs or hash/fixture

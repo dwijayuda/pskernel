@@ -25,6 +25,16 @@ source-runtime/receipt.json and complete captured producer bytes.
 The dated [machine receipt](PSC1_MIN_KERNEL_MODULE_QUALIFICATION_2026-10-28.json)
 records this checkpoint. Subsequent adoption CI must keep its own SHA and run.
 
+Adoption [run 40708696489](https://github.com/dwijayuda/pskernel/actions/runs/40708696489)
+passed at `f27399e13f187957bb79e7dd20db9ca9a68c77eb`,
+job `122887721077`. Its hash-verified artifact `12826040236` is
+3671081 bytes, SHA-256
+`bfecc7ed9cb6dd4ef86911dc4a63137598bfa2293e56a2292423e0f7d4c3abfb`.
+The stricter fresh member/owner checks and closure-wide partial checks pass.
+Counts and exact Source/consumer packet, IR and generated-code identities are
+unchanged. The matrix retains 326 declared import edges and 827 combined
+import/Core owner edges; 12 dependency closures retain partial-body obligations.
+
 The denominator is the actual `Ps.CompilerUnified.Service` source closure:
 124 modules, 2685282 source bytes, 4743 source Core / 4748 logical members,
 3466 records, 115 implicit prelude declarations and 29889352 transport bytes.
@@ -125,6 +135,17 @@ Fresh CompilerIr.Model differs from its global projection because the fresh
 producer retains additional support; that difference is exactly why projected
 acceptance/refusal cannot qualify a module.
 
+All six fresh exact leaf packets also passed an independent replay in
+[Linux run 40711545422](https://github.com/dwijayuda/pskernel/actions/runs/40711545422),
+job `122897859118`, source `69abac84449cd550b8f8dc702d5203471b1b9a65`.
+This diagnostic branch changes only the workflow relative to adoption f27399e1.
+Its artifact `12825978772` is 3672056 bytes, SHA-256
+`772ca0a4027089d855fa6698c682d8097ddcc4b732f235ade89170f0b476e0f1`.
+leaf-official-replay.json retains every input identity and pinned response.
+Five Min refusals therefore remain coverage gaps on these officially accepted
+inputs; replay grants no Min acceptance and advances no qualification count.
+This does not prove universal producer correctness.
+
 The fresh List packet refuses at prefix 1:
 `psListLengthAcc.$psc0SH.0`, SHA-256
 `3c43f32a4872d8c730174119043bebf61fd6b9605201ebce84b74f4386ad3835`.
@@ -144,8 +165,22 @@ Start C1 from the unchanged **21 actual List Core members**, retaining their
 complete fresh packet as the acceptance target. List is small, shared by
 71 closures, and isolates parametric typing/recursion before String/Char runtime
 contracts or the full dependent/universe checker. Name has larger impact but
-immediately requires additional primitive semantics. Do not promise that fixing
+its actual packet references 24 external names, including Char.toNat,
+Int.ofNat/Int.repr, String.Internal.get/next/atEnd/length/append,
+String.Pos.Raw.mk/byteIdx and String.utf8ByteSize. Its real equality routine
+walks UTF-8 byte positions with fuel; its printer converts naturals through Int.
+Ground String literals alone would not qualify that entire module. This source
+comparison supports choosing the smaller List metatheory first. Do not promise that fixing
 List alone will qualify all 71 dependents.
+
+A read-only audit of all 21 actual packet records finds no declaration universe
+parameters and only Sort 1 in their sort nodes. It finds 19 external names:
+Bool, Bool.decEq, Bool.false, Bool.true, Eq, Except, Except.error, Except.ok,
+Except.rec, List, List.cons, List.nil, List.rec, Nat, Nat.rec, Nat.succ, Prod,
+Prod.mk and ite. In particular psListAny needs equality/decidability/conditional
+semantics, psListTakeAcc needs Nat recursion, and the generated accumulator
+helpers need List recursion. These observations delimit investigation; they
+are not a typing proof or proof that rank-one syntax alone is sufficient.
 
 The necessary candidate architecture is a predicative rank-one scheme layer:
 separate leading type quantification from term arrows; introduce rigid type
@@ -160,6 +195,18 @@ implementation-refinement theorem for those polymorphic declarations under the
 current trust restrictions.** The existing ground regular model cannot supply
 that theorem. There is no justified local acceptance patch for Sort 1/bvar.
 This is an open metatheory obligation, not evidence that the goal is impossible.
+
+The exact current model confirms the gap:
+[RegularModel.Denote](../proofs/pskernel-min/RegularModel.lean) interprets closed
+regular type codes into Type and has no variable/scheme context.
+[psMinRegCoreType](../packages/pskernel-min/src/Ps/MinKernel/Profile/RegularIngressProfile.lean)
+has no sort/bound-variable branch or type environment. A polymorphic forall
+over Type cannot simply be added to the same Type-valued interpretation:
+state the predicative code universe, its interpretation, closure and level
+boundaries explicitly. No Type-in-Type shortcut is justified.
+The existing [byte admission source-model theorem](../proofs/pskernel-min/RegularIngressSemantics.lean)
+then needs an actual extended translation/history refinement, not only a new
+syntax constructor.
 
 Before connecting a new rule, establish the model's consistency and an inhabited
 interpretation for admitted data; prove context weakening/substitution and
@@ -176,6 +223,12 @@ literal/zeta and syntactic substitution facts only; they do not discharge this
 obligation. Do not pad progress with field-equality lemmas that never connect to
 the production compiler. Register and prove an actual compiler theorem before
 changing Source's full qualification field.
+The existing [CompilerPreservation.Value/Eval](../proofs/pskernel-min/CompilerPreservation.lean)
+has only natural, Boolean and unit values, with scalar/let/control evaluation;
+it has no structure value or constructor/projection evaluation rule.
+RegularModel's separate carrier/fold interpretation does not automatically bind
+the actual compiler's runtime object layout. This is the concrete C2 gap for
+Source, even though all its finite runtime checks pass.
 
 Then repeat fresh List admission and runtime qualification, update the frontier
 and matrix, and address Name/Text primitive contracts, universe-parameterized
@@ -191,6 +244,16 @@ Ps.Internal.RustRuntimePlan.typeRequirements and
 Ps.Internal.RustRuntimePlan.exprRequirements.
 Define their semantics/termination or reject them; never hide them in an
 external trusted prelude.
+
+Per-module successes also need composition before whole-compiler qualification.
+Independent fresh closures may carry different auxiliary declarations and
+overlapping names; their acceptance counts cannot establish a shared global
+environment. Retain exact import/source/record identities and prove the
+environment extension, freshness and dependency-interface laws. If incremental
+checking becomes necessary for larger eligible modules, define a public checked
+state transition and a model-preservation theorem for every exact-byte chunk.
+A digest/cache can locate previously checked data; it cannot grant admission.
+The final global capture must cover all source members and support obligations.
 
 C3 is complete only after the real full compiler passes its public Min byte
 path, actual Min-backed G1/G2/G3 succeed at exact retained payload identities,
@@ -217,3 +280,38 @@ Protected base 94e0c13f6a4b434f73c859cc0c716cb6fb8d1340 stays unchanged;
 do not merge the draft PR or publish npm. Official Lean Wasm remains default.
 Production min/dual continue refusing PSC1_MIN_CANONICAL_BRIDGE_UNPROVED until
 the full admission/preservation bridge is proved and qualified.
+
+## Terminal adoption regression evidence
+
+All selected workflows at adoption f27399e13f187957bb79e7dd20db9ca9a68c77eb
+are terminal success:
+
+- [Actual module matrix 40708696489](https://github.com/dwijayuda/pskernel/actions/runs/40708696489):
+  complete dependency diagnostics, six fresh leaves, actual Source 525-case runtime.
+- [Focused 40708696485](https://github.com/dwijayuda/pskernel/actions/runs/40708696485):
+  proof 122887721713, compiler-preservation 122887721290 and
+  portability/closure/package 122888949386 passed.
+- [Broader Linux 40708703986](https://github.com/dwijayuda/pskernel/actions/runs/40708703986):
+  all selected jobs passed, including full/linux-scoped 122895606482 and
+  final gate 122910373047; benchmark was unselected/skipped.
+- [Installed CLI 40708696445](https://github.com/dwijayuda/pskernel/actions/runs/40708696445):
+  preflight 122887721956 and installed 122888099835 passed.
+
+The separate six-leaf oracle run 40711545422 is also terminal success at its
+recorded workflow-only source. Ordinary generations/regression suites above
+do not qualify Min-backed G1/G2/G3. Source, IR, canonical packet and target
+identities are retained independently from these pass/fail statuses.
+
+The current private R4B regression pack at f27399e1 is 42240 bytes, SHA-256
+`08931b3a19702ac1938222cda2c3ff0eff3e93357c69c9124ef8e96a0a8c17bd`.
+It passed offline qualification. Its source metadata differs from U1's original
+42237-byte deliverable; the original tarball is preserved and not relabelled.
+The compiled kernel JavaScript remains SHA-256
+`2cfe8dd6564b7ec6e968841c1ef43b01897d7ca5303095eb2b8c9b48dd27ded3`.
+
+This reporting update changes Markdown/JSON documentation only. The exact
+implementation/driver/proof/source checkpoint remains f27399e1.
+All proofs, builds, compiler execution, tests and resource measurements ran
+on GitHub Actions Linux; local work was read-only artifact parsing, hashing
+and export. The overall full-compiler/self-hosting goal remains incomplete
+at the explicit C1/C2 fundamental proof obligations above.

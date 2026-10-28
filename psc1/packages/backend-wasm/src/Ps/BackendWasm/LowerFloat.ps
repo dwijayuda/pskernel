@@ -1,0 +1,35 @@
+import Ps.BackendWasm.Type
+
+def psWasmLowerFloatBinary(type : PsVerifiedIrFloatingType, operation : PsVerifiedIrFloatBinaryOp) : List(PsWasmInstruction) := match type with {
+  | float32 => match operation with {
+  | add => _root_.List.cons(PsWasmInstruction.f32Add, _root_.List.nil)
+  | sub => _root_.List.cons(PsWasmInstruction.f32Sub, _root_.List.nil)
+  | mul => _root_.List.cons(PsWasmInstruction.f32Mul, _root_.List.nil)
+  | div => _root_.List.cons(PsWasmInstruction.f32Div, _root_.List.nil)
+}
+  | float => match operation with {
+  | add => _root_.List.cons(PsWasmInstruction.f64Add, _root_.List.nil)
+  | sub => _root_.List.cons(PsWasmInstruction.f64Sub, _root_.List.nil)
+  | mul => _root_.List.cons(PsWasmInstruction.f64Mul, _root_.List.nil)
+  | div => _root_.List.cons(PsWasmInstruction.f64Div, _root_.List.nil)
+}
+}
+
+def psWasmLowerFloatCompare(type : PsVerifiedIrFloatingType, operation : PsVerifiedIrFloatCompareOp) : List(PsWasmInstruction) := match type with {
+  | float32 => match operation with {
+  | eq => _root_.List.cons(PsWasmInstruction.f32Eq, _root_.List.nil)
+  | ne => _root_.List.cons(PsWasmInstruction.f32Ne, _root_.List.nil)
+  | lt => _root_.List.cons(PsWasmInstruction.f32Lt, _root_.List.nil)
+  | le => _root_.List.cons(PsWasmInstruction.f32Le, _root_.List.nil)
+  | gt => _root_.List.cons(PsWasmInstruction.f32Gt, _root_.List.nil)
+  | ge => _root_.List.cons(PsWasmInstruction.f32Ge, _root_.List.nil)
+}
+  | float => match operation with {
+  | eq => _root_.List.cons(PsWasmInstruction.f64Eq, _root_.List.nil)
+  | ne => _root_.List.cons(PsWasmInstruction.f64Ne, _root_.List.nil)
+  | lt => _root_.List.cons(PsWasmInstruction.f64Lt, _root_.List.nil)
+  | le => _root_.List.cons(PsWasmInstruction.f64Le, _root_.List.nil)
+  | gt => _root_.List.cons(PsWasmInstruction.f64Gt, _root_.List.nil)
+  | ge => _root_.List.cons(PsWasmInstruction.f64Ge, _root_.List.nil)
+}
+}

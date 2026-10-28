@@ -1,0 +1,47 @@
+import Ps.BackendJs.CompilerService
+import Ps.BackendTs.CompilerService
+import Ps.BackendRust.CompilerService
+import Ps.BackendWasm.CompilerService
+
+namespace Ps.Internal.UnifiedCompilerService
+-- One owned compiler source closure. Execution engine and output target are
+-- independent; optional Python/PHP emitters are deliberately outside this root.
+def refused(target : String, code : String) : String := psJsonObject((_root_.List.cons((_root_.Prod.mk("admission", (psJsonQuote("not-run")))), (_root_.List.cons((_root_.Prod.mk("candidateOnly", "true")), (_root_.List.cons((_root_.Prod.mk("code", (psJsonQuote(code)))), (_root_.List.cons((_root_.Prod.mk("column", "0")), (_root_.List.cons((_root_.Prod.mk("declaration", (psJsonQuote("")))), (_root_.List.cons((_root_.Prod.mk("line", "0")), (_root_.List.cons((_root_.Prod.mk("module", (psJsonQuote("")))), (_root_.List.cons((_root_.Prod.mk("phase", (psJsonQuote("wire")))), (_root_.List.cons((_root_.Prod.mk("protocol", (psJsonQuote("psc1-compiler-service/1")))), (_root_.List.cons((_root_.Prod.mk("requestId", (psJsonQuote("")))), (_root_.List.cons((_root_.Prod.mk("sourceClosureDigest", (psJsonQuote("")))), (_root_.List.cons((_root_.Prod.mk("status", (psJsonQuote("refused")))), (_root_.List.cons((_root_.Prod.mk("target", (psJsonQuote(target)))), _root_.List.nil)))))))))))))))))))))))))))
+end Ps.Internal.UnifiedCompilerService
+
+namespace Ps.Internal.UnifiedCompilerService
+def run(target : PsBackendTarget, emit : (_ : PsValidatedIrModule) -> (_ : List(String)) -> Except(Ps.Internal.CompilerService.Error, (Prod(String, (List(String))))), values : List(PsJsonValue)) : String := Ps.Internal.CompilerService.candidateFields(target, emit, values)
+end Ps.Internal.UnifiedCompilerService
+
+namespace Ps.Internal.UnifiedCompilerService
+def dispatch(target : String, values : List(PsJsonValue)) : String := if (psStringEq(target, "js")) { run(PsBackendTarget.js, Ps.Internal.JsCompilerService.emit, values) } else { if (psStringEq(target, "ts")) { run(PsBackendTarget.ts, Ps.Internal.TsCompilerService.emit, values) } else { if (psStringEq(target, "rust")) { run(PsBackendTarget.rust, Ps.Internal.RustCompilerService.emit, values) } else { if (psStringEq(target, "wasm-core")) { run(PsBackendTarget.wasmCore, Ps.Internal.WasmCompilerService.emit, values) } else { refused(target, "target-unavailable") } } } }
+end Ps.Internal.UnifiedCompilerService
+
+namespace Ps.Internal.UnifiedCompilerService
+def fields(values : List(PsJsonValue)) : String := if ((!Nat.beq((psListLength(values)), 3))) { refused("", "request-arity") } else { match (Ps.Internal.CompilerService.stringAt(values, 0)) with {
+  | Except.error _ => refused("", "expected-string")
+  | Except.ok protocol => if ((!psStringEq(protocol, "psc1-unified-compiler-service/2"))) { refused("", "protocol") } else { match (Ps.Internal.CompilerService.stringAt(values, 1)) with {
+  | Except.error _ => refused("", "expected-string")
+  | Except.ok target => match (Ps.Internal.CompilerService.atWorker(values, 2)) with {
+  | Except.error _ => refused(target, "expected-array")
+  | Except.ok input => match input with {
+  | PsJsonValue.array request => dispatch(target, request)
+  | _ => refused(target, "expected-array")
+}
+}
+} }
+} }
+end Ps.Internal.UnifiedCompilerService
+
+namespace Ps.Internal.UnifiedCompilerService
+def candidate(input : String) : String := match (psJsonParse(input)) with {
+  | Except.error _ => refused("", "invalid-json")
+  | Except.ok value => match value with {
+  | PsJsonValue.array values => fields(values)
+  | _ => refused("", "expected-array")
+}
+}
+end Ps.Internal.UnifiedCompilerService
+
+/-- Candidates only. Independent admission remains in the external host. -/
+def psCompilerServiceCandidate(input : String) : String := Ps.Internal.UnifiedCompilerService.candidate(input)

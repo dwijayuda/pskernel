@@ -81,8 +81,10 @@ const literalMoves={
 const read=file=>fs.readFileSync(file,'utf8');
 // Original move evidence remains reproducible at its qualified checkpoint.
 // Runtime/watch behavior has a distinct installed/runtime qualification, not an exact-move claim.
+// The source-ownership audit profile is checked by canonical preparation and host tests;
+// its original relocation correspondence remains pinned to the same historical checkpoint.
 const layoutCheckpoint='94e0c13f6a4b434f73c859cc0c716cb6fb8d1340';
-const changedOwners=new Set(['npm-cli/compiler-api.mjs','host-tools/generated-compiler-session.mjs','test/installed/cli.test.mjs','test/host/cli.test.mjs']);
+const changedOwners=new Set(['npm-cli/compiler-api.mjs','host-tools/generated-compiler-session.mjs','host-tools/source-refactoring.mjs','test/installed/cli.test.mjs','test/host/cli.test.mjs']);
 function migrationRead(file){
  if(!changedOwners.has(file))return read(file);
  const r=spawnSync('git',['show',layoutCheckpoint+':psc1/'+file],{encoding:'utf8',timeout:10000,maxBuffer:2*1024*1024});
@@ -127,7 +129,7 @@ for(const file of ['host-tools/source-refactoring.mjs','host-tools/generated-tar
   .replace("import {pathToFileURL} from 'node:url';","import {fileURLToPath,pathToFileURL} from 'node:url';")
   .replace("path.resolve('host-tools/process/bounded-process.py')","fileURLToPath(new URL('./process/bounded-process.py',import.meta.url))");
  assert.equal(migrationRead(file),expected,'host relocation changed non-path bytes: '+file);
- compared.push({from:file,to:file,relation:file==='host-tools/generated-target-tools.mjs'?'enumerated-paths-and-module-relative-supervisor-resolution':'only-enumerated-runtime-path-literals'});
+ compared.push({from:file,to:file,relation:file==='host-tools/generated-target-tools.mjs'?'enumerated-paths-and-module-relative-supervisor-resolution':'only-enumerated-runtime-path-literals',checkpoint:changedOwners.has(file)?layoutCheckpoint:'current'});
 }
 for(const name of ['STATUS','NPM_PACKAGE_WORK_STATE'])
  assert.equal(read('docs/history/'+name+'_BEFORE_LAYOUT_2026-10-26.md'),historical(name+'.md'));
@@ -136,7 +138,11 @@ assert.equal(read('docs/history/ROADMAP_BEFORE_LAYOUT_2026-10-26.md'),historical
 const listed=spawnSync('git',['ls-files','-z','.'],{encoding:'utf8',timeout:10000,maxBuffer:4*1024*1024});
 assert.equal(listed.status,0,listed.stderr);
 const files=listed.stdout.split('\0').filter(Boolean).sort();
-const nodes=[],edges=[],modules=new Map();
+const nodes=[],edges=[],modules=new Map(),nativeModules=new Map();
+const canonicalManifest=fs.existsSync('CANONICAL_SOURCES.json')?JSON.parse(read('CANONICAL_SOURCES.json')):null;
+const canonicalOwners=new Map((canonicalManifest?.owners??[]).map(row=>[row.module,row.path]));
+const bootstrapPaths=new Set((canonicalManifest?.owners??[]).map(row=>row.bootstrap.path));
+const classifiedRoles=new Map((canonicalManifest?.classifiedRemainder??[]).map(row=>[row.path,row.role]));
 function category(file){
  if(file.startsWith('legacy/'))return 'historical-code';
  if(file.startsWith('docs/history/'))return 'historical-record';
@@ -146,25 +152,36 @@ function category(file){
  if(/^packages\/pskernel-lean/.test(file))return 'official-independent-checker';
  if(file.startsWith('test/'))return 'test-or-reference';
  if(file.startsWith('host-tools/')||file.startsWith('npm-cli/')||file.startsWith('host/src/'))return 'host-source';
- if(file.startsWith('packages/'))return 'compiler-or-library-source';
+ if(file.startsWith('packages/')||file.startsWith('stdlib/ProofScript/'))return 'compiler-or-library-source';
  if(file.startsWith('scripts/'))return 'automation-or-retained-guard';
  return 'workspace-config-or-entry';
 }
 for(const file of files){
  const node={path:file,category:category(file)};
- if(file.endsWith('.lean')&&!file.startsWith('legacy/')){
-  const matched=file.match(/^(?:packages\/[^/]+|host)\/src\/(.+)\.lean$/);
-  if(matched){node.module=matched[1].replaceAll('/','.');modules.set(node.module,file);}
+ if(/\.(lean|ps)$/.test(file)&&!file.startsWith('legacy/')){
+  const matched=file.match(/^(?:packages\/[^/]+|host)\/src\/(.+)\.(lean|ps)$/)
+   ??file.match(/^stdlib\/(ProofScript\/.+)\.(lean|ps)$/);
+  if(matched){
+   node.module=matched[1].replaceAll('/','.');
+   if(canonicalOwners.get(node.module)===file)node.sourceRole='canonical-editable-proofscript';
+   else if(bootstrapPaths.has(file))node.sourceRole='immutable-checked-bootstrap-reference';
+   else if(classifiedRoles.has(file))node.sourceRole=classifiedRoles.get(file);
+   if(canonicalOwners.has(node.module))node.canonicalPath=canonicalOwners.get(node.module);
+   if(file.endsWith('.lean'))nativeModules.set(node.module,file);
+   if(!canonicalOwners.has(node.module)||canonicalOwners.get(node.module)===file)modules.set(node.module,file);
+  }
  }
  nodes.push(node);
 }
 for(const node of nodes){
- if(!/\.(mjs|js|lean)$/.test(node.path)||node.path.startsWith('legacy/')||
+ if(!/\.(mjs|js|lean|ps)$/.test(node.path)||node.path.startsWith('legacy/')||
     node.path.startsWith('packages/pskernel-lean')||node.path.startsWith('packages/pskernel-core/'))continue;
  const text=read(node.path);
- if(node.path.endsWith('.lean')){
-  for(const match of text.matchAll(/^import (Ps\.[A-Za-z0-9_.]+)\s*$/gm))
-   edges.push({from:node.path,to:modules.get(match[1])??null,module:match[1],kind:'lean-import'});
+ if(/\.(lean|ps)$/.test(node.path)){
+  for(const match of text.matchAll(/^import ((?:Ps|ProofScript)\.[A-Za-z0-9_.]+)\s*$/gm))
+   edges.push({from:node.path,to:(node.path.endsWith('.ps')?modules:nativeModules).get(match[1])??null,
+    module:match[1],canonicalPath:canonicalOwners.get(match[1])??null,
+    kind:node.path.endsWith('.ps')?'canonical-ps-import':'bootstrap-or-native-lean-import'});
  }else{
   for(const match of text.matchAll(/(?:from\s+|import\s*)['"](\.[^'"]+)['"]/g)){
    const target=path.posix.normalize(path.posix.join(path.posix.dirname(node.path),match[1]));
@@ -187,7 +204,7 @@ for(const file of ['host-tools/process/resource-profiles.mjs','host-tools/proces
  assert.ok(read('scripts/generated-target-qualification.mjs').includes(file),'canonical process policy missing from protected tool inventory: '+file);
 
 const ownDocs=[
- 'README.md','ARCHITECTURE.md','CONTRIBUTING.md','docs/README.md',
+ 'README.md','ARCHITECTURE.md','CONTRIBUTING.md','docs/README.md','docs/CANONICAL_SOURCE_OWNERSHIP.md',
  'docs/PSC1_DEVELOPMENT_ROADMAP.md',...files.filter(f=>/^docs\/(guides|architecture|reference|development|evidence)\/.+\.md$/.test(f)),
  ...files.filter(f=>/^packages\/[^/]+\/README\.md$/.test(f)&&!/^packages\/pskernel-/.test(f)),
  'npm-cli/README.md','scripts/README.md'
@@ -197,23 +214,28 @@ for(const file of new Set(ownDocs)){
  for(const match of read(file).matchAll(/\]\(([^()\n]+)\)/g)){
   const url=match[1];if(/^(https?:|mailto:|codex:|#)/.test(url))continue;
   const target=path.resolve(path.dirname(file),url.split('#')[0]);
-  assert.ok(target.startsWith(root+path.sep)||target===root,'documentation path escape: '+file+':'+url);
+  const repositoryOwnershipIndex=path.resolve(root,'..','SOURCE_OWNERSHIP.json');
+  assert.ok(target.startsWith(root+path.sep)||target===root||target===repositoryOwnershipIndex,'documentation path escape: '+file+':'+url);
   assert.ok(fs.existsSync(target),'broken current link: '+file+':'+url);
   checkedLinks.push({from:file,to:path.relative(root,target)});
  }
 }
 const out=path.resolve('dist/readability');fs.mkdirSync(path.join(out,'runtime'),{recursive:true});
-const runtime=read('packages/backend-ts/src/Ps/BackendTs/RuntimeSupport.lean');
+const runtimeOwner=canonicalOwners.get('Ps.BackendTs.RuntimeSupport')??'packages/backend-ts/src/Ps/BackendTs/RuntimeSupport.lean';
+const runtime=read(runtimeOwner);
 const runtimeViews=[];
-for(const match of runtime.matchAll(/^def (psTs(?:Stack|Utf8)RuntimeSupport) : String :=\n  ("(?:[^"\\]|\\.)*")/gm)){
+for(const match of runtime.matchAll(/^def (psTs(?:Stack|Utf8)RuntimeSupport) : String :=\s*("(?:[^"\\]|\\.)*")/gm)){
  const text=JSON.parse(match[2]),file=match[1]+'.generated.ts';
- fs.writeFileSync(path.join(out,'runtime',file),text);runtimeViews.push({file,sourceDefinition:match[1],utf8Bytes:Buffer.byteLength(text)});
+ fs.writeFileSync(path.join(out,'runtime',file),text);runtimeViews.push({file,sourceDefinition:match[1],utf8Bytes:Buffer.byteLength(text),
+  sourcePath:runtimeOwner,
+  sourceRole:canonicalManifest?'canonical-editable-proofscript':'native-bootstrap-source',
+  canonicalPath:canonicalOwners.get('Ps.BackendTs.RuntimeSupport')??null});
 }
 assert.equal(runtimeViews.length,2,'both runtime views must be derived from source');
 const result={schema:'psc1-repository-layout/1',testedCommit:process.env.GITHUB_SHA,baseline,status:'passed',nodes,edges,compared,checkedLinks,runtimeViews,
  layoutCheckpoint,historicalRecords:'byte-identical',humanQualified:false,semanticPreservation:'not-claimed',frozenPayloadPromotion:'not-claimed'};
 fs.writeFileSync(path.join(out,'repository-map.json'),JSON.stringify(result,null,2)+'\n');
-const rows=nodes.filter(n=>n.module).map(n=>'| '+n.module+' | ['+n.path+'](../../'+n.path+') | '+n.category+' |').join('\n');
+const rows=nodes.filter(n=>n.module).map(n=>'| '+n.module+' | ['+n.path+'](../../'+n.path+') | '+(n.sourceRole??n.category)+' |').join('\n');
 const receipts=nodes.filter(n=>n.category==='dated-evidence').map(n=>'- '+n.path).join('\n');
 fs.writeFileSync(path.join(out,'repository-map.md'),'# Exact-source repository map\n\nGenerated from tracked paths and actual imports; no additional semantic authority.\n\n| Module | Source | Role |\n| --- | --- | --- |\n'+rows+'\n\n## Dated evidence\n\n'+receipts+'\n');
 console.log('PSC1_REPOSITORY_LAYOUT: '+JSON.stringify({status:'passed',nodes:nodes.length,imports:edges.length,exactRelations:compared.length,links:checkedLinks.length,runtimeViews:runtimeViews.length,humanQualified:false}));

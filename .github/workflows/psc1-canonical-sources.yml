@@ -1,0 +1,80 @@
+name: PSC1 canonical source ownership
+on:
+  workflow_call:
+  push:
+    branches: [feat/psc1-canonical-latency-20261028]
+    paths:
+      - psc1/CANONICAL_SOURCES.json
+      - psc1/compiler.project.json
+      - psc1/bootstrap/CANONICAL_BASELINE.json
+      - psc1/packages/**/*.lean
+      - psc1/stdlib/**/*.lean
+      - psc1/packages/**/*.ps
+      - psc1/stdlib/**/*.ps
+      - psc1/host-tools/canonical-sources.mjs
+      - psc1/scripts/check-canonical-sources.mjs
+      - psc1/scripts/NativeReferenceProjection.lean
+      - psc1/scripts/native-reference-projection.mjs
+      - psc1/scripts/native-reference-projection-tests.mjs
+      - .github/workflows/psc1-canonical-sources.yml
+permissions:
+  contents: read
+jobs:
+  ownership:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: psc1
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Require one authored source and an exhaustive classified inventory
+        run: |
+          node scripts/check-canonical-sources.mjs --static
+          node ../scripts/check-source-ownership.mjs
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-canonical-elan-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        id: source-tools-cache
+        with:
+          path: psc1/.lake/build
+          key: psc1-canonical-source-tools-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc1/packages/**/*.lean', 'psc1/scripts/**/*.lean', 'psc1/host/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
+      - name: Install the pinned bootstrap compiler
+        run: |
+          set -euo pipefail
+          if [ ! -x "$HOME/.elan/bin/elan" ]; then
+            curl --connect-timeout 20 --max-time 120 --retry 2 -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o "$RUNNER_TEMP/psc1-elan-init.sh"
+            timeout 180 sh "$RUNNER_TEMP/psc1-elan-init.sh" -y --default-toolchain none
+          fi
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build checked ownership helpers and lossless native regression
+        run: lake build psc1 psc1_unified_service_seed psc1_lossless_source psc1_source_ownership psc1_independent_checker psc1_lossless_tests psc1_modular_pilot psc1_backend_python psc1_backend_php
+      - uses: actions/cache/save@v4
+        if: steps.source-tools-cache.outputs.cache-hit != 'true'
+        with:
+          path: psc1/.lake/build
+          key: ${{ steps.source-tools-cache.outputs.cache-primary-key }}
+      - name: Check every canonical compiler and library graph against its bootstrap reference freshly
+        run: |
+          node scripts/native-reference-projection-tests.mjs
+          node --max-old-space-size=4096 scripts/check-canonical-sources.mjs
+          .lake/build/bin/psc1_lossless_tests
+          node scripts/lossless-source-tests.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-canonical-source-evidence-${{ github.sha }}
+          path: |
+            psc1/dist/canonical-source-check/
+            psc1/dist/lossless-source/
+            psc1/dist/native-reference-projection-tests/
+          if-no-files-found: warn
+          retention-days: 90

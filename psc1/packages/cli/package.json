@@ -45,7 +45,7 @@
     "implementationOwner": "@proofscript/compiler",
     "internalCompilerModules": false,
     "packageKind": "shared-compiler-adapter",
-    "canonicalSources": "src",
+    "canonicalSources": "src/**/*.lean",
     "sourceVariants": [
       "lean"
     ],
@@ -53,7 +53,14 @@
     "compilerInputGrammars": [
       "lean",
       "ps"
-    ]
+    ],
+    "canonicalGrammar": "lean",
+    "sourceOwnership": {
+      "role": "native-adapter-source",
+      "manifest": "dist/source-manifest.json",
+      "repositoryManifest": "psc1/CANONICAL_SOURCES.json"
+    },
+    "bootstrapReferences": null
   },
   "scripts": {
     "build": "node ../../scripts/build-packages.mjs build --package cli",

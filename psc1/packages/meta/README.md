@@ -1,6 +1,6 @@
 # meta
 
-Inference, reduction, unification and instances. Start at [src/Ps/Meta/Infer.lean](src/Ps/Meta/Infer.lean).
+Inference, reduction, unification and instances. Start at [src/Ps/Meta/Infer.ps](src/Ps/Meta/Infer.ps).
 
 - Representation: Core terms/environment → inferred or refused semantic result.
 - Boundary: No target or host authority.

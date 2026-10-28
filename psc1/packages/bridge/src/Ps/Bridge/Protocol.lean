@@ -44,7 +44,7 @@ def psKernelBridgeEnvelope
     ("op", psJsonQuote op),
     ("payload", payload),
     ("protocol", psJsonQuote psKernelBridgeProtocol),
-    ("version", toString psKernelBridgeVersion)
+    ("version", psCheckedAdmissionNatToString psKernelBridgeVersion)
   ]
 
 def psEncodeKernelBridgeRequest
@@ -75,21 +75,19 @@ def psEncodeKernelBridgeRequest
                 ("expr", encoded)
               ]))
   | .defeq left right =>
-      match
-          psEncodeCodecExpr left,
-          psEncodeCodecExpr right with
-      | Except.ok encodedLeft, Except.ok encodedRight =>
-          Except.ok
-            (psKernelBridgeEnvelope
-              "defeq"
-              (psJsonObject [
-                ("left", encodedLeft),
-                ("right", encodedRight)
-              ]))
-      | Except.error error, _ =>
-          Except.error (PsKernelBridgeProtocolError.encode error)
-      | _, Except.error error =>
-          Except.error (PsKernelBridgeProtocolError.encode error)
+      match psEncodeCodecExpr left with
+      | Except.error error => Except.error (PsKernelBridgeProtocolError.encode error)
+      | Except.ok encodedLeft =>
+          match psEncodeCodecExpr right with
+          | Except.error error => Except.error (PsKernelBridgeProtocolError.encode error)
+          | Except.ok encodedRight =>
+              Except.ok
+                (psKernelBridgeEnvelope
+                  "defeq"
+                  (psJsonObject [
+                    ("left", encodedLeft),
+                    ("right", encodedRight)
+                  ]))
   | .replayAdmissions declarations =>
       match psEncodeCheckedAdmissionsCanonical declarations with
       | Except.error error =>
@@ -105,10 +103,10 @@ def psKernelBridgeRequireField
     (name : String) :
     Except PsKernelBridgeProtocolError PsJsonValue :=
   match psJsonGetField value name with
-  | none =>
+  | Option.none =>
       Except.error
         (PsKernelBridgeProtocolError.missingField name)
-  | some field => Except.ok field
+  | Option.some field => Except.ok field
 
 def psKernelBridgeRequireString
     (value : PsJsonValue)
@@ -118,10 +116,10 @@ def psKernelBridgeRequireString
   | Except.error error => Except.error error
   | Except.ok field =>
       match psJsonAsString field with
-      | none =>
+      | Option.none =>
           Except.error
             (PsKernelBridgeProtocolError.invalidField name)
-      | some text => Except.ok text
+      | Option.some text => Except.ok text
 
 def psKernelBridgeRequireNumberText
     (value : PsJsonValue)
@@ -131,40 +129,38 @@ def psKernelBridgeRequireNumberText
   | Except.error error => Except.error error
   | Except.ok field =>
       match psJsonAsNumberText field with
-      | none =>
+      | Option.none =>
           Except.error
             (PsKernelBridgeProtocolError.invalidField name)
-      | some text => Except.ok text
+      | Option.some text => Except.ok text
 
 def psKernelBridgeValidateEnvelope
     (value : PsJsonValue) :
     Except PsKernelBridgeProtocolError Unit :=
-  match
-      psKernelBridgeRequireString value "protocol",
-      psKernelBridgeRequireNumberText value "version",
-      psKernelBridgeRequireString value "kernel",
-      psKernelBridgeRequireString value "foundation" with
-  | Except.ok protocol,
-    Except.ok version,
-    Except.ok kernel,
-    Except.ok foundation =>
-      if protocol != psKernelBridgeProtocol then
-        Except.error PsKernelBridgeProtocolError.protocolMismatch
-      else if version != toString psKernelBridgeVersion then
-        Except.error PsKernelBridgeProtocolError.versionMismatch
-      else if kernel != psKernelBridgeKernelFingerprint then
-        Except.error
-          PsKernelBridgeProtocolError.kernelFingerprintMismatch
-      else if foundation != psKernelBridgeFoundationFingerprint then
-        Except.error
-          PsKernelBridgeProtocolError.foundationFingerprintMismatch
-      else
-        Except.ok ()
-  | Except.error error, _, _, _ => Except.error error
-  | _, Except.error error, _, _ => Except.error error
-  | _, _, Except.error error, _ => Except.error error
-  | _, _, _, Except.error error => Except.error error
-
+  match psKernelBridgeRequireString value "protocol" with
+  | Except.error error => Except.error error
+  | Except.ok protocol =>
+      match psKernelBridgeRequireNumberText value "version" with
+      | Except.error error => Except.error error
+      | Except.ok version =>
+          match psKernelBridgeRequireString value "kernel" with
+          | Except.error error => Except.error error
+          | Except.ok kernel =>
+              match psKernelBridgeRequireString value "foundation" with
+              | Except.error error => Except.error error
+              | Except.ok foundation =>
+                  if !psStringEq protocol psKernelBridgeProtocol then
+                    Except.error PsKernelBridgeProtocolError.protocolMismatch
+                  else if !psStringEq version (psCheckedAdmissionNatToString psKernelBridgeVersion) then
+                    Except.error PsKernelBridgeProtocolError.versionMismatch
+                  else if !psStringEq kernel psKernelBridgeKernelFingerprint then
+                    Except.error
+                      PsKernelBridgeProtocolError.kernelFingerprintMismatch
+                  else if !psStringEq foundation psKernelBridgeFoundationFingerprint then
+                    Except.error
+                      PsKernelBridgeProtocolError.foundationFingerprintMismatch
+                  else
+                    Except.ok ()
 def psDecodeKernelBridgeResponse
     (source : String) :
     Except PsKernelBridgeProtocolError PsKernelBridgeResponse :=
@@ -179,33 +175,33 @@ def psDecodeKernelBridgeResponse
           | Except.error error => Except.error error
           | Except.ok okValue =>
               match psJsonAsBool okValue with
-              | none =>
+              | Option.none =>
                   Except.error
                     (PsKernelBridgeProtocolError.invalidField "ok")
-              | some false =>
-                  match psKernelBridgeRequireString value "error" with
-                  | Except.error error => Except.error error
-                  | Except.ok message =>
-                      Except.error
-                        (PsKernelBridgeProtocolError.remoteError
-                          message)
-              | some true =>
-                  match psJsonGetField value "value" with
-                  | none =>
-                      Except.ok { value := none }
-                  | some PsJsonValue.nullE =>
-                      Except.ok { value := none }
-                  | some responseValue =>
-                      Except.ok { value := some responseValue }
+              | Option.some succeeded =>
+                  if succeeded then
+                    match psJsonGetField value "value" with
+                    | Option.none => Except.ok { value := Option.none }
+                    | Option.some responseValue =>
+                        match responseValue with
+                        | PsJsonValue.nullE => Except.ok { value := Option.none }
+                        | _ => Except.ok { value := Option.some responseValue }
+                  else
+                    match psKernelBridgeRequireString value "error" with
+                    | Except.error error => Except.error error
+                    | Except.ok message =>
+                        Except.error
+                          (PsKernelBridgeProtocolError.remoteError message)
+
 
 def psKernelBridgeResponseExpr
     (response : PsKernelBridgeResponse) :
     Except PsKernelBridgeProtocolError PsExpr :=
   match response.value with
-  | none =>
+  | Option.none =>
       Except.error
         (PsKernelBridgeProtocolError.missingField "value")
-  | some value =>
+  | Option.some value =>
       match psDecodeCodecExpr value with
       | Except.error error =>
           Except.error (PsKernelBridgeProtocolError.codec error)
@@ -215,7 +211,10 @@ def psKernelBridgeResponseBool
     (response : PsKernelBridgeResponse) :
     Except PsKernelBridgeProtocolError Bool :=
   match response.value with
-  | some (PsJsonValue.bool value) => Except.ok value
-  | _ =>
-      Except.error
-        (PsKernelBridgeProtocolError.invalidField "value")
+  | Option.none =>
+      Except.error (PsKernelBridgeProtocolError.invalidField "value")
+  | Option.some value =>
+      match value with
+      | PsJsonValue.bool result => Except.ok result
+      | _ =>
+          Except.error (PsKernelBridgeProtocolError.invalidField "value")

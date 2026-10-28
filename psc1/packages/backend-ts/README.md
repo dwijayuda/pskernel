@@ -1,9 +1,9 @@
 # backend-ts
 
-TypeScript emission and runtime support. Start at [src/Ps/BackendTs/Module.lean](src/Ps/BackendTs/Module.lean).
+TypeScript emission and runtime support. Start at [src/Ps/BackendTs/Module.ps](src/Ps/BackendTs/Module.ps).
 
 - Representation: Checked IR → readable typed candidate plus existing runtime.
-- Boundary: RuntimeSupport.lean owns stack/UTF-8 strings; no changed semantics.
+- Boundary: RuntimeSupport.ps owns stack/UTF-8 strings; no changed semantics.
 - Focused guard: [scripts/check-stack-safe-ts-source.mjs](../../scripts/check-stack-safe-ts-source.mjs). This guard alone is not release qualification.
 - Refusal/resources: preserve explicit fuel, error order, source/body identities,
   and negative cases. See [pass contracts](../../docs/reference/pass-contracts.md).

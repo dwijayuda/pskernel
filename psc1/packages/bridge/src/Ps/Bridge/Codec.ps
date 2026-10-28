@@ -1,0 +1,259 @@
+import Ps.Bridge.CheckedAdmissions
+
+inductive PsCodecDecodeError where {
+  | fuelExhausted
+  | expectedObject
+  | expectedArray
+  | expectedString
+  | expectedNumber
+  | missingField(name : String)
+  | invalidNatural
+  | invalidTag(tag : String)
+  | invalidBinder(binder : String)
+}
+
+def psCodecField(value : PsJsonValue, name : String) : Except(PsCodecDecodeError, PsJsonValue) := match (psJsonGetField(value, name)) with {
+  | Option.none => Except.error((PsCodecDecodeError.missingField(name)))
+  | Option.some field => Except.ok(field)
+}
+
+def psCodecString(value : PsJsonValue) : Except(PsCodecDecodeError, String) := match (psJsonAsString(value)) with {
+  | Option.some text => Except.ok(text)
+  | Option.none => Except.error(PsCodecDecodeError.expectedString)
+}
+
+def psCodecArray(value : PsJsonValue) : Except(PsCodecDecodeError, (List(PsJsonValue))) := match (psJsonAsArray(value)) with {
+  | Option.some values => Except.ok(values)
+  | Option.none => Except.error(PsCodecDecodeError.expectedArray)
+}
+
+def psCodecNaturalDigits(chars : List(Char), value : Nat) : Option(Nat) := match chars with {
+  | List.nil => Option.some(value)
+  | List.cons char rest => let code : Nat := (Char.toNat(char))
+if ((Nat.ble(48, code) && Nat.ble(code, 57))) { psCodecNaturalDigits(rest, (Nat.add((Nat.mul(value, 10)), (Nat.sub(code, 48))))) } else { Option.none }
+}
+
+def psCodecNaturalText(text : String) : Option(Nat) := match (psJsonStringToChars(text)) with {
+  | List.nil => Option.none
+  | List.cons first rest => let code : Nat := (Char.toNat(first))
+if (Nat.beq(code, 48)) { if (psListIsEmpty(rest)) { Option.some(0) } else { Option.none } } else { if ((Nat.ble(49, code) && Nat.ble(code, 57))) { psCodecNaturalDigits(rest, ((code - 48))) } else { Option.none } }
+}
+
+def psCodecNat(value : PsJsonValue) : Except(PsCodecDecodeError, Nat) := match (psJsonAsNumberText(value)) with {
+  | Option.none => Except.error(PsCodecDecodeError.expectedNumber)
+  | Option.some text => match (psCodecNaturalText(text)) with {
+  | Option.none => Except.error(PsCodecDecodeError.invalidNatural)
+  | Option.some natural => Except.ok(natural)
+}
+}
+
+def psDecodeCodecNameWithFuel(fuelBudget : Nat, value : PsJsonValue) : Except(PsCodecDecodeError, PsName) := match fuelBudget with {
+  | Nat.zero => Except.error(PsCodecDecodeError.fuelExhausted)
+  | Nat.succ fuel => match (psCodecField(value, "k")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok tagValue => match (psCodecString(tagValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok tag => if (psStringEq(tag, "a")) { Except.ok(PsName.anonymous) } else { if (psStringEq(tag, "s")) { match (psCodecField(value, "p")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok parentValue => match (psCodecField(value, "v")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok textValue => match (psDecodeCodecNameWithFuel(fuel, parentValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok parent => match (psCodecString(textValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok text => Except.ok((psNameAppendStr(parent, text)))
+}
+}
+}
+} } else { if (psStringEq(tag, "n")) { match (psCodecField(value, "p")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok parentValue => match (psCodecField(value, "v")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok textValue => match (psDecodeCodecNameWithFuel(fuel, parentValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok parent => match (psCodecString(textValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok text => match (psCodecNaturalText(text)) with {
+  | Option.none => Except.error(PsCodecDecodeError.invalidNatural)
+  | Option.some number => Except.ok((psNameAppendNum(parent, number)))
+}
+}
+}
+}
+} } else { Except.error((PsCodecDecodeError.invalidTag(tag))) } } }
+}
+}
+}
+
+def psDecodeCodecName(value : PsJsonValue) : Except(PsCodecDecodeError, PsName) := psDecodeCodecNameWithFuel(4096, value)
+
+def psDecodeCodecLevelWithFuel(fuelBudget : Nat, value : PsJsonValue) : Except(PsCodecDecodeError, PsLevel) := match fuelBudget with {
+  | Nat.zero => Except.error(PsCodecDecodeError.fuelExhausted)
+  | Nat.succ fuel => match (psCodecField(value, "k")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok tagValue => match (psCodecString(tagValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok tag => if (psStringEq(tag, "z")) { Except.ok(PsLevel.zero) } else { if (psStringEq(tag, "s")) { match (psCodecField(value, "o")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok inner => match (psDecodeCodecLevelWithFuel(fuel, inner)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok level => Except.ok((PsLevel.succ(level)))
+}
+} } else { if ((psStringEq(tag, "max") || psStringEq(tag, "imax"))) { match (psCodecField(value, "l")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok leftValue => match (psCodecField(value, "r")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok rightValue => match (psDecodeCodecLevelWithFuel(fuel, leftValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok left => match (psDecodeCodecLevelWithFuel(fuel, rightValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok right => if (psStringEq(tag, "max")) { Except.ok((PsLevel.max(left, right))) } else { Except.ok((PsLevel.imax(left, right))) }
+}
+}
+}
+} } else { if (psStringEq(tag, "p")) { match (psCodecField(value, "n")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok nameValue => match (psDecodeCodecNameWithFuel(fuel, nameValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok name => Except.ok((PsLevel.param(name)))
+}
+} } else { Except.error((PsCodecDecodeError.invalidTag(tag))) } } } }
+}
+}
+}
+
+def psDecodeCodecLevel(value : PsJsonValue) : Except(PsCodecDecodeError, PsLevel) := psDecodeCodecLevelWithFuel(4096, value)
+
+def psDecodeCodecBinder(value : PsJsonValue) : Except(PsCodecDecodeError, PsBinderInfo) := match (psCodecString(value)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok binder => if (psStringEq(binder, "default")) { Except.ok(PsBinderInfo.explicit) } else { if (psStringEq(binder, "implicit")) { Except.ok(PsBinderInfo.implicit) } else { if (psStringEq(binder, "strictImplicit")) { Except.ok(PsBinderInfo.strictImplicit) } else { if (psStringEq(binder, "instImplicit")) { Except.ok(PsBinderInfo.instanceImplicit) } else { Except.error((PsCodecDecodeError.invalidBinder(binder))) } } } }
+}
+
+def psDecodeCodecLevelsWithFuel(fuel : Nat, values : List(PsJsonValue)) : Except(PsCodecDecodeError, (List(PsLevel))) := psListMapExcept((psDecodeCodecLevelWithFuel(fuel)), values)
+
+def psDecodeCodecExprWithFuel(fuelBudget : Nat, value : PsJsonValue) : Except(PsCodecDecodeError, PsExpr) := match fuelBudget with {
+  | Nat.zero => Except.error(PsCodecDecodeError.fuelExhausted)
+  | Nat.succ fuel => match (psCodecField(value, "k")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok tagValue => match (psCodecString(tagValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok tag => if (psStringEq(tag, "b")) { match (psCodecField(value, "i")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok indexValue => match (psCodecNat(indexValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok index => Except.ok((PsExpr.bvar(index)))
+}
+} } else { if (psStringEq(tag, "sort")) { match (psCodecField(value, "l")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok levelValue => match (psDecodeCodecLevelWithFuel(fuel, levelValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok level => Except.ok((PsExpr.sortE(level)))
+}
+} } else { if (psStringEq(tag, "const")) { match (psCodecField(value, "n")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok nameValue => match (psCodecField(value, "ls")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok levelsValue => match (psDecodeCodecNameWithFuel(fuel, nameValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok name => match (psCodecArray(levelsValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok rawLevels => match (psDecodeCodecLevelsWithFuel(fuel, rawLevels)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok levels => Except.ok((PsExpr.constE(name, levels)))
+}
+}
+}
+}
+} } else { if (psStringEq(tag, "app")) { match (psCodecField(value, "f")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok fnValue => match (psCodecField(value, "a")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok argValue => match (psDecodeCodecExprWithFuel(fuel, fnValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok fn => match (psDecodeCodecExprWithFuel(fuel, argValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok arg => Except.ok((PsExpr.app(fn, arg)))
+}
+}
+}
+} } else { if ((psStringEq(tag, "lam") || psStringEq(tag, "forall"))) { match (psCodecField(value, "n")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok nameValue => match (psCodecField(value, "t")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok typeValue => match (psCodecField(value, "b")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok bodyValue => match (psCodecField(value, "bi")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok binderValue => match (psDecodeCodecNameWithFuel(fuel, nameValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok name => match (psDecodeCodecExprWithFuel(fuel, typeValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok type => match (psDecodeCodecExprWithFuel(fuel, bodyValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok body => match (psDecodeCodecBinder(binderValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok binder => if (psStringEq(tag, "lam")) { Except.ok((PsExpr.lam(name, type, body, binder))) } else { Except.ok((PsExpr.forallE(name, type, body, binder))) }
+}
+}
+}
+}
+}
+}
+}
+} } else { if (psStringEq(tag, "let")) { match (psCodecField(value, "n")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok nameValue => match (psCodecField(value, "t")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok typeValue => match (psCodecField(value, "v")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok valueValue => match (psCodecField(value, "b")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok bodyValue => match (psDecodeCodecNameWithFuel(fuel, nameValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok name => match (psDecodeCodecExprWithFuel(fuel, typeValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok type => match (psDecodeCodecExprWithFuel(fuel, valueValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok boundValue => match (psDecodeCodecExprWithFuel(fuel, bodyValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok body => Except.ok((PsExpr.letE(name, type, boundValue, body)))
+}
+}
+}
+}
+}
+}
+}
+} } else { if ((psStringEq(tag, "nat") || psStringEq(tag, "str"))) { match (psCodecField(value, "v")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok literalValue => match (psCodecString(literalValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok text => if (psStringEq(tag, "str")) { Except.ok((PsExpr.lit((PsLiteral.string(text))))) } else { match (psCodecNaturalText(text)) with {
+  | Option.none => Except.error(PsCodecDecodeError.invalidNatural)
+  | Option.some natural => Except.ok((PsExpr.lit((PsLiteral.natural(natural)))))
+} }
+}
+} } else { if (psStringEq(tag, "proj")) { match (psCodecField(value, "n")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok nameValue => match (psCodecField(value, "i")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok indexValue => match (psCodecField(value, "e")) with {
+  | Except.error error => Except.error(error)
+  | Except.ok exprValue => match (psDecodeCodecNameWithFuel(fuel, nameValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok name => match (psCodecNat(indexValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok index => match (psDecodeCodecExprWithFuel(fuel, exprValue)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok expr => Except.ok((PsExpr.proj(name, index, expr)))
+}
+}
+}
+}
+}
+} } else { Except.error((PsCodecDecodeError.invalidTag(tag))) } } } } } } } }
+}
+}
+}
+
+def psDecodeCodecExpr(value : PsJsonValue) : Except(PsCodecDecodeError, PsExpr) := psDecodeCodecExprWithFuel(4096, value)

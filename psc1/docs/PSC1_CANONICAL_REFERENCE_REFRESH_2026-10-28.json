@@ -1,0 +1,432 @@
+{
+  "schema": "psc1-canonical-reference-refresh-record/1",
+  "status": "passed",
+  "run": 40646380001,
+  "job": 122676049880,
+  "artifact": {
+    "id": 12798737842,
+    "name": "psc1-canonical-reference-refresh-0575b1a39a09c4253fd5691eec9fbc270fac6f5b",
+    "size_in_bytes": 516943,
+    "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12798737842",
+    "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12798737842/zip",
+    "expired": false,
+    "created_at": "2026-10-28T07:21:34Z",
+    "expires_at": "2027-01-26T06:51:07Z",
+    "updated_at": "2026-10-28T07:21:34Z",
+    "digest": "sha256:287a890b97e42e341a99dd934b20b8efadcd5bae636625ca375fcfb4a497c9b9",
+    "workflow_run": {
+      "id": 40646380001,
+      "repository_id": 1381609925,
+      "head_repository_id": 1381609925,
+      "head_branch": "feat/psc1-canonical-latency-20261028",
+      "head_sha": "0575b1a39a09c4253fd5691eec9fbc270fac6f5b"
+    }
+  },
+  "result": {
+    "schema": "psc1-canonical-reference-refresh/1",
+    "status": "prepared-checked-reference-refresh",
+    "baseline": "109e404586504cfe5f20352d1804d0cf0ac83310",
+    "baselineManifestSha256": "941c23fc7bd63b6168f4baea54ccdf26252761cdfa43e3a1a84eb157884c049f",
+    "preparedCommit": "0575b1a39a09c4253fd5691eec9fbc270fac6f5b",
+    "baseTree": "4ccdeca1a842276a6b4f7a8cc8d079d54a98800e",
+    "treeSha": "0cd95603f94c3cec3503b09fa5a92748f3ada8de",
+    "changedCanonicalModules": [
+      "Ps.CompilerIr.Specialize"
+    ],
+    "changedReferences": [
+      "packages/compiler-ir/src/Ps/CompilerIr/Specialize.lean"
+    ],
+    "sourceClosureDigest": "424c15ce2cf5bb87a293dd2aad1705fa801c07067c972578aa76111627d590d7",
+    "nativeProjectionProbe": {
+      "status": "passed",
+      "scope": "hybrid native compiler with only changed authored modules projected",
+      "nativeBuild": true,
+      "independentlyCheckedAfterNativeRebuild": true,
+      "helperHashes": {
+        "lexical": "886ba6d1743e4e5b13ef7297b1edb5dae002e8a0b508b3307e9b08402d2c2603",
+        "ownership": "02ea07e8e89f8afed7e3ed830be3eba9c403933c002b349b94216d1c991f1dd4",
+        "checker": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1"
+      },
+      "checkedGraphs": [
+        {
+          "group": "compiler",
+          "admissionsSha256": "0a4c1cded077208f519e1fafa4e15d809e91e92753810e64111ca672e4f3d291",
+          "originalIrSha256": "1d6f10ff3dcca1bbde7e952ef17702f0ae9ad715b65528f4236efae7d63e76b5",
+          "canonicalChecker": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.35.0",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "profile": "lean4.35-core",
+            "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+            "accepted": true
+          },
+          "bootstrapChecker": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.35.0",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "profile": "lean4.35-core",
+            "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+            "accepted": true
+          },
+          "canonicalMetrics": {
+            "elapsedMs": 122117,
+            "maxRssKiB": 388916,
+            "peakTreeRssKiB": 388788,
+            "timeoutMs": 240000,
+            "graphFilesProfile": "canonical-repository-40m",
+            "graphFilesBytesLimit": 41943040,
+            "admissionsBytes": 34431244,
+            "originalIrBytes": 10029216
+          },
+          "bootstrapMetrics": {
+            "elapsedMs": 120547,
+            "maxRssKiB": 386700,
+            "peakTreeRssKiB": 386700,
+            "timeoutMs": 240000,
+            "graphFilesProfile": "canonical-repository-40m",
+            "graphFilesBytesLimit": 41943040,
+            "admissionsBytes": 34431244,
+            "originalIrBytes": 10029216
+          }
+        },
+        {
+          "group": "library",
+          "admissionsSha256": "3d731ffb8d828657b37bcc1e19a28852ff17be401429d1e43ef8622129e1bf81",
+          "originalIrSha256": "c44535e3bf9d596a7f593536193a0ba3b94fbbde73ad4ffc0dec59729e9ef2be",
+          "canonicalChecker": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.35.0",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "profile": "lean4.35-core",
+            "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+            "accepted": true
+          },
+          "bootstrapChecker": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.35.0",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "profile": "lean4.35-core",
+            "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+            "accepted": true
+          },
+          "canonicalMetrics": {
+            "elapsedMs": 307,
+            "maxRssKiB": 101904,
+            "peakTreeRssKiB": 101904,
+            "timeoutMs": 240000
+          },
+          "bootstrapMetrics": {
+            "elapsedMs": 398,
+            "maxRssKiB": 102492,
+            "peakTreeRssKiB": 102492,
+            "timeoutMs": 240000
+          }
+        }
+      ],
+      "changedReferences": [
+        {
+          "module": "Ps.CompilerIr.Specialize",
+          "path": "packages/compiler-ir/src/Ps/CompilerIr/Specialize.lean",
+          "beforeSha256": "d686403b8749c65ae5770bfb50fefb8a1bd7bb7bef827adc05f50ab6a7b0b53d",
+          "afterSha256": "1fad41896864a01363843e0c017a926410eb9b10a49c9ad995025911494b2ee7"
+        }
+      ],
+      "untouchedCompilerReferences": 150,
+      "referenceFilesPromoted": false
+    },
+    "workingReferencesChanged": false,
+    "commitsCreated": false,
+    "refsChanged": false,
+    "objectUploadStatus": "complete",
+    "entries": [
+      {
+        "path": "psc1/packages/compiler-ir/src/Ps/CompilerIr/Specialize.ps",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "b57427b2b8ec471c91472d6a30570b7db8950c02",
+        "bytes": 60198,
+        "sha256": "74fb1bb1c8f9beef611300e06fff3010121ed2589e828b7102f539217a09ad93"
+      },
+      {
+        "path": "psc1/packages/compiler-ir/src/Ps/CompilerIr/Specialize.lean",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "da0e232d405a4e1d8544ca80cfcd1a78d55ffd92",
+        "bytes": 59344,
+        "sha256": "1fad41896864a01363843e0c017a926410eb9b10a49c9ad995025911494b2ee7"
+      },
+      {
+        "path": "psc1/CANONICAL_SOURCES.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "e5d42ff35436957462aed1e8184d95b9e3a1bde0",
+        "bytes": 152310,
+        "sha256": "7042d360216751f8736ec9188285e1300ae65508b97b3895fd99d7dad52b9d96"
+      },
+      {
+        "path": "psc1/compiler.project.json",
+        "mode": "100644",
+        "type": "blob",
+        "sha": "d2a32bf1dc6895d45df8e3d4ef62570c71669a95",
+        "bytes": 14626,
+        "sha256": "36bedf25da22e5b65b3318ea972efe2a069160ba826fbb001e27cbfb9775b58e"
+      }
+    ],
+    "preparedFiles": {
+      "path": "prepared-files.json",
+      "bytes": 304062,
+      "sha256": "5c25909db8b68626f2ec2c0f02dbc677115c32f12fa6a7256b82e7f5c1038577"
+    }
+  },
+  "currentUnified": {
+    "entryModule": "Ps.CompilerUnified.Service",
+    "modules": 125,
+    "sourceClosureDigest": "424c15ce2cf5bb87a293dd2aad1705fa801c07067c972578aa76111627d590d7",
+    "exactQualifiedProofScriptBytesRetained": false
+  },
+  "correspondence": {
+    "status": "passed",
+    "assurance": "ordinary-checked",
+    "modules": 151,
+    "bootstrapSourceClosureDigest": "66159fc7801f8c405710823372cb6081e59c482e46a49bd4c65ecd4f46a9f855",
+    "canonicalSourceClosureDigest": "3db5588a9ff7fe1d7bdfa8aea80993e62e7a5efadc7d30137805e2c590b82b5c",
+    "admissionsSha256": "0a4c1cded077208f519e1fafa4e15d809e91e92753810e64111ca672e4f3d291",
+    "originalIrSha256": "1d6f10ff3dcca1bbde7e952ef17702f0ae9ad715b65528f4236efae7d63e76b5",
+    "sourceCoreDeclarations": 5496,
+    "partialNamesPreserved": true,
+    "importsAndMemberOwnershipPreserved": true,
+    "bootstrapChecker": {
+      "protocol": "pskernel-lean/1",
+      "provider": "lean4-cpp",
+      "leanVersion": "4.35.0",
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "profile": "lean4.35-core",
+      "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+      "accepted": true
+    },
+    "canonicalChecker": {
+      "protocol": "pskernel-lean/1",
+      "provider": "lean4-cpp",
+      "leanVersion": "4.35.0",
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "profile": "lean4.35-core",
+      "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+      "accepted": true
+    },
+    "helperHashes": {
+      "lexical": "886ba6d1743e4e5b13ef7297b1edb5dae002e8a0b508b3307e9b08402d2c2603",
+      "ownership": "02ea07e8e89f8afed7e3ed830be3eba9c403933c002b349b94216d1c991f1dd4",
+      "checker": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1"
+    },
+    "reverseProjection": {
+      "admissionsSha256": "0a4c1cded077208f519e1fafa4e15d809e91e92753810e64111ca672e4f3d291",
+      "originalIrSha256": "1d6f10ff3dcca1bbde7e952ef17702f0ae9ad715b65528f4236efae7d63e76b5",
+      "nativePatternProjection": {
+        "schema": "psc1-native-reference-projection/1",
+        "status": "candidate-only",
+        "script": "scripts/NativeReferenceProjection.lean",
+        "scriptSha256": "4862465c9d605748f912338c362d0c214a49a4e7d6cbe3a8ce0941c87412caf8",
+        "requestSha256": "4519469092964fc2602a7cbc193706bde4b0519cf0ebe1dde572712c64380f65",
+        "responseSha256": "1500e152991cef86121c962c9cd59f00a7b9813ef1ae2ad7c6f4d50f2972b779",
+        "elapsedMs": 2172,
+        "modules": [
+          {
+            "module": "Ps.CompilerIr.Specialize",
+            "inputBytes": 59344,
+            "inputSha256": "1fad41896864a01363843e0c017a926410eb9b10a49c9ad995025911494b2ee7",
+            "outputBytes": 59344,
+            "outputSha256": "1fad41896864a01363843e0c017a926410eb9b10a49c9ad995025911494b2ee7",
+            "constructorDots": [],
+            "reparsed": true,
+            "idempotent": true,
+            "allOriginalBytesPreserved": true
+          }
+        ],
+        "admissionAuthority": false,
+        "sourceFilesWritten": false,
+        "formalSourcePreservationProof": false
+      }
+    },
+    "commentPolicy": "changed references derive from canonical PS with raw comments retained; untouched reference bytes are preserved",
+    "formalSourcePreservationProof": false,
+    "receiptGrantsAdmissionAuthority": false,
+    "nativeProjectionProbe": {
+      "status": "passed",
+      "scope": "hybrid native compiler with only changed authored modules projected",
+      "nativeBuild": true,
+      "independentlyCheckedAfterNativeRebuild": true,
+      "helperHashes": {
+        "lexical": "886ba6d1743e4e5b13ef7297b1edb5dae002e8a0b508b3307e9b08402d2c2603",
+        "ownership": "02ea07e8e89f8afed7e3ed830be3eba9c403933c002b349b94216d1c991f1dd4",
+        "checker": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1"
+      },
+      "checkedGraphs": [
+        {
+          "group": "compiler",
+          "admissionsSha256": "0a4c1cded077208f519e1fafa4e15d809e91e92753810e64111ca672e4f3d291",
+          "originalIrSha256": "1d6f10ff3dcca1bbde7e952ef17702f0ae9ad715b65528f4236efae7d63e76b5",
+          "canonicalChecker": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.35.0",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "profile": "lean4.35-core",
+            "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+            "accepted": true
+          },
+          "bootstrapChecker": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.35.0",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "profile": "lean4.35-core",
+            "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+            "accepted": true
+          },
+          "canonicalMetrics": {
+            "elapsedMs": 122117,
+            "maxRssKiB": 388916,
+            "peakTreeRssKiB": 388788,
+            "timeoutMs": 240000,
+            "graphFilesProfile": "canonical-repository-40m",
+            "graphFilesBytesLimit": 41943040,
+            "admissionsBytes": 34431244,
+            "originalIrBytes": 10029216
+          },
+          "bootstrapMetrics": {
+            "elapsedMs": 120547,
+            "maxRssKiB": 386700,
+            "peakTreeRssKiB": 386700,
+            "timeoutMs": 240000,
+            "graphFilesProfile": "canonical-repository-40m",
+            "graphFilesBytesLimit": 41943040,
+            "admissionsBytes": 34431244,
+            "originalIrBytes": 10029216
+          }
+        },
+        {
+          "group": "library",
+          "admissionsSha256": "3d731ffb8d828657b37bcc1e19a28852ff17be401429d1e43ef8622129e1bf81",
+          "originalIrSha256": "c44535e3bf9d596a7f593536193a0ba3b94fbbde73ad4ffc0dec59729e9ef2be",
+          "canonicalChecker": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.35.0",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "profile": "lean4.35-core",
+            "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+            "accepted": true
+          },
+          "bootstrapChecker": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.35.0",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "profile": "lean4.35-core",
+            "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+            "accepted": true
+          },
+          "canonicalMetrics": {
+            "elapsedMs": 307,
+            "maxRssKiB": 101904,
+            "peakTreeRssKiB": 101904,
+            "timeoutMs": 240000
+          },
+          "bootstrapMetrics": {
+            "elapsedMs": 398,
+            "maxRssKiB": 102492,
+            "peakTreeRssKiB": 102492,
+            "timeoutMs": 240000
+          }
+        }
+      ],
+      "changedReferences": [
+        {
+          "module": "Ps.CompilerIr.Specialize",
+          "path": "packages/compiler-ir/src/Ps/CompilerIr/Specialize.lean",
+          "beforeSha256": "d686403b8749c65ae5770bfb50fefb8a1bd7bb7bef827adc05f50ab6a7b0b53d",
+          "afterSha256": "1fad41896864a01363843e0c017a926410eb9b10a49c9ad995025911494b2ee7"
+        }
+      ],
+      "untouchedCompilerReferences": 150,
+      "referenceFilesPromoted": false
+    },
+    "elapsedMs": 1766002
+  },
+  "libraryCorrespondence": {
+    "status": "passed",
+    "assurance": "ordinary-checked",
+    "modules": 13,
+    "bootstrapSourceClosureDigest": "d464ca3b187004c2b1b97400b850543537a4d3ce9a9e22c3796d69d40ca50099",
+    "canonicalSourceClosureDigest": "22af16cf564281964ce4f134798bad98966ca85240f20926038f30dac503fe39",
+    "admissionsSha256": "3d731ffb8d828657b37bcc1e19a28852ff17be401429d1e43ef8622129e1bf81",
+    "originalIrSha256": "c44535e3bf9d596a7f593536193a0ba3b94fbbde73ad4ffc0dec59729e9ef2be",
+    "sourceCoreDeclarations": 237,
+    "partialNamesPreserved": true,
+    "importsAndMemberOwnershipPreserved": true,
+    "bootstrapChecker": {
+      "protocol": "pskernel-lean/1",
+      "provider": "lean4-cpp",
+      "leanVersion": "4.35.0",
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "profile": "lean4.35-core",
+      "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+      "accepted": true
+    },
+    "canonicalChecker": {
+      "protocol": "pskernel-lean/1",
+      "provider": "lean4-cpp",
+      "leanVersion": "4.35.0",
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "profile": "lean4.35-core",
+      "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+      "accepted": true
+    },
+    "helperHashes": {
+      "lexical": "886ba6d1743e4e5b13ef7297b1edb5dae002e8a0b508b3307e9b08402d2c2603",
+      "ownership": "02ea07e8e89f8afed7e3ed830be3eba9c403933c002b349b94216d1c991f1dd4",
+      "checker": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1"
+    },
+    "reverseProjection": {
+      "admissionsSha256": "3d731ffb8d828657b37bcc1e19a28852ff17be401429d1e43ef8622129e1bf81",
+      "originalIrSha256": "c44535e3bf9d596a7f593536193a0ba3b94fbbde73ad4ffc0dec59729e9ef2be",
+      "nativePatternProjection": null
+    },
+    "commentPolicy": "changed references derive from canonical PS with raw comments retained; untouched reference bytes are preserved",
+    "formalSourcePreservationProof": false,
+    "receiptGrantsAdmissionAuthority": false,
+    "auditRoot": {
+      "module": "ProofScript.Canonical.Library",
+      "imports": [
+        "ProofScript.Data.Prod",
+        "ProofScript.Data.Option",
+        "ProofScript.Data.Result",
+        "ProofScript.Compiler.Effect",
+        "ProofScript.Data.Ordering",
+        "ProofScript.Data.Json",
+        "ProofScript.Compiler.KernelProtocol",
+        "ProofScript.Data.Array",
+        "ProofScript.Data.Except",
+        "ProofScript.Data.List",
+        "ProofScript.Data.Map",
+        "ProofScript.Data.Set",
+        "ProofScript.System.IO"
+      ],
+      "authored": false,
+      "sha256": "069d9aa4a1477a8245e2bfc2d81eea3589be232918d739c75eef36fc84284bea"
+    },
+    "initialPsVariant": {
+      "path": "stdlib/ProofScript/System/IO.ps",
+      "bytes": 5820,
+      "sha256": "54dde9210eaece347e5ff96396eb7168255ff999961be16664132b7bdfc7b601",
+      "retainedCanonicalBytes": true,
+      "sameAdmissionsAndOriginalIr": true
+    }
+  },
+  "interpretation": "Only the authored TypeKey optimization and its freshly checked native reference are integrated; all untouched references remain byte-identical. The current unified source bytes exactly match the measured O2 qualification.",
+  "receiptGrantsAdmissionAuthority": false
+}

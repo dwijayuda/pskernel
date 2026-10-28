@@ -2,7 +2,16 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import {readCanonicalOwnership,readCanonicalCompilerSources} from './canonical-sources.mjs';
+export {readCanonicalCompilerSources} from './canonical-sources.mjs';
+// Legacy native/bootstrap consumers explicitly read immutable Lean references.
+// Canonical standalone development uses readCanonicalCompilerSources instead.
 export function readOwnedCompilerSources(entry) {
+if(fs.existsSync('CANONICAL_SOURCES.json')){
+ const ownership=readCanonicalOwnership();
+ if(ownership.modules.has(entry))return readCanonicalCompilerSources(entry,{grammar:'lean-bootstrap'});
+}
+
 const lake=fs.readFileSync('lakefile.lean','utf8'),index=new Map();
 for(const match of lake.matchAll(/lean_lib\s+(\w+)\s+where\n([\s\S]*?)(?=\n(?:lean_|@)|$)/g)){
  const dir=match[2].match(/srcDir\s*:=\s*"([^"]+)"/)?.[1];if(!dir)continue;

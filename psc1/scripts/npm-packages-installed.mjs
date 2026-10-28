@@ -142,6 +142,8 @@ record('all-advertised-exports-import',{exports:exports.count});
    "assert.equal(root.compile,compiler.compile);assert.equal(root.compile,syntax.compile);",
    "assert.equal(root.getCompilerMetadata,compiler.getCompilerMetadata);",
    "const sources=foundation.readSources();assert.ok(sources.length>=5);assert.ok(sources.some(s=>s.module==='Ps.Foundation.Name'));",
+   "assert.equal(foundation.sourcePackage.canonicalGrammar,'ps');assert.ok(sources.every(s=>s.kind==='ps'&&s.role==='canonical-editable-proofscript'));",
+   "assert.ok(foundation.readSources({kind:'lean'}).every(s=>s.role==='immutable-checked-bootstrap-reference'));",
    "assert.equal(foundation.sourcePackage.internalRuntimeApi,false);",
    "assert.equal('psNameAppendStr' in foundation,false);",
    "console.log(JSON.stringify({sourceModules:sources.length,version:root.getCompilerMetadata().version}));"
@@ -253,17 +255,39 @@ record('all-advertised-exports-import',{exports:exports.count});
   const response=JSON.parse(script(cwd,'more-targets.mjs',"import{compile}from '"+selectedPackage+"';const r=compile(JSON.parse(process.argv[2]));if(r.logicalAdmission!=='accepted')throw Error('unchecked');console.log(JSON.stringify({target:r.target,source:r.source}));",[JSON.stringify(options)]));
   assert.equal(response.target,target);assert.ok(response.source.length>0);record('checked-installed-target-'+target);
  }
- // Compile actual source snapshots from a separately installed existing package.
- const foundationCode=[
+ // Exercise the canonical default and the explicit checked Lean reference variant.
+ const foundationConsumers=[
+  {name:'existing-source-package-compiles-through-shared-compiler',kind:'ps',reader:'readSources()',
+   entry:'const answer : String := psNameToString(psNameAppendStr(PsName.anonymous, "café"))\n'},
+  {name:'explicit-lean-source-package-compiles-through-shared-compiler',kind:'lean',reader:"readSources({kind:'lean'})",
+   entry:'def answer : String := psNameToString (psNameAppendStr PsName.anonymous "café")\n'}
+ ];
+ for(const consumer of foundationConsumers){
+  const foundationCode=[
+   "import assert from 'node:assert/strict';",
+   "import{readSources}from '@proofscript/foundation';import{compile}from '@proofscript/compiler';",
+   'const sources=[...'+consumer.reader+'];',
+   'assert.ok(sources.length>0);assert.ok(sources.every(s=>s.kind==='+JSON.stringify(consumer.kind)+'));',
+   "const text=sources.map(s=>'import '+s.module).join('\\n')+'\\n'+"+JSON.stringify(consumer.entry)+';',
+   "sources.push({module:'Entry',kind:"+JSON.stringify(consumer.kind)+",text});const r=compile({sources,entryModule:'Entry'});",
+   "if(r.logicalAdmission!=='accepted')throw Error('unchecked');console.log(JSON.stringify(r.source));"
+  ].join('\n');
+  const foundationOutput=JSON.parse(script(cwd,'source-package-'+consumer.kind+'.mjs',foundationCode));
+  const outputName='foundation-output-'+consumer.kind+'.mjs';
+  fs.writeFileSync(path.join(cwd,outputName),foundationOutput);
+  script(cwd,'foundation-observe-'+consumer.kind+'.mjs',
+   'import{answer}from '+JSON.stringify('./'+outputName)+";if(answer!=='café')throw Error('source package output');");
+  record(consumer.name,{grammar:consumer.kind});
+ }
+ const mixedGrammarCode=[
+  "import assert from 'node:assert/strict';",
   "import{readSources}from '@proofscript/foundation';import{compile}from '@proofscript/compiler';",
-  "const sources=[...readSources()];const text=sources.map(s=>'import '+s.module).join('\\n')+'\\ndef answer : String := psNameToString (psNameAppendStr PsName.anonymous \"café\")\\n';",
-  "sources.push({module:'Entry',kind:'lean',text});const r=compile({sources,entryModule:'Entry'});",
-  "if(r.logicalAdmission!=='accepted')throw Error('unchecked');console.log(JSON.stringify(r.source));"
+  "const sources=[...readSources()];assert.ok(sources.length>0&&sources.every(s=>s.kind==='ps'));",
+  "sources.push({module:'Entry',kind:'lean',text:'def answer : Nat := 42'});",
+  "assert.throws(()=>compile({sources,entryModule:'Entry'}),{message:'PSC1_SERVICE_CAPTURE_INVALID'});"
  ].join('\n');
- const foundationOutput=JSON.parse(script(cwd,'source-package.mjs',foundationCode));
- fs.writeFileSync(path.join(cwd,'foundation-output.mjs'),foundationOutput);
- script(cwd,'foundation-observe.mjs',"import{answer}from './foundation-output.mjs';if(answer!=='café')throw Error('source package output');");
- record('existing-source-package-compiles-through-shared-compiler');
+ script(cwd,'mixed-source-grammars.mjs',mixedGrammarCode);
+ record('mixed-source-grammars-refused');
 
 
  const mismatch=call(process.execPath,['--input-type=module','--eval',
@@ -276,7 +300,7 @@ record('all-advertised-exports-import',{exports:exports.count});
   assert.equal(script(cwd,'refuse.mjs',code,[JSON.stringify(options)]).trim(),'refused');record('semantic-refusal-'+fixture.id);
  }
  // Source integrity is data integrity; it does not confer proof-admission authority.
- const source=path.join(nodes,'@proofscript/foundation/src/Ps/Foundation/Name.lean'),before=fs.readFileSync(source);
+ const source=path.join(nodes,'@proofscript/foundation/src/Ps/Foundation/Name.ps'),before=fs.readFileSync(source);
  try{fs.appendFileSync(source,'\n-- changed\n');
   const r=call(process.execPath,['--input-type=module','--eval',"import{readSources}from '@proofscript/foundation';readSources();"],cwd);
   assert.notEqual(r.status,0);assert.match(r.stderr,/PSC1_PACKAGE_SOURCE_IDENTITY/);

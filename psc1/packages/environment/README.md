@@ -1,6 +1,6 @@
 # environment
 
-Prelude, declarations, lookup and name resolution. Start at [src/Ps/Environment/Resolve.lean](src/Ps/Environment/Resolve.lean).
+Prelude, declarations, lookup and name resolution. Start at [src/Ps/Environment/Resolve.ps](src/Ps/Environment/Resolve.ps).
 
 - Representation: Core declarations/names → bounded semantic environment.
 - Boundary: Shared semantics; no target-specific language behavior.

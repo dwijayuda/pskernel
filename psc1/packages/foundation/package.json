@@ -45,15 +45,27 @@
     "implementationOwner": "@proofscript/compiler",
     "internalCompilerModules": false,
     "packageKind": "source-only",
-    "canonicalSources": "src",
+    "canonicalSources": "src/**/*.ps",
     "sourceVariants": [
+      "ps",
       "lean"
     ],
     "publishingRequiresQualification": true,
     "compilerInputGrammars": [
       "lean",
       "ps"
-    ]
+    ],
+    "canonicalGrammar": "ps",
+    "sourceOwnership": {
+      "role": "canonical-editable-proofscript",
+      "manifest": "dist/source-manifest.json",
+      "repositoryManifest": "psc1/CANONICAL_SOURCES.json"
+    },
+    "bootstrapReferences": {
+      "grammar": "lean",
+      "role": "immutable-checked-bootstrap-reference",
+      "manifest": "dist/source-manifest.json"
+    }
   },
   "scripts": {
     "build": "node ../../scripts/build-packages.mjs build --package foundation",

@@ -13,8 +13,11 @@ from immutable evidence; dated records remain preserved.
 
 | Question | Read |
 | --- | --- |
-| How do I use the qualified project-oriented CLI? | [CLI guide](./guides/cli.md), [workflow research](./development/typescript-workflows.md) |
-| How do the existing npm packages build, install and import? | [Simple npm package guide](./guides/npm-packages.md), [finite contract](../NPM_PACKAGE_CONTRACT.json), [current .13 umbrella qualification](./PSC1_NPM_UMBRELLA_QUALIFICATION_2026-10-27.json), [prior .12 evidence](./PSC1_SIMPLE_NPM_PACKAGE_QUALIFICATION_2026-10-27.json) |
+| Which compiler source should I edit, and how are bootstrap references refreshed? | [Canonical ownership and maintenance](./CANONICAL_SOURCE_OWNERSHIP.md), [owner manifest](../CANONICAL_SOURCES.json), [repository inventory](../../SOURCE_OWNERSHIP.json) |
+| How do I install and rebuild the compiler without a separate SDK? | [Standalone installation](../standalone/README.md), [design and measured results](./PSC1_INDEPENDENT_DEVELOPMENT.md), [qualified environments](./PSC1_INDEPENDENT_ENVIRONMENTS_QUALIFICATION_2026-10-28.json) |
+| What measured change improved rebuild latency? | [TypeKey qualification](./PSC1_TYPE_KEY_LATENCY_QUALIFICATION_2026-10-28.json), [raw profile interpretation](./PSC1_REBUILD_PROFILE_2026-10-28.json) |
+| How do I use the qualified project-oriented CLI? | [CLI guide](./guides/cli.md), [Linux CLI/runtime qualification](./PSC1_CLI_COMPATIBILITY_QUALIFICATION_2026-10-28.json), [workflow research](./development/typescript-workflows.md) |
+| How do the existing npm packages build, install and import? | [Simple npm package guide](./guides/npm-packages.md), [finite contract](../NPM_PACKAGE_CONTRACT.json), [current source/package qualification](./PSC1_CANONICAL_INTEGRATION_QUALIFICATION_2026-10-28.json), [original .13 umbrella qualification](./PSC1_NPM_UMBRELLA_QUALIFICATION_2026-10-27.json), [prior .12 evidence](./PSC1_SIMPLE_NPM_PACKAGE_QUALIFICATION_2026-10-27.json) |
 | How do I install/use the current slim toolchain? | [Slim package guide](./PSC1_SLIM_UNIVERSAL_PACKAGE.md) |
 | How do checked component/Python/PHP outputs work? | [Dispatch architecture](./PSC1_CHECKED_DISPATCH.md), [exact receipt](./PSC1_CHECKED_DISPATCH_QUALIFICATION_2026-10-26.json), [install](./PSC1_CHECKED_DISPATCH_INSTALL.md) |
 | How do checked targets and transactions work? | [Guide](./PSC1_CHECKED_PUBLICATION.md), [receipt](./PSC1_CHECKED_PUBLICATION_QUALIFICATION_2026-10-26.json), [install](./PSC1_CHECKED_PUBLICATION_INSTALL.md) |
@@ -41,6 +44,14 @@ results to exact source/artifact identities. Work state and this index point to
 those authorities; they do not create qualification.
 
 ## Exact existing qualification
+
+- [Canonical PS, changed-compiler and environment integration](./PSC1_CANONICAL_INTEGRATION_QUALIFICATION_2026-10-28.json):
+  164 canonical owners, exhaustive 275-file repository classification, checked
+  source/reference transition, real PS/Lean package consumers, and retained broader
+  source/CLI gates. [Complete environment evidence](./PSC1_INDEPENDENT_ENVIRONMENTS_QUALIFICATION_2026-10-28.json)
+  qualifies Ubuntu 24.04 x64, Ubuntu 22.04 x64 and Ubuntu 24.04 ARM64 through
+  fresh admission, strict IR, full B1/B2 and C1/C2 rebuilds, 54 frontend/compiler
+  observations and actual publication/refusal checks.
 
 - [Project CLI and npm toolchain](./PSC1_CLI_QUALIFICATION_2026-10-26.json):
   qualified .8 host with all original kernel/dispatch/publication/application/type

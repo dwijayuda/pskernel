@@ -1,0 +1,168 @@
+import Ps.BackendWasm.Model
+import Ps.Bridge.Json
+import Ps.Foundation.List
+
+inductive PsWasmIrEncodeError where {
+  | unsupportedInstruction
+}
+
+def psWasmIrEncodeValues(values : List((Except(PsWasmIrEncodeError, String)))) : Except(PsWasmIrEncodeError, String) := let unwrap : (_ : Except(PsWasmIrEncodeError, String)) -> Except(PsWasmIrEncodeError, String) := (fun (value : Except(PsWasmIrEncodeError, String)) => value)
+match (psListMapExcept(unwrap, values)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok encoded => Except.ok((psJsonArray(encoded)))
+}
+
+def psWasmIrEncodeNode(tag : String, values : List((Except(PsWasmIrEncodeError, String)))) : Except(PsWasmIrEncodeError, String) := psWasmIrEncodeValues((List.cons((Except.ok((psJsonQuote(tag)))), values)))
+
+def psWasmIrEncodeText(value : String) : Except(PsWasmIrEncodeError, String) := Except.ok((psJsonQuote(value)))
+
+def psWasmIrEncodeNat(value : Nat) : Except(PsWasmIrEncodeError, String) := psWasmIrEncodeText((Int.repr((Int.ofNat(value)))))
+
+def psWasmIrEncodeInt(value : Int) : Except(PsWasmIrEncodeError, String) := psWasmIrEncodeText((Int.repr(value)))
+
+def psWasmIrEncodeBool(value : Bool) : Except(PsWasmIrEncodeError, String) := if (value) { Except.ok("true") } else { Except.ok("false") }
+
+def psWasmIrEncodeOptionText(value : Option(String)) : Except(PsWasmIrEncodeError, String) := match value with {
+  | Option.none => psWasmIrEncodeNode("none", List.nil)
+  | Option.some text => psWasmIrEncodeNode("some", (_root_.List.cons((psWasmIrEncodeText(text)), _root_.List.nil)))
+}
+
+def psWasmIrEncodeValueType(value : PsWasmValueType) : Except(PsWasmIrEncodeError, String) := match value with {
+  | PsWasmValueType.i32 => psWasmIrEncodeNode("i32", List.nil)
+  | PsWasmValueType.i64 => psWasmIrEncodeNode("i64", List.nil)
+  | PsWasmValueType.f32 => psWasmIrEncodeNode("f32", List.nil)
+  | PsWasmValueType.f64 => psWasmIrEncodeNode("f64", List.nil)
+  | PsWasmValueType.refT name => psWasmIrEncodeNode("ref", (_root_.List.cons((psWasmIrEncodeText(name)), _root_.List.nil)))
+  | PsWasmValueType.funcRef => psWasmIrEncodeNode("funcRef", List.nil)
+  | PsWasmValueType.noValue => psWasmIrEncodeNode("noValue", List.nil)
+}
+
+def psWasmIrEncodeStorageType(value : PsWasmStorageType) : Except(PsWasmIrEncodeError, String) := match value with {
+  | PsWasmStorageType.value type => psWasmIrEncodeNode("value", (_root_.List.cons((psWasmIrEncodeValueType(type)), _root_.List.nil)))
+  | PsWasmStorageType.packedI8 => psWasmIrEncodeNode("packedI8", List.nil)
+  | PsWasmStorageType.packedI16 => psWasmIrEncodeNode("packedI16", List.nil)
+}
+
+def psWasmIrEncodeInstruction(value : PsWasmInstruction) : Except(PsWasmIrEncodeError, String) := match value with {
+  | PsWasmInstruction.i32Load offset => psWasmIrEncodeNode("i32Load", (_root_.List.cons((psWasmIrEncodeNat(offset)), _root_.List.nil)))
+  | PsWasmInstruction.i32Store offset => psWasmIrEncodeNode("i32Store", (_root_.List.cons((psWasmIrEncodeNat(offset)), _root_.List.nil)))
+  | PsWasmInstruction.i32Load8U => psWasmIrEncodeNode("i32Load8U", _root_.List.nil)
+  | PsWasmInstruction.i32Store8 => psWasmIrEncodeNode("i32Store8", _root_.List.nil)
+  | PsWasmInstruction.abiHeapGet => psWasmIrEncodeNode("abiHeapGet", _root_.List.nil)
+  | PsWasmInstruction.abiHeapSet => psWasmIrEncodeNode("abiHeapSet", _root_.List.nil)
+  | PsWasmInstruction.abiBusyGet => psWasmIrEncodeNode("abiBusyGet", _root_.List.nil)
+  | PsWasmInstruction.abiBusySet => psWasmIrEncodeNode("abiBusySet", _root_.List.nil)
+  | PsWasmInstruction.localGet index => psWasmIrEncodeNode("localGet", (_root_.List.cons((psWasmIrEncodeNat(index)), _root_.List.nil)))
+  | PsWasmInstruction.localSet index => psWasmIrEncodeNode("localSet", (_root_.List.cons((psWasmIrEncodeNat(index)), _root_.List.nil)))
+  | PsWasmInstruction.drop => psWasmIrEncodeNode("drop", List.nil)
+  | PsWasmInstruction.unreachable => psWasmIrEncodeNode("unreachable", List.nil)
+  | PsWasmInstruction.call name => psWasmIrEncodeNode("call", (_root_.List.cons((psWasmIrEncodeText(name)), _root_.List.nil)))
+  | PsWasmInstruction.returnCall name => psWasmIrEncodeNode("returnCall", (_root_.List.cons((psWasmIrEncodeText(name)), _root_.List.nil)))
+  | PsWasmInstruction.return_ => psWasmIrEncodeNode("return", List.nil)
+  | PsWasmInstruction.ifStart result => match result with {
+  | Option.none => psWasmIrEncodeNode("ifStart", (_root_.List.cons((psWasmIrEncodeNode("none", List.nil)), _root_.List.nil)))
+  | Option.some type => psWasmIrEncodeNode("ifStart", (_root_.List.cons((psWasmIrEncodeNode("some", (_root_.List.cons((psWasmIrEncodeValueType(type)), _root_.List.nil)))), _root_.List.nil)))
+}
+  | PsWasmInstruction.else_ => psWasmIrEncodeNode("else", List.nil)
+  | PsWasmInstruction.end_ => psWasmIrEncodeNode("end", List.nil)
+  | PsWasmInstruction.i32Const integer => psWasmIrEncodeNode("i32Const", (_root_.List.cons((psWasmIrEncodeInt(integer)), _root_.List.nil)))
+  | PsWasmInstruction.i64Const integer => psWasmIrEncodeNode("i64Const", (_root_.List.cons((psWasmIrEncodeInt(integer)), _root_.List.nil)))
+  | PsWasmInstruction.f32ConstBits _ => Except.error(PsWasmIrEncodeError.unsupportedInstruction)
+  | PsWasmInstruction.f64ConstBits _ => Except.error(PsWasmIrEncodeError.unsupportedInstruction)
+  | PsWasmInstruction.i32Add => psWasmIrEncodeNode("i32Add", List.nil)
+  | PsWasmInstruction.i32Sub => psWasmIrEncodeNode("i32Sub", List.nil)
+  | PsWasmInstruction.i32Mul => psWasmIrEncodeNode("i32Mul", List.nil)
+  | PsWasmInstruction.i32And => psWasmIrEncodeNode("i32And", List.nil)
+  | PsWasmInstruction.i32Or => psWasmIrEncodeNode("i32Or", List.nil)
+  | PsWasmInstruction.i32Xor => psWasmIrEncodeNode("i32Xor", List.nil)
+  | PsWasmInstruction.i32ShrU => psWasmIrEncodeNode("i32ShrU", List.nil)
+  | PsWasmInstruction.i32Extend8S => psWasmIrEncodeNode("i32Extend8S", List.nil)
+  | PsWasmInstruction.i32Extend16S => psWasmIrEncodeNode("i32Extend16S", List.nil)
+  | PsWasmInstruction.i32Eq => psWasmIrEncodeNode("i32Eq", List.nil)
+  | PsWasmInstruction.i32Ne => psWasmIrEncodeNode("i32Ne", List.nil)
+  | PsWasmInstruction.i32LtS => psWasmIrEncodeNode("i32LtS", List.nil)
+  | PsWasmInstruction.i32LtU => psWasmIrEncodeNode("i32LtU", List.nil)
+  | PsWasmInstruction.i32LeS => psWasmIrEncodeNode("i32LeS", List.nil)
+  | PsWasmInstruction.i32LeU => psWasmIrEncodeNode("i32LeU", List.nil)
+  | PsWasmInstruction.i32GtS => psWasmIrEncodeNode("i32GtS", List.nil)
+  | PsWasmInstruction.i32GtU => psWasmIrEncodeNode("i32GtU", List.nil)
+  | PsWasmInstruction.i32GeS => psWasmIrEncodeNode("i32GeS", List.nil)
+  | PsWasmInstruction.i32GeU => psWasmIrEncodeNode("i32GeU", List.nil)
+  | PsWasmInstruction.i64Add => psWasmIrEncodeNode("i64Add", List.nil)
+  | PsWasmInstruction.i64Sub => psWasmIrEncodeNode("i64Sub", List.nil)
+  | PsWasmInstruction.i64Mul => psWasmIrEncodeNode("i64Mul", List.nil)
+  | PsWasmInstruction.i64And => psWasmIrEncodeNode("i64And", List.nil)
+  | PsWasmInstruction.i64Or => psWasmIrEncodeNode("i64Or", List.nil)
+  | PsWasmInstruction.i64Xor => psWasmIrEncodeNode("i64Xor", List.nil)
+  | PsWasmInstruction.i64Eq => psWasmIrEncodeNode("i64Eq", List.nil)
+  | PsWasmInstruction.i64Ne => psWasmIrEncodeNode("i64Ne", List.nil)
+  | PsWasmInstruction.i64LtS => psWasmIrEncodeNode("i64LtS", List.nil)
+  | PsWasmInstruction.i64LtU => psWasmIrEncodeNode("i64LtU", List.nil)
+  | PsWasmInstruction.i64LeS => psWasmIrEncodeNode("i64LeS", List.nil)
+  | PsWasmInstruction.i64LeU => psWasmIrEncodeNode("i64LeU", List.nil)
+  | PsWasmInstruction.i64GtS => psWasmIrEncodeNode("i64GtS", List.nil)
+  | PsWasmInstruction.i64GtU => psWasmIrEncodeNode("i64GtU", List.nil)
+  | PsWasmInstruction.i64GeS => psWasmIrEncodeNode("i64GeS", List.nil)
+  | PsWasmInstruction.i64GeU => psWasmIrEncodeNode("i64GeU", List.nil)
+  | PsWasmInstruction.f32Add => psWasmIrEncodeNode("f32Add", List.nil)
+  | PsWasmInstruction.f32Sub => psWasmIrEncodeNode("f32Sub", List.nil)
+  | PsWasmInstruction.f32Mul => psWasmIrEncodeNode("f32Mul", List.nil)
+  | PsWasmInstruction.f32Div => psWasmIrEncodeNode("f32Div", List.nil)
+  | PsWasmInstruction.f32Eq => psWasmIrEncodeNode("f32Eq", List.nil)
+  | PsWasmInstruction.f32Ne => psWasmIrEncodeNode("f32Ne", List.nil)
+  | PsWasmInstruction.f32Lt => psWasmIrEncodeNode("f32Lt", List.nil)
+  | PsWasmInstruction.f32Le => psWasmIrEncodeNode("f32Le", List.nil)
+  | PsWasmInstruction.f32Gt => psWasmIrEncodeNode("f32Gt", List.nil)
+  | PsWasmInstruction.f32Ge => psWasmIrEncodeNode("f32Ge", List.nil)
+  | PsWasmInstruction.f64Add => psWasmIrEncodeNode("f64Add", List.nil)
+  | PsWasmInstruction.f64Sub => psWasmIrEncodeNode("f64Sub", List.nil)
+  | PsWasmInstruction.f64Mul => psWasmIrEncodeNode("f64Mul", List.nil)
+  | PsWasmInstruction.f64Div => psWasmIrEncodeNode("f64Div", List.nil)
+  | PsWasmInstruction.f64Eq => psWasmIrEncodeNode("f64Eq", List.nil)
+  | PsWasmInstruction.f64Ne => psWasmIrEncodeNode("f64Ne", List.nil)
+  | PsWasmInstruction.f64Lt => psWasmIrEncodeNode("f64Lt", List.nil)
+  | PsWasmInstruction.f64Le => psWasmIrEncodeNode("f64Le", List.nil)
+  | PsWasmInstruction.f64Gt => psWasmIrEncodeNode("f64Gt", List.nil)
+  | PsWasmInstruction.f64Ge => psWasmIrEncodeNode("f64Ge", List.nil)
+  | PsWasmInstruction.structNew name => psWasmIrEncodeNode("structNew", (_root_.List.cons((psWasmIrEncodeText(name)), _root_.List.nil)))
+  | PsWasmInstruction.structGet name index => psWasmIrEncodeNode("structGet", (_root_.List.cons((psWasmIrEncodeText(name)), (_root_.List.cons((psWasmIrEncodeNat(index)), _root_.List.nil)))))
+  | PsWasmInstruction.structGetS name index => psWasmIrEncodeNode("structGetS", (_root_.List.cons((psWasmIrEncodeText(name)), (_root_.List.cons((psWasmIrEncodeNat(index)), _root_.List.nil)))))
+  | PsWasmInstruction.structGetU name index => psWasmIrEncodeNode("structGetU", (_root_.List.cons((psWasmIrEncodeText(name)), (_root_.List.cons((psWasmIrEncodeNat(index)), _root_.List.nil)))))
+  | PsWasmInstruction.arrayNew name => psWasmIrEncodeNode("arrayNew", (_root_.List.cons((psWasmIrEncodeText(name)), _root_.List.nil)))
+  | PsWasmInstruction.arrayNewDefault name => psWasmIrEncodeNode("arrayNewDefault", (_root_.List.cons((psWasmIrEncodeText(name)), _root_.List.nil)))
+  | PsWasmInstruction.arrayNewFixed name length => psWasmIrEncodeNode("arrayNewFixed", (_root_.List.cons((psWasmIrEncodeText(name)), (_root_.List.cons((psWasmIrEncodeNat(length)), _root_.List.nil)))))
+  | PsWasmInstruction.arrayGet name => psWasmIrEncodeNode("arrayGet", (_root_.List.cons((psWasmIrEncodeText(name)), _root_.List.nil)))
+  | PsWasmInstruction.arrayGetS name => psWasmIrEncodeNode("arrayGetS", (_root_.List.cons((psWasmIrEncodeText(name)), _root_.List.nil)))
+  | PsWasmInstruction.arrayGetU name => psWasmIrEncodeNode("arrayGetU", (_root_.List.cons((psWasmIrEncodeText(name)), _root_.List.nil)))
+  | PsWasmInstruction.arraySet name => psWasmIrEncodeNode("arraySet", (_root_.List.cons((psWasmIrEncodeText(name)), _root_.List.nil)))
+  | PsWasmInstruction.arrayLen => psWasmIrEncodeNode("arrayLen", List.nil)
+  | PsWasmInstruction.arrayCopy destination source => psWasmIrEncodeNode("arrayCopy", (_root_.List.cons((psWasmIrEncodeText(destination)), (_root_.List.cons((psWasmIrEncodeText(source)), _root_.List.nil)))))
+  | PsWasmInstruction.refTest name => psWasmIrEncodeNode("refTest", (_root_.List.cons((psWasmIrEncodeText(name)), _root_.List.nil)))
+  | PsWasmInstruction.refCast name => psWasmIrEncodeNode("refCast", (_root_.List.cons((psWasmIrEncodeText(name)), _root_.List.nil)))
+  | PsWasmInstruction.refFunc name => psWasmIrEncodeNode("refFunc", (_root_.List.cons((psWasmIrEncodeText(name)), _root_.List.nil)))
+  | PsWasmInstruction.refCastFunction name => psWasmIrEncodeNode("refCastFunction", (_root_.List.cons((psWasmIrEncodeText(name)), _root_.List.nil)))
+  | PsWasmInstruction.callRef name => psWasmIrEncodeNode("callRef", (_root_.List.cons((psWasmIrEncodeText(name)), _root_.List.nil)))
+  | PsWasmInstruction.returnCallRef name => psWasmIrEncodeNode("returnCallRef", (_root_.List.cons((psWasmIrEncodeText(name)), _root_.List.nil)))
+}
+
+def psWasmIrEncodeStructField(value : PsWasmStructField) : Except(PsWasmIrEncodeError, String) := psWasmIrEncodeValues((_root_.List.cons((psWasmIrEncodeText(value.name)), (_root_.List.cons((psWasmIrEncodeStorageType(value.storageType)), _root_.List.nil)))))
+
+def psWasmIrEncodeStructType(value : PsWasmStructType) : Except(PsWasmIrEncodeError, String) := psWasmIrEncodeValues((_root_.List.cons((psWasmIrEncodeText(value.name)), (_root_.List.cons((psWasmIrEncodeOptionText(value.superType)), (_root_.List.cons((psWasmIrEncodeBool(value.isFinal)), (_root_.List.cons((psWasmIrEncodeValues((psListMap(psWasmIrEncodeStructField, value.fields)))), _root_.List.nil)))))))))
+
+def psWasmIrEncodeArrayType(value : PsWasmArrayType) : Except(PsWasmIrEncodeError, String) := psWasmIrEncodeValues((_root_.List.cons((psWasmIrEncodeText(value.name)), (_root_.List.cons((psWasmIrEncodeStorageType(value.elementType)), (_root_.List.cons((psWasmIrEncodeBool(value.mutable)), _root_.List.nil)))))))
+
+def psWasmIrEncodeValueTypes(values : List(PsWasmValueType)) : Except(PsWasmIrEncodeError, String) := psWasmIrEncodeValues((psListMap(psWasmIrEncodeValueType, values)))
+
+def psWasmIrEncodeFunctionType(value : PsWasmFunctionType) : Except(PsWasmIrEncodeError, String) := psWasmIrEncodeValues((_root_.List.cons((psWasmIrEncodeText(value.name)), (_root_.List.cons((psWasmIrEncodeValueTypes(value.parameters)), (_root_.List.cons((psWasmIrEncodeValueTypes(value.results)), _root_.List.nil)))))))
+
+def psWasmIrEncodeInstructions(values : List(PsWasmInstruction)) : Except(PsWasmIrEncodeError, String) := psWasmIrEncodeValues((psListMap(psWasmIrEncodeInstruction, values)))
+
+def psWasmIrEncodeFunction(value : PsWasmFunction) : Except(PsWasmIrEncodeError, String) := psWasmIrEncodeValues((_root_.List.cons((psWasmIrEncodeText(value.name)), (_root_.List.cons((psWasmIrEncodeOptionText(value.typeName)), (_root_.List.cons((psWasmIrEncodeValueTypes(value.parameters)), (_root_.List.cons((psWasmIrEncodeValueTypes(value.results)), (_root_.List.cons((psWasmIrEncodeValueTypes(value.locals)), (_root_.List.cons((psWasmIrEncodeInstructions(value.body)), _root_.List.nil)))))))))))))
+
+def psWasmIrEncodeExport(value : _root_.Prod(String, String)) : Except(PsWasmIrEncodeError, String) := psWasmIrEncodeValues((_root_.List.cons((psWasmIrEncodeText((Prod.fst(value)))), (_root_.List.cons((psWasmIrEncodeText((Prod.snd(value)))), _root_.List.nil)))))
+
+def psWasmIrEncodeTexts(values : List(String)) : Except(PsWasmIrEncodeError, String) := psWasmIrEncodeValues((psListMap(psWasmIrEncodeText, values)))
+
+def psWasmIrEncodeModuleBase(value : PsWasmModule) : Except(PsWasmIrEncodeError, String) := psWasmIrEncodeNode("psc-wasm-ir-json/1", (_root_.List.cons((psWasmIrEncodeValues((psListMap(psWasmIrEncodeStructType, value.structures)))), (_root_.List.cons((psWasmIrEncodeValues((psListMap(psWasmIrEncodeArrayType, value.arrays)))), (_root_.List.cons((psWasmIrEncodeValues((psListMap(psWasmIrEncodeFunctionType, value.functionTypes)))), (_root_.List.cons((psWasmIrEncodeValues((psListMap(psWasmIrEncodeFunction, value.functions)))), (_root_.List.cons((psWasmIrEncodeTexts(value.functionRefs)), (_root_.List.cons((psWasmIrEncodeValues((psListMap(psWasmIrEncodeExport, value.exports)))), _root_.List.nil)))))))))))))
+
+def psWasmIrEncodeModule(value : PsWasmModule) : Except(PsWasmIrEncodeError, String) := if (value.abiMemory) { psWasmIrEncodeNode("psc-wasm-ir-abi-json/1", (_root_.List.cons((psWasmIrEncodeModuleBase(value)), (_root_.List.cons((psWasmIrEncodeBool(value.abiMemoryImports)), (_root_.List.cons((psWasmIrEncodeBool(value.abiGlobalsExport)), (_root_.List.cons((psWasmIrEncodeValues((psListMap((fun (item : PsWasmFunctionImport) => psWasmIrEncodeValues((_root_.List.cons((psWasmIrEncodeText(item.moduleName)), (_root_.List.cons((psWasmIrEncodeText(item.importName)), (_root_.List.cons((psWasmIrEncodeFunction(item.function)), _root_.List.nil)))))))), value.functionImports)))), _root_.List.nil))))))))) } else { psWasmIrEncodeModuleBase(value) }

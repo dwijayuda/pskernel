@@ -42,9 +42,13 @@ After extracting the qualified archive and entering its toolchain directory:
 ./bin/psc build compiler/project.json --profile correctness-3600s --compiler build/g1 --out build/g2
 ```
 
-The repository's Lean-like source remains the bootstrap reference. Edits in the
-standalone workspace use the delivered `.ps` project directly. Full source-owner
-migration, incremental compilation and other platforms remain separate work.
+Repository compiler development uses the canonical `.ps` owners in
+[CANONICAL_SOURCES.json](CANONICAL_SOURCES.json): 151 portable compiler modules and
+13 ordinary standard-library modules. The paired Lean files are pinned bootstrap
+references. [Ownership and reference refresh](docs/CANONICAL_SOURCE_OWNERSHIP.md)
+explains the single-source rule and its fresh CI checks. The 125-module unified
+project reads those ProofScript bytes directly. Performance and additional
+environments have separate exact qualification receipts.
 The existing npm profiles and their output-consumer requirements below retain
 their original qualification scope.
 

@@ -1,0 +1,156 @@
+import Ps.Environment.Prelude
+
+def psSelfHostListNilName : PsName := psNameAppendStr(psListName, "nil")
+
+def psSelfHostListConsName : PsName := psNameAppendStr(psListName, "cons")
+
+def psSelfHostListRecName : PsName := psNameAppendStr(psListName, "rec")
+
+def psSelfHostOptionNoneName : PsName := psNameAppendStr(psOptionName, "none")
+
+def psSelfHostOptionSomeName : PsName := psNameAppendStr(psOptionName, "some")
+
+def psSelfHostOptionRecName : PsName := psNameAppendStr(psOptionName, "rec")
+
+def psSelfHostExceptName : PsName := psRootName("Except")
+
+def psSelfHostExceptErrorName : PsName := psNameAppendStr(psSelfHostExceptName, "error")
+
+def psSelfHostExceptOkName : PsName := psNameAppendStr(psSelfHostExceptName, "ok")
+
+def psSelfHostExceptRecName : PsName := psNameAppendStr(psSelfHostExceptName, "rec")
+
+def psSelfHostListOf(alpha : PsExpr) : PsExpr := PsExpr.app((PsExpr.constE(psListName, _root_.List.nil)), alpha)
+
+def psSelfHostListNilOf(alpha : PsExpr) : PsExpr := PsExpr.app((PsExpr.constE(psSelfHostListNilName, _root_.List.nil)), alpha)
+
+def psSelfHostListConsOf(alpha : PsExpr, head : PsExpr, tail : PsExpr) : PsExpr := PsExpr.app((PsExpr.app((PsExpr.app((PsExpr.constE(psSelfHostListConsName, _root_.List.nil)), alpha)), head)), tail)
+
+def psSelfHostOptionOf(alpha : PsExpr) : PsExpr := PsExpr.app((PsExpr.constE(psOptionName, _root_.List.nil)), alpha)
+
+def psSelfHostOptionNoneOf(alpha : PsExpr) : PsExpr := PsExpr.app((PsExpr.constE(psSelfHostOptionNoneName, _root_.List.nil)), alpha)
+
+def psSelfHostOptionSomeOf(alpha : PsExpr, value : PsExpr) : PsExpr := PsExpr.app((PsExpr.app((PsExpr.constE(psSelfHostOptionSomeName, _root_.List.nil)), alpha)), value)
+
+def psSelfHostExceptOf(errorType : PsExpr, valueType : PsExpr) : PsExpr := PsExpr.app((PsExpr.app((PsExpr.constE(psSelfHostExceptName, _root_.List.nil)), errorType)), valueType)
+
+def psSelfHostExceptErrorOf(errorType : PsExpr, valueType : PsExpr, error : PsExpr) : PsExpr := PsExpr.app((PsExpr.app((PsExpr.app((PsExpr.constE(psSelfHostExceptErrorName, _root_.List.nil)), errorType)), valueType)), error)
+
+def psSelfHostExceptOkOf(errorType : PsExpr, valueType : PsExpr, value : PsExpr) : PsExpr := PsExpr.app((PsExpr.app((PsExpr.app((PsExpr.constE(psSelfHostExceptOkName, _root_.List.nil)), errorType)), valueType)), value)
+
+def psSelfHostReplacePreludeAxiom(environment : PsEnvironment, declaration : PsDeclaration) : PsEnvironment := match (psEnvironmentAddReplacingAxiom(environment, declaration)) with {
+  | none => environment
+  | some next => next
+}
+
+-- Id is an ordinary checked identity alias, selected at Type 0 in this slice.
+def psSelfHostIdName : PsName := psRootName("Id")
+
+def psSelfHostIdRunName : PsName := psNameAppendStr(psSelfHostIdName, "run")
+
+-- Higher-universe Id is outside the current shared effect profile.
+def psSelfHostIdDeclaration : PsDeclaration := let alpha := (psRootName("α"))
+let type := (PsExpr.sortE((PsLevel.succ(PsLevel.zero))))
+PsDeclaration.definitionDecl(psSelfHostIdName, _root_.List.nil, (PsExpr.forallE(alpha, type, type, PsBinderInfo.explicit)), (PsExpr.lam(alpha, type, (PsExpr.bvar(0)), PsBinderInfo.explicit)))
+
+def psSelfHostIdRunDeclaration : PsDeclaration := let alpha := (psRootName("α"))
+let value := (psRootName("value"))
+let type := (PsExpr.sortE((PsLevel.succ(PsLevel.zero))))
+let domain := (PsExpr.app((PsExpr.constE(psSelfHostIdName, _root_.List.nil)), (PsExpr.bvar(0))))
+PsDeclaration.definitionDecl(psSelfHostIdRunName, _root_.List.nil, (PsExpr.forallE(alpha, type, (PsExpr.forallE(value, domain, (PsExpr.bvar(1)), PsBinderInfo.explicit)), PsBinderInfo.implicit)), (PsExpr.lam(alpha, type, (PsExpr.lam(value, domain, (PsExpr.bvar(0)), PsBinderInfo.explicit)), PsBinderInfo.implicit)))
+
+def psSelfHostPreludeEnvironment : PsEnvironment := let uName := (psRootName("u"))
+let alphaName := (psRootName("α"))
+let errorTypeName := (psRootName("ε"))
+let valueTypeName := (psRootName("α"))
+let motiveName := (psRootName("_motive"))
+let nilMinorName := (psRootName("_nil"))
+let consMinorName := (psRootName("_cons"))
+let noneMinorName := (psRootName("_none"))
+let someMinorName := (psRootName("_some"))
+let errorMinorName := (psRootName("_error"))
+let okMinorName := (psRootName("_ok"))
+let headName := (psRootName("head"))
+let tailName := (psRootName("tail"))
+let valueName := (psRootName("value"))
+let errorName := (psRootName("error"))
+let hypothesisName := (psRootName("_ih"))
+let majorName := (psRootName("_major"))
+let typeType := (PsExpr.sortE((PsLevel.succ(PsLevel.zero))))
+let listType := (PsExpr.forallE(alphaName, typeType, typeType, PsBinderInfo.explicit))
+let nilType := (PsExpr.forallE(alphaName, typeType, (psSelfHostListOf((PsExpr.bvar(0)))), PsBinderInfo.implicit))
+let consType := (PsExpr.forallE(alphaName, typeType, (PsExpr.forallE(headName, (PsExpr.bvar(0)), (PsExpr.forallE(tailName, (psSelfHostListOf((PsExpr.bvar(1)))), (psSelfHostListOf((PsExpr.bvar(2)))), PsBinderInfo.explicit)), PsBinderInfo.explicit)), PsBinderInfo.implicit))
+let listMotiveType := (PsExpr.forallE(majorName, (psSelfHostListOf((PsExpr.bvar(0)))), (PsExpr.sortE((PsLevel.param(uName)))), PsBinderInfo.explicit))
+let nilMinorType := (PsExpr.app((PsExpr.bvar(0)), (psSelfHostListNilOf((PsExpr.bvar(1))))))
+let consMinorType := (PsExpr.forallE(headName, (PsExpr.bvar(2)), (PsExpr.forallE(tailName, (psSelfHostListOf((PsExpr.bvar(3)))), (PsExpr.forallE(hypothesisName, (PsExpr.app((PsExpr.bvar(3)), (PsExpr.bvar(0)))), (PsExpr.app((PsExpr.bvar(4)), (psSelfHostListConsOf((PsExpr.bvar(5)), (PsExpr.bvar(2)), (PsExpr.bvar(1)))))), PsBinderInfo.explicit)), PsBinderInfo.explicit)), PsBinderInfo.explicit))
+let listRecType := (PsExpr.forallE(alphaName, typeType, (PsExpr.forallE(motiveName, listMotiveType, (PsExpr.forallE(nilMinorName, nilMinorType, (PsExpr.forallE(consMinorName, consMinorType, (PsExpr.forallE(majorName, (psSelfHostListOf((PsExpr.bvar(3)))), (PsExpr.app((PsExpr.bvar(3)), (PsExpr.bvar(0)))), PsBinderInfo.explicit)), PsBinderInfo.explicit)), PsBinderInfo.explicit)), PsBinderInfo.explicit)), PsBinderInfo.implicit))
+let optionType := (PsExpr.forallE(alphaName, typeType, typeType, PsBinderInfo.explicit))
+let noneType := (PsExpr.forallE(alphaName, typeType, (psSelfHostOptionOf((PsExpr.bvar(0)))), PsBinderInfo.implicit))
+let someType := (PsExpr.forallE(alphaName, typeType, (PsExpr.forallE(valueName, (PsExpr.bvar(0)), (psSelfHostOptionOf((PsExpr.bvar(1)))), PsBinderInfo.explicit)), PsBinderInfo.implicit))
+let optionMotiveType := (PsExpr.forallE(majorName, (psSelfHostOptionOf((PsExpr.bvar(0)))), (PsExpr.sortE((PsLevel.param(uName)))), PsBinderInfo.explicit))
+let noneMinorType := (PsExpr.app((PsExpr.bvar(0)), (psSelfHostOptionNoneOf((PsExpr.bvar(1))))))
+let someMinorType := (PsExpr.forallE(valueName, (PsExpr.bvar(2)), (PsExpr.app((PsExpr.bvar(2)), (psSelfHostOptionSomeOf((PsExpr.bvar(3)), (PsExpr.bvar(0)))))), PsBinderInfo.explicit))
+let optionRecType := (PsExpr.forallE(alphaName, typeType, (PsExpr.forallE(motiveName, optionMotiveType, (PsExpr.forallE(noneMinorName, noneMinorType, (PsExpr.forallE(someMinorName, someMinorType, (PsExpr.forallE(majorName, (psSelfHostOptionOf((PsExpr.bvar(3)))), (PsExpr.app((PsExpr.bvar(3)), (PsExpr.bvar(0)))), PsBinderInfo.explicit)), PsBinderInfo.explicit)), PsBinderInfo.explicit)), PsBinderInfo.explicit)), PsBinderInfo.implicit))
+let exceptType := (PsExpr.forallE(errorTypeName, typeType, (PsExpr.forallE(valueTypeName, typeType, typeType, PsBinderInfo.explicit)), PsBinderInfo.explicit))
+let exceptErrorType := (PsExpr.forallE(errorTypeName, typeType, (PsExpr.forallE(valueTypeName, typeType, (PsExpr.forallE(errorName, (PsExpr.bvar(1)), (psSelfHostExceptOf((PsExpr.bvar(2)), (PsExpr.bvar(1)))), PsBinderInfo.explicit)), PsBinderInfo.implicit)), PsBinderInfo.implicit))
+let exceptOkType := (PsExpr.forallE(errorTypeName, typeType, (PsExpr.forallE(valueTypeName, typeType, (PsExpr.forallE(valueName, (PsExpr.bvar(0)), (psSelfHostExceptOf((PsExpr.bvar(2)), (PsExpr.bvar(1)))), PsBinderInfo.explicit)), PsBinderInfo.implicit)), PsBinderInfo.implicit))
+let exceptMotiveType := (PsExpr.forallE(majorName, (psSelfHostExceptOf((PsExpr.bvar(1)), (PsExpr.bvar(0)))), (PsExpr.sortE((PsLevel.param(uName)))), PsBinderInfo.explicit))
+let exceptErrorMinorType := (PsExpr.forallE(errorName, (PsExpr.bvar(2)), (PsExpr.app((PsExpr.bvar(1)), (psSelfHostExceptErrorOf((PsExpr.bvar(3)), (PsExpr.bvar(2)), (PsExpr.bvar(0)))))), PsBinderInfo.explicit))
+let exceptOkMinorType := (PsExpr.forallE(valueName, (PsExpr.bvar(2)), (PsExpr.app((PsExpr.bvar(2)), (psSelfHostExceptOkOf((PsExpr.bvar(4)), (PsExpr.bvar(3)), (PsExpr.bvar(0)))))), PsBinderInfo.explicit))
+let exceptRecType := (PsExpr.forallE(errorTypeName, typeType, (PsExpr.forallE(valueTypeName, typeType, (PsExpr.forallE(motiveName, exceptMotiveType, (PsExpr.forallE(errorMinorName, exceptErrorMinorType, (PsExpr.forallE(okMinorName, exceptOkMinorType, (PsExpr.forallE(majorName, (psSelfHostExceptOf((PsExpr.bvar(4)), (PsExpr.bvar(3)))), (PsExpr.app((PsExpr.bvar(3)), (PsExpr.bvar(0)))), PsBinderInfo.explicit)), PsBinderInfo.explicit)), PsBinderInfo.explicit)), PsBinderInfo.explicit)), PsBinderInfo.implicit)), PsBinderInfo.implicit))
+let withList := (psSelfHostReplacePreludeAxiom(psBootstrapPreludeEnvironment, (PsDeclaration.inductiveDecl((PsInductiveInfo.mk(psListName, _root_.List.nil, listType, 1, 0, (_root_.List.cons(psSelfHostListNilName, (_root_.List.cons(psSelfHostListConsName, _root_.List.nil)))), false))))))
+let withNil := (psPreludeAdd(withList, (PsDeclaration.constructorDecl((PsConstructorInfo.mk(psSelfHostListNilName, _root_.List.nil, nilType, psListName, 0, 1, 0, _root_.List.nil))))))
+let withCons := (psPreludeAdd(withNil, (PsDeclaration.constructorDecl((PsConstructorInfo.mk(psSelfHostListConsName, _root_.List.nil, consType, psListName, 1, 1, 2, (_root_.List.cons(1, _root_.List.nil))))))))
+let withListRec := (psPreludeAdd(withCons, (PsDeclaration.recursorDecl((PsRecursorInfo.mk(psSelfHostListRecName, (_root_.List.cons(uName, _root_.List.nil)), listRecType, (_root_.List.cons(psListName, _root_.List.nil)), 1, 0, 1, 2))))))
+let withOption := (psSelfHostReplacePreludeAxiom(withListRec, (PsDeclaration.inductiveDecl((PsInductiveInfo.mk(psOptionName, _root_.List.nil, optionType, 1, 0, (_root_.List.cons(psSelfHostOptionNoneName, (_root_.List.cons(psSelfHostOptionSomeName, _root_.List.nil)))), false))))))
+let withNone := (psPreludeAdd(withOption, (PsDeclaration.constructorDecl((PsConstructorInfo.mk(psSelfHostOptionNoneName, _root_.List.nil, noneType, psOptionName, 0, 1, 0, _root_.List.nil))))))
+let withSome := (psPreludeAdd(withNone, (PsDeclaration.constructorDecl((PsConstructorInfo.mk(psSelfHostOptionSomeName, _root_.List.nil, someType, psOptionName, 1, 1, 1, _root_.List.nil))))))
+let withOptionRec := (psPreludeAdd(withSome, (PsDeclaration.recursorDecl((PsRecursorInfo.mk(psSelfHostOptionRecName, (_root_.List.cons(uName, _root_.List.nil)), optionRecType, (_root_.List.cons(psOptionName, _root_.List.nil)), 1, 0, 1, 2))))))
+let withExcept := (psSelfHostReplacePreludeAxiom(withOptionRec, (PsDeclaration.inductiveDecl((PsInductiveInfo.mk(psSelfHostExceptName, _root_.List.nil, exceptType, 2, 0, (_root_.List.cons(psSelfHostExceptErrorName, (_root_.List.cons(psSelfHostExceptOkName, _root_.List.nil)))), false))))))
+let withExceptError := (psPreludeAdd(withExcept, (PsDeclaration.constructorDecl((PsConstructorInfo.mk(psSelfHostExceptErrorName, _root_.List.nil, exceptErrorType, psSelfHostExceptName, 0, 2, 1, _root_.List.nil))))))
+let withExceptOk := (psPreludeAdd(withExceptError, (PsDeclaration.constructorDecl((PsConstructorInfo.mk(psSelfHostExceptOkName, _root_.List.nil, exceptOkType, psSelfHostExceptName, 1, 2, 1, _root_.List.nil))))))
+let withExceptRec := (psPreludeAdd(withExceptOk, (PsDeclaration.recursorDecl((PsRecursorInfo.mk(psSelfHostExceptRecName, (_root_.List.cons(uName, _root_.List.nil)), exceptRecType, (_root_.List.cons(psSelfHostExceptName, _root_.List.nil)), 2, 0, 1, 2))))))
+let withId := (psPreludeAdd(withExceptRec, psSelfHostIdDeclaration))
+psPreludeAdd(withId, psSelfHostIdRunDeclaration)
+
+def psSelfHostRuntimeDataPreludeDeclarations : List(PsDeclaration) := match (psEnvironmentFind(psSelfHostPreludeEnvironment, psListName)) with {
+  | none => List.nil
+  | some listDeclaration => match (psEnvironmentFind(psSelfHostPreludeEnvironment, psSelfHostListNilName)) with {
+  | none => List.nil
+  | some nilDeclaration => match (psEnvironmentFind(psSelfHostPreludeEnvironment, psSelfHostListConsName)) with {
+  | none => List.nil
+  | some consDeclaration => match (psEnvironmentFind(psSelfHostPreludeEnvironment, psSelfHostListRecName)) with {
+  | none => List.nil
+  | some listRecDeclaration => match (psEnvironmentFind(psSelfHostPreludeEnvironment, psOptionName)) with {
+  | none => List.nil
+  | some optionDeclaration => match (psEnvironmentFind(psSelfHostPreludeEnvironment, psSelfHostOptionNoneName)) with {
+  | none => List.nil
+  | some noneDeclaration => match (psEnvironmentFind(psSelfHostPreludeEnvironment, psSelfHostOptionSomeName)) with {
+  | none => List.nil
+  | some someDeclaration => match (psEnvironmentFind(psSelfHostPreludeEnvironment, psSelfHostOptionRecName)) with {
+  | none => List.nil
+  | some optionRecDeclaration => match (psEnvironmentFind(psSelfHostPreludeEnvironment, psSelfHostExceptName)) with {
+  | none => List.nil
+  | some exceptDeclaration => match (psEnvironmentFind(psSelfHostPreludeEnvironment, psSelfHostExceptErrorName)) with {
+  | none => List.nil
+  | some exceptErrorDeclaration => match (psEnvironmentFind(psSelfHostPreludeEnvironment, psSelfHostExceptOkName)) with {
+  | none => List.nil
+  | some exceptOkDeclaration => match (psEnvironmentFind(psSelfHostPreludeEnvironment, psSelfHostExceptRecName)) with {
+  | none => List.nil
+  | some exceptRecDeclaration => _root_.List.cons(listDeclaration, (_root_.List.cons(nilDeclaration, (_root_.List.cons(consDeclaration, (_root_.List.cons(listRecDeclaration, (_root_.List.cons(optionDeclaration, (_root_.List.cons(noneDeclaration, (_root_.List.cons(someDeclaration, (_root_.List.cons(optionRecDeclaration, (_root_.List.cons(exceptDeclaration, (_root_.List.cons(exceptErrorDeclaration, (_root_.List.cons(exceptOkDeclaration, (_root_.List.cons(exceptRecDeclaration, _root_.List.nil)))))))))))))))))))))))
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+
+-- Runtime definitions use the same checked prelude identity. Erasure selects
+-- only referenced definitions and their closure, then lowers them ordinarily.
+def psSelfHostRuntimePreludeDeclarations : List(PsDeclaration) := List.cons(psSelfHostIdRunDeclaration, psSelfHostRuntimeDataPreludeDeclarations)

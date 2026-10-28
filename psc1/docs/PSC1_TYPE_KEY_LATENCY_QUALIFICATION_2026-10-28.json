@@ -1,0 +1,240 @@
+{
+  "schema": "psc1-type-key-qualification-record/1",
+  "status": "passed",
+  "testedCommit": "bc983a806a2995bed7851512a175652cbf4b5226",
+  "artifact": {
+    "run": 40634776830,
+    "job": 122639100927,
+    "artifact": 12796523762,
+    "commit": "bc983a806a2995bed7851512a175652cbf4b5226",
+    "zipSha256": "c17a4d364810714e4dd7ed775fb9ff3547de87ebf89501e402d75fc9a7fb7af1"
+  },
+  "artifactMetadata": {
+    "name": "psc1-type-key-latency-bc983a806a2995bed7851512a175652cbf4b5226",
+    "bytes": 24777348,
+    "expiresAt": "2027-01-26T04:52:45Z"
+  },
+  "result": {
+    "schema": "psc1-type-key-latency-qualification/1",
+    "status": "passed",
+    "sourceChange": {
+      "schema": "psc1-type-key-source-change/1",
+      "module": "Ps.CompilerIr.Specialize",
+      "canonicalOwner": "psc1/packages/compiler-ir/src/Ps/CompilerIr/Specialize.ps",
+      "projectPath": "packages/compiler-ir/src/Ps/CompilerIr/Specialize.ps",
+      "bytes": 60198,
+      "beforeSha256": "feeaf5c7a44f54be247492ff30ee27df628fa6ea32be7a8506224064bcc025b2",
+      "afterSha256": "74fb1bb1c8f9beef611300e06fff3010121ed2589e828b7102f539217a09ad93",
+      "beforeDefinition": "def psIrSpecializeTypeKeyWithFuel(fuel : Nat) : (_ : PsVerifiedIrType) -> Option(String) := match fuel with {\n  | _root_.Nat.zero => fun (type : PsVerifiedIrType) => Option.none\n  | _root_.Nat.succ remaining => let smaller : (_ : PsVerifiedIrType) -> Option(String) := (psIrSpecializeTypeKeyWithFuel(remaining))\nfun (type : PsVerifiedIrType) => match type with {\n  | PsVerifiedIrType.unknown => Option.none\n  | PsVerifiedIrType.typeParameter _ => Option.none\n  | PsVerifiedIrType.primitive primitive => Option.some((psIrSpecializePrimitiveKey(primitive)))\n  | PsVerifiedIrType.function parameters result => let parameterKeys : List((Option(String))) := (psListMap(smaller, parameters))\nmatch (psIrSpecializeJoinKeys(parameterKeys)) with {\n  | Option.none => Option.none\n  | Option.some parameterKey => match (smaller(result)) with {\n  | Option.none => Option.none\n  | Option.some resultKey => Option.some((psIrSpecializeConcat4(\"Fn$\", parameterKey, \"$To$\", resultKey)))\n}\n}\n  | PsVerifiedIrType.named name arguments => let argumentKeys : List((Option(String))) := (psListMap(smaller, arguments))\nmatch (psIrSpecializeJoinKeys(argumentKeys)) with {\n  | Option.none => Option.none\n  | Option.some keys => if (psStringEq(keys, \"\")) { Option.some((String.Internal.append(\"N$\", name))) } else { Option.some((psIrSpecializeConcat4(\"N$\", name, \"$\", keys))) }\n}\n}\n}\n",
+      "afterDefinition": "def psIrSpecializeTypeKeyWithFuel(fuel : Nat) : (_ : PsVerifiedIrType) -> Option(String) := match fuel with {\n  | _root_.Nat.zero => fun (type : PsVerifiedIrType) => Option.none\n  | _root_.Nat.succ remaining => fun (type : PsVerifiedIrType) => let smaller : (_ : PsVerifiedIrType) -> Option(String) := (psIrSpecializeTypeKeyWithFuel(remaining))\nmatch type with {\n  | PsVerifiedIrType.unknown => Option.none\n  | PsVerifiedIrType.typeParameter _ => Option.none\n  | PsVerifiedIrType.primitive primitive => Option.some((psIrSpecializePrimitiveKey(primitive)))\n  | PsVerifiedIrType.function parameters result => let parameterKeys : List((Option(String))) := (psListMap(smaller, parameters))\nmatch (psIrSpecializeJoinKeys(parameterKeys)) with {\n  | Option.none => Option.none\n  | Option.some parameterKey => match (smaller(result)) with {\n  | Option.none => Option.none\n  | Option.some resultKey => Option.some((psIrSpecializeConcat4(\"Fn$\", parameterKey, \"$To$\", resultKey)))\n}\n}\n  | PsVerifiedIrType.named name arguments => let argumentKeys : List((Option(String))) := (psListMap(smaller, arguments))\nmatch (psIrSpecializeJoinKeys(argumentKeys)) with {\n  | Option.none => Option.none\n  | Option.some keys => if (psStringEq(keys, \"\")) { Option.some((String.Internal.append(\"N$\", name))) } else { Option.some((psIrSpecializeConcat4(\"N$\", name, \"$\", keys))) }\n}\n}\n}\n",
+      "beforeAnchor": "let smaller : (_ : PsVerifiedIrType) -> Option(String) := (psIrSpecializeTypeKeyWithFuel(remaining))\nfun (type : PsVerifiedIrType) => ",
+      "afterAnchor": "fun (type : PsVerifiedIrType) => let smaller : (_ : PsVerifiedIrType) -> Option(String) := (psIrSpecializeTypeKeyWithFuel(remaining))\n",
+      "changedModules": 1,
+      "oldSourceClosureDigest": "9d0f097e79eb2b1e14d10362c6db9b4bc2370c26627658017bf6b2681b46fabf",
+      "newSourceClosureDigest": "424c15ce2cf5bb87a293dd2aad1705fa801c07067c972578aa76111627d590d7",
+      "semantics": "same fuel, branches, keys and rejection conditions; prepare recursive closure only when a type is inspected"
+    },
+    "fixedPoint": {
+      "identities": {
+        "sourceClosureDigest": "424c15ce2cf5bb87a293dd2aad1705fa801c07067c972578aa76111627d590d7",
+        "sourceSha256": "49d851d26008abf116b9f4c680c0833311e835b90d6c58e369ca426f33ecd2e6",
+        "admissionsSha256": "9ac7a395b3f473fdb0278e3bf220ece76443ee9502a6d16996684f4c2e52619a",
+        "originalIrSha256": "a910cc599e67b93077b004d79dc3c042a6d594e4169ea0ef8abafb8980a2415b",
+        "specializedIrSha256": "e3316c7598b48e70daa5e32e32f6c4340f070003cf85abc2fd8d61983af8e2c7"
+      },
+      "compared": [
+        "compiler.mjs",
+        "candidate.json",
+        "admissions.json",
+        "original-ir.json",
+        "specialized-ir.json",
+        "sources.json"
+      ]
+    },
+    "qualifiedCompiler": {
+      "directory": "O2",
+      "compilerSha256": "49d851d26008abf116b9f4c680c0833311e835b90d6c58e369ca426f33ecd2e6",
+      "filesManifestSha256": "aa1ca6b19585a7be8b21d78b9ab4cbb024abd633466f41a7bfc292380696f80c",
+      "sourceClosureDigest": "424c15ce2cf5bb87a293dd2aad1705fa801c07067c972578aa76111627d590d7",
+      "selectedCanonicalSourceSha256": "74fb1bb1c8f9beef611300e06fff3010121ed2589e828b7102f539217a09ad93"
+    },
+    "comparison": {
+      "workloadSourceClosureDigest": "9d0f097e79eb2b1e14d10362c6db9b4bc2370c26627658017bf6b2681b46fabf",
+      "requestSha256": "4206adb1eb0f795cd09401136f45e638a1298cf8f6c801e30a639c0eccd6180a",
+      "completeCandidateSha256": "532081726b246297e30fd0a0975f95a6198510e295338a2bcfbe74ed602c4978",
+      "completeCandidateBytesEqual": true,
+      "sameMachine": true,
+      "sameOrdinaryRuntimeFlags": true,
+      "controlCompilerSha256": "858c188024f0a7da221e0c26053437b3fac3fc0ab1cc9d14092df19b39d1465d",
+      "optimizedCompilerSha256": "49d851d26008abf116b9f4c680c0833311e835b90d6c58e369ca426f33ecd2e6",
+      "controlElapsedMs": 1710047,
+      "optimizedElapsedMs": 1485908,
+      "elapsedRatio": 0.8689281639627449,
+      "savedMs": 224139,
+      "observedReduction": 0.1310718360372551,
+      "controlPeakRssKiB": 3619020,
+      "optimizedPeakRssKiB": 3435212,
+      "interpretation": "one sequential matched pair on the same hosted runner; observed latency, not a statistical guarantee"
+    },
+    "generations": {
+      "O1": {
+        "execution": {
+          "protocol": "psc1-independent-worker/1",
+          "operation": "compile",
+          "compilerSha256": "e7d9c7b6eb9ea22aaaecad2bbf21adcf9856a0518dba0079eb63e8db0d03a0aa",
+          "requestSha256": "de0dc68facf1580163f64a60c39372ba7e5b40f52b22e004a76ae6fc3416b67b",
+          "responseSha256": "7c34918ba3b007bf311e436d44e22aa28100c0ed8f5bd34e0140dbfe75400035",
+          "responseUtf8Bytes": 73813463,
+          "elapsedMs": 1689262,
+          "maxRssKiB": 3533272,
+          "supervisorElapsedMs": 1689582,
+          "peakRssKiB": 3533272,
+          "timeoutMs": 3600000,
+          "stdoutBytes": 383,
+          "stderrBytes": 0,
+          "memoryMeasurement": "worker getrusage maxRSS plus sampled Linux /proc VmRSS/VmHWM",
+          "runtime": {
+            "node": "22.23.3",
+            "embedded": true
+          },
+          "hostElapsedMs": 1689957
+        },
+        "checker": {
+          "path": "kernel/checker",
+          "sha256": "1415522ad1fa22ea919d796dc0d689be5c65275c0a24fe43a6ac7f675d32239b",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "accepted": true,
+          "executed": true,
+          "admissionsSha256": "9ac7a395b3f473fdb0278e3bf220ece76443ee9502a6d16996684f4c2e52619a",
+          "elapsedMs": 2876,
+          "admissionReceiptSha256": "1102a807526f712a18ba6466bdeef850e22df68bc6f5602cf38a30a2ae3bb818"
+        }
+      },
+      "O2": {
+        "execution": {
+          "protocol": "psc1-independent-worker/1",
+          "operation": "compile",
+          "compilerSha256": "49d851d26008abf116b9f4c680c0833311e835b90d6c58e369ca426f33ecd2e6",
+          "requestSha256": "de0dc68facf1580163f64a60c39372ba7e5b40f52b22e004a76ae6fc3416b67b",
+          "responseSha256": "7c34918ba3b007bf311e436d44e22aa28100c0ed8f5bd34e0140dbfe75400035",
+          "responseUtf8Bytes": 73813463,
+          "elapsedMs": 1478453,
+          "maxRssKiB": 3406628,
+          "supervisorElapsedMs": 1478771,
+          "peakRssKiB": 3406936,
+          "timeoutMs": 3600000,
+          "stdoutBytes": 383,
+          "stderrBytes": 0,
+          "memoryMeasurement": "worker getrusage maxRSS plus sampled Linux /proc VmRSS/VmHWM",
+          "runtime": {
+            "node": "22.23.3",
+            "embedded": true
+          },
+          "hostElapsedMs": 1479123
+        },
+        "checker": {
+          "path": "kernel/checker",
+          "sha256": "1415522ad1fa22ea919d796dc0d689be5c65275c0a24fe43a6ac7f675d32239b",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "accepted": true,
+          "executed": true,
+          "admissionsSha256": "9ac7a395b3f473fdb0278e3bf220ece76443ee9502a6d16996684f4c2e52619a",
+          "elapsedMs": 2843,
+          "admissionReceiptSha256": "1102a807526f712a18ba6466bdeef850e22df68bc6f5602cf38a30a2ae3bb818"
+        }
+      }
+    },
+    "benchmarks": {
+      "control": {
+        "execution": {
+          "protocol": "psc1-independent-worker/1",
+          "operation": "compile",
+          "compilerSha256": "858c188024f0a7da221e0c26053437b3fac3fc0ab1cc9d14092df19b39d1465d",
+          "requestSha256": "4206adb1eb0f795cd09401136f45e638a1298cf8f6c801e30a639c0eccd6180a",
+          "responseSha256": "532081726b246297e30fd0a0975f95a6198510e295338a2bcfbe74ed602c4978",
+          "responseUtf8Bytes": 73800724,
+          "elapsedMs": 1710047,
+          "maxRssKiB": 3618696,
+          "supervisorElapsedMs": 1710388,
+          "peakRssKiB": 3619020,
+          "timeoutMs": 3600000,
+          "stdoutBytes": 383,
+          "stderrBytes": 0,
+          "memoryMeasurement": "worker getrusage maxRSS plus sampled Linux /proc VmRSS/VmHWM",
+          "runtime": {
+            "node": "22.23.3",
+            "embedded": true
+          },
+          "hostElapsedMs": 1710749
+        },
+        "checker": {
+          "path": "kernel/checker",
+          "sha256": "1415522ad1fa22ea919d796dc0d689be5c65275c0a24fe43a6ac7f675d32239b",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "accepted": true,
+          "executed": true,
+          "admissionsSha256": "904cdaf4b2e57b2e1b4d3205928a14dd44676e74468e952c29e73847ec245de1",
+          "elapsedMs": 2848,
+          "admissionReceiptSha256": "72ac2a5e001311ad42d25364d8644f998611b5a68c2a76b70f438960294a35a7"
+        }
+      },
+      "optimized": {
+        "execution": {
+          "protocol": "psc1-independent-worker/1",
+          "operation": "compile",
+          "compilerSha256": "49d851d26008abf116b9f4c680c0833311e835b90d6c58e369ca426f33ecd2e6",
+          "requestSha256": "4206adb1eb0f795cd09401136f45e638a1298cf8f6c801e30a639c0eccd6180a",
+          "responseSha256": "532081726b246297e30fd0a0975f95a6198510e295338a2bcfbe74ed602c4978",
+          "responseUtf8Bytes": 73800724,
+          "elapsedMs": 1485908,
+          "maxRssKiB": 3435212,
+          "supervisorElapsedMs": 1486250,
+          "peakRssKiB": 3435212,
+          "timeoutMs": 3600000,
+          "stdoutBytes": 383,
+          "stderrBytes": 0,
+          "memoryMeasurement": "worker getrusage maxRSS plus sampled Linux /proc VmRSS/VmHWM",
+          "runtime": {
+            "node": "22.23.3",
+            "embedded": true
+          },
+          "hostElapsedMs": 1486598
+        },
+        "checker": {
+          "path": "kernel/checker",
+          "sha256": "1415522ad1fa22ea919d796dc0d689be5c65275c0a24fe43a6ac7f675d32239b",
+          "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "accepted": true,
+          "executed": true,
+          "admissionsSha256": "904cdaf4b2e57b2e1b4d3205928a14dd44676e74468e952c29e73847ec245de1",
+          "elapsedMs": 2843,
+          "admissionReceiptSha256": "72ac2a5e001311ad42d25364d8644f998611b5a68c2a76b70f438960294a35a7"
+        }
+      }
+    },
+    "freshIndependentAdmissionEveryBuild": true,
+    "strictOriginalAndTransformedIrEveryBuild": true,
+    "ordinaryHostUnchanged": true,
+    "ordinaryRunnerUnchanged": true
+  },
+  "interpretation": "One sequential matched compiler-worker pair on the same runner; no statistical or 240-second qualification claim.",
+  "receiptGrantsAdmissionAuthority": false,
+  "hostProcessObservations": {
+    "source": {
+      "run": 40634776830,
+      "job": 122639100927,
+      "event": "PSC1_TYPE_KEY_BUILD",
+      "phase": "passed"
+    },
+    "measurements": {
+      "O1": 1699097,
+      "O2": 1489381,
+      "control": 1720972,
+      "optimized-baseline": 1496718
+    },
+    "unit": "ms",
+    "savedMs": 224254,
+    "observedReduction": 0.130306594180498,
+    "interpretation": "Complete host subprocess duration measured by the outer qualification harness, distinct from execution.hostElapsedMs."
+  }
+}

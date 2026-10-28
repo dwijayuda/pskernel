@@ -1,6 +1,6 @@
 # backend-wasm
 
-GC core Wasm and bounded component emission. Start at [src/Ps/BackendWasm/Lower.lean](src/Ps/BackendWasm/Lower.lean).
+GC core Wasm and bounded component emission. Start at [src/Ps/BackendWasm/Lower.ps](src/Ps/BackendWasm/Lower.ps).
 
 - Representation: Checked IR/plan → GC core or component candidate.
 - Boundary: Compiler-Wasm is GC; the official independent C++ checker is linear memory.

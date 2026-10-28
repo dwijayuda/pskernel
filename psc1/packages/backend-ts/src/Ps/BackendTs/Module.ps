@@ -1,0 +1,868 @@
+import Ps.BackendTs.RuntimeSupport
+import Ps.BackendTs.Expr
+
+structure PsTsFreshNameResult where {
+  name : String
+  nextIndex : Nat
+}
+
+def psTsAppendLines(left : List(String)) : (_ : List(String)) -> List(String) := match left with {
+  | List.nil => fun (right : List(String)) => right
+  | List.cons value rest => let smaller : (_ : List(String)) -> List(String) := (psTsAppendLines(rest))
+fun (right : List(String)) => List.cons(value, (smaller(right)))
+}
+
+def psTsFreshInternalWorker(used : List(String), namePrefix : String, attempts : Nat, index : Nat) : PsTsFreshNameResult := match attempts with {
+  | Nat.zero => PsTsFreshNameResult.mk((String.Internal.append(namePrefix, "overflow")), (Nat.succ(index)))
+  | Nat.succ remaining => let candidate := (String.Internal.append(namePrefix, (psNatToString(index))))
+let sameName : (_ : String) -> Bool := (fun (name : String) => psStringEq(name, candidate))
+if (psListAny(sameName, used)) { psTsFreshInternalWorker(used, namePrefix, remaining, (Nat.succ(index))) } else { PsTsFreshNameResult.mk(candidate, (Nat.succ(index))) }
+}
+
+def psTsFreshInternalWithFuel(used : List(String), namePrefix : String, index : Nat, attempts : Nat) : PsTsFreshNameResult := psTsFreshInternalWorker(used, namePrefix, attempts, index)
+
+def psTsFreshInternal(used : List(String), namePrefix : String, index : Nat) : PsTsFreshNameResult := psTsFreshInternalWithFuel(used, namePrefix, index, 4096)
+
+structure PsTsSymbolMapState where {
+  used : List(String)
+  nextIndex : Nat
+  entriesRev : List((_root_.Prod(String, String)))
+}
+
+def psTsBuildSymbolMap(namePrefix : String, names : List(String), state : PsTsSymbolMapState) : PsTsSymbolMapState := match names with {
+  | List.nil => state
+  | List.cons name rest => let fresh := (psTsFreshInternal(state.used, namePrefix, state.nextIndex))
+psTsBuildSymbolMap(namePrefix, rest, (PsTsSymbolMapState.mk((List.cons(fresh.name, state.used)), fresh.nextIndex, (List.cons((Prod.mk(name, fresh.name)), state.entriesRev)))))
+}
+
+def psTsStructureName(value : PsVerifiedIrStructure) : String := value.name
+
+def psTsInductiveName(value : PsVerifiedIrInductive) : String := value.name
+
+def psTsDeclarationName(value : PsVerifiedIrDeclaration) : String := value.name
+
+def psTsTypeParameterName(value : PsVerifiedIrTypeParameter) : String := value.name
+
+def psTsModuleTopLevelNames(module : PsVerifiedIrModule) : List(String) := psTsAppendLines((psListMap(psTsDeclarationName, module.declarations)), (psTsAppendLines((psListMap(psTsStructureName, module.structures)), (psListMap(psTsInductiveName, module.inductives)))))
+
+def psTsBuildBrandMap(module : PsVerifiedIrModule) : List((_root_.Prod(String, String))) := let state := (psTsBuildSymbolMap("__ps$brand$", (psListMap(psTsStructureName, module.structures)), (PsTsSymbolMapState.mk((psTsModuleTopLevelNames(module)), 0, List.nil))))
+psListReverse(state.entriesRev)
+
+def psTsBuildTagMap(module : PsVerifiedIrModule) : List((_root_.Prod(String, String))) := let state := (psTsBuildSymbolMap("__ps$tag$", (psListMap(psTsInductiveName, module.inductives)), (PsTsSymbolMapState.mk((psTsModuleTopLevelNames(module)), 0, List.nil))))
+psListReverse(state.entriesRev)
+
+def psTsGenericNames(parameters : List(PsVerifiedIrTypeParameter)) : String := if (psListIsEmpty(parameters)) { "" } else { psTsJoin("", (_root_.List.cons("<", (_root_.List.cons((psTsJoin(", ", (psListMap(psTsTypeParameterName, parameters)))), (_root_.List.cons(">", _root_.List.nil))))))) }
+
+def psTsNameSequence(namePrefix : String, count : Nat) : (_ : Nat) -> List(String) := match count with {
+  | Nat.zero => fun (_index : Nat) => List.nil
+  | Nat.succ remaining => fun (index : Nat) => let smaller : (_ : Nat) -> List(String) := (psTsNameSequence(namePrefix, remaining))
+List.cons((String.Internal.append(namePrefix, (psNatToString(index)))), (smaller((Nat.succ(index)))))
+}
+
+def psTsEmitStructureWithVisibility(isPublic : Bool, brands : List((_root_.Prod(String, String))), structureInfo : PsVerifiedIrStructure) : Except(PsTsEmitError, (List(String))) := match (psTsLookup(brands, structureInfo.name)) with {
+  | Option.none => Except.error((PsTsEmitError.unknownStructure(structureInfo.name)))
+  | Option.some brand => let printField : (_ : PsVerifiedIrStructureField) -> Except(PsTsEmitError, String) := (fun (field : PsVerifiedIrStructureField) => match (psTsEmitType(field.type)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok type => Except.ok((psTsJoin("", (_root_.List.cons("readonly ", (_root_.List.cons(field.name, (_root_.List.cons(": ", (_root_.List.cons(type, (_root_.List.cons(";", _root_.List.nil)))))))))))))
+})
+match (psListMapExcept(printField, structureInfo.fields)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok fields => let generic := (psTsGenericNames(structureInfo.typeParameters))
+let brandLine := (psTsJoin("", (_root_.List.cons("const ", (_root_.List.cons(brand, (_root_.List.cons(": unique symbol = Symbol(", (_root_.List.cons((psJsonQuote((psTsJoin("", (_root_.List.cons("ProofScript.", (_root_.List.cons(structureInfo.name, _root_.List.nil)))))))), (_root_.List.cons(");", _root_.List.nil))))))))))))
+let interfaceLine := (psTsJoin("", (_root_.List.cons((if (isPublic) { "export interface " } else { "interface " }), (_root_.List.cons(structureInfo.name, (_root_.List.cons(generic, (_root_.List.cons(" { readonly [", (_root_.List.cons(brand, (_root_.List.cons("]: true; ", (_root_.List.cons((psTsJoin(" ", fields)), (_root_.List.cons(" }", _root_.List.nil))))))))))))))))))
+Except.ok((_root_.List.cons(brandLine, (_root_.List.cons(interfaceLine, _root_.List.nil)))))
+}
+}
+
+def psTsEmitStructure(brands : List((_root_.Prod(String, String))), value : PsVerifiedIrStructure) : Except(PsTsEmitError, (List(String))) := psTsEmitStructureWithVisibility(true, brands, value)
+
+def psTsEmitConstructorVariant(tag : String, constructorInfo : PsVerifiedIrConstructor) : Except(PsTsEmitError, String) := let printField : (_ : PsVerifiedIrConstructorField) -> Except(PsTsEmitError, String) := (fun (field : PsVerifiedIrConstructorField) => match (psTsEmitType(field.type)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok type => Except.ok((psTsJoin("", (_root_.List.cons("readonly ", (_root_.List.cons(field.name, (_root_.List.cons(": ", (_root_.List.cons(type, (_root_.List.cons(";", _root_.List.nil)))))))))))))
+})
+match (psListMapExcept(printField, constructorInfo.fields)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok fields => Except.ok((psTsJoin("", (_root_.List.cons("{ readonly [", (_root_.List.cons(tag, (_root_.List.cons("]: ", (_root_.List.cons((psJsonQuote(constructorInfo.name)), (_root_.List.cons("; ", (_root_.List.cons((psTsJoin(" ", fields)), (_root_.List.cons(" }", _root_.List.nil)))))))))))))))))
+}
+
+def psTsEmitConstructorValue(tag : String, inductiveInfo : PsVerifiedIrInductive, constructorInfo : PsVerifiedIrConstructor) : Except(PsTsEmitError, String) := let generic := (psTsGenericNames(inductiveInfo.typeParameters))
+let resultType := (psTsJoin("", (_root_.List.cons(inductiveInfo.name, (_root_.List.cons(generic, _root_.List.nil))))))
+if (if (psListIsEmpty(inductiveInfo.typeParameters)) { psListIsEmpty(constructorInfo.fields) } else { false }) { Except.ok((psTsJoin("", (_root_.List.cons("  [", (_root_.List.cons((psJsonQuote(constructorInfo.name)), (_root_.List.cons("]: { [", (_root_.List.cons(tag, (_root_.List.cons("]: ", (_root_.List.cons((psJsonQuote(constructorInfo.name)), (_root_.List.cons(" } as ", (_root_.List.cons(resultType, (_root_.List.cons(",", _root_.List.nil))))))))))))))))))))) } else { let printParameter : (_ : PsVerifiedIrConstructorField) -> Except(PsTsEmitError, String) := (fun (field : PsVerifiedIrConstructorField) => match (psTsEmitType(field.type)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok type => Except.ok(type)
+})
+match (psListMapExcept(printParameter, constructorInfo.fields)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok fieldTypes => let parameterNames := (psTsNameSequence("__field", (psListLength(constructorInfo.fields)), 0))
+let formatParameter : (_ : _root_.Prod(String, String)) -> String := (fun (entry : _root_.Prod(String, String)) => match entry with {
+  | Prod.mk name type => psTsJoin("", (_root_.List.cons(name, (_root_.List.cons(": ", (_root_.List.cons(type, _root_.List.nil)))))))
+})
+let parameters := (psListMap(formatParameter, (psListZip(parameterNames, fieldTypes))))
+let formatField : (_ : _root_.Prod(PsVerifiedIrConstructorField, String)) -> String := (fun (entry : _root_.Prod(PsVerifiedIrConstructorField, String)) => match entry with {
+  | Prod.mk field name => psTsJoin("", (_root_.List.cons("[", (_root_.List.cons((psJsonQuote(field.name)), (_root_.List.cons("]: ", (_root_.List.cons(name, _root_.List.nil)))))))))
+})
+let fields := (psListMap(formatField, (psListZip(constructorInfo.fields, parameterNames))))
+let suffix := (if (psListIsEmpty(fields)) { "" } else { psTsJoin("", (_root_.List.cons(", ", (_root_.List.cons((psTsJoin(", ", fields)), _root_.List.nil))))) })
+Except.ok((psTsJoin("", (_root_.List.cons("  [", (_root_.List.cons((psJsonQuote(constructorInfo.name)), (_root_.List.cons("]: ", (_root_.List.cons(generic, (_root_.List.cons("(", (_root_.List.cons((psTsJoin(", ", parameters)), (_root_.List.cons("): ", (_root_.List.cons(resultType, (_root_.List.cons(" => ({ [", (_root_.List.cons(tag, (_root_.List.cons("]: ", (_root_.List.cons((psJsonQuote(constructorInfo.name)), (_root_.List.cons(suffix, (_root_.List.cons(" } as ", (_root_.List.cons(resultType, (_root_.List.cons("),", _root_.List.nil)))))))))))))))))))))))))))))))))))
+} }
+
+-- A leading union separator on a single variant creates a
+-- one-member TSUnionType which formatters collapse to its member.
+-- Emit the canonical type shape before the exact AST guard.
+def psTsEmitInductiveWithVisibility(isPublic : Bool, tags : List((_root_.Prod(String, String))), inductiveInfo : PsVerifiedIrInductive) : Except(PsTsEmitError, (List(String))) := match (psTsLookup(tags, inductiveInfo.name)) with {
+  | Option.none => Except.error((PsTsEmitError.unknownInductive(inductiveInfo.name)))
+  | Option.some tag => match (psListMapExcept((psTsEmitConstructorVariant(tag)), inductiveInfo.constructors)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok variants => match (psListMapExcept((psTsEmitConstructorValue(tag, inductiveInfo)), inductiveInfo.constructors)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok constructorValues => let generic := (psTsGenericNames(inductiveInfo.typeParameters))
+let declarationPrefix := (psTsJoin("", (_root_.List.cons((if (isPublic) { "export type " } else { "type " }), (_root_.List.cons(inductiveInfo.name, (_root_.List.cons(generic, _root_.List.nil))))))))
+let typeLine : String := (match variants with {
+  | List.nil => psTsJoin("", (_root_.List.cons(declarationPrefix, (_root_.List.cons(" = never;", _root_.List.nil)))))
+  | List.cons first rest => match rest with {
+  | List.nil => psTsJoin("", (_root_.List.cons(declarationPrefix, (_root_.List.cons(" = ", (_root_.List.cons(first, (_root_.List.cons(";", _root_.List.nil)))))))))
+  | List.cons _ _ => psTsJoin("", (_root_.List.cons(declarationPrefix, (_root_.List.cons(" =\n  | ", (_root_.List.cons((psTsJoin("\n  | ", variants)), (_root_.List.cons(";", _root_.List.nil)))))))))
+}
+})
+let tagLine := (psTsJoin("", (_root_.List.cons("const ", (_root_.List.cons(tag, (_root_.List.cons(": unique symbol = Symbol(", (_root_.List.cons((psJsonQuote((psTsJoin("", (_root_.List.cons("ProofScript.", (_root_.List.cons(inductiveInfo.name, (_root_.List.cons(".tag", _root_.List.nil)))))))))), (_root_.List.cons(");", _root_.List.nil))))))))))))
+let exportLine := (psTsJoin("", (_root_.List.cons((if (isPublic) { "export const " } else { "const " }), (_root_.List.cons(inductiveInfo.name, (_root_.List.cons(" = {", _root_.List.nil))))))))
+Except.ok((psTsAppendLines((_root_.List.cons(tagLine, (_root_.List.cons(typeLine, (_root_.List.cons(exportLine, _root_.List.nil)))))), (psTsAppendLines(constructorValues, (_root_.List.cons("} as const;", _root_.List.nil)))))))
+}
+}
+}
+
+def psTsEmitInductive(tags : List((_root_.Prod(String, String))), value : PsVerifiedIrInductive) : Except(PsTsEmitError, (List(String))) := psTsEmitInductiveWithVisibility(true, tags, value)
+
+def psTsEmitImport(item : PsVerifiedIrExternalImport) : String := let alias := (if (psStringEq(item.importedName, item.localName)) { "" } else { String.Internal.append(" as ", item.localName) })
+psTsJoin("", (_root_.List.cons("import { ", (_root_.List.cons(item.importedName, (_root_.List.cons(alias, (_root_.List.cons(" } from ", (_root_.List.cons((psJsonQuote(item.source)), (_root_.List.cons(";", _root_.List.nil)))))))))))))
+
+-- Eta parameters are already evaluated variables. When none of their names
+-- occur in the callee, they can safely pass through its lexical bindings and
+-- branches without capturing a name or changing argument evaluation order.
+def psTsEtaArgumentsFresh(fn : PsVerifiedIrExpr, arguments : List(PsVerifiedIrExpr)) : Bool := match arguments with {
+  | List.nil => true
+  | List.cons argument rest => match argument with {
+  | PsVerifiedIrExpr.var name => if (psTsExprUsesNameWithFuel(4096, fn, name)) { false } else { psTsEtaArgumentsFresh(fn, rest) }
+  | _ => false
+}
+}
+
+def psTsEtaBind(parameters : List(PsVerifiedIrParameter)) : (_ : List(PsVerifiedIrExpr)) -> (_ : PsVerifiedIrExpr) -> Option(PsVerifiedIrExpr) := match parameters with {
+  | List.nil => fun (arguments : List(PsVerifiedIrExpr)) (body : PsVerifiedIrExpr) => if (psListIsEmpty(arguments)) { Option.some(body) } else { Option.none }
+  | List.cons parameter rest => let smaller : (_ : List(PsVerifiedIrExpr)) -> (_ : PsVerifiedIrExpr) -> Option(PsVerifiedIrExpr) := (psTsEtaBind(rest))
+fun (arguments : List(PsVerifiedIrExpr)) (body : PsVerifiedIrExpr) => match arguments with {
+  | List.nil => Option.none
+  | List.cons argument tail => match (smaller(tail, body)) with {
+  | Option.none => Option.none
+  | Option.some inner => Option.some((PsVerifiedIrExpr.letE(parameter.name, parameter.type, argument, inner)))
+}
+}
+}
+
+def psTsEtaAlternatives(apply : (_ : PsVerifiedIrExpr) -> Option(PsVerifiedIrExpr), alternatives : List((Prod(String, (Prod((List(PsVerifiedIrMatchBinding)), PsVerifiedIrExpr)))))) : Option((List((Prod(String, (Prod((List(PsVerifiedIrMatchBinding)), PsVerifiedIrExpr))))))) := match alternatives with {
+  | List.nil => Option.some(List.nil)
+  | List.cons alternative rest => match (apply((Prod.snd((Prod.snd(alternative)))))) with {
+  | Option.none => Option.none
+  | Option.some body => match (psTsEtaAlternatives(apply, rest)) with {
+  | Option.none => Option.none
+  | Option.some tail => Option.some((List.cons((Prod.mk((Prod.fst(alternative)), (Prod.mk((Prod.fst((Prod.snd(alternative)))), body)))), tail)))
+}
+}
+}
+
+def psTsEtaApplyWorker(arguments : List(PsVerifiedIrExpr), fuel : Nat) : (_ : PsVerifiedIrExpr) -> Option(PsVerifiedIrExpr) := match fuel with {
+  | Nat.zero => fun (_fn : PsVerifiedIrExpr) => Option.none
+  | Nat.succ remaining => fun (fn : PsVerifiedIrExpr) => let smaller : (_ : PsVerifiedIrExpr) -> Option(PsVerifiedIrExpr) := (psTsEtaApplyWorker(arguments, remaining))
+match fn with {
+  | PsVerifiedIrExpr.lambda parameters _ body => psTsEtaBind(parameters, arguments, body)
+  | PsVerifiedIrExpr.letE name type value body => match (smaller(body)) with {
+  | Option.none => Option.none
+  | Option.some inner => Option.some((PsVerifiedIrExpr.letE(name, type, value, inner)))
+}
+  | PsVerifiedIrExpr.ifE condition left right => match (smaller(left)) with {
+  | Option.none => Option.none
+  | Option.some first => match (smaller(right)) with {
+  | Option.none => Option.none
+  | Option.some second => Option.some((PsVerifiedIrExpr.ifE(condition, first, second)))
+}
+}
+  | PsVerifiedIrExpr.matchE name types scrutinee alternatives => match (psTsEtaAlternatives(smaller, alternatives)) with {
+  | Option.none => Option.none
+  | Option.some branches => Option.some((PsVerifiedIrExpr.matchE(name, types, scrutinee, branches)))
+}
+  | _ => Option.none
+}
+}
+
+def psTsInlineEtaApplication(expr : PsVerifiedIrExpr) : PsVerifiedIrExpr := match expr with {
+  | PsVerifiedIrExpr.call fn types arguments => if (psListIsEmpty(types)) { if (psTsEtaArgumentsFresh(fn, arguments)) { match (psTsEtaApplyWorker(arguments, 4096, fn)) with {
+  | Option.some body => body
+  | Option.none => expr
+} } else { expr } } else { expr }
+  | _ => expr
+}
+
+def psTsEmitDeclarationGeneralWithVisibility(isPublic : Bool, brands : List((_root_.Prod(String, String))), tags : List((_root_.Prod(String, String))), declaration : PsVerifiedIrDeclaration) : Except(PsTsEmitError, String) := let generic := (psTsGenericNames(declaration.typeParameters))
+match (psTsEmitType(declaration.resultType)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok resultType => match (psTsEmitTypedTailExpr(brands, tags, declaration.resultType, (psTsInlineEtaApplication(declaration.body)))) with {
+  | Except.error error => Except.error(error)
+  | Except.ok body => if (psListIsEmpty(declaration.parameters)) { if (psListIsEmpty(declaration.typeParameters)) { Except.ok((psTsJoin("", (_root_.List.cons((if (isPublic) { "export const " } else { "const " }), (_root_.List.cons(declaration.name, (_root_.List.cons(": ", (_root_.List.cons(resultType, (_root_.List.cons(" = __ps$run((function*(): __ps$Computation<", (_root_.List.cons(resultType, (_root_.List.cons("> { return ", (_root_.List.cons(body, (_root_.List.cons("; })());", _root_.List.nil))))))))))))))))))))) } else { Except.error((PsTsEmitError.genericValueUnsupported(declaration.name))) } } else { let printParameter : (_ : PsVerifiedIrParameter) -> Except(PsTsEmitError, String) := (fun (parameter : PsVerifiedIrParameter) => match (psTsEmitType(parameter.type)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok type => Except.ok((psTsJoin("", (_root_.List.cons(parameter.name, (_root_.List.cons(": ", (_root_.List.cons(type, _root_.List.nil)))))))))
+})
+match (psListMapExcept(printParameter, declaration.parameters)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok parameters => let parameterName : (_ : PsVerifiedIrParameter) -> String := (fun (parameter : PsVerifiedIrParameter) => parameter.name)
+let arguments := (psTsJoin(", ", (psListMap(parameterName, declaration.parameters))))
+let implementation := (String.Internal.append("__ps$impl$", declaration.name))
+Except.ok((psTsJoin("", (_root_.List.cons((if (isPublic) { "export function " } else { "function " }), (_root_.List.cons(declaration.name, (_root_.List.cons(generic, (_root_.List.cons("(", (_root_.List.cons((psTsJoin(", ", parameters)), (_root_.List.cons("): ", (_root_.List.cons(resultType, (_root_.List.cons(" { return __ps$run(", (_root_.List.cons(implementation, (_root_.List.cons(generic, (_root_.List.cons("(", (_root_.List.cons(arguments, (_root_.List.cons(")); }\nfunction* ", (_root_.List.cons(implementation, (_root_.List.cons(generic, (_root_.List.cons("(", (_root_.List.cons((psTsJoin(", ", parameters)), (_root_.List.cons("): __ps$Computation<", (_root_.List.cons(resultType, (_root_.List.cons("> { return ", (_root_.List.cons(body, (_root_.List.cons("; }\n__ps$implementations.set(", (_root_.List.cons(declaration.name, (_root_.List.cons(", ", (_root_.List.cons(implementation, (_root_.List.cons(");", _root_.List.nil)))))))))))))))))))))))))))))))))))))))))))))))))))))))
+} }
+}
+}
+
+-- A zero/successor fold over one recursive field is a count. Emit its exact
+-- computation as a loop, avoiding a suspended generator for every list cell.
+-- Recognition uses the IR shape, not a source function or inductive name.
+def psTsEmitDeclarationGeneral(brands : List((_root_.Prod(String, String))), tags : List((_root_.Prod(String, String))), value : PsVerifiedIrDeclaration) : Except(PsTsEmitError, String) := psTsEmitDeclarationGeneralWithVisibility(true, brands, tags, value)
+
+def psTsCountLiteral(expected : Nat, expr : PsVerifiedIrExpr) : Bool := match expr with {
+  | PsVerifiedIrExpr.literal literal => match literal with {
+  | PsVerifiedIrLiteral.natural value => Nat.beq(expected, value)
+  | _ => false
+}
+  | _ => false
+}
+
+def psTsCountRecursiveArgument(name : String, expr : PsVerifiedIrExpr) : Option(String) := match expr with {
+  | PsVerifiedIrExpr.call fn _ args => match fn with {
+  | PsVerifiedIrExpr.var called => if (psStringEq(called, name)) { match args with {
+  | List.cons argument rest => if (psListIsEmpty(rest)) { match argument with {
+  | PsVerifiedIrExpr.var localName => Option.some(localName)
+  | _ => Option.none
+} } else { Option.none }
+  | _ => Option.none
+} } else { Option.none }
+  | _ => Option.none
+}
+  | _ => Option.none
+}
+
+def psTsCountStepArgument(name : String, expr : PsVerifiedIrExpr) : Option(String) := match expr with {
+  | PsVerifiedIrExpr.intrinsic operation _ args => match operation with {
+  | PsVerifiedIrIntrinsic.natAdd => match args with {
+  | List.cons left rest => match rest with {
+  | List.cons right tail => if (psListIsEmpty(tail)) { if (psTsCountLiteral(1, left)) { psTsCountRecursiveArgument(name, right) } else { if (psTsCountLiteral(1, right)) { psTsCountRecursiveArgument(name, left) } else { Option.none } } } else { Option.none }
+  | _ => Option.none
+}
+  | _ => Option.none
+}
+  | _ => Option.none
+}
+  | _ => Option.none
+}
+
+def psTsCountField(localName : String, bindings : List(PsVerifiedIrMatchBinding)) : Option(String) := match bindings with {
+  | List.nil => Option.none
+  | List.cons binding rest => if (psStringEq(localName, binding.name)) { Option.some(binding.field) } else { psTsCountField(localName, rest) }
+}
+
+def psTsEmitCountCases(tag : String, name : String, base : Prod(String, (Prod((List(PsVerifiedIrMatchBinding)), PsVerifiedIrExpr))), step : Prod(String, (Prod((List(PsVerifiedIrMatchBinding)), PsVerifiedIrExpr)))) : Option(String) := if (psTsCountLiteral(0, (Prod.snd((Prod.snd(base)))))) { match (psTsCountStepArgument(name, (Prod.snd((Prod.snd(step)))))) with {
+  | Option.none => Option.none
+  | Option.some localName => match (psTsCountField(localName, (Prod.fst((Prod.snd(step)))))) with {
+  | Option.none => Option.none
+  | Option.some field => Option.some((psTsJoin("", (_root_.List.cons("let __ps$count = 0n; for (;;) { switch (__ps$cursor[", (_root_.List.cons(tag, (_root_.List.cons("]) { case ", (_root_.List.cons((psJsonQuote((Prod.fst(base)))), (_root_.List.cons(": return __ps$count; case ", (_root_.List.cons((psJsonQuote((Prod.fst(step)))), (_root_.List.cons(": __ps$cursor = __ps$cursor.", (_root_.List.cons(field, (_root_.List.cons("; __ps$count += 1n; break; default: throw new Error(\"invalid ProofScript constructor tag\"); } }", _root_.List.nil)))))))))))))))))))))
+}
+} } else { Option.none }
+
+def psTsEmitCountLoopWithVisibility(isPublic : Bool, tags : List((Prod(String, String))), declaration : PsVerifiedIrDeclaration) : Option(String) := match declaration.resultType with {
+  | PsVerifiedIrType.primitive primitive => match primitive with {
+  | PsVerifiedIrPrimitiveType.nat => match declaration.parameters with {
+  | List.cons parameter rest => if (psListIsEmpty(rest)) { match declaration.body with {
+  | PsVerifiedIrExpr.matchE name _ scrutinee alternatives => match scrutinee with {
+  | PsVerifiedIrExpr.var localName => if (psStringEq(localName, parameter.name)) { match (psTsLookup(tags, name)) with {
+  | Option.none => Option.none
+  | Option.some tag => match alternatives with {
+  | List.cons first remaining => match remaining with {
+  | List.cons second tail => if (psListIsEmpty(tail)) { let cases : Option(String) := (match (psTsEmitCountCases(tag, declaration.name, first, second)) with {
+  | Option.some printed => Option.some(printed)
+  | Option.none => psTsEmitCountCases(tag, declaration.name, second, first)
+})
+match cases with {
+  | Option.none => Option.none
+  | Option.some printed => match (psTsEmitType(parameter.type)) with {
+  | Except.error _ => Option.none
+  | Except.ok type => Option.some((psTsJoin("", (_root_.List.cons((if (isPublic) { "export function " } else { "function " }), (_root_.List.cons(declaration.name, (_root_.List.cons((psTsGenericNames(declaration.typeParameters)), (_root_.List.cons("(", (_root_.List.cons(parameter.name, (_root_.List.cons(": ", (_root_.List.cons(type, (_root_.List.cons("): bigint { let __ps$cursor = ", (_root_.List.cons(parameter.name, (_root_.List.cons("; ", (_root_.List.cons(printed, (_root_.List.cons(" }", _root_.List.nil)))))))))))))))))))))))))))
+}
+} } else { Option.none }
+  | _ => Option.none
+}
+  | _ => Option.none
+}
+} } else { Option.none }
+  | _ => Option.none
+}
+  | _ => Option.none
+} } else { Option.none }
+  | _ => Option.none
+}
+  | _ => Option.none
+}
+  | _ => Option.none
+}
+
+-- Closed tail workers need no suspended continuations. This recognizer accepts
+-- pure expressions and exact self calls only; all other code uses generators.
+def psTsEmitCountLoop(tags : List((Prod(String, String))), value : PsVerifiedIrDeclaration) : Option(String) := psTsEmitCountLoopWithVisibility(true, tags, value)
+
+structure PsTsTailAlias where {
+  name : String
+  captured : List(PsVerifiedIrExpr)
+  arity : Nat
+}
+
+def psTsTailMap {alpha : Type} {beta : Type}(convert : (_ : alpha) -> Option(beta), values : List(alpha)) : Option((List(beta))) := match values with {
+  | List.nil => Option.some(List.nil)
+  | List.cons value rest => match (convert(value)) with {
+  | Option.none => Option.none
+  | Option.some result => match (psTsTailMap(convert, rest)) with {
+  | Option.none => Option.none
+  | Option.some results => Option.some((List.cons(result, results)))
+}
+}
+}
+
+def psTsTailFindAlias(aliases : List(PsTsTailAlias), name : String) : Option(PsTsTailAlias) := match aliases with {
+  | List.nil => Option.none
+  | List.cons alias rest => if (psStringEq(alias.name, name)) { Option.some(alias) } else { psTsTailFindAlias(rest, name) }
+}
+
+def psTsTailParametersMatch(parameters : List(PsVerifiedIrParameter)) : (_ : List(PsVerifiedIrExpr)) -> Bool := match parameters with {
+  | List.nil => fun (arguments : List(PsVerifiedIrExpr)) => psListIsEmpty(arguments)
+  | List.cons parameter rest => let smaller : (_ : List(PsVerifiedIrExpr)) -> Bool := (psTsTailParametersMatch(rest))
+fun (arguments : List(PsVerifiedIrExpr)) => match arguments with {
+  | List.nil => false
+  | List.cons argument tail => match argument with {
+  | PsVerifiedIrExpr.var name => if (psStringEq(name, parameter.name)) { smaller(tail) } else { false }
+  | _ => false
+}
+}
+}
+
+def psTsTailAliasPrefix(parameters : List(PsVerifiedIrParameter), arguments : List(PsVerifiedIrExpr)) : Option((List(PsVerifiedIrExpr))) := match arguments with {
+  | List.nil => if (psListIsEmpty(parameters)) { Option.some(List.nil) } else { Option.none }
+  | List.cons argument rest => if (psTsTailParametersMatch(parameters, arguments)) { Option.some(List.nil) } else { match argument with {
+  | PsVerifiedIrExpr.var name => let shadows : (_ : PsVerifiedIrParameter) -> Bool := (fun (parameter : PsVerifiedIrParameter) => psStringEq(parameter.name, name))
+if (psListAny(shadows, parameters)) { Option.none } else { match (psTsTailAliasPrefix(parameters, rest)) with {
+  | Option.none => Option.none
+  | Option.some captured => Option.some((List.cons(argument, captured)))
+} }
+  | _ => Option.none
+} }
+}
+
+def psTsTailAliasValue(self : String, name : String, value : PsVerifiedIrExpr) : Option(PsTsTailAlias) := match value with {
+  | PsVerifiedIrExpr.lambda parameters _ body => match body with {
+  | PsVerifiedIrExpr.call fn types arguments => if (psListIsEmpty(types)) { match fn with {
+  | PsVerifiedIrExpr.var called => if (psStringEq(called, self)) { let shadows : (_ : PsVerifiedIrParameter) -> Bool := (fun (parameter : PsVerifiedIrParameter) => psStringEq(parameter.name, self))
+if (psListAny(shadows, parameters)) { Option.none } else { match (psTsTailAliasPrefix(parameters, arguments)) with {
+  | Option.none => Option.none
+  | Option.some captured => Option.some((PsTsTailAlias.mk(name, captured, (psListLength(parameters)))))
+} } } else { Option.none }
+  | _ => Option.none
+} } else { Option.none }
+  | _ => Option.none
+}
+  | _ => Option.none
+}
+
+def psTsTailPureWithFuel(aliases : List(PsTsTailAlias), fuel : Nat) : (_ : PsVerifiedIrExpr) -> Bool := match fuel with {
+  | Nat.zero => fun (_expr : PsVerifiedIrExpr) => false
+  | Nat.succ remaining => fun (expr : PsVerifiedIrExpr) => let smaller : (_ : PsVerifiedIrExpr) -> Bool := (psTsTailPureWithFuel(aliases, remaining))
+let impure : (_ : PsVerifiedIrExpr) -> Bool := (fun (value : PsVerifiedIrExpr) => if (smaller(value)) { false } else { true })
+let impureField : (_ : Prod(String, PsVerifiedIrExpr)) -> Bool := (fun (field : Prod(String, PsVerifiedIrExpr)) => impure((Prod.snd(field))))
+match expr with {
+  | PsVerifiedIrExpr.literal _ => true
+  | PsVerifiedIrExpr.var name => match (psTsTailFindAlias(aliases, name)) with {
+  | Option.none => true
+  | Option.some _ => false
+}
+  | PsVerifiedIrExpr.intrinsic operation _ arguments => match operation with {
+  | PsVerifiedIrIntrinsic.arrayMap => false
+  | PsVerifiedIrIntrinsic.arrayFoldl => false
+  | _ => if (psListAny(impure, arguments)) { false } else { true }
+}
+  | PsVerifiedIrExpr.record _ _ fields => if (psListAny(impureField, fields)) { false } else { true }
+  | PsVerifiedIrExpr.constructor _ _ _ fields => if (psListAny(impureField, fields)) { false } else { true }
+  | PsVerifiedIrExpr.projection _ _ target _ => smaller(target)
+  | PsVerifiedIrExpr.ifE condition left right => if (smaller(condition)) { if (smaller(left)) { smaller(right) } else { false } } else { false }
+  | _ => false
+}
+}
+
+def psTsTailPrintPure(brands : List((Prod(String, String))), tags : List((Prod(String, String))), aliases : List(PsTsTailAlias), expr : PsVerifiedIrExpr) : Option(String) := if (psTsTailPureWithFuel(aliases, 4096, expr)) { match (psTsEmitExpr(brands, tags, expr)) with {
+  | Except.error _ => Option.none
+  | Except.ok printed => Option.some(printed)
+} } else { Option.none }
+
+def psTsTailBindingSafe(declaration : PsVerifiedIrDeclaration, aliases : List(PsTsTailAlias), name : String) : Bool := let parameterUses : (_ : PsVerifiedIrParameter) -> Bool := (fun (parameter : PsVerifiedIrParameter) => psStringEq(parameter.name, name))
+let prefixUses : (_ : PsVerifiedIrExpr) -> Bool := (fun (value : PsVerifiedIrExpr) => psTsExprUsesNameWithFuel(4096, value, name))
+let aliasUses : (_ : PsTsTailAlias) -> Bool := (fun (alias : PsTsTailAlias) => if (psStringEq(alias.name, name)) { true } else { psListAny(prefixUses, alias.captured) })
+if (psStringEq(declaration.name, name)) { false } else { if (psListAny(parameterUses, declaration.parameters)) { false } else { if (psListAny(aliasUses, aliases)) { false } else { true } } }
+
+def psTsTailCallArguments(self : String, aliases : List(PsTsTailAlias), fn : PsVerifiedIrExpr, arguments : List(PsVerifiedIrExpr)) : Option((List(PsVerifiedIrExpr))) := match fn with {
+  | PsVerifiedIrExpr.var name => if (psStringEq(name, self)) { Option.some(arguments) } else { match (psTsTailFindAlias(aliases, name)) with {
+  | Option.none => Option.none
+  | Option.some alias => if (Nat.beq(alias.arity, (psListLength(arguments)))) { Option.some((psListAppend(alias.captured, arguments))) } else { Option.none }
+} }
+  | _ => Option.none
+}
+
+-- A removed tail alias must never escape through an ordinary expression.
+def psTsTailMentionsAlias(aliases : List(PsTsTailAlias), expr : PsVerifiedIrExpr) : Bool := psListAny((fun (alias : PsTsTailAlias) => psTsExprUsesNameWithFuel(4096, expr, alias.name)), aliases)
+
+def psTsTailEmitValue(generated : Bool, brands : List((Prod(String, String))), tags : List((Prod(String, String))), aliases : List(PsTsTailAlias), expected : Option(PsVerifiedIrType), tail : Bool, expr : PsVerifiedIrExpr) : Option(String) := if (generated) { if (psTsTailMentionsAlias(aliases, expr)) { Option.none } else { match (psTsEmitTypedExprContextWithFuel(brands, tags, true, 4096, expected, tail, expr)) with {
+  | Except.error _ => Option.none
+  | Except.ok printed => Option.some(printed)
+} } } else { psTsTailPrintPure(brands, tags, aliases, expr) }
+
+def psTsTailReturnValue(generated : Bool, brands : List((Prod(String, String))), tags : List((Prod(String, String))), declaration : PsVerifiedIrDeclaration, aliases : List(PsTsTailAlias), expr : PsVerifiedIrExpr) : Option(String) := match (psTsTailEmitValue(generated, brands, tags, aliases, (Option.some(declaration.resultType)), true, expr)) with {
+  | Option.none => Option.none
+  | Option.some printed => Option.some((psTsJoin("", (_root_.List.cons("return ", (_root_.List.cons(printed, (_root_.List.cons(";", _root_.List.nil)))))))))
+}
+
+def psTsTailEmitTargetContextWithFuel(brands : List((Prod(String, String))), tags : List((Prod(String, String))), declaration : PsVerifiedIrDeclaration, generated : Bool, loopTarget : Option(String), fuel : Nat) : (_ : List(PsTsTailAlias)) -> (_ : PsVerifiedIrExpr) -> Option(String) := match fuel with {
+  | Nat.zero => fun (_aliases : List(PsTsTailAlias)) (_expr : PsVerifiedIrExpr) => Option.none
+  | Nat.succ remaining => fun (aliases : List(PsTsTailAlias)) (expr : PsVerifiedIrExpr) => let smaller : (_ : List(PsTsTailAlias)) -> (_ : PsVerifiedIrExpr) -> Option(String) := (psTsTailEmitTargetContextWithFuel(brands, tags, declaration, generated, loopTarget, remaining))
+let emitPure : (_ : PsVerifiedIrExpr) -> Option(String) := (psTsTailEmitValue(generated, brands, tags, aliases, Option.none, false))
+match expr with {
+  | PsVerifiedIrExpr.call fn types arguments => if (psListIsEmpty(types)) { match (psTsTailCallArguments(declaration.name, aliases, fn, arguments)) with {
+  | Option.none => if (generated) { psTsTailReturnValue(true, brands, tags, declaration, aliases, expr) } else { Option.none }
+  | Option.some actual => if (Nat.beq((psListLength(actual)), (psListLength(declaration.parameters)))) { match (psTsTailMap(emitPure, actual)) with {
+  | Option.none => Option.none
+  | Option.some printed => let parameterName : (_ : PsVerifiedIrParameter) -> String := (fun (parameter : PsVerifiedIrParameter) => parameter.name)
+match loopTarget with {
+  | Option.none => Option.some((psTsJoin("", (_root_.List.cons("[", (_root_.List.cons((psTsJoin(", ", (psListMap(parameterName, declaration.parameters)))), (_root_.List.cons("] = [", (_root_.List.cons((psTsJoin(", ", printed)), (_root_.List.cons("]; continue;", _root_.List.nil)))))))))))))
+  | Option.some target => Option.some((psTsJoin("", (_root_.List.cons(target, (_root_.List.cons(" = [", (_root_.List.cons((psTsJoin(", ", printed)), (_root_.List.cons("]; continue;", _root_.List.nil)))))))))))
+}
+} } else { Option.none }
+} } else { if (generated) { psTsTailReturnValue(true, brands, tags, declaration, aliases, expr) } else { Option.none } }
+  | PsVerifiedIrExpr.letE name type value body => if (psTsExprUsesNameWithFuel(4096, value, name)) { Option.none } else { if (psTsTailBindingSafe(declaration, aliases, name)) { match (psTsTailAliasValue(declaration.name, name, value)) with {
+  | Option.some alias => let capturedAlias : (_ : PsVerifiedIrExpr) -> Bool := (fun (argument : PsVerifiedIrExpr) => if (psTsTailPureWithFuel(aliases, 4096, argument)) { false } else { true })
+if (psListAny(capturedAlias, alias.captured)) { Option.none } else { smaller((List.cons(alias, aliases)), body) }
+  | Option.none => match (psTsTailEmitValue(generated, brands, tags, aliases, (Option.some(type)), false, value)) with {
+  | Option.none => Option.none
+  | Option.some printedValue => match (psTsEmitType(type)) with {
+  | Except.error _ => Option.none
+  | Except.ok printedType => match (smaller(aliases, body)) with {
+  | Option.none => Option.none
+  | Option.some printedBody => Option.some((psTsJoin("", (_root_.List.cons("{ const ", (_root_.List.cons(name, (_root_.List.cons(": ", (_root_.List.cons(printedType, (_root_.List.cons(" = ", (_root_.List.cons(printedValue, (_root_.List.cons("; ", (_root_.List.cons(printedBody, (_root_.List.cons(" }", _root_.List.nil)))))))))))))))))))))
+}
+}
+}
+} } else { Option.none } }
+  | PsVerifiedIrExpr.ifE condition left right => match (emitPure(condition)) with {
+  | Option.none => Option.none
+  | Option.some printedCondition => match (smaller(aliases, left)) with {
+  | Option.none => Option.none
+  | Option.some printedLeft => match (smaller(aliases, right)) with {
+  | Option.none => Option.none
+  | Option.some printedRight => Option.some((psTsJoin("", (_root_.List.cons("if (", (_root_.List.cons(printedCondition, (_root_.List.cons(") { ", (_root_.List.cons(printedLeft, (_root_.List.cons(" } else { ", (_root_.List.cons(printedRight, (_root_.List.cons(" }", _root_.List.nil)))))))))))))))))
+}
+}
+}
+  | PsVerifiedIrExpr.matchE name _ scrutinee alternatives => if (psListIsEmpty(alternatives)) { Option.none } else { match (psTsLookup(tags, name)) with {
+  | Option.none => Option.none
+  | Option.some tag => match (emitPure(scrutinee)) with {
+  | Option.none => Option.none
+  | Option.some printedScrutinee => let temporary := (psTsFreshMatchTemp(declaration.body))
+let printBinding : (_ : PsVerifiedIrMatchBinding) -> Option(String) := (fun (binding : PsVerifiedIrMatchBinding) => if (psTsTailBindingSafe(declaration, aliases, binding.name)) { match (psTsEmitType(binding.type)) with {
+  | Except.error _ => Option.none
+  | Except.ok type => Option.some((psTsJoin("", (_root_.List.cons("const ", (_root_.List.cons(binding.name, (_root_.List.cons(": ", (_root_.List.cons(type, (_root_.List.cons(" = ", (_root_.List.cons(temporary, (_root_.List.cons(".", (_root_.List.cons(binding.field, (_root_.List.cons(";", _root_.List.nil)))))))))))))))))))))
+} } else { Option.none })
+let printAlternative : (_ : Prod(String, (Prod((List(PsVerifiedIrMatchBinding)), PsVerifiedIrExpr)))) -> Option(String) := (fun (alternative : Prod(String, (Prod((List(PsVerifiedIrMatchBinding)), PsVerifiedIrExpr)))) => match (psTsTailMap(printBinding, (Prod.fst((Prod.snd(alternative)))))) with {
+  | Option.none => Option.none
+  | Option.some bindings => match (smaller(aliases, (Prod.snd((Prod.snd(alternative)))))) with {
+  | Option.none => Option.none
+  | Option.some body => Option.some((psTsJoin("", (_root_.List.cons("case ", (_root_.List.cons((psJsonQuote((Prod.fst(alternative)))), (_root_.List.cons(": { ", (_root_.List.cons((psTsJoin(" ", bindings)), (_root_.List.cons(" ", (_root_.List.cons(body, (_root_.List.cons(" }", _root_.List.nil)))))))))))))))))
+}
+})
+if (psTsTailBindingSafe(declaration, aliases, temporary)) { match (psTsTailMap(printAlternative, alternatives)) with {
+  | Option.none => Option.none
+  | Option.some cases => Option.some((psTsJoin("", (_root_.List.cons("{ const ", (_root_.List.cons(temporary, (_root_.List.cons(" = ", (_root_.List.cons(printedScrutinee, (_root_.List.cons("; switch (", (_root_.List.cons(temporary, (_root_.List.cons("[", (_root_.List.cons(tag, (_root_.List.cons("]) { ", (_root_.List.cons((psTsJoin(" ", cases)), (_root_.List.cons(" } throw new Error(\"invalid ProofScript constructor tag\"); }", _root_.List.nil)))))))))))))))))))))))))
+} } else { Option.none }
+}
+} }
+  | _ => psTsTailReturnValue(generated, brands, tags, declaration, aliases, expr)
+}
+}
+
+def psTsTailEmitContextWithFuel(brands : List((Prod(String, String))), tags : List((Prod(String, String))), declaration : PsVerifiedIrDeclaration, generated : Bool, fuel : Nat) : (_ : List(PsTsTailAlias)) -> (_ : PsVerifiedIrExpr) -> Option(String) := psTsTailEmitTargetContextWithFuel(brands, tags, declaration, generated, Option.none, fuel)
+
+def psTsTailEmitWithFuel(brands : List((Prod(String, String))), tags : List((Prod(String, String))), declaration : PsVerifiedIrDeclaration, fuel : Nat) : (_ : List(PsTsTailAlias)) -> (_ : PsVerifiedIrExpr) -> Option(String) := psTsTailEmitContextWithFuel(brands, tags, declaration, false, fuel)
+
+def psTsEmitTailLoopWithVisibility(isPublic : Bool, brands : List((Prod(String, String))), tags : List((Prod(String, String))), declaration : PsVerifiedIrDeclaration) : Option(String) := if (psListIsEmpty(declaration.typeParameters)) { if (psListIsEmpty(declaration.parameters)) { Option.none } else { let body := (psTsInlineEtaApplication(declaration.body))
+match (psTsTailEmitWithFuel(brands, tags, declaration, 4096, List.nil, body)) with {
+  | Option.none => Option.none
+  | Option.some printedBody => let printParameter : (_ : PsVerifiedIrParameter) -> Option(String) := (fun (parameter : PsVerifiedIrParameter) => match (psTsEmitType(parameter.type)) with {
+  | Except.error _ => Option.none
+  | Except.ok type => Option.some((psTsJoin("", (_root_.List.cons(parameter.name, (_root_.List.cons(": ", (_root_.List.cons(type, _root_.List.nil)))))))))
+})
+match (psTsTailMap(printParameter, declaration.parameters)) with {
+  | Option.none => Option.none
+  | Option.some parameters => match (psTsEmitType(declaration.resultType)) with {
+  | Except.error _ => Option.none
+  | Except.ok resultType => Option.some((psTsJoin("", (_root_.List.cons((if (isPublic) { "export function " } else { "function " }), (_root_.List.cons(declaration.name, (_root_.List.cons("(", (_root_.List.cons((psTsJoin(", ", parameters)), (_root_.List.cons("): ", (_root_.List.cons(resultType, (_root_.List.cons(" { while (true) { ", (_root_.List.cons(printedBody, (_root_.List.cons(" } }", _root_.List.nil)))))))))))))))))))))
+}
+}
+} } } else { Option.none }
+
+def psTsEmitTailLoop(brands : List((Prod(String, String))), tags : List((Prod(String, String))), value : PsVerifiedIrDeclaration) : Option(String) := psTsEmitTailLoopWithVisibility(true, brands, tags, value)
+
+/-- Call-free expressions need neither generators nor a synthetic loop.
+The existing pure-expression recognizer excludes calls, closures, let/match
+suspensions and higher-order array operations. -/
+def psTsEmitPureParameter(parameter : PsVerifiedIrParameter) : Option(String) := match (psTsEmitType(parameter.type)) with {
+  | Except.error _ => Option.none
+  | Except.ok type => Option.some((psTsJoin("", (_root_.List.cons(parameter.name, (_root_.List.cons(": ", (_root_.List.cons(type, _root_.List.nil)))))))))
+}
+
+def psTsEmitPureDeclaration(isPublic : Bool, brands : List((Prod(String, String))), tags : List((Prod(String, String))), declaration : PsVerifiedIrDeclaration) : Option(String) := if ((psListIsEmpty(declaration.parameters) && (!psListIsEmpty(declaration.typeParameters)))) { Option.none } else { match (psTsTailPrintPure(brands, tags, _root_.List.nil, (psTsInlineEtaApplication(declaration.body)))) with {
+  | Option.none => Option.none
+  | Option.some body => match (psTsEmitType(declaration.resultType)) with {
+  | Except.error _ => Option.none
+  | Except.ok result => let exportPrefix : String := (if (isPublic) { "export " } else { "" })
+if (psListIsEmpty(declaration.parameters)) { Option.some((psTsJoin("", (_root_.List.cons(exportPrefix, (_root_.List.cons("const ", (_root_.List.cons(declaration.name, (_root_.List.cons(": ", (_root_.List.cons(result, (_root_.List.cons(" = ", (_root_.List.cons(body, (_root_.List.cons(";", _root_.List.nil))))))))))))))))))) } else { match (psTsTailMap(psTsEmitPureParameter, declaration.parameters)) with {
+  | Option.none => Option.none
+  | Option.some parameters => Option.some((psTsJoin("", (_root_.List.cons(exportPrefix, (_root_.List.cons("function ", (_root_.List.cons(declaration.name, (_root_.List.cons((psTsGenericNames(declaration.typeParameters)), (_root_.List.cons("(", (_root_.List.cons((psTsJoin(", ", parameters)), (_root_.List.cons("): ", (_root_.List.cons(result, (_root_.List.cons(" { return ", (_root_.List.cons(body, (_root_.List.cons("; }", _root_.List.nil)))))))))))))))))))))))))
+} }
+}
+} }
+
+-- Flatten structured tail statements inside the existing generator protocol.
+-- Ordinary expression preflight preserves its original fuel/error boundary.
+def psTsGeneratorSlotNameWorker(brands : List((Prod(String, String))), tags : List((Prod(String, String))), declaration : PsVerifiedIrDeclaration, attempts : Nat, index : Nat) : Option(String) := match attempts with {
+  | Nat.zero => Option.none
+  | Nat.succ remaining => let candidate := (String.Internal.append("__ps$loop$args$", (psNatToString(index))))
+let labelUses : (_ : Prod(String, String)) -> Bool := (fun (entry : Prod(String, String)) => if (psStringEq(entry.fst, candidate)) { true } else { psStringEq(entry.snd, candidate) })
+if (psTsTailBindingSafe(declaration, List.nil, candidate)) { if (psTsExprUsesNameWithFuel(4096, declaration.body, candidate)) { psTsGeneratorSlotNameWorker(brands, tags, declaration, remaining, (Nat.succ(index))) } else { if ((psListAny(labelUses, brands) || psListAny(labelUses, tags))) { psTsGeneratorSlotNameWorker(brands, tags, declaration, remaining, (Nat.succ(index))) } else { Option.some(candidate) } } } else { psTsGeneratorSlotNameWorker(brands, tags, declaration, remaining, (Nat.succ(index))) }
+}
+
+def psTsGeneratorSlotName(brands : List((Prod(String, String))), tags : List((Prod(String, String))), declaration : PsVerifiedIrDeclaration) : Option(String) := psTsGeneratorSlotNameWorker(brands, tags, declaration, 4096, 0)
+
+def psTsEmitGeneratorLoopWithVisibility(isPublic : Bool, brands : List((Prod(String, String))), tags : List((Prod(String, String))), declaration : PsVerifiedIrDeclaration) : Option(String) := let shadowsSelf : (_ : PsVerifiedIrParameter) -> Bool := (fun (parameter : PsVerifiedIrParameter) => psStringEq(parameter.name, declaration.name))
+if ((psListIsEmpty(declaration.parameters) || psListAny(shadowsSelf, declaration.parameters))) { Option.none } else { let body := (psTsInlineEtaApplication(declaration.body))
+match (psTsEmitTypedTailExpr(brands, tags, declaration.resultType, body)) with {
+  | Except.error _ => Option.none
+  | Except.ok _ => match (psTsGeneratorSlotName(brands, tags, declaration)) with {
+  | Option.none => Option.none
+  | Option.some slot => match (psTsTailEmitTargetContextWithFuel(brands, tags, declaration, true, (Option.some(slot)), 4096, List.nil, body)) with {
+  | Option.none => Option.none
+  | Option.some statements => match (psTsTailMap(psTsEmitPureParameter, declaration.parameters)) with {
+  | Option.none => Option.none
+  | Option.some parameters => let parameterType : (_ : PsVerifiedIrParameter) -> Option(String) := (fun (parameter : PsVerifiedIrParameter) => match (psTsEmitType(parameter.type)) with {
+  | Except.error _ => Option.none
+  | Except.ok type => Option.some(type)
+})
+match (psTsTailMap(parameterType, declaration.parameters)) with {
+  | Option.none => Option.none
+  | Option.some types => match (psTsEmitType(declaration.resultType)) with {
+  | Except.error _ => Option.none
+  | Except.ok result => let parameterName : (_ : PsVerifiedIrParameter) -> String := (fun (parameter : PsVerifiedIrParameter) => parameter.name)
+let arguments := (psTsJoin(", ", (psListMap(parameterName, declaration.parameters))))
+let generic := (psTsGenericNames(declaration.typeParameters))
+let implementation := (String.Internal.append("__ps$impl$", declaration.name))
+Option.some((psTsJoin("", (_root_.List.cons((if (isPublic) { "export function " } else { "function " }), (_root_.List.cons(declaration.name, (_root_.List.cons(generic, (_root_.List.cons("(", (_root_.List.cons((psTsJoin(", ", parameters)), (_root_.List.cons("): ", (_root_.List.cons(result, (_root_.List.cons(" { return __ps$run(", (_root_.List.cons(implementation, (_root_.List.cons(generic, (_root_.List.cons("(", (_root_.List.cons(arguments, (_root_.List.cons(")); }\nfunction* ", (_root_.List.cons(implementation, (_root_.List.cons(generic, (_root_.List.cons("(", (_root_.List.cons((psTsJoin(", ", parameters)), (_root_.List.cons("): __ps$Computation<", (_root_.List.cons(result, (_root_.List.cons("> { let ", (_root_.List.cons(slot, (_root_.List.cons(": [", (_root_.List.cons((psTsJoin(", ", types)), (_root_.List.cons("] = [", (_root_.List.cons(arguments, (_root_.List.cons("]; while (true) { const [", (_root_.List.cons(arguments, (_root_.List.cons("] = ", (_root_.List.cons(slot, (_root_.List.cons("; ", (_root_.List.cons(statements, (_root_.List.cons(" } }\n__ps$implementations.set(", (_root_.List.cons(declaration.name, (_root_.List.cons(", ", (_root_.List.cons(implementation, (_root_.List.cons(");", _root_.List.nil)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
+}
+}
+}
+}
+}
+} }
+
+partial def psTsNeedsUtf8Runtime(expr : PsVerifiedIrExpr) : Bool := match expr with {
+  | PsVerifiedIrExpr.literal _ => false
+  | PsVerifiedIrExpr.var _ => false
+  | PsVerifiedIrExpr.intrinsic operation _ arguments => let direct : Bool := (match operation with {
+  | PsVerifiedIrIntrinsic.stringUtf8ByteSize => true
+  | PsVerifiedIrIntrinsic.stringNext => true
+  | PsVerifiedIrIntrinsic.stringGet => true
+  | PsVerifiedIrIntrinsic.stringAtEnd => true
+  | PsVerifiedIrIntrinsic.stringExtract => true
+  | _ => false
+})
+(direct || psListAny(psTsNeedsUtf8Runtime, arguments))
+  | PsVerifiedIrExpr.lambda _ _ body => psTsNeedsUtf8Runtime(body)
+  | PsVerifiedIrExpr.call fn _ arguments => (psTsNeedsUtf8Runtime(fn) || psListAny(psTsNeedsUtf8Runtime, arguments))
+  | PsVerifiedIrExpr.letE _ _ value body => (psTsNeedsUtf8Runtime(value) || psTsNeedsUtf8Runtime(body))
+  | PsVerifiedIrExpr.ifE condition left right => ((psTsNeedsUtf8Runtime(condition) || psTsNeedsUtf8Runtime(left)) || psTsNeedsUtf8Runtime(right))
+  | PsVerifiedIrExpr.record _ _ fields => psListAny((fun (field : Prod(String, PsVerifiedIrExpr)) => psTsNeedsUtf8Runtime(field.snd)), fields)
+  | PsVerifiedIrExpr.constructor _ _ _ fields => psListAny((fun (field : Prod(String, PsVerifiedIrExpr)) => psTsNeedsUtf8Runtime(field.snd)), fields)
+  | PsVerifiedIrExpr.projection _ _ target _ => psTsNeedsUtf8Runtime(target)
+  | PsVerifiedIrExpr.matchE _ _ scrutinee alternatives => (psTsNeedsUtf8Runtime(scrutinee) || psListAny((fun (alternative : Prod(String, (Prod((List(PsVerifiedIrMatchBinding)), PsVerifiedIrExpr)))) => psTsNeedsUtf8Runtime(alternative.snd.snd)), alternatives))
+}
+
+-- Tokens identify only the two existing runtime views. A token never retains a
+-- String or positions array; an evicted token falls back to the original lookup.
+def psTsViewName(index : Nat) : String := psTsJoin("", (_root_.List.cons("__ps$view$", (_root_.List.cons((psNatToString(index)), _root_.List.nil)))))
+
+def psTsViewTokenName(index : Nat) : String := psTsJoin("", (_root_.List.cons("__ps$viewToken$", (_root_.List.cons((psNatToString(index)), _root_.List.nil)))))
+
+def psTsViewParameters(parameters : List(PsVerifiedIrParameter)) : List(PsVerifiedIrParameter) := match parameters with {
+  | List.nil => List.nil
+  | List.cons parameter rest => match parameter.type with {
+  | PsVerifiedIrType.primitive primitive => match primitive with {
+  | PsVerifiedIrPrimitiveType.string => List.cons(parameter, (psTsViewParameters(rest)))
+  | _ => psTsViewParameters(rest)
+}
+  | _ => psTsViewParameters(rest)
+}
+}
+
+def psTsViewBindings(parameters : List(PsVerifiedIrParameter), index : Nat) : List((_root_.Prod(String, String))) := match parameters with {
+  | List.nil => List.nil
+  | List.cons parameter rest => List.cons((Prod.mk(parameter.name, (psTsViewName(index)))), (psTsViewBindings(rest, (Nat.succ(index)))))
+}
+
+def psTsViewPrelude(parameters : List(PsVerifiedIrParameter), index : Nat) : String := match parameters with {
+  | List.nil => ""
+  | List.cons parameter rest => let token := (psTsViewTokenName(index))
+let getter := (psTsViewName(index))
+psTsJoin("", (_root_.List.cons("let ", (_root_.List.cons(token, (_root_.List.cons(": symbol | undefined; const ", (_root_.List.cons(getter, (_root_.List.cons(" = (): __ps$Utf8View => ((view: __ps$Utf8View) => { ", (_root_.List.cons(token, (_root_.List.cons(" = view.token; return view; })(__ps$utf8Known(", (_root_.List.cons(parameter.name, (_root_.List.cons(", ", (_root_.List.cons(token, (_root_.List.cons(")); ", (_root_.List.cons((psTsViewPrelude(rest, (Nat.succ(index)))), _root_.List.nil)))))))))))))))))))))))))
+}
+
+def psTsViewFresh(declaration : PsVerifiedIrDeclaration, parameters : List(PsVerifiedIrParameter), index : Nat) : Bool := match parameters with {
+  | List.nil => true
+  | List.cons _ rest => let uses : (_ : String) -> Bool := (fun (name : String) => ((psStringEq(name, declaration.name) || psListAny((fun (parameter : PsVerifiedIrParameter) => psStringEq(name, parameter.name)), declaration.parameters)) || psTsExprUsesNameWithFuel(4096, declaration.body, name)))
+if ((uses((psTsViewName(index))) || uses((psTsViewTokenName(index))))) { false } else { psTsViewFresh(declaration, rest, (Nat.succ(index))) }
+}
+
+def psTsViewWithout(views : List((_root_.Prod(String, String))), name : String) : List((_root_.Prod(String, String))) := match views with {
+  | List.nil => List.nil
+  | List.cons entry rest => if (psStringEq((Prod.fst(entry)), name)) { psTsViewWithout(rest, name) } else { List.cons(entry, (psTsViewWithout(rest, name))) }
+}
+
+def psTsViewAlias(views : List((_root_.Prod(String, String))), name : String, value : PsVerifiedIrExpr) : List((_root_.Prod(String, String))) := let remaining := (psTsViewWithout(views, name))
+match value with {
+  | var original => match (psTsLookup(views, original)) with {
+  | Option.some getter => List.cons((Prod.mk(name, getter)), remaining)
+  | Option.none => remaining
+}
+  | _ => remaining
+}
+
+def psTsViewInvariant(views : List((_root_.Prod(String, String))), parameters : List(PsVerifiedIrParameter), arguments : List(PsVerifiedIrExpr)) : Bool := match parameters with {
+  | List.nil => psListIsEmpty(arguments)
+  | List.cons parameter rest => match arguments with {
+  | List.nil => false
+  | List.cons argument tail => match (psTsLookup(views, parameter.name)) with {
+  | Option.none => psTsViewInvariant(views, rest, tail)
+  | Option.some expected => match argument with {
+  | var name => match (psTsLookup(views, name)) with {
+  | Option.some actual => (psStringEq(expected, actual) && psTsViewInvariant(views, rest, tail))
+  | Option.none => false
+}
+  | _ => false
+}
+}
+}
+}
+
+-- Position expressions are evaluated before lazy view lookup, as in the old calls.
+def psTsViewIntrinsicKnown(operation : PsVerifiedIrIntrinsic, getter : String, printed : List(String)) : Except(PsTsEmitError, String) := let ordinary := (psTsEmitIntrinsicFromPrinted(operation, printed))
+match printed with {
+  | List.nil => ordinary
+  | List.cons _ rest => match operation with {
+  | stringUtf8ByteSize => if (psListIsEmpty(rest)) { Except.ok((psTsJoin("", (_root_.List.cons(getter, (_root_.List.cons("().size", _root_.List.nil))))))) } else { ordinary }
+  | _ => match rest with {
+  | List.nil => ordinary
+  | List.cons position tail => if (psListIsEmpty(tail)) { match operation with {
+  | stringAtEnd => Except.ok((psTsJoin("", (_root_.List.cons("((__ps_p: bigint) => __ps_p >= ", (_root_.List.cons(getter, (_root_.List.cons("().size)(", (_root_.List.cons(position, (_root_.List.cons(")", _root_.List.nil)))))))))))))
+  | stringGet => Except.ok((psTsJoin("", (_root_.List.cons("((__ps_p: bigint) => __ps$stringGetView(", (_root_.List.cons(getter, (_root_.List.cons("(), __ps_p))(", (_root_.List.cons(position, (_root_.List.cons(")", _root_.List.nil)))))))))))))
+  | stringNext => Except.ok((psTsJoin("", (_root_.List.cons("((__ps_p: bigint) => __ps$stringNextView(", (_root_.List.cons(getter, (_root_.List.cons("(), __ps_p))(", (_root_.List.cons(position, (_root_.List.cons(")", _root_.List.nil)))))))))))))
+  | _ => ordinary
+} } else { ordinary }
+}
+}
+}
+
+def psTsViewIntrinsic(views : List((_root_.Prod(String, String))), operation : PsVerifiedIrIntrinsic, arguments : List(PsVerifiedIrExpr), printed : List(String)) : Except(PsTsEmitError, String) := match arguments with {
+  | List.nil => psTsEmitIntrinsicFromPrinted(operation, printed)
+  | List.cons first _ => match first with {
+  | PsVerifiedIrExpr.var name => match (psTsLookup(views, name)) with {
+  | Option.none => psTsEmitIntrinsicFromPrinted(operation, printed)
+  | Option.some getter => psTsViewIntrinsicKnown(operation, getter, printed)
+}
+  | _ => psTsEmitIntrinsicFromPrinted(operation, printed)
+}
+}
+
+-- The surrounding recognizer admits only pure expressions. Unhandled shapes use
+-- the original expression printer and therefore cannot introduce a fast path.
+def psTsViewPureWithFuel(brands : List((_root_.Prod(String, String))), tags : List((_root_.Prod(String, String))), views : List((_root_.Prod(String, String))), fuel : Nat) : (_ : PsVerifiedIrExpr) -> Except(PsTsEmitError, String) := match fuel with {
+  | Nat.zero => fun (_expr : PsVerifiedIrExpr) => Except.error(PsTsEmitError.fuelExhausted)
+  | Nat.succ remaining => fun (expr : PsVerifiedIrExpr) => let recur : (_ : PsVerifiedIrExpr) -> Except(PsTsEmitError, String) := (psTsViewPureWithFuel(brands, tags, views, remaining))
+match expr with {
+  | intrinsic operation _ arguments => match (psListMapExcept(recur, arguments)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok printed => psTsViewIntrinsic(views, operation, arguments, printed)
+}
+  | ifE condition left right => match (recur(condition)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok c => match (recur(left)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok l => match (recur(right)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok r => Except.ok((psTsJoin("", (_root_.List.cons("(", (_root_.List.cons(c, (_root_.List.cons(" ? ", (_root_.List.cons(l, (_root_.List.cons(" : ", (_root_.List.cons(r, (_root_.List.cons(")", _root_.List.nil)))))))))))))))))
+}
+}
+}
+  | _ => psTsEmitExpr(brands, tags, expr)
+}
+}
+
+def psTsViewTailValue(views : List((_root_.Prod(String, String))), generated : Bool, brands : List((_root_.Prod(String, String))), tags : List((_root_.Prod(String, String))), aliases : List(PsTsTailAlias), expected : Option(PsVerifiedIrType), tail : Bool, expr : PsVerifiedIrExpr) : Option(String) := if (generated) { psTsTailEmitValue(true, brands, tags, aliases, expected, tail, expr) } else { if (psTsTailPureWithFuel(aliases, 4096, expr)) { match (psTsViewPureWithFuel(brands, tags, views, 4096, expr)) with {
+  | Except.error _ => Option.none
+  | Except.ok printed => Option.some(printed)
+} } else { Option.none } }
+
+def psTsViewTailReturn(views : List((_root_.Prod(String, String))), generated : Bool, brands : List((_root_.Prod(String, String))), tags : List((_root_.Prod(String, String))), declaration : PsVerifiedIrDeclaration, aliases : List(PsTsTailAlias), expr : PsVerifiedIrExpr) : Option(String) := match (psTsViewTailValue(views, generated, brands, tags, aliases, (Option.some(declaration.resultType)), true, expr)) with {
+  | Option.none => Option.none
+  | Option.some printed => Option.some((psTsJoin("", (_root_.List.cons("return ", (_root_.List.cons(printed, (_root_.List.cons(";", _root_.List.nil)))))))))
+}
+
+def psTsViewUnbound(views : List((_root_.Prod(String, String))), name : String) : Bool := match (psTsLookup(views, name)) with {
+  | Option.none => true
+  | Option.some _ => false
+}
+
+def psTsViewTailContextWithFuel(brands : List((Prod(String, String))), tags : List((Prod(String, String))), declaration : PsVerifiedIrDeclaration, generated : Bool, fuel : Nat) : (_ : List((_root_.Prod(String, String)))) -> (_ : List(PsTsTailAlias)) -> (_ : PsVerifiedIrExpr) -> Option(String) := match fuel with {
+  | Nat.zero => fun (_views : List((_root_.Prod(String, String)))) (_aliases : List(PsTsTailAlias)) (_expr : PsVerifiedIrExpr) => Option.none
+  | Nat.succ remaining => fun (views : List((_root_.Prod(String, String)))) (aliases : List(PsTsTailAlias)) (expr : PsVerifiedIrExpr) => let recurse : (_ : List((_root_.Prod(String, String)))) -> (_ : List(PsTsTailAlias)) -> (_ : PsVerifiedIrExpr) -> Option(String) := (psTsViewTailContextWithFuel(brands, tags, declaration, generated, remaining))
+let smaller : (_ : List(PsTsTailAlias)) -> (_ : PsVerifiedIrExpr) -> Option(String) := (recurse(views))
+let emitPure : (_ : PsVerifiedIrExpr) -> Option(String) := (psTsViewTailValue(views, generated, brands, tags, aliases, Option.none, false))
+match expr with {
+  | PsVerifiedIrExpr.call fn types arguments => if (psListIsEmpty(types)) { match (psTsTailCallArguments(declaration.name, aliases, fn, arguments)) with {
+  | Option.none => if (generated) { psTsViewTailReturn(views, true, brands, tags, declaration, aliases, expr) } else { Option.none }
+  | Option.some actual => if ((Nat.beq((psListLength(actual)), (psListLength(declaration.parameters))) && psTsViewInvariant(views, declaration.parameters, actual))) { match (psTsTailMap(emitPure, actual)) with {
+  | Option.none => Option.none
+  | Option.some printed => let parameterName : (_ : PsVerifiedIrParameter) -> String := (fun (parameter : PsVerifiedIrParameter) => parameter.name)
+Option.some((psTsJoin("", (_root_.List.cons("[", (_root_.List.cons((psTsJoin(", ", (psListMap(parameterName, declaration.parameters)))), (_root_.List.cons("] = [", (_root_.List.cons((psTsJoin(", ", printed)), (_root_.List.cons("]; continue;", _root_.List.nil)))))))))))))
+} } else { Option.none }
+} } else { if (generated) { psTsViewTailReturn(views, true, brands, tags, declaration, aliases, expr) } else { Option.none } }
+  | PsVerifiedIrExpr.letE name type value body => if (psTsExprUsesNameWithFuel(4096, value, name)) { Option.none } else { if (psTsTailBindingSafe(declaration, aliases, name)) { match (psTsTailAliasValue(declaration.name, name, value)) with {
+  | Option.some alias => let capturedAlias : (_ : PsVerifiedIrExpr) -> Bool := (fun (argument : PsVerifiedIrExpr) => if (psTsTailPureWithFuel(aliases, 4096, argument)) { false } else { true })
+if (psListAny(capturedAlias, alias.captured)) { Option.none } else { smaller((List.cons(alias, aliases)), body) }
+  | Option.none => match (psTsViewTailValue(views, generated, brands, tags, aliases, (Option.some(type)), false, value)) with {
+  | Option.none => Option.none
+  | Option.some printedValue => match (psTsEmitType(type)) with {
+  | Except.error _ => Option.none
+  | Except.ok printedType => match (recurse((psTsViewAlias(views, name, value)), aliases, body)) with {
+  | Option.none => Option.none
+  | Option.some printedBody => Option.some((psTsJoin("", (_root_.List.cons("{ const ", (_root_.List.cons(name, (_root_.List.cons(": ", (_root_.List.cons(printedType, (_root_.List.cons(" = ", (_root_.List.cons(printedValue, (_root_.List.cons("; ", (_root_.List.cons(printedBody, (_root_.List.cons(" }", _root_.List.nil)))))))))))))))))))))
+}
+}
+}
+} } else { Option.none } }
+  | PsVerifiedIrExpr.ifE condition left right => match (emitPure(condition)) with {
+  | Option.none => Option.none
+  | Option.some printedCondition => match (smaller(aliases, left)) with {
+  | Option.none => Option.none
+  | Option.some printedLeft => match (smaller(aliases, right)) with {
+  | Option.none => Option.none
+  | Option.some printedRight => Option.some((psTsJoin("", (_root_.List.cons("if (", (_root_.List.cons(printedCondition, (_root_.List.cons(") { ", (_root_.List.cons(printedLeft, (_root_.List.cons(" } else { ", (_root_.List.cons(printedRight, (_root_.List.cons(" }", _root_.List.nil)))))))))))))))))
+}
+}
+}
+  | PsVerifiedIrExpr.matchE name _ scrutinee alternatives => if (psListIsEmpty(alternatives)) { Option.none } else { match (psTsLookup(tags, name)) with {
+  | Option.none => Option.none
+  | Option.some tag => match (emitPure(scrutinee)) with {
+  | Option.none => Option.none
+  | Option.some printedScrutinee => let temporary := (psTsFreshMatchTemp(declaration.body))
+let printBinding : (_ : PsVerifiedIrMatchBinding) -> Option(String) := (fun (binding : PsVerifiedIrMatchBinding) => if ((psTsTailBindingSafe(declaration, aliases, binding.name) && psTsViewUnbound(views, binding.name))) { match (psTsEmitType(binding.type)) with {
+  | Except.error _ => Option.none
+  | Except.ok type => Option.some((psTsJoin("", (_root_.List.cons("const ", (_root_.List.cons(binding.name, (_root_.List.cons(": ", (_root_.List.cons(type, (_root_.List.cons(" = ", (_root_.List.cons(temporary, (_root_.List.cons(".", (_root_.List.cons(binding.field, (_root_.List.cons(";", _root_.List.nil)))))))))))))))))))))
+} } else { Option.none })
+let printAlternative : (_ : Prod(String, (Prod((List(PsVerifiedIrMatchBinding)), PsVerifiedIrExpr)))) -> Option(String) := (fun (alternative : Prod(String, (Prod((List(PsVerifiedIrMatchBinding)), PsVerifiedIrExpr)))) => match (psTsTailMap(printBinding, (Prod.fst((Prod.snd(alternative)))))) with {
+  | Option.none => Option.none
+  | Option.some bindings => match (smaller(aliases, (Prod.snd((Prod.snd(alternative)))))) with {
+  | Option.none => Option.none
+  | Option.some body => Option.some((psTsJoin("", (_root_.List.cons("case ", (_root_.List.cons((psJsonQuote((Prod.fst(alternative)))), (_root_.List.cons(": { ", (_root_.List.cons((psTsJoin(" ", bindings)), (_root_.List.cons(" ", (_root_.List.cons(body, (_root_.List.cons(" }", _root_.List.nil)))))))))))))))))
+}
+})
+if (psTsTailBindingSafe(declaration, aliases, temporary)) { match (psTsTailMap(printAlternative, alternatives)) with {
+  | Option.none => Option.none
+  | Option.some cases => Option.some((psTsJoin("", (_root_.List.cons("{ const ", (_root_.List.cons(temporary, (_root_.List.cons(" = ", (_root_.List.cons(printedScrutinee, (_root_.List.cons("; switch (", (_root_.List.cons(temporary, (_root_.List.cons("[", (_root_.List.cons(tag, (_root_.List.cons("]) { ", (_root_.List.cons((psTsJoin(" ", cases)), (_root_.List.cons(" } throw new Error(\"invalid ProofScript constructor tag\"); }", _root_.List.nil)))))))))))))))))))))))))
+} } else { Option.none }
+}
+} }
+  | _ => psTsViewTailReturn(views, generated, brands, tags, declaration, aliases, expr)
+}
+}
+
+def psTsEmitViewTailLoopWithVisibility(isPublic : Bool, brands : List((_root_.Prod(String, String))), tags : List((_root_.Prod(String, String))), declaration : PsVerifiedIrDeclaration) : Option(String) := let parameters := (psTsViewParameters(declaration.parameters))
+if ((psListIsEmpty(parameters) || Nat.blt(2, (psListLength(parameters))))) { Option.none } else { if (psTsNeedsUtf8Runtime(declaration.body)) { if ((psListIsEmpty(declaration.typeParameters) && psTsViewFresh(declaration, parameters, 0))) { let views := (psTsViewBindings(parameters, 0))
+let body := (psTsInlineEtaApplication(declaration.body))
+match (psTsViewTailContextWithFuel(brands, tags, declaration, false, 4096, views, _root_.List.nil, body)) with {
+  | Option.none => Option.none
+  | Option.some printedBody => match (psTsTailMap(psTsEmitPureParameter, declaration.parameters)) with {
+  | Option.none => Option.none
+  | Option.some printedParameters => match (psTsEmitType(declaration.resultType)) with {
+  | Except.error _ => Option.none
+  | Except.ok resultType => Option.some((psTsJoin("", (_root_.List.cons((if (isPublic) { "export function " } else { "function " }), (_root_.List.cons(declaration.name, (_root_.List.cons("(", (_root_.List.cons((psTsJoin(", ", printedParameters)), (_root_.List.cons("): ", (_root_.List.cons(resultType, (_root_.List.cons(" { ", (_root_.List.cons((psTsViewPrelude(parameters, 0)), (_root_.List.cons("while (true) { ", (_root_.List.cons(printedBody, (_root_.List.cons(" } }", _root_.List.nil)))))))))))))))))))))))))
+}
+}
+} } else { Option.none } } else { Option.none } }
+
+def psTsEmitDeclarationWithVisibility(isPublic : Bool, brands : List((Prod(String, String))), tags : List((Prod(String, String))), declaration : PsVerifiedIrDeclaration) : Except(PsTsEmitError, String) := match (psTsEmitPureDeclaration(isPublic, brands, tags, declaration)) with {
+  | Option.some source => Except.ok(source)
+  | Option.none => match (psTsEmitCountLoopWithVisibility(isPublic, tags, declaration)) with {
+  | Option.some loop => Except.ok(loop)
+  | Option.none => match (psTsEmitViewTailLoopWithVisibility(isPublic, brands, tags, declaration)) with {
+  | Option.some loop => Except.ok(loop)
+  | Option.none => match (psTsEmitTailLoopWithVisibility(isPublic, brands, tags, declaration)) with {
+  | Option.some loop => Except.ok(loop)
+  | Option.none => match (psTsEmitGeneratorLoopWithVisibility(isPublic, brands, tags, declaration)) with {
+  | Option.some loop => Except.ok(loop)
+  | Option.none => psTsEmitDeclarationGeneralWithVisibility(isPublic, brands, tags, declaration)
+}
+}
+}
+}
+}
+
+def psTsEmitDeclaration(brands : List((Prod(String, String))), tags : List((Prod(String, String))), value : PsVerifiedIrDeclaration) : Except(PsTsEmitError, String) := psTsEmitDeclarationWithVisibility(true, brands, tags, value)
+
+def psTsFlattenLines(groups : List((List(String)))) : List(String) := match groups with {
+  | List.nil => List.nil
+  | List.cons lines rest => psTsAppendLines(lines, (psTsFlattenLines(rest)))
+}
+
+def psTsEmitModule(module : PsVerifiedIrModule) : Except(PsTsEmitError, String) := let brands := (psTsBuildBrandMap(module))
+let tags := (psTsBuildTagMap(module))
+match (psListMapExcept((psTsEmitStructure(brands)), module.structures)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok structures => match (psListMapExcept((psTsEmitInductive(tags)), module.inductives)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok inductives => match (psListMapExcept((psTsEmitDeclaration(brands, tags)), module.declarations)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok declarations => let header : List(String) := (_root_.List.cons("// generated from pskernel-admitted ProofScript checked core", (_root_.List.cons(psTsRuntimeSupport, _root_.List.nil))))
+let lines := (psTsFlattenLines((_root_.List.cons(header, (_root_.List.cons((psListMap(psTsEmitImport, module.imports)), (_root_.List.cons((psTsFlattenLines(structures)), (_root_.List.cons((psTsFlattenLines(inductives)), (_root_.List.cons(declarations, _root_.List.nil))))))))))))
+Except.ok((psTsJoin("", (_root_.List.cons((psTsJoin("\n", lines)), (_root_.List.cons("\n", _root_.List.nil)))))))
+}
+}
+}
+
+def psTsOptionIsNone {alpha : Type}(value : Option(alpha)) : Bool := match value with {
+  | Option.none => true
+  | Option.some _ => false
+}
+
+def psTsNeedsStackRuntime(brands : List((Prod(String, String))), tags : List((Prod(String, String))), declaration : PsVerifiedIrDeclaration) : Bool := ((psTsOptionIsNone((psTsEmitPureDeclaration(false, brands, tags, declaration))) && psTsOptionIsNone((psTsEmitCountLoop(tags, declaration)))) && psTsOptionIsNone((psTsEmitTailLoop(brands, tags, declaration))))
+
+def psTsSelectedRuntimeRequirements(module : PsVerifiedIrModule) : List(String) := let brands : List((Prod(String, String))) := (psTsBuildBrandMap(module))
+let tags : List((Prod(String, String))) := (psTsBuildTagMap(module))
+psListAppend((if (psListAny((psTsNeedsStackRuntime(brands, tags)), module.declarations)) { _root_.List.cons("generator-stack", _root_.List.nil) } else { _root_.List.nil }), (if (psListAny((fun (declaration : PsVerifiedIrDeclaration) => psTsNeedsUtf8Runtime(declaration.body)), module.declarations)) { _root_.List.cons("utf8-byte-index", _root_.List.nil) } else { _root_.List.nil }))
+
+def psTsSelectedRuntimeSource(module : PsVerifiedIrModule) : String := let needs : List(String) := (psTsSelectedRuntimeRequirements(module))
+psTsJoin("\n", (psListAppend((if (psListAny((fun (name : String) => psStringEq(name, "generator-stack")), needs)) { _root_.List.cons(psTsStackRuntimeSupport, _root_.List.nil) } else { _root_.List.nil }), (if (psListAny((fun (name : String) => psStringEq(name, "utf8-byte-index")), needs)) { _root_.List.cons(psTsUtf8RuntimeSupport, _root_.List.nil) } else { _root_.List.nil }))))

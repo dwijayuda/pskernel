@@ -1,0 +1,40 @@
+name: Repository ProofScript source ownership
+on:
+  pull_request:
+    paths:
+      - '**/*.ps'
+      - SOURCE_OWNERSHIP.json
+      - psc1/CANONICAL_SOURCES.json
+      - psc1/host-tools/canonical-sources.mjs
+      - scripts/check-source-ownership.mjs
+      - .github/workflows/proofscript-source-ownership.yml
+  push:
+    branches: [main, feat/psc1-canonical-latency-20261028]
+    paths:
+      - '**/*.ps'
+      - SOURCE_OWNERSHIP.json
+      - psc1/CANONICAL_SOURCES.json
+      - psc1/host-tools/canonical-sources.mjs
+      - scripts/check-source-ownership.mjs
+      - .github/workflows/proofscript-source-ownership.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inventory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Require exactly one owner for every tracked ProofScript source
+        run: node scripts/check-source-ownership.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: proofscript-source-ownership-${{ github.sha }}
+          path: psc1/dist/canonical-source-check/repository-*.json
+          if-no-files-found: error
+          retention-days: 90

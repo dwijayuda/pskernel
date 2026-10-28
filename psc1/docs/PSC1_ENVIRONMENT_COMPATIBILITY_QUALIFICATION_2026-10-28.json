@@ -1,0 +1,927 @@
+{
+  "schema": "psc1-environment-compatibility-correction/1",
+  "status": "passed",
+  "sourceCommit": "0995c4183fd4e642bc85b30f8fc16a48f875b6ad",
+  "repairCommit": "52e0fea66b5e7cb16d7402e387992833f0d9ba65",
+  "npm": {
+    "run": 40649719076,
+    "job": 122686700028,
+    "testedMergeCommit": "23a82493384375f8bd9abfc426d04893d65a93d7",
+    "failure": "PSC1_SERVICE_CAPTURE_INVALID",
+    "cause": "The package reader correctly defaulted to canonical PS sources; the existing test appended a Lean Entry, violating the unchanged homogeneous-source grammar check.",
+    "correction": "Compile and execute the default PS consumer and an explicit Lean consumer; retain exact mixed-grammar refusal. Required package cases increase from 53 to 55.",
+    "artifacts": [
+      {
+        "id": 12799272491,
+        "name": "psc1-npm-packages-23a82493384375f8bd9abfc426d04893d65a93d7",
+        "bytes": 173721930,
+        "zipSha256": "711afc317c3ecca379085a8565c0e42181ab32e70cbf4af9095dcd5895661f9f",
+        "expiresAt": "2027-01-26T07:23:06Z",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40649719076/artifacts/12799272491"
+      }
+    ],
+    "correctedQualification": {
+      "run": 40651614453,
+      "job": 122692758583,
+      "headCommit": "52e0fea66b5e7cb16d7402e387992833f0d9ba65",
+      "testedMergeCommit": "37b016a1a9f0b9e41afdd0f7d7c91bb0a7d5bdc3",
+      "status": "passed",
+      "cases": 55,
+      "completeReceipt": "PSC1_CANONICAL_INTEGRATION_QUALIFICATION_2026-10-28.json"
+    },
+    "latestQualification": {
+      "run": 40669496697,
+      "job": 122752374780,
+      "headCommit": "bba5c93309e833508d5610323a27bad756602091",
+      "testedMergeCommit": "d01e597d61b9e6cb6b912418f3b4329be3eee930",
+      "status": "passed",
+      "cases": 55,
+      "all24PackagesIdenticalToPrecedingPassingBuild": true,
+      "completeReceipt": "PSC1_CANONICAL_INTEGRATION_QUALIFICATION_2026-10-28.json"
+    }
+  },
+  "isolation": {
+    "run": 40649711019,
+    "job": 122686676285,
+    "environmentId": "ubuntu-22.04-x64",
+    "failure": {
+      "failure": null,
+      "processError": null,
+      "stderr": "unshare: cannot change /home/runner/work/pskernel/pskernel/psc1/dist/independent-development/evidence-smoke/jail/proc filesystem propagation: Invalid argument\n",
+      "stdout": ""
+    },
+    "isolation": {
+      "phase": "smoke",
+      "status": "failed",
+      "elapsedMs": 70,
+      "exitStatus": 1,
+      "unexpectedExecutions": [],
+      "traceSha256": "30ad2e62f4b8fafb2de291b3ecae034283d49557d8654cd7ab668028f696f523"
+    },
+    "cause": "The host namespace setup failed while attempting to make the custom jail/proc path private, before the installed private runtime was executed.",
+    "correction": "Let unshare enter the jail root, mount a private proc at /proc, and drop to UID/GID 65534. Explicit private mount propagation, PID namespace, kill-child behavior, network namespace, time bounds, trace allowlist, independent admission and strict IR remain.",
+    "implementationReference": "https://github.com/util-linux/util-linux/blob/v2.37.2/sys-utils/unshare.c",
+    "exactVersionPolicy": "Do not infer the installed utility version from the runner label. Corrected evidence records the actual unshare --version output, executable bytes/SHA256, and unchanged hash after each phase.",
+    "previousSetupArguments": [
+      "--mount",
+      "--pid",
+      "--fork",
+      "--kill-child=KILL",
+      "--mount-proc=<jail>/proc",
+      "--net",
+      "/usr/sbin/chroot",
+      "--userspec=65534:65534",
+      "<jail>"
+    ],
+    "correctedSetupArguments": [
+      "--mount",
+      "--pid",
+      "--fork",
+      "--kill-child=KILL",
+      "--propagation=private",
+      "--net",
+      "--root=<jail>",
+      "--mount-proc=/proc",
+      "--setgid=65534",
+      "--setuid=65534"
+    ],
+    "supersededRunStatus": "cancelled after retained Ubuntu 22.04 setup failure; incomplete remaining chains are not qualification",
+    "artifacts": [
+      {
+        "id": 12800420366,
+        "name": "psc1-independent-baseline-ubuntu-24.04-arm64-40649711019-0995c4183fd4e642bc85b30f8fc16a48f875b6ad",
+        "bytes": 11155,
+        "zipSha256": "125acbeba63f168c9ed5d121dedcc5141c48b63e2ade30045ad1e3954ed46524",
+        "expiresAt": "2027-01-26T07:23:02Z",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40649711019/artifacts/12800420366"
+      },
+      {
+        "id": 12800325653,
+        "name": "psc1-independent-changed-ubuntu-24.04-arm64-40649711019-0995c4183fd4e642bc85b30f8fc16a48f875b6ad",
+        "bytes": 12923,
+        "zipSha256": "e82223df813a0c92ef3d49d01270af5f76d12b8fd7c3540940f458e6342d80f6",
+        "expiresAt": "2027-01-26T07:23:02Z",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40649711019/artifacts/12800325653"
+      },
+      {
+        "id": 12800040928,
+        "name": "psc1-independent-baseline-ubuntu-24.04-x64-40649711019-0995c4183fd4e642bc85b30f8fc16a48f875b6ad",
+        "bytes": 11177,
+        "zipSha256": "4c804a4c9317349bce44e6d3b9f6b6c1d6d43e4503df693e745cea2fe5d77002",
+        "expiresAt": "2027-01-26T07:23:02Z",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40649711019/artifacts/12800040928"
+      },
+      {
+        "id": 12799761256,
+        "name": "psc1-independent-changed-ubuntu-24.04-x64-40649711019-0995c4183fd4e642bc85b30f8fc16a48f875b6ad",
+        "bytes": 12930,
+        "zipSha256": "80f0083bf3388d20bb94aea9cd57251c35d71c3e8d154d6c3cb650c14ed0071e",
+        "expiresAt": "2027-01-26T07:23:02Z",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40649711019/artifacts/12799761256"
+      },
+      {
+        "id": 12799542477,
+        "name": "psc1-independent-smoke-ubuntu-24.04-arm64-40649711019-0995c4183fd4e642bc85b30f8fc16a48f875b6ad",
+        "bytes": 776297,
+        "zipSha256": "1cff99018ac50773de155f2e4f04ddfe45633bbf8616cc7c3ca1fdfd40b3b957",
+        "expiresAt": "2027-01-26T07:23:02Z",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40649711019/artifacts/12799542477"
+      },
+      {
+        "id": 12799366680,
+        "name": "psc1-independent-bootstrap-ubuntu-22.04-x64-40649711019-0995c4183fd4e642bc85b30f8fc16a48f875b6ad",
+        "bytes": 46592751,
+        "zipSha256": "61c3d529f1c42d6b1ef6f2f6d6047b9fbf8cf94fc258b32f2a502fbf9d2853b1",
+        "expiresAt": "2027-01-26T07:23:02Z",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40649711019/artifacts/12799366680"
+      },
+      {
+        "id": 12799242787,
+        "name": "psc1-independent-bootstrap-ubuntu-24.04-x64-40649711019-0995c4183fd4e642bc85b30f8fc16a48f875b6ad",
+        "bytes": 46592755,
+        "zipSha256": "201fcc73b0e1bef805a51611681fa57c6b5380c3940b8f91a30df1b5aae3df69",
+        "expiresAt": "2027-01-26T07:23:02Z",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40649711019/artifacts/12799242787"
+      },
+      {
+        "id": 12798849000,
+        "name": "psc1-independent-bootstrap-ubuntu-24.04-arm64-40649711019-0995c4183fd4e642bc85b30f8fc16a48f875b6ad",
+        "bytes": 46334796,
+        "zipSha256": "c31fb9348394511fedc4ece73d74aba6fd901dc543667a9aeb8dbeb9b42902b2",
+        "expiresAt": "2027-01-26T07:23:02Z",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40649711019/artifacts/12798849000"
+      },
+      {
+        "id": 12798694364,
+        "name": "psc1-independent-smoke-ubuntu-24.04-x64-40649711019-0995c4183fd4e642bc85b30f8fc16a48f875b6ad",
+        "bytes": 776293,
+        "zipSha256": "162f94d59d3ca9c4eb2e11b31cba824b54c7096bfec05b37c9fde7cdcf9da6e7",
+        "expiresAt": "2027-01-26T07:23:02Z",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40649711019/artifacts/12798694364"
+      },
+      {
+        "id": 12798578680,
+        "name": "psc1-independent-smoke-ubuntu-22.04-x64-40649711019-0995c4183fd4e642bc85b30f8fc16a48f875b6ad",
+        "bytes": 11290,
+        "zipSha256": "ebd16b885c924c3a3f0db3728247a3596e3c5f451a6a6e82d5755f9832b62f11",
+        "expiresAt": "2027-01-26T07:23:02Z",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40649711019/artifacts/12798578680"
+      }
+    ],
+    "successfulAssemblyBeforeSetupFailure": {
+      "schema": "psc1-independent-bootstrap/1",
+      "status": "assembled-awaiting-development-qualification",
+      "platform": "linux-x64",
+      "environment": {
+        "schema": "psc1-independent-environment/1",
+        "platform": "linux",
+        "arch": "x64",
+        "kernel": {
+          "release": "6.8.0-1064-azure",
+          "version": "#72~22.04.1-Ubuntu SMP Wed Jul 22 23:39:45 UTC 2026"
+        },
+        "runtime": {
+          "version": "v22.23.3",
+          "versions": {
+            "node": "22.23.3",
+            "acorn": "8.16.0",
+            "ada": "2.9.2",
+            "amaro": "1.1.8",
+            "ares": "1.34.8",
+            "brotli": "1.1.0",
+            "cjs_module_lexer": "2.2.0",
+            "cldr": "48.0",
+            "icu": "78.3",
+            "llhttp": "9.4.3",
+            "modules": "127",
+            "napi": "10",
+            "nbytes": "0.1.3",
+            "ncrypto": "0.0.1",
+            "nghttp2": "1.69.0",
+            "openssl": "3.5.8",
+            "simdjson": "4.5.0",
+            "simdutf": "6.4.2",
+            "sqlite": "3.51.3",
+            "tz": "2026c",
+            "undici": "6.28.1",
+            "unicode": "17.0",
+            "uv": "1.51.0",
+            "uvwasi": "0.0.23",
+            "v8": "12.4.254.21-node.57",
+            "zlib": "1.3.1-e00f703",
+            "zstd": "1.5.7"
+          },
+          "glibcVersionRuntime": "2.35",
+          "glibcVersionCompiler": "2.28"
+        },
+        "osRelease": {
+          "bytes": 386,
+          "sha256": "594d5ddd35aedb47f00d9c34d140017907a5b9f93c975aba125fc924daac5c07",
+          "text": "PRETTY_NAME=\"Ubuntu 22.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"22.04\"\nVERSION=\"22.04.5 LTS (Jammy Jellyfish)\"\nVERSION_CODENAME=jammy\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=jammy\n"
+        },
+        "filesystem": {
+          "type": "61267",
+          "bsize": "4096",
+          "blocks": "38060940",
+          "bfree": "20498362",
+          "bavail": "20494266",
+          "files": "19353600",
+          "ffree": "18168117"
+        },
+        "user": {
+          "uid": 1001,
+          "gid": 1001
+        }
+      },
+      "sourceCommit": "0995c4183fd4e642bc85b30f8fc16a48f875b6ad",
+      "toolchainSha256": "5b296a638d6b66133384cd02ce6e1831b83a6c9e757b8633db86be01ebc82350",
+      "tarball": "psc1-independent-linux-x64.tar.gz",
+      "bytes": 46588589,
+      "sha256": "b214e9dd85f1024322512304f61577d6615eadd5c84a7b9200d516532f630d76",
+      "sourceModules": 125,
+      "sourceClosureDigest": "424c15ce2cf5bb87a293dd2aad1705fa801c07067c972578aa76111627d590d7",
+      "sourceConversionElapsedMs": 201735,
+      "sourceAdmissionsSha256": "9ac7a395b3f473fdb0278e3bf220ece76443ee9502a6d16996684f4c2e52619a",
+      "sourceOriginalIrSha256": "a910cc599e67b93077b004d79dc3c042a6d594e4169ea0ef8abafb8980a2415b",
+      "privateRuntimeSha256": "fde6a4bf8d0562f7751d1a2d6cb9b417c4cfe107bbcb0aa3e9a24e125e348f48",
+      "checkerSha256": "1415522ad1fa22ea919d796dc0d689be5c65275c0a24fe43a6ac7f675d32239b",
+      "compilerSha256": "49d851d26008abf116b9f4c680c0833311e835b90d6c58e369ca426f33ecd2e6",
+      "compilerSelection": {
+        "strategy": "qualified-type-key-O2",
+        "input": {
+          "run": 40634776830,
+          "job": 122639100927,
+          "artifact": 12796523762,
+          "commit": "bc983a806a2995bed7851512a175652cbf4b5226",
+          "zipSha256": "c17a4d364810714e4dd7ed775fb9ff3547de87ebf89501e402d75fc9a7fb7af1"
+        },
+        "summarySha256": "89f76a873360e14d0438582fa1b20a34d048c960c502a90c6b6c0776abd18710",
+        "filesManifestSha256": "aa1ca6b19585a7be8b21d78b9ab4cbb024abd633466f41a7bfc292380696f80c",
+        "compilerSha256": "49d851d26008abf116b9f4c680c0833311e835b90d6c58e369ca426f33ecd2e6",
+        "sourceClosureDigest": "424c15ce2cf5bb87a293dd2aad1705fa801c07067c972578aa76111627d590d7",
+        "selectedCanonicalSourceSha256": "74fb1bb1c8f9beef611300e06fff3010121ed2589e828b7102f539217a09ad93",
+        "receiptGrantsAdmissionAuthority": false
+      }
+    }
+  },
+  "requiredRequalification": {
+    "run": 40655419917,
+    "commit": "a4ca02ef9af1859dfb532a051f6ea4760ed113d0",
+    "rule": "Every environment must complete bootstrap, smoke, baseline B1/B2, changed C1/C2 and evidence verification in this same run and at this source commit.",
+    "status": "passed",
+    "jobs": 13,
+    "artifacts": 16,
+    "receipt": "PSC1_INDEPENDENT_ENVIRONMENTS_QUALIFICATION_2026-10-28.json"
+  },
+  "changedAdmissionPolicy": false,
+  "changedStrictIrPolicy": false,
+  "changedCompilerSources": false,
+  "mixedGrammarGuardRelaxed": false,
+  "correctedSmoke": [
+    {
+      "environmentId": "ubuntu-24.04-x64",
+      "job": 122693395193,
+      "run": 40651609426,
+      "bootstrap": {
+        "schema": "psc1-independent-bootstrap/1",
+        "status": "assembled-awaiting-development-qualification",
+        "platform": "linux-x64",
+        "environment": {
+          "schema": "psc1-independent-environment/1",
+          "platform": "linux",
+          "arch": "x64",
+          "kernel": {
+            "release": "7.0.0-1017-azure",
+            "version": "#17~24.04.1-Ubuntu SMP PREEMPT Thu Sep 24 18:46:57 UTC 2026"
+          },
+          "runtime": {
+            "version": "v22.23.3",
+            "versions": {
+              "node": "22.23.3",
+              "acorn": "8.16.0",
+              "ada": "2.9.2",
+              "amaro": "1.1.8",
+              "ares": "1.34.8",
+              "brotli": "1.1.0",
+              "cjs_module_lexer": "2.2.0",
+              "cldr": "48.0",
+              "icu": "78.3",
+              "llhttp": "9.4.3",
+              "modules": "127",
+              "napi": "10",
+              "nbytes": "0.1.3",
+              "ncrypto": "0.0.1",
+              "nghttp2": "1.69.0",
+              "openssl": "3.5.8",
+              "simdjson": "4.5.0",
+              "simdutf": "6.4.2",
+              "sqlite": "3.51.3",
+              "tz": "2026c",
+              "undici": "6.28.1",
+              "unicode": "17.0",
+              "uv": "1.51.0",
+              "uvwasi": "0.0.23",
+              "v8": "12.4.254.21-node.57",
+              "zlib": "1.3.1-e00f703",
+              "zstd": "1.5.7"
+            },
+            "glibcVersionRuntime": "2.39",
+            "glibcVersionCompiler": "2.28"
+          },
+          "osRelease": {
+            "bytes": 400,
+            "sha256": "87458b3b1f1ca0e5c693ade771de7007c3783bdc692fa6b39eb6414bf2af2763",
+            "text": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n"
+          },
+          "filesystem": {
+            "type": "61267",
+            "bsize": "4096",
+            "blocks": "37815964",
+            "bfree": "20288757",
+            "bavail": "20284661",
+            "files": "19529728",
+            "ffree": "18368719"
+          },
+          "user": {
+            "uid": 1001,
+            "gid": 1001
+          }
+        },
+        "sourceCommit": "52e0fea66b5e7cb16d7402e387992833f0d9ba65",
+        "toolchainSha256": "a03d9a5dfbffdc2a2886c89841a08b94018295d1701177ced1f8262b1b0597be",
+        "tarball": "psc1-independent-linux-x64.tar.gz",
+        "bytes": 46588590,
+        "sha256": "2fcaa57e9230208aaba82400513c334998a2afd753a0dc5e73c67f74bdd17b8c",
+        "sourceModules": 125,
+        "sourceClosureDigest": "424c15ce2cf5bb87a293dd2aad1705fa801c07067c972578aa76111627d590d7",
+        "sourceConversionElapsedMs": 366005,
+        "sourceAdmissionsSha256": "9ac7a395b3f473fdb0278e3bf220ece76443ee9502a6d16996684f4c2e52619a",
+        "sourceOriginalIrSha256": "a910cc599e67b93077b004d79dc3c042a6d594e4169ea0ef8abafb8980a2415b",
+        "privateRuntimeSha256": "fde6a4bf8d0562f7751d1a2d6cb9b417c4cfe107bbcb0aa3e9a24e125e348f48",
+        "checkerSha256": "1415522ad1fa22ea919d796dc0d689be5c65275c0a24fe43a6ac7f675d32239b",
+        "compilerSha256": "49d851d26008abf116b9f4c680c0833311e835b90d6c58e369ca426f33ecd2e6",
+        "compilerSelection": {
+          "strategy": "qualified-type-key-O2",
+          "input": {
+            "run": 40634776830,
+            "job": 122639100927,
+            "artifact": 12796523762,
+            "commit": "bc983a806a2995bed7851512a175652cbf4b5226",
+            "zipSha256": "c17a4d364810714e4dd7ed775fb9ff3547de87ebf89501e402d75fc9a7fb7af1"
+          },
+          "summarySha256": "89f76a873360e14d0438582fa1b20a34d048c960c502a90c6b6c0776abd18710",
+          "filesManifestSha256": "aa1ca6b19585a7be8b21d78b9ab4cbb024abd633466f41a7bfc292380696f80c",
+          "compilerSha256": "49d851d26008abf116b9f4c680c0833311e835b90d6c58e369ca426f33ecd2e6",
+          "sourceClosureDigest": "424c15ce2cf5bb87a293dd2aad1705fa801c07067c972578aa76111627d590d7",
+          "selectedCanonicalSourceSha256": "74fb1bb1c8f9beef611300e06fff3010121ed2589e828b7102f539217a09ad93",
+          "receiptGrantsAdmissionAuthority": false
+        }
+      },
+      "isolation": {
+        "phase": "smoke",
+        "status": "passed",
+        "elapsedMs": 19790,
+        "exitStatus": 0,
+        "unexpectedExecutions": [],
+        "traceSha256": "a36e724cf02305e8d04a9d2bef8c9d4807c68507ae25fbc0aa07c6e9b132b6e4"
+      }
+    },
+    {
+      "environmentId": "ubuntu-22.04-x64",
+      "job": 122693394859,
+      "run": 40651609426,
+      "bootstrap": {
+        "schema": "psc1-independent-bootstrap/1",
+        "status": "assembled-awaiting-development-qualification",
+        "platform": "linux-x64",
+        "environment": {
+          "schema": "psc1-independent-environment/1",
+          "platform": "linux",
+          "arch": "x64",
+          "kernel": {
+            "release": "6.8.0-1064-azure",
+            "version": "#72~22.04.1-Ubuntu SMP Wed Jul 22 23:39:45 UTC 2026"
+          },
+          "runtime": {
+            "version": "v22.23.3",
+            "versions": {
+              "node": "22.23.3",
+              "acorn": "8.16.0",
+              "ada": "2.9.2",
+              "amaro": "1.1.8",
+              "ares": "1.34.8",
+              "brotli": "1.1.0",
+              "cjs_module_lexer": "2.2.0",
+              "cldr": "48.0",
+              "icu": "78.3",
+              "llhttp": "9.4.3",
+              "modules": "127",
+              "napi": "10",
+              "nbytes": "0.1.3",
+              "ncrypto": "0.0.1",
+              "nghttp2": "1.69.0",
+              "openssl": "3.5.8",
+              "simdjson": "4.5.0",
+              "simdutf": "6.4.2",
+              "sqlite": "3.51.3",
+              "tz": "2026c",
+              "undici": "6.28.1",
+              "unicode": "17.0",
+              "uv": "1.51.0",
+              "uvwasi": "0.0.23",
+              "v8": "12.4.254.21-node.57",
+              "zlib": "1.3.1-e00f703",
+              "zstd": "1.5.7"
+            },
+            "glibcVersionRuntime": "2.35",
+            "glibcVersionCompiler": "2.28"
+          },
+          "osRelease": {
+            "bytes": 386,
+            "sha256": "594d5ddd35aedb47f00d9c34d140017907a5b9f93c975aba125fc924daac5c07",
+            "text": "PRETTY_NAME=\"Ubuntu 22.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"22.04\"\nVERSION=\"22.04.5 LTS (Jammy Jellyfish)\"\nVERSION_CODENAME=jammy\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=jammy\n"
+          },
+          "filesystem": {
+            "type": "61267",
+            "bsize": "4096",
+            "blocks": "38060940",
+            "bfree": "20498669",
+            "bavail": "20494573",
+            "files": "19353600",
+            "ffree": "18168236"
+          },
+          "user": {
+            "uid": 1001,
+            "gid": 1001
+          }
+        },
+        "sourceCommit": "52e0fea66b5e7cb16d7402e387992833f0d9ba65",
+        "toolchainSha256": "4348997b304a0cb01a1eda2eead08604937bdc17a23e48f9291e17e5e4766148",
+        "tarball": "psc1-independent-linux-x64.tar.gz",
+        "bytes": 46588584,
+        "sha256": "9c21f2b2da54c0e1c33fd3b3da24c71471b11b6f0fb41183f346923430b7274f",
+        "sourceModules": 125,
+        "sourceClosureDigest": "424c15ce2cf5bb87a293dd2aad1705fa801c07067c972578aa76111627d590d7",
+        "sourceConversionElapsedMs": 501987,
+        "sourceAdmissionsSha256": "9ac7a395b3f473fdb0278e3bf220ece76443ee9502a6d16996684f4c2e52619a",
+        "sourceOriginalIrSha256": "a910cc599e67b93077b004d79dc3c042a6d594e4169ea0ef8abafb8980a2415b",
+        "privateRuntimeSha256": "fde6a4bf8d0562f7751d1a2d6cb9b417c4cfe107bbcb0aa3e9a24e125e348f48",
+        "checkerSha256": "1415522ad1fa22ea919d796dc0d689be5c65275c0a24fe43a6ac7f675d32239b",
+        "compilerSha256": "49d851d26008abf116b9f4c680c0833311e835b90d6c58e369ca426f33ecd2e6",
+        "compilerSelection": {
+          "strategy": "qualified-type-key-O2",
+          "input": {
+            "run": 40634776830,
+            "job": 122639100927,
+            "artifact": 12796523762,
+            "commit": "bc983a806a2995bed7851512a175652cbf4b5226",
+            "zipSha256": "c17a4d364810714e4dd7ed775fb9ff3547de87ebf89501e402d75fc9a7fb7af1"
+          },
+          "summarySha256": "89f76a873360e14d0438582fa1b20a34d048c960c502a90c6b6c0776abd18710",
+          "filesManifestSha256": "aa1ca6b19585a7be8b21d78b9ab4cbb024abd633466f41a7bfc292380696f80c",
+          "compilerSha256": "49d851d26008abf116b9f4c680c0833311e835b90d6c58e369ca426f33ecd2e6",
+          "sourceClosureDigest": "424c15ce2cf5bb87a293dd2aad1705fa801c07067c972578aa76111627d590d7",
+          "selectedCanonicalSourceSha256": "74fb1bb1c8f9beef611300e06fff3010121ed2589e828b7102f539217a09ad93",
+          "receiptGrantsAdmissionAuthority": false
+        }
+      },
+      "isolation": {
+        "phase": "smoke",
+        "status": "passed",
+        "elapsedMs": 20332,
+        "exitStatus": 0,
+        "unexpectedExecutions": [],
+        "traceSha256": "43f5e80290695b3dc025972ac3f326f9c551d5d15a20e24c2e043ee9cad19963"
+      }
+    },
+    {
+      "environmentId": "ubuntu-24.04-arm64",
+      "job": 122693395137,
+      "run": 40651609426,
+      "bootstrap": {
+        "schema": "psc1-independent-bootstrap/1",
+        "status": "assembled-awaiting-development-qualification",
+        "platform": "linux-arm64",
+        "environment": {
+          "schema": "psc1-independent-environment/1",
+          "platform": "linux",
+          "arch": "arm64",
+          "kernel": {
+            "release": "6.17.0-1022-azure",
+            "version": "#22-Ubuntu SMP Mon Jul 27 17:12:01 UTC 2026"
+          },
+          "runtime": {
+            "version": "v22.23.3",
+            "versions": {
+              "node": "22.23.3",
+              "acorn": "8.16.0",
+              "ada": "2.9.2",
+              "amaro": "1.1.8",
+              "ares": "1.34.8",
+              "brotli": "1.1.0",
+              "cjs_module_lexer": "2.2.0",
+              "cldr": "48.0",
+              "icu": "78.3",
+              "llhttp": "9.4.3",
+              "modules": "127",
+              "napi": "10",
+              "nbytes": "0.1.3",
+              "ncrypto": "0.0.1",
+              "nghttp2": "1.69.0",
+              "openssl": "3.5.8",
+              "simdjson": "4.5.0",
+              "simdutf": "6.4.2",
+              "sqlite": "3.51.3",
+              "tz": "2026c",
+              "undici": "6.28.1",
+              "unicode": "17.0",
+              "uv": "1.51.0",
+              "uvwasi": "0.0.23",
+              "v8": "12.4.254.21-node.57",
+              "zlib": "1.3.1-e00f703",
+              "zstd": "1.5.7"
+            },
+            "glibcVersionRuntime": "2.39",
+            "glibcVersionCompiler": "2.28"
+          },
+          "osRelease": {
+            "bytes": 400,
+            "sha256": "87458b3b1f1ca0e5c693ade771de7007c3783bdc692fa6b39eb6414bf2af2763",
+            "text": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n"
+          },
+          "filesystem": {
+            "type": "61267",
+            "bsize": "4096",
+            "blocks": "37815964",
+            "bfree": "25945052",
+            "bavail": "25940956",
+            "files": "19529728",
+            "ffree": "18811501"
+          },
+          "user": {
+            "uid": 1001,
+            "gid": 1001
+          }
+        },
+        "sourceCommit": "52e0fea66b5e7cb16d7402e387992833f0d9ba65",
+        "toolchainSha256": "5ce7f8932477eaf3af7331abcd4538be811d53cdf353793fee04697861de94f6",
+        "tarball": "psc1-independent-linux-arm64.tar.gz",
+        "bytes": 46330622,
+        "sha256": "719c3823d06260d7b541cfb5d4e75e13aba6ac0578a525aa31fecb6e0143fb02",
+        "sourceModules": 125,
+        "sourceClosureDigest": "424c15ce2cf5bb87a293dd2aad1705fa801c07067c972578aa76111627d590d7",
+        "sourceConversionElapsedMs": 261656,
+        "sourceAdmissionsSha256": "9ac7a395b3f473fdb0278e3bf220ece76443ee9502a6d16996684f4c2e52619a",
+        "sourceOriginalIrSha256": "a910cc599e67b93077b004d79dc3c042a6d594e4169ea0ef8abafb8980a2415b",
+        "privateRuntimeSha256": "d09e299258c24f7cdf6f5d5ec185e3a56512b27a697113735dac909f1cac7b8d",
+        "checkerSha256": "d0433c6e187fc0a7b0e165f641eaa8720cdd6b16747237b17cc86ddf01d6052e",
+        "compilerSha256": "49d851d26008abf116b9f4c680c0833311e835b90d6c58e369ca426f33ecd2e6",
+        "compilerSelection": {
+          "strategy": "qualified-type-key-O2",
+          "input": {
+            "run": 40634776830,
+            "job": 122639100927,
+            "artifact": 12796523762,
+            "commit": "bc983a806a2995bed7851512a175652cbf4b5226",
+            "zipSha256": "c17a4d364810714e4dd7ed775fb9ff3547de87ebf89501e402d75fc9a7fb7af1"
+          },
+          "summarySha256": "89f76a873360e14d0438582fa1b20a34d048c960c502a90c6b6c0776abd18710",
+          "filesManifestSha256": "aa1ca6b19585a7be8b21d78b9ab4cbb024abd633466f41a7bfc292380696f80c",
+          "compilerSha256": "49d851d26008abf116b9f4c680c0833311e835b90d6c58e369ca426f33ecd2e6",
+          "sourceClosureDigest": "424c15ce2cf5bb87a293dd2aad1705fa801c07067c972578aa76111627d590d7",
+          "selectedCanonicalSourceSha256": "74fb1bb1c8f9beef611300e06fff3010121ed2589e828b7102f539217a09ad93",
+          "receiptGrantsAdmissionAuthority": false
+        }
+      },
+      "isolation": {
+        "phase": "smoke",
+        "status": "passed",
+        "elapsedMs": 12241,
+        "exitStatus": 0,
+        "unexpectedExecutions": [],
+        "traceSha256": "558bc3f1c5383e9badadbbb4db610dc3c602fbd025c40e9ccdb7d7cf723efd7b"
+      }
+    }
+  ],
+  "intermediateRequalification": {
+    "run": 40651609426,
+    "commit": "52e0fea66b5e7cb16d7402e387992833f0d9ba65",
+    "rule": "Every environment must complete bootstrap, smoke, baseline B1/B2, changed C1/C2 and evidence verification in this same run and at this source commit.",
+    "status": "superseded-after-three-passed-bootstrap-smoke-checks",
+    "reason": "The final documentation/workflow commit adds direct matrix input coverage; partial old chains are not full qualification.",
+    "artifacts": [
+      {
+        "id": 12802080296,
+        "name": "psc1-independent-baseline-ubuntu-22.04-x64-40651609426-52e0fea66b5e7cb16d7402e387992833f0d9ba65",
+        "bytes": 11207,
+        "zipSha256": "7c6d4004c8c611dd31c43fb6d0febb54454883f9ab888ffd452ad4bbf2f80bad",
+        "expiresAt": "2027-01-26T07:40:32Z"
+      },
+      {
+        "id": 12801881233,
+        "name": "psc1-independent-baseline-ubuntu-24.04-x64-40651609426-52e0fea66b5e7cb16d7402e387992833f0d9ba65",
+        "bytes": 11240,
+        "zipSha256": "d5c6cfd4bde5221b6da7950f626cab6a2b0c0ca1080542182523814083b410a3",
+        "expiresAt": "2027-01-26T07:40:32Z"
+      },
+      {
+        "id": 12801402046,
+        "name": "psc1-independent-changed-ubuntu-22.04-x64-40651609426-52e0fea66b5e7cb16d7402e387992833f0d9ba65",
+        "bytes": 12942,
+        "zipSha256": "9efcd5a7b70bd45a421a928202a21b05dea63f19c1338719f0211a09fee8f4b9",
+        "expiresAt": "2027-01-26T07:40:32Z"
+      },
+      {
+        "id": 12801157452,
+        "name": "psc1-independent-baseline-ubuntu-24.04-arm64-40651609426-52e0fea66b5e7cb16d7402e387992833f0d9ba65",
+        "bytes": 11229,
+        "zipSha256": "20e9019c37d84cfe7fd59c62221952ec5b25e9c114025c8ecb943440e12f770f",
+        "expiresAt": "2027-01-26T07:40:32Z"
+      },
+      {
+        "id": 12801137510,
+        "name": "psc1-independent-changed-ubuntu-24.04-x64-40651609426-52e0fea66b5e7cb16d7402e387992833f0d9ba65",
+        "bytes": 13036,
+        "zipSha256": "c40af2b97d82f41f4acb3c1df69cff624447791f3d2788d5aabeac223992136e",
+        "expiresAt": "2027-01-26T07:40:32Z"
+      },
+      {
+        "id": 12800868809,
+        "name": "psc1-independent-changed-ubuntu-24.04-arm64-40651609426-52e0fea66b5e7cb16d7402e387992833f0d9ba65",
+        "bytes": 13022,
+        "zipSha256": "8b6b66e463ecf33471937a21f226c817322672a3ac6c376d52042391474b6095",
+        "expiresAt": "2027-01-26T07:40:32Z"
+      },
+      {
+        "id": 12800865366,
+        "name": "psc1-independent-bootstrap-ubuntu-22.04-x64-40651609426-52e0fea66b5e7cb16d7402e387992833f0d9ba65",
+        "bytes": 46592746,
+        "zipSha256": "820cf99bcd0d1f37fc2811e539514f715ddef86ad348fdb16c7a5a607cae1cce",
+        "expiresAt": "2027-01-26T07:40:32Z"
+      },
+      {
+        "id": 12800681068,
+        "name": "psc1-independent-bootstrap-ubuntu-24.04-arm64-40651609426-52e0fea66b5e7cb16d7402e387992833f0d9ba65",
+        "bytes": 46334802,
+        "zipSha256": "daa0be3f04b62a8a30778278a9b381a0cc16dfb19a9f30dd1cb7d141df7bb069",
+        "expiresAt": "2027-01-26T07:40:32Z"
+      },
+      {
+        "id": 12800666183,
+        "name": "psc1-independent-smoke-ubuntu-24.04-arm64-40651609426-52e0fea66b5e7cb16d7402e387992833f0d9ba65",
+        "bytes": 776401,
+        "zipSha256": "21203fbe17f24fd860391ef4c1726e1355dfdac0963c9222476de6606c079fc1",
+        "expiresAt": "2027-01-26T07:40:32Z"
+      },
+      {
+        "id": 12800537276,
+        "name": "psc1-independent-bootstrap-ubuntu-24.04-x64-40651609426-52e0fea66b5e7cb16d7402e387992833f0d9ba65",
+        "bytes": 46592775,
+        "zipSha256": "c78c3a53df23f605de7f64d894ede606e1b9917446a64a618a686dbd6827432c",
+        "expiresAt": "2027-01-26T07:40:32Z"
+      },
+      {
+        "id": 12800387668,
+        "name": "psc1-independent-smoke-ubuntu-24.04-x64-40651609426-52e0fea66b5e7cb16d7402e387992833f0d9ba65",
+        "bytes": 776485,
+        "zipSha256": "7ce730a8c1f4cf37c2043b340dc86b583173bc774e63e281d6c9a9d8f88d4730",
+        "expiresAt": "2027-01-26T07:40:32Z"
+      },
+      {
+        "id": 12799639671,
+        "name": "psc1-independent-smoke-ubuntu-22.04-x64-40651609426-52e0fea66b5e7cb16d7402e387992833f0d9ba65",
+        "bytes": 776345,
+        "zipSha256": "648502c90bbbf40cab10e673d594013440ba463e1fa98de465e1bbae52cc2b1c",
+        "expiresAt": "2027-01-26T07:40:32Z"
+      }
+    ]
+  },
+  "sourceGateSdkSetup": {
+    "original": {
+      "commit": "a4ca02ef9af1859dfb532a051f6ea4760ed113d0",
+      "run": 40655424739,
+      "job": 122710966887,
+      "workflow": ".github/workflows/psc1-scoped-correctness.yml",
+      "restoredElanCacheBytes": 777087918,
+      "cacheRestoredAt": "2026-10-28T08:30:32.5201501Z",
+      "lastProgressAt": "2026-10-28T08:30:33.6748251Z",
+      "lastProgress": "info: downloading installer",
+      "cancelledAt": "2026-10-28T09:15:04.5998852Z",
+      "sourceTestsReached": false,
+      "artifact": {
+        "id": 12803659702,
+        "bytes": 1415,
+        "zipSha256": "c337793e916b0f9a2e5abb6c9242583ad9af4774c8ce96e87962112e329770d2"
+      }
+    },
+    "firstRepair": {
+      "commit": "56df3321cc41d1c2975df92c44b087867d2cf95e",
+      "workflow": ".github/workflows/psc1-scoped-correctness.yml"
+    },
+    "remainingCopiesObserved": {
+      "commit": "56df3321cc41d1c2975df92c44b087867d2cf95e",
+      "run": 40667524997,
+      "status": "cancelled-when-superseded",
+      "fullSourceJobReached": false,
+      "jobs": [
+        {
+          "job": 122749390652,
+          "name": "g1 / host-session-boundary",
+          "cacheRestoredAt": "2026-10-28T10:00:43.1772578Z",
+          "lastProgressAt": "2026-10-28T10:00:44.8468715Z",
+          "cancelledAt": "2026-10-28T10:07:48.8028747Z",
+          "sourceTestsReached": false
+        },
+        {
+          "job": 122749390755,
+          "name": "closures / selected-closure (directjs-compiler, ordinary-checked)",
+          "cacheRestoredAt": "2026-10-28T10:00:37.5477097Z",
+          "lastProgressAt": "2026-10-28T10:00:39.8477378Z",
+          "cancelledAt": "2026-10-28T10:07:48.8672237Z",
+          "sourceTestsReached": false
+        }
+      ],
+      "lastProgress": "info: downloading installer",
+      "interpretation": "Both selected jobs remained in an unnecessary network installer after a successful cache restore. They were superseded before a timeout or compiler test result; neither is counted as a semantic failure or successful qualification."
+    },
+    "completionRepair": {
+      "commit": "bba5c93309e833508d5610323a27bad756602091",
+      "parent": "56df3321cc41d1c2975df92c44b087867d2cf95e",
+      "workflows": [
+        ".github/workflows/psc1-compiler-closure.yml",
+        ".github/workflows/psc1-generated-compiler.yml",
+        ".github/workflows/psc1-lossless-source.yml",
+        ".github/workflows/psc1-architecture-native.yml",
+        ".github/workflows/psc1-practical-compiler-m.yml",
+        ".github/workflows/psc1-modular-pilot.yml"
+      ],
+      "installerBlocks": 8,
+      "cacheCheck": "Reuse executable $HOME/.elan/bin/elan when present.",
+      "downloadBounds": {
+        "connectTimeoutSeconds": 20,
+        "maxTimeSeconds": 120,
+        "retries": 2
+      },
+      "installerTimeoutSeconds": 180,
+      "installerDefaultToolchain": "none",
+      "stepTimeoutMinutes": 10,
+      "preserved": "Repository lean-toolchain pin and all subsequent dependency/build/test commands; no admission, strict IR, source, host or matrix changes."
+    },
+    "requiredSourceRequalification": {
+      "run": 40669496813,
+      "commit": "bba5c93309e833508d5610323a27bad756602091",
+      "testedMergeCommit": "d01e597d61b9e6cb6b912418f3b4329be3eee930",
+      "status": "passed",
+      "fullJob": 122758372961,
+      "gateJob": 122771699187,
+      "selectedJobsPassed": 17,
+      "readiness": {
+        "counts": {
+          "implemented": 0,
+          "tested": 0,
+          "qualified": 37,
+          "blocked": 0
+        },
+        "releaseReady": true
+      },
+      "completeReceipt": "PSC1_CANONICAL_INTEGRATION_QUALIFICATION_2026-10-28.json",
+      "artifact": {
+        "id": 12810470594,
+        "name": "psc1-scoped-correctness-d01e597d61b9e6cb6b912418f3b4329be3eee930",
+        "bytes": 121486694,
+        "zipSha256": "771c2fb4f14bfb517d5f16cad750ca2cd99627977b1f9feb2a26f438b2c3dae9",
+        "createdAt": "2026-10-28T10:49:43Z",
+        "expiresAt": "2026-11-11T10:49:34Z",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40669496813/artifacts/12810470594"
+      }
+    },
+    "completedInstallerStepObservations": [
+      {
+        "job": 122753287191,
+        "name": "focused / focused (applications)",
+        "step": "Install repository-pinned Lean",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-28T10:09:30Z",
+        "completedAt": "2026-10-28T10:09:30Z"
+      },
+      {
+        "job": 122753287193,
+        "name": "modular / pilot",
+        "step": "Install pinned Lean and locked development consumers",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-28T10:09:33Z",
+        "completedAt": "2026-10-28T10:09:35Z"
+      },
+      {
+        "job": 122753287224,
+        "name": "native / native",
+        "step": "Install repository-pinned Lean",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-28T10:09:32Z",
+        "completedAt": "2026-10-28T10:09:32Z"
+      },
+      {
+        "job": 122753287303,
+        "name": "lossless / lossless",
+        "step": "Install repository-pinned Lean",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-28T10:09:36Z",
+        "completedAt": "2026-10-28T10:09:36Z"
+      },
+      {
+        "job": 122753287349,
+        "name": "focused / focused (core)",
+        "step": "Install repository-pinned Lean",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-28T10:09:44Z",
+        "completedAt": "2026-10-28T10:09:44Z"
+      },
+      {
+        "job": 122753287355,
+        "name": "focused / php-application",
+        "step": "Install repository-pinned Lean and locked host dependencies",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-28T10:09:38Z",
+        "completedAt": "2026-10-28T10:09:39Z"
+      },
+      {
+        "job": 122753287427,
+        "name": "source-bindings / trace",
+        "step": "Install repository-pinned Lean",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-28T10:10:17Z",
+        "completedAt": "2026-10-28T10:10:17Z"
+      },
+      {
+        "job": 122755278917,
+        "name": "source-bindings / integration",
+        "step": "Install repository-pinned Lean",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-28T10:14:02Z",
+        "completedAt": "2026-10-28T10:14:02Z"
+      },
+      {
+        "job": 122756928620,
+        "name": "g1 / generated-js",
+        "step": "Install repository-pinned Lean",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-28T10:17:36Z",
+        "completedAt": "2026-10-28T10:17:36Z"
+      },
+      {
+        "job": 122756928657,
+        "name": "g1 / host-session-boundary",
+        "step": "Install repository-pinned Lean",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-28T10:17:28Z",
+        "completedAt": "2026-10-28T10:17:28Z"
+      },
+      {
+        "job": 122756928757,
+        "name": "closures / selected-closure (semantic-compiler, checked)",
+        "step": "Install repository-pinned Lean",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-28T10:17:35Z",
+        "completedAt": "2026-10-28T10:17:35Z"
+      },
+      {
+        "job": 122756928792,
+        "name": "closures / selected-closure (directjs-compiler, ordinary-checked)",
+        "step": "Install repository-pinned Lean",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-28T10:17:39Z",
+        "completedAt": "2026-10-28T10:17:39Z"
+      },
+      {
+        "job": 122756928797,
+        "name": "closures / selected-closure (rust-compiler, ordinary-checked)",
+        "step": "Install repository-pinned Lean",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-28T10:17:37Z",
+        "completedAt": "2026-10-28T10:17:37Z"
+      },
+      {
+        "job": 122758372961,
+        "name": "full / linux-scoped",
+        "step": "Install repository-pinned Lean",
+        "status": "completed",
+        "conclusion": "success",
+        "startedAt": "2026-10-28T10:21:02Z",
+        "completedAt": "2026-10-28T10:21:02Z"
+      }
+    ]
+  }
+}

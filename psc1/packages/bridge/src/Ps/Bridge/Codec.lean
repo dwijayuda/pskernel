@@ -16,106 +16,103 @@ def psCodecField
     (name : String) :
     Except PsCodecDecodeError PsJsonValue :=
   match psJsonGetField value name with
-  | none =>
+  | Option.none =>
       Except.error (PsCodecDecodeError.missingField name)
-  | some field => Except.ok field
+  | Option.some field => Except.ok field
 
 def psCodecString
     (value : PsJsonValue) :
     Except PsCodecDecodeError String :=
   match psJsonAsString value with
-  | some text => Except.ok text
-  | none => Except.error PsCodecDecodeError.expectedString
+  | Option.some text => Except.ok text
+  | Option.none => Except.error PsCodecDecodeError.expectedString
 
 def psCodecArray
     (value : PsJsonValue) :
     Except PsCodecDecodeError (List PsJsonValue) :=
   match psJsonAsArray value with
-  | some values => Except.ok values
-  | none => Except.error PsCodecDecodeError.expectedArray
+  | Option.some values => Except.ok values
+  | Option.none => Except.error PsCodecDecodeError.expectedArray
 
-def psCodecNaturalDigits :
-    List Char -> Nat -> Option Nat
-  | [], value => some value
-  | char :: rest, value =>
-      let code := char.val.toNat
-      if code >= 48 && code <= 57 then
-        psCodecNaturalDigits
-          rest
-          (value * 10 + (code - 48))
-      else
-        none
+def psCodecNaturalDigits
+    (chars : List Char) (value : Nat) : Option Nat :=
+  match chars with
+  | List.nil => Option.some value
+  | List.cons char rest =>
+      let code : Nat := Char.toNat char;
+      if Nat.ble 48 code && Nat.ble code 57 then
+        psCodecNaturalDigits rest (Nat.add (Nat.mul value 10) (Nat.sub code 48))
+      else Option.none
 
 def psCodecNaturalText
     (text : String) : Option Nat :=
-  match text.toList with
-  | [] => none
-  | '0' :: rest =>
-      if rest.isEmpty then some 0 else none
-  | first :: rest =>
-      let code := first.val.toNat
-      if code >= 49 && code <= 57 then
-        psCodecNaturalDigits
-          rest
-          (code - 48)
-      else
-        none
+  match psJsonStringToChars text with
+  | List.nil => Option.none
+  | List.cons first rest =>
+      let code : Nat := Char.toNat first;
+      if Nat.beq code 48 then
+        if psListIsEmpty rest then Option.some 0 else Option.none
+      else if Nat.ble 49 code && Nat.ble code 57 then
+        psCodecNaturalDigits rest (code - 48)
+      else Option.none
 
 def psCodecNat
     (value : PsJsonValue) :
     Except PsCodecDecodeError Nat :=
   match psJsonAsNumberText value with
-  | none => Except.error PsCodecDecodeError.expectedNumber
-  | some text =>
+  | Option.none => Except.error PsCodecDecodeError.expectedNumber
+  | Option.some text =>
       match psCodecNaturalText text with
-      | none => Except.error PsCodecDecodeError.invalidNatural
-      | some natural => Except.ok natural
+      | Option.none => Except.error PsCodecDecodeError.invalidNatural
+      | Option.some natural => Except.ok natural
 
-def psDecodeCodecNameWithFuel :
-    Nat -> PsJsonValue -> Except PsCodecDecodeError PsName
-  | 0, _ => Except.error PsCodecDecodeError.fuelExhausted
-  | fuel + 1, value =>
+def psDecodeCodecNameWithFuel
+    (fuelBudget : Nat) (value : PsJsonValue) :
+    Except PsCodecDecodeError PsName :=
+  match fuelBudget with
+  | Nat.zero => Except.error PsCodecDecodeError.fuelExhausted
+  | Nat.succ fuel =>
       match psCodecField value "k" with
       | Except.error error => Except.error error
       | Except.ok tagValue =>
           match psCodecString tagValue with
           | Except.error error => Except.error error
           | Except.ok tag =>
-              if tag == "a" then
+              if psStringEq tag "a" then
                 Except.ok PsName.anonymous
-              else if tag == "s" then
-                match
-                    psCodecField value "p",
-                    psCodecField value "v" with
-                | Except.ok parentValue, Except.ok textValue =>
-                    match
-                        psDecodeCodecNameWithFuel fuel parentValue,
-                        psCodecString textValue with
-                    | Except.ok parent, Except.ok text =>
-                        Except.ok (psNameAppendStr parent text)
-                    | Except.error error, _ => Except.error error
-                    | _, Except.error error => Except.error error
-                | Except.error error, _ => Except.error error
-                | _, Except.error error => Except.error error
-              else if tag == "n" then
-                match
-                    psCodecField value "p",
-                    psCodecField value "v" with
-                | Except.ok parentValue, Except.ok textValue =>
-                    match
-                        psDecodeCodecNameWithFuel fuel parentValue,
-                        psCodecString textValue with
-                    | Except.ok parent, Except.ok text =>
-                        match psCodecNaturalText text with
-                        | none =>
-                            Except.error
-                              PsCodecDecodeError.invalidNatural
-                        | some number =>
-                            Except.ok (psNameAppendNum parent number)
-                    | Except.error error, _ => Except.error error
-                    | _, Except.error error => Except.error error
-                | Except.error error, _ => Except.error error
-                | _, Except.error error => Except.error error
+              else if psStringEq tag "s" then
+                match psCodecField value "p" with
+                | Except.error error => Except.error error
+                | Except.ok parentValue =>
+                    match psCodecField value "v" with
+                    | Except.error error => Except.error error
+                    | Except.ok textValue =>
+                        match psDecodeCodecNameWithFuel fuel parentValue with
+                        | Except.error error => Except.error error
+                        | Except.ok parent =>
+                            match psCodecString textValue with
+                            | Except.error error => Except.error error
+                            | Except.ok text =>
+                                Except.ok (psNameAppendStr parent text)
+              else if psStringEq tag "n" then
+                match psCodecField value "p" with
+                | Except.error error => Except.error error
+                | Except.ok parentValue =>
+                    match psCodecField value "v" with
+                    | Except.error error => Except.error error
+                    | Except.ok textValue =>
+                        match psDecodeCodecNameWithFuel fuel parentValue with
+                        | Except.error error => Except.error error
+                        | Except.ok parent =>
+                            match psCodecString textValue with
+                            | Except.error error => Except.error error
+                            | Except.ok text =>
+                                match psCodecNaturalText text with
+                                | Option.none =>
+                                    Except.error
+                                      PsCodecDecodeError.invalidNatural
+                                | Option.some number =>
+                                    Except.ok (psNameAppendNum parent number)
               else
                 Except.error (PsCodecDecodeError.invalidTag tag)
 
@@ -124,19 +121,21 @@ def psDecodeCodecName
     Except PsCodecDecodeError PsName :=
   psDecodeCodecNameWithFuel 4096 value
 
-def psDecodeCodecLevelWithFuel :
-    Nat -> PsJsonValue -> Except PsCodecDecodeError PsLevel
-  | 0, _ => Except.error PsCodecDecodeError.fuelExhausted
-  | fuel + 1, value =>
+def psDecodeCodecLevelWithFuel
+    (fuelBudget : Nat) (value : PsJsonValue) :
+    Except PsCodecDecodeError PsLevel :=
+  match fuelBudget with
+  | Nat.zero => Except.error PsCodecDecodeError.fuelExhausted
+  | Nat.succ fuel =>
       match psCodecField value "k" with
       | Except.error error => Except.error error
       | Except.ok tagValue =>
           match psCodecString tagValue with
           | Except.error error => Except.error error
           | Except.ok tag =>
-              if tag == "z" then
+              if psStringEq tag "z" then
                 Except.ok PsLevel.zero
-              else if tag == "s" then
+              else if psStringEq tag "s" then
                 match psCodecField value "o" with
                 | Except.error error => Except.error error
                 | Except.ok inner =>
@@ -144,24 +143,24 @@ def psDecodeCodecLevelWithFuel :
                     | Except.error error => Except.error error
                     | Except.ok level =>
                         Except.ok (PsLevel.succ level)
-              else if tag == "max" || tag == "imax" then
-                match
-                    psCodecField value "l",
-                    psCodecField value "r" with
-                | Except.ok leftValue, Except.ok rightValue =>
-                    match
-                        psDecodeCodecLevelWithFuel fuel leftValue,
-                        psDecodeCodecLevelWithFuel fuel rightValue with
-                    | Except.ok left, Except.ok right =>
-                        if tag == "max" then
-                          Except.ok (PsLevel.max left right)
-                        else
-                          Except.ok (PsLevel.imax left right)
-                    | Except.error error, _ => Except.error error
-                    | _, Except.error error => Except.error error
-                | Except.error error, _ => Except.error error
-                | _, Except.error error => Except.error error
-              else if tag == "p" then
+              else if psStringEq tag "max" || psStringEq tag "imax" then
+                match psCodecField value "l" with
+                | Except.error error => Except.error error
+                | Except.ok leftValue =>
+                    match psCodecField value "r" with
+                    | Except.error error => Except.error error
+                    | Except.ok rightValue =>
+                        match psDecodeCodecLevelWithFuel fuel leftValue with
+                        | Except.error error => Except.error error
+                        | Except.ok left =>
+                            match psDecodeCodecLevelWithFuel fuel rightValue with
+                            | Except.error error => Except.error error
+                            | Except.ok right =>
+                                if psStringEq tag "max" then
+                                  Except.ok (PsLevel.max left right)
+                                else
+                                  Except.ok (PsLevel.imax left right)
+              else if psStringEq tag "p" then
                 match psCodecField value "n" with
                 | Except.error error => Except.error error
                 | Except.ok nameValue =>
@@ -186,13 +185,13 @@ def psDecodeCodecBinder
   match psCodecString value with
   | Except.error error => Except.error error
   | Except.ok binder =>
-      if binder == "default" then
+      if psStringEq binder "default" then
         Except.ok PsBinderInfo.explicit
-      else if binder == "implicit" then
+      else if psStringEq binder "implicit" then
         Except.ok PsBinderInfo.implicit
-      else if binder == "strictImplicit" then
+      else if psStringEq binder "strictImplicit" then
         Except.ok PsBinderInfo.strictImplicit
-      else if binder == "instImplicit" then
+      else if psStringEq binder "instImplicit" then
         Except.ok PsBinderInfo.instanceImplicit
       else
         Except.error (PsCodecDecodeError.invalidBinder binder)
@@ -201,23 +200,21 @@ def psDecodeCodecLevelsWithFuel
     (fuel : Nat)
     (values : List PsJsonValue) :
     Except PsCodecDecodeError (List PsLevel) :=
-  match
-      values.mapM
-        (psDecodeCodecLevelWithFuel fuel) with
-  | Except.error error => Except.error error
-  | Except.ok levels => Except.ok levels
+  psListMapExcept (psDecodeCodecLevelWithFuel fuel) values
 
-def psDecodeCodecExprWithFuel :
-    Nat -> PsJsonValue -> Except PsCodecDecodeError PsExpr
-  | 0, _ => Except.error PsCodecDecodeError.fuelExhausted
-  | fuel + 1, value =>
+def psDecodeCodecExprWithFuel
+    (fuelBudget : Nat) (value : PsJsonValue) :
+    Except PsCodecDecodeError PsExpr :=
+  match fuelBudget with
+  | Nat.zero => Except.error PsCodecDecodeError.fuelExhausted
+  | Nat.succ fuel =>
       match psCodecField value "k" with
       | Except.error error => Except.error error
       | Except.ok tagValue =>
           match psCodecString tagValue with
           | Except.error error => Except.error error
           | Except.ok tag =>
-              if tag == "b" then
+              if psStringEq tag "b" then
                 match psCodecField value "i" with
                 | Except.error error => Except.error error
                 | Except.ok indexValue =>
@@ -225,7 +222,7 @@ def psDecodeCodecExprWithFuel :
                     | Except.error error => Except.error error
                     | Except.ok index =>
                         Except.ok (PsExpr.bvar index)
-              else if tag == "sort" then
+              else if psStringEq tag "sort" then
                 match psCodecField value "l" with
                 | Except.error error => Except.error error
                 | Except.ok levelValue =>
@@ -236,156 +233,142 @@ def psDecodeCodecExprWithFuel :
                     | Except.error error => Except.error error
                     | Except.ok level =>
                         Except.ok (PsExpr.sortE level)
-              else if tag == "const" then
-                match
-                    psCodecField value "n",
-                    psCodecField value "ls" with
-                | Except.ok nameValue, Except.ok levelsValue =>
-                    match
-                        psDecodeCodecNameWithFuel fuel nameValue,
-                        psCodecArray levelsValue with
-                    | Except.ok name, Except.ok rawLevels =>
-                        match
-                            psDecodeCodecLevelsWithFuel
-                              fuel
-                              rawLevels with
+              else if psStringEq tag "const" then
+                match psCodecField value "n" with
+                | Except.error error => Except.error error
+                | Except.ok nameValue =>
+                    match psCodecField value "ls" with
+                    | Except.error error => Except.error error
+                    | Except.ok levelsValue =>
+                        match psDecodeCodecNameWithFuel fuel nameValue with
                         | Except.error error => Except.error error
-                        | Except.ok levels =>
-                            Except.ok (PsExpr.constE name levels)
-                    | Except.error error, _ => Except.error error
-                    | _, Except.error error => Except.error error
-                | Except.error error, _ => Except.error error
-                | _, Except.error error => Except.error error
-              else if tag == "app" then
-                match
-                    psCodecField value "f",
-                    psCodecField value "a" with
-                | Except.ok fnValue, Except.ok argValue =>
-                    match
-                        psDecodeCodecExprWithFuel fuel fnValue,
-                        psDecodeCodecExprWithFuel fuel argValue with
-                    | Except.ok fn, Except.ok arg =>
-                        Except.ok (PsExpr.app fn arg)
-                    | Except.error error, _ => Except.error error
-                    | _, Except.error error => Except.error error
-                | Except.error error, _ => Except.error error
-                | _, Except.error error => Except.error error
-              else if tag == "lam" || tag == "forall" then
-                match
-                    psCodecField value "n",
-                    psCodecField value "t",
-                    psCodecField value "b",
-                    psCodecField value "bi" with
-                | Except.ok nameValue,
-                  Except.ok typeValue,
-                  Except.ok bodyValue,
-                  Except.ok binderValue =>
-                    match
-                        psDecodeCodecNameWithFuel fuel nameValue,
-                        psDecodeCodecExprWithFuel fuel typeValue,
-                        psDecodeCodecExprWithFuel fuel bodyValue,
-                        psDecodeCodecBinder binderValue with
-                    | Except.ok name,
-                      Except.ok type,
-                      Except.ok body,
-                      Except.ok binder =>
-                        if tag == "lam" then
-                          Except.ok
-                            (PsExpr.lam name type body binder)
-                        else
-                          Except.ok
-                            (PsExpr.forallE name type body binder)
-                    | Except.error error, _, _, _ =>
-                        Except.error error
-                    | _, Except.error error, _, _ =>
-                        Except.error error
-                    | _, _, Except.error error, _ =>
-                        Except.error error
-                    | _, _, _, Except.error error =>
-                        Except.error error
-                | Except.error error, _, _, _ => Except.error error
-                | _, Except.error error, _, _ => Except.error error
-                | _, _, Except.error error, _ => Except.error error
-                | _, _, _, Except.error error => Except.error error
-              else if tag == "let" then
-                match
-                    psCodecField value "n",
-                    psCodecField value "t",
-                    psCodecField value "v",
-                    psCodecField value "b" with
-                | Except.ok nameValue,
-                  Except.ok typeValue,
-                  Except.ok valueValue,
-                  Except.ok bodyValue =>
-                    match
-                        psDecodeCodecNameWithFuel fuel nameValue,
-                        psDecodeCodecExprWithFuel fuel typeValue,
-                        psDecodeCodecExprWithFuel fuel valueValue,
-                        psDecodeCodecExprWithFuel fuel bodyValue with
-                    | Except.ok name,
-                      Except.ok type,
-                      Except.ok boundValue,
-                      Except.ok body =>
-                        Except.ok
-                          (PsExpr.letE
-                            name
-                            type
-                            boundValue
-                            body)
-                    | Except.error error, _, _, _ =>
-                        Except.error error
-                    | _, Except.error error, _, _ =>
-                        Except.error error
-                    | _, _, Except.error error, _ =>
-                        Except.error error
-                    | _, _, _, Except.error error =>
-                        Except.error error
-                | Except.error error, _, _, _ => Except.error error
-                | _, Except.error error, _, _ => Except.error error
-                | _, _, Except.error error, _ => Except.error error
-                | _, _, _, Except.error error => Except.error error
-              else if tag == "nat" || tag == "str" then
+                        | Except.ok name =>
+                            match psCodecArray levelsValue with
+                            | Except.error error => Except.error error
+                            | Except.ok rawLevels =>
+                                match
+                                    psDecodeCodecLevelsWithFuel
+                                      fuel
+                                      rawLevels with
+                                | Except.error error => Except.error error
+                                | Except.ok levels =>
+                                    Except.ok (PsExpr.constE name levels)
+              else if psStringEq tag "app" then
+                match psCodecField value "f" with
+                | Except.error error => Except.error error
+                | Except.ok fnValue =>
+                    match psCodecField value "a" with
+                    | Except.error error => Except.error error
+                    | Except.ok argValue =>
+                        match psDecodeCodecExprWithFuel fuel fnValue with
+                        | Except.error error => Except.error error
+                        | Except.ok fn =>
+                            match psDecodeCodecExprWithFuel fuel argValue with
+                            | Except.error error => Except.error error
+                            | Except.ok arg =>
+                                Except.ok (PsExpr.app fn arg)
+              else if psStringEq tag "lam" || psStringEq tag "forall" then
+                match psCodecField value "n" with
+                | Except.error error => Except.error error
+                | Except.ok nameValue =>
+                    match psCodecField value "t" with
+                    | Except.error error => Except.error error
+                    | Except.ok typeValue =>
+                        match psCodecField value "b" with
+                        | Except.error error => Except.error error
+                        | Except.ok bodyValue =>
+                            match psCodecField value "bi" with
+                            | Except.error error => Except.error error
+                            | Except.ok binderValue =>
+                                match psDecodeCodecNameWithFuel fuel nameValue with
+                                | Except.error error => Except.error error
+                                | Except.ok name =>
+                                    match psDecodeCodecExprWithFuel fuel typeValue with
+                                    | Except.error error => Except.error error
+                                    | Except.ok type =>
+                                        match psDecodeCodecExprWithFuel fuel bodyValue with
+                                        | Except.error error => Except.error error
+                                        | Except.ok body =>
+                                            match psDecodeCodecBinder binderValue with
+                                            | Except.error error => Except.error error
+                                            | Except.ok binder =>
+                                                if psStringEq tag "lam" then
+                                                  Except.ok
+                                                    (PsExpr.lam name type body binder)
+                                                else
+                                                  Except.ok
+                                                    (PsExpr.forallE name type body binder)
+              else if psStringEq tag "let" then
+                match psCodecField value "n" with
+                | Except.error error => Except.error error
+                | Except.ok nameValue =>
+                    match psCodecField value "t" with
+                    | Except.error error => Except.error error
+                    | Except.ok typeValue =>
+                        match psCodecField value "v" with
+                        | Except.error error => Except.error error
+                        | Except.ok valueValue =>
+                            match psCodecField value "b" with
+                            | Except.error error => Except.error error
+                            | Except.ok bodyValue =>
+                                match psDecodeCodecNameWithFuel fuel nameValue with
+                                | Except.error error => Except.error error
+                                | Except.ok name =>
+                                    match psDecodeCodecExprWithFuel fuel typeValue with
+                                    | Except.error error => Except.error error
+                                    | Except.ok type =>
+                                        match psDecodeCodecExprWithFuel fuel valueValue with
+                                        | Except.error error => Except.error error
+                                        | Except.ok boundValue =>
+                                            match psDecodeCodecExprWithFuel fuel bodyValue with
+                                            | Except.error error => Except.error error
+                                            | Except.ok body =>
+                                                Except.ok
+                                                  (PsExpr.letE
+                                                    name
+                                                    type
+                                                    boundValue
+                                                    body)
+              else if psStringEq tag "nat" || psStringEq tag "str" then
                 match psCodecField value "v" with
                 | Except.error error => Except.error error
                 | Except.ok literalValue =>
                     match psCodecString literalValue with
                     | Except.error error => Except.error error
                     | Except.ok text =>
-                        if tag == "str" then
+                        if psStringEq tag "str" then
                           Except.ok
                             (PsExpr.lit
                               (PsLiteral.string text))
                         else
                           match psCodecNaturalText text with
-                          | none =>
+                          | Option.none =>
                               Except.error
                                 PsCodecDecodeError.invalidNatural
-                          | some natural =>
+                          | Option.some natural =>
                               Except.ok
                                 (PsExpr.lit
                                   (PsLiteral.natural natural))
-              else if tag == "proj" then
-                match
-                    psCodecField value "n",
-                    psCodecField value "i",
-                    psCodecField value "e" with
-                | Except.ok nameValue,
-                  Except.ok indexValue,
-                  Except.ok exprValue =>
-                    match
-                        psDecodeCodecNameWithFuel fuel nameValue,
-                        psCodecNat indexValue,
-                        psDecodeCodecExprWithFuel fuel exprValue with
-                    | Except.ok name,
-                      Except.ok index,
-                      Except.ok expr =>
-                        Except.ok (PsExpr.proj name index expr)
-                    | Except.error error, _, _ => Except.error error
-                    | _, Except.error error, _ => Except.error error
-                    | _, _, Except.error error => Except.error error
-                | Except.error error, _, _ => Except.error error
-                | _, Except.error error, _ => Except.error error
-                | _, _, Except.error error => Except.error error
+              else if psStringEq tag "proj" then
+                match psCodecField value "n" with
+                | Except.error error => Except.error error
+                | Except.ok nameValue =>
+                    match psCodecField value "i" with
+                    | Except.error error => Except.error error
+                    | Except.ok indexValue =>
+                        match psCodecField value "e" with
+                        | Except.error error => Except.error error
+                        | Except.ok exprValue =>
+                            match psDecodeCodecNameWithFuel fuel nameValue with
+                            | Except.error error => Except.error error
+                            | Except.ok name =>
+                                match psCodecNat indexValue with
+                                | Except.error error => Except.error error
+                                | Except.ok index =>
+                                    match psDecodeCodecExprWithFuel fuel exprValue with
+                                    | Except.error error => Except.error error
+                                    | Except.ok expr =>
+                                        Except.ok (PsExpr.proj name index expr)
               else
                 Except.error (PsCodecDecodeError.invalidTag tag)
 

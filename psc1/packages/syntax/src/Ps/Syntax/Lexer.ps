@@ -1,0 +1,310 @@
+import Ps.Syntax.Cursor
+import Ps.Syntax.Token
+
+inductive PsLexError where {
+  | unterminatedBlockComment(span : PsSourceSpan)
+  | unterminatedString(span : PsSourceSpan)
+  | newlineInString(span : PsSourceSpan)
+  | unterminatedCharacter(span : PsSourceSpan)
+  | fuelExhausted
+  | invalidSource(reason : String, span : PsSourceSpan)
+}
+
+structure PsLexRead where {
+  cursor : PsLexCursor
+  charsRev : List(Char)
+}
+
+def psLexSpan(start : PsSourcePos, stop : PsSourcePos) : PsSourceSpan := { start := start, stop := stop }
+
+def psLexString(charsRev : List(Char)) : String := match charsRev with {
+  | List.nil => ""
+  | List.cons char rest => String.push((psLexString(rest)), char)
+}
+
+def psLexAdvanceChar(position : PsSourcePos, char : Char) : PsSourcePos := psLexAdvancePosition(position, char)
+
+def psLexAdvanceTwo(position : PsSourcePos, first : Char, second : Char) : PsSourcePos := psLexAdvanceChar((psLexAdvanceChar(position, first)), second)
+
+-- Explicit source accumulator. The synthesized polymorphic recursive helper
+-- still requires checked closed specialization before existing worker fusion.
+def psLexListLengthAcc {α : Type}(xs : List(α), acc : Nat) : Nat := match xs with {
+  | List.nil => acc
+  | List.cons _ rest => psLexListLengthAcc(rest, (Nat.succ(acc)))
+}
+
+def psLexListLength {α : Type}(xs : List(α)) : Nat := psLexListLengthAcc(xs, 0)
+
+def psLexCharEq(left : Char, right : Char) : Bool := Nat.beq((Char.toNat(left)), (Char.toNat(right)))
+
+def psLexNatBetween(lower : Nat, value : Nat, upper : Nat) : Bool := if (Nat.ble(lower, value)) { Nat.ble(value, upper) } else { false }
+
+def psLexWhitespace(char : Char) : Bool := if (psLexCharEq(char, ' ')) { true } else { if (psLexCharEq(char, '\t')) { true } else { if (psLexCharEq(char, '\r')) { true } else { psLexCharEq(char, '\n') } } }
+
+def psLexSkipLineComment(remaining : List(Char)) : (_ : PsSourcePos) -> PsLexCursor := match remaining with {
+  | List.nil => fun (position : PsSourcePos) => { remaining := List.nil, position := position }
+  | List.cons char rest => fun (position : PsSourcePos) => let smaller : (_ : PsSourcePos) -> PsLexCursor := (psLexSkipLineComment(rest))
+if (psLexCharEq(char, '\n')) { { remaining := List.cons(char, rest), position := position } } else { smaller((psLexAdvanceChar(position, char))) }
+}
+
+def psLexSkipBlockCommentWithFuel(fuel : Nat) : (_ : Nat) -> (_ : List(Char)) -> (_ : PsSourcePos) -> (_ : PsSourcePos) -> Except(PsLexError, PsLexCursor) := match fuel with {
+  | _root_.Nat.zero => fun (depth : Nat) (remaining : List(Char)) (start : PsSourcePos) (position : PsSourcePos) => Except.error((PsLexError.unterminatedBlockComment((psLexSpan(start, position)))))
+  | _root_.Nat.succ remainingFuel => fun (depth : Nat) (remaining : List(Char)) (start : PsSourcePos) (position : PsSourcePos) => let smaller : (_ : Nat) -> (_ : List(Char)) -> (_ : PsSourcePos) -> (_ : PsSourcePos) -> Except(PsLexError, PsLexCursor) := (psLexSkipBlockCommentWithFuel(remainingFuel))
+match remaining with {
+  | List.nil => Except.error((PsLexError.unterminatedBlockComment((psLexSpan(start, position)))))
+  | List.cons first rest => match rest with {
+  | List.nil => smaller(depth, List.nil, start, (psLexAdvanceChar(position, first)))
+  | List.cons second tail => if (psLexCharEq(first, '/')) { if (psLexCharEq(second, '-')) { smaller((Nat.add(depth, 1)), tail, start, (psLexAdvanceTwo(position, first, second))) } else { smaller(depth, rest, start, (psLexAdvanceChar(position, first))) } } else { if (psLexCharEq(first, '-')) { if (psLexCharEq(second, '/')) { if (Nat.beq(depth, 1)) { Except.ok(({ remaining := tail, position := psLexAdvanceTwo(position, first, second) })) } else { smaller((Nat.sub(depth, 1)), tail, start, (psLexAdvanceTwo(position, first, second))) } } else { smaller(depth, rest, start, (psLexAdvanceChar(position, first))) } } else { smaller(depth, rest, start, (psLexAdvanceChar(position, first))) } }
+}
+}
+}
+
+def psLexSkipBlockComment(depth : Nat, remaining : List(Char), start : PsSourcePos, position : PsSourcePos) : Except(PsLexError, PsLexCursor) := psLexSkipBlockCommentWithFuel((Nat.add((psLexListLength(remaining)), 1)), depth, remaining, start, position)
+
+def psLexSkipTriviaWithFuel(fuel : Nat) : (_ : List(Char)) -> (_ : PsSourcePos) -> Except(PsLexError, PsLexCursor) := match fuel with {
+  | _root_.Nat.zero => fun (remaining : List(Char)) (position : PsSourcePos) => Except.ok(({ remaining := remaining, position := position }))
+  | _root_.Nat.succ remainingFuel => fun (remaining : List(Char)) (position : PsSourcePos) => let smaller : (_ : List(Char)) -> (_ : PsSourcePos) -> Except(PsLexError, PsLexCursor) := (psLexSkipTriviaWithFuel(remainingFuel))
+match remaining with {
+  | List.nil => Except.ok(({ remaining := List.nil, position := position }))
+  | List.cons first rest => match rest with {
+  | List.cons second tail => if (psLexCharEq(first, '-')) { if (psLexCharEq(second, '-')) { let afterPrefix := (psLexAdvanceTwo(position, first, second))
+let cursor := (psLexSkipLineComment(tail, afterPrefix))
+smaller(cursor.remaining, cursor.position) } else { if (psLexWhitespace(first)) { smaller(rest, (psLexAdvanceChar(position, first))) } else { Except.ok(({ remaining := List.cons(first, rest), position := position })) } } } else { if (psLexCharEq(first, '/')) { if (psLexCharEq(second, '-')) { let afterPrefix := (psLexAdvanceTwo(position, first, second))
+match (psLexSkipBlockComment(1, tail, position, afterPrefix)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok cursor => smaller(cursor.remaining, cursor.position)
+} } else { if (psLexWhitespace(first)) { smaller(rest, (psLexAdvanceChar(position, first))) } else { Except.ok(({ remaining := List.cons(first, rest), position := position })) } } } else { if (psLexWhitespace(first)) { smaller(rest, (psLexAdvanceChar(position, first))) } else { Except.ok(({ remaining := List.cons(first, rest), position := position })) } } }
+  | List.nil => if (psLexWhitespace(first)) { smaller(List.nil, (psLexAdvanceChar(position, first))) } else { Except.ok(({ remaining := List.cons(first, List.nil), position := position })) }
+}
+}
+}
+
+def psLexSkipTrivia(remaining : List(Char), position : PsSourcePos) : Except(PsLexError, PsLexCursor) := psLexSkipTriviaWithFuel((Nat.add((psLexListLength(remaining)), 1)), remaining, position)
+
+def psLexLetterLike(char : Char) : Bool := let code : Nat := (Char.toNat(char))
+if (psLexNatBetween(945, code, 969)) { if (Nat.beq(code, 955)) { false } else { true } } else { if (psLexNatBetween(913, code, 937)) { if (Nat.beq(code, 928)) { false } else { if (Nat.beq(code, 931)) { false } else { true } } } else { if (psLexNatBetween(970, code, 1019)) { true } else { if (psLexNatBetween(7936, code, 8190)) { true } else { if (psLexNatBetween(8448, code, 8527)) { true } else { if (psLexNatBetween(119964, code, 120223)) { true } else { if (psLexNatBetween(192, code, 255)) { if (Nat.beq(code, 215)) { false } else { if (Nat.beq(code, 247)) { false } else { true } } } else { psLexNatBetween(256, code, 383) } } } } } } }
+
+def psLexNumericSubscript(char : Char) : Bool := psLexNatBetween(8320, (Char.toNat(char)), 8329)
+
+def psLexSubscriptAlnum(char : Char) : Bool := let code : Nat := (Char.toNat(char))
+if (psLexNumericSubscript(char)) { true } else { if (psLexNatBetween(8336, code, 8348)) { true } else { if (psLexNatBetween(7522, code, 7530)) { true } else { Nat.beq(code, 11388) } } }
+
+def psLexAsciiAlpha(char : Char) : Bool := let code : Nat := (Char.toNat(char))
+if (psLexNatBetween(65, code, 90)) { true } else { psLexNatBetween(97, code, 122) }
+
+def psLexDigit(char : Char) : Bool := psLexNatBetween(48, (Char.toNat(char)), 57)
+
+def psLexIdentifierStart(char : Char) : Bool := if (psLexAsciiAlpha(char)) { true } else { if (psLexCharEq(char, '_')) { true } else { psLexLetterLike(char) } }
+
+def psLexIdentifierContinue(char : Char) : Bool := if (psLexAsciiAlpha(char)) { true } else { if (psLexDigit(char)) { true } else { if (psLexCharEq(char, '_')) { true } else { if (psLexCharEq(char, '\'')) { true } else { if (psLexCharEq(char, '!')) { true } else { if (psLexCharEq(char, '?')) { true } else { if (psLexLetterLike(char)) { true } else { psLexSubscriptAlnum(char) } } } } } } }
+
+def psLexNaturalContinue(char : Char) : Bool := if (psLexDigit(char)) { true } else { psLexCharEq(char, '_') }
+
+def psLexReadIdentifier(remaining : List(Char)) : (_ : PsSourcePos) -> (_ : List(Char)) -> PsLexRead := match remaining with {
+  | List.nil => fun (position : PsSourcePos) (charsRev : List(Char)) => { cursor := { remaining := List.nil, position := position }, charsRev := charsRev }
+  | List.cons char rest => fun (position : PsSourcePos) (charsRev : List(Char)) => let smaller : (_ : PsSourcePos) -> (_ : List(Char)) -> PsLexRead := (psLexReadIdentifier(rest))
+if (psLexIdentifierContinue(char)) { smaller((psLexAdvanceChar(position, char)), (List.cons(char, charsRev))) } else { { cursor := { remaining := List.cons(char, rest), position := position }, charsRev := charsRev } }
+}
+
+def psLexReadNatural(remaining : List(Char)) : (_ : PsSourcePos) -> (_ : List(Char)) -> PsLexRead := match remaining with {
+  | List.nil => fun (position : PsSourcePos) (charsRev : List(Char)) => { cursor := { remaining := List.nil, position := position }, charsRev := charsRev }
+  | List.cons char rest => fun (position : PsSourcePos) (charsRev : List(Char)) => let smaller : (_ : PsSourcePos) -> (_ : List(Char)) -> PsLexRead := (psLexReadNatural(rest))
+if (psLexNaturalContinue(char)) { smaller((psLexAdvanceChar(position, char)), (List.cons(char, charsRev))) } else { { cursor := { remaining := List.cons(char, rest), position := position }, charsRev := charsRev } }
+}
+
+def psLexReadStringBodyWithFuel(fuel : Nat) : (_ : List(Char)) -> (_ : PsSourcePos) -> (_ : PsSourcePos) -> (_ : List(Char)) -> Except(PsLexError, PsLexRead) := match fuel with {
+  | _root_.Nat.zero => fun (remaining : List(Char)) (position : PsSourcePos) (start : PsSourcePos) (charsRev : List(Char)) => Except.error((PsLexError.unterminatedString((psLexSpan(start, position)))))
+  | _root_.Nat.succ remainingFuel => fun (remaining : List(Char)) (position : PsSourcePos) (start : PsSourcePos) (charsRev : List(Char)) => let smaller : (_ : List(Char)) -> (_ : PsSourcePos) -> (_ : PsSourcePos) -> (_ : List(Char)) -> Except(PsLexError, PsLexRead) := (psLexReadStringBodyWithFuel(remainingFuel))
+match remaining with {
+  | List.nil => Except.error((PsLexError.unterminatedString((psLexSpan(start, position)))))
+  | List.cons char rest => if (psLexCharEq(char, '"')) { let stop := (psLexAdvanceChar(position, char))
+Except.ok(({ cursor := { remaining := rest, position := stop }, charsRev := List.cons(char, charsRev) })) } else { if (psLexCharEq(char, '\n')) { Except.error((PsLexError.newlineInString((psLexSpan(start, position))))) } else { if (psLexCharEq(char, '\\')) { match rest with {
+  | List.nil => Except.error((PsLexError.unterminatedString((psLexSpan(start, position)))))
+  | List.cons escaped tail => let afterSlash := (psLexAdvanceChar(position, char))
+let afterEscape := (psLexAdvanceChar(afterSlash, escaped))
+smaller(tail, afterEscape, start, (List.cons(escaped, (List.cons(char, charsRev)))))
+} } else { smaller(rest, (psLexAdvanceChar(position, char)), start, (List.cons(char, charsRev))) } } }
+}
+}
+
+def psLexReadStringBody(remaining : List(Char), position : PsSourcePos, start : PsSourcePos, charsRev : List(Char)) : Except(PsLexError, PsLexRead) := psLexReadStringBodyWithFuel((Nat.add((psLexListLength(remaining)), 1)), remaining, position, start, charsRev)
+
+def psLexHexDigit(char : Char) : Bool := let code : Nat := (Char.toNat(char))
+if (psLexNatBetween(48, code, 57)) { true } else { if (psLexNatBetween(97, code, 102)) { true } else { psLexNatBetween(65, code, 70) } }
+
+def psLexCharacterEscapeAllowed(char : Char) : Bool := if (psLexCharEq(char, '\'')) { true } else { if (psLexCharEq(char, '"')) { true } else { if (psLexCharEq(char, '\\')) { true } else { if (psLexCharEq(char, 'n')) { true } else { if (psLexCharEq(char, 'r')) { true } else { psLexCharEq(char, 't') } } } } }
+
+def psLexCharacterError(start : PsSourcePos, position : PsSourcePos) : Except(PsLexError, PsLexRead) := Except.error((PsLexError.unterminatedCharacter((psLexSpan(start, position)))))
+
+def psLexReadCharacterHex2(position : PsSourcePos, start : PsSourcePos, charsRev : List(Char), remaining : List(Char)) : Except(PsLexError, PsLexRead) := match remaining with {
+  | List.cons first rest1 => match rest1 with {
+  | List.cons second rest2 => match rest2 with {
+  | List.cons close tail => if (psLexCharEq(close, '\'')) { if (psLexHexDigit(first)) { if (psLexHexDigit(second)) { let afterSlash := (psLexAdvanceChar(position, '\\'))
+let afterX := (psLexAdvanceChar(afterSlash, 'x'))
+let afterFirst := (psLexAdvanceChar(afterX, first))
+let afterSecond := (psLexAdvanceChar(afterFirst, second))
+let stop := (psLexAdvanceChar(afterSecond, close))
+Except.ok(({ cursor := { remaining := tail, position := stop }, charsRev := List.cons(close, (List.cons(second, (List.cons(first, (List.cons('x', (List.cons('\\', charsRev))))))))) })) } else { psLexCharacterError(start, position) } } else { psLexCharacterError(start, position) } } else { psLexCharacterError(start, position) }
+  | List.nil => psLexCharacterError(start, position)
+}
+  | List.nil => psLexCharacterError(start, position)
+}
+  | List.nil => psLexCharacterError(start, position)
+}
+
+def psLexReadCharacterHex4(position : PsSourcePos, start : PsSourcePos, charsRev : List(Char), remaining : List(Char)) : Except(PsLexError, PsLexRead) := match remaining with {
+  | List.cons first rest1 => match rest1 with {
+  | List.cons second rest2 => match rest2 with {
+  | List.cons third rest3 => match rest3 with {
+  | List.cons fourth rest4 => match rest4 with {
+  | List.cons close tail => if (psLexCharEq(close, '\'')) { if (psLexHexDigit(first)) { if (psLexHexDigit(second)) { if (psLexHexDigit(third)) { if (psLexHexDigit(fourth)) { let afterSlash := (psLexAdvanceChar(position, '\\'))
+let afterU := (psLexAdvanceChar(afterSlash, 'u'))
+let afterFirst := (psLexAdvanceChar(afterU, first))
+let afterSecond := (psLexAdvanceChar(afterFirst, second))
+let afterThird := (psLexAdvanceChar(afterSecond, third))
+let afterFourth := (psLexAdvanceChar(afterThird, fourth))
+let stop := (psLexAdvanceChar(afterFourth, close))
+Except.ok(({ cursor := { remaining := tail, position := stop }, charsRev := List.cons(close, (List.cons(fourth, (List.cons(third, (List.cons(second, (List.cons(first, (List.cons('u', (List.cons('\\', charsRev))))))))))))) })) } else { psLexCharacterError(start, position) } } else { psLexCharacterError(start, position) } } else { psLexCharacterError(start, position) } } else { psLexCharacterError(start, position) } } else { psLexCharacterError(start, position) }
+  | List.nil => psLexCharacterError(start, position)
+}
+  | List.nil => psLexCharacterError(start, position)
+}
+  | List.nil => psLexCharacterError(start, position)
+}
+  | List.nil => psLexCharacterError(start, position)
+}
+  | List.nil => psLexCharacterError(start, position)
+}
+
+def psLexReadCharacterBody(remaining : List(Char), position : PsSourcePos, start : PsSourcePos, charsRev : List(Char)) : Except(PsLexError, PsLexRead) := match remaining with {
+  | List.nil => psLexCharacterError(start, position)
+  | List.cons first rest => if (psLexCharEq(first, '\n')) { psLexCharacterError(start, position) } else { if (psLexCharEq(first, '\\')) { match rest with {
+  | List.nil => psLexCharacterError(start, position)
+  | List.cons escaped tail => if (psLexCharEq(escaped, 'x')) { psLexReadCharacterHex2(position, start, charsRev, tail) } else { if (psLexCharEq(escaped, 'u')) { psLexReadCharacterHex4(position, start, charsRev, tail) } else { match tail with {
+  | List.nil => psLexCharacterError(start, position)
+  | List.cons close afterClose => if (psLexCharEq(close, '\'')) { if (psLexCharacterEscapeAllowed(escaped)) { let afterSlash := (psLexAdvanceChar(position, first))
+let afterEscape := (psLexAdvanceChar(afterSlash, escaped))
+let stop := (psLexAdvanceChar(afterEscape, close))
+Except.ok(({ cursor := { remaining := afterClose, position := stop }, charsRev := List.cons(close, (List.cons(escaped, (List.cons(first, charsRev))))) })) } else { psLexCharacterError(start, position) } } else { psLexCharacterError(start, position) }
+} } }
+} } else { match rest with {
+  | List.nil => psLexCharacterError(start, position)
+  | List.cons close tail => if (psLexCharEq(close, '\'')) { let afterChar := (psLexAdvanceChar(position, first))
+let stop := (psLexAdvanceChar(afterChar, close))
+Except.ok(({ cursor := { remaining := tail, position := stop }, charsRev := List.cons(close, (List.cons(first, charsRev))) })) } else { psLexCharacterError(start, (psLexAdvanceTwo(position, first, close))) }
+} } }
+}
+
+def psLexPairEq(first : Char, second : Char, expectedFirst : Char, expectedSecond : Char) : Bool := if (psLexCharEq(first, expectedFirst)) { psLexCharEq(second, expectedSecond) } else { false }
+
+def psLexIsTwoCharSymbol(first : Char, second : Char) : Bool := if (psLexPairEq(first, second, ':', '=')) { true } else { if (psLexPairEq(first, second, '=', '>')) { true } else { if (psLexPairEq(first, second, '-', '>')) { true } else { if (psLexPairEq(first, second, '=', '=')) { true } else { if (psLexPairEq(first, second, '!', '=')) { true } else { if (psLexPairEq(first, second, '<', '=')) { true } else { if (psLexPairEq(first, second, '>', '=')) { true } else { if (psLexPairEq(first, second, '<', '-')) { true } else { if (psLexPairEq(first, second, '&', '&')) { true } else { if (psLexPairEq(first, second, '|', '|')) { true } else { if (psLexPairEq(first, second, ':', ':')) { true } else { if (psLexPairEq(first, second, '+', '+')) { true } else { psLexPairEq(first, second, '*', '*') } } } } } } } } } } } }
+
+def psLexTokenFromRead(kind : PsTokenKind, start : PsSourcePos, read : PsLexRead) : PsToken := { kind := kind, text := psLexString(read.charsRev), span := psLexSpan(start, read.cursor.position) }
+
+def psLexReadToken(cursor : PsLexCursor) : Except(PsLexError, (Prod(PsToken, PsLexCursor))) := let start := cursor.position
+match cursor.remaining with {
+  | List.nil => let token : PsToken := ({ kind := PsTokenKind.endOfInput, text := "", span := psLexSpan(start, start) })
+Except.ok((Prod.mk(token, cursor)))
+  | List.cons first rest => if (psLexCharEq(first, '"')) { let afterOpen := (psLexAdvanceChar(start, first))
+match (psLexReadStringBody(rest, afterOpen, start, (List.cons(first, List.nil)))) with {
+  | Except.error error => Except.error(error)
+  | Except.ok read => Except.ok((Prod.mk((psLexTokenFromRead(PsTokenKind.string, start, read)), read.cursor)))
+} } else { if (psLexCharEq(first, '\'')) { let afterOpen := (psLexAdvanceChar(start, first))
+match (psLexReadCharacterBody(rest, afterOpen, start, (List.cons(first, List.nil)))) with {
+  | Except.error error => Except.error(error)
+  | Except.ok read => Except.ok((Prod.mk((psLexTokenFromRead(PsTokenKind.character, start, read)), read.cursor)))
+} } else { match rest with {
+  | List.nil => if (psLexIdentifierStart(first)) { let read := (psLexReadIdentifier(List.nil, (psLexAdvanceChar(start, first)), (List.cons(first, List.nil))))
+Except.ok((Prod.mk((psLexTokenFromRead(PsTokenKind.identifier, start, read)), read.cursor))) } else { if (psLexDigit(first)) { let read := (psLexReadNatural(List.nil, (psLexAdvanceChar(start, first)), (List.cons(first, List.nil))))
+Except.ok((Prod.mk((psLexTokenFromRead(PsTokenKind.natural, start, read)), read.cursor))) } else { let stop := (psLexAdvanceChar(start, first))
+let read : PsLexRead := ({ cursor := { remaining := List.nil, position := stop }, charsRev := List.cons(first, List.nil) })
+Except.ok((Prod.mk((psLexTokenFromRead(PsTokenKind.symbol, start, read)), read.cursor))) } }
+  | List.cons second tail => if (psLexIdentifierStart(first)) { let read := (psLexReadIdentifier((List.cons(second, tail)), (psLexAdvanceChar(start, first)), (List.cons(first, List.nil))))
+Except.ok((Prod.mk((psLexTokenFromRead(PsTokenKind.identifier, start, read)), read.cursor))) } else { if (psLexDigit(first)) { let read := (psLexReadNatural((List.cons(second, tail)), (psLexAdvanceChar(start, first)), (List.cons(first, List.nil))))
+Except.ok((Prod.mk((psLexTokenFromRead(PsTokenKind.natural, start, read)), read.cursor))) } else { if (psLexIsTwoCharSymbol(first, second)) { let stop := (psLexAdvanceTwo(start, first, second))
+let read : PsLexRead := ({ cursor := { remaining := tail, position := stop }, charsRev := List.cons(second, (List.cons(first, List.nil))) })
+Except.ok((Prod.mk((psLexTokenFromRead(PsTokenKind.symbol, start, read)), read.cursor))) } else { let stop := (psLexAdvanceChar(start, first))
+let read : PsLexRead := ({ cursor := { remaining := List.cons(second, tail), position := stop }, charsRev := List.cons(first, List.nil) })
+Except.ok((Prod.mk((psLexTokenFromRead(PsTokenKind.symbol, start, read)), read.cursor))) } } }
+} } }
+}
+
+def psLexAllAccWorker(inputBound : Nat, fuel : Nat) : (_ : PsLexCursor) -> (_ : List(PsToken)) -> Except(PsLexError, (List(PsToken))) := match fuel with {
+  | _root_.Nat.zero => fun (cursor : PsLexCursor) (reversed : List(PsToken)) => if (psLexCursorDone(cursor)) { let position := cursor.position
+let token : PsToken := ({ kind := PsTokenKind.endOfInput, text := "", span := psLexSpan(position, position) })
+Except.ok((psListReverse((List.cons(token, reversed))))) } else { Except.error(PsLexError.fuelExhausted) }
+  | _root_.Nat.succ remainingFuel => fun (cursor : PsLexCursor) (reversed : List(PsToken)) => let smaller : (_ : PsLexCursor) -> (_ : List(PsToken)) -> Except(PsLexError, (List(PsToken))) := (psLexAllAccWorker(inputBound, remainingFuel))
+match (psLexSkipTriviaWithFuel(inputBound, cursor.remaining, cursor.position)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok ready => if (psLexCursorDone(ready)) { let position := ready.position
+let token : PsToken := ({ kind := PsTokenKind.endOfInput, text := "", span := psLexSpan(position, position) })
+Except.ok((psListReverse((List.cons(token, reversed))))) } else { match (psLexReadToken(ready)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok pair => let token : PsToken := pair.fst
+let next : PsLexCursor := pair.snd
+smaller(next, (List.cons(token, reversed)))
+} }
+}
+}
+
+def psLexAllWorker(inputBound : Nat, fuel : Nat) : (_ : PsLexCursor) -> Except(PsLexError, (List(PsToken))) := fun (cursor : PsLexCursor) => psLexAllAccWorker(inputBound, fuel, cursor, List.nil)
+
+def psLexAllWithFuel(fuel : Nat, cursor : PsLexCursor) : Except(PsLexError, (List(PsToken))) := psLexAllWorker((Nat.succ((psLexListLength(cursor.remaining)))), fuel, cursor)
+
+def psLex(source : String) : Except(PsLexError, (List(PsToken))) := let cursor := (psLexCursorFromString(source))
+let bound := (Nat.succ((String.utf8ByteSize(source))))
+psLexAllWorker(bound, bound, cursor)
+
+def psLexProofScriptWhitespaceError(reason : String, position : PsSourcePos, char : Char) : Except(PsLexError, PsLexCursor) := Except.error((PsLexError.invalidSource(reason, (psLexSpan(position, (psLexAdvanceChar(position, char)))))))
+
+def psLexSkipProofScriptTriviaWithFuel(fuel : Nat) : (_ : List(Char)) -> (_ : PsSourcePos) -> Except(PsLexError, PsLexCursor) := match fuel with {
+  | _root_.Nat.zero => fun (remaining : List(Char)) (position : PsSourcePos) => match remaining with {
+  | _root_.List.nil => Except.ok(({ remaining := _root_.List.nil, position := position }))
+  | _ => Except.error(PsLexError.fuelExhausted)
+}
+  | _root_.Nat.succ remainingFuel => fun (remaining : List(Char)) (position : PsSourcePos) => let smaller : (_ : List(Char)) -> (_ : PsSourcePos) -> Except(PsLexError, PsLexCursor) := (psLexSkipProofScriptTriviaWithFuel(remainingFuel))
+match remaining with {
+  | _root_.List.nil => Except.ok(({ remaining := _root_.List.nil, position := position }))
+  | _root_.List.cons first rest => if (psLexCharEq(first, ' ')) { smaller(rest, (psLexAdvanceChar(position, first))) } else { if (psLexCharEq(first, '\n')) { smaller(rest, (psLexAdvanceChar(position, first))) } else { if (psLexCharEq(first, '\t')) { psLexProofScriptWhitespaceError("horizontal tab outside a literal or comment", position, first) } else { if (psLexCharEq(first, '\r')) { match rest with {
+  | _root_.List.cons second tail => if (psLexCharEq(second, '\n')) { smaller(tail, (psLexAdvanceTwo(position, first, second))) } else { psLexProofScriptWhitespaceError("lone carriage return outside a literal or comment", position, first) }
+  | _root_.List.nil => psLexProofScriptWhitespaceError("lone carriage return outside a literal or comment", position, first)
+} } else { if (Nat.beq((Char.toNat(first)), 65279)) { psLexProofScriptWhitespaceError("byte order mark is only allowed once at the start of a source file", position, first) } else { match rest with {
+  | _root_.List.cons second tail => if (psLexPairEq(first, second, '-', '-')) { let afterPrefix := (psLexAdvanceTwo(position, first, second))
+let cursor := (psLexSkipLineComment(tail, afterPrefix))
+smaller(cursor.remaining, cursor.position) } else { if (psLexPairEq(first, second, '/', '-')) { let afterPrefix := (psLexAdvanceTwo(position, first, second))
+match (psLexSkipBlockComment(1, tail, position, afterPrefix)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok cursor => smaller(cursor.remaining, cursor.position)
+} } else { Except.ok(({ remaining := remaining, position := position })) } }
+  | _root_.List.nil => Except.ok(({ remaining := remaining, position := position }))
+} } } } } }
+}
+}
+
+def psLexAllProofScriptAccWorker(inputBound : Nat, fuel : Nat) : (_ : PsLexCursor) -> (_ : List(PsToken)) -> Except(PsLexError, (List(PsToken))) := match fuel with {
+  | _root_.Nat.zero => fun (cursor : PsLexCursor) (reversed : List(PsToken)) => if (psLexCursorDone(cursor)) { let position := cursor.position
+let token : PsToken := ({ kind := PsTokenKind.endOfInput, text := "", span := psLexSpan(position, position) })
+Except.ok((psListReverse((List.cons(token, reversed))))) } else { Except.error(PsLexError.fuelExhausted) }
+  | _root_.Nat.succ remainingFuel => fun (cursor : PsLexCursor) (reversed : List(PsToken)) => let smaller : (_ : PsLexCursor) -> (_ : List(PsToken)) -> Except(PsLexError, (List(PsToken))) := (psLexAllProofScriptAccWorker(inputBound, remainingFuel))
+match (psLexSkipProofScriptTriviaWithFuel(inputBound, cursor.remaining, cursor.position)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok ready => if (psLexCursorDone(ready)) { let position := ready.position
+let token : PsToken := ({ kind := PsTokenKind.endOfInput, text := "", span := psLexSpan(position, position) })
+Except.ok((psListReverse((List.cons(token, reversed))))) } else { match (psLexReadToken(ready)) with {
+  | Except.error error => Except.error(error)
+  | Except.ok pair => let token : PsToken := pair.fst
+let next : PsLexCursor := pair.snd
+smaller(next, (List.cons(token, reversed)))
+} }
+}
+}
+
+def psLexAllProofScriptWorker(inputBound : Nat, fuel : Nat) : (_ : PsLexCursor) -> Except(PsLexError, (List(PsToken))) := fun (cursor : PsLexCursor) => psLexAllProofScriptAccWorker(inputBound, fuel, cursor, List.nil)
+
+def psLexProofScript(source : String) : Except(PsLexError, (List(PsToken))) := let original := (psLexCursorFromString(source))
+let cursor : PsLexCursor := (match original.remaining with {
+  | _root_.List.cons first rest => if (Nat.beq((Char.toNat(first)), 65279)) { { remaining := rest, position := { byteOffset := 3, line := 1, column := 1 } } } else { original }
+  | _root_.List.nil => original
+})
+let bound := (Nat.succ((String.utf8ByteSize(source))))
+psLexAllProofScriptWorker(bound, bound, cursor)

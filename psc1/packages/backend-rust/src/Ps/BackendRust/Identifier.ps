@@ -1,0 +1,57 @@
+import Ps.Bridge.Json
+import Ps.Foundation.Name
+
+def psRustIdentifierConcat2(left : String, right : String) : String := String.Internal.append(left, right)
+
+def psRustIdentifierConcat3(first : String, second : String, third : String) : String := psRustIdentifierConcat2((psRustIdentifierConcat2(first, second)), third)
+
+def psRustIdentifierSingleChar(char : Char) : String := psJsonStringOfChars((List.cons(char, List.nil)))
+
+def psRustIdentifierNatBetween(lower : Nat, value : Nat, upper : Nat) : Bool := if (Nat.ble(lower, value)) { Nat.ble(value, upper) } else { false }
+
+def psRustIdentifierCharAllowed(char : Char) : Bool := let code : Nat := (Char.toNat(char))
+if (psRustIdentifierNatBetween(48, code, 57)) { true } else { if (psRustIdentifierNatBetween(65, code, 90)) { true } else { if (psRustIdentifierNatBetween(97, code, 122)) { true } else { Nat.beq(code, 95) } } }
+
+def psRustIdentifierEncodeChars(chars : List(Char)) : Prod(String, Bool) := match chars with {
+  | List.nil => Prod.mk("", false)
+  | List.cons char rest => let encodedRest : Prod(String, Bool) := (psRustIdentifierEncodeChars(rest))
+if (psRustIdentifierCharAllowed(char)) { Prod.mk((psRustIdentifierConcat2((psRustIdentifierSingleChar(char)), (Prod.fst(encodedRest)))), (Prod.snd(encodedRest))) } else { Prod.mk((psRustIdentifierConcat2((psRustIdentifierConcat3("_u", (psNatToString((Char.toNat(char)))), "_")), (Prod.fst(encodedRest)))), true) }
+}
+
+def psRustIdentifierCharsStartWith(value : List(Char)) : (_ : List(Char)) -> Bool := match value with {
+  | List.nil => fun (expected : List(Char)) => match expected with {
+  | List.nil => true
+  | List.cons _ _ => false
+}
+  | List.cons valueHead valueRest => let smaller : (_ : List(Char)) -> Bool := (psRustIdentifierCharsStartWith(valueRest))
+fun (expected : List(Char)) => match expected with {
+  | List.nil => true
+  | List.cons expectedHead expectedRest => if (Nat.beq((Char.toNat(valueHead)), (Char.toNat(expectedHead)))) { smaller(expectedRest) } else { false }
+}
+}
+
+def psRustIdentifierStartsWith(value : String, expected : String) : Bool := psRustIdentifierCharsStartWith((psJsonStringToChars(value)), (psJsonStringToChars(expected)))
+
+def psRustIdentifierFirstAllowed(chars : List(Char)) : Bool := match chars with {
+  | List.nil => false
+  | List.cons first _ => let code : Nat := (Char.toNat(first))
+if (psRustIdentifierNatBetween(65, code, 90)) { true } else { if (psRustIdentifierNatBetween(97, code, 122)) { true } else { Nat.beq(code, 95) } }
+}
+
+def psRustIdentifierReservedPrefix(value : String) : Bool := if (psRustIdentifierStartsWith(value, "__psr_")) { true } else { if (psRustIdentifierStartsWith(value, "__ps_kw_")) { true } else { psRustIdentifierStartsWith(value, "__ps_internal_") } }
+
+def psRustIdentifierStringIn(value : String, options : List(String)) : Bool := match options with {
+  | List.nil => false
+  | List.cons option rest => if (psStringEq(value, option)) { true } else { psRustIdentifierStringIn(value, rest) }
+}
+
+def psRustIdentifierSpecialKeyword(value : String) : Bool := psRustIdentifierStringIn(value, (_root_.List.cons("self", (_root_.List.cons("Self", (_root_.List.cons("super", (_root_.List.cons("crate", _root_.List.nil)))))))))
+
+def psRustIdentifierKeyword(value : String) : Bool := psRustIdentifierStringIn(value, (_root_.List.cons("as", (_root_.List.cons("async", (_root_.List.cons("await", (_root_.List.cons("become", (_root_.List.cons("box", (_root_.List.cons("break", (_root_.List.cons("const", (_root_.List.cons("continue", (_root_.List.cons("crate", (_root_.List.cons("do", (_root_.List.cons("dyn", (_root_.List.cons("else", (_root_.List.cons("enum", (_root_.List.cons("extern", (_root_.List.cons("false", (_root_.List.cons("final", (_root_.List.cons("fn", (_root_.List.cons("for", (_root_.List.cons("gen", (_root_.List.cons("if", (_root_.List.cons("impl", (_root_.List.cons("in", (_root_.List.cons("let", (_root_.List.cons("loop", (_root_.List.cons("macro", (_root_.List.cons("match", (_root_.List.cons("mod", (_root_.List.cons("move", (_root_.List.cons("mut", (_root_.List.cons("override", (_root_.List.cons("priv", (_root_.List.cons("pub", (_root_.List.cons("ref", (_root_.List.cons("return", (_root_.List.cons("self", (_root_.List.cons("Self", (_root_.List.cons("static", (_root_.List.cons("struct", (_root_.List.cons("super", (_root_.List.cons("trait", (_root_.List.cons("true", (_root_.List.cons("try", (_root_.List.cons("type", (_root_.List.cons("typeof", (_root_.List.cons("unsafe", (_root_.List.cons("unsized", (_root_.List.cons("use", (_root_.List.cons("virtual", (_root_.List.cons("where", (_root_.List.cons("while", (_root_.List.cons("yield", _root_.List.nil)))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))
+
+def psRustIdentifier(value : String) : String := let chars : List(Char) := (psJsonStringToChars(value))
+let encoded : Prod(String, Bool) := (psRustIdentifierEncodeChars(chars))
+let encodedText : String := (Prod.fst(encoded))
+let changed : Bool := (Prod.snd(encoded))
+let mustEncode : Bool := (if (changed) { true } else { if (psRustIdentifierFirstAllowed(chars)) { psRustIdentifierReservedPrefix(value) } else { true } })
+if (mustEncode) { psRustIdentifierConcat2("__psr_", encodedText) } else { if (psRustIdentifierSpecialKeyword(value)) { psRustIdentifierConcat2("__ps_kw_", value) } else { if (psRustIdentifierKeyword(value)) { psRustIdentifierConcat2("r#", value) } else { value } } }

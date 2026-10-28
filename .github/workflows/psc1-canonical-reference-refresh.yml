@@ -1,0 +1,118 @@
+name: PSC1 canonical bootstrap reference refresh
+on:
+  push:
+    branches: [feat/psc1-canonical-latency-20261028]
+    paths:
+      - psc1/packages/**/*.ps
+      - psc1/stdlib/**/*.ps
+      - psc1/scripts/refresh-canonical-sources.mjs
+      - psc1/scripts/prepare-source-git-tree.mjs
+      - psc1/scripts/NativeReferenceProjection.lean
+      - psc1/scripts/native-reference-projection.mjs
+      - .github/workflows/psc1-canonical-reference-refresh.yml
+  workflow_dispatch:
+    inputs:
+      baseline:
+        description: Exact ancestral commit holding the qualified canonical manifest
+        required: false
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: psc1-canonical-reference-refresh-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 110
+    permissions:
+      contents: write
+    defaults:
+      run:
+        working-directory: psc1
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Select the exact ancestral manifest and inspect canonical edits
+        id: candidate
+        env:
+          REQUESTED_BASELINE: ${{ inputs.baseline }}
+        run: |
+          set -euo pipefail
+          node --check scripts/refresh-canonical-sources.mjs
+          node --check scripts/prepare-source-git-tree.mjs
+          if [ -n "$REQUESTED_BASELINE" ]; then
+            PSC1_REFRESH_BASELINE="$REQUESTED_BASELINE"
+          else
+            PSC1_REFRESH_BASELINE="$(git log -1 --format=%H -- CANONICAL_SOURCES.json)"
+          fi
+          [[ "$PSC1_REFRESH_BASELINE" =~ ^[0-9a-f]{40}$ ]]
+          echo "baseline=$PSC1_REFRESH_BASELINE" >> "$GITHUB_OUTPUT"
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import {readCanonicalEditCandidate} from './host-tools/canonical-sources.mjs';
+          const candidate=readCanonicalEditCandidate(process.cwd());
+          const changed=[...candidate.modules.values()].filter(row=>row.changed).map(row=>row.module);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,'needed='+(changed.length>0)+'\n');
+          console.log(JSON.stringify({changedCanonicalModules:changed,referenceBytesRemainPinned:true}));
+          JS
+      - uses: actions/cache/restore@v4
+        if: steps.candidate.outputs.needed == 'true'
+        id: elan-cache
+        with:
+          path: ~/.elan
+          key: psc1-canonical-elan-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        if: steps.candidate.outputs.needed == 'true'
+        id: source-tools-cache
+        with:
+          path: psc1/.lake/build
+          key: psc1-canonical-source-tools-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc1/packages/**/*.lean', 'psc1/scripts/**/*.lean', 'psc1/host/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
+          restore-keys: |
+            psc1-canonical-source-tools-v1-${{ runner.os }}-${{ runner.arch }}-
+      - name: Install the pinned native bootstrap compiler
+        if: steps.candidate.outputs.needed == 'true'
+        run: |
+          set -euo pipefail
+          if [ ! -x "$HOME/.elan/bin/elan" ]; then
+            curl --connect-timeout 20 --max-time 120 --retry 2 -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o "$RUNNER_TEMP/psc1-elan-init.sh"
+            timeout 180 sh "$RUNNER_TEMP/psc1-elan-init.sh" -y --default-toolchain none
+          fi
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build helpers from the still-pinned native references
+        if: steps.candidate.outputs.needed == 'true'
+        timeout-minutes: 20
+        run: lake build psc1_lossless_source psc1_source_ownership psc1_independent_checker
+      - uses: actions/cache/save@v4
+        if: steps.candidate.outputs.needed == 'true' && steps.elan-cache.outputs.cache-hit != 'true'
+        with:
+          path: ~/.elan
+          key: ${{ steps.elan-cache.outputs.cache-primary-key }}
+      - uses: actions/cache/save@v4
+        if: steps.candidate.outputs.needed == 'true' && steps.source-tools-cache.outputs.cache-hit != 'true'
+        with:
+          path: psc1/.lake/build
+          key: ${{ steps.source-tools-cache.outputs.cache-primary-key }}
+      - name: Check both grammars and the rebuilt native helpers before preparing Git objects
+        if: steps.candidate.outputs.needed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PSC1_CREATE_SOURCE_TREE: '1'
+          PSC1_REFRESH_BASELINE: ${{ steps.candidate.outputs.baseline }}
+        run: node --max-old-space-size=4096 scripts/refresh-canonical-sources.mjs --baseline "$PSC1_REFRESH_BASELINE"
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.candidate.outputs.needed == 'true'
+        with:
+          name: psc1-canonical-reference-refresh-${{ github.sha }}
+          path: |
+            psc1/dist/canonical-source-refresh/*.json
+            psc1/dist/canonical-source-refresh/*.log
+            psc1/dist/canonical-source-refresh/prepared-files/
+            psc1/dist/canonical-source-refresh/native-reference-projection/
+          if-no-files-found: warn
+          retention-days: 90

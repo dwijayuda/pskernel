@@ -1,0 +1,112 @@
+import Ps.Syntax.Cursor
+
+def psCharCodeEq(char : Char, code : Nat) : Bool := Nat.beq((Char.toNat(char)), code)
+
+def psDecimalDigitValue(char : Char) : Option(Nat) := if (psCharCodeEq(char, 48)) { Option.some(0) } else { if (psCharCodeEq(char, 49)) { Option.some(1) } else { if (psCharCodeEq(char, 50)) { Option.some(2) } else { if (psCharCodeEq(char, 51)) { Option.some(3) } else { if (psCharCodeEq(char, 52)) { Option.some(4) } else { if (psCharCodeEq(char, 53)) { Option.some(5) } else { if (psCharCodeEq(char, 54)) { Option.some(6) } else { if (psCharCodeEq(char, 55)) { Option.some(7) } else { if (psCharCodeEq(char, 56)) { Option.some(8) } else { if (psCharCodeEq(char, 57)) { Option.some(9) } else { Option.none } } } } } } } } } }
+
+def psParseNaturalChars(chars : List(Char)) : (_ : Nat) -> Option(Nat) := match chars with {
+  | _root_.List.nil => fun (value : Nat) => Option.some(value)
+  | _root_.List.cons char rest => let smaller : (_ : Nat) -> Option(Nat) := (psParseNaturalChars(rest))
+fun (value : Nat) => if (psCharCodeEq(char, 95)) { smaller(value) } else { match (psDecimalDigitValue(char)) with {
+  | Option.none => Option.none
+  | Option.some digit => smaller((Nat.add((Nat.mul(value, 10)), digit)))
+} }
+}
+
+def psParseNaturalText(text : String) : Option(Nat) := psParseNaturalChars((psLexStringToList(text)), 0)
+
+def psHexDigitValue(char : Char) : Option(Nat) := if (psCharCodeEq(char, 48)) { Option.some(0) } else { if (psCharCodeEq(char, 49)) { Option.some(1) } else { if (psCharCodeEq(char, 50)) { Option.some(2) } else { if (psCharCodeEq(char, 51)) { Option.some(3) } else { if (psCharCodeEq(char, 52)) { Option.some(4) } else { if (psCharCodeEq(char, 53)) { Option.some(5) } else { if (psCharCodeEq(char, 54)) { Option.some(6) } else { if (psCharCodeEq(char, 55)) { Option.some(7) } else { if (psCharCodeEq(char, 56)) { Option.some(8) } else { if (psCharCodeEq(char, 57)) { Option.some(9) } else { if (psCharCodeEq(char, 97)) { Option.some(10) } else { if (psCharCodeEq(char, 98)) { Option.some(11) } else { if (psCharCodeEq(char, 99)) { Option.some(12) } else { if (psCharCodeEq(char, 100)) { Option.some(13) } else { if (psCharCodeEq(char, 101)) { Option.some(14) } else { if (psCharCodeEq(char, 102)) { Option.some(15) } else { if (psCharCodeEq(char, 65)) { Option.some(10) } else { if (psCharCodeEq(char, 66)) { Option.some(11) } else { if (psCharCodeEq(char, 67)) { Option.some(12) } else { if (psCharCodeEq(char, 68)) { Option.some(13) } else { if (psCharCodeEq(char, 69)) { Option.some(14) } else { if (psCharCodeEq(char, 70)) { Option.some(15) } else { Option.none } } } } } } } } } } } } } } } } } } } } } }
+
+def psReadFixedHex(count : Nat) : (_ : List(Char)) -> (_ : Nat) -> Option((Prod(Nat, (List(Char))))) := match count with {
+  | _root_.Nat.zero => fun (chars : List(Char)) => fun (value : Nat) => Option.some((Prod.mk(value, chars)))
+  | _root_.Nat.succ nextCount => fun (chars : List(Char)) => fun (value : Nat) => let smaller : (_ : List(Char)) -> (_ : Nat) -> Option((Prod(Nat, (List(Char))))) := (psReadFixedHex(nextCount))
+match chars with {
+  | _root_.List.nil => Option.none
+  | _root_.List.cons char rest => match (psHexDigitValue(char)) with {
+  | Option.none => Option.none
+  | Option.some digit => smaller(rest, (Nat.add((Nat.mul(value, 16)), digit)))
+}
+}
+}
+
+def psValidUnicodeScalar(value : Nat) : Bool := if (Nat.blt(value, 55296)) { true } else { if (Nat.blt(57343, value)) { Nat.blt(value, 1114112) } else { false } }
+
+def psDecodeEscapedChar(count : Nat, rest : List(Char)) : Option((Prod(Char, (List(Char))))) := match (psReadFixedHex(count, rest, 0)) with {
+  | Option.none => Option.none
+  | Option.some decoded => let value := (Prod.fst(decoded))
+let tail := (Prod.snd(decoded))
+if (psValidUnicodeScalar(value)) { Option.some((Prod.mk((Char.ofNat(value)), tail))) } else { Option.none }
+}
+
+def psStringFromReversedChars(charsRev : List(Char)) : String := match charsRev with {
+  | _root_.List.nil => ""
+  | _root_.List.cons char rest => String.push((psStringFromReversedChars(rest)), char)
+}
+
+-- PSC1 self-host keeps only fuel as the structural recursion parameter.
+def psDecodeStringBodyWithFuel(fuel : Nat) : (_ : List(Char)) -> (_ : List(Char)) -> Option(String) := match fuel with {
+  | _root_.Nat.zero => fun (chars : List(Char)) => fun (charsRev : List(Char)) => Option.none
+  | _root_.Nat.succ nextFuel => fun (chars : List(Char)) => fun (charsRev : List(Char)) => let smaller : (_ : List(Char)) -> (_ : List(Char)) -> Option(String) := (psDecodeStringBodyWithFuel(nextFuel))
+match chars with {
+  | _root_.List.nil => Option.none
+  | _root_.List.cons char restAfterChar => if (psCharCodeEq(char, 34)) { match restAfterChar with {
+  | _root_.List.nil => Option.some((psStringFromReversedChars(charsRev)))
+  | _root_.List.cons _listHead _listTail => Option.none
+} } else { if (psCharCodeEq(char, 92)) { match restAfterChar with {
+  | _root_.List.nil => Option.none
+  | _root_.List.cons escaped rest => if (psCharCodeEq(escaped, 34)) { smaller(rest, (List.cons((Char.ofNat(34)), charsRev))) } else { if (psCharCodeEq(escaped, 92)) { smaller(rest, (List.cons((Char.ofNat(92)), charsRev))) } else { if (psCharCodeEq(escaped, 110)) { smaller(rest, (List.cons((Char.ofNat(10)), charsRev))) } else { if (psCharCodeEq(escaped, 114)) { smaller(rest, (List.cons((Char.ofNat(13)), charsRev))) } else { if (psCharCodeEq(escaped, 116)) { smaller(rest, (List.cons((Char.ofNat(9)), charsRev))) } else { if (psCharCodeEq(escaped, 48)) { smaller(rest, (List.cons((Char.ofNat(0)), charsRev))) } else { if (psCharCodeEq(escaped, 120)) { match (psDecodeEscapedChar(2, rest)) with {
+  | Option.none => Option.none
+  | Option.some decoded => smaller((Prod.snd(decoded)), (List.cons((Prod.fst(decoded)), charsRev)))
+} } else { if (psCharCodeEq(escaped, 117)) { match (psDecodeEscapedChar(4, rest)) with {
+  | Option.none => Option.none
+  | Option.some decoded => smaller((Prod.snd(decoded)), (List.cons((Prod.fst(decoded)), charsRev)))
+} } else { Option.none } } } } } } } }
+} } else { smaller(restAfterChar, (List.cons(char, charsRev))) } }
+}
+}
+
+def psCharListLength(chars : List(Char)) : Nat := match chars with {
+  | _root_.List.nil => 0
+  | _root_.List.cons _listHead rest => Nat.succ((psCharListLength(rest)))
+}
+
+def psDecodeStringLiteral(text : String) : Option(String) := match (psLexStringToList(text)) with {
+  | _root_.List.nil => Option.none
+  | _root_.List.cons first rest => if (psCharCodeEq(first, 34)) { psDecodeStringBodyWithFuel((Nat.succ((psCharListLength(rest)))), rest, _root_.List.nil) } else { Option.none }
+}
+
+def psDecodeCharacterEscape(escaped : Char) : Option(Char) := if (psCharCodeEq(escaped, 39)) { Option.some((Char.ofNat(39))) } else { if (psCharCodeEq(escaped, 34)) { Option.some((Char.ofNat(34))) } else { if (psCharCodeEq(escaped, 92)) { Option.some((Char.ofNat(92))) } else { if (psCharCodeEq(escaped, 110)) { Option.some((Char.ofNat(10))) } else { if (psCharCodeEq(escaped, 114)) { Option.some((Char.ofNat(13))) } else { if (psCharCodeEq(escaped, 116)) { Option.some((Char.ofNat(9))) } else { Option.none } } } } } }
+
+def psDecodeCharacterEscapedTail(decoded : Option((Prod(Char, (List(Char)))))) : Option(Char) := match decoded with {
+  | Option.none => Option.none
+  | Option.some pair => match (Prod.snd(pair)) with {
+  | _root_.List.nil => Option.none
+  | _root_.List.cons closing rest => match rest with {
+  | _root_.List.nil => if (psCharCodeEq(closing, 39)) { Option.some((Prod.fst(pair))) } else { Option.none }
+  | _root_.List.cons _listHead _listTail => Option.none
+}
+}
+}
+
+def psDecodeCharacterLiteral(text : String) : Option(Char) := match (psLexStringToList(text)) with {
+  | _root_.List.nil => Option.none
+  | _root_.List.cons opening rest => if (psCharCodeEq(opening, 39)) { match rest with {
+  | _root_.List.nil => Option.none
+  | _root_.List.cons value tail => if (psCharCodeEq(value, 92)) { match tail with {
+  | _root_.List.nil => Option.none
+  | _root_.List.cons escaped escapedTail => if (psCharCodeEq(escaped, 120)) { psDecodeCharacterEscapedTail((psDecodeEscapedChar(2, escapedTail))) } else { if (psCharCodeEq(escaped, 117)) { psDecodeCharacterEscapedTail((psDecodeEscapedChar(4, escapedTail))) } else { match escapedTail with {
+  | _root_.List.nil => Option.none
+  | _root_.List.cons closing afterClosing => match afterClosing with {
+  | _root_.List.nil => if (psCharCodeEq(closing, 39)) { psDecodeCharacterEscape(escaped) } else { Option.none }
+  | _root_.List.cons _listHead _listTail => Option.none
+}
+} } }
+} } else { match tail with {
+  | _root_.List.nil => Option.none
+  | _root_.List.cons closing afterClosing => match afterClosing with {
+  | _root_.List.nil => if (psCharCodeEq(closing, 39)) { Option.some(value) } else { Option.none }
+  | _root_.List.cons _listHead _listTail => Option.none
+}
+} }
+} } else { Option.none }
+}

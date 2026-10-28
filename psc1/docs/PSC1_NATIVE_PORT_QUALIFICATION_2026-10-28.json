@@ -1,0 +1,1502 @@
+{
+  "schema": "psc1-native-port-qualification-record/1",
+  "status": "passed",
+  "testedCommit": "a0d92f9974e6534441829b4ceea28a46b7419111",
+  "baselineCommit": "29c82adc77cbd1bf271acab75b6f8d51ef0a9ee6",
+  "workflow": {
+    "run": 40639393086,
+    "path": ".github/workflows/psc1-native-port-equivalence.yml",
+    "jobs": {
+      "compare": {
+        "id": 122653731341,
+        "conclusion": "success"
+      },
+      "modular": {
+        "id": 122653731793,
+        "conclusion": "success"
+      },
+      "qualified": {
+        "id": 122654470786,
+        "conclusion": "success"
+      }
+    }
+  },
+  "artifacts": [
+    {
+      "artifact": 12794334716,
+      "name": "psc1-native-port-equivalence-a0d92f9974e6534441829b4ceea28a46b7419111",
+      "bytes": 443772,
+      "zipSha256": "ae36fad839a390481c1bdd2e8802e50a87a35eb55e8bf1e083c2abb0a49da383",
+      "expiresAt": "2027-01-26T05:40:47Z"
+    },
+    {
+      "artifact": 12794069357,
+      "name": "psc1-modular-pilot-a0d92f9974e6534441829b4ceea28a46b7419111",
+      "bytes": 3380188,
+      "zipSha256": "43a2d61e81087385c327cc90498746a748c2dcba5b2c51d6d0cd065395f14807",
+      "expiresAt": "2027-01-26T05:40:47Z"
+    }
+  ],
+  "result": {
+    "schema": "psc1-native-port-equivalence/1",
+    "status": "passed",
+    "startedAt": "2026-10-28T05:42:11.426Z",
+    "baselineCommit": "29c82adc77cbd1bf271acab75b6f8d51ef0a9ee6",
+    "currentCommit": "a0d92f9974e6534441829b4ceea28a46b7419111",
+    "toolPins": [
+      {
+        "generation": "baseline",
+        "role": "producer",
+        "file": "/home/runner/work/_temp/psc1-native-baseline/psc1/.lake/build/bin/psc1_modular_pilot",
+        "bytes": 122589120,
+        "sha256": "a875a57d55bb4eeac729ff8eafbccba999bbc4381bc4fefd40c20b32b76fcc6d"
+      },
+      {
+        "generation": "baseline",
+        "role": "checker",
+        "file": "/home/runner/work/_temp/psc1-native-baseline/psc1/.lake/build/bin/psc1_independent_checker",
+        "bytes": 119206232,
+        "sha256": "bfdbea2499837db2dd71de8425bc17f81e380990964568af98cd98ef31cce6b7"
+      },
+      {
+        "generation": "baseline",
+        "role": "bridge",
+        "file": "/home/runner/work/_temp/psc1-native-baseline/psc1/.lake/build/bin/psc1_bridge_tests",
+        "bytes": 4859008,
+        "sha256": "afd34799f59bae03586be651bb7875491540e1e70a503bc16f174d13a7c66bc2"
+      },
+      {
+        "generation": "baseline",
+        "role": "lossless",
+        "file": "/home/runner/work/_temp/psc1-native-baseline/psc1/.lake/build/bin/psc1_lossless_tests",
+        "bytes": 4480312,
+        "sha256": "13d9a8318ad3dcd7c646c7a322c98655580eb915d425d073ab2e226626b97202"
+      },
+      {
+        "generation": "current",
+        "role": "producer",
+        "file": "/home/runner/work/pskernel/pskernel/psc1/.lake/build/bin/psc1_modular_pilot",
+        "bytes": 122575336,
+        "sha256": "586e74270bb0ebe6931c95545c30efc1a9fb74f1254ec280a70db62ffa1b95d0"
+      },
+      {
+        "generation": "current",
+        "role": "checker",
+        "file": "/home/runner/work/pskernel/pskernel/psc1/.lake/build/bin/psc1_independent_checker",
+        "bytes": 119206496,
+        "sha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1"
+      },
+      {
+        "generation": "current",
+        "role": "bridge",
+        "file": "/home/runner/work/pskernel/pskernel/psc1/.lake/build/bin/psc1_bridge_tests",
+        "bytes": 4859744,
+        "sha256": "cc47733e8ff5bb631eb324ab9b79204a552a60a1d4eebe3b5b550d9ba7445dd3"
+      },
+      {
+        "generation": "current",
+        "role": "lossless",
+        "file": "/home/runner/work/pskernel/pskernel/psc1/.lake/build/bin/psc1_lossless_tests",
+        "bytes": 4480312,
+        "sha256": "bb02f7630240eb8a6e931bcdfcb888c815c8f79cd29314c98ee69f6b72740c18"
+      }
+    ],
+    "fixturePins": [
+      {
+        "module": "Ps.Foundation.Name",
+        "origin": "baseline",
+        "path": "packages/foundation/src/Ps/Foundation/Name.lean",
+        "bytes": 3987,
+        "sha256": "2e663eb4d3af85ef70cd3b0dec148b9303d0e994c7c3157d4f81494c9f999f15"
+      },
+      {
+        "module": "Pilot.Consumer",
+        "origin": "baseline",
+        "path": "test/modular/Consumer.lean",
+        "bytes": 875,
+        "sha256": "533ee0e33de451553bac43c705d6c9d5fa118f93e2d3f032cbca942fcb890dc4"
+      },
+      {
+        "module": "Ps.Foundation.List",
+        "origin": "baseline",
+        "path": "packages/foundation/src/Ps/Foundation/List.lean",
+        "bytes": 3160,
+        "sha256": "fded5488ec5b23135838048541792d71c6f3aae0040a558a05c68c05d1e01f1f"
+      },
+      {
+        "module": "Ps.Foundation.Name",
+        "origin": "baseline",
+        "path": "packages/foundation/src/Ps/Foundation/Name.lean",
+        "bytes": 3987,
+        "sha256": "2e663eb4d3af85ef70cd3b0dec148b9303d0e994c7c3157d4f81494c9f999f15"
+      },
+      {
+        "module": "Ps.Foundation.Text",
+        "origin": "baseline",
+        "path": "packages/foundation/src/Ps/Foundation/Text.lean",
+        "bytes": 2173,
+        "sha256": "06acc3ec85b1c61926958e8d90e235f6eab206914a291b3d5ceeeee6229ee6b0"
+      },
+      {
+        "module": "Ps.Bridge.Json",
+        "origin": "baseline",
+        "path": "packages/bridge/src/Ps/Bridge/Json.lean",
+        "bytes": 37731,
+        "sha256": "b593490086045c235d59fda060f9000d50f415769d103998a6cf5234976f02bb"
+      },
+      {
+        "module": "Pilot.Consumer",
+        "origin": "baseline",
+        "path": "test/modular/Extended.lean",
+        "bytes": 1925,
+        "sha256": "faa8919e43d8ddd7ffc54091168a7564d4ab5f08684fe7b30a35069d49f17aa7"
+      },
+      {
+        "label": "plan.lean",
+        "origin": "baseline",
+        "path": "test/modular/Plan.lean",
+        "bytes": 3414,
+        "sha256": "6cc6648c321d3bc8c73d5c45b7334d2da3abd49b0cd34d411c3129586343d1f5"
+      },
+      {
+        "label": "extendedplan.lean",
+        "origin": "baseline",
+        "path": "test/modular/ExtendedPlan.lean",
+        "bytes": 3063,
+        "sha256": "b8e663170b8bc2fdb14e74863f5af89b0f26e163b0836af9ca2ed522b9fffbb1"
+      },
+      {
+        "label": "provenance.lean",
+        "origin": "baseline",
+        "path": "test/modular/Provenance.lean",
+        "bytes": 6198,
+        "sha256": "c92e9f77fc719dd4761ed6862e9acf83143cead461b58b9a64684af5a94831f9"
+      },
+      {
+        "path": "standalone/native-bridge-observer.lean",
+        "origin": "current-shared-observer",
+        "bytes": 9921,
+        "sha256": "aa4e7f094ee3211ad1888ce9f870e81b33a77b01412d5957ee1b324bfd6ff98b"
+      },
+      {
+        "path": "standalone/native-api-observer.lean",
+        "origin": "current-shared-observer",
+        "bytes": 2277,
+        "sha256": "332c7e6384066a7028a752e888f8eb149c30545d1064b497186b5dcedef116cc"
+      }
+    ],
+    "observations": [
+      {
+        "label": "baseline-commit",
+        "executable": "git",
+        "args": [
+          "rev-parse",
+          "HEAD"
+        ],
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 5,
+        "stdoutSha256": "1e62ffa6cac38c8a0f56a8d70419db1a3786f084d4a7e7984d25db1b632ec637",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "current-commit",
+        "executable": "git",
+        "args": [
+          "rev-parse",
+          "HEAD"
+        ],
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 2,
+        "stdoutSha256": "8301652f7c80a17b991537af1bcbbbdb8da1b676f4bb934dc28deb4c5fd859f4",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "legacy-baseline",
+        "executable": "/usr/bin/prlimit",
+        "args": [
+          "--as=4294967296",
+          "--stack=8388608",
+          "--cpu=240",
+          "--",
+          "/home/runner/work/_temp/psc1-native-baseline/psc1/.lake/build/bin/psc1_modular_pilot",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/native-port-equivalence/requests/legacy.json"
+        ],
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 68,
+        "stdoutSha256": "df31a62b150dbaee249e97cb122e6be1ecb137201a15be579dd2a85c9b4486b3",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "legacy-baseline-independent-admission",
+        "executed": true,
+        "checkerSha256": "bfdbea2499837db2dd71de8425bc17f81e380990964568af98cd98ef31cce6b7",
+        "admissionsSha256": "a82154d3aefd1e55158fabed0cd7fcbf499deaf106e7b06c6ea030c2558adee7",
+        "receiptSha256": "b395dff842bbaa7b2d0138474d004601f2b1c18c842dee98de6a737977f23dfd",
+        "receipt": {
+          "protocol": "psc1-compiler-host/1",
+          "requestId": "native-port-legacy",
+          "target": "js",
+          "sourceClosureDigest": "0122aef2aaafc4d5f57b56381f6434ad0a626f93aa2962864abc72cbe6f088db",
+          "admissionsDigest": "a82154d3aefd1e55158fabed0cd7fcbf499deaf106e7b06c6ea030c2558adee7",
+          "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "accepted": true,
+          "behaviorallyVerified": false
+        }
+      },
+      {
+        "label": "legacy-current",
+        "executable": "/usr/bin/prlimit",
+        "args": [
+          "--as=4294967296",
+          "--stack=8388608",
+          "--cpu=240",
+          "--",
+          "/home/runner/work/pskernel/pskernel/psc1/.lake/build/bin/psc1_modular_pilot",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/native-port-equivalence/requests/legacy.json"
+        ],
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 47,
+        "stdoutSha256": "df31a62b150dbaee249e97cb122e6be1ecb137201a15be579dd2a85c9b4486b3",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "legacy-current-independent-admission",
+        "executed": true,
+        "checkerSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+        "admissionsSha256": "a82154d3aefd1e55158fabed0cd7fcbf499deaf106e7b06c6ea030c2558adee7",
+        "receiptSha256": "b395dff842bbaa7b2d0138474d004601f2b1c18c842dee98de6a737977f23dfd",
+        "receipt": {
+          "protocol": "psc1-compiler-host/1",
+          "requestId": "native-port-legacy",
+          "target": "js",
+          "sourceClosureDigest": "0122aef2aaafc4d5f57b56381f6434ad0a626f93aa2962864abc72cbe6f088db",
+          "admissionsDigest": "a82154d3aefd1e55158fabed0cd7fcbf499deaf106e7b06c6ea030c2558adee7",
+          "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "accepted": true,
+          "behaviorallyVerified": false
+        }
+      },
+      {
+        "label": "extended-baseline",
+        "executable": "/usr/bin/prlimit",
+        "args": [
+          "--as=4294967296",
+          "--stack=8388608",
+          "--cpu=240",
+          "--",
+          "/home/runner/work/_temp/psc1-native-baseline/psc1/.lake/build/bin/psc1_modular_pilot",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/native-port-equivalence/requests/extended.json"
+        ],
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 348,
+        "stdoutSha256": "7138a703fddd08209d96a646607f9b2efb1ae10c215011b27084ecbb737de081",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "extended-baseline-independent-admission",
+        "executed": true,
+        "checkerSha256": "bfdbea2499837db2dd71de8425bc17f81e380990964568af98cd98ef31cce6b7",
+        "admissionsSha256": "0c54fcbb145948d64ef88fb0bf02b231a3981bfc7e4ac49e03fab584068266e0",
+        "receiptSha256": "cf07bc79e414fc3a8f700297ba6b1aa141d8bf0c9c7c985d791d687f30189262",
+        "receipt": {
+          "protocol": "psc1-compiler-host/1",
+          "requestId": "native-port-extended",
+          "target": "js",
+          "sourceClosureDigest": "5e216b6bff00917e2e9cf97e9298f0b183ddd9e50c74e84511a2058926e6c142",
+          "admissionsDigest": "0c54fcbb145948d64ef88fb0bf02b231a3981bfc7e4ac49e03fab584068266e0",
+          "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "accepted": true,
+          "behaviorallyVerified": false
+        }
+      },
+      {
+        "label": "extended-current",
+        "executable": "/usr/bin/prlimit",
+        "args": [
+          "--as=4294967296",
+          "--stack=8388608",
+          "--cpu=240",
+          "--",
+          "/home/runner/work/pskernel/pskernel/psc1/.lake/build/bin/psc1_modular_pilot",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/native-port-equivalence/requests/extended.json"
+        ],
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 393,
+        "stdoutSha256": "7138a703fddd08209d96a646607f9b2efb1ae10c215011b27084ecbb737de081",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "extended-current-independent-admission",
+        "executed": true,
+        "checkerSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+        "admissionsSha256": "0c54fcbb145948d64ef88fb0bf02b231a3981bfc7e4ac49e03fab584068266e0",
+        "receiptSha256": "cf07bc79e414fc3a8f700297ba6b1aa141d8bf0c9c7c985d791d687f30189262",
+        "receipt": {
+          "protocol": "psc1-compiler-host/1",
+          "requestId": "native-port-extended",
+          "target": "js",
+          "sourceClosureDigest": "5e216b6bff00917e2e9cf97e9298f0b183ddd9e50c74e84511a2058926e6c142",
+          "admissionsDigest": "0c54fcbb145948d64ef88fb0bf02b231a3981bfc7e4ac49e03fab584068266e0",
+          "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "accepted": true,
+          "behaviorallyVerified": false
+        }
+      },
+      {
+        "label": "wire-protocol-baseline",
+        "executable": "/usr/bin/prlimit",
+        "args": [
+          "--as=4294967296",
+          "--stack=8388608",
+          "--cpu=240",
+          "--",
+          "/home/runner/work/_temp/psc1-native-baseline/psc1/.lake/build/bin/psc1_modular_pilot",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/native-port-equivalence/requests/wire-protocol.json"
+        ],
+        "status": 1,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 40,
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "3b42a21ae5f8131083c0b2cd94295ab1792da2e8ac5e371c0b880b7c3fb34429"
+      },
+      {
+        "label": "wire-protocol-current",
+        "executable": "/usr/bin/prlimit",
+        "args": [
+          "--as=4294967296",
+          "--stack=8388608",
+          "--cpu=240",
+          "--",
+          "/home/runner/work/pskernel/pskernel/psc1/.lake/build/bin/psc1_modular_pilot",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/native-port-equivalence/requests/wire-protocol.json"
+        ],
+        "status": 1,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 31,
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "3b42a21ae5f8131083c0b2cd94295ab1792da2e8ac5e371c0b880b7c3fb34429"
+      },
+      {
+        "label": "wire-arity-baseline",
+        "executable": "/usr/bin/prlimit",
+        "args": [
+          "--as=4294967296",
+          "--stack=8388608",
+          "--cpu=240",
+          "--",
+          "/home/runner/work/_temp/psc1-native-baseline/psc1/.lake/build/bin/psc1_modular_pilot",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/native-port-equivalence/requests/wire-arity.json"
+        ],
+        "status": 1,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 31,
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "e297f2060536ed3a19228d9527627d7a846755c3574435853bf837f53c140005"
+      },
+      {
+        "label": "wire-arity-current",
+        "executable": "/usr/bin/prlimit",
+        "args": [
+          "--as=4294967296",
+          "--stack=8388608",
+          "--cpu=240",
+          "--",
+          "/home/runner/work/pskernel/pskernel/psc1/.lake/build/bin/psc1_modular_pilot",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/native-port-equivalence/requests/wire-arity.json"
+        ],
+        "status": 1,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 36,
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "e297f2060536ed3a19228d9527627d7a846755c3574435853bf837f53c140005"
+      },
+      {
+        "label": "parse-refusal-baseline",
+        "executable": "/usr/bin/prlimit",
+        "args": [
+          "--as=4294967296",
+          "--stack=8388608",
+          "--cpu=240",
+          "--",
+          "/home/runner/work/_temp/psc1-native-baseline/psc1/.lake/build/bin/psc1_modular_pilot",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/native-port-equivalence/requests/parse-refusal.json"
+        ],
+        "status": 1,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 36,
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "e3181c2a9f1bd13f30f28c5ac39ee9b88504aacee00c4304ffbdcde269765615"
+      },
+      {
+        "label": "parse-refusal-current",
+        "executable": "/usr/bin/prlimit",
+        "args": [
+          "--as=4294967296",
+          "--stack=8388608",
+          "--cpu=240",
+          "--",
+          "/home/runner/work/pskernel/pskernel/psc1/.lake/build/bin/psc1_modular_pilot",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/native-port-equivalence/requests/parse-refusal.json"
+        ],
+        "status": 1,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 33,
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "e3181c2a9f1bd13f30f28c5ac39ee9b88504aacee00c4304ffbdcde269765615"
+      },
+      {
+        "label": "elaboration-refusal-baseline",
+        "executable": "/usr/bin/prlimit",
+        "args": [
+          "--as=4294967296",
+          "--stack=8388608",
+          "--cpu=240",
+          "--",
+          "/home/runner/work/_temp/psc1-native-baseline/psc1/.lake/build/bin/psc1_modular_pilot",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/native-port-equivalence/requests/elaboration-refusal.json"
+        ],
+        "status": 1,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 32,
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "8c421d4a5cfb57eea4adc4311e71572c4828ff502eb33dff0524b239e3ad0374"
+      },
+      {
+        "label": "elaboration-refusal-current",
+        "executable": "/usr/bin/prlimit",
+        "args": [
+          "--as=4294967296",
+          "--stack=8388608",
+          "--cpu=240",
+          "--",
+          "/home/runner/work/pskernel/pskernel/psc1/.lake/build/bin/psc1_modular_pilot",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/native-port-equivalence/requests/elaboration-refusal.json"
+        ],
+        "status": 1,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 32,
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "8c421d4a5cfb57eea4adc4311e71572c4828ff502eb33dff0524b239e3ad0374"
+      },
+      {
+        "label": "plan-baseline",
+        "executable": "lake",
+        "args": [
+          "env",
+          "lean",
+          "--run",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/native-port-equivalence/fixtures/plan.lean"
+        ],
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 634,
+        "stdoutSha256": "57aa0c30b47835e9467760fe30b577873d83b71694a2f48337fb8a6a1c5e2bff",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "plan-current",
+        "executable": "lake",
+        "args": [
+          "env",
+          "lean",
+          "--run",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/native-port-equivalence/fixtures/plan.lean"
+        ],
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 633,
+        "stdoutSha256": "57aa0c30b47835e9467760fe30b577873d83b71694a2f48337fb8a6a1c5e2bff",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "extendedplan-baseline",
+        "executable": "lake",
+        "args": [
+          "env",
+          "lean",
+          "--run",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/native-port-equivalence/fixtures/extendedplan.lean"
+        ],
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 605,
+        "stdoutSha256": "7fb1c1754c63a5b4ff807308bec541d12888201073b96bda0abcafb42a81706d",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "extendedplan-current",
+        "executable": "lake",
+        "args": [
+          "env",
+          "lean",
+          "--run",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/native-port-equivalence/fixtures/extendedplan.lean"
+        ],
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 615,
+        "stdoutSha256": "7fb1c1754c63a5b4ff807308bec541d12888201073b96bda0abcafb42a81706d",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "provenance-baseline",
+        "executable": "lake",
+        "args": [
+          "env",
+          "lean",
+          "--run",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/native-port-equivalence/fixtures/provenance.lean"
+        ],
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 700,
+        "stdoutSha256": "c66216440e3f0088d53290e0c64536e83cf43f99d261d40b06c23542c35d89ae",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "provenance-current",
+        "executable": "lake",
+        "args": [
+          "env",
+          "lean",
+          "--run",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/native-port-equivalence/fixtures/provenance.lean"
+        ],
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 689,
+        "stdoutSha256": "c66216440e3f0088d53290e0c64536e83cf43f99d261d40b06c23542c35d89ae",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "bridge-baseline",
+        "executable": "/home/runner/work/_temp/psc1-native-baseline/psc1/.lake/build/bin/psc1_bridge_tests",
+        "args": [],
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 17,
+        "stdoutSha256": "c93f41fb1a2716d9dc2ad4c21e692d65093386ff35c9c221edc9f07a78c07fb0",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "bridge-current",
+        "executable": "/home/runner/work/pskernel/pskernel/psc1/.lake/build/bin/psc1_bridge_tests",
+        "args": [],
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 16,
+        "stdoutSha256": "c93f41fb1a2716d9dc2ad4c21e692d65093386ff35c9c221edc9f07a78c07fb0",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "lossless-baseline",
+        "executable": "/home/runner/work/_temp/psc1-native-baseline/psc1/.lake/build/bin/psc1_lossless_tests",
+        "args": [],
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 4,
+        "stdoutSha256": "1133e2d1016bbb1117e083d95a863a25ecc005beece917718b7a93199329dbca",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "lossless-current",
+        "executable": "/home/runner/work/pskernel/pskernel/psc1/.lake/build/bin/psc1_lossless_tests",
+        "args": [],
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 5,
+        "stdoutSha256": "1133e2d1016bbb1117e083d95a863a25ecc005beece917718b7a93199329dbca",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "native-bridge-observer-baseline",
+        "executable": "lake",
+        "args": [
+          "env",
+          "lean",
+          "--run",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/native-port-equivalence/fixtures/native-bridge-observer.lean"
+        ],
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 773,
+        "stdoutSha256": "ec56ca014469e800b0d04999531b8705d4c08ffd82278bb18a932e00cc76367e",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "native-bridge-observer-current",
+        "executable": "lake",
+        "args": [
+          "env",
+          "lean",
+          "--run",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/native-port-equivalence/fixtures/native-bridge-observer.lean"
+        ],
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 752,
+        "stdoutSha256": "ec56ca014469e800b0d04999531b8705d4c08ffd82278bb18a932e00cc76367e",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "native-api-observer-baseline",
+        "executable": "lake",
+        "args": [
+          "env",
+          "lean",
+          "--run",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/native-port-equivalence/fixtures/native-api-observer.lean"
+        ],
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 605,
+        "stdoutSha256": "39b5fd88964e757b9cc9cbda855b2fa3b5ec6afccc13a5be5872dae3b7761181",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "native-api-observer-current",
+        "executable": "lake",
+        "args": [
+          "env",
+          "lean",
+          "--run",
+          "/home/runner/work/pskernel/pskernel/psc1/dist/native-port-equivalence/fixtures/native-api-observer.lean"
+        ],
+        "status": 0,
+        "signal": null,
+        "error": null,
+        "elapsedMs": 614,
+        "stdoutSha256": "39b5fd88964e757b9cc9cbda855b2fa3b5ec6afccc13a5be5872dae3b7761181",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "comparisons": [
+      {
+        "label": "legacy",
+        "status": "equal",
+        "stdoutSha256": "df31a62b150dbaee249e97cb122e6be1ecb137201a15be579dd2a85c9b4486b3",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "requestSha256": "52055df0f85eb1c1aa6058e0dba47f81ad4635143d77d7a1b4e8ce3100d423ab",
+        "requestBytes": 5211
+      },
+      {
+        "label": "extended",
+        "status": "equal",
+        "stdoutSha256": "7138a703fddd08209d96a646607f9b2efb1ae10c215011b27084ecbb737de081",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "requestSha256": "78adcb814778443323ea10d7aeb4ce2066992ff9bd6bdac5fad5e414ec285909",
+        "requestBytes": 50766
+      },
+      {
+        "label": "wire-protocol",
+        "status": "equal",
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "3b42a21ae5f8131083c0b2cd94295ab1792da2e8ac5e371c0b880b7c3fb34429",
+        "requestSha256": "1b0b230da77d881a851d45034417e724748457b706bbcad36f91b8ef3ce8f73a",
+        "requestBytes": 24
+      },
+      {
+        "label": "wire-arity",
+        "status": "equal",
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "e297f2060536ed3a19228d9527627d7a846755c3574435853bf837f53c140005",
+        "requestSha256": "d5b23eeb1ec20a89d896296015062cdabd5bff66b05b393415e0f141ecf00a61",
+        "requestBytes": 150
+      },
+      {
+        "label": "parse-refusal",
+        "status": "equal",
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "e3181c2a9f1bd13f30f28c5ac39ee9b88504aacee00c4304ffbdcde269765615",
+        "requestSha256": "04f202e203bebaad8e27416534888679cdefef62c20699327cad30e76ff9ccce",
+        "requestBytes": 4358
+      },
+      {
+        "label": "elaboration-refusal",
+        "status": "equal",
+        "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderrSha256": "8c421d4a5cfb57eea4adc4311e71572c4828ff502eb33dff0524b239e3ad0374",
+        "requestSha256": "88cc4d60dc58379b98e184342548075437b88b3ca9958c8279dbf0562c1c4839",
+        "requestBytes": 4369
+      },
+      {
+        "label": "plan",
+        "status": "equal",
+        "stdoutSha256": "57aa0c30b47835e9467760fe30b577873d83b71694a2f48337fb8a6a1c5e2bff",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "extendedplan",
+        "status": "equal",
+        "stdoutSha256": "7fb1c1754c63a5b4ff807308bec541d12888201073b96bda0abcafb42a81706d",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "provenance",
+        "status": "equal",
+        "stdoutSha256": "c66216440e3f0088d53290e0c64536e83cf43f99d261d40b06c23542c35d89ae",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "bridge-suite",
+        "status": "equal",
+        "stdoutSha256": "c93f41fb1a2716d9dc2ad4c21e692d65093386ff35c9c221edc9f07a78c07fb0",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "lossless-suite",
+        "status": "equal",
+        "stdoutSha256": "1133e2d1016bbb1117e083d95a863a25ecc005beece917718b7a93199329dbca",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "native-bridge-observer",
+        "status": "equal",
+        "stdoutSha256": "ec56ca014469e800b0d04999531b8705d4c08ffd82278bb18a932e00cc76367e",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "label": "native-api-observer",
+        "status": "equal",
+        "stdoutSha256": "39b5fd88964e757b9cc9cbda855b2fa3b5ec6afccc13a5be5872dae3b7761181",
+        "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "scope": "finite exact native source-port behavior and independent admission; not a compiler preservation proof",
+    "finishedAt": "2026-10-28T05:42:20.563Z"
+  },
+  "modular": {
+    "contractSha256": "3afeafcd2b46fd61e62d62b37398822a91c63e56efd3ad94edb67b0c0c968139",
+    "runtimes": {
+      "node": "v22.23.3",
+      "bun": "1.4.4"
+    },
+    "schema": "psc1-modular-pilot-qualification/1",
+    "testedCommit": "a0d92f9974e6534441829b4ceea28a46b7419111",
+    "scope": "real compiler Foundation.Name plus dependent consumer; not a complete modular compiler or self-hosting qualification",
+    "cases": [
+      {
+        "name": "lean-NodeNext",
+        "status": "passed"
+      },
+      {
+        "name": "lean-Bundler",
+        "status": "passed"
+      },
+      {
+        "name": "lean-js-node",
+        "status": "passed",
+        "elapsedMs": 323.975315,
+        "importedMs": 19.342950000000002,
+        "warmMs": 12.759282999999982,
+        "processMaxRssKiB": 184248,
+        "observations": 8
+      },
+      {
+        "name": "lean-js-bun",
+        "status": "passed",
+        "elapsedMs": 120.775021,
+        "importedMs": 19.026021999999998,
+        "warmMs": 5.225183999999999,
+        "processMaxRssKiB": 184376,
+        "observations": 8
+      },
+      {
+        "name": "lean-ts-node",
+        "status": "passed",
+        "elapsedMs": 277.961528,
+        "importedMs": 18.689006,
+        "warmMs": 12.590563999999972,
+        "processMaxRssKiB": 184248,
+        "observations": 8
+      },
+      {
+        "name": "lean-ts-bun",
+        "status": "passed",
+        "elapsedMs": 137.96838,
+        "importedMs": 17.315744000000002,
+        "warmMs": 11.246002000000004,
+        "processMaxRssKiB": 184376,
+        "observations": 8
+      },
+      {
+        "name": "modified-generated-body",
+        "status": "refused-before-target-import"
+      },
+      {
+        "name": "extra-module",
+        "status": "refused-before-target-import"
+      },
+      {
+        "name": "extra-empty-directory",
+        "status": "refused-before-target-import"
+      },
+      {
+        "name": "missing-module",
+        "status": "refused-before-target-import"
+      },
+      {
+        "name": "symlink-module",
+        "status": "refused-before-target-import"
+      },
+      {
+        "name": "wrong-version",
+        "status": "refused-before-target-import"
+      },
+      {
+        "name": "forged-admission-metadata",
+        "status": "refused-before-target-import"
+      },
+      {
+        "name": "nested-runtime-copy",
+        "status": "refused-before-target-import"
+      },
+      {
+        "name": "same-input-tarball-reproduction",
+        "status": "passed",
+        "tarballs": 4
+      },
+      {
+        "name": "cohort-before-commit-preserves-prior",
+        "status": "passed"
+      },
+      {
+        "name": "cohort-after-commit-reports-uncertainty",
+        "status": "passed"
+      },
+      {
+        "name": "ps-NodeNext",
+        "status": "passed"
+      },
+      {
+        "name": "ps-Bundler",
+        "status": "passed"
+      },
+      {
+        "name": "ps-js-node",
+        "status": "passed",
+        "elapsedMs": 328.921091,
+        "importedMs": 18.703516999999998,
+        "warmMs": 5.047466999999983,
+        "processMaxRssKiB": 184664,
+        "observations": 8
+      },
+      {
+        "name": "ps-js-bun",
+        "status": "passed",
+        "elapsedMs": 109.659414,
+        "importedMs": 15.363659,
+        "warmMs": 5.498081999999997,
+        "processMaxRssKiB": 184792,
+        "observations": 8
+      },
+      {
+        "name": "ps-ts-node",
+        "status": "passed",
+        "elapsedMs": 278.38309000000004,
+        "importedMs": 19.206698999999997,
+        "warmMs": 12.947063000000014,
+        "processMaxRssKiB": 184664,
+        "observations": 8
+      },
+      {
+        "name": "ps-ts-bun",
+        "status": "passed",
+        "elapsedMs": 129.700557,
+        "importedMs": 15.449736000000001,
+        "warmMs": 8.218233999999995,
+        "processMaxRssKiB": 184792,
+        "observations": 8
+      },
+      {
+        "name": "same-version-wrong-source-cohort",
+        "status": "refused-before-target-import"
+      },
+      {
+        "name": "ill-typed-source",
+        "status": "refused"
+      },
+      {
+        "name": "missing-source-import",
+        "status": "refused"
+      },
+      {
+        "name": "facade-dynamic-authority-and-thenable-graphs",
+        "status": "refused",
+        "count": 6
+      },
+      {
+        "name": "source-and-map-inventories",
+        "status": "passed",
+        "packages": 6
+      }
+    ],
+    "profiles": [
+      {
+        "grammar": "lean",
+        "generation": "967ab3469b1b436808ebdc838572bda2f10f2d2b1ff6f4e08f38ca8fdd6eacd0",
+        "cohortSha256": "fa4e947fd60105e92f923fdc09aab098d0bd8b17f0888ae5e4e8f3781fd2c437",
+        "sourceClosureDigest": "0122aef2aaafc4d5f57b56381f6434ad0a626f93aa2962864abc72cbe6f088db",
+        "admission": {
+          "protocol": "psc1-compiler-host/1",
+          "requestId": "modular-pack-lean",
+          "target": "js",
+          "sourceClosureDigest": "0122aef2aaafc4d5f57b56381f6434ad0a626f93aa2962864abc72cbe6f088db",
+          "admissionsDigest": "a82154d3aefd1e55158fabed0cd7fcbf499deaf106e7b06c6ea030c2558adee7",
+          "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "accepted": true,
+          "behaviorallyVerified": false
+        },
+        "execution": {
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 60,
+          "stdoutBytes": 238814,
+          "stderrBytes": 0,
+          "timeoutMs": 240000,
+          "timeoutPolicy": "standard-240s",
+          "maxBuffer": 33554432,
+          "maxRssKiB": 79984,
+          "sampledCpuSeconds": 0.03,
+          "peakTreeRssKiB": 79984,
+          "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+          "processGroup": 2446
+        },
+        "tarballs": [
+          {
+            "name": "@proofscript/modular-pilot-runtime",
+            "tarball": "proofscript-modular-pilot-runtime-0.1.0-psc1-modular-pilot.0.tgz",
+            "bytes": 11626,
+            "sha256": "549c07c0351794cb5fed6cca51973f673247c39cdadaef077cdf852b69d79af3"
+          },
+          {
+            "name": "@proofscript/modular-pilot-names",
+            "tarball": "proofscript-modular-pilot-names-0.1.0-psc1-modular-pilot.0.tgz",
+            "bytes": 14012,
+            "sha256": "3df7c73c413622a2c491ed72442d6dc9966803e50fd3dfb73e6a949fd5db2e78"
+          },
+          {
+            "name": "@proofscript/modular-pilot-consumer",
+            "tarball": "proofscript-modular-pilot-consumer-0.1.0-psc1-modular-pilot.0.tgz",
+            "bytes": 9301,
+            "sha256": "d4d758eb28d79f245a10c36f961ad87b8511d34c31c9b498da114b40b7fe244e"
+          },
+          {
+            "tarball": "proofscript-modular-compiler-pilot-0.1.0-psc1-modular-pilot.0.tgz",
+            "bytes": 10491,
+            "sha256": "9bf648aebbb0e8e99906f44540da108598c777e21d38e6cdd3b0fbc80d63a200"
+          }
+        ]
+      },
+      {
+        "grammar": "ps",
+        "generation": "f5ac8e67491a8f987835db229d5565166e341205a0a7422b7e832794bf5dce2b",
+        "cohortSha256": "fcef9f173993276d7e024d295fbef3a647a3276bc7b6ce5c75c818586a50e1b2",
+        "sourceClosureDigest": "5af90d0fc51090b05c53411c1b8d54907b619b35e3f3fe0218b93150ff1f9628",
+        "admission": {
+          "protocol": "psc1-compiler-host/1",
+          "requestId": "modular-pack-ps",
+          "target": "js",
+          "sourceClosureDigest": "5af90d0fc51090b05c53411c1b8d54907b619b35e3f3fe0218b93150ff1f9628",
+          "admissionsDigest": "a82154d3aefd1e55158fabed0cd7fcbf499deaf106e7b06c6ea030c2558adee7",
+          "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "accepted": true,
+          "behaviorallyVerified": false
+        },
+        "execution": {
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 60,
+          "stdoutBytes": 238794,
+          "stderrBytes": 0,
+          "timeoutMs": 240000,
+          "timeoutPolicy": "standard-240s",
+          "maxBuffer": 33554432,
+          "maxRssKiB": 80336,
+          "sampledCpuSeconds": 0.03,
+          "peakTreeRssKiB": 80336,
+          "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+          "processGroup": 3160
+        },
+        "tarballs": [
+          {
+            "name": "@proofscript/modular-pilot-runtime",
+            "tarball": "proofscript-modular-pilot-runtime-0.1.0-psc1-modular-pilot.0.tgz",
+            "bytes": 11591,
+            "sha256": "02c0b01333e32644b26b23610b6c92beb312970c4e833bcd09953578d4ae41a6"
+          },
+          {
+            "name": "@proofscript/modular-pilot-names",
+            "tarball": "proofscript-modular-pilot-names-0.1.0-psc1-modular-pilot.0.tgz",
+            "bytes": 13976,
+            "sha256": "c016d50e7ffd8703f8105f54741ae26c5f8ebeb7a8f12be3a1d4c50c0d0691cf"
+          },
+          {
+            "name": "@proofscript/modular-pilot-consumer",
+            "tarball": "proofscript-modular-pilot-consumer-0.1.0-psc1-modular-pilot.0.tgz",
+            "bytes": 9265,
+            "sha256": "d64658310c55dda6d4c44e0d32502d5e36fe3b7a9c409ee3b1b36879f4271a34"
+          },
+          {
+            "tarball": "proofscript-modular-compiler-pilot-0.1.0-psc1-modular-pilot.0.tgz",
+            "bytes": 10480,
+            "sha256": "e7bee0702f3e7b6c55ebfe94f5541d46a4dc69744f4f0d3b86f42864b44fe768"
+          }
+        ]
+      }
+    ],
+    "performanceTargetClaim": false,
+    "portableReleaseQualified": false,
+    "status": "passed"
+  },
+  "extended": {
+    "contractSha256": "76e1063761721a5153df64121d4f74ded5ae66f625ded689f6b9cf448dfaa86f",
+    "schema": "psc1-extended-modular-qualification/2",
+    "testedCommit": "a0d92f9974e6534441829b4ceea28a46b7419111",
+    "scope": "five-source compiler component graph with explicit specialization/worker provenance; not whole-compiler modular self-hosting",
+    "cases": [
+      {
+        "name": "lean-origin-composition",
+        "status": "passed",
+        "original": 124,
+        "specialized": 129,
+        "fused": 160,
+        "specializations": 57,
+        "workers": 31,
+        "specializedWorkers": 8,
+        "unitValues": [
+          0,
+          33,
+          12,
+          13,
+          87,
+          15
+        ]
+      },
+      {
+        "name": "lean-baseline-transform-parity",
+        "status": "passed",
+        "baselineCommit": "cc13ebfabf6763703ee1ec75a663002a9134bc74",
+        "driverSha256": "4617cc580176af9e36c8556f424cede18b70450cffbee5c97bab003ebe4e1b0c",
+        "originalIrSha256": "34abb0abedee8e8780106365ebfbfdab8c5bf4134581d744a1ccdc7fcf530962",
+        "specializedIrSha256": "7f01dec94937d029c6cf65afa34dfc945c8b8164720ed32cf4cbb143de0fd424",
+        "fusedIrSha256": "f6d263ad32b3f7e54e353fcd574d834cadeabbf7f15f4133120c37fd69afdab2",
+        "execution": {
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 364,
+          "stdoutBytes": 1754238,
+          "stderrBytes": 0,
+          "timeoutMs": 240000,
+          "timeoutPolicy": "standard-240s",
+          "maxBuffer": 33554432,
+          "maxRssKiB": 119220,
+          "sampledCpuSeconds": 0.25,
+          "peakTreeRssKiB": 119220,
+          "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+          "processGroup": 3716
+        }
+      },
+      {
+        "name": "lean-NodeNext",
+        "status": "passed"
+      },
+      {
+        "name": "lean-Bundler",
+        "status": "passed"
+      },
+      {
+        "name": "lean-js-node",
+        "status": "passed",
+        "observations": 11,
+        "elapsedMs": 99.06102899999999,
+        "loadedMs": 31.257718999999998,
+        "processMaxRssKiB": 80580
+      },
+      {
+        "name": "lean-js-bun",
+        "status": "passed",
+        "observations": 11,
+        "elapsedMs": 61.605225,
+        "loadedMs": 33.702633,
+        "processMaxRssKiB": 70444
+      },
+      {
+        "name": "lean-ts-node",
+        "status": "passed",
+        "observations": 11,
+        "elapsedMs": 95.089414,
+        "loadedMs": 30.703312,
+        "processMaxRssKiB": 84792
+      },
+      {
+        "name": "lean-ts-bun",
+        "status": "passed",
+        "observations": 11,
+        "elapsedMs": 70.995462,
+        "loadedMs": 32.592838,
+        "processMaxRssKiB": 70444
+      },
+      {
+        "name": "lean-inventory-and-source-maps",
+        "status": "passed"
+      },
+      {
+        "name": "lean-modified-json-module",
+        "status": "refused-before-import"
+      },
+      {
+        "name": "lean-modified-transform-provenance",
+        "status": "refused-before-import"
+      },
+      {
+        "name": "extended-exact-seven-tarball-reproduction",
+        "status": "passed"
+      },
+      {
+        "name": "extended-before-commit-retains-prior",
+        "status": "passed"
+      },
+      {
+        "name": "extended-after-commit-reports-uncertainty",
+        "status": "passed"
+      },
+      {
+        "name": "ps-origin-composition",
+        "status": "passed",
+        "original": 124,
+        "specialized": 129,
+        "fused": 160,
+        "specializations": 57,
+        "workers": 31,
+        "specializedWorkers": 8,
+        "unitValues": [
+          0,
+          33,
+          12,
+          13,
+          87,
+          15
+        ]
+      },
+      {
+        "name": "ps-baseline-transform-parity",
+        "status": "passed",
+        "baselineCommit": "cc13ebfabf6763703ee1ec75a663002a9134bc74",
+        "driverSha256": "4617cc580176af9e36c8556f424cede18b70450cffbee5c97bab003ebe4e1b0c",
+        "originalIrSha256": "34abb0abedee8e8780106365ebfbfdab8c5bf4134581d744a1ccdc7fcf530962",
+        "specializedIrSha256": "7f01dec94937d029c6cf65afa34dfc945c8b8164720ed32cf4cbb143de0fd424",
+        "fusedIrSha256": "f6d263ad32b3f7e54e353fcd574d834cadeabbf7f15f4133120c37fd69afdab2",
+        "execution": {
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 373,
+          "stdoutBytes": 1754238,
+          "stderrBytes": 0,
+          "timeoutMs": 240000,
+          "timeoutPolicy": "standard-240s",
+          "maxBuffer": 33554432,
+          "maxRssKiB": 118900,
+          "sampledCpuSeconds": 0.26,
+          "peakTreeRssKiB": 118900,
+          "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+          "processGroup": 4749
+        }
+      },
+      {
+        "name": "ps-NodeNext",
+        "status": "passed"
+      },
+      {
+        "name": "ps-Bundler",
+        "status": "passed"
+      },
+      {
+        "name": "ps-js-node",
+        "status": "passed",
+        "observations": 11,
+        "elapsedMs": 99.76387700000001,
+        "loadedMs": 30.440927,
+        "processMaxRssKiB": 94220
+      },
+      {
+        "name": "ps-js-bun",
+        "status": "passed",
+        "observations": 11,
+        "elapsedMs": 66.67340899999999,
+        "loadedMs": 37.324221,
+        "processMaxRssKiB": 94348
+      },
+      {
+        "name": "ps-ts-node",
+        "status": "passed",
+        "observations": 11,
+        "elapsedMs": 95.847683,
+        "loadedMs": 31.268788,
+        "processMaxRssKiB": 94220
+      },
+      {
+        "name": "ps-ts-bun",
+        "status": "passed",
+        "observations": 11,
+        "elapsedMs": 72.150308,
+        "loadedMs": 32.666719,
+        "processMaxRssKiB": 94348
+      },
+      {
+        "name": "ps-inventory-and-source-maps",
+        "status": "passed"
+      },
+      {
+        "name": "ps-modified-json-module",
+        "status": "refused-before-import"
+      },
+      {
+        "name": "ps-modified-transform-provenance",
+        "status": "refused-before-import"
+      },
+      {
+        "name": "cross-profile-package-mix",
+        "status": "refused-before-import"
+      },
+      {
+        "name": "cross-grammar-exact-core-and-transform-parity",
+        "status": "passed"
+      },
+      {
+        "name": "package-slug-collision",
+        "status": "refused"
+      },
+      {
+        "name": "extended-source-bound",
+        "status": "refused"
+      }
+    ],
+    "profiles": [
+      {
+        "kind": "lean",
+        "sourceClosureDigest": "5e216b6bff00917e2e9cf97e9298f0b183ddd9e50c74e84511a2058926e6c142",
+        "cohortSha256": "47f322b8aae987ac0a4cf5ef7d2c862dd09f318939c5718067995dfd44ab7cb7",
+        "generation": "930dea00b2f6de7037703492c448761f237d478246c3844eb509a5db45ad91cc",
+        "originAudit": {
+          "original": 124,
+          "specialized": 129,
+          "fused": 160,
+          "specializations": 57,
+          "workers": 31,
+          "specializedWorkers": 8,
+          "unitValues": [
+            0,
+            33,
+            12,
+            13,
+            87,
+            15
+          ]
+        },
+        "execution": {
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 533,
+          "stdoutBytes": 3269737,
+          "stderrBytes": 0,
+          "timeoutMs": 240000,
+          "timeoutPolicy": "standard-240s",
+          "maxBuffer": 33554432,
+          "maxRssKiB": 129032,
+          "sampledCpuSeconds": 0.34,
+          "peakTreeRssKiB": 129032,
+          "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+          "processGroup": 3469
+        },
+        "admission": {
+          "protocol": "psc1-compiler-host/1",
+          "requestId": "extended-pack-lean",
+          "target": "js",
+          "sourceClosureDigest": "5e216b6bff00917e2e9cf97e9298f0b183ddd9e50c74e84511a2058926e6c142",
+          "admissionsDigest": "0c54fcbb145948d64ef88fb0bf02b231a3981bfc7e4ac49e03fab584068266e0",
+          "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "accepted": true,
+          "behaviorallyVerified": false
+        },
+        "tarballs": [
+          {
+            "name": "@proofscript/modular-pilot-runtime",
+            "tarball": "proofscript-modular-pilot-runtime-0.1.0-psc1-modular-pilot.1.tgz",
+            "bytes": 34188,
+            "sha256": "c41abb1bfc292e6c30764c1a95e1016829f2267ee7b9bf11a9f48c2ee7f416a0"
+          },
+          {
+            "name": "@proofscript/modular-pilot-ps-foundation-list",
+            "tarball": "proofscript-modular-pilot-ps-foundation-list-0.1.0-psc1-modular-pilot.1.tgz",
+            "bytes": 32211,
+            "sha256": "f22aa485dcafcff6963217e4d4f3a1ad96fb8986f5726a6636437b5e7d21f303"
+          },
+          {
+            "name": "@proofscript/modular-pilot-names",
+            "tarball": "proofscript-modular-pilot-names-0.1.0-psc1-modular-pilot.1.tgz",
+            "bytes": 28000,
+            "sha256": "8f099f8511b5d3ffac0c026cf2ddd93cf818f8bfdaaa8b881d824aacd1696159"
+          },
+          {
+            "name": "@proofscript/modular-pilot-ps-foundation-text",
+            "tarball": "proofscript-modular-pilot-ps-foundation-text-0.1.0-psc1-modular-pilot.1.tgz",
+            "bytes": 24914,
+            "sha256": "1d15547e6a0fb7ba4f596e46877fcda39af5daefce865f8971bc2d1ebc182d39"
+          },
+          {
+            "name": "@proofscript/modular-pilot-ps-bridge-json",
+            "tarball": "proofscript-modular-pilot-ps-bridge-json-0.1.0-psc1-modular-pilot.1.tgz",
+            "bytes": 96891,
+            "sha256": "5f9ab7bf7b3571bedf74accb701eff142bb56784d2f59555e58610f807ac9e2e"
+          },
+          {
+            "name": "@proofscript/modular-pilot-consumer",
+            "tarball": "proofscript-modular-pilot-consumer-0.1.0-psc1-modular-pilot.1.tgz",
+            "bytes": 23983,
+            "sha256": "cdd63c2739dd90fb82dcf33ac76384db349ee535dd21fe7b7217f51f6233c3c5"
+          },
+          {
+            "tarball": "proofscript-modular-compiler-pilot-0.1.0-psc1-modular-pilot.1.tgz",
+            "bytes": 14498,
+            "sha256": "1915dabe0ce7d99f69cfe5b7e2822c90768439dc743d140a8462f3427b8a7cf2"
+          }
+        ]
+      },
+      {
+        "kind": "ps",
+        "sourceClosureDigest": "aa0d6936d9d6e952987dfa30b74f02aba1932c6efe7f8f37d044e04996e34423",
+        "cohortSha256": "9cf1443e1943a59d4d9ba52b35bf9400eb0c1f3b6fefe437246776c9a3837c39",
+        "generation": "fdfd1af3a066d7745f6f19a49bbf2920b124fff46703c6fce69a11b65eafcc0a",
+        "originAudit": {
+          "original": 124,
+          "specialized": 129,
+          "fused": 160,
+          "specializations": 57,
+          "workers": 31,
+          "specializedWorkers": 8,
+          "unitValues": [
+            0,
+            33,
+            12,
+            13,
+            87,
+            15
+          ]
+        },
+        "execution": {
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 527,
+          "stdoutBytes": 3269609,
+          "stderrBytes": 0,
+          "timeoutMs": 240000,
+          "timeoutPolicy": "standard-240s",
+          "maxBuffer": 33554432,
+          "maxRssKiB": 131272,
+          "sampledCpuSeconds": 0.33,
+          "peakTreeRssKiB": 131272,
+          "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+          "processGroup": 4505
+        },
+        "admission": {
+          "protocol": "psc1-compiler-host/1",
+          "requestId": "extended-pack-ps",
+          "target": "js",
+          "sourceClosureDigest": "aa0d6936d9d6e952987dfa30b74f02aba1932c6efe7f8f37d044e04996e34423",
+          "admissionsDigest": "0c54fcbb145948d64ef88fb0bf02b231a3981bfc7e4ac49e03fab584068266e0",
+          "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+          "accepted": true,
+          "behaviorallyVerified": false
+        },
+        "tarballs": [
+          {
+            "name": "@proofscript/modular-pilot-runtime",
+            "tarball": "proofscript-modular-pilot-runtime-0.1.0-psc1-modular-pilot.1.tgz",
+            "bytes": 34034,
+            "sha256": "7af3c72ed96a216b57bbac2a9063aa3397691ac6dc02f9bdaf4d089a47f8d393"
+          },
+          {
+            "name": "@proofscript/modular-pilot-ps-foundation-list",
+            "tarball": "proofscript-modular-pilot-ps-foundation-list-0.1.0-psc1-modular-pilot.1.tgz",
+            "bytes": 32048,
+            "sha256": "88b79c60271ceaf8a713abd11989c3095ae22dad755219ef1922c271422395bc"
+          },
+          {
+            "name": "@proofscript/modular-pilot-names",
+            "tarball": "proofscript-modular-pilot-names-0.1.0-psc1-modular-pilot.1.tgz",
+            "bytes": 27826,
+            "sha256": "272ee78811e9ab15974ca998c2850cdd5bd1154ad0d5860cff01287ad5b44239"
+          },
+          {
+            "name": "@proofscript/modular-pilot-ps-foundation-text",
+            "tarball": "proofscript-modular-pilot-ps-foundation-text-0.1.0-psc1-modular-pilot.1.tgz",
+            "bytes": 24749,
+            "sha256": "34476f55fd2280b31aeaa8ac16cd41366047b91cd27e91cd3c7171ccbc6e4464"
+          },
+          {
+            "name": "@proofscript/modular-pilot-ps-bridge-json",
+            "tarball": "proofscript-modular-pilot-ps-bridge-json-0.1.0-psc1-modular-pilot.1.tgz",
+            "bytes": 96742,
+            "sha256": "0fe4921d314a61228f566f40b10e76b8293ee29cf705c9b3a5468437e43f29c4"
+          },
+          {
+            "name": "@proofscript/modular-pilot-consumer",
+            "tarball": "proofscript-modular-pilot-consumer-0.1.0-psc1-modular-pilot.1.tgz",
+            "bytes": 23822,
+            "sha256": "65de6b88a88601cd5cc50c7e5293473c6743d3ea9b1a83a8da4b41f593658b8d"
+          },
+          {
+            "tarball": "proofscript-modular-compiler-pilot-0.1.0-psc1-modular-pilot.1.tgz",
+            "bytes": 14497,
+            "sha256": "a4325409aecec08ea721aa4174e30d5e6ef87698999c28dae5799ed0b6c08e22"
+          }
+        ]
+      }
+    ],
+    "wholeCompilerQualified": false,
+    "modularSelfHosted": false,
+    "status": "passed"
+  },
+  "formalCompilerPreservation": false,
+  "receiptGrantsAdmissionAuthority": false
+}

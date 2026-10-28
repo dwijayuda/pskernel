@@ -1,0 +1,129 @@
+import Ps.Core.Equality
+import Ps.Core.Subst
+import Ps.Environment.Basic
+import Ps.Environment.LocalContext
+import Ps.Meta.Context
+import Ps.Meta.Reduce
+
+structure PsUnifyResult where {
+  context : PsMetaContext
+  success : Bool
+}
+
+def psUnifySuccess(context : PsMetaContext) : PsUnifyResult := { context := context, success := true }
+
+def psUnifyFailure(context : PsMetaContext) : PsUnifyResult := { context := context, success := false }
+
+def psMetaSetLevels(context : PsMetaContext, levels : PsLevelMetaContext) : PsMetaContext := { nextId := context.nextId, declarations := context.declarations, assignments := context.assignments, levels := levels }
+
+def psMetaVarAssignable(context : PsMetaContext, id : Nat) : Bool := match (psMetaFindDecl(context, id)) with {
+  | none => false
+  | some declaration => match declaration.kind with {
+  | syntheticOpaque => false
+  | _ => true
+}
+}
+
+def psMetaVarIsNatural(context : PsMetaContext, id : Nat) : Bool := match (psMetaFindDecl(context, id)) with {
+  | some declaration => match declaration.kind with {
+  | natural => true
+  | _ => false
+}
+  | none => false
+}
+
+def psUnifyAssign(context : PsMetaContext, id : Nat, value : PsExpr) : PsUnifyResult := if (psMetaVarAssignable(context, id)) { match (psMetaAssign(context, id, value)) with {
+  | none => psUnifyFailure(context)
+  | some next => psUnifySuccess(next)
+} } else { psUnifyFailure(context) }
+
+def psUnifyLevelLists(leftLevels : List(PsLevel)) : (_ : PsMetaContext) -> (_ : List(PsLevel)) -> PsUnifyResult := match leftLevels with {
+  | List.nil => fun (context : PsMetaContext) (rightLevels : List(PsLevel)) => match rightLevels with {
+  | List.nil => psUnifySuccess(context)
+  | List.cons _ _ => psUnifyFailure(context)
+}
+  | List.cons left leftRest => let smaller : (_ : PsMetaContext) -> (_ : List(PsLevel)) -> PsUnifyResult := (psUnifyLevelLists(leftRest))
+fun (context : PsMetaContext) (rightLevels : List(PsLevel)) => match rightLevels with {
+  | List.nil => psUnifyFailure(context)
+  | List.cons right rightRest => let unified := (psLevelUnify(context.levels, left, right))
+if (unified.success) { smaller((psMetaSetLevels(context, unified.context)), rightRest) } else { psUnifyFailure(context) }
+}
+}
+
+-- Reflexivity is definitionally valid before any reduction. In
+-- particular, shared local lets must not be unfolded just to compare
+-- the same proposition/decision index with itself.
+def psUnifyWithFuelWorker(fuel : Nat) : (_ : PsEnvironment) -> (_ : PsLocalContext) -> (_ : PsMetaContext) -> (_ : PsExpr) -> (_ : PsExpr) -> PsUnifyResult := match fuel with {
+  | Nat.zero => fun (environment : PsEnvironment) (localContext : PsLocalContext) (context : PsMetaContext) (left : PsExpr) (right : PsExpr) => psUnifyFailure(context)
+  | Nat.succ remaining => fun (environment : PsEnvironment) (localContext : PsLocalContext) (context : PsMetaContext) (left : PsExpr) (right : PsExpr) => let smaller : (_ : PsEnvironment) -> (_ : PsLocalContext) -> (_ : PsMetaContext) -> (_ : PsExpr) -> (_ : PsExpr) -> PsUnifyResult := (psUnifyWithFuelWorker(remaining))
+if (psExprAlphaEq(left, right)) { psUnifySuccess(context) } else { let leftValue := (psWhnf(environment, context, localContext, left))
+let rightValue := (psWhnf(environment, context, localContext, right))
+if (psExprAlphaEq(leftValue, rightValue)) { psUnifySuccess(context) } else { match leftValue with {
+  | mvar leftId => match rightValue with {
+  | mvar rightId => if (Nat.beq(leftId, rightId)) { psUnifySuccess(context) } else { if (psMetaVarIsNatural(context, rightId)) { if (psMetaVarIsNatural(context, leftId)) { if (psMetaVarAssignable(context, leftId)) { psUnifyAssign(context, leftId, rightValue) } else { psUnifyAssign(context, rightId, leftValue) } } else { psUnifyAssign(context, rightId, leftValue) } } else { if (psMetaVarAssignable(context, leftId)) { psUnifyAssign(context, leftId, rightValue) } else { psUnifyAssign(context, rightId, leftValue) } } }
+  | _ => psUnifyAssign(context, leftId, rightValue)
+}
+  | sortE leftLevel => match rightValue with {
+  | mvar id => psUnifyAssign(context, id, leftValue)
+  | sortE rightLevel => let unified := (psLevelUnify(context.levels, leftLevel, rightLevel))
+if (unified.success) { psUnifySuccess((psMetaSetLevels(context, unified.context))) } else { psUnifyFailure(context) }
+  | _ => psUnifyFailure(context)
+}
+  | constE leftName leftLevels => match rightValue with {
+  | mvar id => psUnifyAssign(context, id, leftValue)
+  | constE rightName rightLevels => if (psNameEq(leftName, rightName)) { psUnifyLevelLists(leftLevels, context, rightLevels) } else { psUnifyFailure(context) }
+  | _ => psUnifyFailure(context)
+}
+  | app leftFn leftArg => match rightValue with {
+  | mvar id => psUnifyAssign(context, id, leftValue)
+  | app rightFn rightArg => let fnResult := (smaller(environment, localContext, context, leftFn, rightFn))
+if (fnResult.success) { smaller(environment, localContext, fnResult.context, leftArg, rightArg) } else { psUnifyFailure(context) }
+  | _ => psUnifyFailure(context)
+}
+  | lam leftName leftType leftBody _ => match rightValue with {
+  | mvar id => psUnifyAssign(context, id, leftValue)
+  | lam rightName rightType rightBody _ => let typeResult := (smaller(environment, localContext, context, leftType, rightType))
+if (typeResult.success) { let pushed := (psLocalPushBinding(localContext, rightName, rightType, PsBinderInfo.explicit))
+let fvar := (PsExpr.fvar(pushed.id))
+smaller(environment, pushed.context, typeResult.context, (psExprInstantiate1(leftBody, fvar)), (psExprInstantiate1(rightBody, fvar))) } else { psUnifyFailure(context) }
+  | _ => psUnifyFailure(context)
+}
+  | forallE leftName leftType leftBody _ => match rightValue with {
+  | mvar id => psUnifyAssign(context, id, leftValue)
+  | forallE rightName rightType rightBody _ => let typeResult := (smaller(environment, localContext, context, leftType, rightType))
+if (typeResult.success) { let pushed := (psLocalPushBinding(localContext, rightName, rightType, PsBinderInfo.explicit))
+let fvar := (PsExpr.fvar(pushed.id))
+smaller(environment, pushed.context, typeResult.context, (psExprInstantiate1(leftBody, fvar)), (psExprInstantiate1(rightBody, fvar))) } else { psUnifyFailure(context) }
+  | _ => psUnifyFailure(context)
+}
+  | letE _ _ _ _ => match rightValue with {
+  | mvar id => psUnifyAssign(context, id, leftValue)
+  | _ => psUnifyFailure(context)
+}
+  | lit leftLiteral => match rightValue with {
+  | mvar id => psUnifyAssign(context, id, leftValue)
+  | lit rightLiteral => if (psLiteralEq(leftLiteral, rightLiteral)) { psUnifySuccess(context) } else { psUnifyFailure(context) }
+  | _ => psUnifyFailure(context)
+}
+  | fvar leftId => match rightValue with {
+  | mvar id => psUnifyAssign(context, id, leftValue)
+  | fvar rightId => if (Nat.beq(leftId, rightId)) { psUnifySuccess(context) } else { psUnifyFailure(context) }
+  | _ => psUnifyFailure(context)
+}
+  | bvar leftIndex => match rightValue with {
+  | mvar id => psUnifyAssign(context, id, leftValue)
+  | bvar rightIndex => if (Nat.beq(leftIndex, rightIndex)) { psUnifySuccess(context) } else { psUnifyFailure(context) }
+  | _ => psUnifyFailure(context)
+}
+  | proj leftType leftIndex leftProjValue => match rightValue with {
+  | mvar id => psUnifyAssign(context, id, leftValue)
+  | proj rightType rightIndex rightProjValue => if (psNameEq(leftType, rightType)) { if (Nat.beq(leftIndex, rightIndex)) { smaller(environment, localContext, context, leftProjValue, rightProjValue) } else { psUnifyFailure(context) } } else { psUnifyFailure(context) }
+  | _ => psUnifyFailure(context)
+}
+} } }
+}
+
+def psUnifyWithFuel(environment : PsEnvironment, localContext : PsLocalContext, context : PsMetaContext, fuel : Nat, left : PsExpr, right : PsExpr) : PsUnifyResult := psUnifyWithFuelWorker(fuel, environment, localContext, context, left, right)
+
+def psUnify(environment : PsEnvironment, localContext : PsLocalContext, context : PsMetaContext, left : PsExpr, right : PsExpr) : PsUnifyResult := let result := (psUnifyWithFuel(environment, localContext, context, 512, left, right))
+if (result.success) { result } else { psUnifyFailure(context) }

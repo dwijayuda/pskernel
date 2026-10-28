@@ -49,6 +49,8 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/ci/repository-layout.mjs
+          node scripts/check-canonical-sources.mjs --static
+          node ../scripts/check-source-ownership.mjs
           node test/host/license.test.mjs
           node test/host/process-location.test.mjs
           node scripts/maintainer-docs.mjs
@@ -88,6 +90,11 @@ jobs:
     needs: static
     if: needs.static.outputs.focused == 'true'
     uses: ./.github/workflows/psc1-lossless-source.yml
+
+  canonical-sources:
+    needs: static
+    if: needs.static.outputs.focused == 'true'
+    uses: ./.github/workflows/psc1-canonical-sources.yml
 
   source-bindings:
     needs: static
@@ -138,7 +145,7 @@ jobs:
 
   gate:
     if: always()
-    needs: [static, lossless, source-bindings, native, focused, modular, closures, g1, full, benchmark]
+    needs: [static, lossless, canonical-sources, source-bindings, native, focused, modular, closures, g1, full, benchmark]
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     steps:
@@ -151,7 +158,7 @@ jobs:
           const jobs=JSON.parse(process.env.RESULTS);
           assert.equal(jobs.static.result,'success');
           const selection=jobs.static.outputs;
-          for(const [job,tier] of Object.entries({lossless:'focused','source-bindings':'focused',native:'focused',focused:'focused',modular:'focused',closures:'integration',g1:'integration',full:'release',benchmark:'benchmark'}))
+          for(const [job,tier] of Object.entries({lossless:'focused','canonical-sources':'focused','source-bindings':'focused',native:'focused',focused:'focused',modular:'focused',closures:'integration',g1:'integration',full:'release',benchmark:'benchmark'}))
             assert.equal(jobs[job].result,selection[tier]==='true'?'success':'skipped',job);
           console.log('Every selected PSC1 dependency passed. Release readiness is reported separately.');
           JS

@@ -58,13 +58,13 @@ function requireKeys(value, keys, code) {
     fail(code);
 }
 function loadToolchain() {
-  if (process.platform !== 'linux' || process.arch !== 'x64') fail('PLATFORM');
+  if (process.platform !== 'linux' || !['x64', 'arm64'].includes(process.arch)) fail('PLATFORM');
   if (process.version !== 'v22.23.3') fail('RUNTIME_VERSION');
   const file = path.join(root, 'toolchain.json');
   const bytes = regular(file, 4 * 1024 * 1024, 'TOOLCHAIN_FILE');
   const manifest = JSON.parse(decode(bytes));
   if (!object(manifest) || manifest.schema !== 'psc1-independent-toolchain/1' ||
-      manifest.platform !== 'linux-x64' || manifest.nodeVersion !== '22.23.3' ||
+      manifest.platform !== 'linux-' + process.arch || manifest.nodeVersion !== '22.23.3' ||
       !Array.isArray(manifest.resources) || manifest.resources.length === 0 ||
       manifest.resources.length > 4096) fail('TOOLCHAIN_MANIFEST');
   const roles = {

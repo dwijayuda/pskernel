@@ -7,6 +7,7 @@ import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {sha256} from './kernel435-qualified-artifact.mjs';
+import {readCanonicalOwnership} from '../host-tools/canonical-sources.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 process.chdir(root);
 const out=path.join(root,'dist/npm-packages'),args=process.argv.slice(2),mode=args[0]??'build';
@@ -35,6 +36,31 @@ function clean(dir){
  if(fs.existsSync(target)){assert.ok(!fs.lstatSync(target).isSymbolicLink());fs.rmSync(target,{recursive:true});}
 }
 if(mode==='clean'){for(const dir of selected?[selected]:dirs)clean(dir);process.exit(0);}
+
+// The standard-library package is an exact generated view of its repository owner.
+const libraryPackage=path.join(root,'packages','stdlib'),librarySource=path.join(libraryPackage,'src');
+for(const directory of [libraryPackage,librarySource]){
+ if(!fs.existsSync(directory))fs.mkdirSync(directory);
+ const stat=fs.lstatSync(directory);assert.ok(stat.isDirectory()&&!stat.isSymbolicLink(),'real packaging directory required:'+directory);
+}
+const libraryView=path.join(librarySource,'ProofScript');
+if(fs.existsSync(libraryView)){
+ const stat=fs.lstatSync(libraryView);assert.ok(stat.isDirectory()&&!stat.isSymbolicLink());
+ inventory(libraryView);fs.rmSync(libraryView,{recursive:true});
+}
+fs.cpSync(path.join(root,'stdlib','ProofScript'),libraryView,{recursive:true});
+const canonical=readCanonicalOwnership(root),sourceCatalog=new Map();
+for(const row of canonical.manifest.owners){
+ sourceCatalog.set(row.path,{...row,role:'canonical-editable-proofscript'});
+ sourceCatalog.set(row.bootstrap.path,{...row.bootstrap,module:row.module,imports:row.imports,
+  role:'immutable-checked-bootstrap-reference',canonicalPath:row.path});
+}
+for(const row of canonical.manifest.classifiedRemainder)sourceCatalog.set(row.path,{...row});
+function repositorySourcePath(relative){
+ const generated='packages/stdlib/src/ProofScript/';
+ return relative.startsWith(generated)?'stdlib/ProofScript/'+relative.slice(generated.length):relative;
+}
+
 if(!fs.existsSync(path.join(out,'qualified-bundles.json')))await import('./npm-package-inventory.mjs');
 const input=read('scripts/npm-packages-input.json'),audit=read(path.join(out,'inventory.json'));
 for(const [directory,pin]of [['qualified-input',input.root],['qualified-bundles',input.full]])
@@ -82,28 +108,35 @@ function sourceFiles(dir){
  if(!fs.existsSync(source))return[];
  return inventory(source).filter(p=>/\.(lean|ps)$/.test(p.path)).map(p=>{
   const text=fs.readFileSync(path.join(source,p.path),'utf8');
+  const repositoryPath=repositorySourcePath(path.relative(root,path.join(source,p.path)).split(path.sep).join('/'));
+  const independent=repositoryPath.startsWith('packages/pskernel-');
+  const owned=sourceCatalog.get(repositoryPath);
+  if(!independent){assert.ok(owned,'unclassified package source:'+repositoryPath);assert.equal(p.bytes,owned.bytes);assert.equal(p.sha256,owned.sha256);}
   return{...p,path:'src/'+p.path,module:p.path.replace(/\.(lean|ps)$/,'').replaceAll('/','.'),
-   kind:p.path.endsWith('.ps')?'ps':'lean',
-   imports:[...text.matchAll(/^import\s+(.+)$/gm)].flatMap(m=>m[1].trim().split(/\s+/))};
+   kind:p.path.endsWith('.ps')?'ps':'lean',repositoryPath,
+   role:independent?'independent-kernel-source':owned.role,
+   ...(owned?.canonicalPath?{canonicalPath:owned.canonicalPath}:{}),
+   imports:owned?.imports??[...text.matchAll(/^import\s+(.+)$/gm)].flatMap(m=>m[1].trim().split(/\s+/))};
  });
 }
 const readSourcesCode=[
  "import fs from 'node:fs';import crypto from 'node:crypto';",
  "const data=JSON.parse(fs.readFileSync(new URL('./source-manifest.json',import.meta.url),'utf8'));",
  "export const sourcePackage=Object.freeze({...data,files:Object.freeze(data.files.map(f=>Object.freeze({...f,imports:Object.freeze(f.imports)})))});",
- "export function readSources({kind='lean'}={}){",
+ "export function readSources({kind=sourcePackage.canonicalGrammar}={}){",
+ "if(kind===null)throw Error('PSC1_PACKAGE_NO_SOURCE_VARIANT');",
  "if(!['lean','ps'].includes(kind))throw Error('PSC1_PACKAGE_SOURCE_KIND');",
  "const files=sourcePackage.files.filter(f=>f.kind===kind),result=[],seen=new Set(),active=new Set();",
  "const visit=file=>{if(seen.has(file.module))return;if(active.has(file.module))throw Error('PSC1_PACKAGE_SOURCE_CYCLE');active.add(file.module);",
  "for(const name of file.imports){const dep=files.find(f=>f.module===name);if(dep)visit(dep);}",
  "const bytes=fs.readFileSync(new URL('../'+file.path,import.meta.url));if(bytes.length!==file.bytes||crypto.createHash('sha256').update(bytes).digest('hex')!==file.sha256)throw Error('PSC1_PACKAGE_SOURCE_IDENTITY');",
- "result.push(Object.freeze({module:file.module,kind,text:new TextDecoder('utf-8',{fatal:true}).decode(bytes)}));active.delete(file.module);seen.add(file.module);};",
+ "result.push(Object.freeze({module:file.module,kind,role:file.role,repositoryPath:file.repositoryPath,text:new TextDecoder('utf-8',{fatal:true}).decode(bytes)}));active.delete(file.module);seen.add(file.module);};",
  "files.forEach(visit);if(result.length===0)throw Error('PSC1_PACKAGE_NO_SOURCE_VARIANT');return Object.freeze(result);}"
 ].join('\n')+'\n';
 const sourceTypes=[
- "export interface SourceRecord{readonly module:string;readonly kind:'lean'|'ps';readonly text:string;}",
- "export interface SourceFile{readonly path:string;readonly module:string;readonly kind:'lean'|'ps';readonly bytes:number;readonly sha256:string;readonly imports:readonly string[];}",
- "export const sourcePackage:Readonly<{schema:'psc1-source-package/1';name:string;version:string;kind:string;files:readonly SourceFile[];internalRuntimeApi:false;admissionAuthority:false;}>;",
+ "export interface SourceRecord{readonly module:string;readonly kind:'lean'|'ps';readonly text:string;readonly role:string;readonly repositoryPath:string;}",
+ "export interface SourceFile{readonly path:string;readonly module:string;readonly kind:'lean'|'ps';readonly bytes:number;readonly sha256:string;readonly imports:readonly string[];readonly role:string;readonly repositoryPath:string;readonly canonicalPath?:string;}",
+ "export const sourcePackage:Readonly<{schema:'psc1-source-package/1';name:string;version:string;kind:string;canonicalGrammar:'lean'|'ps'|null;sourceOwnership:Readonly<Record<string,string>>;files:readonly SourceFile[];internalRuntimeApi:false;admissionAuthority:false;}>;",
  "export function readSources(options?:{kind?:'lean'|'ps'}):readonly SourceRecord[];"
 ].join('\n')+'\n';
 const records=[],built=new Map(),packedRoots=new Map(),active=new Set();
@@ -118,7 +151,6 @@ function build(dir){
  }
  // Native checking remains optional; seal its exact descriptor without installing it.
  if(dir==='compiler')build('pskernel-lean');
- if(dir==='stdlib')fs.cpSync(path.join(root,'stdlib/ProofScript'),path.join(packageRoot,'src/ProofScript'),{recursive:true});
  const stamp=sha256(json({input,meta,source:sourceFiles(packageRoot),builder:sha256(fs.readFileSync(fileURLToPath(import.meta.url))),
   dependencyTarballs:Object.keys(meta.dependencies??{}).map(name=>built.get(directoryByName.get(name)).sha256),
   rootMetadata:dir==='compiler'?dirs.map(name=>['package.json','README.md','LICENSE','NOTICE'].map(file=>{const p=path.join(root,'packages',name,file);return fs.existsSync(p)?sha256(fs.readFileSync(p)):null;})):null}));
@@ -137,13 +169,11 @@ function build(dir){
   for(const name of ['LICENSE','NOTICE'])put(path.join(packageRoot,'dist/QUALIFIED_INPUT_'+name),fs.readFileSync(path.join(old,name)));
  }
  if(dir.startsWith('pskernel-lean'))fs.cpSync(originalPackage(meta.name),path.join(packageRoot,'dist/implementation'),{recursive:true});
- if(dir==='stdlib'){
-  // Preserve the existing canonical standard library; copy, never translate.
-  fs.cpSync(path.join(root,'stdlib/ProofScript'),path.join(packageRoot,'src/ProofScript'),{recursive:true});
- }
  const sources=sourceFiles(packageRoot);
  put(path.join(packageRoot,'dist/source-manifest.json'),json({schema:'psc1-source-package/1',
   name:meta.name,version:meta.version,kind:meta.proofscript?.packageKind??'independent-kernel',
+  canonicalGrammar:meta.proofscript?.canonicalGrammar??(sources.length?'lean':null),
+  sourceOwnership:meta.proofscript?.sourceOwnership??{role:'independent-kernel-source'},
   files:sources,internalRuntimeApi:false,admissionAuthority:false}));
  put(path.join(packageRoot,'dist/sources.js'),readSourcesCode);
  put(path.join(packageRoot,'dist/sources.d.ts'),sourceTypes);
@@ -249,7 +279,7 @@ for(const dir of selected?[selected]:dirs)build(dir);
 const sourceRows=dirs.map(dir=>({directory:dir,name:read(path.join('packages',dir,'package.json')).name,files:sourceFiles(path.join('packages',dir))}));
 const sourceOwner=new Map(sourceRows.flatMap(row=>row.files.map(file=>[file.module,row.name])));
 put(path.join(out,'source-dependencies.json'),json(sourceRows.map(row=>({
- directory:row.directory,name:row.name,sourceModules:row.files.map(f=>f.module),
+ directory:row.directory,name:row.name,sourceModules:[...new Set(row.files.map(f=>f.module))],
  sourceDependencies:[...new Set(row.files.flatMap(f=>f.imports).map(name=>sourceOwner.get(name)).filter(name=>name&&name!==row.name))].sort(),
  externalOrInternalWorkspaceImports:[...new Set(row.files.flatMap(f=>f.imports).filter(name=>!sourceOwner.has(name)))].sort(),
  runtimeDependencies:read(path.join('packages',row.directory,'package.json')).dependencies??{},

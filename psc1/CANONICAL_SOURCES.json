@@ -1,0 +1,3731 @@
+{
+  "schema": "psc1-canonical-source-ownership/1",
+  "canonicalLanguage": "ps",
+  "preparedCommit": "0575b1a39a09c4253fd5691eec9fbc270fac6f5b",
+  "preparedRunId": "40646380001",
+  "ownerCount": 164,
+  "compilerOwnerCount": 151,
+  "libraryOwnerCount": 13,
+  "bootstrapFileCount": 182,
+  "canonicalScope": "selected portable compiler package modules and ordinary standard library",
+  "owners": [
+    {
+      "module": "Ps.Foundation.Source",
+      "path": "packages/foundation/src/Ps/Foundation/Source.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 156,
+      "sha256": "190c8c4e3dfc27ce344d5c6aea7fabdbc11f780cdf43771d15a7d0e2dc06ddd8",
+      "imports": [],
+      "bootstrap": {
+        "path": "packages/foundation/src/Ps/Foundation/Source.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 148,
+        "sha256": "33d898574406817537cc0c1a728e50eae2838a47178ad1fe4adba53d54d6c736",
+        "generatedProjectionSha256": "33d898574406817537cc0c1a728e50eae2838a47178ad1fe4adba53d54d6c736"
+      }
+    },
+    {
+      "module": "Ps.Foundation.List",
+      "path": "packages/foundation/src/Ps/Foundation/List.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 3281,
+      "sha256": "9f25f6d12b13de41723df9e5dbeae3aa644e2f917cb6aebc23db50c12b794e95",
+      "imports": [],
+      "bootstrap": {
+        "path": "packages/foundation/src/Ps/Foundation/List.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 3160,
+        "sha256": "fded5488ec5b23135838048541792d71c6f3aae0040a558a05c68c05d1e01f1f",
+        "generatedProjectionSha256": "088142961b0b9c996d16331aacd7114f904a7592dd7ecf88db752ccd96d8f350"
+      }
+    },
+    {
+      "module": "Ps.Syntax.Cursor",
+      "path": "packages/syntax/src/Ps/Syntax/Cursor.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 3025,
+      "sha256": "2e2f021f2d056b7f68752da0a293b53123664ee7b3420546dd171bb8bfb1c56d",
+      "imports": [
+        "Ps.Foundation.Source",
+        "Ps.Foundation.List"
+      ],
+      "bootstrap": {
+        "path": "packages/syntax/src/Ps/Syntax/Cursor.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 3143,
+        "sha256": "4ac4015847fb67d5232e700afa8ddc6f20ff343e25aef4a6a50cfac298830093",
+        "generatedProjectionSha256": "b9b6bfcf8799ffed7e6e6863d00796656ddfd135938f3f76715ec096afbf1759"
+      }
+    },
+    {
+      "module": "Ps.Syntax.Token",
+      "path": "packages/syntax/src/Ps/Syntax/Token.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 899,
+      "sha256": "ed8ce1e58371b2e831bfd0b9ae6bdf0be4a0ff45cb4f6a9e8b0dea18b05f1f13",
+      "imports": [
+        "Ps.Foundation.Source"
+      ],
+      "bootstrap": {
+        "path": "packages/syntax/src/Ps/Syntax/Token.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 959,
+        "sha256": "a690a4bc7c7138f732346155cd985bd5412d9e60e1d04d67c2fd3f46d42c77df",
+        "generatedProjectionSha256": "5530050a92169036d6f772562dbf1225671e14128cd9c2a68aa990d397e05ea5"
+      }
+    },
+    {
+      "module": "Ps.Syntax.Lexer",
+      "path": "packages/syntax/src/Ps/Syntax/Lexer.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 27739,
+      "sha256": "8ea636b2b1dd8b59f2472ecbc21fe1a6d43239144b8056146a54cd7c75a799cd",
+      "imports": [
+        "Ps.Syntax.Cursor",
+        "Ps.Syntax.Token"
+      ],
+      "bootstrap": {
+        "path": "packages/syntax/src/Ps/Syntax/Lexer.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 37257,
+        "sha256": "2591613079336c82a3054e07ad094bdbe6766e9742d666e0cee35a1cfd2ed57c",
+        "generatedProjectionSha256": "73c497255d63db05fc2d36598493a84c25bc97b6d76746209c0aa5d870523c08"
+      }
+    },
+    {
+      "module": "Ps.Foundation.Name",
+      "path": "packages/foundation/src/Ps/Foundation/Name.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 3579,
+      "sha256": "594312f307a7f553d8a92ffe00e73e8429887069171617b969c4f5da670bcecd",
+      "imports": [],
+      "bootstrap": {
+        "path": "packages/foundation/src/Ps/Foundation/Name.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 3987,
+        "sha256": "2e663eb4d3af85ef70cd3b0dec148b9303d0e994c7c3157d4f81494c9f999f15",
+        "generatedProjectionSha256": "640478ebcb110935371dc42c03dd071e085068eeadb89542858975c26f3333ef"
+      }
+    },
+    {
+      "module": "Ps.Syntax.Ast",
+      "path": "packages/syntax/src/Ps/Syntax/Ast.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 10612,
+      "sha256": "99882b18ea1c18ce068af0619f36883f7f6eacbf68f9516f07648f575ac89331",
+      "imports": [
+        "Ps.Foundation.Source",
+        "Ps.Foundation.Name"
+      ],
+      "bootstrap": {
+        "path": "packages/syntax/src/Ps/Syntax/Ast.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 10692,
+        "sha256": "ce9b4cc80d97502cae763c5709c4538148b6a8f6f4da6e958685e4dfb1358cbc",
+        "generatedProjectionSha256": "8c400526fc556d03939f6ef5502fca0a324885ba1742746ecfb8095fd1dbc304"
+      }
+    },
+    {
+      "module": "Ps.Syntax.ParserState",
+      "path": "packages/syntax/src/Ps/Syntax/ParserState.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 2891,
+      "sha256": "dfc4a8d4337ff30df2e79cf2d0c189477b4a0e37b5575d6d7ea1a264f555589d",
+      "imports": [
+        "Ps.Foundation.Name",
+        "Ps.Syntax.Token"
+      ],
+      "bootstrap": {
+        "path": "packages/syntax/src/Ps/Syntax/ParserState.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 2955,
+        "sha256": "f2118ed8b87f1778d307de671bbabf1d0b1481c53cb39917db06f59fbb01c299",
+        "generatedProjectionSha256": "5cd03f27959d8d4ce29ae30c966747f8d1b8bc9640c484aa820ec1459dda3792"
+      }
+    },
+    {
+      "module": "Ps.Syntax.ParseCommon",
+      "path": "packages/syntax/src/Ps/Syntax/ParseCommon.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 27154,
+      "sha256": "00e6ef7fb0a6f15c11b2be0383033e1af5257a3d1a39340ca131a162579878da",
+      "imports": [
+        "Ps.Syntax.Ast",
+        "Ps.Syntax.ParserState"
+      ],
+      "bootstrap": {
+        "path": "packages/syntax/src/Ps/Syntax/ParseCommon.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 32058,
+        "sha256": "5d6b2b5ce48dd4c8e762fcc493238d0980e576332a3c4998e2e2777e017c739a",
+        "generatedProjectionSha256": "82edf3370a43d8f9bc1fb4ec9c3a9b9bb6034ddfc455176e80796e66ffd73a6c"
+      }
+    },
+    {
+      "module": "Ps.Syntax.ParseBinding",
+      "path": "packages/syntax/src/Ps/Syntax/ParseBinding.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 7062,
+      "sha256": "79f8fa74f8d19190a6078362e34cb0f7921cf47b4a70fea41af8a9ea59640247",
+      "imports": [
+        "Ps.Syntax.ParseCommon"
+      ],
+      "bootstrap": {
+        "path": "packages/syntax/src/Ps/Syntax/ParseBinding.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 8307,
+        "sha256": "67b77b0c50e506e4db8b44bdcb4fc3d57c7f11427944d64daaed5162688a1f37",
+        "generatedProjectionSha256": "f6d7463da38f56a35540253c15f1128261905fa80b7518a5301bd3463e62d0bc"
+      }
+    },
+    {
+      "module": "Ps.Syntax.ParseDo",
+      "path": "packages/syntax/src/Ps/Syntax/ParseDo.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 40797,
+      "sha256": "de2eec16edd81071cc76823eb419d400377f281fedd0471275d07ca2f27cd750",
+      "imports": [
+        "Ps.Syntax.ParseCommon",
+        "Ps.Syntax.ParseBinding"
+      ],
+      "bootstrap": {
+        "path": "packages/syntax/src/Ps/Syntax/ParseDo.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 46556,
+        "sha256": "4960355454f3d978a00422bb842521d7359fadbb48a85c2ba237418361ed0aa1",
+        "generatedProjectionSha256": "725de30797a09aa93dee297065a20cba44c973a07400a808f6f8d19b3333697a"
+      }
+    },
+    {
+      "module": "Ps.Syntax.ParseData",
+      "path": "packages/syntax/src/Ps/Syntax/ParseData.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 9199,
+      "sha256": "28ab760ad1ff26db1d3522b788f6abef607d6088bbe2ba1d88c2bda9efc70f87",
+      "imports": [
+        "Ps.Syntax.ParseCommon"
+      ],
+      "bootstrap": {
+        "path": "packages/syntax/src/Ps/Syntax/ParseData.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 10172,
+        "sha256": "d093909fa66c9bad5ac237233cf5b021310f066adb9f6019b83dfc9a2f6b556f",
+        "generatedProjectionSha256": "82cc22896aa6f5aefdb03639ac343ff421fcd1c6a8a5503aa975c9471c5e2204"
+      }
+    },
+    {
+      "module": "Ps.Syntax.Operators",
+      "path": "packages/syntax/src/Ps/Syntax/Operators.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 4996,
+      "sha256": "cada90a8e563ab5d1f6cef86a4a06dc1688e593addaf30dc285ee314bb9ca447",
+      "imports": [
+        "Ps.Syntax.ParseCommon"
+      ],
+      "bootstrap": {
+        "path": "packages/syntax/src/Ps/Syntax/Operators.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 5448,
+        "sha256": "04cd2e5a27ec87bd227f6263622c01dd4ac95ce39420848f123bc1cce1f330c8",
+        "generatedProjectionSha256": "7d0ee252331ef4f46e85ab1088de9eb9e10865e8fdf5723128e02e166bda3fe6"
+      }
+    },
+    {
+      "module": "Ps.Syntax.ParseLean",
+      "path": "packages/syntax/src/Ps/Syntax/ParseLean.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 73654,
+      "sha256": "d623ff5ff60c5b03ae8e373c9dbdea189055935d7eb240ab189d50085bb4e4b4",
+      "imports": [
+        "Ps.Syntax.Lexer",
+        "Ps.Syntax.ParseCommon",
+        "Ps.Syntax.ParseBinding",
+        "Ps.Syntax.ParseDo",
+        "Ps.Syntax.ParseData",
+        "Ps.Syntax.Operators"
+      ],
+      "bootstrap": {
+        "path": "packages/syntax/src/Ps/Syntax/ParseLean.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 100595,
+        "sha256": "24892cb5aa8aa00034289277a3efcaf6476b6ce5b806167828b803b2edb4d0b0",
+        "generatedProjectionSha256": "1942c2d2f98831ea257f75593283c90c10f4b0660e84f7eb4c56678bd875e3eb"
+      }
+    },
+    {
+      "module": "Ps.Syntax.ParseProofScript",
+      "path": "packages/syntax/src/Ps/Syntax/ParseProofScript.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 61005,
+      "sha256": "1520c624d24c4f287b99775da0aabd479becece2b06bddae5470527f06c1bf93",
+      "imports": [
+        "Ps.Syntax.Lexer",
+        "Ps.Syntax.ParseCommon",
+        "Ps.Syntax.ParseBinding",
+        "Ps.Syntax.ParseDo",
+        "Ps.Syntax.ParseData",
+        "Ps.Syntax.Operators"
+      ],
+      "bootstrap": {
+        "path": "packages/syntax/src/Ps/Syntax/ParseProofScript.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 77400,
+        "sha256": "2c3720962ae9567258ac1685676450d8e7996052fa9379140db4356137bb7834",
+        "generatedProjectionSha256": "138b0e2325ab6dc6a0f7aca006bff72387af9c55b69b6724491cae0363df0ead"
+      }
+    },
+    {
+      "module": "Ps.Syntax.PrintCommon",
+      "path": "packages/syntax/src/Ps/Syntax/PrintCommon.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 16782,
+      "sha256": "1226625626a2c3f2b13a3355a0af6f8eb138c96d3941608d1c499437531dd71d",
+      "imports": [
+        "Ps.Syntax.Ast",
+        "Ps.Foundation.Name"
+      ],
+      "bootstrap": {
+        "path": "packages/syntax/src/Ps/Syntax/PrintCommon.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 17164,
+        "sha256": "b061d70495dcd9d76cb0873664d2ac0c8c43c182a75304f2dfd4cbe2150715cb",
+        "generatedProjectionSha256": "b847075f83540242d8e22d803fb27213e6179262ae09d467b14c903fcc411e46"
+      }
+    },
+    {
+      "module": "Ps.Syntax.PrintLean",
+      "path": "packages/syntax/src/Ps/Syntax/PrintLean.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 26262,
+      "sha256": "6bf32d051166a34af6ed1e0feb26478255550078975166f5ddaba6afa964a821",
+      "imports": [
+        "Ps.Syntax.PrintCommon"
+      ],
+      "bootstrap": {
+        "path": "packages/syntax/src/Ps/Syntax/PrintLean.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 33606,
+        "sha256": "bb5bf837a6cc58401c431719a3ff9f4a271d82d77278dd66e75fd5837ca7d747",
+        "generatedProjectionSha256": "95c87116ae43bae845869a10b8c8824a959d382039cc80772ffcb89ed9455273"
+      }
+    },
+    {
+      "module": "Ps.Syntax.PrintProofScript",
+      "path": "packages/syntax/src/Ps/Syntax/PrintProofScript.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 27888,
+      "sha256": "6b9c6edc04ad5e40199ea60cdbe9250399db090c70a8be00f129de1531b05621",
+      "imports": [
+        "Ps.Syntax.PrintCommon"
+      ],
+      "bootstrap": {
+        "path": "packages/syntax/src/Ps/Syntax/PrintProofScript.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 35158,
+        "sha256": "ee86ae95052d9575374587230a215023b98f4a1484e7f6b1ccef60429747e49b",
+        "generatedProjectionSha256": "f33b417dfcd0ef36e944813e5ca4269ee8db7e9d3803bf5f629339cb1eed994a"
+      }
+    },
+    {
+      "module": "Ps.Syntax.Translate",
+      "path": "packages/syntax/src/Ps/Syntax/Translate.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 1939,
+      "sha256": "0ec2e714edc02a69045114124d25e014d155c30f8d7644e1c30129355573120d",
+      "imports": [
+        "Ps.Syntax.ParseLean",
+        "Ps.Syntax.ParseProofScript",
+        "Ps.Syntax.PrintLean",
+        "Ps.Syntax.PrintProofScript"
+      ],
+      "bootstrap": {
+        "path": "packages/syntax/src/Ps/Syntax/Translate.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 2074,
+        "sha256": "c73ef5027b5108bc81b555fc4fcf2f0547e32a7a03aa8db0f136b155099a0c9c",
+        "generatedProjectionSha256": "9c67cc41dcb4faa0f5f0170a8cf3cc56118a477b729cb062bb532e150ef786ba"
+      }
+    },
+    {
+      "module": "Ps.Foundation.Text",
+      "path": "packages/foundation/src/Ps/Foundation/Text.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 2127,
+      "sha256": "39751af9f50465b0f464a29436e1f3fd8294d475664bde514eb91c4ed2f41df1",
+      "imports": [],
+      "bootstrap": {
+        "path": "packages/foundation/src/Ps/Foundation/Text.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 2173,
+        "sha256": "06acc3ec85b1c61926958e8d90e235f6eab206914a291b3d5ceeeee6229ee6b0",
+        "generatedProjectionSha256": "d4546cb8afb8b8ee8aec19fb20c01f2b21e4c8f5ea3bb30882db1c1b3cf2bf86"
+      }
+    },
+    {
+      "module": "Ps.Bridge.Json",
+      "path": "packages/bridge/src/Ps/Bridge/Json.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 31843,
+      "sha256": "253dd89fb9f2abd42cede99aa72cfeb47e1b1698a6b11cde54d6fca24e8c1425",
+      "imports": [
+        "Ps.Foundation.Text"
+      ],
+      "bootstrap": {
+        "path": "packages/bridge/src/Ps/Bridge/Json.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 37731,
+        "sha256": "b593490086045c235d59fda060f9000d50f415769d103998a6cf5234976f02bb",
+        "generatedProjectionSha256": "3436f5c76e19609e5442f5c18a66fa24a22e0ba511f7ce73be0511c8b9792d92"
+      }
+    },
+    {
+      "module": "Ps.Core.Level",
+      "path": "packages/core/src/Ps/Core/Level.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 281,
+      "sha256": "da652d658d9e2560b9b2a297508ff4169129c04cfa88b5aa0393b31c935470fe",
+      "imports": [
+        "Ps.Foundation.Name"
+      ],
+      "bootstrap": {
+        "path": "packages/core/src/Ps/Core/Level.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 286,
+        "sha256": "453fcd9dd535f97e27daedb6d319ac0337eee12679aa0dc9ec2ac0ec1dd35af4",
+        "generatedProjectionSha256": "e33fd288bc3f8e6ee828fdff9c556a1424f143cd9e7a88302a0cc261e1a02b96"
+      }
+    },
+    {
+      "module": "Ps.Core.Expr",
+      "path": "packages/core/src/Ps/Core/Expr.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 740,
+      "sha256": "636e9cd00ef2c3ca1aa5e2dae49ba5576fd4b8a6f15d66439649cd6670aa7783",
+      "imports": [
+        "Ps.Foundation.Name",
+        "Ps.Core.Level"
+      ],
+      "bootstrap": {
+        "path": "packages/core/src/Ps/Core/Expr.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 753,
+        "sha256": "51bdffd893ab4148432c62e2af918a0798999fcab20cf2b3c633dddbb0d880a6",
+        "generatedProjectionSha256": "51bdffd893ab4148432c62e2af918a0798999fcab20cf2b3c633dddbb0d880a6"
+      }
+    },
+    {
+      "module": "Ps.Core.Declaration",
+      "path": "packages/core/src/Ps/Core/Declaration.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 1222,
+      "sha256": "336d770fcc3adaa486964c5fa652ced8073ff9ef7422521daf83a18dc81b0216",
+      "imports": [
+        "Ps.Core.Expr"
+      ],
+      "bootstrap": {
+        "path": "packages/core/src/Ps/Core/Declaration.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 1349,
+        "sha256": "1e08932d0251abc18ee8f3b1175fbbe5acd5a1d1db158204ba4dfa285609b3c6",
+        "generatedProjectionSha256": "272039be5885678b552fb9264f3863bab45addab0f2dc81d5c9d95ede00324ab"
+      }
+    },
+    {
+      "module": "Ps.Core.Abstract",
+      "path": "packages/core/src/Ps/Core/Abstract.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 2304,
+      "sha256": "2dadb01b12bdc9c1ceb1949cfedfa0cdffa9b65e2013f96e3666f122bea0d5b9",
+      "imports": [
+        "Ps.Core.Expr"
+      ],
+      "bootstrap": {
+        "path": "packages/core/src/Ps/Core/Abstract.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 2657,
+        "sha256": "40abf6fef51f7d3e2bffae82a30faed6aa11b89bda9479c43c7db583c76de829",
+        "generatedProjectionSha256": "f0cf33771e055f7aa7ef9ba4ad1512331d81a747c89d96ae36176e5f71fb0487"
+      }
+    },
+    {
+      "module": "Ps.Core.Subst",
+      "path": "packages/core/src/Ps/Core/Subst.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 4666,
+      "sha256": "64fd6b12fed98bf4e3d755cd395dcb4be8ff04af2febce62834e2922a848d05a",
+      "imports": [
+        "Ps.Core.Expr"
+      ],
+      "bootstrap": {
+        "path": "packages/core/src/Ps/Core/Subst.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 5375,
+        "sha256": "092d57ccec3eeab60e3a279e9992b4786abf47bf7f079736ca893eb26deee0e4",
+        "generatedProjectionSha256": "8fd424331de6a5bfd7a4d882e558cb00d0af352f8e29584a31edfe9ddc27ea2c"
+      }
+    },
+    {
+      "module": "Ps.Core.Equality",
+      "path": "packages/core/src/Ps/Core/Equality.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 5361,
+      "sha256": "5edd70ca0a340a73a39e296ea24f053532cb5faa0c478462fd661b8f5d4e56be",
+      "imports": [
+        "Ps.Core.Expr"
+      ],
+      "bootstrap": {
+        "path": "packages/core/src/Ps/Core/Equality.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 6529,
+        "sha256": "6738050d09abb42607c43a70668f34b909b4ccd3153fe62fbde1a345a4b68b6f",
+        "generatedProjectionSha256": "b40c44cbcfa13009e1131b543a4f1c680344ad1cdfa9d89687c6495bd8df68e5"
+      }
+    },
+    {
+      "module": "Ps.Environment.Basic",
+      "path": "packages/environment/src/Ps/Environment/Basic.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 9233,
+      "sha256": "791633a0e314288fb5bb95ae0cb535d96d2520c9e625e37fe2a8a196563b19d9",
+      "imports": [
+        "Ps.Foundation.Name",
+        "Ps.Core.Declaration"
+      ],
+      "bootstrap": {
+        "path": "packages/environment/src/Ps/Environment/Basic.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 9108,
+        "sha256": "5ccb3e39b755baa43a554b7549870b864d4f874c619a92af7e6fcfad8da88ce5",
+        "generatedProjectionSha256": "bd78c94d85d65e6e663ad8f13bc8d8a2ed7f3ad9a3c3c262ea8a25057b759eee"
+      }
+    },
+    {
+      "module": "Ps.Bridge.CheckedAdmissions",
+      "path": "packages/bridge/src/Ps/Bridge/CheckedAdmissions.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 56965,
+      "sha256": "bbc4d8cc27990a024feabea58747b879c839faa2d687dc0b05ad8a69e9b54d32",
+      "imports": [
+        "Ps.Bridge.Json",
+        "Ps.Core.Declaration",
+        "Ps.Core.Abstract",
+        "Ps.Core.Subst",
+        "Ps.Core.Equality",
+        "Ps.Foundation.List",
+        "Ps.Environment.Basic"
+      ],
+      "bootstrap": {
+        "path": "packages/bridge/src/Ps/Bridge/CheckedAdmissions.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 58953,
+        "sha256": "404f933d8a6793b8a622912d1919b366e5d5573bae89d9b4745f69e78b11cf88",
+        "generatedProjectionSha256": "38b743fc5e88d342f3ebc4b452f4d6ccaec2ae1e0510c3c2c97500d4974753fb"
+      }
+    },
+    {
+      "module": "Ps.Core.Builtin",
+      "path": "packages/core/src/Ps/Core/Builtin.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 6369,
+      "sha256": "11fd7bbb687a20c2f889920a14c94915c75fc2564de048c743b66297c7c0a64b",
+      "imports": [
+        "Ps.Foundation.Name"
+      ],
+      "bootstrap": {
+        "path": "packages/core/src/Ps/Core/Builtin.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 6370,
+        "sha256": "0dcdf8d8b71b340bdcf090377036a2806564f7a73b6bd97ad501f0c9fabc841d",
+        "generatedProjectionSha256": "c04ac546eb80c160425776a4575804b85f37f8fc95bef15813c778c42dcb25ff"
+      }
+    },
+    {
+      "module": "Ps.Environment.Prelude",
+      "path": "packages/environment/src/Ps/Environment/Prelude.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 23722,
+      "sha256": "9130f0d543a174059d45b2a2ad6a0b6769187a8395cccefda4b22d41421f56e7",
+      "imports": [
+        "Ps.Core.Builtin",
+        "Ps.Environment.Basic"
+      ],
+      "bootstrap": {
+        "path": "packages/environment/src/Ps/Environment/Prelude.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 24854,
+        "sha256": "36635f57451dcf2409c5658ee698bf989c0b8e4a86079de601e0387263d13ef4",
+        "generatedProjectionSha256": "cd362cb7c76a3af24f5d59301c31fe7e67fd02c9c16c0ae7b2e4ef21cbd6c4bb"
+      }
+    },
+    {
+      "module": "Ps.Environment.SelfHostPrelude",
+      "path": "packages/environment/src/Ps/Environment/SelfHostPrelude.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 14608,
+      "sha256": "9579d8548d134c3ef10a97a49195039a21b9dc786b7538689783f32d4949eece",
+      "imports": [
+        "Ps.Environment.Prelude"
+      ],
+      "bootstrap": {
+        "path": "packages/environment/src/Ps/Environment/SelfHostPrelude.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 18920,
+        "sha256": "ba884faa533e58f9a45032392664d194ce31155232c94fa72f290ddea64dab8d",
+        "generatedProjectionSha256": "ae67876cdb1719c554f36611f52db1652a1dcbd4d3cc415e10786a34475cda69"
+      }
+    },
+    {
+      "module": "Ps.Environment.Control",
+      "path": "packages/environment/src/Ps/Environment/Control.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 14152,
+      "sha256": "0e8c80607df8524bc30ec53b1a9c4cdd26909d08df0cb7d1edbce46820dfefed",
+      "imports": [
+        "Ps.Environment.SelfHostPrelude",
+        "Ps.Core.Abstract",
+        "Ps.Core.Subst"
+      ],
+      "bootstrap": {
+        "path": "packages/environment/src/Ps/Environment/Control.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 11018,
+        "sha256": "11d2fa5087f4e851297d9e9b73c22ac7f9001c66be9b276c05ba37e0774c7b50",
+        "generatedProjectionSha256": "003401487470f25d349931749633ddf998b344f7b5ec9fdfb9bc4c4f53e2a64a"
+      }
+    },
+    {
+      "module": "Ps.Environment.Order",
+      "path": "packages/environment/src/Ps/Environment/Order.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 40043,
+      "sha256": "5efacfa352bf7a7e3815d3705fdf457bef435d360b9576815821e1673e58fbf8",
+      "imports": [
+        "Ps.Environment.Control"
+      ],
+      "bootstrap": {
+        "path": "packages/environment/src/Ps/Environment/Order.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 25836,
+        "sha256": "4fe02aab3c3d36ca3248e324516d3ed848bcb94806f9b7e22138d4a12a625a83",
+        "generatedProjectionSha256": "bb4ee335ce374e34ff47abe51223a476bf8ffb87d44ba254ea75d20c5e209c2a"
+      }
+    },
+    {
+      "module": "Ps.Environment.SelfHostProd",
+      "path": "packages/environment/src/Ps/Environment/SelfHostProd.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 3854,
+      "sha256": "017c9838c5b2e217a00a3c8c4676daf2d006cbc52ceddfb5f819c3a86d1cfb21",
+      "imports": [
+        "Ps.Environment.SelfHostPrelude",
+        "Ps.Environment.Order",
+        "Ps.Foundation.List"
+      ],
+      "bootstrap": {
+        "path": "packages/environment/src/Ps/Environment/SelfHostProd.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 4785,
+        "sha256": "f5c05b09463f348748c91e6f8cbf4db17058d009a4b2ad8619fbebde2928f390",
+        "generatedProjectionSha256": "aee9cbe036d0675f82df2628b39f619d59fb5eed8142b1940b7f9c44f3f1d8f3"
+      }
+    },
+    {
+      "module": "Ps.Environment.LocalContext",
+      "path": "packages/environment/src/Ps/Environment/LocalContext.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 2746,
+      "sha256": "6bcbdb43698907b9bdf414071a09f57e108c1a6197f4a236ebe529c55ba4086b",
+      "imports": [
+        "Ps.Foundation.Name",
+        "Ps.Core.Expr"
+      ],
+      "bootstrap": {
+        "path": "packages/environment/src/Ps/Environment/LocalContext.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 2690,
+        "sha256": "06c5a03d73c26083ec313017120bb509df33e80e5c51d887ffca13942382bdb9",
+        "generatedProjectionSha256": "53c25a627c0d2cd4d367d19c6e45005400a819f145f9a40b1754caae06bd7db5"
+      }
+    },
+    {
+      "module": "Ps.Environment.Resolve",
+      "path": "packages/environment/src/Ps/Environment/Resolve.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 5004,
+      "sha256": "4a77fb1380d7f55e6b2e2d801b1bde6b9e92ccd155c941a68d4d3ba1b3d0ea91",
+      "imports": [
+        "Ps.Environment.Basic",
+        "Ps.Environment.LocalContext"
+      ],
+      "bootstrap": {
+        "path": "packages/environment/src/Ps/Environment/Resolve.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 5080,
+        "sha256": "96be5fdde51ca7711a7f40a4a9510edb72192e53e0f5814c84e0864e57d161b7",
+        "generatedProjectionSha256": "77d1b751e1e5941c72b70f334b6fa65602124836fd8da75b658b93b59c95c1dc"
+      }
+    },
+    {
+      "module": "Ps.Core.LevelSubst",
+      "path": "packages/core/src/Ps/Core/LevelSubst.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 3356,
+      "sha256": "01bdc60ac450b54f86eba0f9520057c7e4cd6219734b8c148288b18da7212b97",
+      "imports": [
+        "Ps.Core.Expr"
+      ],
+      "bootstrap": {
+        "path": "packages/core/src/Ps/Core/LevelSubst.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 3613,
+        "sha256": "1393726ff7b45bb3adfcfb5e12ab79c3e344803e44777c9c67c4560af5373698",
+        "generatedProjectionSha256": "7f852925a0bbae2e2817d7503b0dcf352cc39a1392ffabaea351c749ff179d5d"
+      }
+    },
+    {
+      "module": "Ps.Meta.LevelContext",
+      "path": "packages/meta/src/Ps/Meta/LevelContext.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 8049,
+      "sha256": "96bd6a16bc256896c95d14cbf4c9e9be8f0234befe9bb38c10a24babbc298b18",
+      "imports": [
+        "Ps.Core.Equality",
+        "Ps.Core.Expr",
+        "Ps.Core.Level"
+      ],
+      "bootstrap": {
+        "path": "packages/meta/src/Ps/Meta/LevelContext.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 9033,
+        "sha256": "6f21ca62d389eff74f8151b1e00f0c6e0f3312bc9461a9f6f2e78975c0ce47dc",
+        "generatedProjectionSha256": "8155348aa1a504655a55e9039b877eff5ae9a5d885f5d74d11386fcc0d4f5aaf"
+      }
+    },
+    {
+      "module": "Ps.Meta.Context",
+      "path": "packages/meta/src/Ps/Meta/Context.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 8699,
+      "sha256": "fbaad34aba192f70a095460c9079b4735bba1186888207c366dd00ca2a1fd0c0",
+      "imports": [
+        "Ps.Core.Expr",
+        "Ps.Environment.LocalContext",
+        "Ps.Meta.LevelContext"
+      ],
+      "bootstrap": {
+        "path": "packages/meta/src/Ps/Meta/Context.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 9427,
+        "sha256": "19390da2795f90ebda0864bd89b2e398beb917c259d395393630bea5291355b7",
+        "generatedProjectionSha256": "7bedc29c0d75f45dddaa982e4803c60471bc86a326a65a0b3fdd438aa1c90a01"
+      }
+    },
+    {
+      "module": "Ps.Meta.Reduce",
+      "path": "packages/meta/src/Ps/Meta/Reduce.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 5185,
+      "sha256": "93308a83711fa18281ce2c0bedd8ee4f89c6a982e1c19b7faa5c397b2911ab89",
+      "imports": [
+        "Ps.Core.Equality",
+        "Ps.Core.Subst",
+        "Ps.Core.LevelSubst",
+        "Ps.Environment.Basic",
+        "Ps.Environment.LocalContext",
+        "Ps.Meta.Context"
+      ],
+      "bootstrap": {
+        "path": "packages/meta/src/Ps/Meta/Reduce.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 6430,
+        "sha256": "4f8e6180f0e0a7a046fe070ec21fabed73636815208244a08cb64b67e86d4f6e",
+        "generatedProjectionSha256": "57d2bc0e7ab19a41a770d12ae8abda2d3c716264dd8e3242205650d267565545"
+      }
+    },
+    {
+      "module": "Ps.Meta.Infer",
+      "path": "packages/meta/src/Ps/Meta/Infer.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 15545,
+      "sha256": "48af790c129208d37abd58670b5b96fe5b9be419487c4b21b1f04deec1b0ea87",
+      "imports": [
+        "Ps.Core.Abstract",
+        "Ps.Core.Builtin",
+        "Ps.Core.LevelSubst",
+        "Ps.Environment.Basic",
+        "Ps.Environment.LocalContext",
+        "Ps.Meta.Context",
+        "Ps.Meta.Reduce"
+      ],
+      "bootstrap": {
+        "path": "packages/meta/src/Ps/Meta/Infer.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 21965,
+        "sha256": "2f170a38e591b42ad3a7493c4738f313a76b02085fbc0f9d71a9c01f7f956609",
+        "generatedProjectionSha256": "a9bcfa8cf57bd3f2cff54e6460f84800e131a4a36ef57df4f01c95680c18d336"
+      }
+    },
+    {
+      "module": "Ps.Environment.Instances",
+      "path": "packages/environment/src/Ps/Environment/Instances.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 1569,
+      "sha256": "b51036e807a34ed664dad80472ba6990c3e64974289901540cb7060031020de8",
+      "imports": [
+        "Ps.Core.Expr",
+        "Ps.Environment.LocalContext"
+      ],
+      "bootstrap": {
+        "path": "packages/environment/src/Ps/Environment/Instances.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 1616,
+        "sha256": "63a0fabc0e88e90b647074379e62d4ff2ebd7252676e3703ed06a9cfaefad2bc",
+        "generatedProjectionSha256": "457f7dca91407715cd131797be6f232f5174dac519cf5c8ddbd1aa6b440103d3"
+      }
+    },
+    {
+      "module": "Ps.Meta.Unify",
+      "path": "packages/meta/src/Ps/Meta/Unify.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 8106,
+      "sha256": "0cbc4e40e0a8b846554843fec54ee426a63416b4c2b7de6f44425d477662ead6",
+      "imports": [
+        "Ps.Core.Equality",
+        "Ps.Core.Subst",
+        "Ps.Environment.Basic",
+        "Ps.Environment.LocalContext",
+        "Ps.Meta.Context",
+        "Ps.Meta.Reduce"
+      ],
+      "bootstrap": {
+        "path": "packages/meta/src/Ps/Meta/Unify.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 11760,
+        "sha256": "1580c8126e6d91c80d298a565ad93ffe599eb91de1c91b42d5eaada41980b400",
+        "generatedProjectionSha256": "f7eba8f43c70ee34886617c7e1c295961ac1f0318e11be276550d65225f1b35f"
+      }
+    },
+    {
+      "module": "Ps.Meta.SynthInstance",
+      "path": "packages/meta/src/Ps/Meta/SynthInstance.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 10104,
+      "sha256": "9ff823489a2f63215c2148ce0a1ab9daecf94ba665c8912c6618f1d1637ef3ad",
+      "imports": [
+        "Ps.Core.Subst",
+        "Ps.Environment.Basic",
+        "Ps.Environment.Instances",
+        "Ps.Environment.LocalContext",
+        "Ps.Meta.Context",
+        "Ps.Meta.Reduce",
+        "Ps.Meta.Unify"
+      ],
+      "bootstrap": {
+        "path": "packages/meta/src/Ps/Meta/SynthInstance.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 12794,
+        "sha256": "ea73668c788e16d4fb65b41b1b97ae58dc585027234d5185514e8194baf166b6",
+        "generatedProjectionSha256": "d70b6f649b4cd8eb005e9aeddd3223d691c8f570fd0634576b5699680644c0ad"
+      }
+    },
+    {
+      "module": "Ps.Elab.SourceTrace",
+      "path": "packages/elab/src/Ps/Elab/SourceTrace.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 5746,
+      "sha256": "e274ffebd72b8eab65f959ed7d613d41cb7123b9128ddb0c66dc407e37364840",
+      "imports": [
+        "Ps.Foundation.Source",
+        "Ps.Environment.LocalContext"
+      ],
+      "bootstrap": {
+        "path": "packages/elab/src/Ps/Elab/SourceTrace.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 5627,
+        "sha256": "1933b7a8e1e7c8b7986e28e5827a71207518ed4c4a7176569ee0e4a785d1793b",
+        "generatedProjectionSha256": "20d4fce995d6349a5e348c28de3d8c8b612e8666f2d81d707483703a9285b7ae"
+      }
+    },
+    {
+      "module": "Ps.Elab.Context",
+      "path": "packages/elab/src/Ps/Elab/Context.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 6689,
+      "sha256": "6addc5b0f17f24ca4308bf78921731965b7a295931e0a7459428f66112208887",
+      "imports": [
+        "Ps.Environment.Basic",
+        "Ps.Environment.Instances",
+        "Ps.Environment.LocalContext",
+        "Ps.Meta.Context",
+        "Ps.Elab.SourceTrace"
+      ],
+      "bootstrap": {
+        "path": "packages/elab/src/Ps/Elab/Context.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 6906,
+        "sha256": "1662a779d6202792af1682ba66f26cbf4a85870fb226dd5dcfee2398551038c8",
+        "generatedProjectionSha256": "29e225edf0c93fb9862663e980f55d00f167035faf346a0f1aefcb030a48610d"
+      }
+    },
+    {
+      "module": "Ps.Elab.Literal",
+      "path": "packages/elab/src/Ps/Elab/Literal.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 8835,
+      "sha256": "7aa94a1b01ac24638548c4bd35f599e2e9d3f544035c58261fd426e6b752d71d",
+      "imports": [
+        "Ps.Syntax.Cursor"
+      ],
+      "bootstrap": {
+        "path": "packages/elab/src/Ps/Elab/Literal.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 10490,
+        "sha256": "0369cd23303d3133b92b40aaf7ece65df86e864596adb85556d994e846258b71",
+        "generatedProjectionSha256": "b31c375d75330422e03672bae5eea8bcb7057167727403ae7af9db656d4f5356"
+      }
+    },
+    {
+      "module": "Ps.Elab.Basic",
+      "path": "packages/elab/src/Ps/Elab/Basic.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 7506,
+      "sha256": "654b3f7c3bb801b6467f3188508cafddb26490161fc5168afe2616dcfaac51a8",
+      "imports": [
+        "Ps.Core.Abstract",
+        "Ps.Core.Subst",
+        "Ps.Meta.Infer",
+        "Ps.Meta.Unify",
+        "Ps.Syntax.Ast",
+        "Ps.Elab.Context"
+      ],
+      "bootstrap": {
+        "path": "packages/elab/src/Ps/Elab/Basic.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 8622,
+        "sha256": "d2cc47b7202d6361c94a0ad891041e1e84009c2b8ef02f6b8fdaee82d9d5207a",
+        "generatedProjectionSha256": "f7074a58e852237ec3661fb00285a002f35536de158b40802f9c71d17da9f221"
+      }
+    },
+    {
+      "module": "Ps.Elab.DoBase",
+      "path": "packages/elab/src/Ps/Elab/DoBase.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 24193,
+      "sha256": "9430ff410ce85f46ee2df7bbe7cfdd4724bb470b8dc5d955a8fc5c2ae698dde7",
+      "imports": [
+        "Ps.Environment.SelfHostPrelude",
+        "Ps.Elab.Basic",
+        "Ps.Environment.Resolve"
+      ],
+      "bootstrap": {
+        "path": "packages/elab/src/Ps/Elab/DoBase.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 25026,
+        "sha256": "94568998b895e5c43cf38566581adecc035d12e1866b57b0f1951ee073a950b0",
+        "generatedProjectionSha256": "e77d4b8e14547994f8fefaf045c08c07698c0393bc4889067069b1fc9fe16a92"
+      }
+    },
+    {
+      "module": "Ps.Elab.DoFor",
+      "path": "packages/elab/src/Ps/Elab/DoFor.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 13514,
+      "sha256": "25701750efd209ea354984d331d8355370a7dc52b9982c773493f1270a0ba83c",
+      "imports": [
+        "Ps.Elab.DoBase",
+        "Ps.Environment.Control"
+      ],
+      "bootstrap": {
+        "path": "packages/elab/src/Ps/Elab/DoFor.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 14138,
+        "sha256": "d71398c501c2b98e0fe742635916921a3ff5ce846d119cb5afa645be1d73727b",
+        "generatedProjectionSha256": "9b9d49ace847d6ca544c565f9fc19d87bf9282e2b8feac0c834d60bd1d8e76a5"
+      }
+    },
+    {
+      "module": "Ps.Elab.DoLoop",
+      "path": "packages/elab/src/Ps/Elab/DoLoop.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 3591,
+      "sha256": "0510eeb0338edd9a776b0d1c78c5d562c2bf72006b11c26ba025e8361513f12f",
+      "imports": [
+        "Ps.Core.Declaration",
+        "Ps.Core.Builtin",
+        "Ps.Elab.Basic"
+      ],
+      "bootstrap": {
+        "path": "packages/elab/src/Ps/Elab/DoLoop.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 3166,
+        "sha256": "120f5224fcc7c81c39a724a6da29fce930537803a5f4f61f8dfe8d4b45a74a76",
+        "generatedProjectionSha256": "c25b1b272137d20dcce7ed6c00a3421c77276c6ec40296b54415c6689fe82a29"
+      }
+    },
+    {
+      "module": "Ps.Elab.DoWhile",
+      "path": "packages/elab/src/Ps/Elab/DoWhile.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 10140,
+      "sha256": "453e425c59f30cfa743f76b96e9aafba2f1ab8f3c3269c07f72d0a78bce8e56d",
+      "imports": [
+        "Ps.Elab.DoFor",
+        "Ps.Elab.DoLoop"
+      ],
+      "bootstrap": {
+        "path": "packages/elab/src/Ps/Elab/DoWhile.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 11186,
+        "sha256": "2effeec716415095796793f365ddd7e5bd23db262785b06438de084ba5e5c940",
+        "generatedProjectionSha256": "c9b1f11ec185e041145a9729a92819f42805f1e64ce322ee760f85dfac50a96b"
+      }
+    },
+    {
+      "module": "Ps.Elab.DoTry",
+      "path": "packages/elab/src/Ps/Elab/DoTry.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 10505,
+      "sha256": "228bc2accc6e1fb69981e4015c90e22eba554943b5d57a30ebeecdcf9c803f7f",
+      "imports": [
+        "Ps.Elab.DoWhile"
+      ],
+      "bootstrap": {
+        "path": "packages/elab/src/Ps/Elab/DoTry.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 11481,
+        "sha256": "a2ca0a01b377ae9b11472ae680946bbc624d26f924d09223fd2e918ca30c6e54",
+        "generatedProjectionSha256": "73b5b46d3327145d566f54f058cd9b81fceed95b423438a40619991664842a4b"
+      }
+    },
+    {
+      "module": "Ps.Elab.Data",
+      "path": "packages/elab/src/Ps/Elab/Data.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 14173,
+      "sha256": "39921cc481e42e64db308fdc58a0f097fa918db72646236184a2dc6ab3851891",
+      "imports": [
+        "Ps.Elab.Basic",
+        "Ps.Core.Abstract",
+        "Ps.Core.Subst",
+        "Ps.Environment.SelfHostProd"
+      ],
+      "bootstrap": {
+        "path": "packages/elab/src/Ps/Elab/Data.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 14596,
+        "sha256": "c293579613afc6442e8c1d9ea529e5327a3d6953e11f55d6b60049b7c3fb352e",
+        "generatedProjectionSha256": "83d7827c3c7018edf7c3a0e82ddbc78f77e154d3463ff930a4967f206cf86d1b"
+      }
+    },
+    {
+      "module": "Ps.Elab.Do",
+      "path": "packages/elab/src/Ps/Elab/Do.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 10731,
+      "sha256": "c8709c65cc3672ddd73a7527acb48dda4ef2d64c564e029810387ca938e69003",
+      "imports": [
+        "Ps.Elab.DoTry",
+        "Ps.Elab.Data"
+      ],
+      "bootstrap": {
+        "path": "packages/elab/src/Ps/Elab/Do.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 12623,
+        "sha256": "89ffd485d37f297b3a5ac0eb48613d4e792b0248aab05c498b419d1f44d0cb31",
+        "generatedProjectionSha256": "95650655778c57205f55e2be5fffe5d5ea0445dc4c770f81be97c1f3992b6581"
+      }
+    },
+    {
+      "module": "Ps.Elab.Operators",
+      "path": "packages/elab/src/Ps/Elab/Operators.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 15628,
+      "sha256": "ee2035dc84f46a0cb6288f7cd2d64a58abeb7867a46dec6a915a3015b8d4b8a9",
+      "imports": [
+        "Ps.Elab.Basic",
+        "Ps.Core.Builtin"
+      ],
+      "bootstrap": {
+        "path": "packages/elab/src/Ps/Elab/Operators.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 15686,
+        "sha256": "20699ff3b4e35b58c1219466ab197062c745074cfccc3e6086b1a275f552dc9c",
+        "generatedProjectionSha256": "a65345936c872caea7649064ecd59e25b62a0153c25947234d0490784ad35712"
+      }
+    },
+    {
+      "module": "Ps.Elab.Term",
+      "path": "packages/elab/src/Ps/Elab/Term.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 90046,
+      "sha256": "0291cc64b8920314754fac8b3ec7c86ef2a2e97c86b07b20a4d8489269c3a2e9",
+      "imports": [
+        "Ps.Core.Abstract",
+        "Ps.Core.Equality",
+        "Ps.Core.Subst",
+        "Ps.Environment.Resolve",
+        "Ps.Meta.Infer",
+        "Ps.Meta.SynthInstance",
+        "Ps.Meta.Unify",
+        "Ps.Syntax.Ast",
+        "Ps.Elab.Context",
+        "Ps.Elab.Literal",
+        "Ps.Elab.Basic",
+        "Ps.Elab.Do",
+        "Ps.Elab.Data",
+        "Ps.Elab.Operators"
+      ],
+      "bootstrap": {
+        "path": "packages/elab/src/Ps/Elab/Term.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 115559,
+        "sha256": "87e20039c4f46a81844a2a08c0dc124a2556cc2282b67cefe3fa889f4d9f5f61",
+        "generatedProjectionSha256": "b4c47cc176c6eafedce2867568b63d511a5053f3ff34dc4e31443f1a77cbbe2a"
+      }
+    },
+    {
+      "module": "Ps.Elab.Recursion",
+      "path": "packages/elab/src/Ps/Elab/Recursion.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 42168,
+      "sha256": "1313fcb76249a939a689c9ad761fc400fdb4f53a1d0898f9208cfed1671272f3",
+      "imports": [
+        "Ps.Elab.Term",
+        "Ps.Foundation.List"
+      ],
+      "bootstrap": {
+        "path": "packages/elab/src/Ps/Elab/Recursion.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 48770,
+        "sha256": "5389afc27a4521bb828623e23f524fbd863aa64ebc3dd3286b1eca70cce5493c",
+        "generatedProjectionSha256": "9714f84045120893345abf9d7eae912ab46f96cdc9c129d722043a2db55f9cb9"
+      }
+    },
+    {
+      "module": "Ps.Elab.DoLoopLift",
+      "path": "packages/elab/src/Ps/Elab/DoLoopLift.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 22712,
+      "sha256": "fd254e4823bdcd058e6c3cadb7566213bf1c1198735e593ecb1316a853fd35c1",
+      "imports": [
+        "Ps.Elab.DoLoop",
+        "Ps.Environment.SelfHostPrelude",
+        "Ps.Foundation.List"
+      ],
+      "bootstrap": {
+        "path": "packages/elab/src/Ps/Elab/DoLoopLift.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 25468,
+        "sha256": "6ab5e82df49175699e13dee2ba4b32f51cfa00741ae0f0049c6029c234467aa8",
+        "generatedProjectionSha256": "3bbdc63974cee93e4d5c48342f083fe634b672a0503183ad0cc52d4b9320f259"
+      }
+    },
+    {
+      "module": "Ps.Elab.DoForLift",
+      "path": "packages/elab/src/Ps/Elab/DoForLift.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 15513,
+      "sha256": "2289ae4ec9280d37904a96e4866702e39e59cb79ebfb2043af89a0694a21fe4a",
+      "imports": [
+        "Ps.Elab.DoLoopLift",
+        "Ps.Environment.Control"
+      ],
+      "bootstrap": {
+        "path": "packages/elab/src/Ps/Elab/DoForLift.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 16741,
+        "sha256": "b007f2c4664dfbd873fc13dc417dd4ab629a7f7b4ef2ae1d114867017960ef42",
+        "generatedProjectionSha256": "d8a50eeb9ae84e3cdef40b11ad2c5220e1fdc199a9c77dabfd1572db115438e1"
+      }
+    },
+    {
+      "module": "Ps.Elab.Declaration",
+      "path": "packages/elab/src/Ps/Elab/Declaration.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 55844,
+      "sha256": "f29689a9f892734b7d7aae133fc5b9ca0c04a22910ccd6c25b3d59c6932e317a",
+      "imports": [
+        "Ps.Core.Declaration",
+        "Ps.Core.Equality",
+        "Ps.Elab.Recursion",
+        "Ps.Elab.DoLoopLift",
+        "Ps.Elab.DoForLift"
+      ],
+      "bootstrap": {
+        "path": "packages/elab/src/Ps/Elab/Declaration.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 71093,
+        "sha256": "3d6e528ce7c799f096f964349805676b261ac369c8467c2a708b38e1a3692f4b",
+        "generatedProjectionSha256": "aac982174d70486a7c97ab06d0078da04fca64e61d7e48613da2412cf1b61580"
+      }
+    },
+    {
+      "module": "Ps.CompilerIr.Model",
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/Model.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 5736,
+      "sha256": "e4dc7c8b2b282d4d0078655b1ee458a56c920f692368f8f33a0937f792fa3dec",
+      "imports": [],
+      "bootstrap": {
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/Model.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 5888,
+        "sha256": "0f0dba3dac8f24c8af239513e3c6ac93620f2933f1dc36163a3cf873d474c8ab",
+        "generatedProjectionSha256": "9acfb8dbec1a083f05dfd7f39c80e704b9322a2896fd63ed268cd82805ada03e"
+      }
+    },
+    {
+      "module": "Ps.Erasure.Basic",
+      "path": "packages/erasure/src/Ps/Erasure/Basic.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 33129,
+      "sha256": "8716aa7e22a460690ca142407d1ef2c7762fad4e39d3ce2922e35bd171784aa0",
+      "imports": [
+        "Ps.Foundation.List",
+        "Ps.CompilerIr.Model",
+        "Ps.Core.Builtin",
+        "Ps.Core.Subst",
+        "Ps.Environment.Basic",
+        "Ps.Environment.LocalContext",
+        "Ps.Meta.Context",
+        "Ps.Meta.Infer",
+        "Ps.Meta.Reduce"
+      ],
+      "bootstrap": {
+        "path": "packages/erasure/src/Ps/Erasure/Basic.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 34105,
+        "sha256": "4258961bd35b37049334afc960799fa5256745980a8d085dad6d11f7e459c6f9",
+        "generatedProjectionSha256": "ced7210f20fc33b94a5b13c6a2b2c0b9b6fd549cc3f4278723ba448884c20557"
+      }
+    },
+    {
+      "module": "Ps.Erasure.Expr",
+      "path": "packages/erasure/src/Ps/Erasure/Expr.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 116773,
+      "sha256": "867662dfdb932a546be6f7f0fa71a237590588b7fff05ba1a5ba3e390849da9d",
+      "imports": [
+        "Ps.Erasure.Basic"
+      ],
+      "bootstrap": {
+        "path": "packages/erasure/src/Ps/Erasure/Expr.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 146263,
+        "sha256": "8ff3ebf94c74e5746ca99991a5c256363f615a6090af1888219011745ac2fe20",
+        "generatedProjectionSha256": "0569e555c54892f839aa1367351560a348365bb73f2af2289d9d1c4b6a711124"
+      }
+    },
+    {
+      "module": "Ps.Erasure.Inductive",
+      "path": "packages/erasure/src/Ps/Erasure/Inductive.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 13610,
+      "sha256": "05bd5077e9981ae8b80add335570e59501833cb2f2890ae5f07473cd276adab5",
+      "imports": [
+        "Ps.Erasure.Basic"
+      ],
+      "bootstrap": {
+        "path": "packages/erasure/src/Ps/Erasure/Inductive.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 17656,
+        "sha256": "53dfea95bc7e0610ce1eaf09cc67516990a5c1334c78a881d74471419cac85dd",
+        "generatedProjectionSha256": "818fadaa371d27747181c533c2a504d4fe481807af6f5e26c57cd6f8507640c8"
+      }
+    },
+    {
+      "module": "Ps.Erasure.Structure",
+      "path": "packages/erasure/src/Ps/Erasure/Structure.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 4347,
+      "sha256": "549616a642cbf9fc2834739478e8e83fbc4070c28460bb0ce80a955b6ea6a4c6",
+      "imports": [
+        "Ps.Erasure.Inductive"
+      ],
+      "bootstrap": {
+        "path": "packages/erasure/src/Ps/Erasure/Structure.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 6731,
+        "sha256": "6de88d9b5e41e6e87fd03e55adfe8e218d8c55ba7d9086716c1c75cd6e9212af",
+        "generatedProjectionSha256": "1683f4e61c08675de03dfa50d50797c318ed8774c319cc1c663b3d262dd20062"
+      }
+    },
+    {
+      "module": "Ps.Erasure.StructureRecursor",
+      "path": "packages/erasure/src/Ps/Erasure/StructureRecursor.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 6516,
+      "sha256": "452f325fdcf5ff869ff673220cc3b0159c1d8e46d89c13d5ac1f5b532c6170f2",
+      "imports": [
+        "Ps.Erasure.Structure"
+      ],
+      "bootstrap": {
+        "path": "packages/erasure/src/Ps/Erasure/StructureRecursor.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 10378,
+        "sha256": "74b64416ac236468a41a0aa420c2e908add00fd3daf925c2ebce1035bb62b21b",
+        "generatedProjectionSha256": "8f72696e0eb9a2df50921f71d22c1b733ee05e0b9ed3f0857abb4635a0e4b762"
+      }
+    },
+    {
+      "module": "Ps.Erasure.Definition",
+      "path": "packages/erasure/src/Ps/Erasure/Definition.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 21054,
+      "sha256": "3db671beef4b3b9d6ffe497ba1c87d29eddff452bd8cc0d98f63a36f195f2801",
+      "imports": [
+        "Ps.Erasure.Expr",
+        "Ps.Erasure.Inductive",
+        "Ps.Erasure.StructureRecursor"
+      ],
+      "bootstrap": {
+        "path": "packages/erasure/src/Ps/Erasure/Definition.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 26235,
+        "sha256": "187612067bb713bfe59c70895a22ce23ca4b3a8c369afbcba6e48e58967f7735",
+        "generatedProjectionSha256": "f37f441ba1776688e00bcb438765cf9bf8b6612f28fd140ea992938485d08e4a"
+      }
+    },
+    {
+      "module": "Ps.Compiler.Api",
+      "path": "packages/compiler/src/Ps/Compiler/Api.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 11930,
+      "sha256": "136e81f3d8fbf306cb73aa70f2f40a88c02a3a34cd409bba16ef8a77d0f49a36",
+      "imports": [
+        "Ps.Syntax.Translate",
+        "Ps.Bridge.CheckedAdmissions",
+        "Ps.Environment.SelfHostProd",
+        "Ps.Elab.Declaration",
+        "Ps.Erasure.Definition"
+      ],
+      "bootstrap": {
+        "path": "packages/compiler/src/Ps/Compiler/Api.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 12510,
+        "sha256": "49523e3e464e8ff2abd929c67ce29dd419a898874afed1e80638a6d990fcd370",
+        "generatedProjectionSha256": "48194c48f43273b07f287ecd7e95c32edca313963b01028f08bb89913740cc1f"
+      }
+    },
+    {
+      "module": "Ps.Compiler.Ordinary",
+      "path": "packages/compiler/src/Ps/Compiler/Ordinary.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 16821,
+      "sha256": "41f502e47ec362570dbeddae3429028eef7f69167fc1f95abe63d0fb1074f84f",
+      "imports": [
+        "Ps.Compiler.Api"
+      ],
+      "bootstrap": {
+        "path": "packages/compiler/src/Ps/Compiler/Ordinary.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 17754,
+        "sha256": "8a3e96566c2a47fbacb17922e76bcd25a5165d7acb7eee467d66db62ea380ffc",
+        "generatedProjectionSha256": "12767ef358e03a1c8918b192f6a975de6fd87a1d0ca8b3d95bb9e2a0cb82b470"
+      }
+    },
+    {
+      "module": "Ps.CompilerIr.Encode",
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/Encode.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 25687,
+      "sha256": "bed955e16f553e7aedcc1947543d48fd34b1d1edbddaecf883abf1c98b3a3ca7",
+      "imports": [
+        "Ps.CompilerIr.Model",
+        "Ps.Bridge.Json",
+        "Ps.Foundation.List",
+        "Ps.Foundation.Name"
+      ],
+      "bootstrap": {
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/Encode.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 22342,
+        "sha256": "5b50f585366224b5f2757a988aa8fb8963d2a701cd0f5dbf634e5acf179cea8d",
+        "generatedProjectionSha256": "b883b54a39103f8a87a40bde037c966691f4505391b7cb0445e51fe7ada9147e"
+      }
+    },
+    {
+      "module": "Ps.Bridge.CompilerHost",
+      "path": "packages/bridge/src/Ps/Bridge/CompilerHost.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 1574,
+      "sha256": "1626f914bc6512cb13e32e6225c8f9fe460c7d724d51b2debd2409f8db0d5bc1",
+      "imports": [
+        "Ps.Bridge.Json"
+      ],
+      "bootstrap": {
+        "path": "packages/bridge/src/Ps/Bridge/CompilerHost.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 1301,
+        "sha256": "6ced675ef39b2ebfc7db8edfe920ea08b2b6fd1f19ca4fcfa46bedc02e5e5332",
+        "generatedProjectionSha256": "e2e02b84818e432dec09d3a3e080eca768088638a2f37ebfbff70956d78c379f"
+      }
+    },
+    {
+      "module": "Ps.CompilerIr.CheckTypes",
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/CheckTypes.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 24090,
+      "sha256": "fdac7634e0acc5559bf56f0bce9cda50d00fb677135525efbc713f41768f5c13",
+      "imports": [
+        "Ps.Foundation.List",
+        "Ps.Foundation.Name",
+        "Ps.CompilerIr.Model"
+      ],
+      "bootstrap": {
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/CheckTypes.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 26018,
+        "sha256": "3ccce22596959fa12d084bb25279c686a4d534ec627a2067c4c9da13e29f9cad",
+        "generatedProjectionSha256": "adcf78be54f33cbebc3424016a75352faf7481d14070a175110523f6fcf1affe"
+      }
+    },
+    {
+      "module": "Ps.CompilerIr.CheckSize",
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/CheckSize.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 15748,
+      "sha256": "175aa1acee48211ce824704dbfffe3d16f7ad065be420a05e8471f04cff8c3ab",
+      "imports": [
+        "Ps.CompilerIr.CheckTypes"
+      ],
+      "bootstrap": {
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/CheckSize.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 18919,
+        "sha256": "50c24e57441c028ca0768fac83c966cb5d8b534a68f2f55ca8384983b32fae7d",
+        "generatedProjectionSha256": "5538eff7ea1f963a0ca965555bfc13e88cc65761b429474d2dcd12fcebdeebe4"
+      }
+    },
+    {
+      "module": "Ps.CompilerIr.Check",
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/Check.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 47006,
+      "sha256": "2446e515b7e30806c5bfb099b81d6702079a812d291aeb517f487335d28feeee",
+      "imports": [
+        "Ps.CompilerIr.CheckTypes",
+        "Ps.CompilerIr.CheckSize"
+      ],
+      "bootstrap": {
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/Check.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 46479,
+        "sha256": "22eac288f3c48d57a5856e35ec9bcd072cde5fc1fabd674703f5a20bd02e5bef",
+        "generatedProjectionSha256": "0c4b19b4e02ca60a56da5e0cf3b434b34eb23455767786c8bc0e3553ce1f2544"
+      }
+    },
+    {
+      "module": "Ps.CompilerIr.Provenance",
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/Provenance.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 1319,
+      "sha256": "cfbebd0b61fc1d157c8d23e912c45068c835040007a79ad5b56452c097247f2f",
+      "imports": [
+        "Ps.CompilerIr.Model",
+        "Ps.Foundation.List"
+      ],
+      "bootstrap": {
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/Provenance.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 1316,
+        "sha256": "52c3b580fe4ac54cbd3d1958c9be8cea9ffac93dd763658454039054b2cd7fa6",
+        "generatedProjectionSha256": "efa27aa508e034ade501d912b095f6c5605da3b0aa3cd11754d7fec06c9e7af8"
+      }
+    },
+    {
+      "module": "Ps.Foundation.StringSet",
+      "path": "packages/foundation/src/Ps/Foundation/StringSet.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 4642,
+      "sha256": "dca7da4b20eb88f9b8052731f21ab1f615a0c45bcc47cd3145c404aa625617a3",
+      "imports": [
+        "Ps.Foundation.Name"
+      ],
+      "bootstrap": {
+        "path": "packages/foundation/src/Ps/Foundation/StringSet.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 4774,
+        "sha256": "e1ae76af1780513da61bf8625edb99beae42f0849a45b4fd52f9706c69af701a",
+        "generatedProjectionSha256": "5b90b5cd68bafcade4dc6075f4df42693470597434ec01e8883b64c69bef6949"
+      }
+    },
+    {
+      "module": "Ps.CompilerIr.Specialize",
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/Specialize.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 60198,
+      "sha256": "74fb1bb1c8f9beef611300e06fff3010121ed2589e828b7102f539217a09ad93",
+      "imports": [
+        "Ps.CompilerIr.Check",
+        "Ps.CompilerIr.Provenance",
+        "Ps.Foundation.List",
+        "Ps.Foundation.Name",
+        "Ps.Foundation.StringSet"
+      ],
+      "bootstrap": {
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/Specialize.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 59344,
+        "sha256": "1fad41896864a01363843e0c017a926410eb9b10a49c9ad995025911494b2ee7",
+        "generatedProjectionSha256": "1fad41896864a01363843e0c017a926410eb9b10a49c9ad995025911494b2ee7"
+      }
+    },
+    {
+      "module": "Ps.CompilerIr.Validate",
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/Validate.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 1275,
+      "sha256": "6c14bf597b2c23c14b0c9ab6fa8ca14e5d615c34c753d1c1c6cbe3ace84ac720",
+      "imports": [
+        "Ps.CompilerIr.Check",
+        "Ps.CompilerIr.Specialize",
+        "Ps.Foundation.Name"
+      ],
+      "bootstrap": {
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/Validate.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 1286,
+        "sha256": "7c53f220f55cde4bffac3a7ffdda00eb4efe22e5c94a039658158aa97f32ab30",
+        "generatedProjectionSha256": "cf0dff71fe760a93fe5abcdefd61abcb03819e72139dee5d147a9d056f8e785b"
+      }
+    },
+    {
+      "module": "Ps.CompilerIr.WorkerFusion",
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/WorkerFusion.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 35534,
+      "sha256": "b2b183bc35db3fd9023a1fe4e4dcf7e942fbd382491a00f9b25a5ed2f711d07e",
+      "imports": [
+        "Ps.CompilerIr.Provenance",
+        "Ps.CompilerIr.Validate",
+        "Ps.Foundation.StringSet"
+      ],
+      "bootstrap": {
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/WorkerFusion.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 34547,
+        "sha256": "29614c5b20bffd518e521cdf58a5f08cbfc58f50b519430bf8f02ac796ccbea5",
+        "generatedProjectionSha256": "2be227362516030d1c8a8d4710e3e609a708569c8393e88d20039f9d8897770e"
+      }
+    },
+    {
+      "module": "Ps.BackendCommon.Plan",
+      "path": "packages/backend-common/src/Ps/BackendCommon/Plan.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 11362,
+      "sha256": "ab215bcb08fd433b966133d157c5c467b80269ff777b0b0eb800713fc5537300",
+      "imports": [
+        "Ps.CompilerIr.Validate",
+        "Ps.CompilerIr.WorkerFusion",
+        "Ps.Foundation.List",
+        "Ps.Foundation.Name"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-common/src/Ps/BackendCommon/Plan.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 11531,
+        "sha256": "761f61f3c26f166057ae344959041ea473eeb4037dba791289fceb341ce316dc",
+        "generatedProjectionSha256": "54c0f316242e1e109bfd2b90a47f5da4abce7e59464f3fb106e248adc40e0945"
+      }
+    },
+    {
+      "module": "Ps.Compiler.Service",
+      "path": "packages/compiler/src/Ps/Compiler/Service.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 25234,
+      "sha256": "5d5a0ca580ecf66297bf2560404bc08c6d91e593eaa6f15de55f4c3d9649dc31",
+      "imports": [
+        "Ps.Compiler.Api",
+        "Ps.Compiler.Ordinary",
+        "Ps.CompilerIr.Encode",
+        "Ps.Bridge.CompilerHost",
+        "Ps.BackendCommon.Plan"
+      ],
+      "bootstrap": {
+        "path": "packages/compiler/src/Ps/Compiler/Service.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 23810,
+        "sha256": "fa1bf2153c05f8a3b248040a105f0e1803368935a64edf4b5444f4cdb5f6a6fa",
+        "generatedProjectionSha256": "beedb4c473380bc747ab71ff53f0d1df1e628ee23cb0102735cfc87ad143a27a"
+      }
+    },
+    {
+      "module": "Ps.BackendJs.Model",
+      "path": "packages/backend-js/src/Ps/BackendJs/Model.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 3146,
+      "sha256": "64cdba7a526f85b8b814b348e2bead18104abec74bed2526a7bf8511c625306c",
+      "imports": [
+        "Ps.CompilerIr.Model"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-js/src/Ps/BackendJs/Model.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 3246,
+        "sha256": "4a61273a1fc1bdc8da55aa8b513eedb7631b7f83887a5c0df3c4b2006935580e",
+        "generatedProjectionSha256": "5d67d99e1924e0fcebb1d4066798968a1f779e4f72ab3b13635af0ddd325a5c0"
+      }
+    },
+    {
+      "module": "Ps.BackendJs.Lower",
+      "path": "packages/backend-js/src/Ps/BackendJs/Lower.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 50308,
+      "sha256": "dadcb4756b86689deda6f9cfc5b5c78ad4f79cab71456d7e36cc7455d992ec15",
+      "imports": [
+        "Ps.BackendJs.Model",
+        "Ps.CompilerIr.Specialize",
+        "Ps.Bridge.Json",
+        "Ps.Foundation.List",
+        "Ps.Foundation.Name"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-js/src/Ps/BackendJs/Lower.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 62498,
+        "sha256": "282ef04a2fa1dd241fe4bd860295d1045c32cda687c216666e04333897a46a58",
+        "generatedProjectionSha256": "0e9b702c2a5fc881305199bf9f91ffafd5dd7d0041a678833e75173494645787"
+      }
+    },
+    {
+      "module": "Ps.BackendJs.Validate",
+      "path": "packages/backend-js/src/Ps/BackendJs/Validate.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 13969,
+      "sha256": "7258e1614747f20280c852ef98ce3310473eda9d3a582d1cb5e49fdb79e8e18f",
+      "imports": [
+        "Ps.BackendJs.Lower",
+        "Ps.CompilerIr.Validate"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-js/src/Ps/BackendJs/Validate.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 16671,
+        "sha256": "0fc45e585b0c687d4b9b1e7b4920413fa308fa22ebd1ebd12f73c1822b876b79",
+        "generatedProjectionSha256": "1e8bcdf7624ee3be5a6d22bfea8b9233f517d239735341cb07ef28de9f61b454"
+      }
+    },
+    {
+      "module": "Ps.BackendJs.TailAlias",
+      "path": "packages/backend-js/src/Ps/BackendJs/TailAlias.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 9769,
+      "sha256": "85b402091696332a77a7fe2039b0cbe3854c0e856ed74b0c7e50a03a4aabf271",
+      "imports": [
+        "Ps.BackendJs.Model",
+        "Ps.Foundation.List",
+        "Ps.Foundation.Name"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-js/src/Ps/BackendJs/TailAlias.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 10604,
+        "sha256": "632d498748fc0df0379a519e2d0ad699595739923a0580f7640e6d4fd3dbdf9f",
+        "generatedProjectionSha256": "c4a4ec70e560f473b326155030f8b6c239029d014cd9c02af0e441ae3b3f9735"
+      }
+    },
+    {
+      "module": "Ps.BackendJs.Print",
+      "path": "packages/backend-js/src/Ps/BackendJs/Print.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 91555,
+      "sha256": "3be490a75016b9f0293a65fecc86d27785d468c0f55653c10ce75805475ec766",
+      "imports": [
+        "Ps.BackendJs.Lower",
+        "Ps.BackendJs.Validate",
+        "Ps.BackendJs.TailAlias",
+        "Ps.Bridge.Json",
+        "Ps.Foundation.List",
+        "Ps.Foundation.Name",
+        "Ps.Foundation.Text"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-js/src/Ps/BackendJs/Print.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 92884,
+        "sha256": "3e53fd7bae3b82a8e38e223990d77391598dc7feffe7a62421eb4002e414fc05",
+        "generatedProjectionSha256": "b1f59fc3192d1a55b4f2c3c7d8926c69f697f03f7c214aa0d1d7c67f8599f2e9"
+      }
+    },
+    {
+      "module": "Ps.BackendJs.CompilerService",
+      "path": "packages/backend-js/src/Ps/BackendJs/CompilerService.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 1526,
+      "sha256": "b48fca262918566a03f0e911dc86dfc8cbceb258cbced377a94bb2b47859bbf2",
+      "imports": [
+        "Ps.Compiler.Service",
+        "Ps.BackendJs.Print"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-js/src/Ps/BackendJs/CompilerService.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 1639,
+        "sha256": "3dbadfc81f52ba9aed90e2ee55e36e9d63d4ecc5378da1d9326047797f1cd4a8",
+        "generatedProjectionSha256": "711da7de5d6fec83f15d74a6ca9f38c75272c19bf2abd83500584cbf59d99d08"
+      }
+    },
+    {
+      "module": "Ps.BackendTs.Type",
+      "path": "packages/backend-ts/src/Ps/BackendTs/Type.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 4245,
+      "sha256": "91628c36302c3d9be2d6f25d0e8b550614252d2e2a60cb0b3a5a2f98dd90faa9",
+      "imports": [
+        "Ps.Foundation.List",
+        "Ps.Foundation.Name",
+        "Ps.CompilerIr.Model",
+        "Ps.Bridge.Json"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-ts/src/Ps/BackendTs/Type.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 4202,
+        "sha256": "c231a737470c0d6ef2451f642089e22cebea97da55527500beff82bb610f99cf",
+        "generatedProjectionSha256": "4a8d09f19044493ffd5d864c1facf0851424bc3542bbb6a6134ed486d85423f2"
+      }
+    },
+    {
+      "module": "Ps.BackendTs.RuntimeSupport",
+      "path": "packages/backend-ts/src/Ps/BackendTs/RuntimeSupport.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 6072,
+      "sha256": "4689263a634231a909ce01426dc56cbfe78318573126fc3304e09a990b7e5bc5",
+      "imports": [
+        "Ps.BackendTs.Type"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-ts/src/Ps/BackendTs/RuntimeSupport.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 6022,
+        "sha256": "9fe321d67fc9f0ee411b02881fc3523986c99d823cdc55dfd9b2ed1897aa3e50",
+        "generatedProjectionSha256": "ae520c546431fbe20a28ac4094f6741ae8e1c32b7394ed1228889697a6f7ae07"
+      }
+    },
+    {
+      "module": "Ps.BackendTs.Expr",
+      "path": "packages/backend-ts/src/Ps/BackendTs/Expr.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 49607,
+      "sha256": "0462018cd9f6d059cf431c750dcb0d9fcf27a631b66386345adcd38feb38600a",
+      "imports": [
+        "Ps.BackendTs.Type"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-ts/src/Ps/BackendTs/Expr.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 41347,
+        "sha256": "219b52231d4024c93fc4adfc7bf6a0d8e136fbbcce681c5c14354397efd3461b",
+        "generatedProjectionSha256": "cfc937becacf192ada8e3f22e11665016c586d29c5fd8432d57e3893d7437530"
+      }
+    },
+    {
+      "module": "Ps.BackendTs.Module",
+      "path": "packages/backend-ts/src/Ps/BackendTs/Module.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 71444,
+      "sha256": "787b930ecaaad3a311db7e9def47a926dd679595e610bd6db862361a8d2095e0",
+      "imports": [
+        "Ps.BackendTs.RuntimeSupport",
+        "Ps.BackendTs.Expr"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-ts/src/Ps/BackendTs/Module.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 67489,
+        "sha256": "dc7f17cc0e2c7136e0e39debbcdd5728f8df5b8b100e32cce7d6ba163eaba160",
+        "generatedProjectionSha256": "0cfb3d12baffcdf7cda84ea1eee79ff3c788de2c030e40426888140306a4497b"
+      }
+    },
+    {
+      "module": "Ps.BackendTs.CompilerService",
+      "path": "packages/backend-ts/src/Ps/BackendTs/CompilerService.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 2046,
+      "sha256": "5d21dfd3fad9d2121eb0ab41dba90ed754ac33a0f52819ba9482e1caf9b4cde7",
+      "imports": [
+        "Ps.Compiler.Service",
+        "Ps.BackendTs.Module"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-ts/src/Ps/BackendTs/CompilerService.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 2033,
+        "sha256": "8fd63983f4d3123e905716db76039531c55bca4b3d243e1b6e8ef476737c5494",
+        "generatedProjectionSha256": "e8f9c21e8a2b6710bb862e1555b3bfefc77955f01679fd0488bfff74a92ffa63"
+      }
+    },
+    {
+      "module": "Ps.BackendRust.RuntimePlan",
+      "path": "packages/backend-rust/src/Ps/BackendRust/RuntimePlan.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 21815,
+      "sha256": "3cefff1ca92b3c52ccc060fc64056176dd1d78f9347b9a46e579d48918662ed2",
+      "imports": [
+        "Ps.CompilerIr.Model",
+        "Ps.Foundation.List",
+        "Ps.Foundation.Name",
+        "Ps.Foundation.Text"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-rust/src/Ps/BackendRust/RuntimePlan.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 19978,
+        "sha256": "88a315a4deec17f414f99343cdf047e3a59e4f2ce223660b1e6a83ed49a60f7f",
+        "generatedProjectionSha256": "13627ac29d649515b5794ca9663ea8ed07d9a0e057f013afce865a5799539ba8"
+      }
+    },
+    {
+      "module": "Ps.BackendRust.Identifier",
+      "path": "packages/backend-rust/src/Ps/BackendRust/Identifier.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 5450,
+      "sha256": "5ca0133e17e28fab4af915de0397f8842690196c992e1ed7dd09e44329c673ef",
+      "imports": [
+        "Ps.Bridge.Json",
+        "Ps.Foundation.Name"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-rust/src/Ps/BackendRust/Identifier.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 4822,
+        "sha256": "d19235781e047fc74f20922210e69a51b65e277f54fd51f6e117376e96357c7a",
+        "generatedProjectionSha256": "2b7ee0057dfc9fbccc3c2295799d2429823b2c4f49dfdf7f211fc53b1b5337f5"
+      }
+    },
+    {
+      "module": "Ps.BackendRust.Type",
+      "path": "packages/backend-rust/src/Ps/BackendRust/Type.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 10115,
+      "sha256": "64f0f2be9efe4935ce15b6590a1a0acb5461fd6210e998468cb71618718c3da6",
+      "imports": [
+        "Ps.CompilerIr.Model",
+        "Ps.Bridge.Json",
+        "Ps.Foundation.Name",
+        "Ps.Foundation.List",
+        "Ps.BackendRust.Identifier"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-rust/src/Ps/BackendRust/Type.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 11479,
+        "sha256": "9aa32cd1a752f24d7422111d8380dac6f9b08b59eec216bbeb3c0c6093ae2db1",
+        "generatedProjectionSha256": "ef24cdc98878b12ad103b14861fe4d79edcedca6ee7e2db1aca00845238fad45"
+      }
+    },
+    {
+      "module": "Ps.BackendRust.ValueRefs",
+      "path": "packages/backend-rust/src/Ps/BackendRust/ValueRefs.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 7950,
+      "sha256": "03b8b365f9d1c8a327d375baf20835fc3ed19f10d9ed2a3a120697016eceaa0b",
+      "imports": [
+        "Ps.BackendRust.Type"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-rust/src/Ps/BackendRust/ValueRefs.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 10911,
+        "sha256": "c5e6444cb437972e7da10498a1ed1584f017b96193eb8b32fde54426d7950ee0",
+        "generatedProjectionSha256": "e291471418309507d371ff5c3d8e44ac067fbee60735edf5e4afe7131ac2f1e9"
+      }
+    },
+    {
+      "module": "Ps.BackendRust.Captures",
+      "path": "packages/backend-rust/src/Ps/BackendRust/Captures.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 5497,
+      "sha256": "1df95ce14c9f9807c1bacc1b537a8006aef23eba9de0ae8c5c9f9231694a5bfc",
+      "imports": [
+        "Ps.BackendRust.ValueRefs"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-rust/src/Ps/BackendRust/Captures.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 7029,
+        "sha256": "1a6e23a9ffd9dd6be331db3b1a7ff2d267b739578b11b610012692b7b22ad56d",
+        "generatedProjectionSha256": "ed3c1cb0d8725f96d95a3887ee62b4be21c0864ae0f878f921bb7616a79f2b55"
+      }
+    },
+    {
+      "module": "Ps.BackendRust.Expr",
+      "path": "packages/backend-rust/src/Ps/BackendRust/Expr.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 40758,
+      "sha256": "30de5252dfe53bfe195a9331d1a8316f386f4a4bf8eb13abbf6216cda5297380",
+      "imports": [
+        "Ps.BackendRust.Captures",
+        "Ps.CompilerIr.WorkerFusion"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-rust/src/Ps/BackendRust/Expr.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 50873,
+        "sha256": "4b198649dad0326dadb3dcc79a7dd2d784237e990bc647431c7d50f026803aed",
+        "generatedProjectionSha256": "9af43d4b34f0ab7993ee4b789e3e130ca4992010f16c3a2118bcdad0d5bf5b9b"
+      }
+    },
+    {
+      "module": "Ps.BackendRust.TailAlias",
+      "path": "packages/backend-rust/src/Ps/BackendRust/TailAlias.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 7615,
+      "sha256": "3970fb5fdff246c3d91f3472401293c9cf4bf747222a22f99aec61ca1518bd20",
+      "imports": [
+        "Ps.BackendRust.Expr"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-rust/src/Ps/BackendRust/TailAlias.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 7902,
+        "sha256": "3549bd1f353620b64c21d0a4b3f55e299ebd63a64e5450145d99d3c250c8c5d4",
+        "generatedProjectionSha256": "ca65c21ebd87e0604485735b21dab8144905385fd19b83b8057dff2f7f0b5a9e"
+      }
+    },
+    {
+      "module": "Ps.BackendRust.Tail",
+      "path": "packages/backend-rust/src/Ps/BackendRust/Tail.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 13561,
+      "sha256": "c62e56192453842d64910590d50f963d79a6e1b2c547ae59efbbfbd2c0e70200",
+      "imports": [
+        "Ps.BackendRust.TailAlias"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-rust/src/Ps/BackendRust/Tail.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 13566,
+        "sha256": "d5fa685e349da05e513887c1d5b716b11a5bfb8a5d1440a2d9db113435626454",
+        "generatedProjectionSha256": "2e8c43cd050e52fb336d9e20287998941093d9bce5ac2697e3158dab6efdf34a"
+      }
+    },
+    {
+      "module": "Ps.BackendRust.Runtime",
+      "path": "packages/backend-rust/src/Ps/BackendRust/Runtime.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 6216,
+      "sha256": "629fc826121e552fc95123ab1b79889f8c34307f1c2c3a0b5417edf2c7d726c9",
+      "imports": [],
+      "bootstrap": {
+        "path": "packages/backend-rust/src/Ps/BackendRust/Runtime.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 5693,
+        "sha256": "dc3fa685fa635a9639861d0c9179082be449c0222311fcff168304a5a1d889cd",
+        "generatedProjectionSha256": "310cbb8cd6c930e30089bc78a12ac824c3175b451d3fcc705e2d0f7132df60a1"
+      }
+    },
+    {
+      "module": "Ps.BackendRust.Module",
+      "path": "packages/backend-rust/src/Ps/BackendRust/Module.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 47445,
+      "sha256": "c0b759896b1e5c5f73ce3f93a940b41c5580e0f49b530042896bd84ac4ff342c",
+      "imports": [
+        "Ps.BackendRust.RuntimePlan",
+        "Ps.CompilerIr.Validate",
+        "Ps.Foundation.List",
+        "Ps.BackendRust.Tail",
+        "Ps.BackendRust.ValueRefs",
+        "Ps.BackendRust.Runtime"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-rust/src/Ps/BackendRust/Module.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 54970,
+        "sha256": "ba222037c176331c905350dd1ddec8fda322ce0e2fcde75658ddd761687cb0e3",
+        "generatedProjectionSha256": "ede43769c18cf601614d556ebb1d528cc5ff716764da41712de50292a0128f75"
+      }
+    },
+    {
+      "module": "Ps.BackendRust.CompilerService",
+      "path": "packages/backend-rust/src/Ps/BackendRust/CompilerService.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 781,
+      "sha256": "69b810aa13096ba9a8a53a1c75717745c017afb3a48ca7f67d924f142a38ebb3",
+      "imports": [
+        "Ps.Compiler.Service",
+        "Ps.BackendRust.Module"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-rust/src/Ps/BackendRust/CompilerService.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 767,
+        "sha256": "7aa57cacb32f4e479f7d23281ff9158ab4147eecda26ddf2149f407a81daa6e4",
+        "generatedProjectionSha256": "4a5ea574cd5a6510ad7ad6a8f5ba94d2c360c41e0b75d67f66860a891d2bf163"
+      }
+    },
+    {
+      "module": "Ps.BackendWasm.Lower.RuntimeNeeds",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower/RuntimeNeeds.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 17961,
+      "sha256": "c7447639c000227b815e2739258e4ba1400f7186d401ddb3ebe2beee744fee08",
+      "imports": [
+        "Ps.CompilerIr.Model",
+        "Ps.Foundation.List"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower/RuntimeNeeds.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 21372,
+        "sha256": "26ed5151bd89d49a66bf8d7222d1ac5f0238084cb55e1f0ff33f05cf65f793dc",
+        "generatedProjectionSha256": "6822be6b19faab24bc2d26e9cf331db017b996b2ca22ffffee9459b6b80c5558"
+      }
+    },
+    {
+      "module": "Ps.BackendWasm.Model",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/Model.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 4159,
+      "sha256": "81ba1713ab6e6af9d9bbd3e7bdd9b0ce3f00736250979ca50e4eb81850d97266",
+      "imports": [
+        "Ps.CompilerIr.Model",
+        "Ps.Foundation.List"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/Model.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 4065,
+        "sha256": "b083c37cfea8a23c038606aab811761648c1fc198f6e1f0bd5b2de1255e46c96",
+        "generatedProjectionSha256": "e3b6355fff23894abba0602992d549fdbc1305b2a319b155e745033500a5267f"
+      }
+    },
+    {
+      "module": "Ps.BackendWasm.Type",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/Type.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 7602,
+      "sha256": "c4724f24c4ab5ec3f537f76990f8416c460e14d58e6fbf6678397ba78b55c903",
+      "imports": [
+        "Ps.BackendWasm.Model",
+        "Ps.Foundation.Name"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/Type.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 9041,
+        "sha256": "bfd941e5a7465842c6892364cdf2033cca83f4fccd6ae0ae54e8014e0a817ea4",
+        "generatedProjectionSha256": "1bab00c24b683f20c32015385b750932ae6076eb5a8af6c46fe8207eb6d16ef1"
+      }
+    },
+    {
+      "module": "Ps.BackendWasm.Lower.TypeInventory",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower/TypeInventory.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 23861,
+      "sha256": "f4357ace64c1de768673772c5966fb9d7bb6c21d037392eea5f267498c65d5cd",
+      "imports": [
+        "Ps.BackendWasm.Type",
+        "Ps.Foundation.List"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower/TypeInventory.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 32376,
+        "sha256": "b9b6d4ad523188eb32bab93e1601c19bb82b1f78b69032e45901d5951d2cc96f",
+        "generatedProjectionSha256": "188cf1ed6c88953bd48e3bae82a8f5bb8f213fdd3dc0530c031abdc13ce9c8f9"
+      }
+    },
+    {
+      "module": "Ps.BackendWasm.TailCalls",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/TailCalls.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 4492,
+      "sha256": "40e3b7733b12e6480db5a681060c16db88cf5d8dbc011cd2db69c0a43540ba6f",
+      "imports": [
+        "Ps.BackendWasm.Model",
+        "Ps.Foundation.List"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/TailCalls.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 4789,
+        "sha256": "1f13424b118f834d464ae575b123ef30e384bd5b204153a2466e896d00407a39",
+        "generatedProjectionSha256": "8e7406f4057dbe1942fb86b5b412522dd1a7db4b0a475de9c1e4ff9cae0b1223"
+      }
+    },
+    {
+      "module": "Ps.BackendWasm.LowerInt",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/LowerInt.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 4186,
+      "sha256": "f5efb833c5c1ea4914d2802c943d5d6b2ff27eeac2fa900ffff4e1cdc1095c6a",
+      "imports": [
+        "Ps.BackendWasm.Type"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/LowerInt.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 3984,
+        "sha256": "3b99d06e6602c94e97efba2fbd51d52033445de35983a628943c2c3d2494b06b",
+        "generatedProjectionSha256": "ffcf7b2cfbed0e3f1231fe4b74987828b8a1a34b89ac157f4e6a1c536236734f"
+      }
+    },
+    {
+      "module": "Ps.BackendWasm.LowerFloat",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/LowerFloat.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 1879,
+      "sha256": "18084332ed983dad151a4f34b5eb7e6de58244a7203915c248ff617f467ac0b0",
+      "imports": [
+        "Ps.BackendWasm.Type"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/LowerFloat.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 1353,
+        "sha256": "25402ccc924c09affc1a8a9a7b1aea01d53d2ca8219a1cd878c66ba767068977",
+        "generatedProjectionSha256": "d6d3a1b26e6d64f7d83f449d5dbca6d8025901adbaeae96f14cdd08b1609a97f"
+      }
+    },
+    {
+      "module": "Ps.BackendWasm.RuntimeNat",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 32351,
+      "sha256": "7e1e6bb4cfd4600a510f2b3003f13ccb2dfa3c58ab7300da513bc9eaa05a3034",
+      "imports": [
+        "Ps.BackendWasm.Model",
+        "Ps.Foundation.List"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/RuntimeNat.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 26570,
+        "sha256": "77dc2e6a18e15833f269b3d919b6d94dba7e1837b5c2b46f3e7cf648bc3d55aa",
+        "generatedProjectionSha256": "1f08cdaf035667e323f4832c5defe4d9d8516533c97e1f1f51e68d1156c5e3d0"
+      }
+    },
+    {
+      "module": "Ps.BackendWasm.IntUtil",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/IntUtil.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 3077,
+      "sha256": "cbc42fd50286daafdcb91ff3e515302138561c37da11751da2d7539ce407d58d",
+      "imports": [
+        "Ps.Foundation.Name"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/IntUtil.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 3380,
+        "sha256": "043ddfe58416ae55047c0df2a7d71d123588a5ff55b5016fa39c32c94d3927bf",
+        "generatedProjectionSha256": "c48e53138169e71db366539ff3a4557ea1ba7cefb3ebe7f54d23502435e5f9cc"
+      }
+    },
+    {
+      "module": "Ps.BackendWasm.RuntimeInt",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/RuntimeInt.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 13180,
+      "sha256": "7f1b7c0a567243caa31d5485672d0c6f73b0560c1d5daf69ce2276347531e1a9",
+      "imports": [
+        "Ps.BackendWasm.RuntimeNat",
+        "Ps.BackendWasm.IntUtil",
+        "Ps.Foundation.List"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/RuntimeInt.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 10575,
+        "sha256": "fac8ab5fa7595a9eae85ae509acd698f48ac4eca930411ec43ea1e07eb0e5671",
+        "generatedProjectionSha256": "9ad6913eb6e437fcb15ca90be96f8a1c7e635c9c1d778d66601928acd351ed83"
+      }
+    },
+    {
+      "module": "Ps.BackendWasm.RuntimeString",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/RuntimeString.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 45775,
+      "sha256": "e55547cc194ed516cac8d78fd3eb4434330c03a031f28e9da466c49b3949a4e4",
+      "imports": [
+        "Ps.BackendWasm.RuntimeNat",
+        "Ps.Foundation.List"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/RuntimeString.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 35278,
+        "sha256": "bd38b4e9d859ae63cef6a6fd17329cc2a2676d61dd41aa8a14822e066df48077",
+        "generatedProjectionSha256": "756838d2c66297cfb6f10173ff9bd6cc2aed5d3b45232d1df2581c6b3e8325b8"
+      }
+    },
+    {
+      "module": "Ps.BackendWasm.RuntimeIntRepr",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/RuntimeIntRepr.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 4706,
+      "sha256": "cc56aa7f403c845a37eb86946207ab5a0a4b575361eda09d79272eaba5c3852e",
+      "imports": [
+        "Ps.BackendWasm.RuntimeInt",
+        "Ps.BackendWasm.RuntimeString",
+        "Ps.Foundation.List"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/RuntimeIntRepr.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 3707,
+        "sha256": "a41a79dbf3c76b1ec6709007f7fc6dc39353eb77c9fc8123ebdf163d9777f04a",
+        "generatedProjectionSha256": "c6866098249a263128b189f96680394e90da3ff327299db0245942627daec527"
+      }
+    },
+    {
+      "module": "Ps.BackendWasm.Lower",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 143365,
+      "sha256": "e0bf3eda26b0b36c0d77d4f9e6f76b1eb5d0907ee5a4994cb809c1b3415ee40c",
+      "imports": [
+        "Ps.BackendWasm.Lower.RuntimeNeeds",
+        "Ps.BackendWasm.Lower.TypeInventory",
+        "Ps.BackendWasm.TailCalls",
+        "Ps.CompilerIr.Specialize",
+        "Ps.CompilerIr.Validate",
+        "Ps.Foundation.List",
+        "Ps.Foundation.Name",
+        "Ps.BackendWasm.LowerInt",
+        "Ps.BackendWasm.LowerFloat",
+        "Ps.BackendWasm.RuntimeNat",
+        "Ps.BackendWasm.RuntimeInt",
+        "Ps.BackendWasm.RuntimeString",
+        "Ps.BackendWasm.RuntimeIntRepr"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/Lower.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 219206,
+        "sha256": "f0a0c40d3e93e3838631ae70301392eec433f9bdc4d47f95551d67a6970dd9c0",
+        "generatedProjectionSha256": "572d51e2904f3800f21267ff65ec6bddfbb517c06c09f0814d0406f7910bb4ba"
+      }
+    },
+    {
+      "module": "Ps.BackendWasm.BinaryBytes",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/BinaryBytes.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 52711,
+      "sha256": "a54fc196363302f49966ebcadc9b43721d25a42b0b0cbd90f1db2df54e1fecc1",
+      "imports": [
+        "Ps.BackendWasm.Model",
+        "Ps.BackendWasm.IntUtil",
+        "Ps.Foundation.Name",
+        "Ps.Foundation.List"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/BinaryBytes.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 48179,
+        "sha256": "5cb047a65128aee8284da3eeda4d570fb253c174b57cb095b36844cf70240e6f",
+        "generatedProjectionSha256": "5ada1e1fe8070d2eac6033798f5d58357dffe2b54f5e4aeb34702accf9bc6634"
+      }
+    },
+    {
+      "module": "Ps.BackendWasm.ValidateStructure",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/ValidateStructure.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 23539,
+      "sha256": "fdc3422842a4440b0a949e20b42b1876d0b216f76ae0b73b9e9627c800405830",
+      "imports": [
+        "Ps.BackendWasm.Model",
+        "Ps.Foundation.List",
+        "Ps.Foundation.Name"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/ValidateStructure.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 28602,
+        "sha256": "58538365304f609d6a5d94f87475832436a794a5d3d50736a28bae04fd31e71d",
+        "generatedProjectionSha256": "5e697cbda9eefec8655af68a8d152219fe41b2009800397c65992b8a9c7ba958"
+      }
+    },
+    {
+      "module": "Ps.BackendWasm.ValidateTyping",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/ValidateTyping.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 39592,
+      "sha256": "ed0af5e376bed3c913cd30f3cbfac089d4b80269fb2772d4ee01d7cbdb3652a3",
+      "imports": [
+        "Ps.BackendWasm.ValidateStructure"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/ValidateTyping.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 34815,
+        "sha256": "0e5a34cef775e92a54cd8ba8e3fad561f1258ad55fe50b71864dd2ce1ce32516",
+        "generatedProjectionSha256": "1708c9e4f8c315f4f765a567c1f943e4903d61d04e6fe340281a71b4d2dd0e31"
+      }
+    },
+    {
+      "module": "Ps.BackendWasm.ValidateIr",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/ValidateIr.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 611,
+      "sha256": "4ca21990c91988cd4867cf965b1667eda526661916edaaab5d15eb0c96f8c622",
+      "imports": [
+        "Ps.BackendWasm.ValidateTyping"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/ValidateIr.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 614,
+        "sha256": "543a2d89156f5bae4a6ae0357179ec26dc97755c5d5c63c6232643f5f9f227a5",
+        "generatedProjectionSha256": "ab83e865cc1e229a6c7e4cfa1e60485e8050b215844a5dcb98cc5b4c2fc35d46"
+      }
+    },
+    {
+      "module": "Ps.BackendWasm.ServiceAbi",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/ServiceAbi.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 6440,
+      "sha256": "c1862ca84a1a3f8731bb6cff4f0d31694368b76b2f517d8b06be763e31855ec8",
+      "imports": [
+        "Ps.BackendWasm.RuntimeString",
+        "Ps.BackendWasm.RuntimeInt",
+        "Ps.BackendCommon.Plan"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/ServiceAbi.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 4614,
+        "sha256": "43efb0f6092985162f4fc8ceb502614dbcab4f2795cb6dc0183d2236b2e733be",
+        "generatedProjectionSha256": "5d086fb367ffb32d5155228cbb59c51b9857d98a8853fbd3a90df3ec9e597fc7"
+      }
+    },
+    {
+      "module": "Ps.BackendWasm.CompilerService",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/CompilerService.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 2633,
+      "sha256": "ff8831f2f678bdcfe2a35591268c6adc63a1fe338f240ef89393d06be285042f",
+      "imports": [
+        "Ps.Compiler.Service",
+        "Ps.BackendWasm.Lower",
+        "Ps.BackendWasm.BinaryBytes",
+        "Ps.BackendWasm.ValidateIr",
+        "Ps.BackendWasm.ServiceAbi"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/CompilerService.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 2394,
+        "sha256": "a6af2af5d69bc16e6281a37ca0b9d1bee217ce31fda4c36a37af0795b8b5a70c",
+        "generatedProjectionSha256": "347cf726fa3d6265e4a1d089f10fbd3c621086de09078fe3734c3f59bf3aac78"
+      }
+    },
+    {
+      "module": "Ps.CompilerUnified.Service",
+      "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 3806,
+      "sha256": "4b6a1c1cb433d483e6172cd528ac45b7cb9d032e7eee056237be2a2c3a59a7f7",
+      "imports": [
+        "Ps.BackendJs.CompilerService",
+        "Ps.BackendTs.CompilerService",
+        "Ps.BackendRust.CompilerService",
+        "Ps.BackendWasm.CompilerService"
+      ],
+      "bootstrap": {
+        "path": "packages/compiler-unified/src/Ps/CompilerUnified/Service.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 3075,
+        "sha256": "bcca68c5dd21e3ff6881185ea97631af58ab99c47bc6376d3ffb66fe70e5e179",
+        "generatedProjectionSha256": "573e2440a842f4d766ca3a3ba2d6fb3ffa8d67cb4285926597dec5e29bf33270"
+      }
+    },
+    {
+      "module": "Ps.Foundation.Diagnostic",
+      "path": "packages/foundation/src/Ps/Foundation/Diagnostic.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 210,
+      "sha256": "d27cb1f99e258b5b04bb58b651320b7d484f9eb71228f836530d4cf37c2fd3a2",
+      "imports": [
+        "Ps.Foundation.Source"
+      ],
+      "bootstrap": {
+        "path": "packages/foundation/src/Ps/Foundation/Diagnostic.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 202,
+        "sha256": "69bebd854dcb757f820e18747eb60e8211db93771ded02f59b8fabcc55201412",
+        "generatedProjectionSha256": "69bebd854dcb757f820e18747eb60e8211db93771ded02f59b8fabcc55201412"
+      }
+    },
+    {
+      "module": "Ps.Syntax.Lossless",
+      "path": "packages/syntax/src/Ps/Syntax/Lossless.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 9429,
+      "sha256": "79f5150e2230042e9d209caf7937b86fd658ddf2c787bd523427cdd70777dd78",
+      "imports": [
+        "Ps.Syntax.Lexer"
+      ],
+      "bootstrap": {
+        "path": "packages/syntax/src/Ps/Syntax/Lossless.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 10430,
+        "sha256": "c9689ec5bcb571795145f4f0eaf6afcf040064798cfae4b8c6c9bff0122aaae5",
+        "generatedProjectionSha256": "23b83ad42868e9454abb6008a7c64455e9fb1262b9b1e16878bfc947f4000d7a"
+      }
+    },
+    {
+      "module": "Ps.Bridge.Codec",
+      "path": "packages/bridge/src/Ps/Bridge/Codec.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 12951,
+      "sha256": "fa53a5aab916751cda3d7016a50550bc4ed12d76b4b9f80bd7dc4cb47107466a",
+      "imports": [
+        "Ps.Bridge.CheckedAdmissions"
+      ],
+      "bootstrap": {
+        "path": "packages/bridge/src/Ps/Bridge/Codec.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 18234,
+        "sha256": "b4d0eed5331e6ceab99eef1b04e4def3051c5cc01844acabc72991e2d4571230",
+        "generatedProjectionSha256": "561ae5341b23d3a1574fdad5a06727239d96b89e248d1a61f279d60ce06117e6"
+      }
+    },
+    {
+      "module": "Ps.Bridge.Protocol",
+      "path": "packages/bridge/src/Ps/Bridge/Protocol.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 7412,
+      "sha256": "f75c20b3aa0fb7dc446d9c4691365a330a2267ef658405407714d6db39dafe92",
+      "imports": [
+        "Ps.Bridge.Codec"
+      ],
+      "bootstrap": {
+        "path": "packages/bridge/src/Ps/Bridge/Protocol.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 8100,
+        "sha256": "1f4191c9f956a12038a363fe02dc3c92db142a9db808069d79cef7fe7ca8e8bd",
+        "generatedProjectionSha256": "4a92c208fe9c1611d1e831a446ec3595331522c032722143302d67aede4d4bef"
+      }
+    },
+    {
+      "module": "Ps.CompilerIr.Construct",
+      "path": "packages/compiler-ir/src/Ps/CompilerIr/Construct.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 2436,
+      "sha256": "99f6c0f652a5169de54de572731ce411691708b67117dc2fe2c60106641aaadf",
+      "imports": [
+        "Ps.CompilerIr.Model"
+      ],
+      "bootstrap": {
+        "path": "packages/compiler-ir/src/Ps/CompilerIr/Construct.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 2510,
+        "sha256": "c268a4095bf4b98491c4fbc2d3ed43fb57a47ee99cda3cff802115f11b6c00c1",
+        "generatedProjectionSha256": "7427b84d644f89d78dca9d43cd5e7a7dc9aeec134963193d99ea221020369459"
+      }
+    },
+    {
+      "module": "Ps.BackendCommon.StateExcept",
+      "path": "packages/backend-common/src/Ps/BackendCommon/StateExcept.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 1770,
+      "sha256": "f50b07b71383e7d5f832df0cc8bcb77b27f7e796f6dc7af8a420b45a7abc463d",
+      "imports": [],
+      "bootstrap": {
+        "path": "packages/backend-common/src/Ps/BackendCommon/StateExcept.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 1624,
+        "sha256": "b2029de37886606cca2fcc81f5aae69821dace6d42378d79dd752d3008d621ff",
+        "generatedProjectionSha256": "9d9c07b981006ec48acf89957f295c93fcacbef7cead314707fcebbf555ad38d"
+      }
+    },
+    {
+      "module": "Ps.BackendCommon.Source",
+      "path": "packages/backend-common/src/Ps/BackendCommon/Source.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 4911,
+      "sha256": "0b304d87d4c72e6e39cc80d1ef21f1a0f06e9af9fde880cd83949e106b8e36aa",
+      "imports": [
+        "Ps.BackendCommon.StateExcept",
+        "Ps.Foundation.List"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-common/src/Ps/BackendCommon/Source.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 4760,
+        "sha256": "1baed2d716c85b7d38cb3fcb31906614cd7db1baec65352aa5facfe469f367bc",
+        "generatedProjectionSha256": "469d9ba90c4ea86e7a9a2739a323dc612fdf4fee2435cf659dfa7d3b6822a52b"
+      }
+    },
+    {
+      "module": "Ps.BackendCommon.DirectCalls",
+      "path": "packages/backend-common/src/Ps/BackendCommon/DirectCalls.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 6332,
+      "sha256": "fa68e64c4f560baeefe58b2a5fd9ce06866404826d692165e4b11bdb722d4dce",
+      "imports": [
+        "Ps.CompilerIr.Model",
+        "Ps.BackendCommon.Source",
+        "Ps.BackendCommon.Plan",
+        "Ps.Foundation.StringSet"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-common/src/Ps/BackendCommon/DirectCalls.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 6502,
+        "sha256": "96300a74f023661a4d4c18fdd593b164dd76af890c57af97cd57cf5159c6d8da",
+        "generatedProjectionSha256": "325d13c3c18cfde80e550b16d342e0919337833c2cbc98866b86b61f191cb373"
+      }
+    },
+    {
+      "module": "Ps.BackendCommon.Modules",
+      "path": "packages/backend-common/src/Ps/BackendCommon/Modules.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 27613,
+      "sha256": "f37d006a3516735925c56e18c1f78c7033e2e5630300532f1f62c745d6890acd",
+      "imports": [
+        "Ps.CompilerIr.Specialize",
+        "Ps.CompilerIr.Provenance",
+        "Ps.CompilerIr.Validate",
+        "Ps.Foundation.List",
+        "Ps.Foundation.Name",
+        "Ps.Foundation.Text"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-common/src/Ps/BackendCommon/Modules.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 26367,
+        "sha256": "ee182984d0f5340ceb4a9a3641a08987e10427a6ae486b76215d4c7ce291cf48",
+        "generatedProjectionSha256": "a678eafb239f1a7eacb0a28674c7379f368228f06710c0c2356fdb6768b279ff"
+      }
+    },
+    {
+      "module": "Ps.Compiler",
+      "path": "packages/compiler/src/Ps/Compiler.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 23,
+      "sha256": "26e7fdbaad5fd297d98dcc8b5c19213c3fedc42a97d0b99e98a3467def538231",
+      "imports": [
+        "Ps.Compiler.Api"
+      ],
+      "bootstrap": {
+        "path": "packages/compiler/src/Ps/Compiler.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 23,
+        "sha256": "26e7fdbaad5fd297d98dcc8b5c19213c3fedc42a97d0b99e98a3467def538231",
+        "generatedProjectionSha256": "26e7fdbaad5fd297d98dcc8b5c19213c3fedc42a97d0b99e98a3467def538231"
+      }
+    },
+    {
+      "module": "Ps.Compiler.Sh1",
+      "path": "packages/compiler/src/Ps/Compiler/Sh1.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 35341,
+      "sha256": "cfefb231ede54ff584a3b46de9a96d09a6a112b5502459407be6a774ae9c3536",
+      "imports": [
+        "Ps.Compiler.Api"
+      ],
+      "bootstrap": {
+        "path": "packages/compiler/src/Ps/Compiler/Sh1.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 36143,
+        "sha256": "9205561e25293c63c85f3eb7044931243cb6a16f2d062e2f3a34acf9bf270df9",
+        "generatedProjectionSha256": "c6f77fb5ee3ee97732236fac3628bf4e7436499f05c11553ee34e99ad6be47e8"
+      }
+    },
+    {
+      "module": "Ps.BackendTs.Checked",
+      "path": "packages/backend-ts/src/Ps/BackendTs/Checked.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 2558,
+      "sha256": "e27e111092bb6a494986a6456b9b101832651a08fb3cfde0739306bbbc9f0b94",
+      "imports": [
+        "Ps.Compiler.Api",
+        "Ps.BackendTs.Module",
+        "Ps.CompilerIr.Check",
+        "Ps.CompilerIr.Construct"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-ts/src/Ps/BackendTs/Checked.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 2595,
+        "sha256": "87a9d0a89871644a1a3cf4fa3629d7326077b227e49d0c8f0777c4379f314bd8",
+        "generatedProjectionSha256": "ebc779c2585d1a0cfd38f737241ad0408bd11ff0016ebea76c14b5859b63b68f"
+      }
+    },
+    {
+      "module": "Ps.BackendTs.Sh1Target",
+      "path": "packages/backend-ts/src/Ps/BackendTs/Sh1Target.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 32415,
+      "sha256": "edeb8ed35734ba922bcca550275e1c161d36763394db92428effbc68dff90f90",
+      "imports": [
+        "Ps.BackendTs.Module",
+        "Ps.Erasure.Basic"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-ts/src/Ps/BackendTs/Sh1Target.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 30077,
+        "sha256": "36387a384b31a22a3bcbeb3766a1c725c8c4afac4964b76f4d1d51a234cc3abc",
+        "generatedProjectionSha256": "2363e9c24f0ea41636be6cc8d411f21b7f541a573c253fbda14bf2be8fb30c03"
+      }
+    },
+    {
+      "module": "Ps.BackendTs.Sh1",
+      "path": "packages/backend-ts/src/Ps/BackendTs/Sh1.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 3034,
+      "sha256": "3c549619c64a0b098f7ab5824fddd52d439f67480be09e9e236cc9c9de63d5d4",
+      "imports": [
+        "Ps.Compiler.Sh1",
+        "Ps.BackendTs.Checked",
+        "Ps.BackendTs.Sh1Target"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-ts/src/Ps/BackendTs/Sh1.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 3405,
+        "sha256": "4c35232a7b70a4addb60111300d2266a410759d63c6eb7ca825ab24cafc24e29",
+        "generatedProjectionSha256": "d70f83b4664aed36be740d5693010316ad4ef8f4dd55e77361bce10841f17823"
+      }
+    },
+    {
+      "module": "Ps.BackendTs.Compiler",
+      "path": "packages/backend-ts/src/Ps/BackendTs/Compiler.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 1344,
+      "sha256": "4a056db74d9c1430c41fb9dd215cd81665faf28ef2c03b30e31fdf893a15077e",
+      "imports": [
+        "Ps.Compiler.Api",
+        "Ps.BackendTs.Module",
+        "Ps.BackendTs.Checked",
+        "Ps.BackendTs.Sh1"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-ts/src/Ps/BackendTs/Compiler.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 1398,
+        "sha256": "853731d4c15e6cf894548a841186ae1dfe6bc67ca28141c2b0b3b71336719db7",
+        "generatedProjectionSha256": "1212a3ffdc28bb09e62772b22882bf2f27b6a49fc2e4a4b5819c84c8f82d1d56"
+      }
+    },
+    {
+      "module": "Ps.BackendTs.Modules",
+      "path": "packages/backend-ts/src/Ps/BackendTs/Modules.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 7284,
+      "sha256": "5b539440b5dd87a9d4a0b0fbcac805b4e5f391a62ebf7e50fe4fab9a815cebf5",
+      "imports": [
+        "Ps.BackendCommon.Modules",
+        "Ps.BackendTs.Module"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-ts/src/Ps/BackendTs/Modules.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 6077,
+        "sha256": "e370ba549585e7db69183cd0c380522fa7b6cd9b47a674bc798178d2c2b810da",
+        "generatedProjectionSha256": "ffaf190179347b9d7a386a0884dd0d835e3963238e35891b1a4548e86d89402f"
+      }
+    },
+    {
+      "module": "Ps.BackendJs.Encode",
+      "path": "packages/backend-js/src/Ps/BackendJs/Encode.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 13140,
+      "sha256": "c1fbf9d467fd0ea9c11bda58551aca9c6f8a55b3905ca3eacdab432c6c84ecc4",
+      "imports": [
+        "Ps.BackendJs.Model",
+        "Ps.Bridge.Json",
+        "Ps.Foundation.List"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-js/src/Ps/BackendJs/Encode.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 13076,
+        "sha256": "7a3e4163cf501a14eb862e52d8d04a379952e72abc7df6df8132c75d21c1c008",
+        "generatedProjectionSha256": "10ef60134d7cba5a2266dc10989a58ff7066e161e19de01d5f5922b5eb62bee3"
+      }
+    },
+    {
+      "module": "Ps.BackendJs.Modules",
+      "path": "packages/backend-js/src/Ps/BackendJs/Modules.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 11723,
+      "sha256": "f0f463fa894c2a2b3fa12c38cdc4f2656c44dd3e2bb1ebc941a84576787f09f6",
+      "imports": [
+        "Ps.BackendCommon.Modules",
+        "Ps.BackendJs.Print",
+        "Ps.BackendTs.Type"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-js/src/Ps/BackendJs/Modules.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 9304,
+        "sha256": "e9ebeeca2d03840c1738b414e2ab850a18aedd175adb1ff49ecfa876d9594855",
+        "generatedProjectionSha256": "c78b7095882d734f317af643af3c6115a78ff11fd4f850cf145889aeaefb9ba8"
+      }
+    },
+    {
+      "module": "Ps.BackendWasm.Encode",
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/Encode.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 16020,
+      "sha256": "e8da2f64e1d40ffb43b8b4cae62ae7c9370bbf947ca3ee55827812bb583ba5d1",
+      "imports": [
+        "Ps.BackendWasm.Model",
+        "Ps.Bridge.Json",
+        "Ps.Foundation.List"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-wasm/src/Ps/BackendWasm/Encode.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 15029,
+        "sha256": "4f07321edca7491cf17fd91db7336c264e272ef503c9c7c6978a936bf9135a30",
+        "generatedProjectionSha256": "221102accbc26590bfb46aa1f11e5e4ce0107fee369a08582c3aa5c9916dec6a"
+      }
+    },
+    {
+      "module": "Ps.BackendPython.Runtime",
+      "path": "packages/backend-python/src/Ps/BackendPython/Runtime.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 8470,
+      "sha256": "259215c8022744886a0ac7e9c547d753f6476f2592bc0de0ea3083edcb014d8d",
+      "imports": [
+        "Ps.BackendCommon.Plan"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-python/src/Ps/BackendPython/Runtime.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 7857,
+        "sha256": "2d3e9c1272821973edad0aec3da0fb3d0324aa37427d2822a172bdf1122b2896",
+        "generatedProjectionSha256": "184a5d5df333ac16e995727ae73314947248b19367e470c073e6ff06abbef737"
+      }
+    },
+    {
+      "module": "Ps.BackendPython.Portable",
+      "path": "packages/backend-python/src/Ps/BackendPython/Portable.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 54795,
+      "sha256": "c2fcb0c26eab6722add432daad1e8623bdd0dafa52cde4e2765a04a739e1f415",
+      "imports": [
+        "Ps.CompilerIr.Validate",
+        "Ps.Bridge.Json",
+        "Ps.BackendPython.Runtime",
+        "Ps.BackendCommon.Plan",
+        "Ps.BackendCommon.Source",
+        "Ps.BackendCommon.DirectCalls"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-python/src/Ps/BackendPython/Portable.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 47185,
+        "sha256": "067acf13251417cc052fe5b94198d43711162ae98da0811c4bb2024600057f05",
+        "generatedProjectionSha256": "be29a1a7f5c2300157d7aefb698ecc9ded530a4960259b642fbac25bc7f57cc7"
+      }
+    },
+    {
+      "module": "Ps.BackendPython.CompilerService",
+      "path": "packages/backend-python/src/Ps/BackendPython/CompilerService.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 801,
+      "sha256": "89f6e1fede0f117ac35f2d78e8a694249f986eb2d630e6eb76d0133d74353e00",
+      "imports": [
+        "Ps.Compiler.Service",
+        "Ps.BackendPython.Portable"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-python/src/Ps/BackendPython/CompilerService.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 796,
+        "sha256": "507321474207491d2838b6be4b55ea84d0738e3812ba946ecc13a9ce4b085836",
+        "generatedProjectionSha256": "cf98f37715de2fa715e326e6a65680a4ac4a9992b73d56ece05bd4818bcbe420"
+      }
+    },
+    {
+      "module": "Ps.BackendPhp.Runtime",
+      "path": "packages/backend-php/src/Ps/BackendPhp/Runtime.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 13592,
+      "sha256": "d63b418565c1e8f1df03849414e99a537f7b998f93e228ad31a2599eda7e0141",
+      "imports": [
+        "Ps.BackendCommon.Plan"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-php/src/Ps/BackendPhp/Runtime.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 13225,
+        "sha256": "d7c27cab840b3f565e72f84b4882e0767cd2b89ac9b03cbb97c5dca84a6f76ca",
+        "generatedProjectionSha256": "e241e0518390faf52f89324bb96ebaa08b28dd96badb5a9038e3327298ab4c4a"
+      }
+    },
+    {
+      "module": "Ps.BackendPhp.Portable",
+      "path": "packages/backend-php/src/Ps/BackendPhp/Portable.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 76072,
+      "sha256": "43a9529f2f88602853651a4981f4d96d348eae8b8bde676a1860391cf8e5f5b1",
+      "imports": [
+        "Ps.CompilerIr.Validate",
+        "Ps.Bridge.Json",
+        "Ps.BackendPhp.Runtime",
+        "Ps.BackendCommon.Plan",
+        "Ps.BackendCommon.Source",
+        "Ps.BackendCommon.DirectCalls"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-php/src/Ps/BackendPhp/Portable.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 67623,
+        "sha256": "5689abda3e2783be3fabdfba4c21efe87194700672edf0e28441693608996425",
+        "generatedProjectionSha256": "e7a6449f221bdfb56acc376ee292562534e6a1812f40c6bd1c3d7291c0623150"
+      }
+    },
+    {
+      "module": "Ps.BackendPhp.CompilerService",
+      "path": "packages/backend-php/src/Ps/BackendPhp/CompilerService.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 782,
+      "sha256": "f2f4a941e4b0ce3d0379baab28d05c7d1417ed65e579b8b74f9124858c48900a",
+      "imports": [
+        "Ps.Compiler.Service",
+        "Ps.BackendPhp.Portable"
+      ],
+      "bootstrap": {
+        "path": "packages/backend-php/src/Ps/BackendPhp/CompilerService.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 777,
+        "sha256": "4d899128bf86219e64588873ca070e3fd0e4a3d79f6e4e45fa4a068d15057ffc",
+        "generatedProjectionSha256": "1a96497e388361a6d3a816c44e4f433f48abfbe099ad1ff7d15aeb34c28a08b0"
+      }
+    },
+    {
+      "module": "Ps.Bootstrap.SelfHost",
+      "path": "packages/bootstrap/src/Ps/Bootstrap/SelfHost.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 241,
+      "sha256": "b9f98fbd32ab02fcbed04fa8c9071e0df41d8ef6bbfbc1497dfcba9ea31cdcc1",
+      "imports": [
+        "Ps.BackendTs.Compiler"
+      ],
+      "bootstrap": {
+        "path": "packages/bootstrap/src/Ps/Bootstrap/SelfHost.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 242,
+        "sha256": "1ff1e99ef3f2a53faadc995e27515721800e1ec8739003341287a072316f4ba9",
+        "generatedProjectionSha256": "b9f98fbd32ab02fcbed04fa8c9071e0df41d8ef6bbfbc1497dfcba9ea31cdcc1"
+      }
+    },
+    {
+      "module": "ProofScript.Data.Prod",
+      "path": "stdlib/ProofScript/Data/Prod.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 572,
+      "sha256": "1eaf21decae4b77c5dea3ac31747ddf0139f9e443fab7dd1e8b9a127a145f1c5",
+      "imports": [],
+      "bootstrap": {
+        "path": "stdlib/ProofScript/Data/Prod.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 588,
+        "sha256": "424e744ba64675e874d788661a97bdeff41d97d04125106d383f2731dd7b915a",
+        "generatedProjectionSha256": "ae263f9902bb3ad7944e8c1d9fa170905342e9d6e155dd308f45d51a477627c5"
+      }
+    },
+    {
+      "module": "ProofScript.Data.Option",
+      "path": "stdlib/ProofScript/Data/Option.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 1060,
+      "sha256": "c07cad631bbeeb0bc6ebce9c6a13ac4da926ece267f5ef3ed2855b41b34904a3",
+      "imports": [],
+      "bootstrap": {
+        "path": "stdlib/ProofScript/Data/Option.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 1050,
+        "sha256": "d04669588d6c9e0b42bfb907d4371a80d021310e2c3576d7322c8dd654aae783",
+        "generatedProjectionSha256": "c25a076a1d3591e15fa340b58480363300546549d8be220bdbc1a9240c6077d8"
+      }
+    },
+    {
+      "module": "ProofScript.Data.Result",
+      "path": "stdlib/ProofScript/Data/Result.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 1455,
+      "sha256": "9523a763af9c181469a471a3ca800323c583eb24d27534aa1cc663baafa44bab",
+      "imports": [
+        "ProofScript.Data.Option"
+      ],
+      "bootstrap": {
+        "path": "stdlib/ProofScript/Data/Result.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 1432,
+        "sha256": "82bcf1fbd54b2991d9fbc6e6620dc8325e0f155e9ac92feae4ace629b8261772",
+        "generatedProjectionSha256": "9a8f7dca81b5ba99c3ca2745ddaecf1ccd35425adb2aac47a9685de5e3e44e0f"
+      }
+    },
+    {
+      "module": "ProofScript.Compiler.Effect",
+      "path": "stdlib/ProofScript/Compiler/Effect.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 7110,
+      "sha256": "976a273946b797141df598b69d26be92b6396e5541d91c6d890357e7e074a6c1",
+      "imports": [
+        "ProofScript.Data.Prod",
+        "ProofScript.Data.Result"
+      ],
+      "bootstrap": {
+        "path": "stdlib/ProofScript/Compiler/Effect.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 7307,
+        "sha256": "cdeef6078ea1a285f8a89d7b3a8f969b68f204c3178a6516828d22383b96131c",
+        "generatedProjectionSha256": "aab8b9c4841935f81f69a1099b8cf9093f33736a8ad3ffa0ada97de56248212c"
+      }
+    },
+    {
+      "module": "ProofScript.Data.Ordering",
+      "path": "stdlib/ProofScript/Data/Ordering.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 387,
+      "sha256": "3c65eaedb36728a61de3fda2ef1f46d42bdd0c3fd5ec2e2d0f9316df20256d0f",
+      "imports": [],
+      "bootstrap": {
+        "path": "stdlib/ProofScript/Data/Ordering.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 389,
+        "sha256": "b45eb74b80cb839ac096b7c51b45afb80f14199dd14416479e2535ea90ead52c",
+        "generatedProjectionSha256": "179c5ac038e0f21ba9a49e2d563e8b7464bef67cc4e044b88eb8da7f29eab0bc"
+      }
+    },
+    {
+      "module": "ProofScript.Data.Json",
+      "path": "stdlib/ProofScript/Data/Json.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 24727,
+      "sha256": "20f274e6372ec575f9de928eb81d48df82e118e2a5a47b4be2c8f42a65676e41",
+      "imports": [
+        "ProofScript.Data.Option",
+        "ProofScript.Data.Ordering",
+        "ProofScript.Data.Prod",
+        "ProofScript.Data.Result"
+      ],
+      "bootstrap": {
+        "path": "stdlib/ProofScript/Data/Json.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 29475,
+        "sha256": "0fc178a37bdce47a626b1d76a0a8054dcaf524bcb26dac4ccc126c85ffcc9401",
+        "generatedProjectionSha256": "5f49bfa6e9806cb73493ce3437d54070272bd68f0fd4254cf06166d27392281f"
+      }
+    },
+    {
+      "module": "ProofScript.Compiler.KernelProtocol",
+      "path": "stdlib/ProofScript/Compiler/KernelProtocol.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 7202,
+      "sha256": "659985893c1d2bdded3d930d26cfa293425152deaeab58eb94d8e012d26a1f01",
+      "imports": [
+        "ProofScript.Data.Json"
+      ],
+      "bootstrap": {
+        "path": "stdlib/ProofScript/Compiler/KernelProtocol.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 8112,
+        "sha256": "560a24e7e1d7a5233313e59233cc39425d90f98e3a8192edc7fcf755cc6b8d00",
+        "generatedProjectionSha256": "5ac11332860bfd11c6f9653c676ff07056dda8b5b47f004d61a0ebd45f4f2051"
+      }
+    },
+    {
+      "module": "ProofScript.Data.Array",
+      "path": "stdlib/ProofScript/Data/Array.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 2211,
+      "sha256": "3b253a1dd4e251d9ce8a7f586875b169acb1c426341d36216c1da8c4d8e5c8a3",
+      "imports": [
+        "ProofScript.Data.Option"
+      ],
+      "bootstrap": {
+        "path": "stdlib/ProofScript/Data/Array.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 2326,
+        "sha256": "52bc412daf3bf17816d6b882f65660f4bfc42e2f437d985223101aa0f190cc8c",
+        "generatedProjectionSha256": "fa1f571b6f4c542f3ac7beedd595ef791e96351af31f3a6cfeb138c0cbcbd04e"
+      }
+    },
+    {
+      "module": "ProofScript.Data.Except",
+      "path": "stdlib/ProofScript/Data/Except.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 225,
+      "sha256": "7090aee9894a431e85b28d63234d079dc49ff9d5aff012342f7e1ae03832c38d",
+      "imports": [],
+      "bootstrap": {
+        "path": "stdlib/ProofScript/Data/Except.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 225,
+        "sha256": "7090aee9894a431e85b28d63234d079dc49ff9d5aff012342f7e1ae03832c38d",
+        "generatedProjectionSha256": "7090aee9894a431e85b28d63234d079dc49ff9d5aff012342f7e1ae03832c38d"
+      }
+    },
+    {
+      "module": "ProofScript.Data.List",
+      "path": "stdlib/ProofScript/Data/List.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 1713,
+      "sha256": "8f4f1cb2dfdf9e9a012ceddba2a4f2f17f792430c645c3beb08a6f40f896812d",
+      "imports": [
+        "ProofScript.Data.Option"
+      ],
+      "bootstrap": {
+        "path": "stdlib/ProofScript/Data/List.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 1717,
+        "sha256": "b7f5d38c30a38019894ffe74cbae0daa8822d0ef21c3a40e6cf6c4907b4c608f",
+        "generatedProjectionSha256": "7dfeaa0ed4f22777667cd28ddc2bc4563f718d1a8c7ff98d06b047707d925826"
+      }
+    },
+    {
+      "module": "ProofScript.Data.Map",
+      "path": "stdlib/ProofScript/Data/Map.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 1390,
+      "sha256": "18bbda65d9d07e4a6a72364961d2e8a1387e8c80d2e8c5e76c427df6895aa594",
+      "imports": [
+        "ProofScript.Data.Option",
+        "ProofScript.Data.Ordering"
+      ],
+      "bootstrap": {
+        "path": "stdlib/ProofScript/Data/Map.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 1434,
+        "sha256": "136facda66981cc743b480a9e635396e86c07972e663d1c88fec8cdc184a4c42",
+        "generatedProjectionSha256": "90012251186d8a99f85690c014182279ac3f88c37b96e09b2316384690b2cd3f"
+      }
+    },
+    {
+      "module": "ProofScript.Data.Set",
+      "path": "stdlib/ProofScript/Data/Set.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 482,
+      "sha256": "be69f712ba12fc2b2e1aa08347474b993b13879e096799a68db58dba29d48787",
+      "imports": [
+        "ProofScript.Data.Map"
+      ],
+      "bootstrap": {
+        "path": "stdlib/ProofScript/Data/Set.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 477,
+        "sha256": "da87d90a7f1a304997afe3d49e1803a21b7ab53f04493be64e0464efeacc9f84",
+        "generatedProjectionSha256": "99b6d8d6f36b57117bbdbdb2d82876e678362ef3a431dc26565ef394e206173c"
+      }
+    },
+    {
+      "module": "ProofScript.System.IO",
+      "path": "stdlib/ProofScript/System/IO.ps",
+      "authority": "canonical-editable-proofscript",
+      "bytes": 5820,
+      "sha256": "54dde9210eaece347e5ff96396eb7168255ff999961be16664132b7bdfc7b601",
+      "imports": [
+        "ProofScript.Compiler.Effect",
+        "ProofScript.Data.Json"
+      ],
+      "bootstrap": {
+        "path": "stdlib/ProofScript/System/IO.lean",
+        "authority": "immutable-checked-bootstrap-reference",
+        "bytes": 5506,
+        "sha256": "37134d119f629deb56b76765cd1823ef3f261ff5423105d7df582063f19c8028",
+        "generatedProjectionSha256": "d7a078ea57461143780966d178c3bdc42353dd7e2910d359f1968f80bc6ec015"
+      }
+    }
+  ],
+  "classifiedRemainder": [
+    {
+      "path": "packages/backend-php/src/Ps/BackendPhp/Module.lean",
+      "role": "native-compatibility-default-adapter",
+      "reason": "Native optional arguments and record defaults only; emitter semantics have one portable implementation.",
+      "canonicalImplementation": "packages/backend-php/src/Ps/BackendPhp/Portable.ps",
+      "bytes": 972,
+      "sha256": "ed44aee2ae6804eea48e76aea693c396229318840c720cea67b8bd61e592bd45"
+    },
+    {
+      "path": "packages/backend-php/src/Ps/BackendPhp/ProviderMain.lean",
+      "role": "native-process-entry",
+      "reason": "Native IO/process entry at the host boundary, outside the self-hosted semantic compiler.",
+      "bytes": 437,
+      "sha256": "1d7cb75377945fbbad2e2f5428684b8104e431eb9829b49df49a06927827e150"
+    },
+    {
+      "path": "packages/backend-python/src/Ps/BackendPython/Module.lean",
+      "role": "native-compatibility-default-adapter",
+      "reason": "Native optional arguments and record defaults only; emitter semantics have one portable implementation.",
+      "canonicalImplementation": "packages/backend-python/src/Ps/BackendPython/Portable.ps",
+      "bytes": 392,
+      "sha256": "c213554398d017b786e6c87ecff7e1b091da78401a92721277afd14ad607115b"
+    },
+    {
+      "path": "packages/backend-python/src/Ps/BackendPython/ProviderMain.lean",
+      "role": "native-process-entry",
+      "reason": "Native IO/process entry at the host boundary, outside the self-hosted semantic compiler.",
+      "bytes": 428,
+      "sha256": "86fc7a4d5ee07da32974de256bb150534e8550e7828824ece3ec36146a5d81f3"
+    },
+    {
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/Binary.lean",
+      "role": "native-byte-carrier-adapter",
+      "reason": "Native UInt8 carrier/component boundary; portable Nat-byte encoding and semantics have separate canonical owners.",
+      "bytes": 18245,
+      "sha256": "f843b6f27633c78503d8897be7118c3b277d0f7281a4b20163b1d11f4b63d30c"
+    },
+    {
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/CanonicalExports.lean",
+      "role": "retained-unselected-adapter",
+      "reason": "Not declared by the current Lake libraries or imported by the qualified unified compiler; retained explicit reference, not promoted source.",
+      "bytes": 12970,
+      "sha256": "8644ff55fe9b4d94428f66ad25f4a0fb802bf013e5baf1ae0e23903fd53484aa"
+    },
+    {
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/CanonicalRequest.lean",
+      "role": "retained-unselected-adapter",
+      "reason": "Not declared by the current Lake libraries or imported by the qualified unified compiler; retained explicit reference, not promoted source.",
+      "bytes": 6038,
+      "sha256": "f780016396707ac6ecd55a513493b299fa5bba26477f346faecfbb89413e56dc"
+    },
+    {
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/Component.lean",
+      "role": "native-byte-carrier-adapter",
+      "reason": "Native UInt8 carrier/component boundary; portable Nat-byte encoding and semantics have separate canonical owners.",
+      "bytes": 6529,
+      "sha256": "c8bbd080912e131840f7f2e0cc2faf694f44810afeea1094c3c1540a84a2f9b4"
+    },
+    {
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/LiteralEvidence.lean",
+      "role": "retained-unselected-adapter",
+      "reason": "Not declared by the current Lake libraries or imported by the qualified unified compiler; retained explicit reference, not promoted source.",
+      "bytes": 2702,
+      "sha256": "712dab2fecd7f32e2ab00776454967f8895009154a8f1f094303c2ee8c60699f"
+    },
+    {
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/RuntimePlan.lean",
+      "role": "native-byte-carrier-adapter",
+      "reason": "Native UInt8 carrier/component boundary; portable Nat-byte encoding and semantics have separate canonical owners.",
+      "bytes": 2466,
+      "sha256": "cbd43a13de404259bb9b1a902867fa13ac76e58a14a110e0a9cfd179a96f0cd0"
+    },
+    {
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/SelfHostAbi.lean",
+      "role": "retained-unselected-adapter",
+      "reason": "Not declared by the current Lake libraries or imported by the qualified unified compiler; retained explicit reference, not promoted source.",
+      "bytes": 5107,
+      "sha256": "32058a14df269bc28cb535f0b48d3bb1502658ab85aeda639ab54a7feefea740"
+    },
+    {
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/StringAbi.lean",
+      "role": "native-byte-carrier-adapter",
+      "reason": "Native UInt8 carrier/component boundary; portable Nat-byte encoding and semantics have separate canonical owners.",
+      "bytes": 17474,
+      "sha256": "bdd01a653719cec5d7fdada0cb0dbcb87a4d1a04e2e5091034a5760debf1c587"
+    },
+    {
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/StringComponent.lean",
+      "role": "native-byte-carrier-adapter",
+      "reason": "Native UInt8 carrier/component boundary; portable Nat-byte encoding and semantics have separate canonical owners.",
+      "bytes": 5524,
+      "sha256": "eb009ec8d6e1db0491d21140cb832210341b29d55237092e51427864e6bfceef"
+    },
+    {
+      "path": "packages/backend-wasm/src/Ps/BackendWasm/Validate.lean",
+      "role": "retained-unselected-adapter",
+      "reason": "Not declared by the current Lake libraries or imported by the qualified unified compiler; retained explicit reference, not promoted source.",
+      "bytes": 8004,
+      "sha256": "51e90c2b2b20b058d559c38d2867b6ebfdb7b9144f9cdf10cc9dd5f0c444ee2c"
+    },
+    {
+      "path": "packages/cli/src/Main.lean",
+      "role": "native-process-entry",
+      "reason": "Native IO/process entry at the host boundary, outside the self-hosted semantic compiler.",
+      "bytes": 12241,
+      "sha256": "f998f4372a31624dd5c0b5a3da6c1a275d295dd51841b18383e0c40f33fe4801"
+    },
+    {
+      "path": "stdlib/SELFHOST-COLLECTIONS.lean",
+      "role": "validation-composition",
+      "reason": "Ordinary source fixture/composition for library validation; explicitly outside authored library modules.",
+      "bytes": 2791,
+      "sha256": "b1c2164ef981c26048c790ab03c72b3d00496083d8916fe9f32f5603196ba93a"
+    },
+    {
+      "path": "stdlib/SELFHOST-EFFECT.lean",
+      "role": "validation-composition",
+      "reason": "Ordinary source fixture/composition for library validation; explicitly outside authored library modules.",
+      "bytes": 3105,
+      "sha256": "9bbe28f5051ce8cc6f6fe362be694a79870402362e95f3afc23991162aeabf39"
+    },
+    {
+      "path": "stdlib/SELFHOST-JSON.lean",
+      "role": "validation-composition",
+      "reason": "Ordinary source fixture/composition for library validation; explicitly outside authored library modules.",
+      "bytes": 1011,
+      "sha256": "57890f86a98bbe2bbdee88a65eca97709b880a28ae8e1a08131f5e03853c418e"
+    }
+  ],
+  "primaryProject": "compiler.project.json",
+  "bootstrapPolicy": "Canonical .ps is the only authored owner. Existing .lean files are immutable checked bootstrap references; updates require checked projection/correspondence, never independent hand edits.",
+  "independentKernelsExcluded": true,
+  "separateOwnershipDomains": [
+    {
+      "path": "host/",
+      "authority": "native-host-implementation"
+    },
+    {
+      "path": "host-tools/",
+      "authority": "host-orchestration-and-policy"
+    },
+    {
+      "path": "scripts/",
+      "authority": "bootstrap-validation-and-release-tools"
+    },
+    {
+      "path": "test/",
+      "authority": "authored-test-and-reference-oracles"
+    },
+    {
+      "path": "legacy/",
+      "authority": "historical-reference-material"
+    },
+    {
+      "path": "packages/pskernel-*",
+      "authority": "independent-kernel-projects"
+    }
+  ],
+  "generatedViews": [
+    {
+      "path": "packages/stdlib/src/ProofScript",
+      "from": "stdlib/ProofScript",
+      "authority": "exact-generated-packaging-view"
+    }
+  ],
+  "sourceOrdering": "real parser dependency order; compiler and standard library are separately checked graphs",
+  "auditRoot": {
+    "module": "Ps.Canonical.Repository",
+    "imports": [
+      "Ps.Foundation.Source",
+      "Ps.Foundation.List",
+      "Ps.Syntax.Cursor",
+      "Ps.Syntax.Token",
+      "Ps.Syntax.Lexer",
+      "Ps.Foundation.Name",
+      "Ps.Syntax.Ast",
+      "Ps.Syntax.ParserState",
+      "Ps.Syntax.ParseCommon",
+      "Ps.Syntax.ParseBinding",
+      "Ps.Syntax.ParseDo",
+      "Ps.Syntax.ParseData",
+      "Ps.Syntax.Operators",
+      "Ps.Syntax.ParseLean",
+      "Ps.Syntax.ParseProofScript",
+      "Ps.Syntax.PrintCommon",
+      "Ps.Syntax.PrintLean",
+      "Ps.Syntax.PrintProofScript",
+      "Ps.Syntax.Translate",
+      "Ps.Foundation.Text",
+      "Ps.Bridge.Json",
+      "Ps.Core.Level",
+      "Ps.Core.Expr",
+      "Ps.Core.Declaration",
+      "Ps.Core.Abstract",
+      "Ps.Core.Subst",
+      "Ps.Core.Equality",
+      "Ps.Environment.Basic",
+      "Ps.Bridge.CheckedAdmissions",
+      "Ps.Core.Builtin",
+      "Ps.Environment.Prelude",
+      "Ps.Environment.SelfHostPrelude",
+      "Ps.Environment.Control",
+      "Ps.Environment.Order",
+      "Ps.Environment.SelfHostProd",
+      "Ps.Environment.LocalContext",
+      "Ps.Environment.Resolve",
+      "Ps.Core.LevelSubst",
+      "Ps.Meta.LevelContext",
+      "Ps.Meta.Context",
+      "Ps.Meta.Reduce",
+      "Ps.Meta.Infer",
+      "Ps.Environment.Instances",
+      "Ps.Meta.Unify",
+      "Ps.Meta.SynthInstance",
+      "Ps.Elab.SourceTrace",
+      "Ps.Elab.Context",
+      "Ps.Elab.Literal",
+      "Ps.Elab.Basic",
+      "Ps.Elab.DoBase",
+      "Ps.Elab.DoFor",
+      "Ps.Elab.DoLoop",
+      "Ps.Elab.DoWhile",
+      "Ps.Elab.DoTry",
+      "Ps.Elab.Data",
+      "Ps.Elab.Do",
+      "Ps.Elab.Operators",
+      "Ps.Elab.Term",
+      "Ps.Elab.Recursion",
+      "Ps.Elab.DoLoopLift",
+      "Ps.Elab.DoForLift",
+      "Ps.Elab.Declaration",
+      "Ps.CompilerIr.Model",
+      "Ps.Erasure.Basic",
+      "Ps.Erasure.Expr",
+      "Ps.Erasure.Inductive",
+      "Ps.Erasure.Structure",
+      "Ps.Erasure.StructureRecursor",
+      "Ps.Erasure.Definition",
+      "Ps.Compiler.Api",
+      "Ps.Compiler.Ordinary",
+      "Ps.CompilerIr.Encode",
+      "Ps.Bridge.CompilerHost",
+      "Ps.CompilerIr.CheckTypes",
+      "Ps.CompilerIr.CheckSize",
+      "Ps.CompilerIr.Check",
+      "Ps.CompilerIr.Provenance",
+      "Ps.Foundation.StringSet",
+      "Ps.CompilerIr.Specialize",
+      "Ps.CompilerIr.Validate",
+      "Ps.CompilerIr.WorkerFusion",
+      "Ps.BackendCommon.Plan",
+      "Ps.Compiler.Service",
+      "Ps.BackendJs.Model",
+      "Ps.BackendJs.Lower",
+      "Ps.BackendJs.Validate",
+      "Ps.BackendJs.TailAlias",
+      "Ps.BackendJs.Print",
+      "Ps.BackendJs.CompilerService",
+      "Ps.BackendTs.Type",
+      "Ps.BackendTs.RuntimeSupport",
+      "Ps.BackendTs.Expr",
+      "Ps.BackendTs.Module",
+      "Ps.BackendTs.CompilerService",
+      "Ps.BackendRust.RuntimePlan",
+      "Ps.BackendRust.Identifier",
+      "Ps.BackendRust.Type",
+      "Ps.BackendRust.ValueRefs",
+      "Ps.BackendRust.Captures",
+      "Ps.BackendRust.Expr",
+      "Ps.BackendRust.TailAlias",
+      "Ps.BackendRust.Tail",
+      "Ps.BackendRust.Runtime",
+      "Ps.BackendRust.Module",
+      "Ps.BackendRust.CompilerService",
+      "Ps.BackendWasm.Lower.RuntimeNeeds",
+      "Ps.BackendWasm.Model",
+      "Ps.BackendWasm.Type",
+      "Ps.BackendWasm.Lower.TypeInventory",
+      "Ps.BackendWasm.TailCalls",
+      "Ps.BackendWasm.LowerInt",
+      "Ps.BackendWasm.LowerFloat",
+      "Ps.BackendWasm.RuntimeNat",
+      "Ps.BackendWasm.IntUtil",
+      "Ps.BackendWasm.RuntimeInt",
+      "Ps.BackendWasm.RuntimeString",
+      "Ps.BackendWasm.RuntimeIntRepr",
+      "Ps.BackendWasm.Lower",
+      "Ps.BackendWasm.BinaryBytes",
+      "Ps.BackendWasm.ValidateStructure",
+      "Ps.BackendWasm.ValidateTyping",
+      "Ps.BackendWasm.ValidateIr",
+      "Ps.BackendWasm.ServiceAbi",
+      "Ps.BackendWasm.CompilerService",
+      "Ps.CompilerUnified.Service",
+      "Ps.Foundation.Diagnostic",
+      "Ps.Syntax.Lossless",
+      "Ps.Bridge.Codec",
+      "Ps.Bridge.Protocol",
+      "Ps.CompilerIr.Construct",
+      "Ps.BackendCommon.StateExcept",
+      "Ps.BackendCommon.Source",
+      "Ps.BackendCommon.DirectCalls",
+      "Ps.BackendCommon.Modules",
+      "Ps.Compiler",
+      "Ps.Compiler.Sh1",
+      "Ps.BackendTs.Checked",
+      "Ps.BackendTs.Sh1Target",
+      "Ps.BackendTs.Sh1",
+      "Ps.BackendTs.Compiler",
+      "Ps.BackendTs.Modules",
+      "Ps.BackendJs.Encode",
+      "Ps.BackendJs.Modules",
+      "Ps.BackendWasm.Encode",
+      "Ps.BackendPython.Runtime",
+      "Ps.BackendPython.Portable",
+      "Ps.BackendPython.CompilerService",
+      "Ps.BackendPhp.Runtime",
+      "Ps.BackendPhp.Portable",
+      "Ps.BackendPhp.CompilerService",
+      "Ps.Bootstrap.SelfHost"
+    ],
+    "sha256": "55af3fcb59689ee5d38976711680fcf8b60f6ffb0b1eac38329fb67178bac50f",
+    "authored": false
+  },
+  "qualifiedUnified": {
+    "input": {
+      "run": 40618697529,
+      "job": 122611129273,
+      "artifact": 12788978661,
+      "commit": "5484a04df34de1bbcfa46a248b6a93ce510035d6",
+      "zipSha256": "a8b98f259de6d95009bfbbecd5a2fb68091cda5ba632c7a72c74584671a4a2aa"
+    },
+    "modules": 125,
+    "sourceClosureDigest": "9d0f097e79eb2b1e14d10362c6db9b4bc2370c26627658017bf6b2681b46fabf",
+    "exactQualifiedProofScriptBytesRetained": true
+  },
+  "correspondence": {
+    "status": "passed",
+    "assurance": "ordinary-checked",
+    "modules": 151,
+    "bootstrapSourceClosureDigest": "66159fc7801f8c405710823372cb6081e59c482e46a49bd4c65ecd4f46a9f855",
+    "canonicalSourceClosureDigest": "3db5588a9ff7fe1d7bdfa8aea80993e62e7a5efadc7d30137805e2c590b82b5c",
+    "admissionsSha256": "0a4c1cded077208f519e1fafa4e15d809e91e92753810e64111ca672e4f3d291",
+    "originalIrSha256": "1d6f10ff3dcca1bbde7e952ef17702f0ae9ad715b65528f4236efae7d63e76b5",
+    "sourceCoreDeclarations": 5496,
+    "partialNamesPreserved": true,
+    "importsAndMemberOwnershipPreserved": true,
+    "bootstrapChecker": {
+      "protocol": "pskernel-lean/1",
+      "provider": "lean4-cpp",
+      "leanVersion": "4.35.0",
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "profile": "lean4.35-core",
+      "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+      "accepted": true
+    },
+    "canonicalChecker": {
+      "protocol": "pskernel-lean/1",
+      "provider": "lean4-cpp",
+      "leanVersion": "4.35.0",
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "profile": "lean4.35-core",
+      "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+      "accepted": true
+    },
+    "helperHashes": {
+      "lexical": "886ba6d1743e4e5b13ef7297b1edb5dae002e8a0b508b3307e9b08402d2c2603",
+      "ownership": "02ea07e8e89f8afed7e3ed830be3eba9c403933c002b349b94216d1c991f1dd4",
+      "checker": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1"
+    },
+    "reverseProjection": {
+      "admissionsSha256": "0a4c1cded077208f519e1fafa4e15d809e91e92753810e64111ca672e4f3d291",
+      "originalIrSha256": "1d6f10ff3dcca1bbde7e952ef17702f0ae9ad715b65528f4236efae7d63e76b5",
+      "nativePatternProjection": {
+        "schema": "psc1-native-reference-projection/1",
+        "status": "candidate-only",
+        "script": "scripts/NativeReferenceProjection.lean",
+        "scriptSha256": "4862465c9d605748f912338c362d0c214a49a4e7d6cbe3a8ce0941c87412caf8",
+        "requestSha256": "4519469092964fc2602a7cbc193706bde4b0519cf0ebe1dde572712c64380f65",
+        "responseSha256": "1500e152991cef86121c962c9cd59f00a7b9813ef1ae2ad7c6f4d50f2972b779",
+        "elapsedMs": 2172,
+        "modules": [
+          {
+            "module": "Ps.CompilerIr.Specialize",
+            "inputBytes": 59344,
+            "inputSha256": "1fad41896864a01363843e0c017a926410eb9b10a49c9ad995025911494b2ee7",
+            "outputBytes": 59344,
+            "outputSha256": "1fad41896864a01363843e0c017a926410eb9b10a49c9ad995025911494b2ee7",
+            "constructorDots": [],
+            "reparsed": true,
+            "idempotent": true,
+            "allOriginalBytesPreserved": true
+          }
+        ],
+        "admissionAuthority": false,
+        "sourceFilesWritten": false,
+        "formalSourcePreservationProof": false
+      }
+    },
+    "commentPolicy": "changed references derive from canonical PS with raw comments retained; untouched reference bytes are preserved",
+    "formalSourcePreservationProof": false,
+    "receiptGrantsAdmissionAuthority": false,
+    "nativeProjectionProbe": {
+      "status": "passed",
+      "scope": "hybrid native compiler with only changed authored modules projected",
+      "nativeBuild": true,
+      "independentlyCheckedAfterNativeRebuild": true,
+      "helperHashes": {
+        "lexical": "886ba6d1743e4e5b13ef7297b1edb5dae002e8a0b508b3307e9b08402d2c2603",
+        "ownership": "02ea07e8e89f8afed7e3ed830be3eba9c403933c002b349b94216d1c991f1dd4",
+        "checker": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1"
+      },
+      "checkedGraphs": [
+        {
+          "group": "compiler",
+          "admissionsSha256": "0a4c1cded077208f519e1fafa4e15d809e91e92753810e64111ca672e4f3d291",
+          "originalIrSha256": "1d6f10ff3dcca1bbde7e952ef17702f0ae9ad715b65528f4236efae7d63e76b5",
+          "canonicalChecker": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.35.0",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "profile": "lean4.35-core",
+            "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+            "accepted": true
+          },
+          "bootstrapChecker": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.35.0",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "profile": "lean4.35-core",
+            "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+            "accepted": true
+          },
+          "canonicalMetrics": {
+            "elapsedMs": 122117,
+            "maxRssKiB": 388916,
+            "peakTreeRssKiB": 388788,
+            "timeoutMs": 240000,
+            "graphFilesProfile": "canonical-repository-40m",
+            "graphFilesBytesLimit": 41943040,
+            "admissionsBytes": 34431244,
+            "originalIrBytes": 10029216
+          },
+          "bootstrapMetrics": {
+            "elapsedMs": 120547,
+            "maxRssKiB": 386700,
+            "peakTreeRssKiB": 386700,
+            "timeoutMs": 240000,
+            "graphFilesProfile": "canonical-repository-40m",
+            "graphFilesBytesLimit": 41943040,
+            "admissionsBytes": 34431244,
+            "originalIrBytes": 10029216
+          }
+        },
+        {
+          "group": "library",
+          "admissionsSha256": "3d731ffb8d828657b37bcc1e19a28852ff17be401429d1e43ef8622129e1bf81",
+          "originalIrSha256": "c44535e3bf9d596a7f593536193a0ba3b94fbbde73ad4ffc0dec59729e9ef2be",
+          "canonicalChecker": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.35.0",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "profile": "lean4.35-core",
+            "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+            "accepted": true
+          },
+          "bootstrapChecker": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.35.0",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "profile": "lean4.35-core",
+            "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+            "accepted": true
+          },
+          "canonicalMetrics": {
+            "elapsedMs": 307,
+            "maxRssKiB": 101904,
+            "peakTreeRssKiB": 101904,
+            "timeoutMs": 240000
+          },
+          "bootstrapMetrics": {
+            "elapsedMs": 398,
+            "maxRssKiB": 102492,
+            "peakTreeRssKiB": 102492,
+            "timeoutMs": 240000
+          }
+        }
+      ],
+      "changedReferences": [
+        {
+          "module": "Ps.CompilerIr.Specialize",
+          "path": "packages/compiler-ir/src/Ps/CompilerIr/Specialize.lean",
+          "beforeSha256": "d686403b8749c65ae5770bfb50fefb8a1bd7bb7bef827adc05f50ab6a7b0b53d",
+          "afterSha256": "1fad41896864a01363843e0c017a926410eb9b10a49c9ad995025911494b2ee7"
+        }
+      ],
+      "untouchedCompilerReferences": 150,
+      "referenceFilesPromoted": false
+    },
+    "elapsedMs": 1766002
+  },
+  "libraryCorrespondence": {
+    "status": "passed",
+    "assurance": "ordinary-checked",
+    "modules": 13,
+    "bootstrapSourceClosureDigest": "d464ca3b187004c2b1b97400b850543537a4d3ce9a9e22c3796d69d40ca50099",
+    "canonicalSourceClosureDigest": "22af16cf564281964ce4f134798bad98966ca85240f20926038f30dac503fe39",
+    "admissionsSha256": "3d731ffb8d828657b37bcc1e19a28852ff17be401429d1e43ef8622129e1bf81",
+    "originalIrSha256": "c44535e3bf9d596a7f593536193a0ba3b94fbbde73ad4ffc0dec59729e9ef2be",
+    "sourceCoreDeclarations": 237,
+    "partialNamesPreserved": true,
+    "importsAndMemberOwnershipPreserved": true,
+    "bootstrapChecker": {
+      "protocol": "pskernel-lean/1",
+      "provider": "lean4-cpp",
+      "leanVersion": "4.35.0",
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "profile": "lean4.35-core",
+      "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+      "accepted": true
+    },
+    "canonicalChecker": {
+      "protocol": "pskernel-lean/1",
+      "provider": "lean4-cpp",
+      "leanVersion": "4.35.0",
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "profile": "lean4.35-core",
+      "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+      "accepted": true
+    },
+    "helperHashes": {
+      "lexical": "886ba6d1743e4e5b13ef7297b1edb5dae002e8a0b508b3307e9b08402d2c2603",
+      "ownership": "02ea07e8e89f8afed7e3ed830be3eba9c403933c002b349b94216d1c991f1dd4",
+      "checker": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1"
+    },
+    "reverseProjection": {
+      "admissionsSha256": "3d731ffb8d828657b37bcc1e19a28852ff17be401429d1e43ef8622129e1bf81",
+      "originalIrSha256": "c44535e3bf9d596a7f593536193a0ba3b94fbbde73ad4ffc0dec59729e9ef2be",
+      "nativePatternProjection": null
+    },
+    "commentPolicy": "changed references derive from canonical PS with raw comments retained; untouched reference bytes are preserved",
+    "formalSourcePreservationProof": false,
+    "receiptGrantsAdmissionAuthority": false,
+    "auditRoot": {
+      "module": "ProofScript.Canonical.Library",
+      "imports": [
+        "ProofScript.Data.Prod",
+        "ProofScript.Data.Option",
+        "ProofScript.Data.Result",
+        "ProofScript.Compiler.Effect",
+        "ProofScript.Data.Ordering",
+        "ProofScript.Data.Json",
+        "ProofScript.Compiler.KernelProtocol",
+        "ProofScript.Data.Array",
+        "ProofScript.Data.Except",
+        "ProofScript.Data.List",
+        "ProofScript.Data.Map",
+        "ProofScript.Data.Set",
+        "ProofScript.System.IO"
+      ],
+      "authored": false,
+      "sha256": "069d9aa4a1477a8245e2bfc2d81eea3589be232918d739c75eef36fc84284bea"
+    },
+    "initialPsVariant": {
+      "path": "stdlib/ProofScript/System/IO.ps",
+      "bytes": 5820,
+      "sha256": "54dde9210eaece347e5ff96396eb7168255ff999961be16664132b7bdfc7b601",
+      "retainedCanonicalBytes": true,
+      "sameAdmissionsAndOriginalIr": true
+    }
+  },
+  "currentUnified": {
+    "entryModule": "Ps.CompilerUnified.Service",
+    "modules": 125,
+    "sourceClosureDigest": "424c15ce2cf5bb87a293dd2aad1705fa801c07067c972578aa76111627d590d7",
+    "exactQualifiedProofScriptBytesRetained": false
+  },
+  "referenceRefresh": {
+    "baseline": "109e404586504cfe5f20352d1804d0cf0ac83310",
+    "baselineManifestSha256": "941c23fc7bd63b6168f4baea54ccdf26252761cdfa43e3a1a84eb157884c049f",
+    "preparedCommit": "0575b1a39a09c4253fd5691eec9fbc270fac6f5b",
+    "runId": "40646380001",
+    "changedCanonicalModules": [
+      "Ps.CompilerIr.Specialize"
+    ],
+    "changedCompilerReferences": [
+      "packages/compiler-ir/src/Ps/CompilerIr/Specialize.lean"
+    ],
+    "changedLibraryReferences": [],
+    "untouchedReferenceBytesPreserved": true,
+    "nativeProjectionProbe": {
+      "status": "passed",
+      "scope": "hybrid native compiler with only changed authored modules projected",
+      "nativeBuild": true,
+      "independentlyCheckedAfterNativeRebuild": true,
+      "helperHashes": {
+        "lexical": "886ba6d1743e4e5b13ef7297b1edb5dae002e8a0b508b3307e9b08402d2c2603",
+        "ownership": "02ea07e8e89f8afed7e3ed830be3eba9c403933c002b349b94216d1c991f1dd4",
+        "checker": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1"
+      },
+      "checkedGraphs": [
+        {
+          "group": "compiler",
+          "admissionsSha256": "0a4c1cded077208f519e1fafa4e15d809e91e92753810e64111ca672e4f3d291",
+          "originalIrSha256": "1d6f10ff3dcca1bbde7e952ef17702f0ae9ad715b65528f4236efae7d63e76b5",
+          "canonicalChecker": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.35.0",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "profile": "lean4.35-core",
+            "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+            "accepted": true
+          },
+          "bootstrapChecker": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.35.0",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "profile": "lean4.35-core",
+            "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+            "accepted": true
+          },
+          "canonicalMetrics": {
+            "elapsedMs": 122117,
+            "maxRssKiB": 388916,
+            "peakTreeRssKiB": 388788,
+            "timeoutMs": 240000,
+            "graphFilesProfile": "canonical-repository-40m",
+            "graphFilesBytesLimit": 41943040,
+            "admissionsBytes": 34431244,
+            "originalIrBytes": 10029216
+          },
+          "bootstrapMetrics": {
+            "elapsedMs": 120547,
+            "maxRssKiB": 386700,
+            "peakTreeRssKiB": 386700,
+            "timeoutMs": 240000,
+            "graphFilesProfile": "canonical-repository-40m",
+            "graphFilesBytesLimit": 41943040,
+            "admissionsBytes": 34431244,
+            "originalIrBytes": 10029216
+          }
+        },
+        {
+          "group": "library",
+          "admissionsSha256": "3d731ffb8d828657b37bcc1e19a28852ff17be401429d1e43ef8622129e1bf81",
+          "originalIrSha256": "c44535e3bf9d596a7f593536193a0ba3b94fbbde73ad4ffc0dec59729e9ef2be",
+          "canonicalChecker": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.35.0",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "profile": "lean4.35-core",
+            "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+            "accepted": true
+          },
+          "bootstrapChecker": {
+            "protocol": "pskernel-lean/1",
+            "provider": "lean4-cpp",
+            "leanVersion": "4.35.0",
+            "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+            "profile": "lean4.35-core",
+            "executableSha256": "2589e24ee5bba4edbc66e5b0825eec6020a8a1f9e90038be52d79956928724f1",
+            "accepted": true
+          },
+          "canonicalMetrics": {
+            "elapsedMs": 307,
+            "maxRssKiB": 101904,
+            "peakTreeRssKiB": 101904,
+            "timeoutMs": 240000
+          },
+          "bootstrapMetrics": {
+            "elapsedMs": 398,
+            "maxRssKiB": 102492,
+            "peakTreeRssKiB": 102492,
+            "timeoutMs": 240000
+          }
+        }
+      ],
+      "changedReferences": [
+        {
+          "module": "Ps.CompilerIr.Specialize",
+          "path": "packages/compiler-ir/src/Ps/CompilerIr/Specialize.lean",
+          "beforeSha256": "d686403b8749c65ae5770bfb50fefb8a1bd7bb7bef827adc05f50ab6a7b0b53d",
+          "afterSha256": "1fad41896864a01363843e0c017a926410eb9b10a49c9ad995025911494b2ee7"
+        }
+      ],
+      "untouchedCompilerReferences": 150,
+      "referenceFilesPromoted": false
+    },
+    "elapsedMs": 1766002
+  }
+}

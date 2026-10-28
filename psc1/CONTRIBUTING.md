@@ -6,6 +6,12 @@ target emission and host checking/publication.
 
 ## Find the right owner
 
+Edit the canonical `.ps` file identified by [CANONICAL_SOURCES.json](CANONICAL_SOURCES.json).
+A paired `.lean` file is a checked bootstrap reference; it changes only through the
+[reference-refresh workflow](docs/CANONICAL_SOURCE_OWNERSHIP.md). Native adapters,
+independent kernels, host code and tests have separate explicit ownership. The
+[repository-wide index](../SOURCE_OWNERSHIP.json) refuses unclassified ProofScript files.
+
 Language syntax belongs in `packages/syntax`; shared meaning belongs in
 `environment`, `meta` and `elab`. Runtime IR belongs in `compiler-ir`; proof
 erasure belongs in `erasure`. Target code belongs in `backend-*`.

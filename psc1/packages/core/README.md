@@ -1,6 +1,6 @@
 # core
 
-Canonical logical terms and declarations. Start at [src/Ps/Core/Expr.lean](src/Ps/Core/Expr.lean).
+Canonical logical terms and declarations. Start at [src/Ps/Core/Expr.ps](src/Ps/Core/Expr.ps).
 
 - Representation: Logical expressions/declarations → structural operations.
 - Boundary: No target emitter or filesystem authority.

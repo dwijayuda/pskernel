@@ -1,6 +1,6 @@
 # bootstrap
 
-Compiler bootstrap composition. Start at [src/Ps/Bootstrap/SelfHost.lean](src/Ps/Bootstrap/SelfHost.lean).
+Compiler bootstrap composition. Start at [src/Ps/Bootstrap/SelfHost.ps](src/Ps/Bootstrap/SelfHost.ps).
 
 - Representation: Pinned source closure → bootstrap candidate.
 - Boundary: Not a separate semantic authority or owned-kernel replacement.

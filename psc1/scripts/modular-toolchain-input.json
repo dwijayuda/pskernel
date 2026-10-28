@@ -1,0 +1,24 @@
+{
+  "schema": "psc1-modular-toolchain-input/1",
+  "graph": {
+    "schema": "psc1-modular-checked-input/1",
+    "artifact": {
+      "run": 40666692730,
+      "job": 122743152998,
+      "artifact": 12805544463,
+      "commit": "4393ed1551aef8b6e5799b3a611cf084739618d8",
+      "zipSha256": "01eb8af4d455e41c919ad523355aa1e238485fe84fa7f2ea70ea3891ae366e38"
+    },
+    "manifestSha256": "f0b25fabaa702e949645eeee9adedf52237016b316aaeefb90bf806170c4b389",
+    "compilerSourceClosureDigest": "41eb40437e0df1722128c09c9b9da7cad0ccb1ad61371f23eb6bc2db4e9a1106"
+  },
+  "root": {
+    "run": 40666699859,
+    "job": 122743404912,
+    "artifact": 12806608104,
+    "commit": "4393ed1551aef8b6e5799b3a611cf084739618d8",
+    "zipSha256": "0c27ddf0c4d63b1b3c63e6029d73c0e14391c6b6d6f374b980b252b26e5c60dd",
+    "tarball": "proofscript-0.1.0-psc1.13.tgz"
+  },
+  "version": "0.1.0-psc1-modular.1"
+}

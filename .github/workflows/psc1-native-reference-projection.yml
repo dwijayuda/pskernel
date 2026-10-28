@@ -1,0 +1,58 @@
+name: PSC1 native reference projection
+on:
+  workflow_call:
+  push:
+    branches: [feat/psc1-canonical-latency-20261028]
+    paths:
+      - psc1/scripts/NativeReferenceProjection.lean
+      - psc1/scripts/native-reference-projection.mjs
+      - psc1/scripts/native-reference-projection-tests.mjs
+      - .github/workflows/psc1-native-reference-projection.yml
+permissions:
+  contents: read
+jobs:
+  projection:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: psc1
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/cache/restore@v4
+        with:
+          path: ~/.elan
+          key: psc1-canonical-elan-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        with:
+          path: psc1/.lake/build
+          key: psc1-native-projection-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc1/packages/**/*.lean', 'psc1/lean-toolchain') }}
+          restore-keys: |
+            psc1-canonical-source-tools-v1-${{ runner.os }}-${{ runner.arch }}-
+      - name: Install the pinned bootstrap compiler
+        run: |
+          set -euo pipefail
+          if [ ! -x "$HOME/.elan/bin/elan" ]; then
+            curl --connect-timeout 20 --max-time 120 --retry 2 -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o "$RUNNER_TEMP/psc1-elan-init.sh"
+            timeout 180 sh "$RUNNER_TEMP/psc1-elan-init.sh" -y --default-toolchain none
+          fi
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build the maintained parser and check the host adapter
+        run: |
+          node --check scripts/native-reference-projection.mjs
+          node --check scripts/native-reference-projection-tests.mjs
+          lake build Ps.Syntax.ParseLean
+          lake env lean scripts/NativeReferenceProjection.lean
+      - name: Require exact byte edits, idempotence, malformed-report refusals and real native compilation
+        run: node scripts/native-reference-projection-tests.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-native-reference-projection-${{ github.sha }}
+          path: psc1/dist/native-reference-projection-tests/
+          if-no-files-found: warn
+          retention-days: 90

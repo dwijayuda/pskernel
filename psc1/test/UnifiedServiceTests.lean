@@ -1,4 +1,8 @@
 import Ps.CompilerUnified.Service
+import Ps.BackendJs.CompilerService
+import Ps.BackendTs.CompilerService
+import Ps.BackendRust.CompilerService
+import Ps.BackendWasm.CompilerService
 import Lean
 
 def psUnifiedTestRequest : String :=

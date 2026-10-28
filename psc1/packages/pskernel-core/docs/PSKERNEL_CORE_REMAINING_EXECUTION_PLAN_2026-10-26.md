@@ -1,3 +1,34 @@
+## Active goal revision — 29 October 2026 (Asia/Jakarta)
+
+The user's requested research and goal revision makes **PSKernel-Core Bounded Independent Checker Preview 1** the next finite delivery milestone. The normative contract is [the preview goal](PSKERNEL_CORE_BOUNDED_PREVIEW_GOAL_2026-10-29.md), supported by [primary-source research](PSKERNEL_CORE_RESEARCH_GOAL_REVISION_2026-10-29.md) and the [source/CI audit](evidence/2026-10-29-goal-revision-source-audit.md). This leading entry supersedes earlier execution order and pending statuses for the next milestone; the old evidence and original full-goal gates below remain unchanged.
+
+**Deliverable:** the already-qualified nested kernel, with a supervised Linux/Node 22 file interface through the real checked empty-session/public DAG path, explicit input assumptions and five-way outcomes, resource/cleanup controls, both source-bound packages, and a complete regression/limitations ledger. Preview 1 remains **OPEN**; this documentation revision does not implement or qualify the new complete product.
+
+**Original global status remains B OPEN / C FAIL / D OPEN.** Both original nested String routes have 8,400 passing assertions; the retained full Arena denominator is 193, with 174 strict passes, 17 timeouts and two safety-contract differences. The preview requires running/publishing the whole original gate and preserving semantics; it does not turn these 19 non-passes into passes. The strict comparator keeps its failing exit code. Every preview closeout must show preview status and original strict compatibility together. No new false acceptance or unexplained regression is permitted.
+
+| Preview gate | Required evidence | Current boundary |
+|---|---|---|
+| P1 | Frozen CLI/result/assumption/resource contract bound to implementation and controls | Normative specification written; implementation bindings OPEN |
+| P2 | Actual independent packaged file checking in both routes | Existing library/examples verified; supervised file product OPEN |
+| P3 | Five outcome categories, strict assumption profile and host/protocol/cleanup negative controls | Complete wrapper matrix OPEN |
+| P4 | Reviewed code and all retained 814 reports/61 modules under unchanged axiom policy | Baseline qualified; changed bytes need applicable checks |
+| P5 | Both complete String routes and every original Arena row/budget/receipt | Prior baseline recorded; final product bindings OPEN; strict Arena FAIL |
+| P6 | No new false acceptance, missing case or unexplained semantic/classification regression | Final comparison OPEN |
+| P7 | Complete audited packages, examples, reproduction and limitation ledger | Library packages exist; supervised package extension OPEN |
+| P8 | All gate receipts, terminal evidence, exact Git readback and clear closeout | Product closeout OPEN |
+
+**Immediate next task:** implement batch 1 of the normative goal. Reuse the existing stream adapter, checked-session/public DAG API and typed outcomes. Add an external process supervisor; kernel fuel is recursive depth, not a global work counter. Freeze the file-profile assumption policy separately from PSKernel's proof-build axiom allowlist; allowed axiom names alone are insufficient. Keep malformed/unsupported/resource/host errors distinct and never accept on timeout or a partial receipt. Address the worker by the current Node executable with empty PATH and no runtime Lean callback. Do not change the original Arena adapter/oracles to fit this extra product policy.
+
+**Remaining batches:** complete fault/cleanup controls; run the final exact-byte full String/Arena evidence campaign with every failed case retained; then package, audit and deliver. These are four engineering work batches, not four days or a guaranteed completion date. See the normative goal for the exact acceptance and blocker rules.
+
+The emitter/cache experiment is deferred from this preview's critical path and remains isolated. Its original full-gate adoption rules are unchanged. Resolving all 17 timeouts/two safety differences, an accepted dependency-closed compiler replay (currently blocked at declaration 1 on missing Nat), global logical soundness, fixed points and backend preservation remain separate unfinished goals. No overall completion percentage or full-project certainty is justified.
+
+Reviewed baseline primary is a1a041b63ca4f2e34f5223240a7761e086f72f25, production source bbe353e649feed5b796adb164dcec36eaca915ab; integration remains d746fb8cdcb47f2031ac6db483cf63b7debbcbef. Fetch both refs before any implementation write. All compiler/kernel builds/tests/benchmarks/artifact generation remain GitHub Linux Actions only. Preserve all original bodies/assertions/oracles/deadlines/fuel/heap limits/failure denominators and proof statements. No sorry, unknown axioms, assumed output invariant, main merge, force push, npm publication, local kernel execution or subagents.
+
+## Historical evidence retained verbatim
+
+The following dated records are historical where they conflict with the active goal above. They remain append-only evidence; the new milestone does not erase their failures or replace the original acceptance criteria.
+
 ## Current milestone — 27 October 2026 (Asia/Jakarta)
 
 The complete owning nested route is selectively adopted through code checkpoint `619d865cde228ad479c63c97ccbaf8b3e5b77c83` after exact source review and native gate `40441811683`. Its production source tree is `bbe353e649feed5b796adb164dcec36eaca915ab`, byte-identical to the independently qualified nested producer `e58ef33ad14b26dcc85231801b1322551cf34614`. Only the eight reviewed production files, associated retained tests/harnesses, and explicit proof/build roots are selected; neither cache experiment nor the compiler emitter experiment is adopted. The prior constructor-parameter free-variable capture correction and its precedence remain unchanged. Integration remains `d746fb8cdcb47f2031ac6db483cf63b7debbcbef`; fetch both live refs before further writes.

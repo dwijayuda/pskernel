@@ -43,11 +43,15 @@ jobs:
       - name: Build actual source producer and independent official checker
         run: |
           node packages/pskernel-lean/host/check-pin.mjs
-          lake build PsBackendTs psc1_source_census_probe psc2_joint_closure_inventory psc1_independent_checker
+          lake build PsBackendTs psc1_source_census_probe psc2_joint_closure_inventory psc1_independent_checker PsMinActualSourceProbe
       - name: Capture the entire actual compiler graph once
         run: node scripts/minkernel-closure-audit.mjs
       - name: Query unchanged public MinKernel API for actual dependency-closed modules
         run: node --max-old-space-size=256 scripts/minkernel-module-matrix.mjs
+      - name: Pinpoint the real List type-binder refusal and dependency impact
+        run: node --max-old-space-size=256 scripts/minkernel-module-diagnostics.mjs
+      - name: Qualify actual Source constructors and projections on native and generated paths
+        run: node --max-old-space-size=256 scripts/minkernel-actual-source-module.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

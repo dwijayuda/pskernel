@@ -49,7 +49,7 @@ if(current)await crosscheckCompilerAdmissions({
  outputFile:path.join(out,'compiler-kernel-admission.json')
 });
 
-const hostFiles=[
+const hostFiles=['host-tools/executable/verify.mjs','host-tools/executable/loader.mjs','host-tools/executable/tools.mjs',
  "npm-cli/compiler-api.mjs","npm-cli/checked-command-cli.mjs","host-tools/contracts/compiler-closure.mjs","host-tools/execution/generated-service-runner.mjs","host-tools/execution/unified-candidate-runner.mjs",
  'host-tools/checked-component.mjs','host-tools/checked-optional-provider.mjs',
  'host-tools/transactional-publication.mjs','host-tools/checked-targets.mjs','host-tools/generated-wasm-transport.mjs','host-tools/generated-compiler-session.mjs','host-tools/compiler-host-protocol.mjs','host-tools/installed-engine-resolver.mjs',

@@ -33,13 +33,16 @@ jobs:
         run: |
           node scripts/ci/repository-layout.mjs
           node --check scripts/modular-toolchain-package.mjs
-      - name: Inspect exact qualified modular graph and independent kernel sizes
+      - name: Assemble the sealed modular root and genuine independent kernel
         env:
           GH_TOKEN: ${{ github.token }}
-        run: node scripts/modular-toolchain-package.mjs inspect
+        run: node scripts/modular-toolchain-package.mjs build
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: psc1-modular-toolchain-inspection-${{ github.sha }}
-          path: psc1/dist/modular-toolchain/inspection.json
+          name: psc1-modular-toolchain-package-${{ github.sha }}
+          path: |
+            psc1/dist/modular-toolchain/inspection.json
+            psc1/dist/modular-toolchain/package-receipt.json
+            psc1/dist/modular-toolchain/tarballs
           retention-days: 90

@@ -69,7 +69,7 @@ for (const pin of d.hostFiles.filter(p => /^(host-tools|npm-cli|scripts)\//.test
   assert.equal(sha256(fs.readFileSync(path.join(stage, pin.path))), pin.sha256);
 }
 const version = '0.1.0-psc1.11';
-const added = ["host-tools/runtime-policy.mjs","npm-cli/cli-watch.mjs","npm-cli/cli-watch-worker.mjs","npm-cli/proofscript-cli.mjs","npm-cli/cli-project.mjs","npm-cli/compiler-api.mjs","npm-cli/checked-command-cli.mjs","host-tools/contracts/compiler-closure.mjs","host-tools/execution/generated-service-runner.mjs","host-tools/execution/unified-candidate-runner.mjs"];
+const added = ['host-tools/executable/verify.mjs','host-tools/executable/loader.mjs','host-tools/executable/tools.mjs',"host-tools/runtime-policy.mjs","npm-cli/cli-watch.mjs","npm-cli/cli-watch-worker.mjs","npm-cli/proofscript-cli.mjs","npm-cli/cli-project.mjs","npm-cli/compiler-api.mjs","npm-cli/checked-command-cli.mjs","host-tools/contracts/compiler-closure.mjs","host-tools/execution/generated-service-runner.mjs","host-tools/execution/unified-candidate-runner.mjs"];
 for (const file of [...relocatedHosts, ...added]) {
   fs.mkdirSync(path.dirname(path.join(stage,file)),{recursive:true});
   fs.copyFileSync(file,path.join(stage,file));

@@ -90,6 +90,7 @@ function sessionFor(selected, publicationRoot) {
           },
         ]
       : [];
+  const modular = engine.descriptor.kind === 'modular-graph';
   return createGeneratedJsCompilerSession({
     requestId: 'installed-' + crypto.randomUUID(),
     sources: selected.sources,
@@ -99,22 +100,22 @@ function sessionFor(selected, publicationRoot) {
     target: selected.target,
     publicationProtocol: selected.publicationProtocol,
     serviceKind:
-      selected.target === 'js'
+      selected.target === 'js' && !modular
         ? 'js-adapter'
         : engine.candidateKind === 'embedded'
           ? 'unified-embedded'
           : 'unified-bundle',
     ...resolveCheckedTarget(selected.target, d, { rustToolchainRoot: selected.rustToolchainRoot }),
-    serviceFile: selected.target === 'js' ? engine.service.path : engine.candidate.path,
-    serviceSha256: selected.target === 'js' ? engine.service.sha256 : engine.candidate.sha256,
+    serviceFile: selected.target === 'js' && !modular ? engine.service.path : engine.candidate.path,
+    serviceSha256: selected.target === 'js' && !modular ? engine.service.sha256 : engine.candidate.sha256,
     runnerFile: path.join(
       installationRoot,
-      selected.target === 'js'
+      selected.target === 'js' && !modular
         ? 'host-tools/execution/generated-service-runner.mjs'
         : 'host-tools/execution/unified-candidate-runner.mjs',
     ),
     runnerSha256:
-      selected.target === 'js'
+      selected.target === 'js' && !modular
         ? d.runner.sha256
         : d.hostFiles.find(
             (row) => row.path === 'host-tools/execution/unified-candidate-runner.mjs',

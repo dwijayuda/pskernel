@@ -713,3 +713,7 @@ lean_exe psc1_portable_module_seed where
 lean_exe psc1_portable_module_tests where
   srcDir := "test"
   root := `PortableModuleTests
+
+lean_exe psc1_specialization_type_key_tests where
+  srcDir := "test"
+  root := `SpecializationTypeKeyTests

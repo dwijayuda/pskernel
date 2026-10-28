@@ -1,12 +1,13 @@
 name: PSC1 portable production modules
 on:
   push:
-    branches: [feat/psc1-portable-modules-20261029]
+    branches: [feat/psc1-portable-modules-20261029, perf/psc1-modular-type-keys-20261029]
     paths:
       - '.github/workflows/psc1-portable-modules.yml'
       - 'psc1/packages/**/*.lean'
       - 'psc1/host/src/**/*.lean'
       - 'psc1/scripts/Portable*.lean'
+      - 'psc1/test/SpecializationTypeKeyTests.lean'
       - 'psc1/lakefile.lean'
       - 'psc1/host-tools/executable/**'
       - 'psc1/scripts/check-portable-renderer-reference.mjs'
@@ -58,7 +59,16 @@ jobs:
       - name: Build portable planner, immutable reference and source census
         run: |
           node scripts/check-portable-renderer-reference.mjs
-          lake build psc1_portable_plan_tests psc1_executable_plan_tests psc1_source_census_probe psc1_portable_module_seed psc1_portable_module_tests psc1_executable_packages psc1_independent_checker
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import assert from 'node:assert/strict';import {execFileSync} from 'node:child_process';
+          const original=execFileSync('git',['show','17ce19919175b60be06050188e2a546a8a72e689:psc1/packages/compiler-ir/src/Ps/CompilerIr/Specialize.lean'],{encoding:'utf8'});
+          const start=original.indexOf('def psIrSpecializeTypeKeyWithFuel');
+          const end=original.indexOf('\ndef psIrSpecializeTypeKey\n',start);
+          assert.ok(start>=0&&end>start);
+          assert.ok(fs.readFileSync('test/SpecializationTypeKeyTests.lean','utf8').includes(original.slice(start,end).replaceAll('psIrSpecializeTypeKeyWithFuel','referenceTypeKeyWithFuel')));
+          console.log('PSC1_SPECIALIZATION_KEY_REFERENCE exact source17ce1991');
+          JS
+          lake build psc1_specialization_type_key_tests psc1_portable_plan_tests psc1_executable_plan_tests psc1_source_census_probe psc1_portable_module_seed psc1_portable_module_tests psc1_executable_packages psc1_independent_checker
       - uses: actions/cache/save@v4
         if: always() && steps.native.outputs.cache-hit != 'true'
         with:
@@ -66,6 +76,7 @@ jobs:
           key: ${{ steps.native.outputs.cache-primary-key }}
       - name: Compare native and portable plans, ordering and refusal classes
         run: |
+          .lake/build/bin/psc1_specialization_type_key_tests
           .lake/build/bin/psc1_executable_plan_tests
           .lake/build/bin/psc1_portable_plan_tests
           .lake/build/bin/psc1_portable_module_tests

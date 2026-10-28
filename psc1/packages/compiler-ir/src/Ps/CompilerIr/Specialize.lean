@@ -195,32 +195,31 @@ def psIrSpecializePrimitiveKey (primitive : PsVerifiedIrPrimitiveType) : String 
   | PsVerifiedIrPrimitiveType.string => "String"
   | PsVerifiedIrPrimitiveType.unit => "Unit"
 
-def psIrSpecializeTypeKeyWithFuel (fuel : Nat) : PsVerifiedIrType -> Option String :=
+def psIrSpecializeTypeKeyWithFuel (fuel : Nat) (type : PsVerifiedIrType) : Option String :=
   match fuel with
-  | 0 => fun (type : PsVerifiedIrType) => Option.none
+  | 0 => Option.none
   | remaining + 1 =>
       let smaller : PsVerifiedIrType -> Option String := psIrSpecializeTypeKeyWithFuel remaining;
-      fun (type : PsVerifiedIrType) =>
-        match type with
-        | PsVerifiedIrType.unknown => Option.none
-        | PsVerifiedIrType.typeParameter _ => Option.none
-        | PsVerifiedIrType.primitive primitive => Option.some (psIrSpecializePrimitiveKey primitive)
-        | PsVerifiedIrType.function parameters result =>
-            let parameterKeys : List (Option String) := psListMap smaller parameters;
-            match psIrSpecializeJoinKeys parameterKeys with
-            | Option.none => Option.none
-            | Option.some parameterKey =>
-                match smaller result with
-                | Option.none => Option.none
-                | Option.some resultKey =>
-                    Option.some (psIrSpecializeConcat4 "Fn$" parameterKey "$To$" resultKey)
-        | PsVerifiedIrType.named name arguments =>
-            let argumentKeys : List (Option String) := psListMap smaller arguments;
-            match psIrSpecializeJoinKeys argumentKeys with
-            | Option.none => Option.none
-            | Option.some keys =>
-                if psStringEq keys "" then Option.some (String.Internal.append "N$" name)
-                else Option.some (psIrSpecializeConcat4 "N$" name "$" keys)
+      match type with
+      | PsVerifiedIrType.unknown => Option.none
+      | PsVerifiedIrType.typeParameter _ => Option.none
+      | PsVerifiedIrType.primitive primitive => Option.some (psIrSpecializePrimitiveKey primitive)
+      | PsVerifiedIrType.function parameters result =>
+          let parameterKeys : List (Option String) := psListMap smaller parameters;
+          match psIrSpecializeJoinKeys parameterKeys with
+          | Option.none => Option.none
+          | Option.some parameterKey =>
+              match smaller result with
+              | Option.none => Option.none
+              | Option.some resultKey =>
+                  Option.some (psIrSpecializeConcat4 "Fn$" parameterKey "$To$" resultKey)
+      | PsVerifiedIrType.named name arguments =>
+          let argumentKeys : List (Option String) := psListMap smaller arguments;
+          match psIrSpecializeJoinKeys argumentKeys with
+          | Option.none => Option.none
+          | Option.some keys =>
+              if psStringEq keys "" then Option.some (String.Internal.append "N$" name)
+              else Option.some (psIrSpecializeConcat4 "N$" name "$" keys)
 
 def psIrSpecializeTypeKey
     (type : PsVerifiedIrType) : Option String :=

@@ -62,9 +62,13 @@ jobs:
           path: psc1/.lake
           key: psc1-lake-v2-${{ runner.os }}-${{ github.job }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/lake-manifest.json', 'psc1/**/*.lean') }}
       - name: Install repository-pinned Lean
+        timeout-minutes: 10
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          if [ ! -x "$HOME/.elan/bin/elan" ]; then
+            curl --connect-timeout 20 --max-time 120 --retry 2 -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o "$RUNNER_TEMP/psc1-elan-init.sh"
+            timeout 180 sh "$RUNNER_TEMP/psc1-elan-init.sh" -y --default-toolchain none
+          fi
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: Install pinned Rust and locked host dependencies
         run: |
@@ -206,9 +210,13 @@ jobs:
           path: psc1/.lake
           key: psc1-lake-v2-${{ runner.os }}-${{ github.job }}-${{ hashFiles('psc1/lean-toolchain', 'psc1/lakefile.lean', 'psc1/lake-manifest.json', 'psc1/**/*.lean') }}
       - name: Install repository-pinned Lean and locked host dependencies
+        timeout-minutes: 10
         run: |
           set -euo pipefail
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          if [ ! -x "$HOME/.elan/bin/elan" ]; then
+            curl --connect-timeout 20 --max-time 120 --retry 2 -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o "$RUNNER_TEMP/psc1-elan-init.sh"
+            timeout 180 sh "$RUNNER_TEMP/psc1-elan-init.sh" -y --default-toolchain none
+          fi
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           npm --prefix host-tools --workspaces=false ci --ignore-scripts --no-audit --no-fund
       - name: Build production compiler and UTF8 boundary regression

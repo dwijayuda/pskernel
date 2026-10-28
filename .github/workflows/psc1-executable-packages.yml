@@ -23,6 +23,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22.23.3'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            psc1/host-tools/package-lock.json
       - name: Fast syntax checks for the production host boundary
         run: |
           for file in host-tools/executable/*.mjs host-tools/module-graph-inspection.mjs scripts/executable-*.mjs; do node --check "$file"; done
@@ -37,12 +41,22 @@ jobs:
           restore-keys: |
             psc1-lake-v2-${{ runner.os }}-native-
             psc1-modular-native-v1-${{ runner.os }}-
-      - name: Prepare exact read-only baseline and locked build consumers
+      - name: Prepare the pinned Lean tool launcher
+        timeout-minutes: 3
         run: |
-          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          if [ ! -x "$HOME/.elan/bin/lake" ]; then
+            curl --fail --location --retry 2 --connect-timeout 20 --max-time 90 https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o "$RUNNER_TEMP/psc1-elan-init.sh"
+            sh "$RUNNER_TEMP/psc1-elan-init.sh" -y
+          fi
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-          npm ci --prefix .. --ignore-scripts --include=optional --no-audit --no-fund
-          npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
+      - name: Install locked JavaScript build consumers
+        timeout-minutes: 5
+        run: |
+          npm ci --prefix .. --ignore-scripts --include=optional --no-audit --no-fund --fetch-retries=2 --fetch-timeout=30000
+          npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund --fetch-retries=2 --fetch-timeout=30000
+      - name: Prepare the immutable source comparison baseline
+        timeout-minutes: 3
+        run: |
           git worktree add --detach "$RUNNER_TEMP/psc1-executable-baseline" b400552324956d9c3a684c9231f60f70066e1629
           echo "PSC1_EXECUTABLE_BASELINE=$RUNNER_TEMP/psc1-executable-baseline/psc1" >> "$GITHUB_ENV"
       - name: Prepare the existing pinned and locked Rust application consumer

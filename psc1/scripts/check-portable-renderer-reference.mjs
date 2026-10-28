@@ -6,7 +6,9 @@ for(const backend of ['Js','Ts']){
  const result=spawnSync('git',['show','d53b43c271c65635b07a6ffa78fb6b08a5fa55de:'+file],{encoding:'utf8'});
  assert.equal(result.status,0,result.stderr);
  const original=result.stdout.slice(result.stdout.indexOf('namespace Ps.Internal.Modular'+backend));
- assert.ok(ref.includes(original.replaceAll('Ps.Internal.Modular'+backend,'Ps.Host.M5Reference'+backend)));
+ assert.ok(ref.includes(original.replaceAll('Ps.Internal.Modular'+backend,'Ps.Host.M5Reference'+backend)
+  .replaceAll('names := runtimeValues }','names := runtimeValues, typeOnly := false }')
+  .replaceAll(', names })',', names, typeOnly := false })')));
 }
-console.log('PSC1_IMMUTABLE_RENDERER_REFERENCE exact pre-M5 bodies and namespaces only');
+console.log('PSC1_IMMUTABLE_RENDERER_REFERENCE exact pre-M5 bodies; namespaces and Bool=false defaults materialized');
 

@@ -3,8 +3,9 @@ import Ps.BackendJs.Print
 import Ps.BackendTs.Type
 import Ps.BackendTs.Module
 
-/-! Immutable pre-M5 native test oracle from d53b43c2. Canonical generated compilers
-never import this host module. Only namespace names change; bodies remain exact. -/
+/-! Pre-M5 native test oracle from d53b43c2. Canonical compilers never import it.
+Only namespaces and the removed Bool=false field defaults are made explicit.
+The audit checks these exact finite transformations of the original bodies. -/
 
 namespace Ps.Host.M5ReferenceJs
 
@@ -53,10 +54,10 @@ def unitImports (plan : PsModulePlan) (unit : PsModuleUnit) : List PsModuleImpor
   if unit.index == 0 then []
   else
     let runtimeValues := helpers ++ (unit.imports.filter (fun item => item.unit == 0)).map (fun item => item.name)
-    let values : List PsModuleImport := [{ source := psModuleSpecifierFor plan 0 false, names := runtimeValues }]
+    let values : List PsModuleImport := [{ source := psModuleSpecifierFor plan 0 false, names := runtimeValues, typeOnly := false }]
     values ++ ((psModuleSourceIndices plan).filterMap fun index =>
       let names := (unit.imports.filter (fun item => item.unit == index)).map (fun item => item.name)
-      if names.isEmpty then none else some { source := psModuleSpecifierFor plan index false, names })
+      if names.isEmpty then none else some { source := psModuleSpecifierFor plan index false, names, typeOnly := false })
 
 def renderUnit (plan : PsModulePlan) (lowered : PsJsIrModule)
     (digest : String) (unit : PsModuleUnit) : Except String PsModuleArtifact := do
@@ -115,11 +116,11 @@ def renderUnit (plan : PsModulePlan) (digest : String)
   let runtimeValues := helpers ++ symbols ++ constructors ++
     (unit.imports.filter (fun item => item.unit == 0)).map (fun item => item.name)
   let imports : List PsModuleImport := if unit.index == 0 then [] else
-    [{ source := psModuleSpecifierFor plan 0 true, names := runtimeValues },
+    [{ source := psModuleSpecifierFor plan 0 true, names := runtimeValues, typeOnly := false },
       { source := psModuleSpecifierFor plan 0 true, names := runtimeTypes, typeOnly := true }] ++
       ((psModuleSourceIndices plan).filterMap fun index =>
         let names := (unit.imports.filter (fun item => item.unit == index)).map (fun item => item.name)
-        if names.isEmpty then none else some { source := psModuleSpecifierFor plan index true, names })
+        if names.isEmpty then none else some { source := psModuleSpecifierFor plan index true, names, typeOnly := false })
   let structures ← if unit.index == 0 then
     (plan.raw.structures.mapM (psTsEmitStructure brands)).mapError (fun _ => "PSC1_MODULE_TS_STRUCTURE")
     else pure []

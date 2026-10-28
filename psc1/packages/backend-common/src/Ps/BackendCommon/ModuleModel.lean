@@ -138,7 +138,7 @@ end Ps.Internal.ModuleGraph
 structure PsModuleImport where
   source : String
   names : List String
-  typeOnly : Bool := false
+  typeOnly : Bool
 
 structure PsModuleArtifact where
   unit : Nat

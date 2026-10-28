@@ -22,30 +22,6 @@ concurrency:
   group: psc1-native-port-equivalence-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  diagnose-retained-observer:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    permissions:
-      contents: read
-      actions: read
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          github-token: ${{ github.token }}
-          run-id: 40638049023
-          name: psc1-native-port-equivalence-a33bc53adc85a3ffe730932e9b4771de0db30ce9
-          path: retained-diagnostic
-      - name: Print the retained baseline observer failure without executing it
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          for name in ['native-api-observer-baseline.stdout', 'native-api-observer-baseline.stderr']:
-              target = Path('retained-diagnostic/logs') / name
-              data = target.read_bytes()
-              assert len(data) <= 32 * 1024 * 1024
-              print(name + ':')
-              print(data[-16000:].decode('utf-8'))
-          PY
   compare:
     runs-on: ubuntu-24.04
     timeout-minutes: 45

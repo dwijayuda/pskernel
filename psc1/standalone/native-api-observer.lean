@@ -27,8 +27,7 @@ example :
 def main : IO Unit := do
   let omitted : PsModuleImport := {source := "fixture", names := []}
   let explicit : PsModuleImport := {source := "fixture", names := [], typeOnly := true}
-  let php : PsPhpPrintedModule := {source := "", composer := "", runtimeSource := "",
-    runtimeRequirements := [], declarations := [], declarationLines := []}
+  let php : PsPhpPrintedModule := {source := "", composer := "", runtimeSource := "", runtimeRequirements := [], declarations := [], declarationLines := []}
   if omitted.typeOnly || !explicit.typeOnly || php.runtimeVersion != psPhpRuntimeVersion then
     throw (IO.userError "native compatibility default changed")
   IO.println (Lean.Json.mkObj [

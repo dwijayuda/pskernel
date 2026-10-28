@@ -12,16 +12,22 @@ def main : IO Unit := do
     let response ← match Lean.Json.parse (psCompilerServiceCandidate request.compress) with
       | .ok value => pure value
       | .error reason => throw (IO.userError reason)
-    unless response.getObjValAs? String "status" == .ok "candidate" do
-      throw (IO.userError response.compress)
+    match response.getObjValAs? String "status" with
+    | .ok "candidate" => pure ()
+    | _ => throw (IO.userError response.compress)
     let files ← match (response.getObjVal? "files").bind Lean.Json.getArr? with
       | .ok values => pure values
       | .error reason => throw (IO.userError reason)
     unless files.size == 15 do throw (IO.userError "PSC1_PORTABLE_SMALL_GRAPH_FILES")
-    unless response.getObjValAs? String "admission" == .ok "not-run" do
-      throw (IO.userError "PSC1_PORTABLE_CANDIDATE_AUTHORITY")
+    match response.getObjValAs? String "admission" with
+    | .ok "not-run" => pure ()
+    | _ => throw (IO.userError "PSC1_PORTABLE_CANDIDATE_AUTHORITY")
   let refused := psCompilerServiceCandidate "[\"psc1-modular-build/1\"]"
-  unless refused.contains "PSC1_EXECUTABLE_REQUEST_ARITY" do
-    throw (IO.userError "PSC1_PORTABLE_ARITY")
+  let refusal ← match Lean.Json.parse refused with
+    | .ok result => pure result
+    | .error reason => throw (IO.userError reason)
+  match refusal.getObjValAs? String "code" with
+  | .ok "PSC1_EXECUTABLE_REQUEST_ARITY" => pure ()
+  | _ => throw (IO.userError "PSC1_PORTABLE_ARITY")
   IO.println "PSC1_PORTABLE_MODULE_PASS both grammars; native pure candidate; no admission authority; arity refusal"
 

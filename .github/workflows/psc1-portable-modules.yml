@@ -33,6 +33,7 @@ jobs:
           path: psc1/.lake
           key: psc1-portable-modules-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain','psc1/lakefile.lean','psc1/**/*.lean') }}
           restore-keys: |
+            psc1-portable-modules-v1-${{ runner.os }}-
             psc1-executable-v1-${{ runner.os }}-
             psc1-lake-v2-${{ runner.os }}-native-
             psc1-modular-native-v1-${{ runner.os }}-
@@ -47,7 +48,7 @@ jobs:
       - name: Build portable planner, immutable reference and source census
         run: lake build psc1_portable_plan_tests psc1_executable_plan_tests psc1_source_census_probe psc1_portable_module_seed psc1_portable_module_tests
       - uses: actions/cache/save@v4
-        if: steps.native.outputs.cache-hit != 'true'
+        if: always() && steps.native.outputs.cache-hit != 'true'
         with:
           path: psc1/.lake
           key: ${{ steps.native.outputs.cache-primary-key }}

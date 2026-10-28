@@ -68,6 +68,13 @@ jobs:
             psc1/dist/modular-toolchain/tarballs
           retention-days: 90
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-modular-target-resources-${{ github.sha }}
+          path: |
+            psc1/dist/modular-toolchain/target-tarballs
+            psc1/dist/modular-toolchain/target-archive-correspondence.json
+          retention-days: 90
   qualify:
     needs: package
     runs-on: ubuntu-24.04
@@ -93,6 +100,10 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: psc1-modular-toolchain-package-${{ github.sha }}
+          path: psc1/dist/modular-toolchain
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-modular-target-resources-${{ github.sha }}
           path: psc1/dist/modular-toolchain
       - name: Install exact official Rust target SDK
         run: |

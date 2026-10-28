@@ -335,6 +335,63 @@ if (process.argv[2] !== 'inspect') {
       qualification: 'not-qualified-for-current-modular-source',
       preservedReferenceVersion: '0.1.0-psc1.13',
     };
+  // Reconcile archive metadata with qualified file pins. Python/PHP become
+  // independent optional providers; no old checked compiler facade is retained.
+  const optionalArchive = await readQualifiedArtifact(input.optional,path.join(out,'optional-input'));
+  const optionalFiles = files(optionalArchive);
+  const targetTars = path.join(out,'target-tarballs');fs.mkdirSync(targetTars);
+  const selectedDescriptors = [d.targetConsumers.ts,...d.targetConsumers.ts.dependencies,
+    d.targetConsumers.rust,...Object.values(d.dispatchPackages)];
+  const archiveRepairs=[];
+  for(const descriptor of selectedDescriptors){
+    const basename=descriptor.package.replace('@','').replace('/','-')+'-'+descriptor.version+'.tgz';
+    const matches=optionalFiles.filter(row=>path.basename(row.path)===basename);
+    assert.equal(matches.length,1,basename);
+    const source=path.join(optionalArchive,matches[0].path);
+    const directory=path.join(out,'target-packages',descriptor.package.replace('@','').replace('/','-'));
+    fs.mkdirSync(directory,{recursive:true});
+    assert.ok(run('tar',['tzf',source]).split('\n').filter(Boolean).every(p=>p.startsWith('package/')&&!p.includes('\\')&&!p.split('/').includes('..')));
+    run('tar',['xzf',source,'-C',directory]);
+    const pkg=path.join(directory,'package'),before=files(pkg),byPath=new Map(before.map(row=>[row.path,row]));
+    for(const pin of descriptor.files)assert.deepEqual(byPath.get(pin.path),pin,'qualified target input:'+descriptor.package+'/'+pin.path);
+    let packedFile=source;
+    if(['@proofscript/backend-python','@proofscript/backend-php'].includes(descriptor.package)){
+      const meta=JSON.parse(fs.readFileSync(path.join(pkg,'package.json')));
+      assert.deepEqual(meta.dependencies,{'@proofscript/compiler':'0.1.0-psc1.13'});
+      meta.version=version;meta.dependencies={};delete meta.peerDependencies;delete meta.peerDependenciesMeta;
+      delete meta.scripts;delete meta.exports['./compiler'];
+      meta.proofscript={...meta.proofscript,npmArchitecture:'psc1-optional-provider/1',
+        implementationOwner:meta.name,packageKind:'optional-emit-only-provider'};
+      write(path.join(pkg,'package.json'),json(meta));
+      const sourceManifest=JSON.parse(fs.readFileSync(path.join(pkg,'dist/source-manifest.json')));
+      sourceManifest.version=version;write(path.join(pkg,'dist/source-manifest.json'),json(sourceManifest));
+      write(path.join(pkg,'dist/index.js'),"export {sourcePackage,readSources} from './sources.js';\n");
+      write(path.join(pkg,'dist/index.d.ts'),"export * from './sources.js';\n");
+      for(const name of ['compiler.js','compiler.d.ts'])fs.rmSync(path.join(pkg,'dist',name));
+      const allowed=new Set(['package.json','dist/source-manifest.json','dist/index.js','dist/index.d.ts','dist/compiler.js','dist/compiler.d.ts']);
+      const after=new Map(files(pkg).map(row=>[row.path,row]));
+      for(const pin of before.filter(row=>!allowed.has(row.path)))
+        assert.deepEqual(after.get(pin.path),pin,'optional executable/runtime bytes preserved');
+      const result=JSON.parse(run('npm',['pack',pkg,'--ignore-scripts','--json','--pack-destination',targetTars]));
+      assert.equal(result.length,1);packedFile=path.join(targetTars,result[0].filename);
+      descriptor.version=version;descriptor.files=files(pkg);
+    } else fs.copyFileSync(source,path.join(targetTars,path.basename(source)));
+    const actualSha=sha256(fs.readFileSync(packedFile));
+    archiveRepairs.push({package:descriptor.package,priorArchiveSha256:descriptor.tarballSha256,
+      archiveSha256:actualSha,payloadPinsPreserved:true,compilerDependencyRemoved:descriptor.package.startsWith('@proofscript/backend-')});
+    descriptor.tarball=path.basename(packedFile);descriptor.tarballSha256=actualSha;
+  }
+  const compilerPackage=path.join(nodes,'@proofscript/compiler/package.json');
+  const compilerMeta=JSON.parse(fs.readFileSync(compilerPackage));
+  for(const name of ['@proofscript/backend-python','@proofscript/backend-php'])
+    compilerMeta.peerDependencies[name]=version;
+  write(compilerPackage,json(compilerMeta));
+  installedPackages.find(row=>row.name==='@proofscript/compiler').peerDependencies=compilerMeta.peerDependencies;
+  for(const key of Object.keys(d))
+    if(!['schema','version','compilerSourceClosureDigest','leanCommit','defaultEngine','defaultKernel',
+      'engines','kernels','targetConsumers','dispatchPackages','hostFiles','runner'].includes(key))delete d[key];
+  d.qualification='checked-modular-preview';d.fullModularSelfHosting=false;
+  write(path.join(out,'target-archive-correspondence.json'),json(archiveRepairs));
   d.hostFiles = [...runtimeFiles].sort().map((file) => {
     const b = fs.readFileSync(path.join(host, file));
     return { path: file, bytes: b.length, sha256: sha256(b) };
@@ -375,6 +432,20 @@ if (process.argv[2] !== 'inspect') {
         ? "import type{CompileOptions,CheckedCompilation}from'@proofscript/compiler';export function compile(options:Omit<CompileOptions,'target'>):CheckedCompilation;\n"
         : body,
     );
+  }
+  for (const row of originalGraph.graphEvidence.js) {
+    const parts = row.specifier.split('/'), short = parts[1], module = parts[3];
+    assert.ok(coreNames.includes('@proofscript/' + short));
+    for (const variant of ['js', 'ts']) {
+      const suffix = variant === 'ts' ? '.ts' : '';
+      const forward = 'export * from ' + JSON.stringify(row.specifier + (suffix ? '/ts' : '')) + ';\n';
+      for (const extension of ['mjs', 'd.mts'])
+        write(path.join(stage, 'dist/generated', short, module + suffix + '.' + extension), forward);
+    }
+    exports['./' + short + '/generated/*/ts'] = {
+      types:'./dist/generated/' + short + '/*.ts.d.mts',import:'./dist/generated/' + short + '/*.ts.mjs'};
+    exports['./' + short + '/generated/*'] = {
+      types:'./dist/generated/' + short + '/*.d.mts',import:'./dist/generated/' + short + '/*.mjs'};
   }
   write(path.join(stage, 'dist/index.js'), "export * from '@proofscript/compiler';\n");
   write(path.join(stage, 'dist/index.d.ts'), "export * from '@proofscript/compiler';\n");

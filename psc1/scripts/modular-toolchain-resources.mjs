@@ -5,7 +5,8 @@ import assert from 'node:assert/strict';
 import {spawnSync} from 'node:child_process';
 import {readQualifiedArtifact,sha256} from './kernel435-qualified-artifact.mjs';
 const out=path.resolve('dist/modular-toolchain'),input=JSON.parse(fs.readFileSync('scripts/modular-toolchain-input.json'));
-const archive=await readQualifiedArtifact(input.optional,path.join(out,'optional-input'));
+const archive=path.join(out,'target-tarballs');
+assert.ok(fs.lstatSync(archive).isDirectory());
 function find(dir){return fs.readdirSync(dir).flatMap(n=>{const p=path.join(dir,n);return fs.lstatSync(p).isDirectory()?find(p):[p];});}
 const assembly=JSON.parse(fs.readFileSync(path.join(out,'package-receipt.json')));
 const descriptorBytes=fs.readFileSync(path.join(out,'consumer-descriptors.json'));
@@ -13,7 +14,7 @@ assert.equal(sha256(descriptorBytes),assembly.consumerDescriptorsSha256);
 const d=JSON.parse(descriptorBytes);
 const descriptors=[d.targetConsumers.ts,...d.targetConsumers.ts.dependencies,d.targetConsumers.rust,...Object.values(d.dispatchPackages)];
 const all=find(archive),tarballs=descriptors.map(row=>{
- const name=row.package.replace('@','').replace('/','-')+'-'+row.version+'.tgz';
+ const name=row.tarball;assert.match(name,/^[A-Za-z0-9_.-]+\.tgz$/);
  const found=all.filter(p=>path.basename(p)===name);assert.equal(found.length,1,name);
  assert.equal(sha256(fs.readFileSync(found[0])),row.tarballSha256,name);return {package:row.package,file:found[0]};
 });

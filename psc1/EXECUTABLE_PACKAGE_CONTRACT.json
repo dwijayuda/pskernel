@@ -71,7 +71,7 @@
     {
       "id": "M4",
       "work": "thin CLI and installable umbrella integration",
-      "status": "not-implemented"
+      "status": "implemented-preview-qualification-in-progress"
     },
     {
       "id": "M5",
@@ -182,5 +182,29 @@
       "M4-checked-install-and-CLI",
       "M5-generation-and-fixed-points"
     ]
+  },
+  "installedPreview": {
+    "version": "0.1.0-psc1-modular.1",
+    "workflow": "psc1-modular-toolchain.yml",
+    "architecture": "docs/architecture/installed-modular-toolchain.md",
+    "smokeRun": 40711483603,
+    "smokeCommit": "8ed9e07ab2342a2afb41fdcce637826aa4d06dfc",
+    "checkedBuilds": 16,
+    "kernelCases": 28,
+    "profile": "psc1-installed-executable-npm-graph/1",
+    "corePackages": 20,
+    "compilerEngines": [
+      "js",
+      "ts"
+    ],
+    "defaultKernel": "official Lean 4.35.0 C++/Emscripten linear-memory Wasm",
+    "optionalProviderLeaves": [
+      "python",
+      "php"
+    ],
+    "fullModularSelfHosting": false,
+    "defaultReferenceReplaced": false,
+    "standaloneCheckedHostQualified": false,
+    "extendedQualification": "pending"
   }
 }

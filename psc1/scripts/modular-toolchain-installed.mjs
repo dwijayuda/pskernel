@@ -74,6 +74,13 @@ try {
   const line = result.split('\n').find((l) => l.startsWith('PSC1_MODULAR_ROOT_EXERCISE '));
   assert.ok(line);
   records.push(...JSON.parse(line.slice('PSC1_MODULAR_ROOT_EXERCISE '.length)));
+  const generatedProgram = path.join(directory,'generated-imports.mjs');
+  fs.writeFileSync(generatedProgram,
+    "import assert from'node:assert/strict';import{pathToFileURL}from'node:url';"+
+    "for(const variant of ['js','ts']){const root=await import('proofscript/foundation/generated/runtime'+(variant==='ts'?'/ts':''));"+
+    "const direct=await import(pathToFileURL(process.argv[2]+'/node_modules/@proofscript/foundation/dist/'+variant+'/generated/runtime.mjs'));"+
+    "assert.deepEqual(Object.keys(root),Object.keys(direct));for(const k of Object.keys(root))assert.equal(root[k],direct[k]);}");
+  run(runtime,[...flags,generatedProgram,root]);
   const compiler = path.join(root, 'node_modules/@proofscript/compiler');
   assert.equal(fs.existsSync(path.join(compiler, 'dist/implementation')), false);
   assert.equal(fs.existsSync(path.join(compiler, 'dist/host/selfhost')), false);

@@ -1,11 +1,51 @@
 # PSC1 AI work state
 
-Updated 2026-10-28 Asia/Jakarta. Active PR #207 branch
-feat/psc1-modular-semantic-corpus-20261028 from verified PR #206 HEAD 7da52af9.
+Updated 2026-10-28 Asia/Jakarta. Active M4 branch
+feat/psc1-modular-toolchain-20261028 from verified PR #207 HEAD
+415dbba4b5c1627185fc0ee8cdf29a83b15b6f08.
 Production modularity implementation PR #205,
 stacked on plan PR #204 / b400552324956d9c3a684c9231f60f70066e1629.
 GitHub/Linux CI only; expected-HEAD, single-parent/non-force history.
 No merge or registry publication.
+
+## Active M4: installable genuine modular compiler preview
+
+Version `0.1.0-psc1-modular.1` is assembled independently of the qualified .13
+reference. Root proofscript bundles all 20 core packages, including the genuine
+unchanged official Lean 4.35.0 linear-memory Wasm kernel. It contains the exact
+127 source-owned units/15 executable owners from the qualified graph, not a hidden
+whole-compiler module. The three-line psc launcher delegates to @proofscript/cli;
+existing project/watch bodies are relocated with reversible import/label rewrites.
+Generated root subpaths avoid assuming npm hoisting.
+
+[Linux smoke 40711483603](https://github.com/dwijayuda/pskernel/actions/runs/40711483603)
+passes at `8ed9e07ab2342a2afb41fdcce637826aa4d06dfc`: 16 checked installed
+builds/publications and 28 actual kernel acceptance/rejection cases on Node/Bun.
+[Host receipt](docs/PSC1_MODULAR_HOST_RUNTIME_QUALIFICATION_2026-10-28.json).
+The historical cleanup/layout/runtime AST proofs remain; the two intentional host
+changes now have that separately tested feature baseline. CI-generated formatting
+preserves its executable AST.
+
+Extended qualification is pending: full retained public values across seven
+targets, actual default-Wasm recheck of the native-qualified compiler admissions,
+global root-only installation, and nine applicable retained watch bodies per host.
+The complete reference CLI still runs its original native descendant/cancellation
+tests. Do not claim these pending extended results or modular G2/G3/fixed points.
+
+The installed graph remains within 128 MiB/32 MiB per file/8,192 files and the
+existing path/unit bounds. The profile binds original files/ownership/admission/IR
+identity; only versioned package metadata changes. One exact bounded bootstrap
+seal is excluded from its own graph hash and retained in per-request common pins.
+Compiler/checker/tool timeouts, memory/stack/fuel and original profile checks stay.
+
+Python/PHP preview providers are optional leaves. Their runtime/tool payloads stay
+byte-identical; obsolete checked compiler facades/dependencies are removed and
+archive metadata is reconciled against every prior qualified file pin before
+resealing. This fixes stale .13 archive digests without relaxing runtime validation.
+Rust/Wasm remain output backends, while older compiled compiler executors explicitly
+refuse this newer source cohort. They remain qualified/usable with the .13 reference.
+Standalone checked-host installation, other-platform durability and M5 reproduction
+remain unqualified. [Installed preview architecture](docs/architecture/installed-modular-toolchain.md).
 
 ## M3 semantic/backend milestone: qualified focused matrices
 

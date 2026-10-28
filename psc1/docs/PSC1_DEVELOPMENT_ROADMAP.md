@@ -104,6 +104,19 @@ remain; expanding the deferred pilot is not a prerequisite. The stopped PR #203
 and prototype branches are preserved.
 
 
+## M4 preview implementation in progress
+
+The [installed modular preview](architecture/installed-modular-toolchain.md) assembles
+proofscript `0.1.0-psc1-modular.1` around the unchanged qualified graph and genuine
+independent Wasm kernel. It has 20 bundled core packages, source-owned generated
+subpaths, a thin psc launcher and relocated existing CLI/watch bodies.
+Smoke run 40711483603 passes 16 installed builds/publications and 28 independent
+kernel cases on Node/Bun at `8ed9e07a`. Full cross-target/public-value, global,
+compiler-admission and retained watch qualification remains pending.
+Python/PHP become optional provider leaves with unchanged runtime bytes.
+Existing Rust/Wasm executors remain qualified only for their preserved .13 cohort.
+Do not promote this preview or infer modular generations/fixed points.
+
 ## Qualified automatic core package installation (.13)
 
 PR #198 continues from qualified PR #197 HEAD9d0e23c3. Cohort .13 makes proofscript

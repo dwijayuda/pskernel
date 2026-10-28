@@ -190,8 +190,8 @@ def psIrSpecializePrimitiveKey(primitive : PsVerifiedIrPrimitiveType) : String :
 
 def psIrSpecializeTypeKeyWithFuel(fuel : Nat) : (_ : PsVerifiedIrType) -> Option(String) := match fuel with {
   | _root_.Nat.zero => fun (type : PsVerifiedIrType) => Option.none
-  | _root_.Nat.succ remaining => let smaller : (_ : PsVerifiedIrType) -> Option(String) := (psIrSpecializeTypeKeyWithFuel(remaining))
-fun (type : PsVerifiedIrType) => match type with {
+  | _root_.Nat.succ remaining => fun (type : PsVerifiedIrType) => let smaller : (_ : PsVerifiedIrType) -> Option(String) := (psIrSpecializeTypeKeyWithFuel(remaining))
+match type with {
   | PsVerifiedIrType.unknown => Option.none
   | PsVerifiedIrType.typeParameter _ => Option.none
   | PsVerifiedIrType.primitive primitive => Option.some((psIrSpecializePrimitiveKey(primitive)))

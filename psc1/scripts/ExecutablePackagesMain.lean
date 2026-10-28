@@ -146,6 +146,9 @@ def emit (directory specifierFile digest : String) : IO Unit := do
     write (directory ++ "/ts" ++ suffix ++ ".mts") ts.source
     jsRows := artifactJson "js" js :: jsRows
     tsRows := artifactJson "ts" ts :: tsRows
+  write (directory ++ "/js-runtime.mjs") (psJsStringRuntimeSupport ++ psJsStackRuntimeSupport ++
+    "\nexport { " ++ String.intercalate ", "
+      (Ps.Internal.ModularJs.helpers.filter (fun name => name != "__ps$cohort")) ++ " };\n")
   phase "reference"
   write (directory ++ "/reference.mjs") (← liftResult
     ((psJsPrintModuleStackSafe lowered).mapError (fun _ => "PSC1_EXECUTABLE_REFERENCE_JS")))

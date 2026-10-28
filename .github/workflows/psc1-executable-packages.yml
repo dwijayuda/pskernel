@@ -52,6 +52,8 @@ jobs:
           lake exe psc1_executable_plan_tests
       - name: Execute real JS and TS outputs and validate the Wasm bytes
         run: node scripts/executable-emitter-consumers.mjs
+      - name: Capture, independently admit and emit the complete production JS/TS graph
+        run: node host-tools/executable/build.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:

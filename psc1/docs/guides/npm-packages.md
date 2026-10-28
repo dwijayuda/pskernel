@@ -1,9 +1,25 @@
-# Existing PSC1 npm packages
+# PSC1 npm distributions
+
+The qualified .13 reference and the genuine modular preview are separate cohorts.
+The new [modular preview guide](../architecture/installed-modular-toolchain.md)
+provides its verified ZIP, installation, API transition and exact qualification.
+It executes the compiler through 127 source-owned units in 15 executable owners,
+with a thin psc CLI and 20 bundled core packages. Python/PHP stay optional leaves.
+Its finite Linux install/watch/application tests pass; new modular G2/G3/fixed
+points and final release promotion remain pending.
+
+The rest of this page describes the preserved **.13 reference**, including its
+compatibility ./compiler facades. Those obsolete lower checked aliases are removed
+explicitly in the versioned modular preview; checked root APIs remain. Do not mix
+engine/provider cohorts or infer that .13's whole-compiler files describe the preview.
+
+## Qualified .13 reference
 
 The .13 cohort makes one proofscript installation include all 20 existing core
 @proofscript packages. It preserves the 25 existing directories and 24 npm names.
 The unnamed compiler-unified source directory remains internal and has no invented
-npm name. Full compiler-internal modularization and modular G2/G3 remain deferred.
+npm name. Its whole-compiler executor remains unchanged; modular G2/G3 are not qualified
+by this reference distribution.
 
 ## Installation and use
 

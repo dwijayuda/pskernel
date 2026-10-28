@@ -8,44 +8,84 @@ stacked on plan PR #204 / b400552324956d9c3a684c9231f60f70066e1629.
 GitHub/Linux CI only; expected-HEAD, single-parent/non-force history.
 No merge or registry publication.
 
-## Active M4: installable genuine modular compiler preview
+## M4 milestone: qualified installed modular Linux preview
 
-Version `0.1.0-psc1-modular.1` is assembled independently of the qualified .13
-reference. Root proofscript bundles all 20 core packages, including the genuine
-unchanged official Lean 4.35.0 linear-memory Wasm kernel. It contains the exact
-127 source-owned units/15 executable owners from the qualified graph, not a hidden
-whole-compiler module. The three-line psc launcher delegates to @proofscript/cli;
-existing project/watch bodies are relocated with reversible import/label rewrites.
-Generated root subpaths avoid assuming npm hoisting.
+PR #208 implementation `ca92bbdbc7c0f34e1da4076db7300033802eab3e` passes
+[installed qualification 40714983520](https://github.com/dwijayuda/pskernel/actions/runs/40714983520).
+Version `0.1.0-psc1-modular.1` bundles all 20 core packages, including the unchanged
+official Lean 4.35.0 linear-memory Wasm kernel. The original 127 source-owned units
+in 15 executable owners contain the genuine generated JS/TS compiler bodies.
+There is no hidden frozen whole-compiler fallback. The three-line psc launcher
+delegates to @proofscript/cli; existing project/watch bodies are relocated with
+reversible import/label rewrites. Root subpaths avoid assuming npm hoisting.
 
-[Linux smoke 40711483603](https://github.com/dwijayuda/pskernel/actions/runs/40711483603)
-passes at `8ed9e07ab2342a2afb41fdcce637826aa4d06dfc`: 16 checked installed
-builds/publications and 28 actual kernel acceptance/rejection cases on Node/Bun.
-[Host receipt](docs/PSC1_MODULAR_HOST_RUNTIME_QUALIFICATION_2026-10-28.json).
-The historical cleanup/layout/runtime AST proofs remain; the two intentional host
-changes now have that separately tested feature baseline. CI-generated formatting
-preserves its executable AST.
+Node 22.23.3 and Bun 1.4.4 pass 16 smoke builds/28 actual kernel cases, then
+128 public-value/component builds and 20 source/assurance refusals across both
+compiler engines and seven targets. Both hosts recheck the exact native-qualified
+compiler admission using the real default Wasm kernel and pass fresh global
+root-only check/build. Eighteen retained watch cases pass; the reference CLI keeps
+its original native guardian/cancellation tests unchanged.
 
-Extended qualification is pending: full retained public values across seven
-targets, actual default-Wasm recheck of the native-qualified compiler admissions,
-global root-only installation, and nine applicable retained watch bodies per host.
-The complete reference CLI still runs its original native descendant/cancellation
-tests. Do not claim these pending extended results or modular G2/G3/fixed points.
+[Boundary/IO/types 40722004088](https://github.com/dwijayuda/pskernel/actions/runs/40722004088)
+passes on the exact unchanged root tarball: 46 resource/metadata/installed-consumer
+refusals, 16 Unicode callback/trap IO builds, eight unsupported Wasm-core dispatcher
+refusals, strict NodeNext/Bundler consumers on both hosts and two extra TS-engine
+live watch cases. TS-watch shutdown is 101/102 ms. Checked API phase refusals and
+exact candidate diagnostics are tested separately without granting candidate authority.
 
-The installed graph remains within 128 MiB/32 MiB per file/8,192 files and the
-existing path/unit bounds. The profile binds original files/ownership/admission/IR
-identity; only versioned package metadata changes. One exact bounded bootstrap
-seal is excluded from its own graph hash and retained in per-request common pins.
-Compiler/checker/tool timeouts, memory/stack/fuel and original profile checks stay.
+[Installed applications 40725714755](https://github.com/dwijayuda/pskernel/actions/runs/40725714755)
+passes 32 independently checked builds and 528 retained behavior cases: both engines,
+both grammars, JS/strict TS outputs, four 11-module CLI/JSON/file/compiler-like apps.
+Native reference admission, serialized original/specialized IR and decoded source
+identities match. Actual app runners import installed proofscript/io with reversible
+rewrites and identical runtime bytes. The 100,000-statement cases take Node
+6,250–11,765 ms / maximum 168,740 KiB RSS; Bun 1,605–2,865 ms / 110,356 KiB.
+These are concurrent CI observations, not universal performance claims.
 
-Python/PHP preview providers are optional leaves. Their runtime/tool payloads stay
+[Source 40719527295](https://github.com/dwijayuda/pskernel/actions/runs/40719527295)
+passes all 16 selected jobs at the same implementation (tested merge
+`1f8415f790387a0702d1760896a2998f0c05a4c1`): 37/37 finite Practical Core criteria,
+zero blocked, 14 scoped target bundles; benchmark intentionally skipped.
+[Retained CLI 40714983602](https://github.com/dwijayuda/pskernel/actions/runs/40714983602)
+passes all nine jobs. Its .11 frozen compatibility cohort is separate from both
+the new modular preview and the separately qualified .13 default reference.
+
+[Installable ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40723525652/artifacts/12832176204)
+contains the exact tested root tarball, INSTALL, checksums, notices and focused
+receipts. GitHub wraps the inner installable ZIP and delivery.json. Extract both
+ZIP layers. Root tarball SHA256:
+`7773a7a2abcebaf1fd77df836b2c687e013001c23885bb0bb584e6fe8d012507`.
+The ZIP's focused receipt predates the additional source/application evidence;
+the [complete repository receipt](docs/PSC1_MODULAR_INSTALLED_QUALIFICATION_2026-10-28.json)
+records all runs, commits, artifacts, source identities, measurements and attempts.
+
+Installed graph: 1,423 files / 124,338,997 bytes, within the unchanged 128 MiB bound;
+32 MiB/file, 8,192 files and existing path/unit bounds remain. Original graph
+ownership/admission/IR/files are bound by exact projection; only package metadata
+is versioned. The one bounded bootstrap seal is retained in common per-request
+pins. Trusted bootstrap/stable-resource assumptions remain; this is not a signature,
+sandbox, totality or semantic preservation proof. Official independent admission,
+strict original/transformed IR, 240-second compiler/tool and 120-second checker,
+memory/stack/fuel, negatives and ABI refusals are preserved.
+
+Python/PHP are optional preview provider leaves. Runtime/tool payloads remain
 byte-identical; obsolete checked compiler facades/dependencies are removed and
-archive metadata is reconciled against every prior qualified file pin before
-resealing. This fixes stale .13 archive digests without relaxing runtime validation.
-Rust/Wasm remain output backends, while older compiled compiler executors explicitly
-refuse this newer source cohort. They remain qualified/usable with the .13 reference.
-Standalone checked-host installation, other-platform durability and M5 reproduction
-remain unqualified. [Installed preview architecture](docs/architecture/installed-modular-toolchain.md).
+all prior file pins are verified before resealing archive metadata. Rust/Wasm
+remain output backends. Older compiled compiler executors explicitly refuse this
+new source cohort and stay qualified/usable with .13. Standalone checked-host
+installation and other-platform durability remain unqualified.
+
+CI-only boundary/delivery/application controllers are adopted byte-identically
+from the successful diagnostic branch; no canonical compiler/host/package payload
+changes accompany this evidence checkpoint. Historical host cleanup/layout/AST
+guards remain. No merge, npm publication or .13 replacement.
+
+**Next: M5 portable module planning/emission in the same compiler, deterministic
+complete graph/package reproduction, then genuine new modular JS/TS G1/G2/G3 and
+fixed points.** Current M4 is a finite Linux preview milestone, not that self-hosted
+release. Component String/IO, actual non-JS host-IO applications, platform consumers
+and the user-arranged independent maintainer trial remain explicit separate work.
+[Architecture](docs/architecture/installed-modular-toolchain.md).
 
 ## M3 semantic/backend milestone: qualified focused matrices
 
@@ -115,9 +155,9 @@ umbrella reference. These are passing terminal results, not pending claims.
 
 The .13 default, official linear-memory C++/Emscripten Wasm kernel, qualified
 Rust/Wasm executors, optional Python/PHP, deferred pilot and all prior evidence
-remain preserved. M4 checked umbrella/thin CLI/watch integration, actual non-JS
-host-IO application qualification and M5 portable module reproduction/new modular
-G1/G2/G3/fixed points remain incomplete. No merge or registry publication.
+remain preserved. The later M4 milestone above qualifies checked umbrella/thin CLI/watch
+integration in its finite Linux scope. Actual non-JS host-IO applications and M5
+portable module reproduction/new modular G1/G2/G3/fixed points remain incomplete. No merge or registry publication.
 
 ## M3 application milestone: qualified checked modular execution
 
@@ -191,8 +231,8 @@ The first application qualification, 40677391651 at `8dac01c7`, also passed all
 528 cases before the four additional boundary cases were added per runtime.
 
 The retained M3 application/semantic/seven-target scopes are now qualified above.
-M4 checked umbrella/thin CLI/watch integration and default independent Wasm-kernel
-qualification for that new graph remain unpromoted. M5 modular generation/fixed
+M4 checked umbrella/thin CLI/watch and default independent Wasm-kernel use are now
+qualified in the preview scope above; release promotion remains pending. M5 modular generation/fixed
 points and compiled native artifact reproduction are unqualified.
 Qualified .13, default linear-memory C++/Emscripten kernel, existing Rust/Wasm
 executors, optional Python/PHP and deferred pilot remain preserved.
@@ -266,23 +306,18 @@ Apache-2.0 and upstream notices, semantic fuel,240s ordinary compiler/tool reque
 
 ## Dependency-ordered continuation
 
-1. Preserve the now-qualified M3 application/semantic/public-value matrices as
-   dependency-selected graph regression gates. Keep richer component ABI and
-   actual non-JS host-IO application acceptance explicit rather than infer them.
-2. Next implementation, M4: version the direct low-level API transition and integrate verified graph
-   loading/coherent transactional publication with checked @proofscript/compiler,
-   thin @proofscript/cli, root-only local/global proofscript install and watch.
-   Python/PHP remain optional. Do not silently turn checked APIs into emitters.
-3. M5 prerequisite: make module planning/emission a portable operation in the same
-   canonical compiler source. Current native build adapter cannot by itself supply
-   genuine generated-compiler module reproduction.
-4. Reproduce and qualify complete modular G1/G2/G3/fixed points with new identities;
-   then applicable platform/publication gates. Do not promote .13 replacement,
-   merge, publish npm packages or claim modular self-hosting before those gates.
+1. M4 finite Linux installed preview is qualified above. Preserve exact .13 and
+   earlier source/graph/kernel qualifications; do not inherit their self-host receipts.
+2. M5 prerequisite: implement portable module planning/emission in the same
+   canonical compiler. The current native graph build adapter does not supply
+   generated-compiler module reproduction.
+3. Reproduce the full graph/packages, then qualify independent new modular JS/TS
+   G1/G2/G3 and exact fixed points with source/admission/IR/resource identities.
+4. Follow the roadmap for component String/IO, actual non-JS IO apps, optional
+   executors, platform consumers and authorized final promotion.
 
-Experimental pilot expansion and stopped prototype PR #203 remain deferred.
-This candidate milestone implements M1/M2 and the finite M3 scopes above; M4/M5
-remain incomplete and the checked .13 distribution is not replaced.
+Pilot expansion and stopped PR #203 remain deferred. The M4 preview does not
+replace .13, qualify standalone checked-host installation or claim a self-hosted release.
 
 ## Diagnosed attempts preserved
 
@@ -314,9 +349,10 @@ Final documentation run40665911767 at8ac2aa72 refuses the new walkthrough's rela
 link outside psc1/. Replace it with the exact qualified GitHub workflow URL; retain
 the layout guard unchanged. No compiler/package implementation bytes change.
 
-CI selection now gives the not-yet-integrated production builder its own complete
+Historical M1/M2 CI selection gave the then-unintegrated production builder its own complete
 qualification workflow, alongside the retained pilot exclusion; shared host files
 and CLI changes still run the installed-CLI gate. Remove the candidate-builder
-exclusion during M4 integration. Successful native compilation is cached before
+exclusion during M4 integration; M4 now imports executable helpers and the reference
+CLI workflow watches those dependencies. Successful native compilation is cached before
 candidate execution so test failures do not force identical rebuilds. The workflow
 edit also reruns the existing CLI at the corrected documentation HEAD.

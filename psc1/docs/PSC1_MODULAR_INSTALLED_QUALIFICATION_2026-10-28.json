@@ -1,0 +1,889 @@
+{
+  "schema": "psc1-modular-installed-qualification/1",
+  "date": "2026-10-28",
+  "status": "qualified-finite-linux-preview",
+  "implementationCommit": "ca92bbdbc7c0f34e1da4076db7300033802eab3e",
+  "baseCommit": "415dbba4b5c1627185fc0ee8cdf29a83b15b6f08",
+  "pr": 208,
+  "package": {
+    "schema": "psc1-modular-installed-package/1",
+    "testedCommit": "ca92bbdbc7c0f34e1da4076db7300033802eab3e",
+    "version": "0.1.0-psc1-modular.1",
+    "tarball": "proofscript-0.1.0-psc1-modular.1.tgz",
+    "bytes": 11329698,
+    "sha256": "7773a7a2abcebaf1fd77df836b2c687e013001c23885bb0bb584e6fe8d012507",
+    "manifestSha256": "02fa935fa4c279c73360d18ccff47a97ac208466382c1dabb4428ac07436f65c",
+    "consumerDescriptorsSha256": "d2579d61da1c793f31625356055dd321cdc5be2800b048034b8b3faab2ec1805",
+    "compilerAdmissionsSha256": "97041042ece09003a253c1f4a038921ff89517a702a96da48bb631de930d1107",
+    "sourceGraphManifestSha256": "f0b25fabaa702e949645eeee9adedf52237016b316aaeefb90bf806170c4b389",
+    "compilerSourceClosureDigest": "41eb40437e0df1722128c09c9b9da7cad0ccb1ad61371f23eb6bc2db4e9a1106",
+    "sourceUnits": 127,
+    "corePackages": 20,
+    "installedGraphFiles": 1423,
+    "installedGraphBytes": 124338997,
+    "defaultKernel": "official-Lean-4.35.0-Emscripten-linear-memory-Wasm",
+    "referenceCompilerExecuted": false,
+    "fullModularSelfHosting": false,
+    "standaloneCheckedHostQualified": false
+  },
+  "qualification": {
+    "run": 40714983520,
+    "jobs": {
+      "package": 122910099618,
+      "node": 122912819078,
+      "bun": 122912818763
+    },
+    "status": "success",
+    "hostRuntimes": [
+      "Node 22.23.3",
+      "Bun 1.4.4"
+    ],
+    "compilerEngines": [
+      "js",
+      "ts"
+    ],
+    "grammars": [
+      "lean",
+      "ps"
+    ],
+    "targets": [
+      "js",
+      "ts",
+      "rust",
+      "wasm-core",
+      "wasm-component",
+      "python",
+      "php"
+    ],
+    "smoke": {
+      "checkedBuilds": 16,
+      "actualKernelCases": 28
+    },
+    "hosts": {
+      "node": {
+        "status": "passed",
+        "checkedBuilds": 64,
+        "refusals": 10,
+        "fullCompilerWasmAdmissionSha256": "97041042ece09003a253c1f4a038921ff89517a702a96da48bb631de930d1107",
+        "globalRootOnlyCheckAndBuild": true,
+        "watchCases": 9
+      },
+      "bun": {
+        "status": "passed",
+        "checkedBuilds": 64,
+        "refusals": 10,
+        "fullCompilerWasmAdmissionSha256": "97041042ece09003a253c1f4a038921ff89517a702a96da48bb631de930d1107",
+        "globalRootOnlyCheckAndBuild": true,
+        "watchCases": 9
+      }
+    },
+    "componentScope": "Actual Bool false/true; richer component ABI remains refused/unqualified.",
+    "artifacts": [
+      {
+        "id": 12829700980,
+        "name": "psc1-modular-installed-node-ca92bbdbc7c0f34e1da4076db7300033802eab3e",
+        "bytes": 16468,
+        "sha256": "39d3189cd6cacf7df5efbe652a79b2cfb8d006eebc9938d96936a134ba0d9e04",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40714983520/artifacts/12829700980"
+      },
+      {
+        "id": 12828397964,
+        "name": "psc1-modular-installed-bun-ca92bbdbc7c0f34e1da4076db7300033802eab3e",
+        "bytes": 16462,
+        "sha256": "7d55f629de204f3690a62bd83ed102e3f858b6383c12cb627ccc7923e8386f9e",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40714983520/artifacts/12828397964"
+      },
+      {
+        "id": 12827921799,
+        "name": "psc1-modular-target-resources-ca92bbdbc7c0f34e1da4076db7300033802eab3e",
+        "bytes": 178000866,
+        "sha256": "ccda47d0a10bcfd52e58f2dd2f0875669580aa09b5f9138d05bfd97101248b7b",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40714983520/artifacts/12827921799"
+      },
+      {
+        "id": 12827338983,
+        "name": "psc1-modular-toolchain-package-ca92bbdbc7c0f34e1da4076db7300033802eab3e",
+        "bytes": 11496018,
+        "sha256": "12d990baf69371ef3dc78aa23b61a12d354c3037d9de827a6eb3e230454f2e33",
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40714983520/artifacts/12827338983"
+      }
+    ]
+  },
+  "diagnostics": {
+    "run": 40722004088,
+    "commit": "103172427f10bd088606ef88967bd0b93388c25c",
+    "status": "success",
+    "jobs": {
+      "node": 122935104823,
+      "bun": 122935104686
+    },
+    "boundaryRefusals": 46,
+    "unicodeIoBuilds": 16,
+    "ioDispatcherRefusals": 8,
+    "strictTypeConsumers": 4,
+    "extraTsEngineWatchCases": 2,
+    "details": {
+      "node": {
+        "boundaryCases": 23,
+        "ioBuilds": 8,
+        "ioRefusals": 4,
+        "typeConsumers": [
+          "NodeNext",
+          "Bundler"
+        ],
+        "tsWatch": {
+          "engine": "ts",
+          "builds": 2,
+          "editedValue": "43",
+          "typingRefusalPreservedPointer": true,
+          "exit": 143,
+          "stopMs": 101
+        },
+        "pin": {
+          "run": 40722004088,
+          "job": 122935104823,
+          "artifact": 12831771641,
+          "commit": "103172427f10bd088606ef88967bd0b93388c25c",
+          "zipSha256": "2eb43eb35c346bf85001d6ee1b8313dc3de7f264ca35a233474c8d44320438dc"
+        }
+      },
+      "bun": {
+        "boundaryCases": 23,
+        "ioBuilds": 8,
+        "ioRefusals": 4,
+        "typeConsumers": [
+          "NodeNext",
+          "Bundler"
+        ],
+        "tsWatch": {
+          "engine": "ts",
+          "builds": 2,
+          "editedValue": "43",
+          "typingRefusalPreservedPointer": true,
+          "exit": 143,
+          "stopMs": 102
+        },
+        "pin": {
+          "run": 40722004088,
+          "job": 122935104686,
+          "artifact": 12831057351,
+          "commit": "103172427f10bd088606ef88967bd0b93388c25c",
+          "zipSha256": "cc2e7b7a7f3079a4223a0ec729c9c7c170f9ab9b426a0fdd408817179f2748e5"
+        }
+      }
+    },
+    "artifacts": [
+      {
+        "id": 12831771641,
+        "name": "psc1-modular-boundaries-node-103172427f10bd088606ef88967bd0b93388c25c",
+        "bytes": 1329,
+        "sha256": "2eb43eb35c346bf85001d6ee1b8313dc3de7f264ca35a233474c8d44320438dc",
+        "expired": false,
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40722004088/artifacts/12831771641"
+      },
+      {
+        "id": 12831057351,
+        "name": "psc1-modular-boundaries-bun-103172427f10bd088606ef88967bd0b93388c25c",
+        "bytes": 1312,
+        "sha256": "cc2e7b7a7f3079a4223a0ec729c9c7c170f9ab9b426a0fdd408817179f2748e5",
+        "expired": false,
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40722004088/artifacts/12831057351"
+      }
+    ]
+  },
+  "applications": {
+    "run": 40725714755,
+    "commit": "1ce58717ee9565d1e52fbff2566721d7c30c1654",
+    "status": "success",
+    "jobs": {
+      "node": 122948289237,
+      "bun": 122948288623
+    },
+    "checkedBuilds": 32,
+    "behaviorCases": 528,
+    "sourceModulesPerApplication": 11,
+    "reference": {
+      "run": 40679842606,
+      "job": 122787447037,
+      "artifact": 12812871458,
+      "commit": "f433bad08a5b53992030d4f6ad043bfd0839d68f",
+      "zipSha256": "88252afc343ffc964c115f6e2bcdc4d529223c6f83e6290ad7724deafef19c92"
+    },
+    "hosts": {
+      "node": {
+        "status": "passed",
+        "commit": "1ce58717ee9565d1e52fbff2566721d7c30c1654",
+        "inputCommit": "ca92bbdbc7c0f34e1da4076db7300033802eab3e",
+        "builds": 16,
+        "behaviorCases": 264,
+        "buildElapsedMs": {
+          "min": 23980,
+          "max": 44705
+        },
+        "largeApplication": {
+          "observations": 8,
+          "elapsedMs": {
+            "min": 6250,
+            "max": 11765
+          },
+          "maxRssKiB": 168740
+        },
+        "records": [
+          {
+            "engine": "js",
+            "id": "lean-cli-json",
+            "target": "js",
+            "modules": 11,
+            "generation": "dc213cefa55733d64c480b9c77df567d09aea595f6dce4ef97ecb0e9bb7d1965",
+            "sourceClosureDigest": "d0ff83526c431e9839a37a497aaf10d60df7e119213471cb029172353e77be84",
+            "admissionsSha256": "e3d2565456e90f2949a8b331d2e0060342e78ea5be1af8d83fc1842898d57eb9",
+            "originalIrSha256": "bfbb9498508fa84f362ab0c9e1ee1e3ee08f376490507ae7d7337b0d20b04eff",
+            "specializedIrSha256": "bf7515764855a1739a7901b053546eacd2836e2d7b889f627319017d94306f1b",
+            "sourceSha256": "e28074069144414e37401006510a8e2531c564dad0bc39fbdc404d3ac93eacfa",
+            "elapsedMs": 24636,
+            "behaviorCases": 21
+          },
+          {
+            "engine": "js",
+            "id": "lean-cli-json",
+            "target": "ts",
+            "modules": 11,
+            "generation": "977fb878192140dfd3abb7649321f7277140e6f2f24060d1745470067ec28dfd",
+            "sourceClosureDigest": "d0ff83526c431e9839a37a497aaf10d60df7e119213471cb029172353e77be84",
+            "admissionsSha256": "e3d2565456e90f2949a8b331d2e0060342e78ea5be1af8d83fc1842898d57eb9",
+            "originalIrSha256": "bfbb9498508fa84f362ab0c9e1ee1e3ee08f376490507ae7d7337b0d20b04eff",
+            "specializedIrSha256": "bf7515764855a1739a7901b053546eacd2836e2d7b889f627319017d94306f1b",
+            "sourceSha256": "0de46c09a1c0a72b9f4903ffff2177e5f4e74652a235368b692ae9f787926480",
+            "elapsedMs": 23980,
+            "behaviorCases": 21
+          },
+          {
+            "engine": "js",
+            "id": "lean-compiler-like",
+            "target": "js",
+            "modules": 11,
+            "generation": "508ecc167d5da85701717226a94df6aa72c79a38ee25e694379772123d2a58ff",
+            "sourceClosureDigest": "d6147a2ea3909b4d40044fc2f174093d56a76cf88eae8e05e37c100c176dd79b",
+            "admissionsSha256": "3dbd4d492c0afc4be1a77e488a81635cecfb5c2ba7e0f06595cde4e6c6996dfc",
+            "originalIrSha256": "bd84b2cb315b083cd57152463718e7814f211b1e0186ab9f1961bb3bb0832d3e",
+            "specializedIrSha256": "2c4d35149e827daf1f68dd175f745e2e8dc1771859d4a9124cca74d5c706159c",
+            "sourceSha256": "09ea685323017da80c2ca679afdc24520ac119d5e2c94238c33f361eeb788bb0",
+            "elapsedMs": 35346,
+            "behaviorCases": 12
+          },
+          {
+            "engine": "js",
+            "id": "lean-compiler-like",
+            "target": "ts",
+            "modules": 11,
+            "generation": "239b376a90679ee07c376b6d6a5df8f81a0a3cc5dad246b6faabc3a6d21b6c6a",
+            "sourceClosureDigest": "d6147a2ea3909b4d40044fc2f174093d56a76cf88eae8e05e37c100c176dd79b",
+            "admissionsSha256": "3dbd4d492c0afc4be1a77e488a81635cecfb5c2ba7e0f06595cde4e6c6996dfc",
+            "originalIrSha256": "bd84b2cb315b083cd57152463718e7814f211b1e0186ab9f1961bb3bb0832d3e",
+            "specializedIrSha256": "2c4d35149e827daf1f68dd175f745e2e8dc1771859d4a9124cca74d5c706159c",
+            "sourceSha256": "77709354a95dd692a2f3d106302a78cf465833d39276a2144705a13d992afa98",
+            "elapsedMs": 39939,
+            "behaviorCases": 12
+          },
+          {
+            "engine": "js",
+            "id": "ps-cli-json",
+            "target": "js",
+            "modules": 11,
+            "generation": "88488e065fbeabc7526335c6028fe9587d5d8691b35bece993d1d4a7fd587d08",
+            "sourceClosureDigest": "2c78829afc24c4f6a1ba80f2de2f3a4dcb80172defcff0477b024e001274fa00",
+            "admissionsSha256": "e3d2565456e90f2949a8b331d2e0060342e78ea5be1af8d83fc1842898d57eb9",
+            "originalIrSha256": "bfbb9498508fa84f362ab0c9e1ee1e3ee08f376490507ae7d7337b0d20b04eff",
+            "specializedIrSha256": "bf7515764855a1739a7901b053546eacd2836e2d7b889f627319017d94306f1b",
+            "sourceSha256": "e28074069144414e37401006510a8e2531c564dad0bc39fbdc404d3ac93eacfa",
+            "elapsedMs": 24675,
+            "behaviorCases": 21
+          },
+          {
+            "engine": "js",
+            "id": "ps-cli-json",
+            "target": "ts",
+            "modules": 11,
+            "generation": "a0a5f3f3c09c1b484e8d653ef1abb60786b0cba3108f271f73b6351924f9bd7d",
+            "sourceClosureDigest": "2c78829afc24c4f6a1ba80f2de2f3a4dcb80172defcff0477b024e001274fa00",
+            "admissionsSha256": "e3d2565456e90f2949a8b331d2e0060342e78ea5be1af8d83fc1842898d57eb9",
+            "originalIrSha256": "bfbb9498508fa84f362ab0c9e1ee1e3ee08f376490507ae7d7337b0d20b04eff",
+            "specializedIrSha256": "bf7515764855a1739a7901b053546eacd2836e2d7b889f627319017d94306f1b",
+            "sourceSha256": "0de46c09a1c0a72b9f4903ffff2177e5f4e74652a235368b692ae9f787926480",
+            "elapsedMs": 24567,
+            "behaviorCases": 21
+          },
+          {
+            "engine": "js",
+            "id": "ps-compiler-like",
+            "target": "js",
+            "modules": 11,
+            "generation": "08c6d9971ee311fc4d0c97ec3b9f10d7fefde61dbc0951280ab550a678f0c462",
+            "sourceClosureDigest": "c410a69b4a830bec9b0b97fac02dedbc22ae33f83820e0c302db106b0e10f518",
+            "admissionsSha256": "3dbd4d492c0afc4be1a77e488a81635cecfb5c2ba7e0f06595cde4e6c6996dfc",
+            "originalIrSha256": "bd84b2cb315b083cd57152463718e7814f211b1e0186ab9f1961bb3bb0832d3e",
+            "specializedIrSha256": "2c4d35149e827daf1f68dd175f745e2e8dc1771859d4a9124cca74d5c706159c",
+            "sourceSha256": "09ea685323017da80c2ca679afdc24520ac119d5e2c94238c33f361eeb788bb0",
+            "elapsedMs": 35941,
+            "behaviorCases": 12
+          },
+          {
+            "engine": "js",
+            "id": "ps-compiler-like",
+            "target": "ts",
+            "modules": 11,
+            "generation": "18619b0d9d8b603c47dbb87169bba497f46935c806b4b6372da4ee43aed08050",
+            "sourceClosureDigest": "c410a69b4a830bec9b0b97fac02dedbc22ae33f83820e0c302db106b0e10f518",
+            "admissionsSha256": "3dbd4d492c0afc4be1a77e488a81635cecfb5c2ba7e0f06595cde4e6c6996dfc",
+            "originalIrSha256": "bd84b2cb315b083cd57152463718e7814f211b1e0186ab9f1961bb3bb0832d3e",
+            "specializedIrSha256": "2c4d35149e827daf1f68dd175f745e2e8dc1771859d4a9124cca74d5c706159c",
+            "sourceSha256": "77709354a95dd692a2f3d106302a78cf465833d39276a2144705a13d992afa98",
+            "elapsedMs": 40415,
+            "behaviorCases": 12
+          },
+          {
+            "engine": "ts",
+            "id": "lean-cli-json",
+            "target": "js",
+            "modules": 11,
+            "generation": "2cfd5552b30c068c972ef2281729422d18a3637866ba3a5b1c3460591c09fc3c",
+            "sourceClosureDigest": "d0ff83526c431e9839a37a497aaf10d60df7e119213471cb029172353e77be84",
+            "admissionsSha256": "e3d2565456e90f2949a8b331d2e0060342e78ea5be1af8d83fc1842898d57eb9",
+            "originalIrSha256": "bfbb9498508fa84f362ab0c9e1ee1e3ee08f376490507ae7d7337b0d20b04eff",
+            "specializedIrSha256": "bf7515764855a1739a7901b053546eacd2836e2d7b889f627319017d94306f1b",
+            "sourceSha256": "e28074069144414e37401006510a8e2531c564dad0bc39fbdc404d3ac93eacfa",
+            "elapsedMs": 26415,
+            "behaviorCases": 21
+          },
+          {
+            "engine": "ts",
+            "id": "lean-cli-json",
+            "target": "ts",
+            "modules": 11,
+            "generation": "14c4d505315836bb4779eae8a5039811fe8165418b247fc50a4be13944067460",
+            "sourceClosureDigest": "d0ff83526c431e9839a37a497aaf10d60df7e119213471cb029172353e77be84",
+            "admissionsSha256": "e3d2565456e90f2949a8b331d2e0060342e78ea5be1af8d83fc1842898d57eb9",
+            "originalIrSha256": "bfbb9498508fa84f362ab0c9e1ee1e3ee08f376490507ae7d7337b0d20b04eff",
+            "specializedIrSha256": "bf7515764855a1739a7901b053546eacd2836e2d7b889f627319017d94306f1b",
+            "sourceSha256": "0de46c09a1c0a72b9f4903ffff2177e5f4e74652a235368b692ae9f787926480",
+            "elapsedMs": 26059,
+            "behaviorCases": 21
+          },
+          {
+            "engine": "ts",
+            "id": "lean-compiler-like",
+            "target": "js",
+            "modules": 11,
+            "generation": "00bae89c376e5aee1ec8795702a2ba68d6f7c621f852b6238c6cb9a0c7b4cc1b",
+            "sourceClosureDigest": "d6147a2ea3909b4d40044fc2f174093d56a76cf88eae8e05e37c100c176dd79b",
+            "admissionsSha256": "3dbd4d492c0afc4be1a77e488a81635cecfb5c2ba7e0f06595cde4e6c6996dfc",
+            "originalIrSha256": "bd84b2cb315b083cd57152463718e7814f211b1e0186ab9f1961bb3bb0832d3e",
+            "specializedIrSha256": "2c4d35149e827daf1f68dd175f745e2e8dc1771859d4a9124cca74d5c706159c",
+            "sourceSha256": "09ea685323017da80c2ca679afdc24520ac119d5e2c94238c33f361eeb788bb0",
+            "elapsedMs": 39971,
+            "behaviorCases": 12
+          },
+          {
+            "engine": "ts",
+            "id": "lean-compiler-like",
+            "target": "ts",
+            "modules": 11,
+            "generation": "c27b3d8c1c63e6da519a20d9fc02d567484372a20a2e5f94b59342038cf73adb",
+            "sourceClosureDigest": "d6147a2ea3909b4d40044fc2f174093d56a76cf88eae8e05e37c100c176dd79b",
+            "admissionsSha256": "3dbd4d492c0afc4be1a77e488a81635cecfb5c2ba7e0f06595cde4e6c6996dfc",
+            "originalIrSha256": "bd84b2cb315b083cd57152463718e7814f211b1e0186ab9f1961bb3bb0832d3e",
+            "specializedIrSha256": "2c4d35149e827daf1f68dd175f745e2e8dc1771859d4a9124cca74d5c706159c",
+            "sourceSha256": "77709354a95dd692a2f3d106302a78cf465833d39276a2144705a13d992afa98",
+            "elapsedMs": 44534,
+            "behaviorCases": 12
+          },
+          {
+            "engine": "ts",
+            "id": "ps-cli-json",
+            "target": "js",
+            "modules": 11,
+            "generation": "67e71d49fdf33cb32f23489eb69887b5e8b5ebb2f0ab8f9152b6156052fedb93",
+            "sourceClosureDigest": "2c78829afc24c4f6a1ba80f2de2f3a4dcb80172defcff0477b024e001274fa00",
+            "admissionsSha256": "e3d2565456e90f2949a8b331d2e0060342e78ea5be1af8d83fc1842898d57eb9",
+            "originalIrSha256": "bfbb9498508fa84f362ab0c9e1ee1e3ee08f376490507ae7d7337b0d20b04eff",
+            "specializedIrSha256": "bf7515764855a1739a7901b053546eacd2836e2d7b889f627319017d94306f1b",
+            "sourceSha256": "e28074069144414e37401006510a8e2531c564dad0bc39fbdc404d3ac93eacfa",
+            "elapsedMs": 27024,
+            "behaviorCases": 21
+          },
+          {
+            "engine": "ts",
+            "id": "ps-cli-json",
+            "target": "ts",
+            "modules": 11,
+            "generation": "f1e9b1f89a225e4dd3d576639d9577b24c08409ab91467293ed54bcf7454a120",
+            "sourceClosureDigest": "2c78829afc24c4f6a1ba80f2de2f3a4dcb80172defcff0477b024e001274fa00",
+            "admissionsSha256": "e3d2565456e90f2949a8b331d2e0060342e78ea5be1af8d83fc1842898d57eb9",
+            "originalIrSha256": "bfbb9498508fa84f362ab0c9e1ee1e3ee08f376490507ae7d7337b0d20b04eff",
+            "specializedIrSha256": "bf7515764855a1739a7901b053546eacd2836e2d7b889f627319017d94306f1b",
+            "sourceSha256": "0de46c09a1c0a72b9f4903ffff2177e5f4e74652a235368b692ae9f787926480",
+            "elapsedMs": 26650,
+            "behaviorCases": 21
+          },
+          {
+            "engine": "ts",
+            "id": "ps-compiler-like",
+            "target": "js",
+            "modules": 11,
+            "generation": "fa46d8a6dce1ccba0100732e5a60b60a06fce8743016aea3a0fabf426e8ed40c",
+            "sourceClosureDigest": "c410a69b4a830bec9b0b97fac02dedbc22ae33f83820e0c302db106b0e10f518",
+            "admissionsSha256": "3dbd4d492c0afc4be1a77e488a81635cecfb5c2ba7e0f06595cde4e6c6996dfc",
+            "originalIrSha256": "bd84b2cb315b083cd57152463718e7814f211b1e0186ab9f1961bb3bb0832d3e",
+            "specializedIrSha256": "2c4d35149e827daf1f68dd175f745e2e8dc1771859d4a9124cca74d5c706159c",
+            "sourceSha256": "09ea685323017da80c2ca679afdc24520ac119d5e2c94238c33f361eeb788bb0",
+            "elapsedMs": 40422,
+            "behaviorCases": 12
+          },
+          {
+            "engine": "ts",
+            "id": "ps-compiler-like",
+            "target": "ts",
+            "modules": 11,
+            "generation": "de996b8e070925da5e259d8fc5214bbfe21b193f5ae680c903e1b9d6a6f68cfa",
+            "sourceClosureDigest": "c410a69b4a830bec9b0b97fac02dedbc22ae33f83820e0c302db106b0e10f518",
+            "admissionsSha256": "3dbd4d492c0afc4be1a77e488a81635cecfb5c2ba7e0f06595cde4e6c6996dfc",
+            "originalIrSha256": "bd84b2cb315b083cd57152463718e7814f211b1e0186ab9f1961bb3bb0832d3e",
+            "specializedIrSha256": "2c4d35149e827daf1f68dd175f745e2e8dc1771859d4a9124cca74d5c706159c",
+            "sourceSha256": "77709354a95dd692a2f3d106302a78cf465833d39276a2144705a13d992afa98",
+            "elapsedMs": 44705,
+            "behaviorCases": 12
+          }
+        ]
+      },
+      "bun": {
+        "status": "passed",
+        "commit": "1ce58717ee9565d1e52fbff2566721d7c30c1654",
+        "inputCommit": "ca92bbdbc7c0f34e1da4076db7300033802eab3e",
+        "builds": 16,
+        "behaviorCases": 264,
+        "buildElapsedMs": {
+          "min": 11456,
+          "max": 19157
+        },
+        "largeApplication": {
+          "observations": 8,
+          "elapsedMs": {
+            "min": 1605,
+            "max": 2865
+          },
+          "maxRssKiB": 110356
+        },
+        "records": [
+          {
+            "engine": "js",
+            "id": "lean-cli-json",
+            "target": "js",
+            "modules": 11,
+            "generation": "8696d41213a9789d7cb18a81ab8ebfa4c5db10e2619fd983614e414ada4772ae",
+            "sourceClosureDigest": "d0ff83526c431e9839a37a497aaf10d60df7e119213471cb029172353e77be84",
+            "admissionsSha256": "e3d2565456e90f2949a8b331d2e0060342e78ea5be1af8d83fc1842898d57eb9",
+            "originalIrSha256": "bfbb9498508fa84f362ab0c9e1ee1e3ee08f376490507ae7d7337b0d20b04eff",
+            "specializedIrSha256": "bf7515764855a1739a7901b053546eacd2836e2d7b889f627319017d94306f1b",
+            "sourceSha256": "e28074069144414e37401006510a8e2531c564dad0bc39fbdc404d3ac93eacfa",
+            "elapsedMs": 11456,
+            "behaviorCases": 21
+          },
+          {
+            "engine": "js",
+            "id": "lean-cli-json",
+            "target": "ts",
+            "modules": 11,
+            "generation": "d5f92e96e4512fc1fe24497c0e4345eec2d6c94dc63f73f2711efb2444390acd",
+            "sourceClosureDigest": "d0ff83526c431e9839a37a497aaf10d60df7e119213471cb029172353e77be84",
+            "admissionsSha256": "e3d2565456e90f2949a8b331d2e0060342e78ea5be1af8d83fc1842898d57eb9",
+            "originalIrSha256": "bfbb9498508fa84f362ab0c9e1ee1e3ee08f376490507ae7d7337b0d20b04eff",
+            "specializedIrSha256": "bf7515764855a1739a7901b053546eacd2836e2d7b889f627319017d94306f1b",
+            "sourceSha256": "0de46c09a1c0a72b9f4903ffff2177e5f4e74652a235368b692ae9f787926480",
+            "elapsedMs": 11874,
+            "behaviorCases": 21
+          },
+          {
+            "engine": "js",
+            "id": "lean-compiler-like",
+            "target": "js",
+            "modules": 11,
+            "generation": "4f20265395534a56e65394e4217769fa204af5eba0a74c0df13aacfb62b9ede7",
+            "sourceClosureDigest": "d6147a2ea3909b4d40044fc2f174093d56a76cf88eae8e05e37c100c176dd79b",
+            "admissionsSha256": "3dbd4d492c0afc4be1a77e488a81635cecfb5c2ba7e0f06595cde4e6c6996dfc",
+            "originalIrSha256": "bd84b2cb315b083cd57152463718e7814f211b1e0186ab9f1961bb3bb0832d3e",
+            "specializedIrSha256": "2c4d35149e827daf1f68dd175f745e2e8dc1771859d4a9124cca74d5c706159c",
+            "sourceSha256": "09ea685323017da80c2ca679afdc24520ac119d5e2c94238c33f361eeb788bb0",
+            "elapsedMs": 15008,
+            "behaviorCases": 12
+          },
+          {
+            "engine": "js",
+            "id": "lean-compiler-like",
+            "target": "ts",
+            "modules": 11,
+            "generation": "302b67abd1bed12aed47743c94a715387814c3fd42dd1a4d70ade07c4c8b29e3",
+            "sourceClosureDigest": "d6147a2ea3909b4d40044fc2f174093d56a76cf88eae8e05e37c100c176dd79b",
+            "admissionsSha256": "3dbd4d492c0afc4be1a77e488a81635cecfb5c2ba7e0f06595cde4e6c6996dfc",
+            "originalIrSha256": "bd84b2cb315b083cd57152463718e7814f211b1e0186ab9f1961bb3bb0832d3e",
+            "specializedIrSha256": "2c4d35149e827daf1f68dd175f745e2e8dc1771859d4a9124cca74d5c706159c",
+            "sourceSha256": "77709354a95dd692a2f3d106302a78cf465833d39276a2144705a13d992afa98",
+            "elapsedMs": 15955,
+            "behaviorCases": 12
+          },
+          {
+            "engine": "js",
+            "id": "ps-cli-json",
+            "target": "js",
+            "modules": 11,
+            "generation": "3f11af80fe6f086382c459990c82f82627ab304cc4e0dcd905d8c4d27db56817",
+            "sourceClosureDigest": "2c78829afc24c4f6a1ba80f2de2f3a4dcb80172defcff0477b024e001274fa00",
+            "admissionsSha256": "e3d2565456e90f2949a8b331d2e0060342e78ea5be1af8d83fc1842898d57eb9",
+            "originalIrSha256": "bfbb9498508fa84f362ab0c9e1ee1e3ee08f376490507ae7d7337b0d20b04eff",
+            "specializedIrSha256": "bf7515764855a1739a7901b053546eacd2836e2d7b889f627319017d94306f1b",
+            "sourceSha256": "e28074069144414e37401006510a8e2531c564dad0bc39fbdc404d3ac93eacfa",
+            "elapsedMs": 11555,
+            "behaviorCases": 21
+          },
+          {
+            "engine": "js",
+            "id": "ps-cli-json",
+            "target": "ts",
+            "modules": 11,
+            "generation": "4e44fc5c7fe6e7417e5eab30fe6d8b2ec0beae3d6662a75fa000852227f43975",
+            "sourceClosureDigest": "2c78829afc24c4f6a1ba80f2de2f3a4dcb80172defcff0477b024e001274fa00",
+            "admissionsSha256": "e3d2565456e90f2949a8b331d2e0060342e78ea5be1af8d83fc1842898d57eb9",
+            "originalIrSha256": "bfbb9498508fa84f362ab0c9e1ee1e3ee08f376490507ae7d7337b0d20b04eff",
+            "specializedIrSha256": "bf7515764855a1739a7901b053546eacd2836e2d7b889f627319017d94306f1b",
+            "sourceSha256": "0de46c09a1c0a72b9f4903ffff2177e5f4e74652a235368b692ae9f787926480",
+            "elapsedMs": 11760,
+            "behaviorCases": 21
+          },
+          {
+            "engine": "js",
+            "id": "ps-compiler-like",
+            "target": "js",
+            "modules": 11,
+            "generation": "0e1f2658cab8ec14d874be194f73e714f563d1e10e67200d07940da043114be7",
+            "sourceClosureDigest": "c410a69b4a830bec9b0b97fac02dedbc22ae33f83820e0c302db106b0e10f518",
+            "admissionsSha256": "3dbd4d492c0afc4be1a77e488a81635cecfb5c2ba7e0f06595cde4e6c6996dfc",
+            "originalIrSha256": "bd84b2cb315b083cd57152463718e7814f211b1e0186ab9f1961bb3bb0832d3e",
+            "specializedIrSha256": "2c4d35149e827daf1f68dd175f745e2e8dc1771859d4a9124cca74d5c706159c",
+            "sourceSha256": "09ea685323017da80c2ca679afdc24520ac119d5e2c94238c33f361eeb788bb0",
+            "elapsedMs": 14300,
+            "behaviorCases": 12
+          },
+          {
+            "engine": "js",
+            "id": "ps-compiler-like",
+            "target": "ts",
+            "modules": 11,
+            "generation": "a5d60bdd355b5576b20823c17857998b13276f7d1fbc43c49190204c831ab67a",
+            "sourceClosureDigest": "c410a69b4a830bec9b0b97fac02dedbc22ae33f83820e0c302db106b0e10f518",
+            "admissionsSha256": "3dbd4d492c0afc4be1a77e488a81635cecfb5c2ba7e0f06595cde4e6c6996dfc",
+            "originalIrSha256": "bd84b2cb315b083cd57152463718e7814f211b1e0186ab9f1961bb3bb0832d3e",
+            "specializedIrSha256": "2c4d35149e827daf1f68dd175f745e2e8dc1771859d4a9124cca74d5c706159c",
+            "sourceSha256": "77709354a95dd692a2f3d106302a78cf465833d39276a2144705a13d992afa98",
+            "elapsedMs": 15889,
+            "behaviorCases": 12
+          },
+          {
+            "engine": "ts",
+            "id": "lean-cli-json",
+            "target": "js",
+            "modules": 11,
+            "generation": "e6cfa66a2711a744c291f31774330fa023688be8337d0a7c86f68cb7d3c07c27",
+            "sourceClosureDigest": "d0ff83526c431e9839a37a497aaf10d60df7e119213471cb029172353e77be84",
+            "admissionsSha256": "e3d2565456e90f2949a8b331d2e0060342e78ea5be1af8d83fc1842898d57eb9",
+            "originalIrSha256": "bfbb9498508fa84f362ab0c9e1ee1e3ee08f376490507ae7d7337b0d20b04eff",
+            "specializedIrSha256": "bf7515764855a1739a7901b053546eacd2836e2d7b889f627319017d94306f1b",
+            "sourceSha256": "e28074069144414e37401006510a8e2531c564dad0bc39fbdc404d3ac93eacfa",
+            "elapsedMs": 13665,
+            "behaviorCases": 21
+          },
+          {
+            "engine": "ts",
+            "id": "lean-cli-json",
+            "target": "ts",
+            "modules": 11,
+            "generation": "22bf8d5b33c06c16e021d3fa3a956807fd71e2e65035ef1e6d4d86a7ca488d7f",
+            "sourceClosureDigest": "d0ff83526c431e9839a37a497aaf10d60df7e119213471cb029172353e77be84",
+            "admissionsSha256": "e3d2565456e90f2949a8b331d2e0060342e78ea5be1af8d83fc1842898d57eb9",
+            "originalIrSha256": "bfbb9498508fa84f362ab0c9e1ee1e3ee08f376490507ae7d7337b0d20b04eff",
+            "specializedIrSha256": "bf7515764855a1739a7901b053546eacd2836e2d7b889f627319017d94306f1b",
+            "sourceSha256": "0de46c09a1c0a72b9f4903ffff2177e5f4e74652a235368b692ae9f787926480",
+            "elapsedMs": 14045,
+            "behaviorCases": 21
+          },
+          {
+            "engine": "ts",
+            "id": "lean-compiler-like",
+            "target": "js",
+            "modules": 11,
+            "generation": "d627d4b767f210b708b0ad82e5f6126c0400f16bf4a57a8eff461c932e9b0105",
+            "sourceClosureDigest": "d6147a2ea3909b4d40044fc2f174093d56a76cf88eae8e05e37c100c176dd79b",
+            "admissionsSha256": "3dbd4d492c0afc4be1a77e488a81635cecfb5c2ba7e0f06595cde4e6c6996dfc",
+            "originalIrSha256": "bd84b2cb315b083cd57152463718e7814f211b1e0186ab9f1961bb3bb0832d3e",
+            "specializedIrSha256": "2c4d35149e827daf1f68dd175f745e2e8dc1771859d4a9124cca74d5c706159c",
+            "sourceSha256": "09ea685323017da80c2ca679afdc24520ac119d5e2c94238c33f361eeb788bb0",
+            "elapsedMs": 17549,
+            "behaviorCases": 12
+          },
+          {
+            "engine": "ts",
+            "id": "lean-compiler-like",
+            "target": "ts",
+            "modules": 11,
+            "generation": "81fcd79bd591ad900f134957f5d19c5068b3fcf81575e07518495b66b0f55471",
+            "sourceClosureDigest": "d6147a2ea3909b4d40044fc2f174093d56a76cf88eae8e05e37c100c176dd79b",
+            "admissionsSha256": "3dbd4d492c0afc4be1a77e488a81635cecfb5c2ba7e0f06595cde4e6c6996dfc",
+            "originalIrSha256": "bd84b2cb315b083cd57152463718e7814f211b1e0186ab9f1961bb3bb0832d3e",
+            "specializedIrSha256": "2c4d35149e827daf1f68dd175f745e2e8dc1771859d4a9124cca74d5c706159c",
+            "sourceSha256": "77709354a95dd692a2f3d106302a78cf465833d39276a2144705a13d992afa98",
+            "elapsedMs": 19084,
+            "behaviorCases": 12
+          },
+          {
+            "engine": "ts",
+            "id": "ps-cli-json",
+            "target": "js",
+            "modules": 11,
+            "generation": "926fc719274a2118aa67c9562a7a57eceaceac2d8b8b2fbe46a93dc46201a1fd",
+            "sourceClosureDigest": "2c78829afc24c4f6a1ba80f2de2f3a4dcb80172defcff0477b024e001274fa00",
+            "admissionsSha256": "e3d2565456e90f2949a8b331d2e0060342e78ea5be1af8d83fc1842898d57eb9",
+            "originalIrSha256": "bfbb9498508fa84f362ab0c9e1ee1e3ee08f376490507ae7d7337b0d20b04eff",
+            "specializedIrSha256": "bf7515764855a1739a7901b053546eacd2836e2d7b889f627319017d94306f1b",
+            "sourceSha256": "e28074069144414e37401006510a8e2531c564dad0bc39fbdc404d3ac93eacfa",
+            "elapsedMs": 13994,
+            "behaviorCases": 21
+          },
+          {
+            "engine": "ts",
+            "id": "ps-cli-json",
+            "target": "ts",
+            "modules": 11,
+            "generation": "96fcbd2ada8a8dd7d5f04d2a36a30e7a4ea06165e16ea0a5bec4c3043396be58",
+            "sourceClosureDigest": "2c78829afc24c4f6a1ba80f2de2f3a4dcb80172defcff0477b024e001274fa00",
+            "admissionsSha256": "e3d2565456e90f2949a8b331d2e0060342e78ea5be1af8d83fc1842898d57eb9",
+            "originalIrSha256": "bfbb9498508fa84f362ab0c9e1ee1e3ee08f376490507ae7d7337b0d20b04eff",
+            "specializedIrSha256": "bf7515764855a1739a7901b053546eacd2836e2d7b889f627319017d94306f1b",
+            "sourceSha256": "0de46c09a1c0a72b9f4903ffff2177e5f4e74652a235368b692ae9f787926480",
+            "elapsedMs": 14381,
+            "behaviorCases": 21
+          },
+          {
+            "engine": "ts",
+            "id": "ps-compiler-like",
+            "target": "js",
+            "modules": 11,
+            "generation": "fda29d97f7460486c8c6162e0bd30c9fe9d52755e75f0271557cd72523a162dc",
+            "sourceClosureDigest": "c410a69b4a830bec9b0b97fac02dedbc22ae33f83820e0c302db106b0e10f518",
+            "admissionsSha256": "3dbd4d492c0afc4be1a77e488a81635cecfb5c2ba7e0f06595cde4e6c6996dfc",
+            "originalIrSha256": "bd84b2cb315b083cd57152463718e7814f211b1e0186ab9f1961bb3bb0832d3e",
+            "specializedIrSha256": "2c4d35149e827daf1f68dd175f745e2e8dc1771859d4a9124cca74d5c706159c",
+            "sourceSha256": "09ea685323017da80c2ca679afdc24520ac119d5e2c94238c33f361eeb788bb0",
+            "elapsedMs": 18339,
+            "behaviorCases": 12
+          },
+          {
+            "engine": "ts",
+            "id": "ps-compiler-like",
+            "target": "ts",
+            "modules": 11,
+            "generation": "f3d0e037dcedf4faf752477f8bd7869f786f6412439552e0d7bf2e4d11518e48",
+            "sourceClosureDigest": "c410a69b4a830bec9b0b97fac02dedbc22ae33f83820e0c302db106b0e10f518",
+            "admissionsSha256": "3dbd4d492c0afc4be1a77e488a81635cecfb5c2ba7e0f06595cde4e6c6996dfc",
+            "originalIrSha256": "bd84b2cb315b083cd57152463718e7814f211b1e0186ab9f1961bb3bb0832d3e",
+            "specializedIrSha256": "2c4d35149e827daf1f68dd175f745e2e8dc1771859d4a9124cca74d5c706159c",
+            "sourceSha256": "77709354a95dd692a2f3d106302a78cf465833d39276a2144705a13d992afa98",
+            "elapsedMs": 19157,
+            "behaviorCases": 12
+          }
+        ]
+      }
+    },
+    "artifacts": [
+      {
+        "id": 12833640652,
+        "name": "psc1-modular-installed-applications-bun-1ce58717ee9565d1e52fbff2566721d7c30c1654",
+        "bytes": 6299,
+        "sha256": "efb96e838fb6ecf740dfc11966501a1c65b77b6378ab06b449944885d226c3b5",
+        "expired": false,
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40725714755/artifacts/12833640652"
+      },
+      {
+        "id": 12833202195,
+        "name": "psc1-modular-installed-applications-node-1ce58717ee9565d1e52fbff2566721d7c30c1654",
+        "bytes": 6070,
+        "sha256": "ed252ea97dddd82f15f0c5eae24a85b65f65d8e78d0eb546f8217b4ab7f02f74",
+        "expired": false,
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40725714755/artifacts/12833202195"
+      }
+    ],
+    "comparison": "Canonical admissions, original/specialized serialized IR and decoded source against independently checked native references. Real application runner bodies preserved except reversible imports to installed proofscript/io; runtime file bytes identical. Request IDs are not semantic identities."
+  },
+  "retainedRegressions": {
+    "source": {
+      "run": 40719527295,
+      "branchCommit": "ca92bbdbc7c0f34e1da4076db7300033802eab3e",
+      "testedMergeCommit": "1f8415f790387a0702d1760896a2998f0c05a4c1",
+      "status": "success",
+      "selectedJobs": 16,
+      "benchmark": "intentionally-not-selected",
+      "practicalCoreCriteria": 37,
+      "blocked": 0,
+      "scopedTargetBundles": 14
+    },
+    "legacyCli": {
+      "run": 40714983602,
+      "branchCommit": "ca92bbdbc7c0f34e1da4076db7300033802eab3e",
+      "status": "success",
+      "jobs": 9,
+      "cohort": ".11 retained frozen compatibility tests, including unchanged native guardian/cancellation; distinct from modular preview and separately qualified .13."
+    }
+  },
+  "delivery": {
+    "schema": "psc1-modular-preview-delivery/1",
+    "status": "qualified-focused-linux-preview",
+    "testedCommit": "abd7820fb5ee11896ab2283ebd6850f48cbcee74",
+    "packageCommit": "ca92bbdbc7c0f34e1da4076db7300033802eab3e",
+    "package": {
+      "schema": "psc1-modular-installed-package/1",
+      "testedCommit": "ca92bbdbc7c0f34e1da4076db7300033802eab3e",
+      "version": "0.1.0-psc1-modular.1",
+      "tarball": "proofscript-0.1.0-psc1-modular.1.tgz",
+      "bytes": 11329698,
+      "sha256": "7773a7a2abcebaf1fd77df836b2c687e013001c23885bb0bb584e6fe8d012507",
+      "manifestSha256": "02fa935fa4c279c73360d18ccff47a97ac208466382c1dabb4428ac07436f65c",
+      "consumerDescriptorsSha256": "d2579d61da1c793f31625356055dd321cdc5be2800b048034b8b3faab2ec1805",
+      "compilerAdmissionsSha256": "97041042ece09003a253c1f4a038921ff89517a702a96da48bb631de930d1107",
+      "sourceGraphManifestSha256": "f0b25fabaa702e949645eeee9adedf52237016b316aaeefb90bf806170c4b389",
+      "compilerSourceClosureDigest": "41eb40437e0df1722128c09c9b9da7cad0ccb1ad61371f23eb6bc2db4e9a1106",
+      "sourceUnits": 127,
+      "corePackages": 20,
+      "installedGraphFiles": 1423,
+      "installedGraphBytes": 124338997,
+      "defaultKernel": "official-Lean-4.35.0-Emscripten-linear-memory-Wasm",
+      "referenceCompilerExecuted": false,
+      "fullModularSelfHosting": false,
+      "standaloneCheckedHostQualified": false
+    },
+    "diagnostics": {
+      "node": {
+        "boundaryCases": 23,
+        "ioBuilds": 8,
+        "ioRefusals": 4,
+        "typeConsumers": [
+          "NodeNext",
+          "Bundler"
+        ],
+        "tsWatch": {
+          "engine": "ts",
+          "builds": 2,
+          "editedValue": "43",
+          "typingRefusalPreservedPointer": true,
+          "exit": 143,
+          "stopMs": 101
+        },
+        "pin": {
+          "run": 40722004088,
+          "job": 122935104823,
+          "artifact": 12831771641,
+          "commit": "103172427f10bd088606ef88967bd0b93388c25c",
+          "zipSha256": "2eb43eb35c346bf85001d6ee1b8313dc3de7f264ca35a233474c8d44320438dc"
+        }
+      },
+      "bun": {
+        "boundaryCases": 23,
+        "ioBuilds": 8,
+        "ioRefusals": 4,
+        "typeConsumers": [
+          "NodeNext",
+          "Bundler"
+        ],
+        "tsWatch": {
+          "engine": "ts",
+          "builds": 2,
+          "editedValue": "43",
+          "typingRefusalPreservedPointer": true,
+          "exit": 143,
+          "stopMs": 102
+        },
+        "pin": {
+          "run": 40722004088,
+          "job": 122935104686,
+          "artifact": 12831057351,
+          "commit": "103172427f10bd088606ef88967bd0b93388c25c",
+          "zipSha256": "cc2e7b7a7f3079a4223a0ec729c9c7c170f9ab9b426a0fdd408817179f2748e5"
+        }
+      }
+    },
+    "modularQualificationRun": 40714983520,
+    "sourceAndReferenceCliQualification": "recorded separately in repository qualification receipt",
+    "noRegistryPublication": true,
+    "noMerge": true,
+    "fullModularSelfHosting": false,
+    "defaultReferenceReplaced": false,
+    "zip": "proofscript-0.1.0-psc1-modular.1-installable.zip",
+    "zipBytes": 10518439,
+    "zipSha256": "8e7a573225d484f6852543dee77e4f65d8067b4fda511ada1a8af148380f960d",
+    "artifacts": [
+      {
+        "id": 12832176204,
+        "name": "proofscript-modular-preview-installable-abd7820fb5ee11896ab2283ebd6850f48cbcee74",
+        "bytes": 10522868,
+        "sha256": "8b4abaf7ee9cc87062fdd65ef6d30cabea72f6c74a2dc1a825313112da4b6224",
+        "expired": false,
+        "url": "https://github.com/dwijayuda/pskernel/actions/runs/40723525652/artifacts/12832176204"
+      }
+    ],
+    "contents": "GitHub artifact wraps the installable ZIP plus delivery.json. Extract the artifact, then inner installable ZIP. Its focused receipt predates the additional application/source results recorded here."
+  },
+  "preservation": {
+    "lean": "4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "defaultKernel": "official C++/Emscripten linear-memory Wasm; unchanged qualified kernel bytes",
+    "compilerSeconds": 240,
+    "checkerSeconds": 120,
+    "semanticFuel": "unchanged",
+    "memoryStackPolicies": "unchanged",
+    "strictOriginalAndTransformedIr": true,
+    "independentAdmission": true,
+    "fullModularSelfHosting": false,
+    "reference13Replaced": false,
+    "noMerge": true,
+    "noRegistryPublication": true
+  },
+  "attempts": [
+    {
+      "commit": "54eb0afb439d80c07a58411363ae10c2fc90f8e3",
+      "failure": "Undefined versus empty kernel dependency metadata",
+      "resolution": "Normalize absent metadata without changing kernel payload."
+    },
+    {
+      "commit": "b27e85f49223be49cc41e61e0a2659706f4902e4",
+      "failure": "Test identifier typo dummiedGraphPin",
+      "resolution": "Corrected before passing smoke at 8ed9e07."
+    },
+    {
+      "commit": "ecebe1e7ca442ef1ee9ed0116564a90fb96270c3",
+      "failure": "Stale optional-provider tar archive digest",
+      "resolution": "Verify all qualified payload file pins; version optional provider leaves and reseal metadata, never bypass archive verification."
+    },
+    {
+      "run": 40720843511,
+      "commit": "2e042568243c3d435795e270620a2f51c736ea4a",
+      "failure": "Diagnostic expected candidate error text from intentionally phase-only checked API",
+      "resolution": "Assert checked API phase and separately exact candidate refusal code with no admission/publication authority; production unchanged."
+    }
+  ],
+  "remaining": [
+    "M5: implement portable complete module planning/emission in the same canonical compiler; deterministic graph/package reproduction.",
+    "Genuine separate new modular JS/TS G1/G2/G3 and fixed points; do not inherit frozen .13 receipts.",
+    "Native Rust/Wasm compiler executors for this new source cohort; old executors explicitly refuse and stay qualified only for .13.",
+    "Component richer String/IO ABI and actual non-JS host-IO practical applications.",
+    "Standalone checked-host installation, macOS/Windows consumers/durability, exact native binary reproduction.",
+    "Independent human maintainer trial remains pending user-arranged participation.",
+    "Final release promotion, merge and registry publication require applicable qualification and authorization."
+  ],
+  "interpretation": "Finite checked runtime/source-identity evidence for the Linux developer preview, not a semantic preservation/totality proof, all-platform release, new self-host qualification or immutable retention guarantee. The trusted bootstrap/stable installed file assumptions remain."
+}

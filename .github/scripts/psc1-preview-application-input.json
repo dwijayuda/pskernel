@@ -1,0 +1,25 @@
+{
+  "schema": "psc1-modular-boundary-input/1",
+  "package": {
+    "run": 40714983520,
+    "job": 122910099618,
+    "artifact": 12827338983,
+    "commit": "ca92bbdbc7c0f34e1da4076db7300033802eab3e",
+    "zipSha256": "12d990baf69371ef3dc78aa23b61a12d354c3037d9de827a6eb3e230454f2e33"
+  },
+  "targets": {
+    "run": 40714983520,
+    "job": 122910099618,
+    "artifact": 12827921799,
+    "commit": "ca92bbdbc7c0f34e1da4076db7300033802eab3e",
+    "zipSha256": "ccda47d0a10bcfd52e58f2dd2f0875669580aa09b5f9138d05bfd97101248b7b"
+  },
+  "applicationReference": {
+    "run": 40679842606,
+    "job": 122787447037,
+    "artifact": 12812871458,
+    "commit": "f433bad08a5b53992030d4f6ad043bfd0839d68f",
+    "zipSha256": "88252afc343ffc964c115f6e2bcdc4d529223c6f83e6290ad7724deafef19c92"
+  },
+  "sourceCommit": "ca92bbdbc7c0f34e1da4076db7300033802eab3e"
+}

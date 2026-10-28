@@ -93,29 +93,42 @@ Installed CLI [40695323349](https://github.com/dwijayuda/pskernel/actions/runs/4
 passes all nine retained .11-cohort jobs. These scopes remain distinct from both
 the new modular graph and the separate .13 reference.
 
-The next dependency is M4: version the direct low-level API transition, integrate
-checked root-only proofscript installation and thin psc CLI/watch with the genuine
-graph, then qualify default independent Wasm-kernel use and coherent publication.
-M3 now has the finite application/semantic/backend evidence above, without a
-replacement release claim. Portable module generation within the same compiler
-and M5 new modular G1/G2/G3/fixed points remain incomplete. The qualified .13
-API/distribution remains the default reference. Existing pilot tests/evidence
-remain; expanding the deferred pilot is not a prerequisite. The stopped PR #203
-and prototype branches are preserved.
+M4 now qualifies the finite installed Linux preview described below. The next
+dependency is M5: portable module planning/emission in the same compiler, exact
+graph/package reproduction, then genuine new modular G1/G2/G3/fixed points.
+The qualified .13 distribution stays the default reference. Pilot expansion
+remains deferred; the stopped PR #203 and prototype history are preserved.
 
+## M4: qualified installed Linux preview
 
-## M4 preview implementation in progress
+PR #208 / `ca92bbdbc7c0f34e1da4076db7300033802eab3e` passes
+[40714983520](https://github.com/dwijayuda/pskernel/actions/runs/40714983520):
+the genuine 127-unit/15-owner compiler graph, 20 core packages, thin psc CLI,
+default official linear-memory Wasm kernel, optional Python/PHP leaves and
+fresh root-only local/global installation. Node/Bun pass 16 smoke builds/28
+kernel cases, 128 seven-target public/component builds, 20 source/assurance
+refusals, 18 retained watch cases and two whole-compiler default-Wasm rechecks.
 
-The [installed modular preview](architecture/installed-modular-toolchain.md) assembles
-proofscript `0.1.0-psc1-modular.1` around the unchanged qualified graph and genuine
-independent Wasm kernel. It has 20 bundled core packages, source-owned generated
-subpaths, a thin psc launcher and relocated existing CLI/watch bodies.
-Smoke run 40711483603 passes 16 installed builds/publications and 28 independent
-kernel cases on Node/Bun at `8ed9e07a`. Full cross-target/public-value, global,
-compiler-admission and retained watch qualification remains pending.
-Python/PHP become optional provider leaves with unchanged runtime bytes.
-Existing Rust/Wasm executors remain qualified only for their preserved .13 cohort.
-Do not promote this preview or infer modular generations/fixed points.
+[40722004088](https://github.com/dwijayuda/pskernel/actions/runs/40722004088)
+adds 46 resource/cohort/consumer refusals, 16 Unicode IO callback/trap builds,
+eight unsupported dispatcher refusals, four strict type consumers and two TS-engine
+live watch cases against the unchanged installed tarball.
+[40725714755](https://github.com/dwijayuda/pskernel/actions/runs/40725714755)
+passes 32 checked installed CLI/JSON/file/compiler-like builds and 528 behavior cases,
+both grammars/engines and JS/strict TS outputs, including 100,000 statements.
+
+Retained source [40719527295](https://github.com/dwijayuda/pskernel/actions/runs/40719527295)
+passes all 16 selected jobs, 37/37 finite Core criteria, zero blocked and 14 scoped
+target bundles. Retained .11 reference CLI [40714983602](https://github.com/dwijayuda/pskernel/actions/runs/40714983602)
+passes all nine jobs; it remains distinct from the modular preview and .13 default.
+
+[Exact receipt](PSC1_MODULAR_INSTALLED_QUALIFICATION_2026-10-28.json),
+[architecture and installation](architecture/installed-modular-toolchain.md)
+and [installable ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40723525652/artifacts/12832176204).
+Existing Rust/Wasm executors remain qualified only for their preserved .13 cohort;
+they explicitly refuse this newer compiler source. New modular generations/fixed
+points, standalone checked-host installation, actual non-JS host-IO applications
+and other-platform durability remain unqualified. No merge/publication or .13 replacement.
 
 ## Qualified automatic core package installation (.13)
 
@@ -147,7 +160,7 @@ PR #197 implementation 9aefeeb and documentation refresh c5c15582 pass all 42 pa
 | 2 | Independent maintainer trial | Pending human participation; the user can arrange a maintainer. Record commit, navigation mistakes, elapsed time, assistance and a real small change. No AI/CI comprehension claim. |
 | 3 | Compiler-origin structured diagnostics/editor integration | Pending: actual spans/provenance, both grammars, machine/human consumers and malformed-input refusals. |
 | 4 | Runtime compatibility, checked watch and licensing | Qualified Linux milestone, PR#193 /fdc52207fdf3d809ad99b05a5b738aca21b95139: Node>=22.23.3, Bun>=1.4.4; actual Node22.23.3/24.21.0/26.12.1 and Bun1.4.4; older Node/Bun refusals;55 CLI requests,11 full watch cases,16 applications/264 observations,32 publications/143 refusals; all61 SDK pins unchanged. Apache-2.0 source/cohort, vendor notices retained. [Receipt](PSC1_RUNTIME_WATCH_QUALIFICATION_2026-10-27.json). Semantic incremental caching remains deferred. |
-| 5 | Fully modular executable compiler | M1/M2 candidate graph and finite M3 application/semantic/seven-target execution are qualified in PR #205–#207; see the [current plan](architecture/executable-package-modularity.md) and [M3 receipt](PSC1_MODULAR_SEMANTIC_QUALIFICATION_2026-10-28.json). M4 checked umbrella/thin CLI/watch and M5 portable reproduction/new generations remain incomplete. Preserve .13, existing package names, independent checking and resource policies. Pilot expansion stays deferred. No new modular fixed-point/release claim. |
+| 5 | Fully modular executable compiler | M1/M2 candidate graph and finite M3 application/semantic/seven-target execution are qualified in PR #205–#207; see the [current plan](architecture/executable-package-modularity.md) and [M3 receipt](PSC1_MODULAR_SEMANTIC_QUALIFICATION_2026-10-28.json). M4 finite Linux installed umbrella/thin CLI/watch is qualified in PR #208 ([receipt](PSC1_MODULAR_INSTALLED_QUALIFICATION_2026-10-28.json)); M5 portable reproduction/new generations remain incomplete. Preserve .13, existing package names, independent checking and resource policies. Pilot expansion stays deferred. No new modular fixed-point/release claim. |
 | 6 | Component String/IO and export selection | Pending: reuse shared/native ABI; both grammars/four engines, actual validation/execution, exact exports and refusals. Public component ABI currently Bool only. |
 | 7 | Full Python/PHP practical applications | Pending: real CLI/JSON/file/multi-module observations against checked reference; retain corpus/Unicode/integer/loop/IO tests. Providers remain optional. |
 | 8 | Automatic source-package capture | Pending: bounded deterministic order, exact identities, cycle/missing/stale refusals, real multi-package applications. Metadata never executes code or grants authority. |

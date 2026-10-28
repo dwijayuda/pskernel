@@ -1,5 +1,24 @@
 # Current capabilities and evidence scope
 
+## Standalone compiler development
+
+The [Linux x64 standalone profile](../standalone/README.md) has a separate
+[2026-10-28 qualification](PSC1_INDEPENDENT_DEVELOPMENT_QUALIFICATION_2026-10-28.json).
+It develops the full current 125-module `.ps` compiler using a bundled private
+runtime and precompiled native official checker. Its baseline and changed-source
+chains require actual generated compiler execution, fresh independent admission,
+exact canonical artifact equality and observed changed diagnostic behavior.
+No separate Lean/Lake, Node/Bun, TypeScript, Rust or C/C++ development toolchain
+is required by that demonstrated cycle.
+
+This establishes independent development in the delivered `.ps` workspace.
+The repository still retains Lean bootstrap source ownership; the private runtime,
+host and kernel are prebuilt components. The long correctness profile is distinct
+from the unqualified 240-second full-compiler performance goal. This profile does
+not broaden the npm target ABI or platform claims below.
+
+## Earlier npm package qualifications
+
 The newer [.9 layout milestone](PSC1_LAYOUT_QUALIFICATION_2026-10-26.json) passes
 source 40344469855 (37/37 finite criteria), current-source WasmG1/40344458240 and
 installed40344458391. It preserves the frozen122-module G3 source/executables;

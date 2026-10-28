@@ -1,6 +1,6 @@
 # PSC1 development roadmap
 
-Updated 2026-10-27 Asia/Jakarta. This is the authoritative remaining-work queue.
+Updated 2026-10-28 Asia/Jakarta. This is the authoritative remaining-work queue.
 Practical Core v1 remains frozen at14 feature families and 37 finite criteria.
 Completed detail is preserved in [the previous roadmap](history/ROADMAP_BEFORE_LAYOUT_2026-10-26.md)
 and [dated evidence](evidence/README.md).
@@ -26,7 +26,33 @@ retain122 modules/4742 members and closure
 Current source qualification and frozen executor qualification remain distinct.
 Repository organization remains qualified at PR#192 /94e0c13f6a4b434f73c859cc0c716cb6fb8d1340.
 
-## Immediate priority: automatic core package installation
+## Qualified first independent-development milestone
+
+PR #201 implementation `5484a04df34de1bbcfa46a248b6a93ce510035d6` qualifies the
+complete current 125-module editable `.ps` compiler with a private Node/V8
+runtime and genuine precompiled official native checker. Dedicated run
+[40618697529](https://github.com/dwijayuda/pskernel/actions/runs/40618697529)
+passes bootstrap, isolated smoke, baseline B1/B2, genuinely changed-source C1/C2
+with observed changed behavior, and exact same-source fixed points. The
+[dated receipt](PSC1_INDEPENDENT_DEVELOPMENT_QUALIFICATION_2026-10-28.json)
+binds source/tool identities and actual measurements. The broader
+[source gate](https://github.com/dwijayuda/pskernel/actions/runs/40618701864)
+also passes all 16 selected jobs and 37 finite Core criteria.
+
+Ordinary standalone development needs no separately installed external language
+tools; the runtime and independent checker are explicit prebuilt components.
+The delivered `.ps` workspace is authoritative for its edits; repository Lean
+bootstrap ownership is retained. The long correctness profile remains separate
+from the unqualified 240-second full-compiler performance goal.
+
+Next address measured rebuild latency, repository-wide canonical `.ps` source
+ownership, broader real compiler edits and additional platform qualification.
+[Architecture/dependency audit](PSC1_INDEPENDENT_DEVELOPMENT.md) and
+[work state](../AI_WORK_STATE.md) record scope and remaining obligations.
+Kernel research, a new runtime/backend and full modular partitioning are separate
+streams, not prerequisites retroactively attached to this completed milestone.
+
+## Preserved qualification: automatic core package installation
 
 PR #198 continues from qualified PR #197 HEAD9d0e23c3. Cohort .13 makes proofscript
 an umbrella over the20 existing core packages and moves the shared implementation

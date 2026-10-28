@@ -118,3 +118,16 @@ See [current roadmap](./docs/PSC1_DEVELOPMENT_ROADMAP.md), [contracts and receip
 owners. [Pass contracts](./docs/reference/pass-contracts.md) record invariants, refusal and
 resource behavior. [Maintainer exercise](./docs/development/maintainer-exercise.md) distinguishes
 an executable CI rehearsal from a pending independent human trial.
+
+## Independent compiler-development profile
+
+The additive [standalone profile](standalone/README.md) packages the generated JS
+compiler, a private pinned runtime and the genuine precompiled native official
+checker with an editable checked `.ps` compiler project. Each rebuilt generation
+receives fresh independent admission. Existing npm defaults and frozen executor
+qualifications remain separate. See the [architecture decision and dependency
+audit](docs/PSC1_INDEPENDENT_DEVELOPMENT.md),
+[dated qualification](docs/PSC1_INDEPENDENT_DEVELOPMENT_QUALIFICATION_2026-10-28.json)
+and AI_WORK_STATE.md. The qualified 125-module baseline and changed-source chains
+retain the repository's separate Lean bootstrap ownership and use the explicit
+long correctness profile.

@@ -57,10 +57,25 @@ const entry=rows.at(-1).text;
 for(const name of contract.sourceEntries.pureEmitters)assert.ok(entry.includes('import '+name+'\n'));
 assert.ok(!/^import Ps[.]Backend\w+[.]CompilerService$/m.test(entry));
 record('unified-entry-uses-pure-emitters');
-// Shared extraction must preserve the retained bounded profiles and printer
-// bodies exactly; production growth is implemented in a separate host planner.
+// Historical M1/M2 extraction bodies remain checked at the immutable M4 epoch.
+// M5 changes portable spelling deliberately; its exact source baseline and
+// actual whole-compiler renderer-byte oracle are checked separately below.
+const historical=file=>{
+ const result=spawnSync('git',['show',contract.portableNormalization.historicalBodyCommit+':psc1/'+file],
+  {encoding:'utf8',maxBuffer:33554432});
+ assert.equal(result.status,0,result.stderr);return result.stdout;
+};
+for(const file of contract.portableNormalization.files){
+ const result=spawnSync('git',['show',contract.portableNormalization.implementationBaselineCommit+':psc1/'+file],
+  {encoding:'utf8',maxBuffer:33554432});
+ assert.equal(result.status,0,result.stderr);
+ assert.equal(read('.',file),result.stdout,'PSC1_PORTABLE_NORMALIZATION_SOURCE_BASELINE:'+file);
+}
+const rendererAudit=spawnSync(process.execPath,['scripts/check-portable-renderer-reference.mjs'],{encoding:'utf8'});
+assert.equal(rendererAudit.status,0,rendererAudit.stdout+rendererAudit.stderr);
+record('portable-normalization-source-baseline-and-immutable-renderers');
 const commonPath='packages/backend-common/src/Ps/BackendCommon/Modules.lean';
-const oldCommon=read(baseline,commonPath),model=read('.','packages/backend-common/src/Ps/BackendCommon/ModuleModel.lean');
+const oldCommon=read(baseline,commonPath),model=historical('packages/backend-common/src/Ps/BackendCommon/ModuleModel.lean');
 const markers=['structure PsModuleOwner','def psModulePackageSafe','structure PsModuleImport','def psModulePackage (',
  'def psModuleTypeNames','def psModuleCohort (','/-! Carry value'];
 const positions=markers.map(marker=>{const i=oldCommon.indexOf(marker);assert.ok(i>=0);return i;});
@@ -73,7 +88,7 @@ for(const [dir,ns]of [['js','Js'],['ts','Ts']]){
  const modulePath='packages/backend-'+dir+'/src/Ps/Backend'+ns+'/Modules.lean';
  const old=read(baseline,modulePath),cut=old.indexOf('def psEmit'+ns+'Modules');
  assert.ok(cut>0);
- const common=read('.',modulePath.replace('Modules.lean','ModuleFiles.lean'));
+ const common=historical(modulePath.replace('Modules.lean','ModuleFiles.lean'));
  assert.equal(common.replace('import Ps.BackendCommon.ModuleModel','import Ps.BackendCommon.Modules'),old.slice(0,cut));
  assert.ok(read('.',modulePath).endsWith(old.slice(cut)),'retained module API exact body');
 }
@@ -92,7 +107,7 @@ const report={schema:'psc1-executable-source-ownership/1',testedCommit:process.e
  sources:rows.map(row=>({module:row.module,path:row.path,bytes:Buffer.byteLength(row.text),sha256:hash(row.text)})),
  packageDependencies:Object.fromEntries([...edges].map(([name,deps])=>[name,[...deps].sort()])),order,bodies,
  errorContract:{sha256:hash(errorBlock),bytes:Buffer.byteLength(errorBlock)},
- scope:'registered source dependency graph/body-preserving production refactor; not final transformed runtime ownership or full modular compiler qualification'};
+ portableNormalization:contract.portableNormalization,scope:'registered graph and historical M1/M2 bodies; current M5 normalized source baseline plus immutable reference audit; actual renderer-byte equivalence requires the separate full native build; not full modular self-host qualification'};
 fs.mkdirSync('dist/executable-packages',{recursive:true});
 fs.writeFileSync('dist/executable-packages/ownership.json',JSON.stringify(report,null,2)+'\n');
 console.log('PSC1_EXECUTABLE_SOURCE_OWNERSHIP '+JSON.stringify(report));

@@ -1,10 +1,12 @@
 import Ps.CompilerIr.Specialize
 import Ps.CompilerIr.Provenance
 import Ps.CompilerIr.Validate
+import Ps.Foundation.Collections
+import Ps.Foundation.Text
 
-/-! Shared structured module records, reference traversal and checked transform
-ownership. The legacy bounded pilot and production build use the same bodies;
-profile limits and initialization policies belong to their separate planners. -/
+/-! Shared structured records and exact producer provenance. The production
+compiler and retained pilot use these same definitions. Portable spelling makes
+container operations explicit; no fixture bounds or checking policy changes. -/
 
 structure PsModuleOwner where
   name : String
@@ -25,88 +27,129 @@ structure PsModulePlan where
 namespace Ps.Internal.ModuleGraph
 
 def seen (name : String) (names : List String) : Bool :=
-  names.any (fun item => item == name)
+  psListAny (fun (item : String) => psStringEq item name) names
+
+def startsWithCodes (codes : List Nat) (text : String) (position : Nat) : Bool :=
+  match codes with
+  | [] => true
+  | code :: rest =>
+    let current := String.Pos.Raw.mk position;
+    if String.Internal.atEnd text current then false
+    else if Nat.beq (Char.toNat (String.Internal.get text current)) code then
+      startsWithCodes rest text (String.Pos.Raw.byteIdx (String.Internal.next text current))
+    else false
 
 def safeName (name : String) : Except String Unit :=
-  if name.startsWith "__ps$" || ["eval", "Function", "require", "process", "globalThis", "then"].contains name then
-    .error "PSC1_MODULE_RESERVED_NAME" else .ok ()
+  if startsWithCodes [95, 95, 112, 115, 36] name 0 ||
+      seen name ["eval", "Function", "require", "process", "globalThis", "then"] then
+    Except.error "PSC1_MODULE_RESERVED_NAME"
+  else Except.ok ()
 
 def owner (owners : List PsModuleOwner) (name : String) : Except String PsModuleOwner :=
-  match owners.filter (fun item => item.name == name) with
-  | [value] => .ok value
-  | _ => .error ("PSC1_MODULE_OWNER_COVERAGE:" ++ name)
+  match psListFilter (fun (item : PsModuleOwner) => psStringEq item.name name) owners with
+  | value :: rest =>
+    if psListIsEmpty rest then Except.ok value
+    else Except.error (String.Internal.append "PSC1_MODULE_OWNER_COVERAGE:" name)
+  | [] => Except.error (String.Internal.append "PSC1_MODULE_OWNER_COVERAGE:" name)
 
-def references (fuel : Nat) (locals : List String) :
-    PsVerifiedIrExpr -> Except String (List String) :=
+def references (fuel : Nat) (locals : List String) (expression : PsVerifiedIrExpr) :
+    Except String (List String) :=
   match fuel with
-  | 0 => fun _ => .error "PSC1_MODULE_REFERENCE_FUEL"
-  | remaining + 1 => fun expression => do
-    let visit := references remaining locals
+  | Nat.zero => Except.error "PSC1_MODULE_REFERENCE_FUEL"
+  | Nat.succ remaining => do
+    let visit : PsVerifiedIrExpr -> Except String (List String) :=
+      fun (child : PsVerifiedIrExpr) => references remaining locals child
     match expression with
-    | .literal _ => return []
-    | .var name =>
+    | PsVerifiedIrExpr.literal _ => do return []
+    | PsVerifiedIrExpr.var name => do
       safeName name
       return if seen name locals then [] else [name]
-    | .intrinsic _ _ values =>
-      return (← values.mapM visit).flatten
-    | .lambda parameters _ body =>
+    | PsVerifiedIrExpr.intrinsic _ _ values => do
+      let result ← psListMapExcept visit values
+      return psListFlatten result
+    | PsVerifiedIrExpr.lambda parameters _ body => do
       for parameter in parameters do safeName parameter.name
-      references remaining (parameters.map (fun p => p.name) ++ locals) body
-    | .call fn _ values =>
-      return (← visit fn) ++ (← values.mapM visit).flatten
-    | .letE name _ value body =>
+      references remaining
+        (psListAppend (psListMap (fun (p : PsVerifiedIrParameter) => p.name) parameters) locals) body
+    | PsVerifiedIrExpr.call fn _ values => do
+      let target ← visit fn
+      let arguments ← psListMapExcept visit values
+      return psListAppend target (psListFlatten arguments)
+    | PsVerifiedIrExpr.letE name _ value body => do
       safeName name
-      return (← visit value) ++ (← references remaining (name :: locals) body)
-    | .ifE condition left right =>
-      return (← visit condition) ++ (← visit left) ++ (← visit right)
-    | .record _ _ fields =>
-      return (← fields.mapM (fun field => visit field.2)).flatten
-    | .projection _ _ value _ => visit value
-    | .constructor _ _ _ fields =>
-      return (← fields.mapM (fun field => visit field.2)).flatten
-    | .matchE _ _ value alternatives =>
-      let branches ← alternatives.mapM fun alternative => do
-        for binding in alternative.2.1 do safeName binding.name
-        references remaining (alternative.2.1.map (fun b => b.name) ++ locals) alternative.2.2
-      return (← visit value) ++ branches.flatten
+      let first ← visit value
+      let rest ← references remaining (List.cons name locals) body
+      return psListAppend first rest
+    | PsVerifiedIrExpr.ifE condition left right => do
+      let first ← visit condition
+      let yes ← visit left
+      let no ← visit right
+      return psListAppend first (psListAppend yes no)
+    | PsVerifiedIrExpr.record _ _ fields => do
+      let result ← psListMapExcept
+        (fun (field : Prod String PsVerifiedIrExpr) => visit field.snd) fields
+      return psListFlatten result
+    | PsVerifiedIrExpr.projection _ _ value _ => do visit value
+    | PsVerifiedIrExpr.constructor _ _ _ fields => do
+      let result ← psListMapExcept
+        (fun (field : Prod String PsVerifiedIrExpr) => visit field.snd) fields
+      return psListFlatten result
+    | PsVerifiedIrExpr.matchE _ _ value alternatives => do
+      let branches ← psListMapExcept
+        (fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) => do
+          for binding in alternative.snd.fst do safeName binding.name
+          references remaining (psListAppend
+            (psListMap (fun (binding : PsVerifiedIrMatchBinding) => binding.name) alternative.snd.fst)
+            locals) alternative.snd.snd) alternatives
+      let target ← visit value
+      return psListAppend target (psListFlatten branches)
 
-def staticInitializer (fuel : Nat) : PsVerifiedIrExpr -> Bool :=
+def staticInitializer (fuel : Nat) (expression : PsVerifiedIrExpr) : Bool :=
   match fuel with
-  | 0 => fun _ => false
-  | remaining + 1 => fun expression =>
+  | Nat.zero => false
+  | Nat.succ remaining =>
     match expression with
-    | .literal _ => true
-    | .lambda _ _ _ => true
-    | .constructor _ _ _ fields =>
-      fields.all (fun field => staticInitializer remaining field.2)
-    | .record _ _ fields =>
-      fields.all (fun field => staticInitializer remaining field.2)
+    | PsVerifiedIrExpr.literal _ => true
+    | PsVerifiedIrExpr.lambda _ _ _ => true
+    | PsVerifiedIrExpr.constructor _ _ _ fields =>
+        psListAll (fun (field : Prod String PsVerifiedIrExpr) => staticInitializer remaining field.snd) fields
+    | PsVerifiedIrExpr.record _ _ fields =>
+        psListAll (fun (field : Prod String PsVerifiedIrExpr) => staticInitializer remaining field.snd) fields
     | _ => false
 
+def distinctImportsWorker (values acc : List PsModuleOwner) : List PsModuleOwner :=
+  match values with
+  | [] => acc
+  | item :: rest =>
+    let next := if psListAny
+      (fun (previous : PsModuleOwner) => psStringEq previous.name item.name) acc then acc
+      else psListAppend acc [item];
+    distinctImportsWorker rest next
+
 def distinctImports (values : List PsModuleOwner) : List PsModuleOwner :=
-  values.foldl (fun acc item =>
-    if acc.any (fun previous => previous.name == item.name) then acc else acc ++ [item]) []
+  distinctImportsWorker values []
 
 def unit (raw : PsVerifiedIrModule) (owners : List PsModuleOwner) (index : Nat) :
     Except String PsModuleUnit := do
-  let declarations ← raw.declarations.filterM fun declaration => do
+  let declarations ← psListFilterExcept (fun (declaration : PsVerifiedIrDeclaration) => do
     let assigned ← owner owners declaration.name
-    return assigned.unit == index
-  let references ← declarations.mapM fun declaration => do
-    let names ← references 4096 (declaration.parameters.map (fun p => p.name)) declaration.body
-    names.mapM (owner owners)
-  let imports := (distinctImports references.flatten).filter (fun imported => imported.unit != index)
-  -- Cross-owner cycles, including latent function cycles, are unqualified.
-  if imports.any (fun imported => imported.unit >= index) then
+    return Nat.beq assigned.unit index) raw.declarations
+  let refs ← psListMapExcept (fun (declaration : PsVerifiedIrDeclaration) => do
+    let names ← references 4096
+      (psListMap (fun (p : PsVerifiedIrParameter) => p.name) declaration.parameters) declaration.body
+    psListMapExcept (owner owners) names) declarations
+  let imports := psListFilter (fun (imported : PsModuleOwner) => !(Nat.beq imported.unit index))
+    (distinctImports (psListFlatten refs))
+  if psListAny (fun (imported : PsModuleOwner) => Nat.ble index imported.unit) imports then
     throw "PSC1_MODULE_CYCLE_OR_ORDER"
-  return { index, declarations, imports }
+  return PsModuleUnit.mk index declarations imports
 
 end Ps.Internal.ModuleGraph
 
 structure PsModuleImport where
   source : String
   names : List String
-  typeOnly : Bool := false
+  typeOnly : Bool
 
 structure PsModuleArtifact where
   unit : Nat
@@ -116,77 +159,108 @@ structure PsModuleArtifact where
   exports : List String
 
 def psModuleTypeNames (raw : PsVerifiedIrModule) : List String :=
-  raw.structures.map (fun value => value.name) ++ raw.inductives.map (fun value => value.name)
-
-/-! Carry value ownership only through complete producer-generated provenance.
-Nominal types remain owned by the shared runtime unit. This metadata neither
-authorizes IR nor proves transform preservation: both raw modules are rechecked. -/
+  psListAppend (psListMap (fun (value : PsVerifiedIrStructure) => value.name) raw.structures)
+    (psListMap (fun (value : PsVerifiedIrInductive) => value.name) raw.inductives)
 
 def psModuleOriginKindEqual (left right : PsIrOriginKind) : Bool :=
-  match left, right with
-  | .structure, .structure => true
-  | .inductive, .inductive => true
-  | .declaration, .declaration => true
-  | _, _ => false
+  match left with
+  | PsIrOriginKind.structure =>
+    match right with
+    | PsIrOriginKind.structure => true
+    | _ => false
+  | PsIrOriginKind.inductive =>
+    match right with
+    | PsIrOriginKind.inductive => true
+    | _ => false
+  | PsIrOriginKind.declaration =>
+    match right with
+    | PsIrOriginKind.declaration => true
+    | _ => false
 
 def psModuleEntityArity (raw : PsVerifiedIrModule) (kind : PsIrOriginKind)
     (name : String) : Except String Nat := do
-  let entries := match kind with
-    | .structure => raw.structures.filterMap (fun item =>
-        if item.name == name then some item.typeParameters.length else none)
-    | .inductive => raw.inductives.filterMap (fun item =>
-        if item.name == name then some item.typeParameters.length else none)
-    | .declaration => raw.declarations.filterMap (fun item =>
-        if item.name == name then some item.typeParameters.length else none)
+  let entries : List Nat := match kind with
+    | PsIrOriginKind.structure => psListFilterMap (fun (item : PsVerifiedIrStructure) =>
+        if psStringEq item.name name then Option.some (psListLength item.typeParameters)
+        else Option.none) raw.structures
+    | PsIrOriginKind.inductive => psListFilterMap (fun (item : PsVerifiedIrInductive) =>
+        if psStringEq item.name name then Option.some (psListLength item.typeParameters)
+        else Option.none) raw.inductives
+    | PsIrOriginKind.declaration => psListFilterMap (fun (item : PsVerifiedIrDeclaration) =>
+        if psStringEq item.name name then Option.some (psListLength item.typeParameters)
+        else Option.none) raw.declarations
   match entries with
-  | [arity] => return arity
-  | _ => throw ("PSC1_MODULE_ORIGIN_ENTITY:" ++ name)
+  | arity :: rest => do
+    if psListIsEmpty rest then return arity
+    else throw (String.Internal.append "PSC1_MODULE_ORIGIN_ENTITY:" name)
+  | [] => do throw (String.Internal.append "PSC1_MODULE_ORIGIN_ENTITY:" name)
 
 def psModuleOriginFor (rows : List PsIrTransformOrigin) (kind : PsIrOriginKind)
     (name : String) : Except String PsIrTransformOrigin := do
-  match rows.filter (fun row => psModuleOriginKindEqual row.kind kind && row.outputName == name) with
-  | [row] => return row
-  | _ => throw ("PSC1_MODULE_ORIGIN_COVERAGE:" ++ name)
+  match psListFilter (fun (row : PsIrTransformOrigin) =>
+      psModuleOriginKindEqual row.kind kind && psStringEq row.outputName name) rows with
+  | row :: rest => do
+    if psListIsEmpty rest then return row
+    else throw (String.Internal.append "PSC1_MODULE_ORIGIN_COVERAGE:" name)
+  | [] => do throw (String.Internal.append "PSC1_MODULE_ORIGIN_COVERAGE:" name)
 
 def psModuleCarryOwners (input : PsVerifiedIrModule) (owners : List PsModuleOwner)
     (output : PsIrTracedModule) : Except String (List PsModuleOwner) := do
-  let _ ← (psStrictValidateModule input).mapError (fun _ => "PSC1_MODULE_ORIGIN_INPUT_IR")
-  let _ ← (psStrictValidateModule output.raw).mapError (fun _ => "PSC1_MODULE_ORIGIN_OUTPUT_IR")
-  if owners.length != input.declarations.length then throw "PSC1_MODULE_ORIGIN_INPUT_OWNERS"
+  let _ ← psExceptMapError (fun (_reason : PsVerifiedIrValidationError) => "PSC1_MODULE_ORIGIN_INPUT_IR")
+    (psStrictValidateModule input)
+  let _ ← psExceptMapError (fun (_reason : PsVerifiedIrValidationError) => "PSC1_MODULE_ORIGIN_OUTPUT_IR")
+    (psStrictValidateModule output.raw)
+  if !(Nat.beq (psListLength owners) (psListLength input.declarations)) then
+    throw "PSC1_MODULE_ORIGIN_INPUT_OWNERS"
   for declaration in input.declarations do
     let _ ← Ps.Internal.ModuleGraph.owner owners declaration.name
-  let count := output.raw.structures.length + output.raw.inductives.length + output.raw.declarations.length
-  if output.origins.length != count then throw "PSC1_MODULE_ORIGIN_COVERAGE"
+  let count := psListLength output.raw.structures + psListLength output.raw.inductives +
+    psListLength output.raw.declarations
+  if !(Nat.beq (psListLength output.origins) count) then throw "PSC1_MODULE_ORIGIN_COVERAGE"
   for row in output.origins do
     let _ ← psModuleEntityArity output.raw row.kind row.outputName
     let arity ← psModuleEntityArity input row.kind row.inputName
     match row.rule with
-    | .retained =>
-      if row.outputName != row.inputName || !row.arguments.isEmpty then
+    | PsIrOriginRule.retained => do
+      if !psStringEq row.outputName row.inputName || !psListIsEmpty row.arguments then
         throw "PSC1_MODULE_ORIGIN_RETAINED"
-    | .specialization =>
-      if arity != row.arguments.length || !psIrSpecializeAllGround row.arguments then
+    | PsIrOriginRule.specialization => do
+      if !(Nat.beq arity (psListLength row.arguments)) || !psIrSpecializeAllGround row.arguments then
         throw "PSC1_MODULE_ORIGIN_ARGUMENTS"
-      if psIrSpecializedName row.inputName row.arguments != some row.outputName then
-        throw "PSC1_MODULE_ORIGIN_SPECIALIZATION"
-    | .worker =>
-      if !psModuleOriginKindEqual row.kind .declaration || !row.arguments.isEmpty ||
-          row.outputName == row.inputName || input.declarations.any (fun d => d.name == row.outputName) then
+      match psIrSpecializedName row.inputName row.arguments with
+      | Option.some expected => do
+        if !psStringEq expected row.outputName then throw "PSC1_MODULE_ORIGIN_SPECIALIZATION"
+      | Option.none => do throw "PSC1_MODULE_ORIGIN_SPECIALIZATION"
+    | PsIrOriginRule.worker => do
+      if !psModuleOriginKindEqual row.kind PsIrOriginKind.declaration ||
+          !psListIsEmpty row.arguments || psStringEq row.outputName row.inputName ||
+          psListAny (fun (d : PsVerifiedIrDeclaration) => psStringEq d.name row.outputName) input.declarations then
         throw "PSC1_MODULE_ORIGIN_WORKER"
   for item in output.raw.structures do
-    let _ ← psModuleOriginFor output.origins .structure item.name
+    let _ ← psModuleOriginFor output.origins PsIrOriginKind.structure item.name
   for item in output.raw.inductives do
-    let _ ← psModuleOriginFor output.origins .inductive item.name
-  output.raw.declarations.mapM fun declaration => do
-    let row ← psModuleOriginFor output.origins .declaration declaration.name
+    let _ ← psModuleOriginFor output.origins PsIrOriginKind.inductive item.name
+  psListMapExcept (fun (declaration : PsVerifiedIrDeclaration) => do
+    let row ← psModuleOriginFor output.origins PsIrOriginKind.declaration declaration.name
     let previous ← Ps.Internal.ModuleGraph.owner owners row.inputName
-    return { name := declaration.name, unit := previous.unit }
+    return PsModuleOwner.mk declaration.name previous.unit) output.raw.declarations
 
 def psModuleSpecifierFor (plan : PsModulePlan) (index : Nat) (typed : Bool) : String :=
-  (plan.packages[index]?.getD "invalid-module-index") ++ (if typed then "/ts" else "")
+  let selected : String := match psListGetOption plan.packages index with
+    | Option.some value => value
+    | Option.none => "invalid-module-index";
+  String.Internal.append selected (if typed then "/ts" else "")
+
+def psModuleSourceIndicesWorker (fuel : Nat) (index : Nat) : List Nat :=
+  match fuel with
+  | Nat.zero => []
+  | Nat.succ remaining => List.cons index (psModuleSourceIndicesWorker remaining (Nat.succ index))
 
 def psModuleSourceIndices (plan : PsModulePlan) : List Nat :=
-  (List.range plan.packages.length).tail
+  match psListLength plan.packages with
+  | Nat.zero => []
+  | Nat.succ remaining => psModuleSourceIndicesWorker remaining 1
 
 def psModuleCohortFor (plan : PsModulePlan) (sourceDigest : String) (typed : Bool) : String :=
-  plan.protocol ++ ":" ++ (if typed then "ts:" else "js:") ++ sourceDigest
+  psTextJoin "" [plan.protocol, ":", if typed then "ts:" else "js:", sourceDigest]
+

@@ -7,7 +7,9 @@ import {spawnSync} from 'node:child_process';
 import {pathToFileURL} from 'node:url';
 import {createCompilerHostSession,compilerSourceClosureDigest} from '../compiler-host-protocol.mjs';
 import {verify} from './verify.mjs';
-import {put,sha256,json,bounded,run,files,output} from './tools.mjs';
+import {put,sha256,json,bounded as defaultBounded,run,files,output as defaultOutput} from './tools.mjs';
+const output=path.resolve(process.argv[2]??defaultOutput);
+const bounded=(label,command,options={})=>defaultBounded(label,command,{...options,directory:output});
 const bytes=fs.readFileSync(path.join(output,'manifest.json')),hash=sha256(bytes);
 const root=path.join(output,'candidate'),manifest=verify(root,bytes,hash);
 const checker=path.resolve('.lake/build/bin/psc1_independent_checker'),checkerPin=sha256(fs.readFileSync(checker));
@@ -132,7 +134,7 @@ for(const variant of ['js','ts']){
 }
 verify(root,bytes,hash);
 
-const tarballs=path.join(output,'tarballs');fs.mkdirSync(tarballs);
+const tarballs=path.join(output,'tarballs');fs.mkdirSync(tarballs,{recursive:true});
 const records=[];
 for(const pkg of manifest.packages){
  const metadata=JSON.parse(run('npm',['pack',path.join(root,'node_modules',pkg.name),

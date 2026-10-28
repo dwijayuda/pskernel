@@ -1,7 +1,7 @@
 # Fully modular executable compiler plan
 
 Decision date: 2026-10-28 (Asia/Jakarta).
-Status: **M1/M2 candidate graph, finite M3 execution and M4 installed Linux preview qualified in PR #205–#208; M5 incomplete**.
+Status: **M1/M2 candidate graph, finite M3 execution and M4 installed Linux preview qualified in PR #205–#208; M5 finite Linux JS/TS reproduction and G1/G2/G3 fixed points qualified in PR #209**.
 See the [dated qualification receipt](../PSC1_EXECUTABLE_PACKAGES_QUALIFICATION_2026-10-28.json)
 and [production build walkthrough](executable-package-build.md). The
 [M3 semantic receipt](../PSC1_MODULAR_SEMANTIC_QUALIFICATION_2026-10-28.json) and
@@ -10,7 +10,10 @@ semantic builds plus 120 public-value builds on Node/Bun, with independent admis
 and explicit finite scope. The [M4 receipt](../PSC1_MODULAR_INSTALLED_QUALIFICATION_2026-10-28.json)
 and [installed preview guide](installed-modular-toolchain.md) record the working
 20-package root, thin CLI, independent Wasm checking, watch and real applications.
-Production promotion and new modular self-hosting remain unqualified.
+The [M5 receipt](../PSC1_PORTABLE_MODULAR_QUALIFICATION_2026-10-29.json) records
+independently admitted genuine JS/TS G1/G2/G3, complete graph and15 exact npm
+tarball fixed points. New root promotion,240-second performance and universal
+release remain unqualified.
 The [machine-readable contract](../../EXECUTABLE_PACKAGE_CONTRACT.json) and
 [work state](../../AI_WORK_STATE.md) record exact implemented/tested/pending scope.
 

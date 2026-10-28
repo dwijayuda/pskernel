@@ -7,8 +7,10 @@ lean_lib PsFoundation where
   srcDir := "packages/foundation/src"
   roots := #[
     `Ps.Foundation.List,
+    `Ps.Foundation.Collections,
     `Ps.Foundation.Name,
     `Ps.Foundation.StringSet,
+    `Ps.Foundation.StringMap,
     `Ps.Foundation.Source,
     `Ps.Foundation.Diagnostic,
     `Ps.Foundation.Text
@@ -90,7 +92,7 @@ lean_lib PsCompilerIr where
 
 lean_lib PsBackendCommon where
   srcDir := "packages/backend-common/src"
-  roots := #[`Ps.BackendCommon.ServiceError, `Ps.BackendCommon.Plan, `Ps.BackendCommon.StateExcept, `Ps.BackendCommon.Source, `Ps.BackendCommon.DirectCalls, `Ps.BackendCommon.ModuleModel, `Ps.BackendCommon.Modules]
+  roots := #[`Ps.BackendCommon.ServiceError, `Ps.BackendCommon.Plan, `Ps.BackendCommon.StateExcept, `Ps.BackendCommon.Source, `Ps.BackendCommon.DirectCalls, `Ps.BackendCommon.ModuleModel, `Ps.BackendCommon.ExecutablePlan, `Ps.BackendCommon.Modules]
 
 lean_lib PsErasure where
   srcDir := "packages/erasure/src"
@@ -189,7 +191,7 @@ lean_lib PsBackendWasm where
 
 lean_lib PsCompilerUnified where
   srcDir := "packages/compiler-unified/src"
-  roots := #[`Ps.CompilerUnified.Service]
+  roots := #[`Ps.CompilerUnified.Service, `Ps.CompilerUnified.Modular]
 
 lean_lib PsBackendPython where
   srcDir := "packages/backend-python/src"
@@ -220,6 +222,7 @@ lean_lib PsHost where
     `Ps.Host.SourceOwnership,
     `Ps.Host.SourceModules,
     `Ps.Host.ExecutablePlan,
+    `Ps.Host.M5RendererReference,
     `Ps.Host.SourceBindings,
     `Ps.Host.ArtifactBundle,
     `Ps.Host.CompilerDriver,
@@ -698,3 +701,15 @@ lean_exe psc1_executable_plan_tests where
 lean_exe psc1_executable_packages where
   srcDir := "scripts"
   root := `ExecutablePackagesMain
+
+lean_exe psc1_portable_plan_tests where
+  srcDir := "test"
+  root := `PortablePlanTests
+
+lean_exe psc1_portable_module_seed where
+  srcDir := "scripts"
+  root := `PortableModuleSeed
+
+lean_exe psc1_portable_module_tests where
+  srcDir := "test"
+  root := `PortableModuleTests

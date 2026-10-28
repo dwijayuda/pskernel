@@ -1,4 +1,5 @@
 import Ps.Compiler.Service
+import Ps.CompilerUnified.Modular
 import Ps.BackendJs.Emit
 import Ps.BackendTs.Emit
 import Ps.BackendRust.Emit
@@ -65,7 +66,15 @@ def candidate (input : String) : String :=
   | Except.error _ => refused "" "invalid-json"
   | Except.ok value =>
       match value with
-      | PsJsonValue.array values => fields values
+      | PsJsonValue.array values =>
+          match Ps.Internal.CompilerService.stringAt values 0 with
+          | Except.ok protocol =>
+              if psStringEq protocol "psc1-modular-build/1" then
+                match Ps.Internal.ModularCompiler.decodeBuild values with
+                | Except.ok output => output
+                | Except.error reason => Ps.Internal.ModularCompiler.refused reason
+              else fields values
+          | Except.error _ => fields values
       | _ => refused "" "expected-array"
 
 end Ps.Internal.UnifiedCompilerService

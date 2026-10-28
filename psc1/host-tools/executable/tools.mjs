@@ -26,10 +26,10 @@ export function run(command,args,options={}){
  assert.equal(result.status,0,result.stdout+'\n'+result.stderr);
  return result.stdout;
 }
-export function bounded(label,command,{seconds=240,addressSpace=true}={}){
+export function bounded(label,command,{seconds=240,addressSpace=true,directory=output}={}){
  assert.ok(seconds>0&&seconds<=240);
  const supervisor=path.resolve('host-tools/process/bounded-process.py');
- const log=path.join(output,'execution',label);
+ const log=path.join(directory,'execution',label);
  const report=JSON.parse(run('python3',[supervisor,JSON.stringify({
   command:['/usr/bin/prlimit',...(addressSpace?['--as=4294967296']:[]),'--stack=8388608','--cpu='+seconds,'--',...command],
   directory:log,timeoutMs:seconds*1000,maxBuffer:33554432

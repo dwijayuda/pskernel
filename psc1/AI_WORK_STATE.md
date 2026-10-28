@@ -1,12 +1,96 @@
 # PSC1 AI work state
 
-Updated 2026-10-29 Asia/Jakarta. Active M4 branch
-feat/psc1-modular-toolchain-20261028 from verified PR #207 HEAD
-415dbba4b5c1627185fc0ee8cdf29a83b15b6f08.
-Production modularity implementation PR #205,
+Updated 2026-10-29 Asia/Jakarta. Active M5 branch
+feat/psc1-portable-modules-20261029 from verified PR #208 HEAD
+d53b43c271c65635b07a6ffa78fb6b08a5fa55de.
+Initial production modularity implementation PR #205,
 stacked on plan PR #204 / b400552324956d9c3a684c9231f60f70066e1629.
 GitHub/Linux CI only; expected-HEAD, single-parent/non-force history.
 No merge or registry publication.
+
+## Active M5: JS/TS G1/G2/G3 and exact modular fixed points qualified
+
+PR #209 continues from PR #208 / d53b43c271c65635b07a6ffa78fb6b08a5fa55de.
+[Linux qualification 40755246954](https://github.com/dwijayuda/pskernel/actions/runs/40755246954)
+passes both genuine JS and TypeScript chains at controller
+336ab495df5479a959a071166b7c2c6b24823b26. Adopted controller checkpoint:
+0a4cbba5c38327290f0c309c507cdaf583dc9b15. Canonical implementation source:
+17ce19919175b60be06050188e2a546a8a72e689; exact 133-module source closure:
+1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb.
+
+The same frontend/elaborator, strict original/transformed IR, bounded planner and
+structured source-owned renderers produce 134 units in 15 executable packages.
+All 4905 logical declarations are independently checked using official Lean
+4.35.0 / eb6cafb7290e8bd5f2937522d8d804f58f02bafc at every generation.
+Admission digest: cff6304aef7b3e7c69ac7c4941d275a685b945af2fdc79bf9dfee7ebfd1513f4.
+G1/G2/G3 manifest: 74e14f5650931ccc3de2a4a7ed6829f54197bb8100466bcb2eb0ad90d7b14a85.
+Complete graphs, all 1131 files / 103951941 bytes, exact IR/rendered references,
+and all 15 actual npm tarballs reproduce byte-for-byte across both chains.
+Native frontend executables are quarantined; nativeFrontendCalls=0.
+
+| Producer | G2 wall | G3 wall | G2 maxRSS | G3 maxRSS |
+| --- | ---: | ---: | ---: | ---: |
+| JS | 2930.381 s | 2907.843 s | 4024528 KiB | 4017160 KiB |
+| TypeScript | 2914.908 s | 3078.368 s | 3895680 KiB | 3977884 KiB |
+
+Each request succeeds within the explicit correctness-3600s wall profile.
+The user's authorized increase applies only to G2-self/G3-self; retain the
+correctness-1800s and performance-240s profiles unchanged. G1/corpus/tools remain
+240s; checker remains 120s. V8 heap 4096 MiB / stack 8 MiB, native 4 GiB AS and CPU
+guards, semantic fuel, 32 MiB files/streams, 128 MiB graph/stage/wire, 8192
+values/files, 257 units, 4096 reference depth and 131072 initializer edges remain.
+MaxRSS is measured process memory, not a changed V8 heap allowance.
+The 160-minute Linux jobs cover both requests, checking, corpus and packaging.
+
+[G1 seed 40748275409](https://github.com/dwijayuda/pskernel/actions/runs/40748275409)
+passes at17ce1991: 112798 ms / 1210604 KiB; repeat40749484426 passes at77961851:
+123453 ms /1207588 KiB. [Adopted G1 40759089971](https://github.com/dwijayuda/pskernel/actions/runs/40759089971)
+passes at0a4cbba5:115849 ms /1208424 KiB, same native ELF and source closure.
+All six raw-JSON/native byte round trips pass. The efdb1385/40746744949 transient
+wire overflow is preserved and fixed by removing duplicate escaping, not raising bounds.
+
+Each generated G2/G3 graph also passes the retained small corpus: 26 exact response
+observations, 16 independently admitted positives and 10 refusals across the two
+grammars/variants; actual JS/strict TS/Rust execution, Wasm validation, wrong-cohort
+refusals and offline installation/repacking of all 15 packages. Nested corpus
+receipts retain their original conservative local-scope wording; the enclosing
+generation receipts supply the actual G2/G3/fixed-point evidence.
+
+[Full source 40759096464](https://github.com/dwijayuda/pskernel/actions/runs/40759096464)
+passes all16 selected jobs at0a4cbba5:37/37 finite Practical Core criteria,
+zero blockers and14 scoped target bundles. Earlier40749527957 at77961851 passes
+the same scope. [Ownership/policy40755976488](https://github.com/dwijayuda/pskernel/actions/runs/40755976488)
+passes all11 retained/current cases and wire/profile refusals.
+[Retained CLI40759090079](https://github.com/dwijayuda/pskernel/actions/runs/40759090079)
+passes all9 jobs at0a4cbba5, including supported Node/Bun and older-runtime
+refusals. Its frozen.11 reference cohort is separate from M5. The prior
+40749484645 cancellation at the60-minute aggregate deadline remains recorded;
+the90-minute job retry changes no commands or per-request limits.
+[Existing.13 npm40759096440](https://github.com/dwijayuda/pskernel/actions/runs/40759096440)
+passes separately.
+
+Download qualified graphs, IR, manifests, npm tarballs and full receipts:
+[JS artifact12852666295](https://github.com/dwijayuda/pskernel/actions/runs/40755246954/artifacts/12852666295)
+(115817158 bytes; SHA256 ea16cfb3d4c597d3b37fb22b1b1cffa2940f7075a0d17197140ca6d9e4825194),
+[TS artifact12851274486](https://github.com/dwijayuda/pskernel/actions/runs/40755246954/artifacts/12851274486)
+(115817233 bytes; SHA256 b49445fe4c4c5626f5a718b619024a6abbcfb3975b5f7f5e080ea1338f221715).
+
+Initial40749484847 G2 failures hit an introduced CPU=wall cap before the defined
+wall deadline; correcting Node supervision preserves the canonical wall policy and
+native CPU guards. Diagnostics40754131717/40759841635 preserve the exact workload,
+CPU profiles and measurements; they are not generation qualification.
+The type-key experiment at20e6fa1a remains isolated/unadopted and unqualified.
+
+This completes finite Linux modular JS/TS reproduction, not universal release,
+240-second performance, a semantic preservation theorem or totality.
+New.2 packages are candidates, not a promoted proofscript root. M4.1 root/.13,
+thin psc, default genuine C++/Emscripten linear-memory Wasm kernel, optional
+Python/PHP and qualified frozen Rust/Wasm stay preserved. New-cohort Bun/full
+M3/M4 application matrices, standalone checked host, other platforms and final
+root promotion remain unqualified. No merge or registry publication.
+
+[Exact qualification receipt](docs/PSC1_PORTABLE_MODULAR_QUALIFICATION_2026-10-29.json)
+and [portable architecture](docs/architecture/portable-modular-generation.md).
 
 ## M4 milestone: qualified installed modular Linux preview
 
@@ -90,10 +174,9 @@ from the successful diagnostic branch; no canonical compiler/host/package payloa
 changes accompany this evidence checkpoint. Historical host cleanup/layout/AST
 guards remain. No merge, npm publication or .13 replacement.
 
-**Next: M5 portable module planning/emission in the same compiler, deterministic
-complete graph/package reproduction, then genuine new modular JS/TS G1/G2/G3 and
-fixed points.** Current M4 is a finite Linux preview milestone, not that self-hosted
-release. Component String/IO, actual non-JS host-IO applications, platform consumers
+**M5 now qualifies finite Linux JS/TS graph/package reproduction and genuine
+G1/G2/G3 fixed points above.** M4 remains its original installed preview cohort;
+new root promotion is a separate gate. Component String/IO, actual non-JS host-IO applications, platform consumers
 and the user-arranged independent maintainer trial remain explicit separate work.
 [Architecture](docs/architecture/installed-modular-toolchain.md).
 
@@ -166,8 +249,8 @@ umbrella reference. These are passing terminal results, not pending claims.
 The .13 default, official linear-memory C++/Emscripten Wasm kernel, qualified
 Rust/Wasm executors, optional Python/PHP, deferred pilot and all prior evidence
 remain preserved. The later M4 milestone above qualifies checked umbrella/thin CLI/watch
-integration in its finite Linux scope. Actual non-JS host-IO applications and M5
-portable module reproduction/new modular G1/G2/G3/fixed points remain incomplete. No merge or registry publication.
+integration in its finite Linux scope. M5 reproduction/fixed points are now qualified
+above; actual non-JS host-IO applications remain incomplete. No merge or registry publication.
 
 ## M3 application milestone: qualified checked modular execution
 
@@ -242,8 +325,8 @@ The first application qualification, 40677391651 at `8dac01c7`, also passed all
 
 The retained M3 application/semantic/seven-target scopes are now qualified above.
 M4 checked umbrella/thin CLI/watch and default independent Wasm-kernel use are now
-qualified in the preview scope above; release promotion remains pending. M5 modular generation/fixed
-points and compiled native artifact reproduction are unqualified.
+qualified in the preview scope above; release promotion remains pending. M5 modular
+generation/fixed points now pass above; compiled native artifact reproduction remains unqualified.
 Qualified .13, default linear-memory C++/Emscripten kernel, existing Rust/Wasm
 executors, optional Python/PHP and deferred pilot remain preserved.
 
@@ -318,11 +401,11 @@ Apache-2.0 and upstream notices, semantic fuel,240s ordinary compiler/tool reque
 
 1. M4 finite Linux installed preview is qualified above. Preserve exact .13 and
    earlier source/graph/kernel qualifications; do not inherit their self-host receipts.
-2. M5 prerequisite: implement portable module planning/emission in the same
-   canonical compiler. The current native graph build adapter does not supply
-   generated-compiler module reproduction.
-3. Reproduce the full graph/packages, then qualify independent new modular JS/TS
-   G1/G2/G3 and exact fixed points with source/admission/IR/resource identities.
+2. M5 is qualified in its finite Linux JS/TS scope:40755246954, exact source17ce1991,
+   complete graph and 15 npm tarballs. Preserve its source, measurements and artifacts.
+3. Before root promotion, run the applicable new-cohort installed Node/Bun/application
+   gates and platform consumers. Optimize toward240s using actual workload profiles;
+   do not adopt the parked type-key experiment without its own exact proof/evidence.
 4. Follow the roadmap for component String/IO, actual non-JS IO apps, optional
    executors, platform consumers and authorized final promotion.
 

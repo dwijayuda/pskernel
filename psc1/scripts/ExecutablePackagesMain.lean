@@ -1,5 +1,6 @@
 import Ps.Host.SourceModules
 import Ps.Host.ExecutablePlan
+import Ps.Host.M5RendererReference
 import Ps.Host.PortableIr
 import Ps.BackendJs.ModuleFiles
 import Ps.BackendTs.ModuleFiles
@@ -148,12 +149,21 @@ def emit (directory specifierFile digest : String) : IO Unit := do
     let js ← liftResult (Ps.Internal.ModularJs.renderUnit unitPlan
       { lowered with declarations := ordered } digest unit)
     let ts ← liftResult (Ps.Internal.ModularTs.renderUnit selected digest brands tags unit)
+    let expectedJs ← liftResult (Ps.Host.M5ReferenceJs.renderUnit unitPlan
+      { lowered with declarations := ordered } digest unit)
+    let expectedTs ← liftResult (Ps.Host.M5ReferenceTs.renderUnit selected digest brands tags unit)
+    if js.source != expectedJs.source || js.declarations != expectedJs.declarations ||
+        (artifactJson "js" js).compress != (artifactJson "js" expectedJs).compress ||
+        ts.source != expectedTs.source ||
+        (artifactJson "ts" ts).compress != (artifactJson "ts" expectedTs).compress then
+      throw (IO.userError "PSC1_IMMUTABLE_RENDERER_REFERENCE_MISMATCH")
     let suffix := "/unit-" ++ toString unit.index
     write budget (directory ++ "/js" ++ suffix ++ ".mjs") js.source
     write budget (directory ++ "/js" ++ suffix ++ ".d.mts") js.declarations
     write budget (directory ++ "/ts" ++ suffix ++ ".mts") ts.source
     jsRows := artifactJson "js" js :: jsRows
     tsRows := artifactJson "ts" ts :: tsRows
+  IO.println "PSC1_IMMUTABLE_RENDERER_REFERENCE_PASS all source-owned units"
   write budget (directory ++ "/js-runtime.mjs") (psJsStringRuntimeSupport ++ psJsStackRuntimeSupport ++
     "\nexport { " ++ String.intercalate ", "
       (Ps.Internal.ModularJs.helpers.filter (fun name => name != "__ps$cohort")) ++ " };\n")

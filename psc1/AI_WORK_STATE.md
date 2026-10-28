@@ -1,8 +1,8 @@
 # PSC1 AI work state
 
 Updated 2026-10-29 Asia/Jakarta. Active M5 branch
-feat/psc1-portable-modules-20261029 from verified PR #207 HEAD
-415dbba4b5c1627185fc0ee8cdf29a83b15b6f08.
+feat/psc1-portable-modules-20261029 from verified PR #208 HEAD
+d53b43c271c65635b07a6ffa78fb6b08a5fa55de.
 Production modularity implementation PR #205,
 stacked on plan PR #204 / b400552324956d9c3a684c9231f60f70066e1629.
 GitHub/Linux CI only; expected-HEAD, single-parent/non-force history.
@@ -13,6 +13,24 @@ No merge or registry publication.
 Continues from PR #208 / d53b43c271c65635b07a6ffa78fb6b08a5fa55de,
 whose final static/evidence runs 40735281270/40735269495 are verified green.
 The native M4 source/graph/executors and exact installed tarball remain preserved.
+
+Native differential evidence now passes 49 plans/eight refusal classes, real hash
+collisions and immutable snapshots, plus candidate generation for both grammars.
+Runs 40741529276/40742163314/40742936110/40743397930 preserve successful native
+test evidence and diagnosed census failures. All 133 modules now parse in both
+grammars. The current census blocker is bounded match-result inference after
+normalizing the curried traversal; source elaboration/IR/full G1 are not qualified.
+Earlier fca207e2/40737031132 and 43888983/40737545849 failed only native harness
+imports/instances; fd3b66c3/40738171658 identified the full syntax classes.
+
+The implementation also adds compiler-owned module generation, tagged source
+ownership, the unchanged specialization/worker provenance path and quarantined
+candidate file transport. The native pre-M5 JS/TS renderers are test-only oracles,
+checked against their exact original bodies with only namespace/default-field
+materialization. Full-compiler emitted-byte comparisons are required before G1.
+New package version 0.1.0-psc1-modular.2 is a candidate, not a promoted umbrella.
+Source maps retain their real readable TS targets while avoiding duplicate
+sourcesContent; file/graph limits remain fixed.
 
 First implementation ports the bounded production planner into backend-common,
 using an exact-key persistent compiler lookup instead of host Std containers.

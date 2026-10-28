@@ -18,16 +18,16 @@ def importText (item : PsModuleImport) : String :=
 def renderUnit (plan : PsModulePlan) (digest : String)
     (brands tags : List (Prod String String)) (unit : PsModuleUnit) :
     Except String PsModuleArtifact := do
-  let runtimeTypes := psListAppend ["__ps$Request", "__ps$Computation", "__ps$Utf8View"]
+  let runtimeTypes : List String := psListAppend ["__ps$Request", "__ps$Computation", "__ps$Utf8View"]
     (psListMap (fun (info : PsVerifiedIrStructure) => info.name) plan.raw.structures)
-  let symbols := psListAppend
+  let symbols : List String := psListAppend
     (psListMap (fun (item : Prod String String) => item.snd) brands)
     (psListMap (fun (item : Prod String String) => item.snd) tags)
-  let constructors := psListMap (fun (info : PsVerifiedIrInductive) => info.name) plan.raw.inductives
-  let runtimeValues := psListFlatten [helpers, symbols, constructors,
+  let constructors : List String := psListMap (fun (info : PsVerifiedIrInductive) => info.name) plan.raw.inductives
+  let runtimeValues : List String := psListFlatten [helpers, symbols, constructors,
     psListMap (fun (item : PsModuleOwner) => item.name)
       (psListFilter (fun (item : PsModuleOwner) => Nat.beq item.unit 0) unit.imports)]
-  let imports := if Nat.beq unit.index 0 then [] else
+  let imports : List PsModuleImport := if Nat.beq unit.index 0 then [] else
     psListAppend [
       PsModuleImport.mk (psModuleSpecifierFor plan 0 true) runtimeValues false,
       PsModuleImport.mk (psModuleSpecifierFor plan 0 true) runtimeTypes true]
@@ -48,7 +48,7 @@ def renderUnit (plan : PsModulePlan) (digest : String)
   let declarations ← psListMapExcept (fun (declaration : PsVerifiedIrDeclaration) =>
     psExceptMapError (fun _ => String.Internal.append "PSC1_MODULE_TS_PRINT:" declaration.name)
       (psTsEmitDeclarationWithVisibility true brands tags declaration)) unit.declarations
-  let header := if Nat.beq unit.index 0 then
+  let header : String := if Nat.beq unit.index 0 then
       psTextJoin "" [psTsRuntimeSupport, "\nexport const __ps$cohort = ",
         psJsonQuote (psModuleCohortFor plan digest true), ";\n", "export { ",
         psTextJoin ", " (psListAppend
@@ -57,8 +57,8 @@ def renderUnit (plan : PsModulePlan) (digest : String)
     else psTextJoin "" [psTextJoin "" (psListMap importText imports), "if (__ps$cohort !== ",
       psJsonQuote (psModuleCohortFor plan digest true),
       ") throw new Error(\"PSC1_MODULE_RUNTIME_COHORT\");\n"]
-  let typeNames := psModuleTypeNames plan.raw
-  let typeExports := if Nat.beq unit.index 0 || psListIsEmpty typeNames then "" else
+  let typeNames : List String := psModuleTypeNames plan.raw
+  let typeExports : String := if Nat.beq unit.index 0 || psListIsEmpty typeNames then "" else
     psTextJoin "" ["export type { ", psTextJoin ", " typeNames, " } from ",
       psJsonQuote (psModuleSpecifierFor plan 0 true), ";\n"]
   return PsModuleArtifact.mk unit.index

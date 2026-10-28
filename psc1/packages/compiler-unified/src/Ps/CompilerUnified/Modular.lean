@@ -72,11 +72,11 @@ def originalOwners (semantic : Ps.Internal.CompilerService.Semantic) (authored :
     (fun (declaration : PsDeclaration) => nameKey (psDeclarationName declaration))
     psSelfHostRuntimePreludeDeclarationsWithProd)
   psListMapExcept (fun (declaration : PsVerifiedIrDeclaration) => do
-    let source ← match psStringMapGet erased declaration.name with
+    let source : PsName ← match psStringMapGet erased declaration.name with
       | Option.some value => Except.ok value
       | Option.none => Except.error (String.Internal.append "PSC1_MODULE_ERASURE_OWNER:" declaration.name)
     let key := nameKey source
-    let unit ← match psStringMapGet authored key with
+    let unit : Nat ← match psStringMapGet authored key with
       | Option.some index => Except.ok index
       | Option.none =>
         if psStringSetContains prelude key then Except.ok 0
@@ -118,7 +118,7 @@ def generate (request : Ps.Internal.CompilerService.Request) (specifiers : List 
   let start := Ps.Internal.CompilerService.Captured.mk
     (psCompilerPreparationStart request.kind) [] [] [] Option.none
   let captured ← captureModules request.sources request 1 (CapturedModules.mk start PsStringMap.empty)
-  let absent := match captured.captured.entry with
+  let absent : Bool := match captured.captured.entry with
     | Option.none => true
     | Option.some _ => false
   if absent then throw "PSC1_EXECUTABLE_ENTRY_MISSING"

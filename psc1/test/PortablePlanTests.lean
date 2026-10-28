@@ -50,6 +50,13 @@ def main : IO Unit := do
     "persistent-snapshots"
   require (psStringMapGet replaced "aȀ" == some 11 && psStringMapGet replaced "bÿ" == some 9)
     "exact-key-replacement"
+  for name in ["", "x", "é", "🙂", "__ps", "__ps$", "__ps$hidden", "eval", "then", "evaluation"] do
+    let actual := match Ps.Internal.ModuleGraph.safeName name with
+      | .ok _ => true
+      | .error _ => false
+    let native := !(name.startsWith "__ps$" ||
+      ["eval", "Function", "require", "process", "globalThis", "then"].contains name)
+    require (actual == native) "portable-reserved-name-prefix"
   compare original (own original) sources
   for count in List.range 48 do
     let declarations := (List.range (count + 1)).map fun n =>

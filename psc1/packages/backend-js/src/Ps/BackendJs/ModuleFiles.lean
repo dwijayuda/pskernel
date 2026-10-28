@@ -53,12 +53,12 @@ def declarationType (declaration : PsVerifiedIrDeclaration) : Except String Stri
 def unitImports (plan : PsModulePlan) (unit : PsModuleUnit) : List PsModuleImport :=
   if Nat.beq unit.index 0 then []
   else
-    let runtimeValues := psListAppend helpers (psListMap
+    let runtimeValues : List String := psListAppend helpers (psListMap
       (fun (item : PsModuleOwner) => item.name)
       (psListFilter (fun (item : PsModuleOwner) => Nat.beq item.unit 0) unit.imports));
     let values : List PsModuleImport := [PsModuleImport.mk
       (psModuleSpecifierFor plan 0 false) runtimeValues false];
-    let others := psListFilterMap (fun (index : Nat) =>
+    let others : List PsModuleImport := psListFilterMap (fun (index : Nat) =>
       let names := psListMap (fun (item : PsModuleOwner) => item.name)
         (psListFilter (fun (item : PsModuleOwner) => Nat.beq item.unit index) unit.imports);
       if psListIsEmpty names then Option.none
@@ -75,7 +75,7 @@ def renderUnit (plan : PsModulePlan) (lowered : PsJsIrModule)
     psExceptMapError (fun _ => String.Internal.append "PSC1_MODULE_JS_PRINT:" declaration.name)
       (psJsPrintDeclarationStackSafeWithVisibility true declaration)) selected
   let imports := unitImports plan unit
-  let header := if Nat.beq unit.index 0 then
+  let header : String := if Nat.beq unit.index 0 then
       psTextJoin "" [psJsStringRuntimeSupport, psJsStackRuntimeSupport,
         "export const __ps$cohort = ", psJsonQuote (psModuleCohortFor plan digest false), ";\n",
         "export { ", psTextJoin ", "
@@ -83,8 +83,8 @@ def renderUnit (plan : PsModulePlan) (lowered : PsJsIrModule)
     else psTextJoin "" [psTextJoin "" (psListMap importText imports),
       "if (__ps$cohort !== ", psJsonQuote (psModuleCohortFor plan digest false),
       ") throw new Error(\"PSC1_MODULE_RUNTIME_COHORT\");\n"]
-  let types := psModuleTypeNames plan.raw
-  let typeHeader := if Nat.beq unit.index 0 || psListIsEmpty types then "" else
+  let types : List String := psModuleTypeNames plan.raw
+  let typeHeader : String := if Nat.beq unit.index 0 || psListIsEmpty types then "" else
     psTextJoin "" ["import type { ", psTextJoin ", " types, " } from ",
       psJsonQuote (psModuleSpecifierFor plan 0 false), ";\nexport type { ",
       psTextJoin ", " types, " } from ", psJsonQuote (psModuleSpecifierFor plan 0 false), ";\n"]

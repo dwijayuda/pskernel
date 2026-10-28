@@ -196,7 +196,7 @@ def plan (raw : PsVerifiedIrModule) (owners : List PsModuleOwner)
     Nat.ble (psListLength raw.structures + psListLength raw.inductives) 2048) "PSC1_EXECUTABLE_IR_BOUND"
   ensure (Nat.ble 2 (psListLength specifiers) && Nat.ble (psListLength specifiers) 257)
     "PSC1_EXECUTABLE_SOURCE_BOUND"
-  let runtimeCorrect := match psListHeadOption specifiers with
+  let runtimeCorrect : Bool := match psListHeadOption specifiers with
     | Option.some value => psStringEq value "@proofscript/foundation/generated/runtime"
     | Option.none => false
   ensure runtimeCorrect "PSC1_EXECUTABLE_RUNTIME_OWNER"
@@ -216,7 +216,7 @@ def plan (raw : PsVerifiedIrModule) (owners : List PsModuleOwner)
   let mut byName : PsStringMap (List String) := PsStringMap.empty
   for declaration in raw.declarations do
     Ps.Internal.ModuleGraph.safeName declaration.name
-    let unit ← match psStringMapGet index declaration.name with
+    let unit : Nat ← match psStringMapGet index declaration.name with
       | Option.some value => Except.ok value
       | Option.none => Except.error "PSC1_EXECUTABLE_OWNER_MISSING"
     ensure (psListIsEmpty declaration.typeParameters) "PSC1_EXECUTABLE_OPEN_VALUE"
@@ -227,7 +227,7 @@ def plan (raw : PsVerifiedIrModule) (owners : List PsModuleOwner)
       (psListMap (fun (p : PsVerifiedIrParameter) => p.name) declaration.parameters) declaration.body
     byName := psStringMapPut byName declaration.name refs
     for name in refs do
-      let assigned ← match psStringMapGet index name with
+      let assigned : Nat ← match psStringMapGet index name with
         | Option.some value => Except.ok value
         | Option.none => Except.error (String.Internal.append "PSC1_EXECUTABLE_UNKNOWN_REFERENCE:" name)
       if !(Nat.beq assigned unit) then

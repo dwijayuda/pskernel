@@ -29,10 +29,20 @@ namespace Ps.Internal.ModuleGraph
 def seen (name : String) (names : List String) : Bool :=
   psListAny (fun (item : String) => psStringEq item name) names
 
+def startsWithCodes (codes : List Nat) (text : String) (position : Nat) : Bool :=
+  match codes with
+  | [] => true
+  | code :: rest =>
+    let current := String.Pos.Raw.mk position;
+    if String.Internal.atEnd text current then false
+    else if Nat.beq (Char.toNat (String.Internal.get text current)) code then
+      startsWithCodes rest text (String.Pos.Raw.byteIdx (String.Internal.next text current))
+    else false
+
 def safeName (name : String) : Except String Unit :=
-  let reserved := seen name ["eval", "Function", "require", "process", "globalThis", "then"];
-  let leading := String.Internal.extract name (String.Pos.Raw.mk 0) (String.Pos.Raw.mk 5);
-  if psStringEq leading "__ps$" || reserved then Except.error "PSC1_MODULE_RESERVED_NAME"
+  if startsWithCodes [95, 95, 112, 115, 36] name 0 ||
+      seen name ["eval", "Function", "require", "process", "globalThis", "then"] then
+    Except.error "PSC1_MODULE_RESERVED_NAME"
   else Except.ok ()
 
 def owner (owners : List PsModuleOwner) (name : String) : Except String PsModuleOwner :=
@@ -169,7 +179,7 @@ def psModuleOriginKindEqual (left right : PsIrOriginKind) : Bool :=
 
 def psModuleEntityArity (raw : PsVerifiedIrModule) (kind : PsIrOriginKind)
     (name : String) : Except String Nat := do
-  let entries := match kind with
+  let entries : List Nat := match kind with
     | PsIrOriginKind.structure => psListFilterMap (fun (item : PsVerifiedIrStructure) =>
         if psStringEq item.name name then Option.some (psListLength item.typeParameters)
         else Option.none) raw.structures
@@ -236,7 +246,7 @@ def psModuleCarryOwners (input : PsVerifiedIrModule) (owners : List PsModuleOwne
     return PsModuleOwner.mk declaration.name previous.unit) output.raw.declarations
 
 def psModuleSpecifierFor (plan : PsModulePlan) (index : Nat) (typed : Bool) : String :=
-  let selected := match psListGetOption plan.packages index with
+  let selected : String := match psListGetOption plan.packages index with
     | Option.some value => value
     | Option.none => "invalid-module-index";
   String.Internal.append selected (if typed then "/ts" else "")

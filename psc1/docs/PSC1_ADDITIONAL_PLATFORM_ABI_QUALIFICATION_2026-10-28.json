@@ -1,0 +1,953 @@
+{
+  "schema": "psc1-additional-platform-abi-qualification/1",
+  "status": "passed-runtime-checker-abi-only",
+  "testedCommit": "293a4ba1972aa857bc3ee74347423aa3ea9403e7",
+  "run": 40633426535,
+  "environments": [
+    {
+      "job": 122634841014,
+      "schema": "psc1-platform-abi-preflight/1",
+      "status": "passed-runtime-kernel-abi-preflight",
+      "testedCommit": "293a4ba1972aa857bc3ee74347423aa3ea9403e7",
+      "runId": "40633426535",
+      "environmentId": "ubuntu-24.04-x64",
+      "platform": "linux-x64",
+      "startedAt": "2026-10-28T04:38:33.946Z",
+      "observations": [
+        {
+          "label": "native-archive-list",
+          "executable": "tar",
+          "args": [
+            "tzf",
+            "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/qualified-native/proofscript-pskernel-lean-4.35.0-psc1.13.tgz"
+          ],
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 98,
+          "stdoutSha256": "5019f5dc8ca3b19d42477578ce7cd99b728062eb2b8334cca3781302058680e3",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "native-archive-extract",
+          "executable": "tar",
+          "args": [
+            "xzf",
+            "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/qualified-native/proofscript-pskernel-lean-4.35.0-psc1.13.tgz",
+            "--no-same-owner",
+            "-C",
+            "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/native"
+          ],
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 100,
+          "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "runtime-archive-extract",
+          "executable": "tar",
+          "args": [
+            "xf",
+            "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/node-v22.23.3-linux-x64.tar.xz",
+            "--no-same-owner",
+            "-C",
+            "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/runtime-extract",
+            "node-v22.23.3-linux-x64/bin/node"
+          ],
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 1500,
+          "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "private-runtime-version",
+          "executable": "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/psc-runtime",
+          "args": [
+            "--version"
+          ],
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 11,
+          "stdoutSha256": "33e26f35db6e57ce0c486ddc815fe966867e4f649e418eaf323f75f4720eb8e9",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "genuine-checker-health",
+          "executable": "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/native/package/dist/implementation/prebuilt/linux-x64/psc2_lean_kernel_provider",
+          "args": [
+            "--health"
+          ],
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 12,
+          "stdoutSha256": "445b867bedaca549748f1628afa356c75baa6a32a3fe61c2b8cd0c1ee556c08e",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "runtime-system-libraries",
+          "executable": "ldd",
+          "args": [
+            "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/psc-runtime"
+          ],
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 17,
+          "stdoutSha256": "412f729595511161929aaaece8d5f3c8e7e7785232340521ab239bfaf46d2527",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "checker-system-libraries",
+          "executable": "ldd",
+          "args": [
+            "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/native/package/dist/implementation/prebuilt/linux-x64/psc2_lean_kernel_provider"
+          ],
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 13,
+          "stdoutSha256": "1a86a04337c5da820c8df3dea7e0420e8b27fc8ee06b9fdc3b4569310906de4d",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "shell-system-libraries",
+          "executable": "ldd",
+          "args": [
+            "/usr/bin/dash"
+          ],
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 12,
+          "stdoutSha256": "28752d2f8eb8c117d2973651bbd72abad0182d64385787c19629b8f2b7293935",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "fullCompilerQualified": false,
+      "admissionCached": false,
+      "environment": {
+        "schema": "psc1-independent-environment/1",
+        "platform": "linux",
+        "arch": "x64",
+        "kernel": {
+          "release": "6.17.0-1022-azure",
+          "version": "#22-Ubuntu SMP Mon Jul 27 17:24:03 UTC 2026"
+        },
+        "runtime": {
+          "version": "v22.23.3",
+          "versions": {
+            "node": "22.23.3",
+            "acorn": "8.16.0",
+            "ada": "2.9.2",
+            "amaro": "1.1.8",
+            "ares": "1.34.8",
+            "brotli": "1.1.0",
+            "cjs_module_lexer": "2.2.0",
+            "cldr": "48.0",
+            "icu": "78.3",
+            "llhttp": "9.4.3",
+            "modules": "127",
+            "napi": "10",
+            "nbytes": "0.1.3",
+            "ncrypto": "0.0.1",
+            "nghttp2": "1.69.0",
+            "openssl": "3.5.8",
+            "simdjson": "4.5.0",
+            "simdutf": "6.4.2",
+            "sqlite": "3.51.3",
+            "tz": "2026c",
+            "undici": "6.28.1",
+            "unicode": "17.0",
+            "uv": "1.51.0",
+            "uvwasi": "0.0.23",
+            "v8": "12.4.254.21-node.57",
+            "zlib": "1.3.1-e00f703",
+            "zstd": "1.5.7"
+          },
+          "glibcVersionRuntime": "2.39",
+          "glibcVersionCompiler": "2.28"
+        },
+        "osRelease": {
+          "bytes": 400,
+          "sha256": "87458b3b1f1ca0e5c693ade771de7007c3783bdc692fa6b39eb6414bf2af2763",
+          "text": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n"
+        },
+        "filesystem": {
+          "type": "61267",
+          "bsize": "4096",
+          "blocks": "37815964",
+          "bfree": "21652535",
+          "bavail": "21648439",
+          "files": "19529728",
+          "ffree": "18413438"
+        },
+        "user": {
+          "uid": 1001,
+          "gid": 1001
+        }
+      },
+      "native": {
+        "input": {
+          "run": 40509034127,
+          "job": 122205738648,
+          "artifact": 12736781848,
+          "commit": "892e1895b6be54f2fff4957a66b34d293c4105b8",
+          "zipSha256": "c88036b06889606bcc3bc4b9af2d888ccffe2d1330187e932e2602230d1e0eff"
+        },
+        "manifestSha256": "d048b07c5993607e44b30b45f1556c93179cb2be16fd2a60ada49723e834dde0",
+        "target": {
+          "path": "prebuilt/linux-x64/psc2_lean_kernel_provider",
+          "sha256": "1415522ad1fa22ea919d796dc0d689be5c65275c0a24fe43a6ac7f675d32239b",
+          "size": 4079232,
+          "sourceCommit": "57e8668bb0717a51291dc7ce4a7dcaa378148ae6",
+          "qualification": {
+            "run": 40154010946,
+            "job": 121051344145,
+            "artifact": 12583552650,
+            "zipSha256": "01f025c2a073e45d7401455fd8af111bf10695a4115119a0a01ce4e5c40c2ffa",
+            "standalone": true,
+            "parityCases": 14
+          }
+        }
+      },
+      "runtime": {
+        "version": "22.23.3",
+        "upstream": "https://nodejs.org/dist/v22.23.3/",
+        "archive": "node-v22.23.3-linux-x64.tar.xz",
+        "archiveSha256": "df450af89261115ef9f9e3830c3eeb2cc9213b63c720b1af623cb5dcbe2e02de",
+        "executableBytes": 124827920,
+        "executableSha256": "fde6a4bf8d0562f7751d1a2d6cb9b417c4cfe107bbcb0aa3e9a24e125e348f48",
+        "verification": "official HTTPS release SHA256; no signature claim"
+      },
+      "checkerHealth": {
+        "protocol": "pskernel-lean/1",
+        "provider": "lean4-cpp",
+        "leanVersion": "4.35.0",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "profile": "lean4.35-core",
+        "status": "ok"
+      },
+      "systemLibraries": [
+        {
+          "path": "/lib/x86_64-linux-gnu/libc.so.6",
+          "realPath": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+          "bytes": 2129424,
+          "sha256": "3a15d66867d83762c7f2f1e37359cb8f6c5743edb369c65285cb0b1c4f7498bf"
+        },
+        {
+          "path": "/lib/x86_64-linux-gnu/libdl.so.2",
+          "realPath": "/usr/lib/x86_64-linux-gnu/libdl.so.2",
+          "bytes": 14408,
+          "sha256": "c2994527172cc23b7fb0f7d611b71e00a37da27af12c2e5e9e0dc1a742886c96"
+        },
+        {
+          "path": "/lib/x86_64-linux-gnu/libgcc_s.so.1",
+          "realPath": "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1",
+          "bytes": 183024,
+          "sha256": "d93224d2b0dab4247598be683adca02f5cf00586f99c187579cd7e92058fb7cb"
+        },
+        {
+          "path": "/lib/x86_64-linux-gnu/libm.so.6",
+          "realPath": "/usr/lib/x86_64-linux-gnu/libm.so.6",
+          "bytes": 952616,
+          "sha256": "fce00b6f25f459cf4ae0b7fae4257909a1a8a86f9149e7c029a5d617baf1ccd0"
+        },
+        {
+          "path": "/lib/x86_64-linux-gnu/libpthread.so.0",
+          "realPath": "/usr/lib/x86_64-linux-gnu/libpthread.so.0",
+          "bytes": 14408,
+          "sha256": "90491a21ce44efcf3bd4b65ec82501c091d7ebe7f8d9b341dd01d721001d9ecd"
+        },
+        {
+          "path": "/lib/x86_64-linux-gnu/librt.so.1",
+          "realPath": "/usr/lib/x86_64-linux-gnu/librt.so.1",
+          "bytes": 14624,
+          "sha256": "6d072187d88e092e81561a44c03a4a41397319022c6d43519757cc051c576d82"
+        },
+        {
+          "path": "/lib/x86_64-linux-gnu/libstdc++.so.6",
+          "realPath": "/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33",
+          "bytes": 2592224,
+          "sha256": "1fd75fe70354a416d75aef22bcae68c47bd25d20e2d0568c30b1a9838cf62f11"
+        },
+        {
+          "path": "/lib64/ld-linux-x86-64.so.2",
+          "realPath": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+          "bytes": 236616,
+          "sha256": "c20a2dc8917c755f02b94049356320fe1f62ac7d9f8994731f807d9df39302da"
+        }
+      ],
+      "shell": {
+        "path": "/usr/bin/dash",
+        "bytes": 129784,
+        "sha256": "86d31f6fb799e91fa21bad341484564510ca287703a16e9e46c53338776f4f42"
+      },
+      "completedAt": "2026-10-28T04:38:42.475Z"
+    },
+    {
+      "job": 122634841142,
+      "schema": "psc1-platform-abi-preflight/1",
+      "status": "passed-runtime-kernel-abi-preflight",
+      "testedCommit": "293a4ba1972aa857bc3ee74347423aa3ea9403e7",
+      "runId": "40633426535",
+      "environmentId": "ubuntu-22.04-x64",
+      "platform": "linux-x64",
+      "startedAt": "2026-10-28T04:38:41.106Z",
+      "observations": [
+        {
+          "label": "native-archive-list",
+          "executable": "tar",
+          "args": [
+            "tzf",
+            "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/qualified-native/proofscript-pskernel-lean-4.35.0-psc1.13.tgz"
+          ],
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 135,
+          "stdoutSha256": "5019f5dc8ca3b19d42477578ce7cd99b728062eb2b8334cca3781302058680e3",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "native-archive-extract",
+          "executable": "tar",
+          "args": [
+            "xzf",
+            "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/qualified-native/proofscript-pskernel-lean-4.35.0-psc1.13.tgz",
+            "--no-same-owner",
+            "-C",
+            "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/native"
+          ],
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 135,
+          "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "runtime-archive-extract",
+          "executable": "tar",
+          "args": [
+            "xf",
+            "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/node-v22.23.3-linux-x64.tar.xz",
+            "--no-same-owner",
+            "-C",
+            "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/runtime-extract",
+            "node-v22.23.3-linux-x64/bin/node"
+          ],
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 2205,
+          "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "private-runtime-version",
+          "executable": "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/psc-runtime",
+          "args": [
+            "--version"
+          ],
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 21,
+          "stdoutSha256": "33e26f35db6e57ce0c486ddc815fe966867e4f649e418eaf323f75f4720eb8e9",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "genuine-checker-health",
+          "executable": "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/native/package/dist/implementation/prebuilt/linux-x64/psc2_lean_kernel_provider",
+          "args": [
+            "--health"
+          ],
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 20,
+          "stdoutSha256": "445b867bedaca549748f1628afa356c75baa6a32a3fe61c2b8cd0c1ee556c08e",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "runtime-system-libraries",
+          "executable": "ldd",
+          "args": [
+            "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/psc-runtime"
+          ],
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 26,
+          "stdoutSha256": "c07fdbd74fe55893d2505eae76485fdc7c53153b2c7d8f118752cb9d6af4a2c8",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "checker-system-libraries",
+          "executable": "ldd",
+          "args": [
+            "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/native/package/dist/implementation/prebuilt/linux-x64/psc2_lean_kernel_provider"
+          ],
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 25,
+          "stdoutSha256": "281a16af756b8059cbce6222cf125a1ec53181571f92aec1dc55ed924b24ee40",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "shell-system-libraries",
+          "executable": "ldd",
+          "args": [
+            "/usr/bin/dash"
+          ],
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 24,
+          "stdoutSha256": "3fb576bad21d441440a88e2b2a888994baad72b6845adf3c3842237487aac344",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "fullCompilerQualified": false,
+      "admissionCached": false,
+      "environment": {
+        "schema": "psc1-independent-environment/1",
+        "platform": "linux",
+        "arch": "x64",
+        "kernel": {
+          "release": "6.8.0-1064-azure",
+          "version": "#72~22.04.1-Ubuntu SMP Wed Jul 22 23:39:45 UTC 2026"
+        },
+        "runtime": {
+          "version": "v22.23.3",
+          "versions": {
+            "node": "22.23.3",
+            "acorn": "8.16.0",
+            "ada": "2.9.2",
+            "amaro": "1.1.8",
+            "ares": "1.34.8",
+            "brotli": "1.1.0",
+            "cjs_module_lexer": "2.2.0",
+            "cldr": "48.0",
+            "icu": "78.3",
+            "llhttp": "9.4.3",
+            "modules": "127",
+            "napi": "10",
+            "nbytes": "0.1.3",
+            "ncrypto": "0.0.1",
+            "nghttp2": "1.69.0",
+            "openssl": "3.5.8",
+            "simdjson": "4.5.0",
+            "simdutf": "6.4.2",
+            "sqlite": "3.51.3",
+            "tz": "2026c",
+            "undici": "6.28.1",
+            "unicode": "17.0",
+            "uv": "1.51.0",
+            "uvwasi": "0.0.23",
+            "v8": "12.4.254.21-node.57",
+            "zlib": "1.3.1-e00f703",
+            "zstd": "1.5.7"
+          },
+          "glibcVersionRuntime": "2.35",
+          "glibcVersionCompiler": "2.28"
+        },
+        "osRelease": {
+          "bytes": 386,
+          "sha256": "594d5ddd35aedb47f00d9c34d140017907a5b9f93c975aba125fc924daac5c07",
+          "text": "PRETTY_NAME=\"Ubuntu 22.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"22.04\"\nVERSION=\"22.04.5 LTS (Jammy Jellyfish)\"\nVERSION_CODENAME=jammy\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=jammy\n"
+        },
+        "filesystem": {
+          "type": "61267",
+          "bsize": "4096",
+          "blocks": "38060940",
+          "bfree": "21707702",
+          "bavail": "21703606",
+          "files": "19353600",
+          "ffree": "18188934"
+        },
+        "user": {
+          "uid": 1001,
+          "gid": 1001
+        }
+      },
+      "native": {
+        "input": {
+          "run": 40509034127,
+          "job": 122205738648,
+          "artifact": 12736781848,
+          "commit": "892e1895b6be54f2fff4957a66b34d293c4105b8",
+          "zipSha256": "c88036b06889606bcc3bc4b9af2d888ccffe2d1330187e932e2602230d1e0eff"
+        },
+        "manifestSha256": "d048b07c5993607e44b30b45f1556c93179cb2be16fd2a60ada49723e834dde0",
+        "target": {
+          "path": "prebuilt/linux-x64/psc2_lean_kernel_provider",
+          "sha256": "1415522ad1fa22ea919d796dc0d689be5c65275c0a24fe43a6ac7f675d32239b",
+          "size": 4079232,
+          "sourceCommit": "57e8668bb0717a51291dc7ce4a7dcaa378148ae6",
+          "qualification": {
+            "run": 40154010946,
+            "job": 121051344145,
+            "artifact": 12583552650,
+            "zipSha256": "01f025c2a073e45d7401455fd8af111bf10695a4115119a0a01ce4e5c40c2ffa",
+            "standalone": true,
+            "parityCases": 14
+          }
+        }
+      },
+      "runtime": {
+        "version": "22.23.3",
+        "upstream": "https://nodejs.org/dist/v22.23.3/",
+        "archive": "node-v22.23.3-linux-x64.tar.xz",
+        "archiveSha256": "df450af89261115ef9f9e3830c3eeb2cc9213b63c720b1af623cb5dcbe2e02de",
+        "executableBytes": 124827920,
+        "executableSha256": "fde6a4bf8d0562f7751d1a2d6cb9b417c4cfe107bbcb0aa3e9a24e125e348f48",
+        "verification": "official HTTPS release SHA256; no signature claim"
+      },
+      "checkerHealth": {
+        "protocol": "pskernel-lean/1",
+        "provider": "lean4-cpp",
+        "leanVersion": "4.35.0",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "profile": "lean4.35-core",
+        "status": "ok"
+      },
+      "systemLibraries": [
+        {
+          "path": "/lib/x86_64-linux-gnu/libc.so.6",
+          "realPath": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+          "bytes": 2220400,
+          "sha256": "b2cf6c33b74d2f22543b7a469a75b538911e690f769d0b238843a49465b83793"
+        },
+        {
+          "path": "/lib/x86_64-linux-gnu/libdl.so.2",
+          "realPath": "/usr/lib/x86_64-linux-gnu/libdl.so.2",
+          "bytes": 14432,
+          "sha256": "3eaaa4aefd9c28f3867c96a427c3cbec9191cb61c4c9d0a2cb4a765d66064499"
+        },
+        {
+          "path": "/lib/x86_64-linux-gnu/libgcc_s.so.1",
+          "realPath": "/usr/lib/x86_64-linux-gnu/libgcc_s.so.1",
+          "bytes": 125488,
+          "sha256": "fc9d43b2f6c20e53b009238f767c5b949d202389e20de9e202ea684b4ba3729a"
+        },
+        {
+          "path": "/lib/x86_64-linux-gnu/libm.so.6",
+          "realPath": "/usr/lib/x86_64-linux-gnu/libm.so.6",
+          "bytes": 940560,
+          "sha256": "3dd5511ae94785c9f921429b0f2b2f7aabb461b6f0e6de6dfdbef15f24bdfee6"
+        },
+        {
+          "path": "/lib/x86_64-linux-gnu/libpthread.so.0",
+          "realPath": "/usr/lib/x86_64-linux-gnu/libpthread.so.0",
+          "bytes": 21448,
+          "sha256": "fbed9505adacada2abb37c6b43be2df6de81e742712c6025694ba48de62c7e78"
+        },
+        {
+          "path": "/lib/x86_64-linux-gnu/librt.so.1",
+          "realPath": "/usr/lib/x86_64-linux-gnu/librt.so.1",
+          "bytes": 14664,
+          "sha256": "5f20d34fb3bb4d84b4edeb6ca11fa5b48c705207253741619acab7cc758185fb"
+        },
+        {
+          "path": "/lib/x86_64-linux-gnu/libstdc++.so.6",
+          "realPath": "/usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.30",
+          "bytes": 2260296,
+          "sha256": "ff0825e113603c3866680d5d52216bc6d8eedf3a59f52a0aef67ff01994db128"
+        },
+        {
+          "path": "/lib64/ld-linux-x86-64.so.2",
+          "realPath": "/usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2",
+          "bytes": 240936,
+          "sha256": "41daf7836f7fce21a40ca63a00c5caf21b05a35a76ccc075d86f1716212cdf01"
+        }
+      ],
+      "shell": {
+        "path": "/usr/bin/dash",
+        "bytes": 125688,
+        "sha256": "4f291296e89b784cd35479fca606f228126e3641f5bcaee68dee36583d7c9483"
+      },
+      "completedAt": "2026-10-28T04:38:50.695Z"
+    },
+    {
+      "job": 122634841285,
+      "schema": "psc1-platform-abi-preflight/1",
+      "status": "passed-runtime-kernel-abi-preflight",
+      "testedCommit": "293a4ba1972aa857bc3ee74347423aa3ea9403e7",
+      "runId": "40633426535",
+      "environmentId": "ubuntu-24.04-arm64",
+      "platform": "linux-arm64",
+      "startedAt": "2026-10-28T04:38:36.253Z",
+      "observations": [
+        {
+          "label": "native-archive-list",
+          "executable": "tar",
+          "args": [
+            "tzf",
+            "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/qualified-native/proofscript-pskernel-lean-4.35.0-psc1.13.tgz"
+          ],
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 108,
+          "stdoutSha256": "5019f5dc8ca3b19d42477578ce7cd99b728062eb2b8334cca3781302058680e3",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "native-archive-extract",
+          "executable": "tar",
+          "args": [
+            "xzf",
+            "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/qualified-native/proofscript-pskernel-lean-4.35.0-psc1.13.tgz",
+            "--no-same-owner",
+            "-C",
+            "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/native"
+          ],
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 107,
+          "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "runtime-archive-extract",
+          "executable": "tar",
+          "args": [
+            "xf",
+            "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/node-v22.23.3-linux-arm64.tar.xz",
+            "--no-same-owner",
+            "-C",
+            "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/runtime-extract",
+            "node-v22.23.3-linux-arm64/bin/node"
+          ],
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 1455,
+          "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "private-runtime-version",
+          "executable": "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/psc-runtime",
+          "args": [
+            "--version"
+          ],
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 13,
+          "stdoutSha256": "33e26f35db6e57ce0c486ddc815fe966867e4f649e418eaf323f75f4720eb8e9",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "genuine-checker-health",
+          "executable": "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/native/package/dist/implementation/prebuilt/linux-arm64/psc2_lean_kernel_provider",
+          "args": [
+            "--health"
+          ],
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 17,
+          "stdoutSha256": "445b867bedaca549748f1628afa356c75baa6a32a3fe61c2b8cd0c1ee556c08e",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "runtime-system-libraries",
+          "executable": "ldd",
+          "args": [
+            "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/psc-runtime"
+          ],
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 19,
+          "stdoutSha256": "10e1b408ece2351bc50fc4a5789eeb256007fe22719a53e7d03cab7d8caeed37",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "checker-system-libraries",
+          "executable": "ldd",
+          "args": [
+            "/home/runner/work/pskernel/pskernel/psc1/dist/platform-preflight/native/package/dist/implementation/prebuilt/linux-arm64/psc2_lean_kernel_provider"
+          ],
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 18,
+          "stdoutSha256": "077b059cd6211302e55098754f2c5c68d34e4e980c0fa545b31704c027064c29",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "label": "shell-system-libraries",
+          "executable": "ldd",
+          "args": [
+            "/usr/bin/dash"
+          ],
+          "status": 0,
+          "signal": null,
+          "error": null,
+          "elapsedMs": 18,
+          "stdoutSha256": "eef4df8130853847bc00bb83de57c69147df0170fd46da9b0bd4ff723bccc5a3",
+          "stderrSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "fullCompilerQualified": false,
+      "admissionCached": false,
+      "environment": {
+        "schema": "psc1-independent-environment/1",
+        "platform": "linux",
+        "arch": "arm64",
+        "kernel": {
+          "release": "6.17.0-1022-azure",
+          "version": "#22-Ubuntu SMP Mon Jul 27 17:12:01 UTC 2026"
+        },
+        "runtime": {
+          "version": "v22.23.3",
+          "versions": {
+            "node": "22.23.3",
+            "acorn": "8.16.0",
+            "ada": "2.9.2",
+            "amaro": "1.1.8",
+            "ares": "1.34.8",
+            "brotli": "1.1.0",
+            "cjs_module_lexer": "2.2.0",
+            "cldr": "48.0",
+            "icu": "78.3",
+            "llhttp": "9.4.3",
+            "modules": "127",
+            "napi": "10",
+            "nbytes": "0.1.3",
+            "ncrypto": "0.0.1",
+            "nghttp2": "1.69.0",
+            "openssl": "3.5.8",
+            "simdjson": "4.5.0",
+            "simdutf": "6.4.2",
+            "sqlite": "3.51.3",
+            "tz": "2026c",
+            "undici": "6.28.1",
+            "unicode": "17.0",
+            "uv": "1.51.0",
+            "uvwasi": "0.0.23",
+            "v8": "12.4.254.21-node.57",
+            "zlib": "1.3.1-e00f703",
+            "zstd": "1.5.7"
+          },
+          "glibcVersionRuntime": "2.39",
+          "glibcVersionCompiler": "2.28"
+        },
+        "osRelease": {
+          "bytes": 400,
+          "sha256": "87458b3b1f1ca0e5c693ade771de7007c3783bdc692fa6b39eb6414bf2af2763",
+          "text": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n"
+        },
+        "filesystem": {
+          "type": "61267",
+          "bsize": "4096",
+          "blocks": "37815964",
+          "bfree": "27330888",
+          "bavail": "27326792",
+          "files": "19529728",
+          "ffree": "18843718"
+        },
+        "user": {
+          "uid": 1001,
+          "gid": 1001
+        }
+      },
+      "native": {
+        "input": {
+          "run": 40509034127,
+          "job": 122205738648,
+          "artifact": 12736781848,
+          "commit": "892e1895b6be54f2fff4957a66b34d293c4105b8",
+          "zipSha256": "c88036b06889606bcc3bc4b9af2d888ccffe2d1330187e932e2602230d1e0eff"
+        },
+        "manifestSha256": "d048b07c5993607e44b30b45f1556c93179cb2be16fd2a60ada49723e834dde0",
+        "target": {
+          "path": "prebuilt/linux-arm64/psc2_lean_kernel_provider",
+          "sha256": "d0433c6e187fc0a7b0e165f641eaa8720cdd6b16747237b17cc86ddf01d6052e",
+          "size": 4160016,
+          "sourceCommit": "57e8668bb0717a51291dc7ce4a7dcaa378148ae6",
+          "qualification": {
+            "run": 40154010946,
+            "job": 121051344263,
+            "artifact": 12583702369,
+            "zipSha256": "0e1a49679bfdedfda7ad6ca4c0edeca18dce65209722b145cc25aad4b90c6dcf",
+            "standalone": true,
+            "parityCases": 14
+          }
+        }
+      },
+      "runtime": {
+        "version": "22.23.3",
+        "upstream": "https://nodejs.org/dist/v22.23.3/",
+        "archive": "node-v22.23.3-linux-arm64.tar.xz",
+        "archiveSha256": "a44aeb94849a299b22df10b9e622ec2f605c2183501bc40590705131de7c740f",
+        "executableBytes": 122179336,
+        "executableSha256": "d09e299258c24f7cdf6f5d5ec185e3a56512b27a697113735dac909f1cac7b8d",
+        "verification": "official HTTPS release SHA256; no signature claim"
+      },
+      "checkerHealth": {
+        "protocol": "pskernel-lean/1",
+        "provider": "lean4-cpp",
+        "leanVersion": "4.35.0",
+        "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+        "profile": "lean4.35-core",
+        "status": "ok"
+      },
+      "systemLibraries": [
+        {
+          "path": "/lib/aarch64-linux-gnu/libc.so.6",
+          "realPath": "/usr/lib/aarch64-linux-gnu/libc.so.6",
+          "bytes": 1722920,
+          "sha256": "0f1905dc27dbc6715875c70527bc8da846a10084c9c483e9d8ff76dce8d69d0e"
+        },
+        {
+          "path": "/lib/aarch64-linux-gnu/libdl.so.2",
+          "realPath": "/usr/lib/aarch64-linux-gnu/libdl.so.2",
+          "bytes": 67440,
+          "sha256": "1c16b2692a155191c97d7fdc5ce937d37c242435f05745046a794a9832b16af4"
+        },
+        {
+          "path": "/lib/aarch64-linux-gnu/libgcc_s.so.1",
+          "realPath": "/usr/lib/aarch64-linux-gnu/libgcc_s.so.1",
+          "bytes": 133696,
+          "sha256": "f2d3ad2bf0b61f6bc944cc37d7b6ab7f88d2582b41ff989ca164803f56cc5f20"
+        },
+        {
+          "path": "/lib/aarch64-linux-gnu/libm.so.6",
+          "realPath": "/usr/lib/aarch64-linux-gnu/libm.so.6",
+          "bytes": 591800,
+          "sha256": "5e0391562de36de323fb9cb0f2c1b6bd6d034c840b1dac018499f5fe4ded1b4a"
+        },
+        {
+          "path": "/lib/aarch64-linux-gnu/libpthread.so.0",
+          "realPath": "/usr/lib/aarch64-linux-gnu/libpthread.so.0",
+          "bytes": 67440,
+          "sha256": "6f1ab9e7d7de142dc5e2feaf6d19faceff0a0f40d5e225c922899f5362b8c353"
+        },
+        {
+          "path": "/lib/aarch64-linux-gnu/librt.so.1",
+          "realPath": "/usr/lib/aarch64-linux-gnu/librt.so.1",
+          "bytes": 67512,
+          "sha256": "93d0d5ab643b50ac1a61c2c7baf670e8aa94973fa5a2584d13db05295d5b5a0e"
+        },
+        {
+          "path": "/lib/aarch64-linux-gnu/libstdc++.so.6",
+          "realPath": "/usr/lib/aarch64-linux-gnu/libstdc++.so.6.0.33",
+          "bytes": 2633224,
+          "sha256": "6e3112d35cfc86db7ee85b27e1746f67408e2837ff8628b46386c3eabd5682a4"
+        },
+        {
+          "path": "/lib/ld-linux-aarch64.so.1",
+          "realPath": "/usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1",
+          "bytes": 203968,
+          "sha256": "390027e5f45f236bd1838bc54bf464c5ff01d260ab9f8b415ea8276641bce505"
+        }
+      ],
+      "shell": {
+        "path": "/usr/bin/dash",
+        "bytes": 133608,
+        "sha256": "c883d9c27228339580994a1d0ea960645368c7d1b960a712bd0c655860c2d0d7"
+      },
+      "completedAt": "2026-10-28T04:38:57.955Z"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 12792816030,
+      "name": "psc1-platform-abi-ubuntu-24.04-arm64-293a4ba1972aa857bc3ee74347423aa3ea9403e7",
+      "size_in_bytes": 7139,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12792816030",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12792816030/zip",
+      "expired": false,
+      "created_at": "2026-10-28T04:38:59Z",
+      "expires_at": "2027-01-26T04:38:08Z",
+      "updated_at": "2026-10-28T04:38:59Z",
+      "digest": "sha256:a01dad95080f66a7be56f42756552b8e086205f7c79a06fddb081f5204babd9b",
+      "workflow_run": {
+        "id": 40633426535,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "feat/psc1-canonical-latency-20261028",
+        "head_sha": "293a4ba1972aa857bc3ee74347423aa3ea9403e7"
+      }
+    },
+    {
+      "id": 12792667147,
+      "name": "psc1-platform-abi-ubuntu-24.04-x64-293a4ba1972aa857bc3ee74347423aa3ea9403e7",
+      "size_in_bytes": 7165,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12792667147",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12792667147/zip",
+      "expired": false,
+      "created_at": "2026-10-28T04:38:43Z",
+      "expires_at": "2027-01-26T04:38:08Z",
+      "updated_at": "2026-10-28T04:38:43Z",
+      "digest": "sha256:13ec606f48e521e720caf0e37919a5ff3f40f31378b0358f388b1e986a0ef252",
+      "workflow_run": {
+        "id": 40633426535,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "feat/psc1-canonical-latency-20261028",
+        "head_sha": "293a4ba1972aa857bc3ee74347423aa3ea9403e7"
+      }
+    },
+    {
+      "id": 12791874960,
+      "name": "psc1-platform-abi-ubuntu-22.04-x64-293a4ba1972aa857bc3ee74347423aa3ea9403e7",
+      "size_in_bytes": 7172,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12791874960",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12791874960/zip",
+      "expired": false,
+      "created_at": "2026-10-28T04:38:51Z",
+      "expires_at": "2027-01-26T04:38:08Z",
+      "updated_at": "2026-10-28T04:38:51Z",
+      "digest": "sha256:ac2e32a05abffae8f305c0be396633c176da7544906aab2f20c029464c65a03a",
+      "workflow_run": {
+        "id": 40633426535,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "feat/psc1-canonical-latency-20261028",
+        "head_sha": "293a4ba1972aa857bc3ee74347423aa3ea9403e7"
+      }
+    }
+  ],
+  "fullCompilerQualified": false,
+  "publicationQualified": false,
+  "firstAttempt": {
+    "run": 40633208907,
+    "commit": "c91b3eb51e2d4a5ca959dd43a0a73aaa160812d1",
+    "failure": "tar binary extraction exceeded the observer stdout limit; no ABI execution had occurred.",
+    "repair": "Extract the fixed archive member to a bounded regular file, hash it, and keep command logs textual.",
+    "artifacts": [
+      {
+        "environment": "ubuntu-24.04-x64",
+        "id": 12791803670,
+        "bytes": 5772296,
+        "sha256": "06ad980138fe71f7a0410f66ec37def5da76145ab1ef14561ed1d9528c402f1a"
+      },
+      {
+        "environment": "ubuntu-22.04-x64",
+        "id": 12791894543,
+        "bytes": 5772294,
+        "sha256": "c879bcb7f792198780b50eb149f4084e848944dbdee634dff9de7287c0bbf520"
+      },
+      {
+        "environment": "ubuntu-24.04-arm64",
+        "id": 12792063977,
+        "bytes": 5872912,
+        "sha256": "a292cfa94b490f797db7b62fc7726bcafc6856111567359627b0ac50006ef50c"
+      }
+    ]
+  }
+}

@@ -32,7 +32,7 @@ V8's tick logger with the same worker restrictions, and records native symbol
 analysis tools (nm/objdump) as CI observation-only dependencies. No ordinary
 runner or compiler acceptance policy is changed.
 
-No optimization or latency reduction is claimed before that profile passes.
+Profile40631714254 now passes exact complete candidate/IR/admission equality and fresh official checker admission. Worker1,236,092ms; maxRSS3,615,680KiB; checker2,029ms;243,356ticks. Sampled GC19.617%; nearest generated attribution to psIrSpecializeTypeKeyWithFuel18.721%; WeakCollectionSet top-frame12.579%. The selected first experiment defers the remaining-fuel closure until a type is supplied, preserving the fuel64 and all result/refusal cases. No cache, serialization or admission change is selected. Latency improvement remains unqualified until the new compiler and controlled old-source comparison pass.
 Generated JS uses a generator trampoline, so weighted sampled self-time and
 generated declaration locations are the initial views; JavaScript stack ancestry
 is not the logical ProofScript call stack. Existing UTF-8 caches and balanced
@@ -40,7 +40,7 @@ text builders must not be duplicated based on speculation.
 
 ## Parallel implementation investigations
 
-The ownership audit enumerates every non-kernel package source. The 125-module
+Initial all153 compiler-owner preparation40632545333 refused Ps.Syntax.Lossless at parse before promotion. The focused parenthesized-projection refactor now uses a local binding; a diagnostic probe covers all proposed owners before mandatory admission. Additional pure modular planning/rendering and Sh1 surface ports are under review. No source owner has been promoted yet. The ownership audit enumerates every non-kernel package source. The 125-module
 unified compiler is already representable in checked `.ps`; additional portable
 modules and explicit native/bootstrap-only exceptions are being classified.
 Canonical source promotion must retain one authored owner, explicit immutable
@@ -52,8 +52,7 @@ Broader regressions will modify real frontend and compiler behavior in an
 isolated source workspace, execute positive and negative observations, and require
 the changed compiler to rebuild itself. Additional Linux environments under
 investigation are Ubuntu 22.04 x64 and Ubuntu 24.04 ARM64, using qualified native
-Lean 4.35 checker payloads and matching private runtimes. Platform/library and
-publication claims remain pending actual execution.
+Lean 4.35 checker payloads and matching private runtimes. ABI probes now pass on all three environments in40633426535: exact Node22.23.3, genuine Lean4.35 checker health and eight system libraries per environment. Full compiler and publication qualification remains pending actual execution. See docs/PSC1_ADDITIONAL_PLATFORM_ABI_QUALIFICATION_2026-10-28.json.
 
 ## Inherited qualified baseline
 

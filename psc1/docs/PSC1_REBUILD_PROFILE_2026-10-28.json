@@ -1,0 +1,869 @@
+{
+  "schema": "psc1-rebuild-profile-receipt/1",
+  "status": "qualified-measured-profile",
+  "date": "2026-10-28",
+  "timezone": "Asia/Jakarta",
+  "evidence": {
+    "run": 40631714254,
+    "job": 122629371853,
+    "observerCommit": "c829935ff30b0f715ed40ea70e788a6625ce7265",
+    "artifact": {
+      "id": 12792955597,
+      "name": "psc1-rebuild-profile-c829935ff30b0f715ed40ea70e788a6625ce7265",
+      "size_in_bytes": 18926883,
+      "url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12792955597",
+      "archive_download_url": "https://api.github.com/repos/dwijayuda/pskernel/actions/artifacts/12792955597/zip",
+      "expired": false,
+      "created_at": "2026-10-28T04:41:43Z",
+      "expires_at": "2027-01-26T04:19:54Z",
+      "updated_at": "2026-10-28T04:41:43Z",
+      "digest": "sha256:9998b75aeb9b8316fb5524b2a1d1168079616a49c475922d89e4da57e805c9ed",
+      "workflow_run": {
+        "id": 40631714254,
+        "repository_id": 1381609925,
+        "head_repository_id": 1381609925,
+        "head_branch": "feat/psc1-canonical-latency-20261028",
+        "head_sha": "c829935ff30b0f715ed40ea70e788a6625ce7265"
+      }
+    }
+  },
+  "profile": {
+    "schema": "psc1-rebuild-profile/1",
+    "status": "passed",
+    "observerCommit": "c829935ff30b0f715ed40ea70e788a6625ce7265",
+    "identities": {
+      "sourceClosureDigest": "9d0f097e79eb2b1e14d10362c6db9b4bc2370c26627658017bf6b2681b46fabf",
+      "compilerSha256": "858c188024f0a7da221e0c26053437b3fac3fc0ab1cc9d14092df19b39d1465d",
+      "admissionsSha256": "904cdaf4b2e57b2e1b4d3205928a14dd44676e74468e952c29e73847ec245de1",
+      "originalIrSha256": "13fc0f2fbd65d421257e6df901a9a3afa1b74bf0472292de27549f6214a03b50",
+      "specializedIrSha256": "a1a377f537848666837c74d0bffd4604718812d59a0d7bcb56586bf7936771c8"
+    },
+    "completeCandidateBytesEqual": true,
+    "worker": {
+      "protocol": "psc1-independent-worker/1",
+      "operation": "compile",
+      "compilerSha256": "858c188024f0a7da221e0c26053437b3fac3fc0ab1cc9d14092df19b39d1465d",
+      "requestSha256": "4206adb1eb0f795cd09401136f45e638a1298cf8f6c801e30a639c0eccd6180a",
+      "responseSha256": "532081726b246297e30fd0a0975f95a6198510e295338a2bcfbe74ed602c4978",
+      "responseUtf8Bytes": 73800724,
+      "elapsedMs": 1236092,
+      "maxRssKiB": 3615680
+    },
+    "processElapsedMs": 1236571,
+    "sampledPeakRssKiB": 3615680,
+    "profileIdentity": {
+      "path": "compile.v8.log",
+      "bytes": 49791905,
+      "sha256": "5eba285e8858c09f7182a1c23ba377604cebf5153f1f7105e69267a12dfca9f1"
+    },
+    "processedProfileIdentity": {
+      "path": "compile-ticks.json",
+      "bytes": 70854405,
+      "sha256": "f489bbfbb915d4a610d36f6a2a3498fa0906634979372d5f21307c93fe14bbf3"
+    },
+    "observationTools": [
+      {
+        "requestedPath": "/usr/bin/nm",
+        "resolvedPath": "/usr/bin/x86_64-linux-gnu-nm",
+        "bytes": 44544,
+        "sha256": "3708df3d7ce16e2c1dcdcd722784ae382d4d582276a71ab7bbe2d542f5621202",
+        "version": "GNU nm (GNU Binutils for Ubuntu) 2.42"
+      },
+      {
+        "requestedPath": "/usr/bin/objdump",
+        "resolvedPath": "/usr/bin/x86_64-linux-gnu-objdump",
+        "bytes": 390848,
+        "sha256": "325c4205a4c658a9d1e1ebc469ae55975a2b897a3d3c1e79d9b158612d37f745",
+        "version": "GNU objdump (GNU Binutils for Ubuntu) 2.42"
+      }
+    ],
+    "preprocessingElapsedMs": 10876,
+    "preprocessingStderrBytes": 179,
+    "checker": {
+      "executed": true,
+      "accepted": true,
+      "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "sha256": "1415522ad1fa22ea919d796dc0d689be5c65275c0a24fe43a6ac7f675d32239b",
+      "admissionsSha256": "904cdaf4b2e57b2e1b4d3205928a14dd44676e74468e952c29e73847ec245de1",
+      "elapsedMs": 2029,
+      "receiptSha256": "72ac2a5e001311ad42d25364d8644f998611b5a68c2a76b70f438960294a35a7"
+    },
+    "strictIr": "unchanged generated compiler pipeline; original/transformed IR and complete candidate bytes equal qualified B2",
+    "profile": {
+      "profiler": "V8 --prof statistical tick logger",
+      "samplingIntervalUs": 5000,
+      "ticks": 243356,
+      "codeEntries": 45333,
+      "observedTickSpanMs": 1236190.649,
+      "unknownTopTicks": 1374,
+      "attribution": "tick counts and sampled shares; categories are name heuristics, not wall-clock phase timing; physical generator stacks are not logical ProofScript caller stacks",
+      "gc": {
+        "name": "GC",
+        "ticks": 47739,
+        "share": 0.19616939791909796
+      },
+      "vmStates": [
+        {
+          "name": "JS",
+          "ticks": 193994,
+          "share": 0.7971613603116422
+        },
+        {
+          "name": "GC",
+          "ticks": 47739,
+          "share": 0.19616939791909796
+        },
+        {
+          "name": "OTHER",
+          "ticks": 1398,
+          "share": 0.005744670359473364
+        },
+        {
+          "name": "COMPILER",
+          "ticks": 90,
+          "share": 0.00036982856391459427
+        },
+        {
+          "name": "BYTECODE_COMPILER",
+          "ticks": 79,
+          "share": 0.0003246272949916994
+        },
+        {
+          "name": "PARSER",
+          "ticks": 35,
+          "share": 0.00014382221930012
+        },
+        {
+          "name": "EXTERNAL",
+          "ticks": 18,
+          "share": 0.00007396571278291886
+        },
+        {
+          "name": "STATE_8",
+          "ticks": 3,
+          "share": 0.000012327618797153142
+        }
+      ],
+      "categories": [
+        {
+          "name": "other",
+          "ticks": 82141,
+          "share": 0.33753431187231875
+        },
+        {
+          "name": "shared-library attribution",
+          "ticks": 62020,
+          "share": 0.2548529725998126
+        },
+        {
+          "name": "sampled GC",
+          "ticks": 47739,
+          "share": 0.19616939791909796
+        },
+        {
+          "name": "foundation names",
+          "ticks": 26764,
+          "share": 0.1099787964956689
+        },
+        {
+          "name": "IR/erasure names",
+          "ticks": 12748,
+          "share": 0.052384161475369416
+        },
+        {
+          "name": "generator execution driver",
+          "ticks": 4162,
+          "share": 0.017102516477917124
+        },
+        {
+          "name": "UTF-8 runtime helpers",
+          "ticks": 3441,
+          "share": 0.014139778760334653
+        },
+        {
+          "name": "JSON codec names",
+          "ticks": 1904,
+          "share": 0.007823928729926528
+        },
+        {
+          "name": "elaboration/metaprogramming names",
+          "ticks": 690,
+          "share": 0.0028353523233452227
+        },
+        {
+          "name": "backend names",
+          "ticks": 672,
+          "share": 0.0027613866105623036
+        },
+        {
+          "name": "frontend names",
+          "ticks": 570,
+          "share": 0.002342247571459097
+        },
+        {
+          "name": "native symbols",
+          "ticks": 505,
+          "share": 0.0020751491641874454
+        }
+      ],
+      "topFrames": [
+        {
+          "name": "/home/runner/work/pskernel/pskernel/psc1/dist/next/qualified/toolchain/libexec/psc-runtime",
+          "functionName": "/home/runner/work/pskernel/pskernel/psc1/dist/next/qualified/toolchain/libexec/psc-runtime",
+          "type": "SHARED_LIB",
+          "kind": null,
+          "generatedCompiler": false,
+          "line": null,
+          "owner": "/home/runner/work/pskernel/pskernel/psc1/dist/next/qualified/toolchain/libexec/psc-runtime",
+          "ticks": 102026,
+          "share": 0.4192458784661155
+        },
+        {
+          "name": "WeakCollectionSet",
+          "functionName": "WeakCollectionSet",
+          "type": "CODE",
+          "kind": "Builtin",
+          "generatedCompiler": false,
+          "line": null,
+          "owner": "WeakCollectionSet",
+          "ticks": 30611,
+          "share": 0.12578691299988495
+        },
+        {
+          "name": "__ps$impl$psStringEq file:///home/runner/work/pskernel/pskernel/psc1/dist/next/baseline/baseline/B2/compiler.mjs:241:31",
+          "functionName": "__ps$impl$psStringEq",
+          "type": "JS",
+          "kind": "Opt",
+          "generatedCompiler": true,
+          "line": 241,
+          "owner": "psStringEq",
+          "ticks": 21228,
+          "share": 0.08723023060865563
+        },
+        {
+          "name": "StringFromCodePointAt",
+          "functionName": "StringFromCodePointAt",
+          "type": "CODE",
+          "kind": "Builtin",
+          "generatedCompiler": false,
+          "line": null,
+          "owner": "StringFromCodePointAt",
+          "ticks": 10988,
+          "share": 0.04515195844770624
+        },
+        {
+          "name": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+          "functionName": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+          "type": "SHARED_LIB",
+          "kind": null,
+          "generatedCompiler": false,
+          "line": null,
+          "owner": "/usr/lib/x86_64-linux-gnu/libc.so.6",
+          "ticks": 6121,
+          "share": 0.025152451552458127
+        },
+        {
+          "name": "__ps$impl$psIrCheckFindDeclaration file:///home/runner/work/pskernel/pskernel/psc1/dist/next/baseline/baseline/B2/compiler.mjs:4458:45",
+          "functionName": "__ps$impl$psIrCheckFindDeclaration",
+          "type": "JS",
+          "kind": "Opt",
+          "generatedCompiler": true,
+          "line": 4458,
+          "owner": "psIrCheckFindDeclaration",
+          "ticks": 4608,
+          "share": 0.018935222472427227
+        },
+        {
+          "name": "LoadIC_Megamorphic",
+          "functionName": "LoadIC_Megamorphic",
+          "type": "CODE",
+          "kind": "Builtin",
+          "generatedCompiler": false,
+          "line": null,
+          "owner": "LoadIC_Megamorphic",
+          "ticks": 4414,
+          "share": 0.01813803645687799
+        },
+        {
+          "name": "__ps$run file:///home/runner/work/pskernel/pskernel/psc1/dist/next/baseline/baseline/B2/compiler.mjs:81:18",
+          "functionName": "__ps$run",
+          "type": "JS",
+          "kind": "Opt",
+          "generatedCompiler": true,
+          "line": 81,
+          "owner": "__ps$run",
+          "ticks": 4156,
+          "share": 0.01707786124032282
+        },
+        {
+          "name": "psStringEqFromWithFuel$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/next/baseline/baseline/B2/compiler.mjs:10517:39",
+          "functionName": "psStringEqFromWithFuel$worker",
+          "type": "JS",
+          "kind": "Opt",
+          "generatedCompiler": true,
+          "line": 10517,
+          "owner": "psStringEqFromWithFuel$worker",
+          "ticks": 3715,
+          "share": 0.015265701277141308
+        },
+        {
+          "name": "LoadIC_NoFeedback",
+          "functionName": "LoadIC_NoFeedback",
+          "type": "CODE",
+          "kind": "Builtin",
+          "generatedCompiler": false,
+          "line": null,
+          "owner": "LoadIC_NoFeedback",
+          "ticks": 2496,
+          "share": 0.010256578839231414
+        },
+        {
+          "name": "RecordWriteSaveFP",
+          "functionName": "RecordWriteSaveFP",
+          "type": "CODE",
+          "kind": "Builtin",
+          "generatedCompiler": false,
+          "line": null,
+          "owner": "RecordWriteSaveFP",
+          "ticks": 2257,
+          "share": 0.009274478541724881
+        },
+        {
+          "name": "__ps$impl$psIrCheckHasName file:///home/runner/work/pskernel/pskernel/psc1/dist/next/baseline/baseline/B2/compiler.mjs:4452:37",
+          "functionName": "__ps$impl$psIrCheckHasName",
+          "type": "JS",
+          "kind": "Opt",
+          "generatedCompiler": true,
+          "line": 4452,
+          "owner": "psIrCheckHasName",
+          "ticks": 2031,
+          "share": 0.008345797925672678
+        },
+        {
+          "name": "GeneratorPrototypeNext",
+          "functionName": "GeneratorPrototypeNext",
+          "type": "CODE",
+          "kind": "Builtin",
+          "generatedCompiler": false,
+          "line": null,
+          "owner": "GeneratorPrototypeNext",
+          "ticks": 2026,
+          "share": 0.008325251894344089
+        },
+        {
+          "name": "ResumeGeneratorTrampoline",
+          "functionName": "ResumeGeneratorTrampoline",
+          "type": "CODE",
+          "kind": "Builtin",
+          "generatedCompiler": false,
+          "line": null,
+          "owner": "ResumeGeneratorTrampoline",
+          "ticks": 1662,
+          "share": 0.006829500813622841
+        },
+        {
+          "name": "InterpreterEntryTrampoline",
+          "functionName": "InterpreterEntryTrampoline",
+          "type": "CODE",
+          "kind": "Builtin",
+          "generatedCompiler": false,
+          "line": null,
+          "owner": "InterpreterEntryTrampoline",
+          "ticks": 1629,
+          "share": 0.006693897006854156
+        },
+        {
+          "name": "__ps$utf8 file:///home/runner/work/pskernel/pskernel/psc1/dist/next/baseline/baseline/B2/compiler.mjs:5:19",
+          "functionName": "__ps$utf8",
+          "type": "JS",
+          "kind": "Opt",
+          "generatedCompiler": true,
+          "line": 5,
+          "owner": "__ps$utf8",
+          "ticks": 1449,
+          "share": 0.0059542398790249675
+        },
+        {
+          "name": "__ps$impl$psJsonEscapeStringWithFuel$worker file:///home/runner/work/pskernel/pskernel/psc1/dist/next/baseline/baseline/B2/compiler.mjs:10698:54",
+          "functionName": "__ps$impl$psJsonEscapeStringWithFuel$worker",
+          "type": "JS",
+          "kind": "Opt",
+          "generatedCompiler": true,
+          "line": 10698,
+          "owner": "psJsonEscapeStringWithFuel$worker",
+          "ticks": 1415,
+          "share": 0.005814526865990565
+        },
+        {
+          "name": "(unaccounted)",
+          "owner": "(unaccounted)",
+          "type": "UNKNOWN",
+          "generatedCompiler": false,
+          "ticks": 1374,
+          "share": 0.005646049409096139
+        },
+        {
+          "name": "SuspendGenerator",
+          "functionName": "SuspendGenerator",
+          "type": "CODE",
+          "kind": "BytecodeHandler",
+          "generatedCompiler": false,
+          "line": null,
+          "owner": "SuspendGenerator",
+          "ticks": 1318,
+          "share": 0.005415933858215947
+        },
+        {
+          "name": "WeakMapLookupHashIndex",
+          "functionName": "WeakMapLookupHashIndex",
+          "type": "CODE",
+          "kind": "Builtin",
+          "generatedCompiler": false,
+          "line": null,
+          "owner": "WeakMapLookupHashIndex",
+          "ticks": 1275,
+          "share": 0.005239237988790085
+        },
+        {
+          "name": "CreateIterResultObject",
+          "functionName": "CreateIterResultObject",
+          "type": "CODE",
+          "kind": "Builtin",
+          "generatedCompiler": false,
+          "line": null,
+          "owner": "CreateIterResultObject",
+          "ticks": 1145,
+          "share": 0.004705041174246783
+        },
+        {
+          "name": "__ps$impl$psIrSpecializeFindDeclaration file:///home/runner/work/pskernel/pskernel/psc1/dist/next/baseline/baseline/B2/compiler.mjs:4646:50",
+          "functionName": "__ps$impl$psIrSpecializeFindDeclaration",
+          "type": "JS",
+          "kind": "Opt",
+          "generatedCompiler": true,
+          "line": 4646,
+          "owner": "psIrSpecializeFindDeclaration",
+          "ticks": 1028,
+          "share": 0.00422426404115781
+        },
+        {
+          "name": "GetProperty",
+          "functionName": "GetProperty",
+          "type": "CODE",
+          "kind": "Builtin",
+          "generatedCompiler": false,
+          "line": null,
+          "owner": "GetProperty",
+          "ticks": 986,
+          "share": 0.004051677377997666
+        },
+        {
+          "name": "CreateDataProperty",
+          "functionName": "CreateDataProperty",
+          "type": "CODE",
+          "kind": "Builtin",
+          "generatedCompiler": false,
+          "line": null,
+          "owner": "CreateDataProperty",
+          "ticks": 957,
+          "share": 0.003932510396291852
+        },
+        {
+          "name": "CallFunction_ReceiverIsAny",
+          "functionName": "CallFunction_ReceiverIsAny",
+          "type": "CODE",
+          "kind": "Builtin",
+          "generatedCompiler": false,
+          "line": null,
+          "owner": "CallFunction_ReceiverIsAny",
+          "ticks": 794,
+          "share": 0.003262709774979865
+        },
+        {
+          "name": "__ps$stringNextView file:///home/runner/work/pskernel/pskernel/psc1/dist/next/baseline/baseline/B2/compiler.mjs:45:29",
+          "functionName": "__ps$stringNextView",
+          "type": "JS",
+          "kind": "Opt",
+          "generatedCompiler": true,
+          "line": 45,
+          "owner": "__ps$stringNextView",
+          "ticks": 779,
+          "share": 0.003201071680994099
+        },
+        {
+          "name": "CEntry_Return1_ArgvOnStack_NoBuiltinExit",
+          "functionName": "CEntry_Return1_ArgvOnStack_NoBuiltinExit",
+          "type": "CODE",
+          "kind": "Builtin",
+          "generatedCompiler": false,
+          "line": null,
+          "owner": "CEntry_Return1_ArgvOnStack_NoBuiltinExit",
+          "ticks": 722,
+          "share": 0.0029668469238481893
+        },
+        {
+          "name": "pthread_cond_signal@@GLIBC_2.3.2",
+          "functionName": "pthread_cond_signal@@GLIBC_2.3.2",
+          "type": "CPP",
+          "kind": null,
+          "generatedCompiler": false,
+          "line": null,
+          "owner": "pthread_cond_signal@@GLIBC_2.3.2",
+          "ticks": 719,
+          "share": 0.002954519305051036
+        },
+        {
+          "name": "StaInArrayLiteral",
+          "functionName": "StaInArrayLiteral",
+          "type": "CODE",
+          "kind": "BytecodeHandler",
+          "generatedCompiler": false,
+          "line": null,
+          "owner": "StaInArrayLiteral",
+          "ticks": 686,
+          "share": 0.002818915498282352
+        },
+        {
+          "name": "WeakMapGet",
+          "functionName": "WeakMapGet",
+          "type": "CODE",
+          "kind": "Builtin",
+          "generatedCompiler": false,
+          "line": null,
+          "owner": "WeakMapGet",
+          "ticks": 683,
+          "share": 0.002806587879485199
+        }
+      ],
+      "topGeneratedOwners": [
+        {
+          "name": "psStringEq",
+          "ticks": 21228,
+          "share": 0.08723023060865563
+        },
+        {
+          "name": "psIrCheckFindDeclaration",
+          "ticks": 4608,
+          "share": 0.018935222472427227
+        },
+        {
+          "name": "__ps$run",
+          "ticks": 4156,
+          "share": 0.01707786124032282
+        },
+        {
+          "name": "psStringEqFromWithFuel$worker",
+          "ticks": 3736,
+          "share": 0.01535199460872138
+        },
+        {
+          "name": "psIrCheckHasName",
+          "ticks": 2031,
+          "share": 0.008345797925672678
+        },
+        {
+          "name": "__ps$utf8",
+          "ticks": 1449,
+          "share": 0.0059542398790249675
+        },
+        {
+          "name": "psJsonEscapeStringWithFuel$worker",
+          "ticks": 1415,
+          "share": 0.005814526865990565
+        },
+        {
+          "name": "psIrSpecializeFindDeclaration",
+          "ticks": 1028,
+          "share": 0.00422426404115781
+        },
+        {
+          "name": "__ps$stringNextView",
+          "ticks": 779,
+          "share": 0.003201071680994099
+        },
+        {
+          "name": "psIrCheckFindStructure",
+          "ticks": 651,
+          "share": 0.0026750932789822318
+        },
+        {
+          "name": "psExprInstantiateAtWorker$worker",
+          "ticks": 549,
+          "share": 0.002255954239879025
+        },
+        {
+          "name": "__ps$stringUtf8Size",
+          "ticks": 508,
+          "share": 0.0020874767829845986
+        },
+        {
+          "name": "psEnvironmentHashStringWorker$worker",
+          "ticks": 494,
+          "share": 0.0020299478952645507
+        },
+        {
+          "name": "psIrCheckFindInductive",
+          "ticks": 467,
+          "share": 0.0019189993260901725
+        },
+        {
+          "name": "psNameEq$worker",
+          "ticks": 429,
+          "share": 0.0017628494879928993
+        },
+        {
+          "name": "psTextInsertApplied_$psc0SH_0$worker",
+          "ticks": 404,
+          "share": 0.0016601193313499564
+        },
+        {
+          "name": "psErasureExprReferences",
+          "ticks": 391,
+          "share": 0.001606699649895626
+        },
+        {
+          "name": "psStringSetHashWithFuel$worker",
+          "ticks": 369,
+          "share": 0.0015162971120498364
+        },
+        {
+          "name": "__ps$utf8Known",
+          "ticks": 280,
+          "share": 0.00115057775440096
+        },
+        {
+          "name": "psEnvironmentIndexFindWorker$worker",
+          "ticks": 270,
+          "share": 0.0011094856917437828
+        },
+        {
+          "name": "psIrCheckStep",
+          "ticks": 255,
+          "share": 0.001047847597758017
+        },
+        {
+          "name": "psIrCheckModuleSizeWorker_$psc0SH_0$worker",
+          "ticks": 249,
+          "share": 0.0010231923601637107
+        },
+        {
+          "name": "psMetaExprHasAssignedVarScan",
+          "ticks": 236,
+          "share": 0.0009697726787093805
+        },
+        {
+          "name": "psJsonStringGet",
+          "ticks": 212,
+          "share": 0.0008711517283321554
+        },
+        {
+          "name": "psJsValidationContains",
+          "ticks": 204,
+          "share": 0.0008382780782064137
+        },
+        {
+          "name": "psLexListLengthAcc_$psc0SH_0$spec$Char$worker",
+          "ticks": 180,
+          "share": 0.0007396571278291885
+        },
+        {
+          "name": "psJsonStringNext",
+          "ticks": 174,
+          "share": 0.0007150018902348823
+        },
+        {
+          "name": "psJsonStringAtEnd",
+          "ticks": 171,
+          "share": 0.0007026742714377291
+        },
+        {
+          "name": "psEnvironmentNameHash",
+          "ticks": 170,
+          "share": 0.0006985650651720114
+        },
+        {
+          "name": "psIrSpecializeFindStructure",
+          "ticks": 166,
+          "share": 0.0006821282401091405
+        }
+      ],
+      "nearestGeneratedFrameAttribution": [
+        {
+          "name": "psIrSpecializeTypeKeyWithFuel",
+          "ticks": 45559,
+          "share": 0.18721132825983333
+        },
+        {
+          "name": "__ps$run",
+          "ticks": 27210,
+          "share": 0.111811502490179
+        },
+        {
+          "name": "psStringEq",
+          "ticks": 24566,
+          "share": 0.10094676112362136
+        },
+        {
+          "name": "psStringEqFrom",
+          "ticks": 7302,
+          "share": 0.030005424152270747
+        },
+        {
+          "name": "psCompilerServiceCandidate",
+          "ticks": 5357,
+          "share": 0.022013017965449792
+        },
+        {
+          "name": "psStringEqFromWithFuel$worker",
+          "ticks": 5075,
+          "share": 0.020854221798517397
+        },
+        {
+          "name": "psIrCheckFindDeclaration",
+          "ticks": 4610,
+          "share": 0.01894344088495866
+        },
+        {
+          "name": "psTextInsert",
+          "ticks": 4170,
+          "share": 0.01713539012804287
+        },
+        {
+          "name": "__ps$utf8",
+          "ticks": 4100,
+          "share": 0.01684774568944263
+        },
+        {
+          "name": "psTextInsertApplied",
+          "ticks": 3831,
+          "share": 0.015742369203964563
+        },
+        {
+          "name": "psJsonEscapeStringWithFuel$worker",
+          "ticks": 2326,
+          "share": 0.009558013774059402
+        },
+        {
+          "name": "__ps$wrap",
+          "ticks": 2276,
+          "share": 0.009352553460773516
+        },
+        {
+          "name": "psIrCheckHasName",
+          "ticks": 2032,
+          "share": 0.008349907131938394
+        },
+        {
+          "name": "psJsonConcat3",
+          "ticks": 2018,
+          "share": 0.008292378244218346
+        },
+        {
+          "name": "psIrCheckExpression",
+          "ticks": 1536,
+          "share": 0.0063117408241424085
+        },
+        {
+          "name": "__ps$stringNextView",
+          "ticks": 1322,
+          "share": 0.005432370683278818
+        },
+        {
+          "name": "psJsIdentifierKeyword",
+          "ticks": 1225,
+          "share": 0.0050337776755042
+        },
+        {
+          "name": "Ps_Internal_WorkerFusion_names_$psc0SH_0$worker",
+          "ticks": 1194,
+          "share": 0.004906392281266951
+        },
+        {
+          "name": "psListReverseAcc$spec$N$PsIrCheckTask",
+          "ticks": 1072,
+          "share": 0.00440506911684939
+        },
+        {
+          "name": "psIrSpecializeFindDeclaration",
+          "ticks": 1031,
+          "share": 0.004236591659954963
+        },
+        {
+          "name": "psIrSpecializeRewriteExprWithFuel",
+          "ticks": 1026,
+          "share": 0.004216045628626375
+        },
+        {
+          "name": "psIrCheckSchedule",
+          "ticks": 1020,
+          "share": 0.004191390391032068
+        },
+        {
+          "name": "psJsonQuote",
+          "ticks": 1014,
+          "share": 0.004166735153437762
+        },
+        {
+          "name": "psListAppend$spec$N$PsIrCheckTask",
+          "ticks": 906,
+          "share": 0.0037229408767402486
+        },
+        {
+          "name": "psJsPrintExprWithPositionAndFuel_$psc0SH_0",
+          "ticks": 903,
+          "share": 0.003710613257943096
+        },
+        {
+          "name": "psMetaInstantiate",
+          "ticks": 900,
+          "share": 0.0036982856391459427
+        },
+        {
+          "name": "psIrCheckAnnotation",
+          "ticks": 828,
+          "share": 0.003402422788014267
+        },
+        {
+          "name": "psEnvironmentFind",
+          "ticks": 816,
+          "share": 0.003353112312825655
+        },
+        {
+          "name": "psJsExprUsesNameWithFuelWorker_$psc0SH_0$worker",
+          "ticks": 751,
+          "share": 0.003086013905554003
+        },
+        {
+          "name": "__ps$stringUtf8Size",
+          "ticks": 724,
+          "share": 0.002975065336379625
+        }
+      ]
+    }
+  },
+  "selectedHypothesis": {
+    "module": "Ps.CompilerIr.Specialize",
+    "declaration": "psIrSpecializeTypeKeyWithFuel",
+    "problem": "Successor-fuel construction eagerly creates the remaining closure chain before receiving a type.",
+    "proposedChange": "Move the type lambda before construction of the remaining-fuel function.",
+    "changesFuel": false,
+    "changesCachePolicy": false,
+    "changesSerialization": false,
+    "changesAdmission": false,
+    "changesStrictIr": false,
+    "performanceImprovementQualified": false
+  },
+  "firstAttempt": {
+    "run": 40630905618,
+    "job": 122626783222,
+    "commit": "bce64f121625f4387e5f0b09613b92961dd0ef42",
+    "conclusion": "failed observation preflight: unchanged worker exited successfully, but Inspector produced no .cpuprofile under the retained permission mode",
+    "artifact": 12791527226,
+    "zipSha256": "47eb8e488d78a8f56a28556714f65d52876e1265103a0cc2263483030071c21e"
+  },
+  "limitations": [
+    "V8 tick shares are sampled observations, not exact phase wall-time percentages.",
+    "Physical generator stacks are not logical ProofScript caller stacks.",
+    "This receipt qualifies the baseline observation only; an optimized compiler must still pass a controlled comparison and fresh self-rebuild."
+  ]
+}

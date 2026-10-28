@@ -45,7 +45,7 @@ jobs:
           fi
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: Build portable planner, immutable reference and source census
-        run: lake build psc1_portable_plan_tests psc1_executable_plan_tests psc1_source_census_probe
+        run: lake build psc1_portable_plan_tests psc1_executable_plan_tests psc1_source_census_probe psc1_portable_module_seed psc1_portable_module_tests
       - uses: actions/cache/save@v4
         if: steps.native.outputs.cache-hit != 'true'
         with:
@@ -55,6 +55,7 @@ jobs:
         run: |
           .lake/build/bin/psc1_executable_plan_tests
           .lake/build/bin/psc1_portable_plan_tests
+          .lake/build/bin/psc1_portable_module_tests
       - name: Census actual enlarged compiler source in both grammars
         run: node scripts/generated-target-source-audit.mjs js unified
       - uses: actions/upload-artifact@v4

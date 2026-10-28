@@ -190,7 +190,7 @@ lean_lib PsBackendWasm where
 
 lean_lib PsCompilerUnified where
   srcDir := "packages/compiler-unified/src"
-  roots := #[`Ps.CompilerUnified.Service]
+  roots := #[`Ps.CompilerUnified.Service, `Ps.CompilerUnified.Modular]
 
 lean_lib PsBackendPython where
   srcDir := "packages/backend-python/src"
@@ -703,3 +703,11 @@ lean_exe psc1_executable_packages where
 lean_exe psc1_portable_plan_tests where
   srcDir := "test"
   root := `PortablePlanTests
+
+lean_exe psc1_portable_module_seed where
+  srcDir := "scripts"
+  root := `PortableModuleSeed
+
+lean_exe psc1_portable_module_tests where
+  srcDir := "test"
+  root := `PortableModuleTests

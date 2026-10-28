@@ -1,3 +1,4 @@
+import Lean.Data.Json
 import Ps.Host.ExecutablePlan
 import Ps.BackendCommon.ExecutablePlan
 
@@ -64,8 +65,10 @@ def main : IO Unit := do
   let illTyped := {original with declarations := [value "wrong" (.literal (.bool true))]}
   compare illTyped (own illTyped) sources
   let cyclic := {original with declarations := [
-    value "alias" (.var "computed"), original.declarations[0]!,
-    original.declarations[1]!, original.declarations[3]!] }
+    value "alias" (.var "computed"),
+    value "computed" (.call (.var "reader") [] [.literal (.natural 0)]),
+    { value "reader" (.var "alias") with parameters := [{name := "x", type := nat}] },
+    value "answer" (.literal (.natural 42))] }
   compare cyclic (own cyclic) sources
   compare original [{name := "computed", unit := 1}, {name := "reader", unit := 2},
     {name := "alias", unit := 1}, {name := "answer", unit := 1}] sources

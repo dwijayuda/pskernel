@@ -1,5 +1,5 @@
 import Ps.Compiler.Service
-import Ps.BackendCommon.ExecutablePlan
+import Ps.CompilerUnified.Modular
 import Ps.BackendJs.Emit
 import Ps.BackendTs.Emit
 import Ps.BackendRust.Emit
@@ -66,7 +66,13 @@ def candidate (input : String) : String :=
   | Except.error _ => refused "" "invalid-json"
   | Except.ok value =>
       match value with
-      | PsJsonValue.array values => fields values
+      | PsJsonValue.array values =>
+          match values with
+          | PsJsonValue.string "psc1-modular-build/1" :: _ =>
+              match Ps.Internal.ModularCompiler.decodeBuild values with
+              | Except.ok output => output
+              | Except.error reason => Ps.Internal.ModularCompiler.refused reason
+          | _ => fields values
       | _ => refused "" "expected-array"
 
 end Ps.Internal.UnifiedCompilerService

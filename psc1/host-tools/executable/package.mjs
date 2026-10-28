@@ -73,11 +73,24 @@ export function packageGraph(emission,sourceRows,receipt,captured,options={}){
   const pkg=path.join(root,'node_modules',name);
   compile('typescript-'+name.split('/')[1],{compilerOptions:{strict:true,verbatimModuleSyntax:true,noEmitOnError:true,
    target:'ES2022',module:'NodeNext',moduleResolution:'NodeNext',declaration:true,declarationMap:true,
-   sourceMap:true,inlineSources:true,types:[],lib:['ES2022','DOM'],rootDir:path.join(pkg,'src/ts'),
+   sourceMap:true,inlineSources:false,types:[],lib:['ES2022','DOM'],rootDir:path.join(pkg,'src/ts'),
    outDir:path.join(pkg,'dist/ts'),paths},files:sources.get(name)});
   for(const unit of packageRows.get(name).units){
    const specifier=emission.packages[unit],module=specifier.split('/')[3];
    paths[specifier+'/ts']=[path.join(pkg,'dist/ts/generated',module+'.d.mts')];
+  }
+  // Readable TS is already shipped. Keep accurate maps without embedding a
+  // second full copy of every source into sourcesContent.
+  for(const row of files(path.join(pkg,'dist/ts')).filter(row=>row.path.endsWith('.map'))){
+   const file=path.join(pkg,'dist/ts',row.path),map=JSON.parse(fs.readFileSync(file,'utf8'));
+   assert.equal(map.version,3);assert.equal(map.sourcesContent,undefined);
+   for(const source of map.sources){
+    assert.equal(path.isAbsolute(source),false);
+    const target=path.resolve(path.dirname(file),map.sourceRoot||'',source);
+    const relative=path.relative(pkg,target);
+    assert.ok(relative!==''&&!relative.startsWith('..'+path.sep)&&!path.isAbsolute(relative));
+    assert.equal(fs.realpathSync(target),target);assert.ok(fs.lstatSync(target).isFile());
+   }
   }
   const dependencies=Object.fromEntries(Object.entries(packageRows.get(name).dependencies).sort());
   packageRows.get(name).dependencies=dependencies;

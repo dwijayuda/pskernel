@@ -31,8 +31,8 @@ def seen (name : String) (names : List String) : Bool :=
 
 def safeName (name : String) : Except String Unit :=
   let reserved := seen name ["eval", "Function", "require", "process", "globalThis", "then"];
-  let prefix := String.Internal.extract name (String.Pos.Raw.mk 0) (String.Pos.Raw.mk 5);
-  if psStringEq prefix "__ps$" || reserved then Except.error "PSC1_MODULE_RESERVED_NAME"
+  let leading := String.Internal.extract name (String.Pos.Raw.mk 0) (String.Pos.Raw.mk 5);
+  if psStringEq leading "__ps$" || reserved then Except.error "PSC1_MODULE_RESERVED_NAME"
   else Except.ok ()
 
 def owner (owners : List PsModuleOwner) (name : String) : Except String PsModuleOwner :=

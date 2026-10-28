@@ -36,16 +36,21 @@ modules where appropriate. Move misplaced shared contracts down to avoid cycles;
 do not hide them in undeclared runtime loads. Preserve qualified .13 until the
 production graph passes its own finite gates.
 
-Implementation has resumed in PR #205. The pure backend/source ownership boundary
-passed focused Linux runs 40658954932 and 40659282400; this does not qualify a
-complete modular compiler. The production builder now implements complete capture,
-strict transforms, external Lean admission, transitive initializer planning,
-source-owned JS/TS package files and finite artifact contracts. Complete graph,
-compiler execution and npm consumer qualification are in progress.
-The dependency-ordered remaining queue is: finish M2 graph/type/integrity gates;
-finish M3 application/backend parity; implement M4 root-only checked umbrella,
-thin CLI/watch and coherent publication; then M5 portable graph reproduction and
-new modular G1/G2/G3/fixed points. The .13 public API remains the default meanwhile. Existing pilot tests/evidence remain; expanding experimental pilot
+PR #205 reaches a verified candidate M1/M2 milestone. Linux run40664681150 at
+60a0d5cb passes complete126-source capture,4781 logical declarations independently
+admitted,4516 uniquely owned transformed values in127 units/15 existing packages,
+all strict TS checks,26 exact modular-compiler response observations, emitted
+JS/TS/Rust execution, Wasm validation, graph/cohort negatives and offline npm
+package byte/consumer checks. [Exact receipt](PSC1_EXECUTABLE_PACKAGES_QUALIFICATION_2026-10-28.json)
+and [build walkthrough](architecture/executable-package-build.md) state the scope.
+
+The dependency-ordered queue is: finish M3's retained real application/backend
+corpus through the modular engines (including Bun and Wasm execution); M4 checked
+root-only umbrella/thin CLI/watch and coherent graph publication; portable module
+generation within the same compiler; then M5 new modular G1/G2/G3/fixed points and
+applicable platform/publication gates. M3 has finite partial qualification;
+M4/M5 remain incomplete. The .13 API/distribution stays the default reference.
+Existing pilot tests/evidence remain; expanding experimental pilot
 profiles is not a prerequisite. The stopped PR #203/prototype branches are
 preserved, not promoted.
 

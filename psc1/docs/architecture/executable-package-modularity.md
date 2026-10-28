@@ -1,7 +1,9 @@
 # Fully modular executable compiler plan
 
 Decision date: 2026-10-28 (Asia/Jakarta).
-Status: **implementation in progress in PR #205; production promotion remains unqualified**.
+Status: **M1/M2 candidate milestone qualified in PR #205; M3 partial, M4/M5 incomplete**.
+See the [dated qualification receipt](../PSC1_EXECUTABLE_PACKAGES_QUALIFICATION_2026-10-28.json)
+and [production build walkthrough](executable-package-build.md). Production promotion remains unqualified.
 The [machine-readable contract](../../EXECUTABLE_PACKAGE_CONTRACT.json) and
 [work state](../../AI_WORK_STATE.md) record exact implemented/tested/pending scope.
 

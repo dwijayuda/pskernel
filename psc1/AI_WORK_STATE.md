@@ -1,92 +1,118 @@
 # PSC1 AI work state
 
-Updated 2026-10-28 Asia/Jakarta. Branch `feat/psc1-executable-packages-20261028`, based on
-PR #204 HEAD `b400552324956d9c3a684c9231f60f70066e1629`. GitHub/Linux CI only; expected-HEAD/non-force
-updates. No merge or npm publication.
+Updated 2026-10-28 Asia/Jakarta. Production modularity implementation PR #205,
+stacked on plan PR #204 / b400552324956d9c3a684c9231f60f70066e1629.
+GitHub/Linux CI only; expected-HEAD, single-parent/non-force history.
+No merge or registry publication.
 
-## Active: execute the production modularity plan
+## Verified milestone: complete source-owned JS/TS compiler candidates
 
-The user has resumed implementation of
-[the production plan](docs/architecture/executable-package-modularity.md).
-proofscript remains the installation umbrella and psc its thin CLI.
-The experimental pilot/prototype remains deferred; no pilot expansion was resumed.
+Production run [40664681150](https://github.com/dwijayuda/pskernel/actions/runs/40664681150)
+passes at60a0d5cbaa0644215ee21d508d25730b61f2a32c. Exact evidence and tarball hashes:
+[qualification receipt](docs/PSC1_EXECUTABLE_PACKAGES_QUALIFICATION_2026-10-28.json).
+[Build walkthrough](docs/architecture/executable-package-build.md),
+[production plan](docs/architecture/executable-package-modularity.md) and
+[machine-readable contract](EXECUTABLE_PACKAGE_CONTRACT.json) describe the boundary.
 
-Current M0/M1 slice removes the real source-level driver return edges:
-- Shared Error/failure data move unchanged to BackendCommon.ServiceError.
-- Each core backend gets a pure Emit module containing its exact existing emitter body.
-- Legacy CompilerService entry points remain compatibility wrappers.
-- Unified orchestration imports the pure emitters and the compiler driver explicitly.
-- Logical names/bodies are preserved, registered Lake roots updated, source IDs measured anew.
+Implemented and tested:
+- Move unchanged Error/failure below orchestration; keep logical names and legacy
+  single-backend entry points. Four pure Emit modules contain exact original bodies.
+- Extract existing structured module model/printers and actual source-owner
+  collection. Ten body/source/profile cases pass; the deferred pilot's policies
+  and tests are unchanged, not expanded.
+- Capture the complete126-module compiler through the existing elaborator once.
+  Reuse established ordinary-checked preparation with exact logical/runtime body
+  binding; explicitly record five partial declarations. This is not a totality claim.
+- Independently admit4781 logical declarations with official Lean4.35.0
+  eb6cafb7290e8bd5f2937522d8d804f58f02bafc. Strict original/specialized/fused IR remains.
+- Emit127 real source-owned units across15 existing package names:3150 original,
+  3946 specialized and4516 fused values. Every surviving value is owned once.
+  One foundation runtime/nominal registry per JS/TS variant; actual import-derived
+  dependencies are acyclic. No hidden whole-compiler bundle in candidate packages.
+- Order356 computed initializers conservatively through actual function/closure
+  references. Eight planner/negative cases pass, including transitive cycles.
+- All15 strict TS7.0.2 package checks pass. Nine graph-integrity negatives and
+  direct wrong-cohort refusals for both variants pass.
+- Both complete modular engines produce26 byte-identical reference responses:
+  16 independently admitted positives and10 typing/optional/unknown refusals.
+  Both .lean/.ps two-module applications emit JS/TS/Rust that execute42n.
+  Wasm bytes validate; this fixture does not claim Wasm runtime execution.
+- Fifteen tarballs install offline, preserve exact1075 candidate file bytes and
+  execute both compiler variants through ordinary declared npm subpaths.
+  This is multi-package installation, not root-only proofscript/psc promotion.
 
-[Production contract](EXECUTABLE_PACKAGE_CONTRACT.json) defines finite ownership
-cases and remaining M0-M5 acceptance. The source audit verifies exact baseline
-bodies and an acyclic package source graph; it does not claim transformed runtime
-ownership. Native tests build pure emitters without importing the frontend driver,
-emit a strict-IR fixture, exercise actual JS/TS outputs and validate Wasm bytes.
-Existing unified/compiler/kernel/backend gates remain.
-
-The source/emitter boundary passed focused Linux runs 40658954932 (ec4218b5) and
-40659282400 (a8e22de3). This is source-layer/emitter evidence only. Linux focused workflow
-psc1-executable-packages.yml will record actual results. This is real source-layer
-work, not completion of the complete executable graph, npm integration or new
-G1/G2/G3/fixed points. Production M2 implementation is now in progress: shared structured model/renderers
-are extracted with pilot profiles unchanged; a host-only production builder captures
-all 126 current compiler source modules, carries owners through the existing checked
-transforms, orders computed initializers by transitive dependencies, and emits real
-JS/TS files under existing package names. It requires exact external Lean admission
-before emission, strict TypeScript, printed-graph audits and tamper negatives.
-This candidate pipeline is awaiting Linux CI and is not a promoted npm release.
-The planner now passes all eight ordering/negative tests on Linux. Run 40661038464
-(5fa6c4fb) builds all new native tools, executes the retained pilot build and unified
-entry, and passes all ten ownership/body/profile checks and strict emitter consumers.
-Whole-graph Node orchestration then fails before capture: the workflow installed the
-root SDK but omitted the existing locked host-tools @babel/parser dependency. Install
-that existing lockfile too; no new parser or dependency version is introduced.
-
-Iterate on build/psc1-executable-packages-20261028 to avoid restarting the PR's full
-source/package gates for each build fix. PR #205 remains at 5fa6c4fb until a focused
-production graph run passes, then fast-forward its branch non-force after a live
-expected-HEAD check. Current M2 graph/type/consumer gates remain unqualified.
-
-## Preserved reference and policies
-
-Qualified .13/PR #198 is unchanged as a reference artifact:53 package cases/125
-exports,16 source jobs/37 Core criteria, default genuine Lean linear-memory Wasm,
-optional Python/PHP/native/engines/SDKs. Exact prior receipt:
-docs/PSC1_NPM_UMBRELLA_QUALIFICATION_2026-10-27.json.
-Frozen source122 modules/closure073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9
-retains only its original qualifications. New source moves require new identities.
-
-Official Lean4.35.0, strict original/transformed IR, source/body pairing, negative
-tests, semantic fuels, memory/stack policies and 240s compiler/120s checker limits
-remain. No kernel, runtime representation or language semantic rewrite. Apache-2.0
-owned code and upstream notices retained. Prototype branches/PR #203 remain
-preserved and deferred; no source/history reset.
-
-## Production capture profile correction
-
-Run40661568068 at7616e75d passes all ten ownership checks and eight planner tests,
-then refuses checked-preparation. Inspection of the existing source-ownership
-qualification confirms that the full compiler is captured with ordinary-checked,
-not the total-only checked profile: its existing partial declarations require the
-retained logical/runtime pairing. The production builder now requests exactly
-that existing profile and records assurance/partial names explicitly. It still uses
-psCompilerPrepareOrdinary and psCompilerOrdinaryIr, including canonical logical
-admission and exact runtime-body binding; there is no fallback, erased guard or
-weakened checker. Application fixtures continue to require checked preparation.
-
-## First complete production graph evidence
-
-Run40662258347 / bf1a0940 produces the full graph:126 source modules,127 generated
-units,15 existing package owners,4516 transformed values (3150 original/3946
-specialized),356 computed initializers,1075 candidate files/119711529 bytes.
 Source closure41eb40437e0df1722128c09c9b9da7cad0ccb1ad61371f23eb6bc2db4e9a1106.
-Independent canonical admission97041042ece09003a253c1f4a038921ff89517a702a96da48bb631de930d1107
-passes official Lean4.35.0. All15 strict TypeScript package checks and8 pre-import
-integrity negatives pass. Capture39390ms/428104KiB maxRSS; emission7078ms/373948KiB.
-Both modular engines match the reference exactly for Lean→JS/TS and execute42n.
-The next Rust fixture consumer fails at unresolved num_bigint because plainrustc
-was used. Reuse the existing pinned1.90.0 locked target-consumer SDK/rlibs, verify
-its resource bytes, and execute the emitted Rust fixture. Do not change the backend.
-New runtime-cohort and symlink negatives are also added before qualification retry.
-This is intermediate M2 evidence, not final workflow success or M4/M5 promotion.
+Canonical admission97041042ece09003a253c1f4a038921ff89517a702a96da48bb631de930d1107.
+Original IR95dcabab3915a70ce1d1755befecbe3fb448629dcf7203ad3a4a6e63f67861a6.
+Fused IR4e973b29d13220693174b7761a6df8bb848c5a2b5414c5d658d492ceba31ba82.
+Tested manifestff22aec6d4bcd859704e43081311111f9845f5b7d9d232f977736d71d5e29455.
+Candidate1075files/119711529bytes. Capture61474ms/414856KiB child maxRSS;
+emission11203ms/364600KiB. Earlier same-source run measured39390ms and7078ms.
+Record actual workload measurements, not a claimed universal speedup.
+
+Artifact12805277518 is46722396bytes, SHA256
+5323f126410a125d46c32191263cfd65752ebbd2481fbf2f245f18c96e947e27.
+It includes candidate tarballs and evidence, not a newly promoted end-user toolchain.
+
+## Preserved regression/reference evidence
+
+At PR head5fa6c4fba129a3b5784ee4aa03a24a8d2f88fddd, source run40661106294
+passes16 jobs (benchmark intentionally skipped),37/37 Practical Core criteria,
+zero blocked, scoped seven-backend execution/14 target bundles, retained pilot,
+source tracing, selected compiler closures and generated-JS G1 cases.
+Its tested synthetic merge is a56ed6c37bbba77113c2664551c1150bad212302.
+Existing npm run40661106285 passes53 cases for .13 at that same tested merge.
+These retained native/bundled checks are distinct from the new modular-engine corpus.
+
+The qualified .13 distribution, proofscript umbrella, psc launcher, independent
+default linear-memory official C++/Emscripten Wasm kernel, optional Python/PHP and
+qualified Rust/Wasm execution bundles remain reference implementations.
+Frozen G3 closure073e5156a3fb521119bcfb4b06ad18ff136e734a0b2e10a676b1e16225835ef9
+retains only its original122-module/4742-member evidence. Do not inherit it here.
+Apache-2.0 and upstream notices, semantic fuel,240s ordinary compiler/tool requests,
+120s checking, memory/stack policies, strict IR and negative tests remain.
+
+## Dependency-ordered continuation
+
+1. Finish M3: run the retained CLI/JSON/library/compiler-like and seven-backend
+   corpora through these modular JS/TS engines; add supported Bun and genuine Wasm
+   execution/adapters. Current finite examples do not replace that corpus.
+2. M4: version the direct low-level API transition and integrate verified graph
+   loading/coherent transactional publication with checked @proofscript/compiler,
+   thin @proofscript/cli, root-only local/global proofscript install and watch.
+   Python/PHP remain optional. Do not silently turn checked APIs into emitters.
+3. M5 prerequisite: make module planning/emission a portable operation in the same
+   canonical compiler source. Current native build adapter cannot by itself supply
+   genuine generated-compiler module reproduction.
+4. Reproduce and qualify complete modular G1/G2/G3/fixed points with new identities;
+   then applicable platform/publication gates. Do not promote .13 replacement,
+   merge, publish npm packages or claim modular self-hosting before those gates.
+
+Experimental pilot expansion and stopped prototype PR #203 remain deferred.
+This candidate milestone implements M1/M2 and part of M3, not completion of M4/M5.
+
+## Diagnosed attempts preserved
+
+- f54e051c /40657227476: extracted emitter headers omitted import keywords.
+- 7886848d /40657626081: Wasm relied on transitive Foundation.Text; explicit import.
+- 5609c2c7 /40658044896: regression test needed explicit legacy service imports.
+- ec4218b5 /40658954932 and a8e22de3 /40659282400: boundary passes.
+- df3ef061 /40659592035 and b3f7af9c /40660373734: new host-tool Lean reserved
+  identifiers/record layout corrected; planner then passes.
+- 5fa6c4fb /40661038464: missing existing locked host-tools dependency; provision it.
+- 7616e75d /40661568068: total-only checked profile refused compiler partials;
+  restore existing ordinary-checked source profile and retain exact body pairing.
+- bf1a0940 /40662258347: complete graph/type/integrity checks pass; Rust consumer
+  lacked num_bigint. Reuse pinned1.90.0 locked target SDK/rlibs and execute output.
+- cafe8c7a /40663294930: cancelled during stalled Elan installer download, before
+  compiler checks. Separate bounded setup steps/npm caching; no correctness waiver.
+- 60a0d5cb /40664681150: complete focused workflow succeeds.
+
+## Branch/checkpoint procedure
+
+Implementation was staged on build/psc1-executable-packages-20261028 to avoid
+restarting the PR's complete matrix on every build fix. Bring qualified changes
+to feat/psc1-executable-packages-20261028 with a live expected-HEAD non-force
+fast-forward; preserve any concurrent changes rather than overwrite them.
+This receipt/work-state commit follows the tested implementation and changes
+documentation/status only. Query the exact PR HEAD's CI before any later promotion.

@@ -51,22 +51,22 @@
     {
       "id": "M0",
       "work": "ownership/API/production artifact contract",
-      "status": "implemented-awaiting-CI"
+      "status": "candidate-contract-and-ownership-implemented"
     },
     {
       "id": "M1",
       "work": "production lower-level executable ownership",
-      "status": "source-boundary-tested-runtime-qualification-pending"
+      "status": "qualified-candidate-scope"
     },
     {
       "id": "M2",
       "work": "complete genuine compiler module graph",
-      "status": "candidate-implemented-awaiting-CI"
+      "status": "qualified-candidate-scope"
     },
     {
       "id": "M3",
       "work": "checked execution through complete JS/TS graphs",
-      "status": "not-qualified"
+      "status": "partially-qualified"
     },
     {
       "id": "M4",
@@ -111,7 +111,7 @@
   "artifact": {
     "schema": "psc1-executable-npm-graph/1",
     "protocol": "psc1-executable-compiler/1",
-    "status": "candidate-implementation-awaiting-CI",
+    "status": "qualified-candidate-scope",
     "fields": [
       "exact source closure",
       "official admission digest",
@@ -141,5 +141,6 @@
     "compilerSourceAssurance": "ordinary-checked",
     "applicationFixtureAssurance": "checked",
     "partialPolicy": "Reuse the existing compiler logical/runtime body-pairing and strict IR path; record exact partial names. No totality or admitted-partial-body claim."
-  }
+  },
+  "qualificationReceipt": "docs/PSC1_EXECUTABLE_PACKAGES_QUALIFICATION_2026-10-28.json"
 }

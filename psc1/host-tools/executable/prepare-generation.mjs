@@ -20,8 +20,14 @@ const specifiers=JSON.parse(fs.readFileSync(path.join(output,'specifiers.json'))
 const request=JSON.stringify(['psc1-modular-build/1',original,specifiers]);
 assert.ok(Buffer.byteLength(request)<=33554432);
 const requestFile=path.join(base,'compiler.request.json');put(requestFile,request);
-const nativeFiles=files(output).filter(row=>/^((js|ts)\/unit-\d+\.(mjs|d\.mts|mts)|js-runtime\.mjs|reference\.(mjs|mts))$/.test(row.path));
+const nativeFiles=files(output).filter(row=>/^((js|ts)\/unit-\d+\.(mjs|d\.mts|mts)|js-runtime\.mjs)$/.test(row.path));
+const oracle=path.join(base,'native-reference');fs.mkdirSync(oracle);
+const nativeOracleFiles=['reference.mjs','reference.mts'].map(file=>{
+ const bytes=fs.readFileSync(path.join(output,file));put(path.join(oracle,file),bytes);
+ return {path:'native-reference/'+file,bytes:bytes.length,sha256:sha256(bytes)};
+});
 const reference={
+ nativeOracleFiles,
  sourceClosureDigest:original[2],
  identities:Object.fromEntries(['admissions.json','original-ir.json','specialized-ir.json','fused-ir.json']
   .map(file=>[file,sha256(fs.readFileSync(path.join(output,file)))])),
@@ -30,8 +36,10 @@ const reference={
  emittedFiles:nativeFiles
 };
 const stage=path.join(base,'G1');
+const nativeSeed=path.resolve('.lake/build/bin/psc1_portable_module_seed'),nativeSeedSha256=sha256(fs.readFileSync(nativeSeed));
 const execution=supervised({label:'G1-native-portable',directory:base,native:true,
- command:[path.resolve('.lake/build/bin/psc1_portable_module_seed'),requestFile,stage]});
+ command:[nativeSeed,requestFile,stage]});
+assert.equal(sha256(fs.readFileSync(nativeSeed)),nativeSeedSha256);
 const graph=admitAndPackage(stage,sourceRows,sources,reference,{label:'G1',compilerCommit:process.env.GITHUB_SHA});
 const packages=packGraph(graph,path.join(stage,'tarballs'));
 const input={schema:'psc1-portable-modular-generation-input/1',sourceCommit:process.env.GITHUB_SHA,
@@ -42,7 +50,8 @@ const receipt={schema:'psc1-portable-modular-G1/1',status:'passed-native-referen
  sourceCommit:process.env.GITHUB_SHA,sourceClosureDigest:reference.sourceClosureDigest,
  sourceModules:sources.length,units:graph.manifest.units.length,packages:packages.length,
  manifestSha256:graph.manifestHash,files:graph.manifest.files.length,
- bytes:graph.manifest.files.reduce((n,x)=>n+x.bytes,0),execution:execution.report,
+ bytes:graph.manifest.files.reduce((n,x)=>n+x.bytes,0),execution:execution.report,nativeSeedSha256,
+ nativeOracleScope:'comparison-only; never imported by a generation producer',
  independentAdmission:graph.admitted,originalAndTransformedIrMatch:true,exactRenderedReferenceBytes:true,
  compilerSeconds:240,checkerSeconds:120,fullModularSelfHosting:false};
 put(path.join(base,'g1-receipt.json'),json(receipt));

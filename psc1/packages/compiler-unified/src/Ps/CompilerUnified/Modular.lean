@@ -209,9 +209,6 @@ def generate (request : Ps.Internal.CompilerService.Request) (specifiers : List 
     ("js", psJsonArray (psListReverse jsRows)), ("ts", psJsonArray (psListReverse tsRows)),
     ("logicalAdmission", psJsonQuote "external-host-required"),
     ("strictIR", "true"), ("referenceFuel", "4096")]
-  let referenceJs ← psExceptMapError (fun _ => "PSC1_EXECUTABLE_REFERENCE_JS")
-    (psJsPrintModuleStackSafe lowered)
-  let referenceTs ← psExceptMapError (fun _ => "PSC1_EXECUTABLE_REFERENCE_TS") (psTsEmitModule selected.raw)
   let runtime := psTextJoin "" [psJsStringRuntimeSupport, psJsStackRuntimeSupport, "\nexport { ",
     psTextJoin ", " (psListFilter (fun (name : String) => !psStringEq name "__ps$cohort")
       Ps.Internal.ModularJs.helpers), " };\n"]
@@ -219,7 +216,7 @@ def generate (request : Ps.Internal.CompilerService.Request) (specifiers : List 
     ("original-ir.json", originalIr), ("specialized-ir.json", specializedIr),
     ("fused-ir.json", fusedIr), ("admissions.json", semantic.admissions),
     ("capture.json", capture), ("modules.json", modules),
-    ("js-runtime.mjs", runtime), ("reference.mjs", referenceJs), ("reference.mts", referenceTs)]
+    ("js-runtime.mjs", runtime)]
     (psListReverse files)
   checkedFileBytes result 0
   return result

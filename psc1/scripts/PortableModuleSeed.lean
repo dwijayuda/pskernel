@@ -20,8 +20,7 @@ def main (args : List String) : IO Unit := do
     | .ok value => pure value.toList
     | .error reason => throw (IO.userError reason)
   let allowed := ["original-ir.json", "specialized-ir.json", "fused-ir.json",
-    "admissions.json", "capture.json", "modules.json", "js-runtime.mjs",
-    "reference.mjs", "reference.mts"] ++ (List.range 257).flatMap (fun index =>
+    "admissions.json", "capture.json", "modules.json", "js-runtime.mjs"] ++ (List.range 257).flatMap (fun index =>
       let suffix := "/unit-" ++ toString index
       ["js" ++ suffix ++ ".mjs", "js" ++ suffix ++ ".d.mts", "ts" ++ suffix ++ ".mts"])
   if rows.length > allowed.length then throw (IO.userError "PSC1_EXECUTABLE_FILE_COUNT")

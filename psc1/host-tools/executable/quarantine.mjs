@@ -9,9 +9,9 @@ export function quarantineCandidate(text,directory){
  assert.equal(candidate.protocol,'psc1-modular-build/1');
  assert.equal(candidate.status,'candidate',JSON.stringify(candidate));
  assert.equal(candidate.candidateOnly,true);assert.equal(candidate.admission,'not-run');
- assert.ok(Array.isArray(candidate.files)&&candidate.files.length<=780);
+ assert.ok(Array.isArray(candidate.files)&&candidate.files.length<=778);
  const names=new Set(['original-ir.json','specialized-ir.json','fused-ir.json','admissions.json',
-  'capture.json','modules.json','js-runtime.mjs','reference.mjs','reference.mts']);
+  'capture.json','modules.json','js-runtime.mjs']);
  for(let unit=0;unit<257;unit++)for(const [variant,extension]of [['js','.mjs'],['js','.d.mts'],['ts','.mts']])
   names.add(variant+'/unit-'+unit+extension);
  const seen=new Set();let total=0;

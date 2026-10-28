@@ -50,6 +50,7 @@ export function admitAndPackage(stage,sourceRows,sources,reference,{label,compil
  const start=performance.now();
  const receipt=session.admit(JSON.stringify({protocol:'psc1-compiler-host/1',op:'admit',
   requestId:capture.requestId,target:'js',sourceClosureDigest:capture.sourceClosureDigest,admissions:read('admissions.json')}));
+ assert.equal(receipt.accepted,true);
  assert.equal(receipt.checkerCommit,capture.leanCommit);
  assert.equal(pin,sha256(fs.readFileSync(checker)));
  const admitted={...receipt,elapsedMs:Math.round(performance.now()-start)};
@@ -75,3 +76,12 @@ export function exactGraphs(left,right){
  assert.equal(right.manifestHash,left.manifestHash);
 }
 
+
+export function attachNativeTestReferences(stage,base,reference){
+ // These are test oracles outside the executable graph, not generation outputs.
+ for(const row of reference.nativeOracleFiles){
+  const bytes=fs.readFileSync(path.join(base,row.path));
+  assert.equal(bytes.length,row.bytes);assert.equal(sha256(bytes),row.sha256);
+  put(path.join(stage,path.basename(row.path)),bytes);
+ }
+}

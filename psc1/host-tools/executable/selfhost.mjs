@@ -6,7 +6,7 @@ import {spawnSync} from 'node:child_process';
 import {readOwnedCompilerSources} from '../compiler-source-inputs.mjs';
 import {verify} from './verify.mjs';
 import {sha256,json,put,files} from './tools.mjs';
-import {supervised,admitAndPackage,packGraph,exactGraphs,nodeFlags} from './generation-tools.mjs';
+import {supervised,admitAndPackage,packGraph,exactGraphs,nodeFlags,attachNativeTestReferences} from './generation-tools.mjs';
 const [variant,profile='correctness-1800s']=process.argv.slice(2);
 assert.ok(['js','ts'].includes(variant));
 assert.ok(['performance-240s','correctness-1800s'].includes(profile));
@@ -22,7 +22,8 @@ const directory=path.join(base,'selfhost-'+variant);assert.ok(!fs.existsSync(dir
 const report={schema:'psc1-portable-modular-selfhost/1',testedCommit:process.env.GITHUB_SHA,
  sourceCommit:input.sourceCommit,sourceClosureDigest:input.reference.sourceClosureDigest,variant,profile,
  status:'running',fixedPoint:'not-run',performanceQualification:profile==='performance-240s'?'pending':'not-run',
- nativeFrontendCalls:0,generations:[],g1ManifestSha256:g1.manifestHash,
+ nativeFrontendCalls:0,generationOutput:'genuine source-owned modules only; no whole-compiler bundle',
+ nativeReferenceScope:'explicit corpus oracle only, outside all executable graphs',generations:[],g1ManifestSha256:g1.manifestHash,
  independentKernel:'official-Lean-4.35.0',semanticFuel:'unchanged',memoryStackPolicies:'unchanged',
  compilerRequestPolicy:'G1/corpus/tools 240s; only G2-self/G3-self use the explicit correctness profile'};
 const checkpoint=()=>fs.writeFileSync(path.join(directory,'qualification.json'),json(report));
@@ -55,6 +56,7 @@ try{
    manifestSha256:graph.manifestHash,packages,fullGraphByteIdentity:true,
    originalAndTransformedIrIdentity:true,renderedNativeReferenceIdentity:true,status:'generated-and-independently-admitted'});
   checkpoint();
+  attachNativeTestReferences(stage,base,input.reference);
   // Reuse retained real output execution, strict TS, offline npm and graph-negative bodies.
   const audit=spawnSync(process.execPath,[...nodeFlags,'host-tools/executable/qualify.mjs',stage],
    {stdio:'inherit'});

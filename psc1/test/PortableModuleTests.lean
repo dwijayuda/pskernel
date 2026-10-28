@@ -18,7 +18,7 @@ def main : IO Unit := do
     let files ← match (response.getObjVal? "files").bind Lean.Json.getArr? with
       | .ok values => pure values
       | .error reason => throw (IO.userError reason)
-    unless files.size == 15 do throw (IO.userError "PSC1_PORTABLE_SMALL_GRAPH_FILES")
+    unless files.size == 13 do throw (IO.userError "PSC1_PORTABLE_SMALL_GRAPH_FILES")
     match response.getObjValAs? String "admission" with
     | .ok "not-run" => pure ()
     | _ => throw (IO.userError "PSC1_PORTABLE_CANDIDATE_AUTHORITY")

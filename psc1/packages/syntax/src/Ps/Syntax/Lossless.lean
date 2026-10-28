@@ -67,17 +67,18 @@ def psLosslessPiece (source : String) (ordinal : Nat) (kind : PsSourcePieceKind)
 
 def psLosslessAdvanceTo (fuel : Nat) (stop : Nat) (cursor : PsLexCursor) :
     Except PsLosslessError PsLexCursor :=
-  if Nat.beq cursor.position.byteOffset stop then Except.ok cursor
-  else
-    match fuel with
-    | Nat.zero => Except.error PsLosslessError.budgetExhausted
-    | Nat.succ remaining =>
-        if Nat.ble stop cursor.position.byteOffset then
-          Except.error PsLosslessError.invalidSpan
-        else
-          match psLexCursorAdvance cursor with
-          | Option.none => Except.error PsLosslessError.invalidSpan
-          | Option.some next => psLosslessAdvanceTo remaining stop next.cursor
+  match fuel with
+  | Nat.zero =>
+      if Nat.beq cursor.position.byteOffset stop then Except.ok cursor
+      else Except.error PsLosslessError.budgetExhausted
+  | Nat.succ remaining =>
+      if Nat.beq cursor.position.byteOffset stop then Except.ok cursor
+      else if Nat.ble stop cursor.position.byteOffset then
+        Except.error PsLosslessError.invalidSpan
+      else
+        match psLexCursorAdvance cursor with
+        | Option.none => Except.error PsLosslessError.invalidSpan
+        | Option.some next => psLosslessAdvanceTo remaining stop next.cursor
 
 def psLosslessWhitespace (remaining : List Char) (position : PsSourcePos) : PsLexCursor :=
   match remaining with

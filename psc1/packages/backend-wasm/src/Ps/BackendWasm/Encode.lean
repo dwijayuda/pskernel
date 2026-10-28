@@ -414,7 +414,12 @@ def psWasmIrEncodeModule (value : PsWasmModule) : Except PsWasmIrEncodeError Str
       [psWasmIrEncodeModuleBase value,
        psWasmIrEncodeBool value.abiMemoryImports,
        psWasmIrEncodeBool value.abiGlobalsExport,
-       psWasmIrEncodeValues (value.functionImports.map (fun item =>
-         psWasmIrEncodeValues [psWasmIrEncodeText item.moduleName,
-           psWasmIrEncodeText item.importName, psWasmIrEncodeFunction item.function]))]
+       psWasmIrEncodeValues
+         (psListMap
+           (fun (item : PsWasmFunctionImport) =>
+             psWasmIrEncodeValues
+               [psWasmIrEncodeText item.moduleName,
+                psWasmIrEncodeText item.importName,
+                psWasmIrEncodeFunction item.function])
+           value.functionImports)]
   else psWasmIrEncodeModuleBase value

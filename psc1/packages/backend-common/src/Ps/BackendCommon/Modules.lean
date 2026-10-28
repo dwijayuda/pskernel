@@ -99,23 +99,23 @@ def rangeFrom (count start : Nat) : List Nat :=
   | Nat.zero => List.nil
   | Nat.succ remaining => List.cons start (rangeFrom remaining (Nat.succ start))
 
-def startsWithAt (fuel : Nat) (value prefix : String) (valuePos prefixPos : Nat) : Bool :=
+def startsWithAt (fuel : Nat) (value wantedPrefix : String) (valuePos prefixPos : Nat) : Bool :=
   match fuel with
   | Nat.zero => false
   | Nat.succ remaining =>
-      if String.Internal.atEnd prefix (String.Pos.Raw.mk prefixPos) then true
+      if String.Internal.atEnd wantedPrefix (String.Pos.Raw.mk prefixPos) then true
       else if String.Internal.atEnd value (String.Pos.Raw.mk valuePos) then false
       else
         let left : Char := String.Internal.get value (String.Pos.Raw.mk valuePos);
-        let right : Char := String.Internal.get prefix (String.Pos.Raw.mk prefixPos);
+        let right : Char := String.Internal.get wantedPrefix (String.Pos.Raw.mk prefixPos);
         if Nat.beq (Char.toNat left) (Char.toNat right) then
-          startsWithAt remaining value prefix
+          startsWithAt remaining value wantedPrefix
             (String.Pos.Raw.byteIdx (String.Internal.next value (String.Pos.Raw.mk valuePos)))
-            (String.Pos.Raw.byteIdx (String.Internal.next prefix (String.Pos.Raw.mk prefixPos)))
+            (String.Pos.Raw.byteIdx (String.Internal.next wantedPrefix (String.Pos.Raw.mk prefixPos)))
         else false
 
-def startsWith (value prefix : String) : Bool :=
-  startsWithAt (Nat.succ (String.utf8ByteSize prefix)) value prefix 0 0
+def startsWith (value wantedPrefix : String) : Bool :=
+  startsWithAt (Nat.succ (String.utf8ByteSize wantedPrefix)) value wantedPrefix 0 0
 
 def seen (name : String) (names : List String) : Bool :=
   psListAny (fun (item : String) => psStringEq item name) names
@@ -150,8 +150,11 @@ def references (fuel : Nat) (locals : List String) : PsVerifiedIrExpr -> Except 
       | PsVerifiedIrExpr.lambda parameters _ body =>
           match forEach (fun (parameter : PsVerifiedIrParameter) => safeName parameter.name) parameters with
           | Except.error error => Except.error error
-          | Except.ok _ => references remaining
-              (psListAppend (psListMap (fun (parameter : PsVerifiedIrParameter) => parameter.name) parameters) locals) body
+          | Except.ok _ =>
+              let nested : PsVerifiedIrExpr -> Except String (List String) :=
+                references remaining
+                  (psListAppend (psListMap (fun (parameter : PsVerifiedIrParameter) => parameter.name) parameters) locals);
+              nested body
       | PsVerifiedIrExpr.call fn _ values =>
           match visit fn with
           | Except.error error => Except.error error
@@ -166,7 +169,9 @@ def references (fuel : Nat) (locals : List String) : PsVerifiedIrExpr -> Except 
               match visit value with
               | Except.error error => Except.error error
               | Except.ok first =>
-                  match references remaining (List.cons name locals) body with
+                  let nested : PsVerifiedIrExpr -> Except String (List String) :=
+                    references remaining (List.cons name locals);
+                  match nested body with
                   | Except.error error => Except.error error
                   | Except.ok second => Except.ok (psListAppend first second)
       | PsVerifiedIrExpr.ifE condition left right =>
@@ -187,9 +192,11 @@ def references (fuel : Nat) (locals : List String) : PsVerifiedIrExpr -> Except 
           let branch := fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) =>
             match forEach (fun (binding : PsVerifiedIrMatchBinding) => safeName binding.name) alternative.snd.fst with
             | Except.error error => Except.error error
-            | Except.ok _ => references remaining
-                (psListAppend (psListMap (fun (binding : PsVerifiedIrMatchBinding) => binding.name) alternative.snd.fst) locals)
-                alternative.snd.snd;
+            | Except.ok _ =>
+                let nested : PsVerifiedIrExpr -> Except String (List String) :=
+                  references remaining
+                    (psListAppend (psListMap (fun (binding : PsVerifiedIrMatchBinding) => binding.name) alternative.snd.fst) locals);
+                nested alternative.snd.snd;
           match psListMapExcept branch alternatives with
           | Except.error error => Except.error error
           | Except.ok branches =>
@@ -205,9 +212,11 @@ def staticInitializer (fuel : Nat) : PsVerifiedIrExpr -> Bool :=
       | PsVerifiedIrExpr.literal _ => true
       | PsVerifiedIrExpr.lambda _ _ _ => true
       | PsVerifiedIrExpr.constructor _ _ _ fields =>
-          all (fun (field : Prod String PsVerifiedIrExpr) => staticInitializer remaining field.snd) fields
+          let visit : PsVerifiedIrExpr -> Bool := staticInitializer remaining;
+          all (fun (field : Prod String PsVerifiedIrExpr) => visit field.snd) fields
       | PsVerifiedIrExpr.record _ _ fields =>
-          all (fun (field : Prod String PsVerifiedIrExpr) => staticInitializer remaining field.snd) fields
+          let visit : PsVerifiedIrExpr -> Bool := staticInitializer remaining;
+          all (fun (field : Prod String PsVerifiedIrExpr) => visit field.snd) fields
       | _ => false
 
 def distinctImports (values : List PsModuleOwner) : List PsModuleOwner :=

@@ -34,17 +34,15 @@ def psCodecArray
   | some values => Except.ok values
   | none => Except.error PsCodecDecodeError.expectedArray
 
-def psCodecNaturalDigits :
-    List Char -> Nat -> Option Nat
-  | [], value => some value
-  | char :: rest, value =>
+def psCodecNaturalDigits
+    (chars : List Char) (value : Nat) : Option Nat :=
+  match chars with
+  | List.nil => Option.some value
+  | List.cons char rest =>
       let code : Nat := Char.toNat char;
       if Nat.ble 48 code && Nat.ble code 57 then
-        psCodecNaturalDigits
-          rest
-          (value * 10 + (code - 48))
-      else
-        none
+        psCodecNaturalDigits rest (Nat.add (Nat.mul value 10) (Nat.sub code 48))
+      else Option.none
 
 def psCodecNaturalText
     (text : String) : Option Nat :=
@@ -68,10 +66,12 @@ def psCodecNat
       | none => Except.error PsCodecDecodeError.invalidNatural
       | some natural => Except.ok natural
 
-def psDecodeCodecNameWithFuel :
-    Nat -> PsJsonValue -> Except PsCodecDecodeError PsName
-  | 0, _ => Except.error PsCodecDecodeError.fuelExhausted
-  | fuel + 1, value =>
+def psDecodeCodecNameWithFuel
+    (fuelBudget : Nat) (value : PsJsonValue) :
+    Except PsCodecDecodeError PsName :=
+  match fuelBudget with
+  | Nat.zero => Except.error PsCodecDecodeError.fuelExhausted
+  | Nat.succ fuel =>
       match psCodecField value "k" with
       | Except.error error => Except.error error
       | Except.ok tagValue =>
@@ -121,10 +121,12 @@ def psDecodeCodecName
     Except PsCodecDecodeError PsName :=
   psDecodeCodecNameWithFuel 4096 value
 
-def psDecodeCodecLevelWithFuel :
-    Nat -> PsJsonValue -> Except PsCodecDecodeError PsLevel
-  | 0, _ => Except.error PsCodecDecodeError.fuelExhausted
-  | fuel + 1, value =>
+def psDecodeCodecLevelWithFuel
+    (fuelBudget : Nat) (value : PsJsonValue) :
+    Except PsCodecDecodeError PsLevel :=
+  match fuelBudget with
+  | Nat.zero => Except.error PsCodecDecodeError.fuelExhausted
+  | Nat.succ fuel =>
       match psCodecField value "k" with
       | Except.error error => Except.error error
       | Except.ok tagValue =>
@@ -200,10 +202,12 @@ def psDecodeCodecLevelsWithFuel
     Except PsCodecDecodeError (List PsLevel) :=
   psListMapExcept (psDecodeCodecLevelWithFuel fuel) values
 
-def psDecodeCodecExprWithFuel :
-    Nat -> PsJsonValue -> Except PsCodecDecodeError PsExpr
-  | 0, _ => Except.error PsCodecDecodeError.fuelExhausted
-  | fuel + 1, value =>
+def psDecodeCodecExprWithFuel
+    (fuelBudget : Nat) (value : PsJsonValue) :
+    Except PsCodecDecodeError PsExpr :=
+  match fuelBudget with
+  | Nat.zero => Except.error PsCodecDecodeError.fuelExhausted
+  | Nat.succ fuel =>
       match psCodecField value "k" with
       | Except.error error => Except.error error
       | Except.ok tagValue =>

@@ -33,6 +33,17 @@ jobs:
         run: |
           node scripts/ci/repository-layout.mjs
           node --check scripts/modular-toolchain-package.mjs
+      - run: npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
+      - name: Retain pinned formatter proposals for changed host adapters
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import path from 'node:path';import{createRequire}from'node:module';
+          const require=createRequire(path.resolve('host-tools/package.json')),prettier=require('prettier');
+          for(const file of ['host-tools/installed-engine-resolver.mjs','npm-cli/compiler-api.mjs',
+           'host-tools/executable/verify.mjs','scripts/modular-toolchain-package.mjs','scripts/modular-toolchain-installed.mjs']){
+            console.log('PSC1_MODULAR_TOOLCHAIN_FORMAT '+JSON.stringify({file,formatted:await prettier.format(fs.readFileSync(file,'utf8'),{parser:'babel',singleQuote:true,printWidth:100})}));
+          }
+          JS
       - name: Assemble the sealed modular root and genuine independent kernel
         env:
           GH_TOKEN: ${{ github.token }}

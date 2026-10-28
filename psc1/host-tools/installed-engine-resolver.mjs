@@ -172,7 +172,7 @@ export function resolveEngine(engine = 'js', distribution = loadDistribution()) 
     fail('ENGINE_SOURCE_IDENTITY');
   if (descriptor.kind === 'modular-graph') {
     if (!['js', 'ts'].includes(engine) || descriptor.variant !== engine ||
-        dummiedGraphPin(descriptor) === false) fail('MODULAR_ENGINE_DESCRIPTOR');
+        validGraphPin(descriptor) === false) fail('MODULAR_ENGINE_DESCRIPTOR');
     const graphRoot = path.resolve(installationRoot, '../../../..');
     const manifestFile = path.resolve(graphRoot, '../dist/COMPILER_GRAPH.json');
     if (fs.realpathSync(graphRoot) !== graphRoot || fs.realpathSync(manifestFile) !== manifestFile)

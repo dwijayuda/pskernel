@@ -25,6 +25,29 @@ The preceding .8 host CLI introduced [project initialization, source files and d
 Its [exact Linux qualification](./docs/PSC1_CLI_QUALIFICATION_2026-10-26.json) preserves the frozen G3 executables.
 [TypeScript workflow research and decisions](./docs/development/typescript-workflows.md) explain the scope.
 
+## Independent compiler development
+
+The [standalone Linux x64 profile](standalone/README.md) provides an editable
+125-module ProofScript compiler project with a private Node/V8 runtime and the
+genuine precompiled official Lean 4.35.0 native checker. Its
+[dated qualification](docs/PSC1_INDEPENDENT_DEVELOPMENT_QUALIFICATION_2026-10-28.json)
+records current-source and genuinely modified-source compiler rebuilds, fresh
+kernel admission and exact same-source fixed points in an isolated environment
+without separately installed language tools.
+
+After extracting the qualified archive and entering its toolchain directory:
+
+```sh
+./bin/psc build compiler/project.json --profile correctness-3600s --out build/g1
+./bin/psc build compiler/project.json --profile correctness-3600s --compiler build/g1 --out build/g2
+```
+
+The repository's Lean-like source remains the bootstrap reference. Edits in the
+standalone workspace use the delivered `.ps` project directly. Full source-owner
+migration, incremental compilation and other platforms remain separate work.
+The existing npm profiles and their output-consumer requirements below retain
+their original qualification scope.
+
 ## Programs and installed use
 
 ```lean
@@ -92,6 +115,7 @@ No merge or npm publication is authorized.
 - `packages/*/src`: authored semantic compiler/backend source.
 - `host/src`, `host-tools`: capture, pinned resources, independent tools and publication.
 - `npm-cli`: installed API/CLI.
+- `standalone`: independent compiler-development host, runner and qualification; its delivered `compiler/` workspace owns editable `.ps` development source.
 - `test`: authored regressions, reference algorithms and applications.
 - `scripts`: CI, bounded consumers, packaging and qualification.
 - `docs`: current guides, contracts, dated receipts and preserved history.

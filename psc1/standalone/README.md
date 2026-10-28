@@ -6,8 +6,23 @@ ProofScript compiler project is included. No separate Node, Bun, Lean, Lake,
 TypeScript, Rust or C/C++ compiler installation belongs to the ordinary
 compiler rebuild cycle.
 
-**Qualification status:** see [AI_WORK_STATE.md](../AI_WORK_STATE.md).
-Implementation and workflow presence alone are not passing evidence.
+**Qualified:** complete baseline and changed-source compiler rebuilds pass
+[40618697529](https://github.com/dwijayuda/pskernel/actions/runs/40618697529) at
+`5484a04df34de1bbcfa46a248b6a93ce510035d6`.
+See the [exact receipt](../docs/PSC1_INDEPENDENT_DEVELOPMENT_QUALIFICATION_2026-10-28.json)
+and [AI work state](../AI_WORK_STATE.md) for finite scope and measurements.
+
+Download the [qualified Linux x64 artifact](https://github.com/dwijayuda/pskernel/actions/runs/40618697529/artifacts/12788978661).
+It contains `psc1-independent-linux-x64.tar.gz`, the completed evidence summary
+and `SHA256SUMS`. The tar is 46,905,678 bytes with SHA-256:
+
+```text
+c227da916348087550f696a1b9f8ad0c6faacaad6bd86d6e72244ed4d96d2fe3
+```
+
+Actions retains this artifact until 2027-01-26T02:03:45Z. Ubuntu 24.04 Linux x64
+is the tested environment; compatible system libraries, `/bin/sh` and Linux
+`/proc` remain required.
 
 ## Installation and first use
 
@@ -17,6 +32,8 @@ qualified seed compiler, licenses and `compiler/project.json` with editable
 `.ps` modules. Keep these installation resources together.
 
 ```sh
+tar -xzf psc1-independent-linux-x64.tar.gz
+cd toolchain
 ./bin/psc identity
 ./bin/psc diagnostic
 ```
@@ -36,7 +53,8 @@ refusal; it does not grant proof admission.
 ```
 
 The first build uses the distributed qualified generated compiler. The second
-executes the compiler just emitted in `build/g1`. Both read the same editable
+executes the compiler just emitted in `build/g1`. Selecting a new generation is
+explicit: building it does not replace the default installed seed. Both read the same editable
 `.ps` files and independently check their new admission graph. There is no
 Lean-source translator or target-language compiler on these commands' path.
 
@@ -100,11 +118,18 @@ workspace. A repository-wide switch of source owners is a separate migration.
 Ordinary requests retain a 240-second compiler limit. Complete compiler rebuilds
 require the explicit 3,600-second correctness profile; the separate `selfhost`
 command selects it by design. Independent checker calls retain 120 seconds.
-Full compiler rebuilding historically took tens of minutes and several GiB of
-memory. Read the new run's actual measurements before estimating your workload.
+Full compiler rebuilding processes the entire ordered project; this profile has
+no incremental module cache. Read the qualified run's actual timing and worker
+RSS measurements before estimating your workload. The runtime's 4,096 MiB
+old-space setting is a V8 heap limit, not a total-process or process-tree RSS limit.
 
-A source or tool mutation, semantic refusal, independent-checker rejection,
-resource exhaustion or interrupted build must fail closed. Installed integrity
+A source or tool mutation, semantic refusal, independent-checker rejection or
+resource exhaustion prevents publication of a new accepted generation. Failures
+before the completion marker preserve the rule that incomplete generations
+cannot be selected as compilers. An error reported as
+`PSC1_INDEPENDENT_PUBLICATION_COMMITTED_UNCERTAIN` occurs after that marker was
+written and may leave a complete generation. Inspect the recorded output rather
+than assume rollback or retry into the same directory. Installed integrity
 pins detect changes relative to the manifest; they do not authenticate a fully
 replaced installation. The supplied archive's external digest is the starting
 identity.

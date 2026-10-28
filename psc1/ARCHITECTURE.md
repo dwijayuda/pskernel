@@ -126,4 +126,8 @@ compiler, a private pinned runtime and the genuine precompiled native official
 checker with an editable checked `.ps` compiler project. Each rebuilt generation
 receives fresh independent admission. Existing npm defaults and frozen executor
 qualifications remain separate. See the [architecture decision and dependency
-audit](docs/PSC1_INDEPENDENT_DEVELOPMENT.md) and AI_WORK_STATE.md for actual run status.
+audit](docs/PSC1_INDEPENDENT_DEVELOPMENT.md),
+[dated qualification](docs/PSC1_INDEPENDENT_DEVELOPMENT_QUALIFICATION_2026-10-28.json)
+and AI_WORK_STATE.md. The qualified 125-module baseline and changed-source chains
+retain the repository's separate Lean bootstrap ownership and use the explicit
+long correctness profile.

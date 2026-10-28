@@ -31,19 +31,7 @@ jobs:
           key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
       - name: Install pinned Lean
         run: |
-          if [ ! -x "$HOME/.elan/bin/elan" ]; then
-            for elan_attempt in 1 2 3; do
-              if curl --fail --show-error --location --connect-timeout 15 --max-time 60 \
-                  https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
-                  -o "$RUNNER_TEMP/psc1-elan-init.sh" &&
-                  timeout 60 sh "$RUNNER_TEMP/psc1-elan-init.sh" -y; then
-                break
-              fi
-            done
-            test -x "$HOME/.elan/bin/elan"
-          fi
-          "$HOME/.elan/bin/elan" --version
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          bash "$GITHUB_WORKSPACE/psc1/scripts/ci/install-pinned-lean.sh"
       - name: Check exact executable and its complete fragment consistency proof
         working-directory: psc1/proofs/pskernel-min
         run: |
@@ -194,19 +182,7 @@ jobs:
             psc1-lake-v2-${{ runner.os }}-
       - name: Install pinned Lean
         run: |
-          if [ ! -x "$HOME/.elan/bin/elan" ]; then
-            for elan_attempt in 1 2 3; do
-              if curl --fail --show-error --location --connect-timeout 15 --max-time 60 \
-                  https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
-                  -o "$RUNNER_TEMP/psc1-elan-init.sh" &&
-                  timeout 60 sh "$RUNNER_TEMP/psc1-elan-init.sh" -y; then
-                break
-              fi
-            done
-            test -x "$HOME/.elan/bin/elan"
-          fi
-          "$HOME/.elan/bin/elan" --version
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          bash "$GITHUB_WORKSPACE/psc1/scripts/ci/install-pinned-lean.sh"
           npm install --prefix "$RUNNER_TEMP/min-ts" --ignore-scripts --no-audit --no-fund typescript@7.0.2
           echo "PSC0_TSC=$RUNNER_TEMP/min-ts/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
       - name: Prove actual compiler capture, currying and scalar-stage preservation
@@ -327,19 +303,7 @@ jobs:
       - name: Install repository-pinned tools
         run: |
           set -euo pipefail
-          if [ ! -x "$HOME/.elan/bin/elan" ]; then
-            for elan_attempt in 1 2 3; do
-              if curl --fail --show-error --location --connect-timeout 15 --max-time 60 \
-                  https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
-                  -o "$RUNNER_TEMP/psc1-elan-init.sh" &&
-                  timeout 60 sh "$RUNNER_TEMP/psc1-elan-init.sh" -y; then
-                break
-              fi
-            done
-            test -x "$HOME/.elan/bin/elan"
-          fi
-          "$HOME/.elan/bin/elan" --version
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          bash "$GITHUB_WORKSPACE/psc1/scripts/ci/install-pinned-lean.sh"
           npm install --prefix "$RUNNER_TEMP/min-ts" --ignore-scripts --no-audit --no-fund typescript@7.0.2
           echo "PSC0_TSC=$RUNNER_TEMP/min-ts/node_modules/typescript/bin/tsc" >> "$GITHUB_ENV"
       - name: Build current PSC1 source seed and official reference checker

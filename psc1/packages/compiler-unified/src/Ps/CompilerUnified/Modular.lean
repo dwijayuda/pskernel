@@ -13,7 +13,8 @@ structure CapturedModules where
   captured : Ps.Internal.CompilerService.Captured
   owners : PsStringMap Nat
 
-def nameKey : PsName -> String
+def nameKey (name : PsName) : String :=
+  match name with
   | PsName.anonymous => "a"
   | PsName.str parent value =>
       psTextJoin "" [nameKey parent, "s", psNatToString (String.utf8ByteSize value), ":", value]

@@ -37,8 +37,10 @@ def safeName (name : String) : Except String Unit :=
 
 def owner (owners : List PsModuleOwner) (name : String) : Except String PsModuleOwner :=
   match psListFilter (fun (item : PsModuleOwner) => psStringEq item.name name) owners with
-  | [value] => Except.ok value
-  | _ => Except.error (String.Internal.append "PSC1_MODULE_OWNER_COVERAGE:" name)
+  | value :: rest =>
+    if psListIsEmpty rest then Except.ok value
+    else Except.error (String.Internal.append "PSC1_MODULE_OWNER_COVERAGE:" name)
+  | [] => Except.error (String.Internal.append "PSC1_MODULE_OWNER_COVERAGE:" name)
 
 def references (fuel : Nat) (locals : List String) :
     PsVerifiedIrExpr -> Except String (List String) :=
@@ -47,41 +49,41 @@ def references (fuel : Nat) (locals : List String) :
   | Nat.succ remaining => fun (expression : PsVerifiedIrExpr) => do
     let visit := references remaining locals
     match expression with
-    | PsVerifiedIrExpr.literal _ => return []
-    | PsVerifiedIrExpr.var name =>
+    | PsVerifiedIrExpr.literal _ => do return []
+    | PsVerifiedIrExpr.var name => do
       safeName name
       return if seen name locals then [] else [name]
-    | PsVerifiedIrExpr.intrinsic _ _ values =>
+    | PsVerifiedIrExpr.intrinsic _ _ values => do
       let result ← psListMapExcept visit values
       return psListFlatten result
-    | PsVerifiedIrExpr.lambda parameters _ body =>
+    | PsVerifiedIrExpr.lambda parameters _ body => do
       for parameter in parameters do safeName parameter.name
       references remaining
         (psListAppend (psListMap (fun (p : PsVerifiedIrParameter) => p.name) parameters) locals) body
-    | PsVerifiedIrExpr.call fn _ values =>
+    | PsVerifiedIrExpr.call fn _ values => do
       let target ← visit fn
       let arguments ← psListMapExcept visit values
       return psListAppend target (psListFlatten arguments)
-    | PsVerifiedIrExpr.letE name _ value body =>
+    | PsVerifiedIrExpr.letE name _ value body => do
       safeName name
       let first ← visit value
       let rest ← references remaining (List.cons name locals) body
       return psListAppend first rest
-    | PsVerifiedIrExpr.ifE condition left right =>
+    | PsVerifiedIrExpr.ifE condition left right => do
       let first ← visit condition
       let yes ← visit left
       let no ← visit right
       return psListAppend first (psListAppend yes no)
-    | PsVerifiedIrExpr.record _ _ fields =>
+    | PsVerifiedIrExpr.record _ _ fields => do
       let result ← psListMapExcept
         (fun (field : Prod String PsVerifiedIrExpr) => visit field.snd) fields
       return psListFlatten result
-    | PsVerifiedIrExpr.projection _ _ value _ => visit value
-    | PsVerifiedIrExpr.constructor _ _ _ fields =>
+    | PsVerifiedIrExpr.projection _ _ value _ => do visit value
+    | PsVerifiedIrExpr.constructor _ _ _ fields => do
       let result ← psListMapExcept
         (fun (field : Prod String PsVerifiedIrExpr) => visit field.snd) fields
       return psListFlatten result
-    | PsVerifiedIrExpr.matchE _ _ value alternatives =>
+    | PsVerifiedIrExpr.matchE _ _ value alternatives => do
       let branches ← psListMapExcept
         (fun (alternative : Prod String (Prod (List PsVerifiedIrMatchBinding) PsVerifiedIrExpr)) => do
           for binding in alternative.snd.fst do safeName binding.name
@@ -177,15 +179,19 @@ def psModuleEntityArity (raw : PsVerifiedIrModule) (kind : PsIrOriginKind)
         if psStringEq item.name name then Option.some (psListLength item.typeParameters)
         else Option.none) raw.declarations
   match entries with
-  | [arity] => return arity
-  | _ => throw (String.Internal.append "PSC1_MODULE_ORIGIN_ENTITY:" name)
+  | arity :: rest => do
+    if psListIsEmpty rest then return arity
+    else throw (String.Internal.append "PSC1_MODULE_ORIGIN_ENTITY:" name)
+  | [] => do throw (String.Internal.append "PSC1_MODULE_ORIGIN_ENTITY:" name)
 
 def psModuleOriginFor (rows : List PsIrTransformOrigin) (kind : PsIrOriginKind)
     (name : String) : Except String PsIrTransformOrigin := do
   match psListFilter (fun (row : PsIrTransformOrigin) =>
       psModuleOriginKindEqual row.kind kind && psStringEq row.outputName name) rows with
-  | [row] => return row
-  | _ => throw (String.Internal.append "PSC1_MODULE_ORIGIN_COVERAGE:" name)
+  | row :: rest => do
+    if psListIsEmpty rest then return row
+    else throw (String.Internal.append "PSC1_MODULE_ORIGIN_COVERAGE:" name)
+  | [] => do throw (String.Internal.append "PSC1_MODULE_ORIGIN_COVERAGE:" name)
 
 def psModuleCarryOwners (input : PsVerifiedIrModule) (owners : List PsModuleOwner)
     (output : PsIrTracedModule) : Except String (List PsModuleOwner) := do
@@ -204,17 +210,17 @@ def psModuleCarryOwners (input : PsVerifiedIrModule) (owners : List PsModuleOwne
     let _ ← psModuleEntityArity output.raw row.kind row.outputName
     let arity ← psModuleEntityArity input row.kind row.inputName
     match row.rule with
-    | PsIrOriginRule.retained =>
+    | PsIrOriginRule.retained => do
       if !psStringEq row.outputName row.inputName || !psListIsEmpty row.arguments then
         throw "PSC1_MODULE_ORIGIN_RETAINED"
-    | PsIrOriginRule.specialization =>
+    | PsIrOriginRule.specialization => do
       if !(Nat.beq arity (psListLength row.arguments)) || !psIrSpecializeAllGround row.arguments then
         throw "PSC1_MODULE_ORIGIN_ARGUMENTS"
       match psIrSpecializedName row.inputName row.arguments with
-      | Option.some expected =>
+      | Option.some expected => do
         if !psStringEq expected row.outputName then throw "PSC1_MODULE_ORIGIN_SPECIALIZATION"
-      | Option.none => throw "PSC1_MODULE_ORIGIN_SPECIALIZATION"
-    | PsIrOriginRule.worker =>
+      | Option.none => do throw "PSC1_MODULE_ORIGIN_SPECIALIZATION"
+    | PsIrOriginRule.worker => do
       if !psModuleOriginKindEqual row.kind PsIrOriginKind.declaration ||
           !psListIsEmpty row.arguments || psStringEq row.outputName row.inputName ||
           psListAny (fun (d : PsVerifiedIrDeclaration) => psStringEq d.name row.outputName) input.declarations then

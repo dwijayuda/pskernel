@@ -23,8 +23,8 @@ def captureModules (sources : List Ps.Internal.CompilerService.Source)
     (request : Ps.Internal.CompilerService.Request) (unit : Nat)
     (current : CapturedModules) : Except String CapturedModules := do
   match sources with
-  | [] => return current
-  | source :: rest =>
+  | [] => do return current
+  | source :: rest => do
     let captured := current.captured
     if psBackendNameSeen source.moduleName captured.seen then throw "PSC1_EXECUTABLE_DUPLICATE_SOURCE"
     let parsed ← psExceptMapError
@@ -100,8 +100,8 @@ def artifactJson (kind : String) (artifact : PsModuleArtifact) : String :=
 
 def checkedFileBytes (files : List (Prod String String)) (total : Nat) : Except String Unit := do
   match files with
-  | [] => return ()
-  | item :: rest =>
+  | [] => do return ()
+  | item :: rest => do
     let size := String.utf8ByteSize item.snd
     if Nat.blt 33554432 size then throw "PSC1_EXECUTABLE_FILE_BOUND"
     let next := Nat.add total size

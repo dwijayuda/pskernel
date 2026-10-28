@@ -58,7 +58,7 @@ def installInitializers (fuel : Nat) (pending : List PsVerifiedIrDeclaration)
       let found := psListFind (fun (item : PsVerifiedIrDeclaration) =>
         psListAll (psStringSetContains installed) (getDefault requirements item.name [])) pending
       match found with
-      | Option.none => throw (String.Internal.append "PSC1_EXECUTABLE_INITIALIZER_CYCLE:"
+      | Option.none => do throw (String.Internal.append "PSC1_EXECUTABLE_INITIALIZER_CYCLE:"
           (psTextJoin "," (psListMap (fun (d : PsVerifiedIrDeclaration) => d.name) (psListTake 8 pending))))
       | Option.some item =>
         installInitializers remaining
@@ -114,15 +114,24 @@ def validCharacters (fuel : Nat) (text : String) (position : Nat) (package : Boo
       if accepted then validCharacters remaining text
         (String.Pos.Raw.byteIdx (String.Internal.next text current)) package else false
 
+def part (parts : List String) (index : Nat) : String :=
+  match psListGetOption parts index with
+  | Option.some value => value
+  | Option.none => ""
+
 def specifierSafe (specifier : String) : Bool :=
-  match slashParts (Nat.succ (String.utf8ByteSize specifier)) specifier 0 0 [] with
-  | [scope, package, folder, name] =>
+  let parts := slashParts (Nat.succ (String.utf8ByteSize specifier)) specifier 0 0 [];
+  if !(Nat.beq (psListLength parts) 4) then false
+  else
+    let scope := part parts 0;
+    let package := part parts 1;
+    let folder := part parts 2;
+    let name := part parts 3;
     psStringEq scope "@proofscript" && psStringEq folder "generated" &&
       !(Nat.beq (String.utf8ByteSize package) 0) && !(Nat.beq (String.utf8ByteSize name) 0) &&
       !(Nat.beq (Char.toNat (String.Internal.get name (String.Pos.Raw.mk 0))) 46) &&
       validCharacters (Nat.succ (String.utf8ByteSize package)) package 0 true &&
       validCharacters (Nat.succ (String.utf8ByteSize name)) name 0 false
-  | _ => false
 
 def rangeWorker (fuel index : Nat) : List Nat :=
   match fuel with
@@ -165,8 +174,8 @@ def buildUnits (ordered : List Nat) (unit : Nat)
     (byName : PsStringMap (List String)) (mapping : List (Prod Nat Nat)) :
     Except String (List PsModuleUnit) := do
   match ordered with
-  | [] => return []
-  | source :: rest =>
+  | [] => do return []
+  | source :: rest => do
     let mut seen : PsStringSet := PsStringSet.empty
     let mut imports : List PsModuleOwner := []
     for ref in psListReverse (getDefault references (psNatToString source) []) do

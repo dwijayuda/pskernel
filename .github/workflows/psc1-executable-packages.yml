@@ -6,7 +6,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: psc1-executable-boundaries-${{ github.ref }}
+  group: psc1-executable-boundaries-v2-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   boundaries:

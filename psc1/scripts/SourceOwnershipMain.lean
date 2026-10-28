@@ -61,7 +61,9 @@ def main (args : List String) : IO Unit := do
       let ir ← match psIrEncodeModule semantic.raw with
         | .ok value => pure value
         | .error _ => throw (IO.userError "PSC1_OWNERSHIP_IR_ENCODING")
-      demand (semantic.admissions.utf8ByteSize ≤ 33554432 && ir.utf8ByteSize ≤ 33554432) "GRAPH_LIMIT"
+      demand (semantic.admissions.utf8ByteSize ≤ 33554432 && ir.utf8ByteSize ≤ 33554432)
+        ("GRAPH_LIMIT:admissions=" ++ toString semantic.admissions.utf8ByteSize ++
+          ":ir=" ++ toString ir.utf8ByteSize)
       let response := (Lean.Json.mkObj [
         ("protocol", .str "psc1-source-ownership/1"), ("status", .str "prepared"),
         ("requestId", .str request.requestId), ("sourceClosureDigest", .str request.sourceClosureDigest),

@@ -6,6 +6,8 @@ on:
       - psc1/packages/**/*.lean
       - psc1/scripts/prepare-canonical-sources.mjs
       - psc1/scripts/CanonicalSourceProbe.lean
+      - psc1/scripts/SourceOwnershipMain.lean
+      - psc1/host-tools/source-refactoring.mjs
       - .github/workflows/psc1-canonical-source-preparation.yml
   workflow_dispatch:
 permissions:
@@ -44,10 +46,10 @@ jobs:
         id: source-tools-cache
         with:
           path: psc1/.lake/build
-          key: psc1-canonical-source-tools-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc1/packages/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
+          key: psc1-canonical-source-tools-v1-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('psc1/packages/**/*.lean', 'psc1/scripts/**/*.lean', 'psc1/host/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
           restore-keys: |
             psc1-canonical-source-tools-v1-${{ runner.os }}-${{ runner.arch }}-
-            psc1-independent-source-tools-v1-Linux-${{ hashFiles('psc1/packages/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
+            psc1-independent-source-tools-v1-Linux-${{ hashFiles('psc1/packages/**/*.lean', 'psc1/scripts/**/*.lean', 'psc1/host/**/*.lean', 'psc1/lakefile.lean', 'psc1/lean-toolchain') }}
       - name: Install the pinned native bootstrap compiler
         run: |
           set -euo pipefail

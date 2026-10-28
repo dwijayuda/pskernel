@@ -695,3 +695,8 @@ lean_lib PsMinStringBridgeFixture where
 lean_lib PsMinCompilerCaller where
   srcDir := "proofs/pskernel-min"
   roots := #[`CompilerCaller, `CompilerCallerTrust]
+
+-- Native/source-generated caller probes, outside checker runtime roots.
+lean_lib PsMinCompilerCallerFixture where
+  srcDir := "packages/pskernel-min/src"
+  roots := #[`Ps.MinKernel.Tests.CompilerCaller]

@@ -1,6 +1,8 @@
 # R7 actual recursive caller correspondence: experiment plan
 
-Status: proof experiment; no new theorem or full compiler qualification yet.
+Status: ten proof reports passed in the first Linux experiment (three axiom-free,
+seven propext-only); native/generated caller qualification is now being added.
+Full compiler qualification remains open.
 Parent usability source: eea9306384ab68c220bece18e769fd16d7903f3a.
 The [usability/full-compiler contract](PSC1_MIN_KERNEL_USABILITY_PLAN.md) remains
 the overall completion definition. This is one C2 component, not C1/C2/C3 completion.

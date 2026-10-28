@@ -11,6 +11,7 @@ on:
       - psc1/scripts/MinKernelSourceCompile.lean
       - psc1/scripts/MinKernelCompilerPreservation.lean
       - psc1/scripts/MinKernelTextPreservation.lean
+      - psc1/scripts/MinKernelCompilerCaller.lean
       - .github/workflows/psc1-minkernel.yml
   workflow_dispatch:
 permissions:
@@ -229,7 +230,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist/pskernel-min/compiler-caller
-          lake build PsMinCompilerCaller 2>&1 | tee dist/pskernel-min/compiler-caller/build.log
+          lake build PsMinCompilerCaller PsMinCompilerCallerFixture 2>&1 | tee dist/pskernel-min/compiler-caller/build.log
           lake env lean proofs/pskernel-min/CompilerCallerTrust.lean 2>&1 | tee dist/pskernel-min/compiler-caller/proof.log
           node --input-type=module <<'JS'
           import fs from 'node:fs';
@@ -249,6 +250,7 @@ jobs:
           console.log('PSC1_R7_CALLER_TRUST_PASS '+reports.length);
           
           JS
+          node --max-old-space-size=256 scripts/minkernel-compiler-caller.mjs --abi-only
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -357,6 +359,9 @@ jobs:
       - name: Check actual text composition source and unchanged String refusal boundary
         if: ${{ !cancelled() && steps.regular_ingress.outcome == 'success' }}
         run: node --max-old-space-size=256 scripts/minkernel-text-preservation.mjs
+      - name: Check actual recursive caller source, emitted module and exact source admission
+        if: ${{ !cancelled() && steps.regular_ingress.outcome == 'success' }}
+        run: node --max-old-space-size=256 scripts/minkernel-compiler-caller.mjs
       - name: Build and qualify exact standalone pskernel-min tarball offline
         if: ${{ !cancelled() && steps.regular_ingress.outcome == 'success' }}
         run: |

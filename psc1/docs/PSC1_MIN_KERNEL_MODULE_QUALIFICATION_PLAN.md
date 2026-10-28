@@ -1,5 +1,12 @@
 # Actual compiler-module qualification plan
 
+The later [C1 List type component](PSC1_MIN_KERNEL_LIST_TYPE_GUIDELINE.md)
+has passed its constructive signature model and all 21 actual signatures /
+100 native-generated observations. Public admission still refuses List and
+full compiler coverage remains 0/124. Continue with actual body/recursor/history
+soundness and the missing prelude/name contracts before connecting that layer.
+
+
 Implemented checkpoint: f27399e13f187957bb79e7dd20db9ca9a68c77eb.
 All 124 dependency projections and six fresh actual leaves were queried.
 Ps.Foundation.Source has fresh Min admission and 525 native/generated runtime

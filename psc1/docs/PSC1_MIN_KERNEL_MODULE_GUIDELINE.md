@@ -1,5 +1,15 @@
 # Actual PSC1 modules: qualification guideline and blocking obligations
 
+C1 continuation (2026-10-29): the [List signature component](PSC1_MIN_KERNEL_LIST_TYPE_GUIDELINE.md)
+now supplies a constructive, independently specified type/scheme model and
+actual worker refinement for all 21 List signatures, with 100 native/generated
+observations. It is isolated from public admission. Counts below remain
+1/124 admitted and 0/124 fully qualified. The next prerequisite is the actual
+typed List body/history model, recursor and primitive contracts, and checker
+refinement; Source C2 and all Min generations remain open.
+The earlier diagnosis below describes the still-current public ground checker.
+
+
 Current result (2026-10-28): **1/124 fresh actual source-module closures
 Min-admitted; 1/124 also has finite native/generated runtime validation;
 0/124 fully compiler-qualified.** No MinKernel-backed G1/G2/G3 is qualified.
@@ -270,8 +280,10 @@ remain labelled and do not advance qualification.
 
 The stable U1 checker remains privately usable; the original tarball and hash
 remain in its [usage guide](PSC1_MIN_KERNEL_USABLE_GUIDE.md).
-The retained adopted proof suite has 259 unique reports: 42 axiom-free and
+The R7/R8 baseline retains 259 unique printed reports: 42 axiom-free and
 217 propext-only; see [R7/R8 guideline](PSC1_MIN_KERNEL_R8_GUIDELINE.md).
+The later C1 signature component adds thirteen guarded reports, without changing
+the admitted compiler-module count; its dated receipt records the separate scope.
 This matrix adds no proof or acceptance rule. Existing proof and runtime gates
 must continue passing on adoption.
 

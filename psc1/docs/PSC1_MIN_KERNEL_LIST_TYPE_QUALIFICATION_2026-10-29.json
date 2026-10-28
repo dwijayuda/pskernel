@@ -1,0 +1,128 @@
+{
+  "schema": "psc1-min-actual-list-signature-qualification/1",
+  "date": "2026-10-29",
+  "source": "34fe275f0d5a72fff150aa7b77fca0e97f716456",
+  "scope": "C1 signature translation/model only",
+  "status": "passed-scoped",
+  "module": "Ps.Foundation.List",
+  "actualSignatures": 21,
+  "arityDistribution": {
+    "1": 12,
+    "2": 6,
+    "3": 3
+  },
+  "cases": 100,
+  "positiveDescriptors": 45,
+  "expectedRefusals": 55,
+  "actualListSource": {
+    "bytes": 3160,
+    "sha256": "fded5488ec5b23135838048541792d71c6f3aae0040a558a05c68c05d1e01f1f"
+  },
+  "actualListCanonical": {
+    "bytes": 57195,
+    "sha256": "8a37e905d2ffb9d9309ff048802b63a10eba5bd591631cc6e5298307016c7609"
+  },
+  "publicMin": {
+    "accepted": false,
+    "code": "PSC1_MIN_CORE_REFUSED",
+    "delegated": false
+  },
+  "officialListReplay": {
+    "accepted": true,
+    "version": "4.35.0",
+    "commit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc"
+  },
+  "counts": {
+    "totalCompilerModules": 124,
+    "minAdmittedFreshSourceClosures": 1,
+    "finiteRuntimeValidatedAdmittedModules": 1,
+    "fullyCompilerQualifiedModules": 0,
+    "minG1": false,
+    "minG2": false,
+    "minG3": false
+  },
+  "model": {
+    "monotypes": "Type",
+    "schemes": "Type 1",
+    "typeInType": false,
+    "actualSignatureWorkerRefinement": true,
+    "independentGrammar": true,
+    "variableBounds": true,
+    "codeRenameAndSubstitutionLaws": true,
+    "typedCoreTermSubstitution": false,
+    "termBodySoundness": false,
+    "sourceCompilerPreservation": false,
+    "publicIntegration": false
+  },
+  "trust": {
+    "newReports": 13,
+    "axiomFree": 2,
+    "propextOnly": 11,
+    "retainedBefore": 259,
+    "retainedWithCandidate": 272,
+    "combinedAxiomFree": 44,
+    "combinedPropextOnly": 228
+  },
+  "evidence": {
+    "run": 40735903282,
+    "modelJob": 122984241627,
+    "actualSignaturesJob": 122985123930,
+    "modelArtifact": {
+      "id": 12836129410,
+      "bytes": 4993,
+      "sha256": "1741dcf0daac14222f866a8c848dfc701fc2a951d66a5a22e08cc1c859e4a679"
+    },
+    "actualArtifact": {
+      "id": 12835844683,
+      "bytes": 3761104,
+      "sha256": "7ce93c23ca342cb632d88749f927e8e9bcf20a2b15e6d22dd28816cb91c803b9"
+    },
+    "sourceRuntimeModules": 6,
+    "sourceRuntimeBytes": 42040,
+    "typescript": {
+      "bytes": 204798,
+      "sha256": "347d48e83ae7ce5698bbf65f5d770d7bf82748c03991ea496527e64a81cf8ecd"
+    },
+    "javascript": {
+      "bytes": 215243,
+      "sha256": "bf07b009f50b4be9c7aebc98860a3525f148fdd794169e7c40bd64607f608273"
+    },
+    "runtimeCanonical": {
+      "bytes": 772700,
+      "sha256": "74b099760703ce58cdd4e6d8eb9be099d97ab52d5a8b4ab32788c28e86d53fb7"
+    }
+  },
+  "nextFundamentalObligations": [
+    "Typed parameter abstraction, term/global environments and List.rec body/history model with actual checker refinement",
+    "Nat.rec, Except.rec, Prod.mk, Bool.decEq/Eq/ite contracts and exact instantiations",
+    "Except/Prod reserved-name and prelude binding laws for a separate connected profile",
+    "Exact-byte and state/history composition before declaration admission",
+    "Actual compiler preservation and Min-backed generations"
+  ],
+  "policy": {
+    "projectExecution": "GitHub Actions Linux only",
+    "publicRulesChanged": false,
+    "stablePackageRootsChanged": false,
+    "defaultProviderChanged": false,
+    "npmPublished": false,
+    "protectedBase": "94e0c13f6a4b434f73c859cc0c716cb6fb8d1340"
+  },
+  "failedCandidates": [
+    {
+      "source": "61e1ade111b8c2c383b242acac3ff79a5b2c1253",
+      "run": 40731718907,
+      "reason": "Lean elaboration: reserved identifiers and explicit fallback fuel required"
+    },
+    {
+      "source": "4f33f7e3f92a444181b0122a0f9dbc1c7a0f7328",
+      "run": 40733172760,
+      "reason": "Main native project omitted CoreBytes runtime dependency roots"
+    },
+    {
+      "source": "08efadfe82e13880e6928105ac8fd10903bc10ce",
+      "run": 40734244818,
+      "reason": "Owned PSC1 frontend refused leading-dot constructor terms; explicit constructors preserve behavior"
+    }
+  ],
+  "boundary": "No newly admitted compiler module. Type-signature success is not declaration/body soundness, compiler preservation or self-hosting."
+}

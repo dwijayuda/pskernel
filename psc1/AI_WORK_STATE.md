@@ -1,5 +1,28 @@
 # PSC1 AI work state
 
+## C1 continuation: actual List signature model — 2026-10-29
+
+Module metrics remain **1/124 fresh source closures Min-admitted, 1/124 with
+finite runtime validation, 0/124 fully compiler-qualified**. No Min generations.
+The isolated type layer now handles all 21 actual List signatures: its constructive
+Type / Type 1 model and executable grammar refinement passed, with all 100
+native/generated/source-expectation observations. Candidate: 34fe275f0d5a72fff150aa7b77fca0e97f716456,
+[Linux run 40735903282](https://github.com/dwijayuda/pskernel/actions/runs/40735903282).
+See the [List type guideline](docs/PSC1_MIN_KERNEL_LIST_TYPE_GUIDELINE.md)
+and [scoped receipt](docs/PSC1_MIN_KERNEL_LIST_TYPE_QUALIFICATION_2026-10-29.json).
+
+This layer is not imported by public admission. The same List packet still
+refuses there; Source retains its 525 checks. Type well-formedness is not a
+semantic declaration value. Next: actual typed List bodies, constant-motive
+List.rec, primitive/prelude and reserved-name contracts, and coherent global
+history before public byte integration. Source's actual compiler preservation
+and complete Min-backed self-hosting remain open. R9 stays parked.
+
+The C1 layer adds 13 guarded reports (two axiom-free, eleven propext-only);
+all previous 259 reports remain. Adopted-source regressions retain their own
+source SHA and terminal status; do not infer qualification from a pending run.
+
+
 ## Actual compiler module checkpoint — 2026-10-28
 
 **1/124 fresh source closures Min-admitted; 1/124 has finite runtime validation;

@@ -52,6 +52,13 @@ compiler packet. A scalable byte/parser/state representation and its refinement
 proof are part of this obligation. R4B stays stable; new grammars need an explicit
 profile, independent model and actual implementation-to-model theorem.
 
+The [C1 signature component](PSC1_MIN_KERNEL_LIST_TYPE_GUIDELINE.md) now
+provides a scoped Type / Type 1 model and actual signature-worker refinement
+for List's quantified type headers. It adds no public admission rule.
+Actual body/recursor/global-history semantics and their checker refinement,
+including Except/Prod prelude binding and name reservations, remain required.
+Signature observations do not advance complete module qualification.
+
 ## C2: actual compiler preservation
 
 Discharge R5's actual recursive caller premises using independent Core source

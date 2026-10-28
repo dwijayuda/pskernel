@@ -1,7 +1,7 @@
 name: PSC1 modular generations and fixed points
 on:
   push:
-    branches: [feat/psc1-portable-modules-20261029]
+    branches: [feat/psc1-portable-modules-20261029, diagnostic/psc1-modular-cpu-20261029]
     paths: ['psc1/scripts/requests/modular-selfhost.json']
   workflow_dispatch:
 permissions:
@@ -17,7 +17,7 @@ jobs:
       matrix:
         engine: [js, ts]
     runs-on: ubuntu-24.04
-    timeout-minutes: 120
+    timeout-minutes: 160
     defaults:
       run:
         shell: bash
@@ -69,7 +69,17 @@ jobs:
           PSC1_MODULAR_ENGINE: ${{ matrix.engine }}
         run: |
           profile="$(node --input-type=module -e "import fs from 'node:fs';process.stdout.write(JSON.parse(fs.readFileSync('scripts/requests/modular-selfhost.json')).profile)")"
-          node host-tools/executable/selfhost.mjs "$PSC1_MODULAR_ENGINE" "$profile"
+          node host-tools/executable/selfhost.mjs "$PSC1_MODULAR_ENGINE" "$profile" &
+          qualification_pid=$!
+          while kill -0 "$qualification_pid" 2>/dev/null; do
+            sleep 45
+            if kill -0 "$qualification_pid" 2>/dev/null; then
+              date -u '+PSC1_MODULAR_PROGRESS %Y-%m-%dT%H:%M:%SZ'
+              # Numeric process metrics only; never dump arguments or environments.
+              ps -C node -o pid=,ppid=,etimes=,time=,rss= || true
+            fi
+          done
+          wait "$qualification_pid"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

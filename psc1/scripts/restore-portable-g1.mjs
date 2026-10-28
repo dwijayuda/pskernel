@@ -6,7 +6,7 @@ import {spawnSync} from 'node:child_process';
 import crypto from 'node:crypto';
 const request=JSON.parse(fs.readFileSync(process.argv[2]));
 assert.equal(request.schema,'psc1-modular-selfhost-request/1');
-assert.ok(['performance-240s','correctness-1800s'].includes(request.profile));
+assert.ok(['performance-240s','correctness-1800s','correctness-3600s'].includes(request.profile));
 assert.match(request.seedCommit,/^[a-f0-9]{40}$/);assert.match(request.archiveSha256,/^[a-f0-9]{64}$/);
 assert.ok(Number.isSafeInteger(request.runId)&&request.runId>0);
 assert.ok(Number.isSafeInteger(request.artifactId)&&request.artifactId>0);

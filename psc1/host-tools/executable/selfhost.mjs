@@ -9,7 +9,7 @@ import {sha256,json,put,files} from './tools.mjs';
 import {supervised,admitAndPackage,packGraph,exactGraphs,nodeFlags,attachNativeTestReferences} from './generation-tools.mjs';
 const [variant,profile='correctness-1800s']=process.argv.slice(2);
 assert.ok(['js','ts'].includes(variant));
-assert.ok(['performance-240s','correctness-1800s'].includes(profile));
+assert.ok(['performance-240s','correctness-1800s','correctness-3600s'].includes(profile));
 const base=path.resolve('dist/portable-modules'),input=JSON.parse(fs.readFileSync(path.join(base,'input.json')));
 assert.equal(input.schema,'psc1-portable-modular-generation-input/1');
 const current=readOwnedCompilerSources('Ps.CompilerUnified.Service');
@@ -25,7 +25,7 @@ const report={schema:'psc1-portable-modular-selfhost/1',testedCommit:process.env
  nativeFrontendCalls:0,generationOutput:'genuine source-owned modules only; no whole-compiler bundle',
  nativeReferenceScope:'explicit corpus oracle only, outside all executable graphs',generations:[],g1ManifestSha256:g1.manifestHash,
  independentKernel:'official-Lean-4.35.0',semanticFuel:'unchanged',memoryStackPolicies:'unchanged',
- compilerRequestPolicy:'G1/corpus/tools 240s; only G2-self/G3-self use the explicit correctness profile'};
+ compilerRequestPolicy:'G1/corpus/tools 240s; only G2-self/G3-self use the explicit chosen wall-clock correctness profile'};
 const checkpoint=()=>fs.writeFileSync(path.join(directory,'qualification.json'),json(report));
 checkpoint();
 try{
@@ -45,6 +45,7 @@ try{
   const stage=path.join(directory,'G'+generation),config=path.join(directory,'G'+generation+'.json');
   put(config,json({engine:{root:producer.root,manifestFile:path.join(path.dirname(producer.root),'manifest.json'),
    manifestSha256:producer.manifestHash,variant},requestFile,directory:stage}));
+  console.log('PSC1_MODULAR_GENERATION_START '+JSON.stringify({generation,variant,profile,producerManifestSha256:producer.manifestHash}));
   const execution=supervised({label:'G'+generation+'-'+variant,directory,profile,request:'G'+generation+'-self',
    command:[process.execPath,...nodeFlags,path.resolve('host-tools/executable/generation-runner.mjs'),config]});
   const graph=admitAndPackage(stage,input.sourceRows,input.sources,input.reference,

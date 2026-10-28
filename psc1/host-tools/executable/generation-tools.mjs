@@ -9,10 +9,12 @@ import {packageGraph} from './package.mjs';
 import {verify} from './verify.mjs';
 import {sha256,json,put,files,run} from './tools.mjs';
 export const nodeFlags=['--max-old-space-size=4096','--stack-size=8192'];
+// Profiles bound wall time. V8/GC threads can use more CPU seconds than wall
+// seconds; do not add an earlier CPU deadline to Node requests.
 export function supervised({label,command,directory,profile='performance-240s',request='G1',native=false}){
  const policy=compilerRequestLimit(profile,request),seconds=policy.timeoutMs/1000;
  const result=spawnSync('python3',[path.resolve('host-tools/process/bounded-process.py'),JSON.stringify({
-  command:['/usr/bin/prlimit',...(native?['--as=4294967296']:[]),'--stack=8388608','--cpu='+seconds,'--',...command],
+  command:['/usr/bin/prlimit',...(native?['--as=4294967296','--cpu='+seconds]:[]),'--stack=8388608','--',...command],
   directory:path.join(directory,'execution',label),...policy,maxBuffer:33554432
  })],{encoding:'utf8',timeout:policy.timeoutMs+5000,maxBuffer:33554432});
  assert.equal(result.error,undefined,result.error?.message);
@@ -21,7 +23,7 @@ export function supervised({label,command,directory,profile='performance-240s',r
  console.log('PSC1_MODULAR_EXECUTION '+label+' '+JSON.stringify(report));
  const stderr=fs.readFileSync(path.join(directory,'execution',label,'tool.stderr.txt'),'utf8');
  const stdout=fs.readFileSync(path.join(directory,'execution',label,'tool.stdout.txt'),'utf8');
- assert.ok(!report.error&&report.status===0,stderr+'\n'+stdout);
+ assert.ok(!report.error&&report.status===0,label+': '+JSON.stringify(report)+'\n'+stderr+'\n'+stdout);
  return {report,stdout};
 }
 export function admitAndPackage(stage,sourceRows,sources,reference,{label,compilerCommit}){

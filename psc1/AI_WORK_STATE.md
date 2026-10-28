@@ -61,6 +61,34 @@ pending their actual results. The retained CLI layout failure in40748274725
 is fixed by importing the canonical host resource profiles directly, not its
 development-script compatibility re-export. No test or policy is waived.
 
+## Diagnostic qualification retry (not yet adopted into PR #209)
+
+PR #209 remains at77961851 while its complete source/CLI regressions finish.
+Initial G2 run40749484847 fails with SIGKILL: TS1565790ms/3130492KiB RSS/
+1800.61 sampled CPU seconds; JS1557142ms/3265200KiB RSS/1804.32 CPU seconds.
+The introduced CPU=wall cap caused early termination before the canonical
+1800s wall deadline. resource-profiles.mjs explicitly defines wall-clock profiles.
+Node retry restores that canonical wall policy; native guards are unchanged.
+No G2/G3 or fixed-point success is claimed.
+
+User explicitly authorizes a sensible limit increase. Select the existing
+correctness-3600s profile only for G2-self/G3-self and allow160-minute Linux jobs
+for both generations, independent admission and retained corpus/npm checks.
+GitHub-hosted jobs allow6h: https://docs.github.com/en/actions/reference/limits.
+Preserve correctness-1800s and the separate performance-240s profile.
+G1/corpus/tools240s, checker120s, heap4096MiB, stack8MiB, native AS4GiB,
+semantic fuel and all file/stage/graph limits are unchanged.
+
+Diagnostic40754131717 at a206c7ee profiles the exact pinned graph/self-source
+request for240s on both engines. It collects real samples, not qualification.
+Top JS source hotspot is bounded psStringEqFromWithFuel; other costs include
+substitution, environment lookup and generator/trampoline dispatch. No single
+dominant first-four-minute defect is established. Preserve full V8 logs/receipts.
+The long retry emits per-generation start identities and45s numeric RSS/CPU
+heartbeats without exposing process arguments or environments. Compiler source
+and qualified G1 files are unchanged. Adopt reviewed controller bytes into the
+active PR only after actual results; preserve all evidence/history.
+
 ## M4 milestone: qualified installed modular Linux preview
 
 Final full-source checkpoint `821292dfd7dac39a1281a1b51b8e5ec17af63346`

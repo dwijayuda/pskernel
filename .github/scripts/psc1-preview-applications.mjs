@@ -18,7 +18,7 @@ assert.equal(prepared.input.compilerSourceClosureDigest,'41eb40437e0df1722128c09
 assert.equal(prepared.records.length,8);
 const f=fixture({consumers:true}),runtime=path.basename(f.runtime).startsWith('bun')?'bun':'node';
 const records=[],report={schema:'psc1-modular-installed-applications/1',status:'running',
- testedCommit:process.env.GITHUB_SHA,inputCommit:input.sourceCommit,runtime,records,defaultKernel:'wasm',
+ testedCommit:process.env.GITHUB_SHA,inputCommit:process.env.PSC1_MODULAR_INPUT_COMMIT||input.sourceCommit,runtime,records,defaultKernel:'wasm',
  fullModularSelfHosting:false,applicationReference:input.applicationReference};
 const save=()=>fs.writeFileSync(path.join(out,'installed-applications-'+runtime+'.json'),JSON.stringify(report,null,2)+'\n');
 const buildFile=path.join(f.directory,'build-app.mjs');

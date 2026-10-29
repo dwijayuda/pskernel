@@ -1,12 +1,14 @@
-name: PSC1 modular installed toolchain
+name: PSC1 self-host-qualified npm toolchain
 on:
   push:
-    branches: [feat/psc1-modular-toolchain-20261028]
+    branches: [feat/psc1-selfhosted-npm-20261029]
     paths:
       - .github/workflows/psc1-modular-toolchain.yml
       - psc1/scripts/modular-toolchain-*
       - psc1/host-tools/**
       - psc1/npm-cli/**
+      - .github/scripts/psc1-preview-applications.mjs
+      - .github/scripts/psc1-selfhosted-delivery.mjs
   workflow_dispatch:
 permissions:
   contents: read
@@ -33,6 +35,12 @@ jobs:
         run: |
           node scripts/ci/repository-layout.mjs
           node --check scripts/modular-toolchain-package.mjs
+          node --check scripts/modular-toolchain-provenance.mjs
+          node --check scripts/modular-toolchain-installed.mjs
+          node --check scripts/modular-toolchain-qualify.mjs
+          node --check ../.github/scripts/psc1-selfhosted-delivery.mjs
+          node --check ../.github/scripts/psc1-preview-applications.mjs
+          git diff --exit-code 2cb55ddc93404d840b07cc3faad5accd1cee62b0 HEAD -- packages host host-tools npm-cli lakefile.lean lean-toolchain
       - run: npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
       - name: Retain pinned formatter proposals for changed host adapters
         run: |
@@ -119,6 +127,7 @@ jobs:
           echo "PSC1_TEST_WASMTIME=$RUNNER_TEMP/psc1-bin/wasmtime" >> "$GITHUB_ENV"
       - name: Select host runtime
         run: |
+          echo "PSC1_TEST_NODE=$(command -v node)" >> "$GITHUB_ENV"
           if [ '${{ matrix.runtime }}' = bun ]; then
             echo "PSC1_TEST_RUNTIME=$(command -v bun)" >> "$GITHUB_ENV"
           else
@@ -142,4 +151,198 @@ jobs:
             psc1/dist/modular-toolchain/qualification-*.json
             psc1/dist/modular-toolchain/watch-*.json
             psc1/dist/modular-toolchain/resources.json
+          retention-days: 90
+
+  boundaries:
+    needs: package
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime: [node,bun]
+    env:
+      PSC1_MODULAR_INPUT_COMMIT: ${{ github.sha }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.4'
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-modular-toolchain-package-${{ github.sha }}
+          path: psc1/dist/modular-toolchain
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-modular-target-resources-${{ github.sha }}
+          path: psc1/dist/modular-toolchain
+      - name: Install exact official Rust target SDK
+        run: |
+          rustup toolchain uninstall 1.90.0
+          rustup toolchain install 1.90.0 --profile minimal
+      - name: Install SHA-pinned component consumer
+        run: |
+          mkdir -p "$RUNNER_TEMP/psc1-wasmtime" "$RUNNER_TEMP/psc1-bin"
+          curl --fail --location --retry 3 --connect-timeout 20 --max-time 120 https://github.com/bytecodealliance/wasmtime/releases/download/v49.0.4/wasmtime-v49.0.4-x86_64-linux.tar.xz -o "$RUNNER_TEMP/psc1-wasmtime.tar.xz"
+          echo "6561abd54bdf941b6519cce883e0857cc9bce94d92c65287ed838d895a27f5a9  $RUNNER_TEMP/psc1-wasmtime.tar.xz" | sha256sum -c -
+          tar xJf "$RUNNER_TEMP/psc1-wasmtime.tar.xz" -C "$RUNNER_TEMP/psc1-wasmtime"
+          install -m 755 "$(find "$RUNNER_TEMP/psc1-wasmtime" -type f -name wasmtime -print -quit)" "$RUNNER_TEMP/psc1-bin/wasmtime"
+          echo "PSC1_TEST_WASMTIME=$RUNNER_TEMP/psc1-bin/wasmtime" >> "$GITHUB_ENV"
+      - name: Select host runtime
+        run: |
+          echo "PSC1_TEST_NODE=$(command -v node)" >> "$GITHUB_ENV"
+          if [ '${{ matrix.runtime }}' = bun ]; then
+            echo "PSC1_TEST_RUNTIME=$(command -v bun)" >> "$GITHUB_ENV"
+          else
+            echo "PSC1_TEST_RUNTIME=$(command -v node)" >> "$GITHUB_ENV"
+          fi
+      - name: Resolve exact optional target resources without installing an old compiler
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node scripts/modular-toolchain-resources.mjs
+          node --input-type=module -e "import fs from 'node:fs';const r=JSON.parse(fs.readFileSync('dist/modular-toolchain/resources.json'));fs.appendFileSync(process.env.GITHUB_ENV,'PSC1_TEST_RUST_ROOT='+r.rustRoot+'\n');"
+      - name: Installed resource and authority refusals, Unicode IO, strict consumer types and TS watch
+        run: |
+          node ../.github/scripts/psc1-modular-boundaries.mjs
+          node ../.github/scripts/psc1-modular-io-types.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-modular-boundaries-${{ matrix.runtime }}-${{ github.sha }}
+          path: |
+            psc1/dist/modular-toolchain/boundaries-*.json
+            psc1/dist/modular-toolchain/io-types-*.json
+          retention-days: 90
+
+  applications:
+    needs: package
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        runtime: [node,bun]
+    env:
+      PSC1_MODULAR_INPUT_COMMIT: ${{ github.sha }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.4.4'
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-modular-toolchain-package-${{ github.sha }}
+          path: psc1/dist/modular-toolchain
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-modular-target-resources-${{ github.sha }}
+          path: psc1/dist/modular-toolchain
+      - name: Install exact official Rust target SDK
+        run: |
+          rustup toolchain uninstall 1.90.0
+          rustup toolchain install 1.90.0 --profile minimal
+      - name: Install SHA-pinned component consumer
+        run: |
+          mkdir -p "$RUNNER_TEMP/psc1-wasmtime" "$RUNNER_TEMP/psc1-bin"
+          curl --fail --location --retry 3 --connect-timeout 20 --max-time 120 https://github.com/bytecodealliance/wasmtime/releases/download/v49.0.4/wasmtime-v49.0.4-x86_64-linux.tar.xz -o "$RUNNER_TEMP/psc1-wasmtime.tar.xz"
+          echo "6561abd54bdf941b6519cce883e0857cc9bce94d92c65287ed838d895a27f5a9  $RUNNER_TEMP/psc1-wasmtime.tar.xz" | sha256sum -c -
+          tar xJf "$RUNNER_TEMP/psc1-wasmtime.tar.xz" -C "$RUNNER_TEMP/psc1-wasmtime"
+          install -m 755 "$(find "$RUNNER_TEMP/psc1-wasmtime" -type f -name wasmtime -print -quit)" "$RUNNER_TEMP/psc1-bin/wasmtime"
+          echo "PSC1_TEST_WASMTIME=$RUNNER_TEMP/psc1-bin/wasmtime" >> "$GITHUB_ENV"
+      - name: Select host runtime
+        run: |
+          echo "PSC1_TEST_NODE=$(command -v node)" >> "$GITHUB_ENV"
+          if [ '${{ matrix.runtime }}' = bun ]; then
+            echo "PSC1_TEST_RUNTIME=$(command -v bun)" >> "$GITHUB_ENV"
+          else
+            echo "PSC1_TEST_RUNTIME=$(command -v node)" >> "$GITHUB_ENV"
+          fi
+      - name: Resolve exact optional target resources without installing an old compiler
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          node scripts/modular-toolchain-resources.mjs
+          node --input-type=module -e "import fs from 'node:fs';const r=JSON.parse(fs.readFileSync('dist/modular-toolchain/resources.json'));fs.appendFileSync(process.env.GITHUB_ENV,'PSC1_TEST_RUST_ROOT='+r.rustRoot+'\n');"
+      - name: Retained CLI, JSON/file and compiler-like applications through the installed root
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ${{ matrix.runtime }} ../.github/scripts/psc1-preview-applications.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-modular-installed-applications-${{ matrix.runtime }}-${{ github.sha }}
+          path: psc1/dist/modular-toolchain/installed-applications-*.json
+          retention-days: 90
+
+  compatibility:
+    needs: package
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [24, 26]
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-modular-toolchain-package-${{ github.sha }}
+          path: psc1/dist/modular-toolchain
+      - name: Fresh npm root-only installation, real compiler and independent kernel on supported Node
+        run: node scripts/modular-toolchain-installed.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-modular-runtime-node${{ matrix.node }}-${{ github.sha }}
+          path: psc1/dist/modular-toolchain/smoke-node.json
+          retention-days: 90
+  delivery:
+    needs: [package, qualify, boundaries, applications, compatibility]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Require complete current-HEAD CI, assemble ZIP and verify a fresh offline installation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node ../.github/scripts/psc1-selfhosted-delivery.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: proofscript-selfhosted-installable-${{ github.sha }}
+          path: |
+            psc1/dist/selfhosted-delivery/*-installable.zip
+            psc1/dist/selfhosted-delivery/delivery.json
           retention-days: 90

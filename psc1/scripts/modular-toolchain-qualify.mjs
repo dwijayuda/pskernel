@@ -12,7 +12,8 @@ const f=fixture({allProviders:true}),records=[],negatives=[];
 const out=path.resolve('dist/modular-toolchain'),runtime=path.basename(f.runtime).startsWith('bun')?'bun':'node';
 const reference=JSON.parse(fs.readFileSync('scripts/modular-toolchain-reference.json'));
 const report={schema:'psc1-modular-installed-qualification/1',testedCommit:process.env.GITHUB_SHA,
- runtime,status:'running',records,negatives,sourceGraph:reference.compilerSourceClosureDigest,
+ runtime,status:'running',records,negatives,sourceGraph:f.assembly.compilerSourceClosureDigest,
+ referenceCompilerSourceClosureDigest:reference.compilerSourceClosureDigest,
  defaultKernel:'wasm',fullModularSelfHosting:false};
 const save=()=>fs.writeFileSync(path.join(out,'qualification-'+runtime+'.json'),JSON.stringify(report,null,2)+'\n');
 const program=path.join(f.directory,'build.mjs');
@@ -90,7 +91,7 @@ try{
  }
  // Every installed owner is ordinary npm code with declared edges and owned bodies.
  const nodes=path.join(f.root,'node_modules'),manifest=JSON.parse(fs.readFileSync(path.join(f.root,'dist/COMPILER_GRAPH.json')));
- assert.equal(manifest.packages.length,20);assert.equal(manifest.units.length,127);
+ assert.equal(manifest.packages.length,20);assert.equal(manifest.units.length,f.assembly.sourceUnits);
  for(const p of manifest.packages){
   const meta=JSON.parse(fs.readFileSync(path.join(nodes,p.name,'package.json')));
   assert.equal(meta.name,p.name);assert.ok(!Object.hasOwn(meta.dependencies||{},'proofscript'));
@@ -106,7 +107,7 @@ try{
  // Fresh global root-only installation; no hidden source/native checkout is selected.
  const global=fixture({global:true});
  try{
-  assert.equal(JSON.parse(global.invoke(['--identity'])).compilerSourceClosureDigest,reference.compilerSourceClosureDigest);
+  assert.equal(JSON.parse(global.invoke(['--identity'])).compilerSourceClosureDigest,f.assembly.compilerSourceClosureDigest);
   global.invoke(['init'],global.directory);
   assert.equal(JSON.parse(global.invoke(['check'],global.directory)).logicalAdmission,'accepted');
   const result=JSON.parse(global.invoke(['build','--out','out','--publication-protocol','portable-file'],global.directory));

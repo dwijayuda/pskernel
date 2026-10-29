@@ -5,6 +5,7 @@ import os from 'node:os';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
+import { sha256 } from './kernel435-qualified-artifact.mjs';
 import { fixtures } from './kernel435-fixtures.mjs';
 const out = path.resolve('dist/modular-toolchain'),
   receipt = JSON.parse(fs.readFileSync(path.join(out, 'package-receipt.json')));
@@ -86,6 +87,18 @@ try {
   assert.equal(fs.existsSync(path.join(compiler, 'dist/host/selfhost')), false);
   const nodes = path.join(root, 'node_modules'),
     manifest = JSON.parse(fs.readFileSync(path.join(root, 'dist/COMPILER_GRAPH.json')));
+  assert.equal(manifest.units.length, 134);
+  assert.equal(manifest.sourceGraph.manifestSha256, receipt.sourceGraphManifestSha256);
+  assert.equal(manifest.compilerSelfHosting.status, 'qualified-finite-linux-modular-js-ts');
+  assert.deepEqual(manifest.compilerSelfHosting, receipt.compilerSelfHosting);
+  const selfHostBytes = fs.readFileSync(path.join(root, receipt.compilerSelfHosting.receiptPath));
+  assert.equal(sha256(selfHostBytes), receipt.compilerSelfHosting.receiptSha256);
+  const selfHost = JSON.parse(selfHostBytes);
+  assert.equal(selfHost.sourceClosureDigest, receipt.compilerSourceClosureDigest);
+  for (const variant of ['js', 'ts']) {
+    assert.equal(selfHost.generations[variant].report.status, 'passed');
+    assert.equal(selfHost.generations[variant].report.nativeFrontendCalls, 0);
+  }
   const sample = manifest.files.find(
     (r) => r.path.includes('/dist/js/generated/') && r.path.endsWith('.mjs'),
   );
@@ -105,6 +118,7 @@ try {
     status: 'passed',
     testedCommit: process.env.GITHUB_SHA,
     runtime,
+    runtimeVersion: run(runtime, ['--version']).trim(),
     records,
     corePackages: 20,
     checkedBuilds: 8,

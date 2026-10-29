@@ -99,6 +99,26 @@ JS/TS G1/G2/G3/fixed points in its finite Linux scope.
 The qualified .13 distribution stays the default reference. Pilot expansion
 remains deferred; the stopped PR #203 and prototype history are preserved.
 
+## Active: qualified M5 compiler in the installable umbrella
+
+Continue PR #209 /2cb55ddc on feat/psc1-selfhosted-npm-20261029.
+Version0.1.0-psc1-modular.3 stages the exact qualified .2 G3 compiler graph inside
+the existing 20-package proofscript umbrella, thin psc and real default Wasm kernel.
+Both successful JS/TS G2/G3 manifests, full graph inventories and all15 tarball
+hashes must match the committed qualification receipt before assembly.
+Canonical compiler/host/checker bodies and every resource policy remain unchanged.
+
+Exit criteria: one immutable tarball must pass fresh root-only local/global npm,
+Node/Bun with both compiler engines, seven-target values/refusals, watch,
+resource/metadata negatives, Unicode IO, strict consumer types and real
+CLI/JSON/file/compiler-like applications. Node24/26 get real install/compiler/kernel
+smokes. The ZIP is created only after installed tests and the current PR source
+gate pass; extraction, SHA256SUMS, offline npm and actual CLI/build are rechecked.
+These results are pending actual CI. Preserve .13/M4.1 and optional Python/PHP.
+Other platforms, native binary reproduction, full M3 semantic-family matrix for
+the new installed cohort, universal release and240s self-compilation stay separate.
+[Integration architecture](architecture/selfhosted-installed-toolchain.md).
+
 ## M5: JS/TS G1/G2/G3 and exact modular fixed points qualified
 
 PR #209 continues from PR #208 / d53b43c271c65635b07a6ffa78fb6b08a5fa55de.

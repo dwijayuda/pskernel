@@ -1,14 +1,38 @@
 # PSC1 AI work state
 
-Updated 2026-10-29 Asia/Jakarta. Active M5 branch
-feat/psc1-portable-modules-20261029 from verified PR #208 HEAD
-d53b43c271c65635b07a6ffa78fb6b08a5fa55de.
+Updated 2026-10-29 Asia/Jakarta. Active integration branch
+feat/psc1-selfhosted-npm-20261029 from verified PR #209 HEAD
+2cb55ddc93404d840b07cc3faad5accd1cee62b0.
 Initial production modularity implementation PR #205,
 stacked on plan PR #204 / b400552324956d9c3a684c9231f60f70066e1629.
 GitHub/Linux CI only; expected-HEAD, single-parent/non-force history.
 No merge or registry publication.
 
-## Active M5: JS/TS G1/G2/G3 and exact modular fixed points qualified
+## Active integration: install the exact qualified M5 compiler
+
+Continue from PR #209 /2cb55ddc93404d840b07cc3faad5accd1cee62b0 on
+feat/psc1-selfhosted-npm-20261029. Candidate installed version0.1.0-psc1-modular.3
+reuses the unchanged .2 G3 compiler graph. Before copying any implementation,
+assembly validates both JS and TS successful40755246954 artifacts, exact G2/G3
+manifests, admissions and all15 tarballs against the committed M5 receipt.
+All generated bodies remain byte-identical; the existing M4 host, thin psc,
+20-package umbrella and real default Lean4.35.0 linear-memory Wasm kernel are reused.
+
+New installation qualification is pending actual CI: root-only local/global npm,
+both JS/TS engines, Node/Bun, seven targets, watch, authority/resource refusals,
+Unicode IO, strict consumer typing and retained real applications. Node24/26
+receive fresh root-only/compiler/kernel smoke checks. The delivery job requires
+the current PR source gate and every installed test to succeed before assembling
+a ZIP; it installs and executes the extracted ZIP again with an empty npm cache.
+
+No compiler source, checker, strict IR, source pairing, resource/semantic-fuel
+policy or qualified frozen executable changes. Python/PHP remain optional;
+Rust/Wasm output backends remain core, and older compiler executors still refuse
+the new cohort. The old.13 reference and M4.1 preview remain preserved.
+No merge or npm publication. This in-progress integration does not inherit
+installed qualification from either previous preview.
+
+## Preserved M5: JS/TS G1/G2/G3 and exact modular fixed points qualified
 
 PR #209 continues from PR #208 / d53b43c271c65635b07a6ffa78fb6b08a5fa55de.
 [Linux qualification 40755246954](https://github.com/dwijayuda/pskernel/actions/runs/40755246954)

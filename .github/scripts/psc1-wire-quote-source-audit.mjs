@@ -11,7 +11,7 @@ assert.equal(body(newB).replace(/\bquoteString\b/g,'psJsonQuote'),body(oldB));
 const oldS=block(oldService,'def compilePreparedWithOutputAbi (','\ndef compilePrepared (');
 const newS=block(service,'def compilePreparedWithQuote (','\ndef compilePreparedWithOutputAbi (');
 assert.equal(body(newS).replace(/\bquoteString\b/g,'psJsonQuote').replace('psCompilerHostAdmissionRequestWithQuote psJsonQuote','psCompilerHostAdmissionRequest'),body(oldS));
-const diff=spawnSync('git',['diff','--name-only',base,'--','packages','host','lakefile.lean','lean-toolchain'],{encoding:'utf8'});assert.equal(diff.status,0);assert.deepEqual(diff.stdout.trim().split('\n').sort(),[bfile,sfile].sort());
+const diff=spawnSync('git',['diff','--name-only',base,'--','packages','host','lakefile.lean','lean-toolchain'],{encoding:'utf8'});assert.equal(diff.status,0);assert.deepEqual(diff.stdout.trim().split('\n').sort(),[bfile,sfile].map(file=>'psc1/'+file).sort());
 const proof='import Ps.Compiler.Service\n\n'+oldB.replace('def psCompilerHostAdmissionRequest\n','def psWireReferenceAdmissionRequest\n')+
  '\ntheorem psWireLegacyAdmissionEquation : psCompilerHostAdmissionRequest = psWireReferenceAdmissionRequest := rfl\n\nnamespace Ps.Internal.CompilerService\n'+
  oldS.replace('def compilePreparedWithOutputAbi (','def psWireReferenceCompilePrepared (')+

@@ -203,6 +203,9 @@ export function resolveEngine(engine = 'js', distribution = loadDistribution()) 
       service: candidate,
       candidate,
       candidateKind: 'embedded',
+      checkCandidate: descriptor.checkCandidate
+        ? verifyFile(installationRoot, descriptor.checkCandidate)
+        : undefined,
       pins: [
         ...common,
         ...pins,
@@ -369,7 +372,7 @@ export function resolveKernel(provider = 'wasm', distribution = loadDistribution
 }
 // Select one explicit checker and retain before/after resource verification.
 // Native fallback is disabled; the default Wasm checker cannot silently change providers.
-export async function kernelHandle(provider = 'wasm', distribution = loadDistribution()) {
+async function kernelImplementation(provider, distribution) {
   const selected = resolveKernel(provider, distribution),
     verify = () =>
       selected.pins.forEach((p) => {
@@ -381,11 +384,16 @@ export async function kernelHandle(provider = 'wasm', distribution = loadDistrib
   const module = await import(pathToFileURL(selected.entry.path).href),
     env = { ...process.env };
   delete env.PSC_LEAN_KERNEL_PROVIDER_BIN;
-  const handle = await module.createKernel(
+
+  const options =
     provider === 'native'
       ? { env, allowSourceCheckoutFallback: false, timeoutMs: 120000, maxBuffer: 32 * 1024 * 1024 }
-      : { timeoutMs: 120000, maxBuffer: 32 * 1024 * 1024 },
-  );
+      : { timeoutMs: 120000, maxBuffer: 32 * 1024 * 1024 };
+  return { module, options, verify };
+}
+export async function kernelHandle(provider = 'wasm', distribution = loadDistribution()) {
+  const { module, options, verify } = await kernelImplementation(provider, distribution);
+  const handle = await module.createKernel(options);
   if (
     handle.metadata.leanVersion !== '4.35.0' ||
     handle.metadata.leanCommit !== leanCommit ||
@@ -395,6 +403,7 @@ export async function kernelHandle(provider = 'wasm', distribution = loadDistrib
   verify();
   return { handle, verify };
 }
+
 export async function checkInstalledAdmissions(source, provider = 'wasm') {
   if (typeof source !== 'string' || Buffer.byteLength(source) > 128 * 1024 * 1024)
     fail('ADMISSIONS_LIMIT');
@@ -403,10 +412,23 @@ export async function checkInstalledAdmissions(source, provider = 'wasm') {
     selected = provider === 'both' ? ['wasm', 'native'] : [provider],
     results = {};
   for (const key of selected) {
-    const { handle, verify } = await kernelHandle(key, d);
+    const { module, options, verify } = await kernelImplementation(key, d);
     verify();
-    results[key] = await handle.checkCanonicalAdmissions(source);
+    // The actual checking response carries the same identity. Explicit health
+    // APIs retain createKernel(); ordinary checks need no separate health process.
+    const result = await module.checkCanonicalAdmissions(source, options);
     verify();
+    if (
+      !result ||
+      result.protocol !== 'pskernel-lean/1' ||
+      result.provider !== 'lean4-cpp' ||
+      result.leanVersion !== '4.35.0' ||
+      result.leanCommit !== leanCommit ||
+      result.profile !== 'lean4.35-core' ||
+      typeof result.accepted !== 'boolean'
+    )
+      fail('KERNEL_IDENTITY');
+    results[key] = result;
   }
   const accepted = selected.every((k) => results[k].accepted === true),
     agreement = selected.every((k) => results[k].accepted === results[selected[0]].accepted);

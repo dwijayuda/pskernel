@@ -1,0 +1,893 @@
+{
+  "schema": "psc1-installed-development-qualification/1",
+  "status": "qualified-finite-linux-node",
+  "baseCommit": "b4facc22e7c576a112710e5081a84349c3f3a1e1",
+  "producerCommit": "f61b5d8cefce07f2b9516db5edb300c8107e8fba",
+  "qualification": {
+    "run": 40840703422,
+    "job": 123336098223,
+    "commit": "f61b5d8cefce07f2b9516db5edb300c8107e8fba",
+    "artifact": 12882623119,
+    "zipSha256": "bbbfb2a5d24f571a08e102e840c75b35a386711d2135ab539b8609b2093e900d"
+  },
+  "hostSources": {
+    "producerCommit": "f61b5d8cefce07f2b9516db5edb300c8107e8fba",
+    "baseCommit": "b4facc22e7c576a112710e5081a84349c3f3a1e1",
+    "pins": [
+      {
+        "path": "psc1/host-tools/generated-compiler-session.mjs",
+        "bytes": 33292,
+        "sha256": "82e5ac1524afb68774644a6ae24ff44a2c8b7fbaf9ab8562e785e420df4a92f7"
+      },
+      {
+        "path": "psc1/host-tools/installed-engine-resolver.mjs",
+        "bytes": 19328,
+        "sha256": "486152e127764686d529f233aee75010f4213461538f3a45fa935dc242925be5"
+      },
+      {
+        "path": "psc1/npm-cli/compiler-api.mjs",
+        "bytes": 15027,
+        "sha256": "bd43e39dbaae55d8698fec92abfaca75d07103395d6d5d6613b599a2b1e52dc3"
+      },
+      {
+        "path": "psc1/npm-cli/cli-project.mjs",
+        "bytes": 14614,
+        "sha256": "cb25f3a3494dbc0817d55ce8b279a5e9b4c64bde84556bc30fbc96dd86b5c778"
+      },
+      {
+        "path": "psc1/npm-cli/checked-command-cli.mjs",
+        "bytes": 5560,
+        "sha256": "f7088c6d6fba91231e3860bd51686d039558b2ddf8c7fee408a66b1bd1138e29"
+      },
+      {
+        "path": "psc1/npm-cli/proofscript-cli.mjs",
+        "bytes": 11648,
+        "sha256": "3d8cef0454c5a31706dcf560c004e170c0ce5aeb1b90444578eb93778f626592"
+      },
+      {
+        "path": "psc1/host-tools/prepared-engine.mjs",
+        "bytes": 8157,
+        "sha256": "c647f733e919a033e802efb84931aef371f81f6e195732c3aa5a93cf02110798"
+      },
+      {
+        "path": "psc1/host-tools/warm-compiler.mjs",
+        "bytes": 1240,
+        "sha256": "99660ffea3554ab96a304cd40f82f123c758b3b41796e960290d9bb098a71213"
+      },
+      {
+        "path": "psc1/scripts/modular-toolchain-package.mjs",
+        "bytes": 32023,
+        "sha256": "e58715c750263eeb01f6dfa03f8ffe0fed6cf98ff92a54b2136bf8c64556c315"
+      },
+      {
+        "path": "psc1/scripts/modular-toolchain-input.json",
+        "bytes": 1629,
+        "sha256": "3afc12efb1b1289af0bc1128021515f33c4ccfa1f740f70f6c60be07d839a999"
+      },
+      {
+        "path": "psc1/npm-cli/universal.d.ts",
+        "bytes": 5137,
+        "sha256": "7ff9bbcee25b5a87a4fd6598483c6e334db5d31bd0231fdc9639dd4ea29049e3"
+      },
+      {
+        "path": "psc1/host-tools/compiler-host-protocol.mjs",
+        "bytes": 4686,
+        "sha256": "dd36acfddf44e95cfcbf91024b41cb888e5400a0b55831f134ab7f152454c4ed"
+      },
+      {
+        "path": "psc1/npm-cli/cli-watch-job.mjs",
+        "bytes": 1810,
+        "sha256": "213d1c2c9c8630ca0c2687bd5420b818e0977138f050c7489bc4bcb88341b9ab"
+      },
+      {
+        "path": "psc1/npm-cli/cli-watch-worker.mjs",
+        "bytes": 357,
+        "sha256": "1a1cac901ab6b388efefa44b1b14471df4b7df2f4554b8a7e7990bc3ca8f1dc9"
+      },
+      {
+        "path": "psc1/npm-cli/cli-watch-server.mjs",
+        "bytes": 1107,
+        "sha256": "84ebc3211e0bb4e655a6148300e545f59ac920849e139b86579cf67aad02a45f"
+      },
+      {
+        "path": "psc1/npm-cli/cli-watch-client.mjs",
+        "bytes": 3452,
+        "sha256": "17bc2e7a16ac76842b3f32c706cdf27b5450057f182b99cebbcba7037795bc77"
+      },
+      {
+        "path": "psc1/npm-cli/cli-watch.mjs",
+        "bytes": 4135,
+        "sha256": "a8c497c64c9d8614464dc30bf3cca5d0cd492e2feb831f77aafab8541c00434d"
+      }
+    ]
+  },
+  "package": {
+    "schema": "psc1-modular-installed-package/1",
+    "testedCommit": "f61b5d8cefce07f2b9516db5edb300c8107e8fba",
+    "version": "0.1.0-psc1-modular.5",
+    "tarball": "proofscript-0.1.0-psc1-modular.5.tgz",
+    "bytes": 9831729,
+    "sha256": "bf8c244bdc2b936a07bf1d43d256b99cdb394abfaae0d544c1d3f21d91ecde9b",
+    "manifestSha256": "625376373b5e52680e94ec4b384ef62dac00b3156ae4de3d8d119ac3c000b551",
+    "consumerDescriptorsSha256": "09ba939509f91418b80eb5ca1c5901fca372b4232afd6bcb68dd555378631045",
+    "compilerAdmissionsSha256": "cff6304aef7b3e7c69ac7c4941d275a685b945af2fdc79bf9dfee7ebfd1513f4",
+    "sourceGraphManifestSha256": "74e14f5650931ccc3de2a4a7ed6829f54197bb8100466bcb2eb0ad90d7b14a85",
+    "compilerSelfHosting": {
+      "schema": "psc1-installed-compiler-selfhosting/1",
+      "status": "qualified-finite-linux-modular-js-ts",
+      "engines": [
+        "js",
+        "ts"
+      ],
+      "qualificationRun": 40755246954,
+      "sourceCommit": "17ce19919175b60be06050188e2a546a8a72e689",
+      "sourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+      "sourceGraphManifestSha256": "74e14f5650931ccc3de2a4a7ed6829f54197bb8100466bcb2eb0ad90d7b14a85",
+      "receiptSha256": "fbf31688151efc29c6de9a74b678e10420c983a24069ecf68f57e4e87e78b9de",
+      "receiptPath": "dist/COMPILER_SELFHOST_QUALIFICATION.json",
+      "fixedPoint": "exact-G1-G2-G3-graph-files-and-npm-tarballs",
+      "qualifiedCorrectnessSeconds": 3600,
+      "performance240Qualified": false,
+      "installedHostQualification": "separate installation CI; not inherited from self-hosting",
+      "scope": "finite Linux JS/TS compiler graph; not universal toolchain release or native binary reproduction"
+    },
+    "compilerSourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+    "sourceUnits": 134,
+    "corePackages": 20,
+    "installedGraphFiles": 1486,
+    "installedGraphBytes": 108689043,
+    "defaultKernel": "official-Lean-4.35.0-Emscripten-linear-memory-Wasm",
+    "referenceCompilerExecuted": false,
+    "fullModularSelfHosting": false,
+    "standaloneCheckedHostQualified": false
+  },
+  "results": {
+    "schema": "psc1-development-qualification/1",
+    "testedCommit": "f61b5d8cefce07f2b9516db5edb300c8107e8fba",
+    "status": "passed",
+    "package": {
+      "schema": "psc1-modular-installed-package/1",
+      "testedCommit": "f61b5d8cefce07f2b9516db5edb300c8107e8fba",
+      "version": "0.1.0-psc1-modular.5",
+      "tarball": "proofscript-0.1.0-psc1-modular.5.tgz",
+      "bytes": 9831729,
+      "sha256": "bf8c244bdc2b936a07bf1d43d256b99cdb394abfaae0d544c1d3f21d91ecde9b",
+      "manifestSha256": "625376373b5e52680e94ec4b384ef62dac00b3156ae4de3d8d119ac3c000b551",
+      "consumerDescriptorsSha256": "09ba939509f91418b80eb5ca1c5901fca372b4232afd6bcb68dd555378631045",
+      "compilerAdmissionsSha256": "cff6304aef7b3e7c69ac7c4941d275a685b945af2fdc79bf9dfee7ebfd1513f4",
+      "sourceGraphManifestSha256": "74e14f5650931ccc3de2a4a7ed6829f54197bb8100466bcb2eb0ad90d7b14a85",
+      "compilerSelfHosting": {
+        "schema": "psc1-installed-compiler-selfhosting/1",
+        "status": "qualified-finite-linux-modular-js-ts",
+        "engines": [
+          "js",
+          "ts"
+        ],
+        "qualificationRun": 40755246954,
+        "sourceCommit": "17ce19919175b60be06050188e2a546a8a72e689",
+        "sourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+        "sourceGraphManifestSha256": "74e14f5650931ccc3de2a4a7ed6829f54197bb8100466bcb2eb0ad90d7b14a85",
+        "receiptSha256": "fbf31688151efc29c6de9a74b678e10420c983a24069ecf68f57e4e87e78b9de",
+        "receiptPath": "dist/COMPILER_SELFHOST_QUALIFICATION.json",
+        "fixedPoint": "exact-G1-G2-G3-graph-files-and-npm-tarballs",
+        "qualifiedCorrectnessSeconds": 3600,
+        "performance240Qualified": false,
+        "installedHostQualification": "separate installation CI; not inherited from self-hosting",
+        "scope": "finite Linux JS/TS compiler graph; not universal toolchain release or native binary reproduction"
+      },
+      "compilerSourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+      "sourceUnits": 134,
+      "corePackages": 20,
+      "installedGraphFiles": 1486,
+      "installedGraphBytes": 108689043,
+      "defaultKernel": "official-Lean-4.35.0-Emscripten-linear-memory-Wasm",
+      "referenceCompilerExecuted": false,
+      "fullModularSelfHosting": false,
+      "standaloneCheckedHostQualified": false
+    },
+    "cases": [
+      {
+        "engine": "js",
+        "kind": "ps",
+        "target": "js",
+        "admissionAndExecution": true,
+        "minimalEvidence": true
+      },
+      {
+        "engine": "js",
+        "kind": "ps",
+        "target": "ts",
+        "admissionAndExecution": true,
+        "minimalEvidence": true
+      },
+      {
+        "engine": "js",
+        "kind": "ps",
+        "target": "wasm-core",
+        "admissionAndExecution": true,
+        "minimalEvidence": true
+      },
+      {
+        "engine": "js",
+        "kind": "ps",
+        "negative": "typing-refusal"
+      },
+      {
+        "engine": "js",
+        "kind": "lean",
+        "target": "js",
+        "admissionAndExecution": true,
+        "minimalEvidence": true
+      },
+      {
+        "engine": "js",
+        "kind": "lean",
+        "target": "ts",
+        "admissionAndExecution": true,
+        "minimalEvidence": true
+      },
+      {
+        "engine": "js",
+        "kind": "lean",
+        "target": "wasm-core",
+        "admissionAndExecution": true,
+        "minimalEvidence": true
+      },
+      {
+        "engine": "js",
+        "kind": "lean",
+        "negative": "typing-refusal"
+      },
+      {
+        "engine": "ts",
+        "kind": "ps",
+        "target": "js",
+        "admissionAndExecution": true,
+        "minimalEvidence": true
+      },
+      {
+        "engine": "ts",
+        "kind": "ps",
+        "target": "ts",
+        "admissionAndExecution": true,
+        "minimalEvidence": true
+      },
+      {
+        "engine": "ts",
+        "kind": "ps",
+        "target": "wasm-core",
+        "admissionAndExecution": true,
+        "minimalEvidence": true
+      },
+      {
+        "engine": "ts",
+        "kind": "ps",
+        "negative": "typing-refusal"
+      },
+      {
+        "engine": "ts",
+        "kind": "lean",
+        "target": "js",
+        "admissionAndExecution": true,
+        "minimalEvidence": true
+      },
+      {
+        "engine": "ts",
+        "kind": "lean",
+        "target": "ts",
+        "admissionAndExecution": true,
+        "minimalEvidence": true
+      },
+      {
+        "engine": "ts",
+        "kind": "lean",
+        "target": "wasm-core",
+        "admissionAndExecution": true,
+        "minimalEvidence": true
+      },
+      {
+        "engine": "ts",
+        "kind": "lean",
+        "negative": "typing-refusal"
+      }
+    ],
+    "samples": [
+      {
+        "command": "check",
+        "target": "language-only",
+        "repeat": 0,
+        "wallMs": 3397.65857900001,
+        "timings": {
+          "resourceVerificationMs": 1209.3170329999998,
+          "compilerProcessMs": 1074.1105530000002,
+          "independentKernelMs": 280.9425449999999,
+          "targetMs": 0,
+          "evidenceMs": 0,
+          "sessionMs": 2882.071572
+        }
+      },
+      {
+        "command": "build",
+        "target": "js",
+        "repeat": 0,
+        "wallMs": 4540.239539000002,
+        "timings": {
+          "resourceVerificationMs": 1223.0422489999996,
+          "compilerProcessMs": 1260.088011,
+          "independentKernelMs": 277.590498,
+          "targetMs": 56.64686500000016,
+          "evidenceMs": 3.005681999999979,
+          "sessionMs": 3133.765212
+        }
+      },
+      {
+        "command": "build",
+        "target": "ts",
+        "repeat": 0,
+        "wallMs": 5272.032600999999,
+        "timings": {
+          "resourceVerificationMs": 1361.6042020000002,
+          "compilerProcessMs": 1250.0641669999998,
+          "independentKernelMs": 293.5280499999999,
+          "targetMs": 407.03420099999994,
+          "evidenceMs": 3.355240999999751,
+          "sessionMs": 3671.987497
+        }
+      },
+      {
+        "command": "check",
+        "target": "language-only",
+        "repeat": 1,
+        "wallMs": 3408.255481,
+        "timings": {
+          "resourceVerificationMs": 1215.7712199999992,
+          "compilerProcessMs": 1075.6936160000002,
+          "independentKernelMs": 279.62433699999974,
+          "targetMs": 0,
+          "evidenceMs": 0,
+          "sessionMs": 2885.269253
+        }
+      },
+      {
+        "command": "build",
+        "target": "js",
+        "repeat": 1,
+        "wallMs": 4596.605513000002,
+        "timings": {
+          "resourceVerificationMs": 1246.6458110000003,
+          "compilerProcessMs": 1260.514924,
+          "independentKernelMs": 288.6210420000002,
+          "targetMs": 57.06045300000005,
+          "evidenceMs": 2.7498430000000553,
+          "sessionMs": 3174.489482
+        }
+      },
+      {
+        "command": "build",
+        "target": "ts",
+        "repeat": 1,
+        "wallMs": 5278.660008000006,
+        "timings": {
+          "resourceVerificationMs": 1357.0522680000001,
+          "compilerProcessMs": 1251.3868599999998,
+          "independentKernelMs": 297.8519080000001,
+          "targetMs": 399.5681330000002,
+          "evidenceMs": 3.5842359999996916,
+          "sessionMs": 3671.253172
+        }
+      }
+    ],
+    "fullEvidencePreserved": true,
+    "kernelCases": 14,
+    "tamperBeforeExecution": true,
+    "watchCheck": {
+      "leafEditMs": 2688.5136540000094,
+      "results": [
+        {
+          "cache": {
+            "prefixModules": 0,
+            "preparedModules": 3,
+            "finishHit": false
+          },
+          "timings": {
+            "resourceVerificationMs": 1218.581968,
+            "compilerProcessMs": 415.9282189999999,
+            "independentKernelMs": 291.81526900000017,
+            "targetMs": 0,
+            "evidenceMs": 0,
+            "sessionMs": 2229.971617
+          }
+        },
+        {
+          "cache": {
+            "prefixModules": 2,
+            "preparedModules": 1,
+            "finishHit": false
+          },
+          "timings": {
+            "resourceVerificationMs": 1209.212353,
+            "compilerProcessMs": 337.64819199999965,
+            "independentKernelMs": 298.8911790000002,
+            "targetMs": 0,
+            "evidenceMs": 0,
+            "sessionMs": 2145.262783
+          }
+        },
+        {
+          "cache": {
+            "prefixModules": 3,
+            "preparedModules": 0,
+            "finishHit": true
+          },
+          "timings": {
+            "resourceVerificationMs": 1235.0888189999996,
+            "compilerProcessMs": 301.2717069999999,
+            "independentKernelMs": 298.5989559999998,
+            "targetMs": 0,
+            "evidenceMs": 0,
+            "sessionMs": 2142.8775110000006
+          }
+        },
+        {
+          "cache": {
+            "prefixModules": 0,
+            "preparedModules": 3,
+            "finishHit": false
+          },
+          "timings": {
+            "resourceVerificationMs": 1255.1974840000003,
+            "compilerProcessMs": 351.4119730000002,
+            "independentKernelMs": 291.0378869999986,
+            "targetMs": 0,
+            "evidenceMs": 0,
+            "sessionMs": 2207.2522610000015
+          }
+        },
+        {
+          "cache": {
+            "prefixModules": 0,
+            "preparedModules": 3,
+            "finishHit": false
+          },
+          "timings": {
+            "resourceVerificationMs": 1205.2737909999996,
+            "compilerProcessMs": 327.1810120000009,
+            "independentKernelMs": 307.53420800000094,
+            "targetMs": 0,
+            "evidenceMs": 0,
+            "sessionMs": 2143.4635770000023
+          }
+        }
+      ],
+      "dependencyInvalidated": true,
+      "errorRepair": true
+    },
+    "watchCheckStopMs": 40,
+    "watchBuild": {
+      "target": "ts",
+      "editMs": 6491.901910999994,
+      "values": [
+        "42",
+        "43"
+      ],
+      "typingRefusalPreserved": true
+    },
+    "watchBuildStopMs": 40,
+    "ordinaryPartialChecked": true
+  },
+  "baseline": {
+    "schema": "psc1-installed-development-baseline/1",
+    "testedCommit": "2d51d32b390105cf97ba963da993fe068da67988",
+    "package": {
+      "schema": "psc1-modular-installed-package/1",
+      "testedCommit": "1c913c5c12049468d78b324a69356e047b3c7fc9",
+      "version": "0.1.0-psc1-modular.4",
+      "tarball": "proofscript-0.1.0-psc1-modular.4.tgz",
+      "bytes": 9824032,
+      "sha256": "97f0bd6809c9f2a910b64ca96977c0725c6810291ea2f5991ce74fdfcf142446",
+      "manifestSha256": "79000c9019015d5891104a4e6224535eb0675b5d033d842bfa0d9c588d4a872c",
+      "consumerDescriptorsSha256": "6f693e297e604d9682a14cd814dcd89b526f56d419e0742f65fd2479f23253e6",
+      "compilerAdmissionsSha256": "cff6304aef7b3e7c69ac7c4941d275a685b945af2fdc79bf9dfee7ebfd1513f4",
+      "sourceGraphManifestSha256": "74e14f5650931ccc3de2a4a7ed6829f54197bb8100466bcb2eb0ad90d7b14a85",
+      "compilerSelfHosting": {
+        "schema": "psc1-installed-compiler-selfhosting/1",
+        "status": "qualified-finite-linux-modular-js-ts",
+        "engines": [
+          "js",
+          "ts"
+        ],
+        "qualificationRun": 40755246954,
+        "sourceCommit": "17ce19919175b60be06050188e2a546a8a72e689",
+        "sourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+        "sourceGraphManifestSha256": "74e14f5650931ccc3de2a4a7ed6829f54197bb8100466bcb2eb0ad90d7b14a85",
+        "receiptSha256": "fbf31688151efc29c6de9a74b678e10420c983a24069ecf68f57e4e87e78b9de",
+        "receiptPath": "dist/COMPILER_SELFHOST_QUALIFICATION.json",
+        "fixedPoint": "exact-G1-G2-G3-graph-files-and-npm-tarballs",
+        "qualifiedCorrectnessSeconds": 3600,
+        "performance240Qualified": false,
+        "installedHostQualification": "separate installation CI; not inherited from self-hosting",
+        "scope": "finite Linux JS/TS compiler graph; not universal toolchain release or native binary reproduction"
+      },
+      "compilerSourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+      "sourceUnits": 134,
+      "corePackages": 20,
+      "installedGraphFiles": 1479,
+      "installedGraphBytes": 108656179,
+      "defaultKernel": "official-Lean-4.35.0-Emscripten-linear-memory-Wasm",
+      "referenceCompilerExecuted": false,
+      "fullModularSelfHosting": false,
+      "standaloneCheckedHostQualified": false
+    },
+    "platform": "linux",
+    "arch": "x64",
+    "node": "v22.23.3",
+    "status": "passed",
+    "samples": [
+      {
+        "command": "check",
+        "target": "js",
+        "repeat": 0,
+        "wallMs": 3925.903674
+      },
+      {
+        "command": "build",
+        "target": "js",
+        "repeat": 0,
+        "wallMs": 4894.6416260000005,
+        "events": [
+          {
+            "role": "generated-compiler",
+            "elapsedMs": 1037,
+            "status": 0
+          },
+          {
+            "role": "independent-checker",
+            "state": "before"
+          },
+          {
+            "role": "independent-checker",
+            "state": "accepted"
+          },
+          {
+            "role": "target-syntax",
+            "elapsedMs": 28,
+            "status": 0
+          },
+          {
+            "role": "target-public-api",
+            "elapsedMs": 28,
+            "status": 0
+          }
+        ],
+        "files": [
+          {
+            "name": "admissions.json",
+            "bytes": 301
+          },
+          {
+            "name": "candidate.json",
+            "bytes": 1813
+          },
+          {
+            "name": "manifest.json",
+            "bytes": 2539
+          },
+          {
+            "name": "original-ir.json",
+            "bytes": 484
+          },
+          {
+            "name": "request.json",
+            "bytes": 244
+          },
+          {
+            "name": "session.json",
+            "bytes": 393282
+          },
+          {
+            "name": "sources.json",
+            "bytes": 91
+          },
+          {
+            "name": "specialized-ir.json",
+            "bytes": 90
+          },
+          {
+            "name": "target.mjs",
+            "bytes": 81
+          }
+        ]
+      },
+      {
+        "command": "build",
+        "target": "ts",
+        "repeat": 0,
+        "wallMs": 5309.628542999999,
+        "events": [
+          {
+            "role": "generated-compiler",
+            "elapsedMs": 967,
+            "status": 0
+          },
+          {
+            "role": "independent-checker",
+            "state": "before"
+          },
+          {
+            "role": "independent-checker",
+            "state": "accepted"
+          },
+          {
+            "role": "target-typescript",
+            "elapsedMs": 263,
+            "status": 0
+          },
+          {
+            "role": "target-syntax",
+            "elapsedMs": 28,
+            "status": 0
+          },
+          {
+            "role": "target-public-api",
+            "elapsedMs": 28,
+            "status": 0
+          }
+        ],
+        "files": [
+          {
+            "name": "admissions.json",
+            "bytes": 301
+          },
+          {
+            "name": "candidate.json",
+            "bytes": 1810
+          },
+          {
+            "name": "manifest.json",
+            "bytes": 3001
+          },
+          {
+            "name": "original-ir.json",
+            "bytes": 484
+          },
+          {
+            "name": "request.json",
+            "bytes": 244
+          },
+          {
+            "name": "session.json",
+            "bytes": 509966
+          },
+          {
+            "name": "sources.json",
+            "bytes": 91
+          },
+          {
+            "name": "specialized-ir.json",
+            "bytes": 90
+          },
+          {
+            "name": "target-config.json",
+            "bytes": 236
+          },
+          {
+            "name": "target.d.ts",
+            "bytes": 37
+          },
+          {
+            "name": "target.mjs",
+            "bytes": 68
+          },
+          {
+            "name": "target.ts",
+            "bytes": 77
+          }
+        ]
+      },
+      {
+        "command": "check",
+        "target": "js",
+        "repeat": 1,
+        "wallMs": 3722.5100469999998
+      },
+      {
+        "command": "build",
+        "target": "js",
+        "repeat": 1,
+        "wallMs": 4792.9705030000005,
+        "events": [
+          {
+            "role": "generated-compiler",
+            "elapsedMs": 988,
+            "status": 0
+          },
+          {
+            "role": "independent-checker",
+            "state": "before"
+          },
+          {
+            "role": "independent-checker",
+            "state": "accepted"
+          },
+          {
+            "role": "target-syntax",
+            "elapsedMs": 26,
+            "status": 0
+          },
+          {
+            "role": "target-public-api",
+            "elapsedMs": 27,
+            "status": 0
+          }
+        ],
+        "files": [
+          {
+            "name": "admissions.json",
+            "bytes": 301
+          },
+          {
+            "name": "candidate.json",
+            "bytes": 1813
+          },
+          {
+            "name": "manifest.json",
+            "bytes": 2539
+          },
+          {
+            "name": "original-ir.json",
+            "bytes": 484
+          },
+          {
+            "name": "request.json",
+            "bytes": 244
+          },
+          {
+            "name": "session.json",
+            "bytes": 393281
+          },
+          {
+            "name": "sources.json",
+            "bytes": 91
+          },
+          {
+            "name": "specialized-ir.json",
+            "bytes": 90
+          },
+          {
+            "name": "target.mjs",
+            "bytes": 81
+          }
+        ]
+      },
+      {
+        "command": "build",
+        "target": "ts",
+        "repeat": 1,
+        "wallMs": 5479.747627999997,
+        "events": [
+          {
+            "role": "generated-compiler",
+            "elapsedMs": 1000,
+            "status": 0
+          },
+          {
+            "role": "independent-checker",
+            "state": "before"
+          },
+          {
+            "role": "independent-checker",
+            "state": "accepted"
+          },
+          {
+            "role": "target-typescript",
+            "elapsedMs": 282,
+            "status": 0
+          },
+          {
+            "role": "target-syntax",
+            "elapsedMs": 30,
+            "status": 0
+          },
+          {
+            "role": "target-public-api",
+            "elapsedMs": 31,
+            "status": 0
+          }
+        ],
+        "files": [
+          {
+            "name": "admissions.json",
+            "bytes": 301
+          },
+          {
+            "name": "candidate.json",
+            "bytes": 1810
+          },
+          {
+            "name": "manifest.json",
+            "bytes": 3001
+          },
+          {
+            "name": "original-ir.json",
+            "bytes": 484
+          },
+          {
+            "name": "request.json",
+            "bytes": 244
+          },
+          {
+            "name": "session.json",
+            "bytes": 509967
+          },
+          {
+            "name": "sources.json",
+            "bytes": 91
+          },
+          {
+            "name": "specialized-ir.json",
+            "bytes": 90
+          },
+          {
+            "name": "target-config.json",
+            "bytes": 236
+          },
+          {
+            "name": "target.d.ts",
+            "bytes": 37
+          },
+          {
+            "name": "target.mjs",
+            "bytes": 68
+          },
+          {
+            "name": "target.ts",
+            "bytes": 77
+          }
+        ]
+      }
+    ],
+    "scope": "small .ps source, repeated cold processes; observational timing, not a performance gate or warm-worker measurement",
+    "hostProfile": {
+      "status": "accepted",
+      "wallMs": 4864.0142049999995,
+      "reads": 13721,
+      "readBytes": 3253474594,
+      "readMs": 1363.09229400005,
+      "writes": 9,
+      "writeBytes": 397235,
+      "children": [
+        {
+          "executable": "node",
+          "firstArgument": "unified-candidate-runner.mjs",
+          "wallMs": 1035.080498,
+          "status": 0
+        },
+        {
+          "executable": "node",
+          "firstArgument": "universal-wasm-checker.mjs",
+          "wallMs": 362.1541900000002,
+          "status": 0
+        },
+        {
+          "executable": "node",
+          "firstArgument": "--check",
+          "wallMs": 26.932040999999572,
+          "status": 0
+        },
+        {
+          "executable": "node",
+          "firstArgument": "--input-type=module",
+          "wallMs": 29.46601899999996,
+          "status": 0
+        }
+      ]
+    }
+  },
+  "limitations": [
+    "Finite Linux x64 Node22.23.3 qualification; new .5 host does not inherit .4 Windows/macOS evidence.",
+    "Build preparation/emission stays on the original generated service; prefix reuse is check-only.",
+    "All independent admissions and resource boundaries remain fresh; no admission cache.",
+    "Cold build gains are small; further resource/startup improvements require measured work.",
+    "No registry publication, merge, new self-host chain, or new backend claim."
+  ]
+}

@@ -1,7 +1,8 @@
-// Test a closed host proposal before canonical adoption. Generated compiler bytes stay unchanged.
+// Manual replay captures canonical host sources; generated compiler bytes stay unchanged.
 import fs from'node:fs';import path from'node:path';import assert from'node:assert/strict';
 import{spawnSync}from'node:child_process';import{createRequire}from'node:module';import{createHash}from'node:crypto';
-const p=JSON.parse(fs.readFileSync('../.github/psc1/development-candidate.json'));assert.equal(p.schema,'psc1-development-candidate/1');
+const receipt=JSON.parse(fs.readFileSync('docs/PSC1_DEVELOPMENT_QUALIFICATION_2026-10-29.json'));
+const p={baseCommit:receipt.baseCommit,files:Object.fromEntries(receipt.hostSources.pins.map(pin=>[pin.path,fs.readFileSync(pin.path.slice(5),'utf8')]))};
 const require=createRequire(path.resolve('host-tools/package.json')),prettier=require('prettier'),{parse}=require('@babel/parser');
 const ast=s=>JSON.parse(JSON.stringify(parse(s,{sourceType:'module'}),(k,v)=>['start','end','loc','extra','comments','leadingComments','trailingComments','innerComments'].includes(k)?undefined:v));
 const guarded=new Set(['host-tools/generated-compiler-session.mjs','host-tools/installed-engine-resolver.mjs','npm-cli/compiler-api.mjs']);

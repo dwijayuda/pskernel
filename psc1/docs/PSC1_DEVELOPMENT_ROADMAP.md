@@ -5,45 +5,63 @@ Practical Core v1 remains frozen at14 feature families and 37 finite criteria.
 Completed detail is preserved in [the previous roadmap](history/ROADMAP_BEFORE_LAYOUT_2026-10-26.md)
 and [dated evidence](evidence/README.md).
 
-## Priority: installed development latency (Linux, from PR #212)
+## Installed development latency — verified Linux milestone
 
-Active branch feat/psc1-development-speed-20261029 from b4facc22e7c576a112710e5081a84349c3f3a1e1.
-The user's scope is installed .ps checking and compilation, not CI throughput.
-[Baseline40835944173](https://github.com/dwijayuda/pskernel/actions/runs/40835944173)
-at2d51d32b passes on Node22.23.3/Linux x64 using the exact qualified.4 root.
-Two tiny-program checks take3926/3723ms; JS builds4895/4793ms; TS builds5310/5480ms.
-The separately instrumented host build reads3253474594 bytes in13721 reads
-(1363ms inside readFileSync), total4864ms; compiler subprocess1035ms,
-independent-checker wrapper362ms. This is a small cold-process observation,
-not a general benchmark or a warm-worker result.
+Active branch `feat/psc1-development-speed-20261029`, from PR #212 HEAD
+`b4facc22e7c576a112710e5081a84349c3f3a1e1`.
+[Focused installed qualification](https://github.com/dwijayuda/pskernel/actions/runs/40840703422)
+passes at producer `f61b5d8cefce07f2b9516db5edb300c8107e8fba`.
+Canonical adoption uses the exact CI-formatted sources and pins in
+[the receipt](PSC1_DEVELOPMENT_QUALIFICATION_2026-10-29.json).
 
-A closed CI host proposal adds:
-- genuine check-only scheduling through unchanged generated capture/preparation
-  and strict original-IR functions, followed by actual independent Lean admission;
-- minimal successful-session evidence with explicit --evidence full;
-- per-boundary resource-alias deduplication, keeping fresh before/after checks;
-- actual kernel checking without a redundant separate health invocation;
-- private, bounded Linux/Node warm watch workers and conservative module-prefix
-  reuse for checks, with exact source-byte/order/kind/entry/assurance binding.
+Implemented and tested:
+- default check performs generated preparation, strict original IR validation and
+  fresh independent Lean 4.35.0 admission, without emitting/consuming a target;
+  explicit target/ABI checks retain target validation;
+- successful evidence defaults to compact records; `--evidence full` retains
+  source/admission/IR/request/candidate dumps. All validation still runs;
+- resource aliases are hashed once per capture/pass; all existing fresh resource
+  boundaries remain. Actual admissions replace the redundant kernel-health probe;
+- Linux/Node watch retains compiler modules in a private sequential supervised
+  worker. Check-only preparation reuses exact module prefixes; edits invalidate
+  the suffix, errors clear reuse, every request receives fresh kernel admission.
 
-Builds continue to use the original generated candidate service and emitter path.
-The first proposal40837904164 passes check-only admission but fails a direct
-generated compilePrepared boundary during the first build; it is not qualified.
-The revised proposal retains the original build entry point instead of creating
-new backend integration obligations. Generated compiler source/graph, kernel Wasm,
-all prior G1/G2/G3 fixed points and ordinary request/checker budgets are unchanged.
+The installed .5 root passes both generated engines and both source grammars,
+12 JS/strict-TS/Wasm builds, four type refusals, 14 real kernel fixtures, full and
+minimal evidence, tamper-before-execution refusal, ordinary partial checking,
+live dependency invalidation, error repair, preserved publication and shutdown.
+No handwritten replacement compiler or compiler-source/backend changes are made.
 
-[Focused candidate40838737539](https://github.com/dwijayuda/pskernel/actions/runs/40838737539)
-at79ec87af is pending: both engines/grammars, actual JS/strict TS/Wasm output,
-full/minimal evidence, genuine kernel fixtures, tamper refusals, live prefix reuse,
-dependency invalidation, type-error repair and preserved build publication.
-No new G1/G2/G3, broad platform matrix or additional release gate is requested.
-Candidate source data remains separate from canonical host files until this passes.
-The .4 cross-platform ZIP stays the qualified reference.
+Two-sample cold-process means for tiny `def answer : Nat := 42`, milliseconds:
 
-Prior PR #212 follow-up is now terminal: source40815747045 passes all16 selected
-jobs/37 finite Core criteria/zero blocked; retained.11 run40815741441 passes all9 jobs.
-Adoption40815741447 passes at b4facc22. Earlier pending text below is historical.
+| Operation | Qualified .4 baseline | .5 | Reduction |
+| --- | ---: | ---: | ---: |
+| check | 3824 | 3403 | 11.0% |
+| js | 4844 | 4568 | 5.7% |
+| ts | 5395 | 5275 | 2.2% |
+
+A three-module watch leaf edit completes in 2689ms; preparation reuses 2/3 modules.
+This is observational Linux/Node evidence, not a speed guarantee. Cold build gains
+remain small. Resource verification still costs about 1.2–1.36s/session; compiler
+startup/preparation is the next measured target. The watch-build test's editMs
+includes the subsequent negative-publication test, so it is not a rebuild latency.
+
+The exact root is `proofscript-0.1.0-psc1-modular.5.tgz` (9831729 bytes), SHA-256
+`bf8c244bdc2b936a07bf1d43d256b99cdb394abfaae0d544c1d3f21d91ecde9b`. Independent kernel, G3 graph and admissions identities are
+unchanged. No new self-host chain or broad release matrix is required for this
+host-only slice. The .4 cross-platform ZIP remains its qualified platform reference;
+.5 Linux results do not qualify its new host on Windows/macOS/Bun.
+[Usage, invariants and next work](architecture/fast-development.md).
+
+Next, in dependency order: measure and remove repeated resource/startup work
+without moving or weakening trust boundaries; then consider warm build preparation
+and an independently supervised persistent kernel only if measurements justify it.
+Keep all seven backend mappings and Python/PHP optional; do not add speculative
+backend, package, self-host or release obligations.
+
+Prior PR #212 is terminal: adoption40815741447 passes; source40815747045 passes
+all16 selected jobs/37 finite Core criteria/zero blocked; retained.11 run40815741441
+passes all9 jobs. Earlier pending text below is historical.
 
 ## Cross-platform npm/CLI milestone — PR #212
 

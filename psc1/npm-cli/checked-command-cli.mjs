@@ -1,7 +1,13 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
 import path from 'node:path';
-import { getCompilerMetadata, compile, build, checkCanonicalAdmissions } from './universal.mjs';
+import {
+  getCompilerMetadata,
+  check,
+  compile,
+  build,
+  checkCanonicalAdmissions,
+} from './universal.mjs';
 import { kernelHandle } from '../host-tools/installed-engine-resolver.mjs';
 const fail = (message) => {
   throw Error('PSC1_CLI_' + message);
@@ -30,6 +36,7 @@ function project(args) {
           '--out',
           '--assurance',
           '--target',
+          '--evidence',
           '--output-abi',
           '--publication-protocol',
           '--rust-toolchain-root',
@@ -72,6 +79,7 @@ function project(args) {
     kernel: options['--kernel'] || options['--provider'] || 'wasm',
     assurance: options['--assurance'] || source.assurance || 'checked',
     ...(options['--output-abi'] ? { outputAbi: options['--output-abi'] } : {}),
+    ...(options['--evidence'] ? { evidence: options['--evidence'] } : {}),
     ...(options['--target'] ? { target: options['--target'] } : {}),
     ...(options['--out'] ? { out: options['--out'] } : {}),
     ...(options['--rust-toolchain-root']
@@ -121,7 +129,12 @@ try {
   } else if (['check', 'compile', 'build'].includes(args[0])) {
     const options = project(args.slice(1));
     if (args[0] !== 'build' && options.out) fail('OUT_REQUIRES_BUILD');
-    const result = args[0] === 'build' ? build(options) : compile(options);
+    const result =
+      args[0] === 'build'
+        ? build(options)
+        : args[0] === 'check'
+          ? check(options)
+          : compile(options);
     console.log(JSON.stringify(args[0] === 'check' ? { ...result, source: undefined } : result));
   } else
     fail(

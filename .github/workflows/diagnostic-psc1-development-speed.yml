@@ -1,10 +1,5 @@
 name: PSC1 installed development latency
 on:
-  push:
-    branches: [feat/psc1-development-speed-20261029]
-    paths:
-      - .github/scripts/psc1-development-baseline.mjs
-      - .github/workflows/diagnostic-psc1-development-speed.yml
   workflow_dispatch:
 permissions:
   contents: read

@@ -100,7 +100,7 @@ try{
  const ordinary=invoke('check',{entryModule:'Main',assurance:'ordinary-checked',sources:[{module:'Main',kind:'lean',text:'partial def again (n : Nat) : Nat := again n\n'}]});
  assert.equal(ordinary.logicalAdmission,'accepted');report.ordinaryPartialChecked=true;
  report.status='passed';
-}finally{
+}catch(error){report.status='failed';report.failure=String(error.stack||error);throw error;}finally{
  fs.mkdirSync('dist/development-results',{recursive:true});fs.writeFileSync('dist/development-results/qualification.json',JSON.stringify(report,null,2)+'\n');
  console.log('PSC1_DEVELOPMENT_QUALIFICATION '+JSON.stringify(report));fs.rmSync(directory,{recursive:true,force:true});
 }

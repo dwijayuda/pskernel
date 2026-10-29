@@ -1,12 +1,5 @@
 name: PSC1 focused development compiler
 on:
-  push:
-    branches: [feat/psc1-development-speed-20261029]
-    paths:
-      - .github/psc1/development-candidate.json
-      - .github/scripts/psc1-stage-development.mjs
-      - .github/scripts/psc1-development-qualify.mjs
-      - .github/workflows/diagnostic-psc1-development-qualify.yml
   workflow_dispatch:
 permissions: {contents: read, actions: read}
 concurrency:

@@ -4,6 +4,7 @@ import { runtimeArguments, defaultPublicationProtocol } from '../host-tools/runt
 import path from 'node:path';
 import os from 'node:os';
 import crypto from 'node:crypto';
+import { warmCompiler } from '../host-tools/warm-compiler.mjs';
 import { spawnSync } from 'node:child_process';
 import { createGeneratedJsCompilerSession } from '../host-tools/generated-compiler-session.mjs';
 import { compilerSourceClosureDigest } from '../host-tools/compiler-host-protocol.mjs';
@@ -37,7 +38,9 @@ function selection(options = {}) {
     assurance = options.assurance || 'checked',
     outputAbi = options.outputAbi ?? 'scalar',
     target = options.target ?? 'js',
-    publicationProtocol = options.publicationProtocol ?? defaultPublicationProtocol;
+    publicationProtocol = options.publicationProtocol ?? defaultPublicationProtocol,
+    evidence = options.evidence ?? 'minimal';
+  if (!['minimal', 'full'].includes(evidence)) fail('EVIDENCE');
   if (!['checked', 'ordinary-checked'].includes(assurance)) fail('ASSURANCE');
   if (!['scalar', 'io-dispatcher'].includes(outputAbi)) fail('OUTPUT_ABI');
   if (!['wasm', 'native', 'both'].includes(kernel)) fail('KERNEL');
@@ -63,6 +66,7 @@ function selection(options = {}) {
     outputAbi,
     target,
     publicationProtocol,
+    evidence,
     sources,
     rustToolchainRoot: options.rustToolchainRoot,
     entryModule: options.entryModule,
@@ -74,6 +78,9 @@ function sessionFor(selected, publicationRoot) {
   const d = loadDistribution(),
     engine = resolveEngine(selected.engine, d),
     providers = selected.kernel === 'both' ? ['wasm', 'native'] : [selected.kernel];
+  const checking = selected.operation === 'check';
+  const service = checking ? engine.checkCandidate : engine.candidate;
+  if (checking && !service) fail('CHECK_SERVICE_UNAVAILABLE');
   const deps = [...engine.pins, ...commonPins(d)];
   for (const provider of providers) deps.push(...resolveKernel(provider, d).pins);
   const script = path.join(
@@ -102,16 +109,22 @@ function sessionFor(selected, publicationRoot) {
     outputAbi: selected.outputAbi,
     target: selected.target,
     publicationProtocol: selected.publicationProtocol,
+    evidence: selected.evidence,
+    operation: checking ? 'check' : 'compile',
     serviceKind:
       selected.target === 'js' && !modular
         ? 'js-adapter'
         : engine.candidateKind === 'embedded'
           ? 'unified-embedded'
           : 'unified-bundle',
-    ...resolveCheckedTarget(selected.target, d, { rustToolchainRoot: selected.rustToolchainRoot }),
-    serviceFile: selected.target === 'js' && !modular ? engine.service.path : engine.candidate.path,
-    serviceSha256:
-      selected.target === 'js' && !modular ? engine.service.sha256 : engine.candidate.sha256,
+    ...(checking
+      ? {}
+      : resolveCheckedTarget(selected.target, d, {
+          rustToolchainRoot: selected.rustToolchainRoot,
+        })),
+    serviceExecute: warmCompiler(service.path, service.sha256),
+    serviceFile: selected.target === 'js' && !modular ? engine.service.path : service.path,
+    serviceSha256: selected.target === 'js' && !modular ? engine.service.sha256 : service.sha256,
     runnerFile: path.join(
       installationRoot,
       selected.target === 'js' && !modular
@@ -141,6 +154,41 @@ export async function checkCanonicalAdmissions(source, { provider = 'wasm' } = {
 }
 // Execute the complete checked session, then return the sealed target source.
 // Temporary staging is always removed; this API does not publish a generation.
+// Language checking uses the same generated preparation and strict original IR validator.
+// An explicitly requested target/ABI retains the existing complete target-check path.
+export function check(options) {
+  if (options?.target !== undefined || options?.outputAbi !== undefined) {
+    const r = compile(options);
+    return Object.freeze({ ...r, source: undefined });
+  }
+  const selected = selection(options),
+    temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'proofscript-check-'));
+  try {
+    const receipt = sessionFor(
+      { ...selected, operation: 'check' },
+      path.join(temporary, 'store'),
+    ).execute();
+    return Object.freeze({
+      status: 'accepted',
+      engine: selected.engine,
+      target: null,
+      kernelProviders: selected.kernel === 'both' ? ['wasm', 'native'] : [selected.kernel],
+      compilerSourceClosureDigest: loadDistribution().compilerSourceClosureDigest,
+      sourceClosureDigest: receipt.sourceClosureDigest,
+      logicalAdmission: 'accepted',
+      irValidation: receipt.irValidation,
+      targetGeneration: 'not-run',
+      publication: 'not-requested',
+      cache: receipt.cache,
+      timings: receipt.timings,
+      receipt,
+      formalPreservation: 'not-provided',
+    });
+  } finally {
+    fs.rmSync(temporary, { recursive: true, force: true });
+  }
+}
+
 export function compile(options) {
   const selected = selection(options),
     temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'proofscript-checked-'));
@@ -174,6 +222,8 @@ export function compile(options) {
             : 'utf8',
       receipt,
       logicalAdmission: 'accepted',
+      evidence: receipt.evidence,
+      timings: receipt.timings,
       irValidation: 'original-and-transformed-by-pinned-compiler',
       publication: 'not-requested',
       formalPreservation: 'not-provided',
@@ -200,6 +250,8 @@ export function build(options, { beforePublish } = {}) {
     kernelProviders: selected.kernel === 'both' ? ['wasm', 'native'] : [selected.kernel],
     compilerSourceClosureDigest: loadDistribution().compilerSourceClosureDigest,
     logicalAdmission: 'accepted',
+    evidence: receipt.evidence,
+    timings: receipt.timings,
     sourceClosureDigest: receipt.sourceClosureDigest,
     artifact: published.immutableTarget,
     runtimeArtifact: published.runtimeTarget,

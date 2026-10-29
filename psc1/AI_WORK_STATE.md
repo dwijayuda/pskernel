@@ -5,6 +5,20 @@ from PR #213 qualified HEAD b1d8d55cb664f1ab4b3d30973c10fbf950674c7d.
 Connected GitHub and Linux/Windows/macOS Actions only. Expected-HEAD,
 single-parent/non-force history. No merge or npm registry publication.
 
+## Pure-reuse diagnostic follow-up
+
+[40868027763](https://github.com/dwijayuda/pskernel/actions/runs/40868027763)
+passes at84038c5e4e126557a34d3f8ace4a0a3850c0d48d: bounded key safety
+and three genuinely checked/executed application compilations. The100ms
+semantic fingerprint budget missed conservatively; emitter reuse hit on the
+third request. Print-only work was1606ms before reuse, while the remaining
+backend pipeline still cost6154ms. No general semantic-edit acceleration claimed.
+The follow-up batches fingerprint hash writes, retains bounded fallbacks,
+adds CPU attribution and exact cold/warm candidate parity for both JS/TS engines
+over real application comment/body/refusal/recovery cases. The optional key
+budget is500ms; compiler/checker/fuel/memory limits are unchanged. .6 remains
+the qualified installable artifact until all .7 gates and adoption pass.
+
 ## Bounded pure-compiler reuse experiment
 
 Phase probe [40865163111](https://github.com/dwijayuda/pskernel/actions/runs/40865163111)

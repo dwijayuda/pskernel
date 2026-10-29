@@ -18,8 +18,24 @@ try{
  run([path.resolve(path.dirname(process.execPath),'../lib/node_modules/npm/bin/npm-cli.js'),'install','--offline','--ignore-scripts','--no-audit','--no-fund','--cache',path.join(directory,'cache'),'--registry','http://127.0.0.1:9',path.join(input,'tarballs',receipt.tarball)]);
  fs.copyFileSync('../.github/scripts/psc1-persistent-profile-driver.mjs',path.join(directory,'profile.mjs'));
  const fixture=path.join(directory,'application.json');fs.writeFileSync(fixture,JSON.stringify({entryModule:'PracticalCli.Run',sources,expected}));
- const text=run([path.join(directory,'profile.mjs'),'warm-app',fixture]),line=text.split('\n').find(l=>l.startsWith('PSC1_PERSISTENT_PROFILE '));assert.ok(line,text);
+ const text=run(['--cpu-prof','--cpu-prof-interval=2000','--cpu-prof-dir='+directory,path.join(directory,'profile.mjs'),'warm-app',fixture]),line=text.split('\n').find(l=>l.startsWith('PSC1_PERSISTENT_PROFILE '));assert.ok(line,text);
+ const profiles=fs.readdirSync(directory).filter(f=>f.endsWith('.cpuprofile')),cpu=[];
+ for(const file of profiles){
+  const data=JSON.parse(fs.readFileSync(path.join(directory,file))),nodes=new Map(data.nodes.map(n=>[n.id,n])),parents=new Map();
+  for(const n of data.nodes)for(const child of n.children??[])parents.set(child,n.id);
+  const self=new Map(),inclusive=new Map();
+  for(let i=0;i<(data.samples??[]).length;i++){
+   const id=data.samples[i],ms=(data.timeDeltas?.[i]??2000)/1000;self.set(id,(self.get(id)??0)+ms);
+   let ancestor=id,depth=0;while(ancestor!==undefined&&depth++<1024){inclusive.set(ancestor,(inclusive.get(ancestor)??0)+ms);ancestor=parents.get(ancestor);}
+  }
+  const rows=[...nodes].map(([id,n])=>({function:n.callFrame.functionName,file:n.callFrame.url.split('/').slice(-2).join('/'),selfMs:self.get(id)??0,inclusiveMs:inclusive.get(id)??0}));
+  cpu.push({file,topSelf:rows.sort((a,b)=>b.selfMs-a.selfMs).slice(0,24),topCompiler:rows.filter(r=>r.file.includes('Ps.')||/^ps/.test(r.function)).sort((a,b)=>b.inclusiveMs-a.inclusiveMs).slice(0,30)});
+ }
+ console.log('PSC1_COMPILER_CPU '+JSON.stringify(cpu));
+ const parityFile=path.join(directory,'parity.mjs');fs.copyFileSync('../.github/scripts/psc1-semantic-parity.mjs',parityFile);
+ const parityText=run([parityFile,fixture]),parityLine=parityText.split('\n').find(l=>l.startsWith('PSC1_SEMANTIC_PARITY '));assert.ok(parityLine,parityText);console.log(parityLine);
+ const parity=JSON.parse(parityLine.slice('PSC1_SEMANTIC_PARITY '.length));
  const report=JSON.parse(line.slice('PSC1_PERSISTENT_PROFILE '.length));assert.ok(report.outcomes.every(x=>x.admission==='accepted'&&x.application?.status==='passed'));
- fs.mkdirSync('dist/semantic-phase',{recursive:true});fs.writeFileSync('dist/semantic-phase/report.json',JSON.stringify({commit:process.env.GITHUB_SHA,receipt,report},null,2)+'\n');
+ fs.mkdirSync('dist/semantic-phase',{recursive:true});fs.writeFileSync('dist/semantic-phase/report.json',JSON.stringify({commit:process.env.GITHUB_SHA,receipt,report,cpu,parity},null,2)+'\n');
  console.log('PSC1_SEMANTIC_PHASES '+JSON.stringify({commit:process.env.GITHUB_SHA,status:'passed',outcomes:report.outcomes,phases:report.phases,maxRssKiB:report.maxRssKiB,scope:'real application; instrumented host; source compiler and kernel unchanged'}));
 }finally{fs.rmSync(directory,{recursive:true,force:true});}

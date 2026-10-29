@@ -5,6 +5,27 @@ Practical Core v1 remains frozen at14 feature families and 37 finite criteria.
 Completed detail is preserved in [the previous roadmap](history/ROADMAP_BEFORE_LAYOUT_2026-10-26.md)
 and [dated evidence](evidence/README.md).
 
+## Terminal production-head CI (2026-10-30)
+
+Implementation `d7f7fe99e13ccd6f60fd096b5191faee35ce9b02` is terminal green:
+[source 40969703214](https://github.com/dwijayuda/pskernel/actions/runs/40969703214)
+passes all 16 selected jobs (benchmark intentionally skipped),
+[npm 40969703130](https://github.com/dwijayuda/pskernel/actions/runs/40969703130) passes,
+and [retained CLI 40969696100](https://github.com/dwijayuda/pskernel/actions/runs/40969696100)
+passes all nine installed/runtime/installable jobs. The frozen CLI packager now
+validates the qualified current host epoch and recovers the exact historical
+bytes; every prior payload comparison and regression remains.
+
+The .10 [source adoption 40969210436](https://github.com/dwijayuda/pskernel/actions/runs/40969210436)
+passed at `65862d3b119398e781cf59638ac829cbdcf3cea6`, verifying all four tested
+source/metadata pins, current source against admitted G1 and ZIP read-back.
+[Verified Linux delivery](https://github.com/dwijayuda/pskernel/actions/runs/40969210436/artifacts/12939207933)
+contains the tested installable ZIP and adoption/checksum receipts. Inner compiler
+ZIP SHA256 `ff5054f9f126ded7cb63d11b9a816ce051f6be9ec0e9f974c276654dbd62b6df`;
+outer artifact SHA256 `7b0286defa52d50b3fbf3b30c38cd4f26efc155fc54aaf554a0f7fccdd495313`.
+No rebuilt/relabelled package or new G2/G3 run was used for host/docs maintenance.
+This final record changes documentation only. No merge or registry publication.
+
 ## Qualified .10 source and installed compiler
 
 [Installed CI 40968122960](https://github.com/dwijayuda/pskernel/actions/runs/40968122960)
@@ -13,7 +34,7 @@ four formatted source/metadata pins and tested tarball; it does not rebuild or
 relabel a previous compiler. Root `proofscript-0.1.0-psc1-modular.10.tgz`: 9842556 bytes, SHA256
 `19f62a66f72e33664ce6b1ac6deb48242510b67de5ac94d0e5e065c16e05adb1`. The tested ZIP is in
 [artifact 12939127333](https://github.com/dwijayuda/pskernel/actions/runs/40968122960/artifacts/12939127333).
-The final source-adoption check verifies current source/pins and reads the ZIP back.
+The final source-adoption check passed, verifying current source/pins and ZIP read-back.
 
 The new installed JS/TS graph uses source `a1f49fb3195a9142f941de34c1e6565bf31146fb`, digest
 `67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad`, G1/G2/G3 manifest

@@ -6,8 +6,8 @@ and [source fixed points](../PSC1_WIRE_MODULAR_QUALIFICATION_2026-10-29.json) ha
 finite Linux scopes. The default checker remains official Lean 4.35.0 C++/Emscripten
 linear-memory Wasm; the kernel and strict IR/publication boundaries are unchanged.
 
-[Verified .10 Linux x64 artifact](https://github.com/dwijayuda/pskernel/actions/runs/40968122960/artifacts/12939127333)
-contains proofscript-wire-quote-linux-x64.zip: the tested root, matching TypeScript
+[Verified .10 Linux x64 artifact](https://github.com/dwijayuda/pskernel/actions/runs/40969210436/artifacts/12939207933)
+contains proofscript-wire-quote-linux-x64.zip and the passed source-adoption receipt: the tested root, matching TypeScript
 SDKs, instructions and exact receipts/checksums. Native quoting is active, with
 portable fallback. The same-runner 11-module application averages 6326.64 ms (.7)
 versus 4547.08 ms (.10) for two steady warm comment edits: about 28% less time.
@@ -79,7 +79,7 @@ grammar, entry and assurance determine reuse. Source changes invalidate the
 affected prefix suffix; errors clear reuse. Build emission invokes the generated compilePreparedWithQuote entry and existing
 backend emitters. Its legacy wrapper supplies psJsonQuote; the fixed Node host
 supplies the guarded native string serializer. The generated entry validates
-original IR before transforms; check-only validates in the adapter.24 exact
+original IR before transforms; check-only validates in the adapter. 24 exact
 candidate comparisons cover both generated data representations. Fresh independent
 admission and strict IR validation still run for every issued checked request.
 

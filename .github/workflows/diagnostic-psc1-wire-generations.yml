@@ -12,48 +12,7 @@ concurrency:
   group: psc1-wire-generations-${{ github.sha }}
   cancel-in-progress: false
 jobs:
-  seed:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 25
-    outputs:
-      artifact: ${{ steps.artifact.outputs.artifact-id }}
-      digest: ${{ steps.artifact.outputs.artifact-digest }}
-    defaults:
-      run: {shell: bash, working-directory: psc1}
-    steps:
-      - uses: actions/checkout@v4
-        with: {fetch-depth: 0}
-      - uses: actions/setup-node@v4
-        with: {node-version: '22.23.3'}
-      - uses: actions/cache@v4
-        with:
-          path: ~/.elan
-          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
-      - uses: actions/cache/restore@v4
-        with:
-          path: psc1/.lake
-          key: psc1-wire-quote-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain','psc1/lakefile.lean','psc1/**/*.lean') }}
-          restore-keys: |
-            psc1-wire-quote-v1-${{ runner.os }}-
-            psc1-portable-modules-v1-${{ runner.os }}-
-      - uses: ./.github/actions/psc1-lean-launcher
-      - env: {GH_TOKEN: '${{ github.token }}'}
-        run: node ../.github/scripts/psc1-wire-generation-seed.mjs
-      - name: Reuse source-matched native seed and exact locked SDK
-        run: |
-          lake build psc1_portable_module_seed psc1_independent_checker
-          npm ci --prefix .. --ignore-scripts --include=optional --no-audit --no-fund
-          npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
-      - name: Portable G1, exact immutable renderer/IR match and independent admission
-        run: node host-tools/executable/prepare-generation.mjs
-      - uses: actions/upload-artifact@v4
-        id: artifact
-        with:
-          name: psc1-wire-portable-G1-${{ github.sha }}
-          path: psc1/dist/portable-modules/
-          retention-days: 90
   qualification:
-    needs: seed
     strategy:
       fail-fast: false
       matrix: {engine: [js, ts]}
@@ -80,8 +39,6 @@ jobs:
       - uses: ./.github/actions/psc1-lean-launcher
       - env:
           GH_TOKEN: ${{ github.token }}
-          PSC1_SEED_ARTIFACT: ${{ needs.seed.outputs.artifact }}
-          PSC1_SEED_SHA256: ${{ needs.seed.outputs.digest }}
         run: node ../.github/scripts/psc1-wire-generation-restore.mjs
       - name: Independent checker and unchanged output consumers
         run: |

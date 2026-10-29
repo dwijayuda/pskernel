@@ -1,0 +1,17 @@
+name: PSC1 stop superseded wire source qualification
+on:
+  push:
+    branches: [qualify/psc1-wire-generations-20261029]
+    paths: [.github/workflows/diagnostic-psc1-stop-superseded-wire.yml]
+permissions: {contents: read}
+# Cancel only run 40891862487's obsolete pre-ABI-fix source cohort.
+# The corrected-source run has a distinct concurrency group and is preserved.
+concurrency:
+  group: psc1-wire-generations-c7cbdcacb59b157516efa5db4d4be3b3756a3419
+  cancel-in-progress: true
+jobs:
+  checkpoint:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    steps:
+      - run: echo 'Superseded unqualified source retained in Git history; corrected cohort is run 40894184363.'

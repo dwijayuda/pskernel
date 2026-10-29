@@ -119,7 +119,7 @@ for (const file of files) {
       ?qualifiedDevelopmentSource(canonicalFiles[file]??file,source):source;
     assert.equal(Buffer.byteLength(platformSource),pin.bytes);
     assert.equal(createHash('sha256').update(platformSource).digest('hex'),pin.sha256,file+': unqualified platform host bytes');
-  }else assert.deepEqual(executableAst(source), executableAst(readAt(currentFeatureBaseline, canonicalFiles[file] ?? file)),
+  }else assert.deepEqual(executableAst(developmentPins.has(canonicalFiles[file]??file)?qualifiedDevelopmentSource(canonicalFiles[file]??file,source):source), executableAst(readAt(currentFeatureBaseline, canonicalFiles[file] ?? file)),
     file + ': host differs from its separately tested feature baseline');
   const formatted = await prettier.format(source, formatOptions);
   assert.deepEqual(executableAst(formatted), executableAst(source),

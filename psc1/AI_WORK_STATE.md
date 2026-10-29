@@ -5,6 +5,46 @@ PR #212 from PR #211 HEAD2c278ab9a47c24ef8635f99b41629fc79fd82699.
 Connected GitHub and Linux/Windows/macOS Actions only. Expected-HEAD,
 single-parent/non-force history. No merge or npm registry publication.
 
+## Active development-latency implementation (Linux, from PR #212)
+
+Active branch feat/psc1-development-speed-20261029 from b4facc22e7c576a112710e5081a84349c3f3a1e1.
+The user's scope is installed .ps checking and compilation, not CI throughput.
+[Baseline40835944173](https://github.com/dwijayuda/pskernel/actions/runs/40835944173)
+at2d51d32b passes on Node22.23.3/Linux x64 using the exact qualified.4 root.
+Two tiny-program checks take3926/3723ms; JS builds4895/4793ms; TS builds5310/5480ms.
+The separately instrumented host build reads3253474594 bytes in13721 reads
+(1363ms inside readFileSync), total4864ms; compiler subprocess1035ms,
+independent-checker wrapper362ms. This is a small cold-process observation,
+not a general benchmark or a warm-worker result.
+
+A closed CI host proposal adds:
+- genuine check-only scheduling through unchanged generated capture/preparation
+  and strict original-IR functions, followed by actual independent Lean admission;
+- minimal successful-session evidence with explicit --evidence full;
+- per-boundary resource-alias deduplication, keeping fresh before/after checks;
+- actual kernel checking without a redundant separate health invocation;
+- private, bounded Linux/Node warm watch workers and conservative module-prefix
+  reuse for checks, with exact source-byte/order/kind/entry/assurance binding.
+
+Builds continue to use the original generated candidate service and emitter path.
+The first proposal40837904164 passes check-only admission but fails a direct
+generated compilePrepared boundary during the first build; it is not qualified.
+The revised proposal retains the original build entry point instead of creating
+new backend integration obligations. Generated compiler source/graph, kernel Wasm,
+all prior G1/G2/G3 fixed points and ordinary request/checker budgets are unchanged.
+
+[Focused candidate40838737539](https://github.com/dwijayuda/pskernel/actions/runs/40838737539)
+at79ec87af is pending: both engines/grammars, actual JS/strict TS/Wasm output,
+full/minimal evidence, genuine kernel fixtures, tamper refusals, live prefix reuse,
+dependency invalidation, type-error repair and preserved build publication.
+No new G1/G2/G3, broad platform matrix or additional release gate is requested.
+Candidate source data remains separate from canonical host files until this passes.
+The .4 cross-platform ZIP stays the qualified reference.
+
+Prior PR #212 follow-up is now terminal: source40815747045 passes all16 selected
+jobs/37 finite Core criteria/zero blocked; retained.11 run40815741441 passes all9 jobs.
+Adoption40815741447 passes at b4facc22. Earlier pending text below is historical.
+
 ## Cross-platform npm/CLI milestone — PR #212
 
 Continue from PR #211 HEAD2c278ab9a47c24ef8635f99b41629fc79fd82699.

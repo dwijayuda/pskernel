@@ -1,0 +1,563 @@
+{
+  "schema": "psc1-selfhosted-installed-qualification/1",
+  "date": "2026-10-29 Asia/Jakarta",
+  "status": "qualified-finite-linux-installed-preview",
+  "pullRequest": 211,
+  "branch": "feat/psc1-selfhosted-npm-20261029",
+  "baseCommit": "2cb55ddc93404d840b07cc3faad5accd1cee62b0",
+  "implementationCommit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+  "compilerQualification": {
+    "schema": "psc1-installed-compiler-selfhosting/1",
+    "status": "qualified-finite-linux-modular-js-ts",
+    "engines": [
+      "js",
+      "ts"
+    ],
+    "qualificationRun": 40755246954,
+    "sourceCommit": "17ce19919175b60be06050188e2a546a8a72e689",
+    "sourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+    "sourceGraphManifestSha256": "74e14f5650931ccc3de2a4a7ed6829f54197bb8100466bcb2eb0ad90d7b14a85",
+    "receiptSha256": "fbf31688151efc29c6de9a74b678e10420c983a24069ecf68f57e4e87e78b9de",
+    "receiptPath": "dist/COMPILER_SELFHOST_QUALIFICATION.json",
+    "fixedPoint": "exact-G1-G2-G3-graph-files-and-npm-tarballs",
+    "qualifiedCorrectnessSeconds": 3600,
+    "performance240Qualified": false,
+    "installedHostQualification": "separate installation CI; not inherited from self-hosting",
+    "scope": "finite Linux JS/TS compiler graph; not universal toolchain release or native binary reproduction"
+  },
+  "originalCompilerReceipt": "docs/PSC1_PORTABLE_MODULAR_QUALIFICATION_2026-10-29.json",
+  "package": {
+    "schema": "psc1-modular-installed-package/1",
+    "testedCommit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+    "version": "0.1.0-psc1-modular.3",
+    "tarball": "proofscript-0.1.0-psc1-modular.3.tgz",
+    "bytes": 9820916,
+    "sha256": "9a0bc7727c009b071d9835db536a6856bb20b294b8e6d5ff18ef79e68bdb0b57",
+    "manifestSha256": "c3f68d0e0c9e836825faac9850d0d3724a3d41f53b2aa7bc9f3e8d22183f762d",
+    "consumerDescriptorsSha256": "644caaf80828e3adcd286d75a0d6b8a2283283ad31eb779b96048a7638a1bfbd",
+    "compilerAdmissionsSha256": "cff6304aef7b3e7c69ac7c4941d275a685b945af2fdc79bf9dfee7ebfd1513f4",
+    "sourceGraphManifestSha256": "74e14f5650931ccc3de2a4a7ed6829f54197bb8100466bcb2eb0ad90d7b14a85",
+    "compilerSelfHosting": {
+      "schema": "psc1-installed-compiler-selfhosting/1",
+      "status": "qualified-finite-linux-modular-js-ts",
+      "engines": [
+        "js",
+        "ts"
+      ],
+      "qualificationRun": 40755246954,
+      "sourceCommit": "17ce19919175b60be06050188e2a546a8a72e689",
+      "sourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+      "sourceGraphManifestSha256": "74e14f5650931ccc3de2a4a7ed6829f54197bb8100466bcb2eb0ad90d7b14a85",
+      "receiptSha256": "fbf31688151efc29c6de9a74b678e10420c983a24069ecf68f57e4e87e78b9de",
+      "receiptPath": "dist/COMPILER_SELFHOST_QUALIFICATION.json",
+      "fixedPoint": "exact-G1-G2-G3-graph-files-and-npm-tarballs",
+      "qualifiedCorrectnessSeconds": 3600,
+      "performance240Qualified": false,
+      "installedHostQualification": "separate installation CI; not inherited from self-hosting",
+      "scope": "finite Linux JS/TS compiler graph; not universal toolchain release or native binary reproduction"
+    },
+    "compilerSourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+    "sourceUnits": 134,
+    "corePackages": 20,
+    "installedGraphFiles": 1479,
+    "installedGraphBytes": 108582986,
+    "defaultKernel": "official-Lean-4.35.0-Emscripten-linear-memory-Wasm",
+    "referenceCompilerExecuted": false,
+    "fullModularSelfHosting": false,
+    "standaloneCheckedHostQualified": false
+  },
+  "smokeReports": [
+    {
+      "status": "passed",
+      "runtimeVersion": "v22.23.3",
+      "checkedBuilds": 8,
+      "kernelCases": 14,
+      "tamperedModuleRefused": true,
+      "oldExecutorsAbsent": true
+    },
+    {
+      "status": "passed",
+      "runtimeVersion": "1.4.4",
+      "checkedBuilds": 8,
+      "kernelCases": 14,
+      "tamperedModuleRefused": true,
+      "oldExecutorsAbsent": true
+    }
+  ],
+  "compatibility": {
+    "node24": {
+      "status": "passed",
+      "runtimeVersion": "v24.22.1",
+      "checkedBuilds": 8,
+      "kernelCases": 14,
+      "tamperedModuleRefused": true
+    },
+    "node26": {
+      "status": "passed",
+      "runtimeVersion": "v26.12.1",
+      "checkedBuilds": 8,
+      "kernelCases": 14,
+      "tamperedModuleRefused": true
+    }
+  },
+  "hosts": {
+    "node": {
+      "status": "passed",
+      "checkedTargetBuilds": 64,
+      "sourceAndAssuranceRefusals": 10,
+      "globalRootOnlyCheckAndBuild": true,
+      "fullCompilerWasmAdmissionSha256": "cff6304aef7b3e7c69ac7c4941d275a685b945af2fdc79bf9dfee7ebfd1513f4",
+      "watchCases": 9,
+      "resourceAndMetadataRefusals": 23,
+      "unicodeIoBuilds": 8,
+      "unsupportedIoRefusals": 4,
+      "typeConsumers": [
+        "NodeNext",
+        "Bundler"
+      ],
+      "tsWatch": {
+        "engine": "ts",
+        "builds": 2,
+        "editedValue": "43",
+        "typingRefusalPreservedPointer": true,
+        "exit": 143,
+        "stopMs": 101
+      },
+      "applicationBuilds": 16,
+      "applicationCases": 264,
+      "applicationModules": [
+        11
+      ],
+      "observedApplicationPerformance": {
+        "maxCaseMs": 11726,
+        "maxRssKiB": 165428,
+        "maxBuildAndAllCasesMs": 45142,
+        "scope": "concurrent Linux CI observations, not a universal benchmark or compiler memory measurement"
+      }
+    },
+    "bun": {
+      "status": "passed",
+      "checkedTargetBuilds": 64,
+      "sourceAndAssuranceRefusals": 10,
+      "globalRootOnlyCheckAndBuild": true,
+      "fullCompilerWasmAdmissionSha256": "cff6304aef7b3e7c69ac7c4941d275a685b945af2fdc79bf9dfee7ebfd1513f4",
+      "watchCases": 9,
+      "resourceAndMetadataRefusals": 23,
+      "unicodeIoBuilds": 8,
+      "unsupportedIoRefusals": 4,
+      "typeConsumers": [
+        "NodeNext",
+        "Bundler"
+      ],
+      "tsWatch": {
+        "engine": "ts",
+        "builds": 2,
+        "editedValue": "43",
+        "typingRefusalPreservedPointer": true,
+        "exit": 143,
+        "stopMs": 101
+      },
+      "applicationBuilds": 16,
+      "applicationCases": 264,
+      "applicationModules": [
+        11
+      ],
+      "observedApplicationPerformance": {
+        "maxCaseMs": 4132,
+        "maxRssKiB": 107488,
+        "maxBuildAndAllCasesMs": 25452,
+        "scope": "concurrent Linux CI observations, not a universal benchmark or compiler memory measurement"
+      }
+    }
+  },
+  "delivery": {
+    "schema": "psc1-selfhosted-installed-delivery/1",
+    "status": "qualified-finite-linux-installed-preview",
+    "testedCommit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+    "run": 40799529998,
+    "package": {
+      "schema": "psc1-modular-installed-package/1",
+      "testedCommit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "version": "0.1.0-psc1-modular.3",
+      "tarball": "proofscript-0.1.0-psc1-modular.3.tgz",
+      "bytes": 9820916,
+      "sha256": "9a0bc7727c009b071d9835db536a6856bb20b294b8e6d5ff18ef79e68bdb0b57",
+      "manifestSha256": "c3f68d0e0c9e836825faac9850d0d3724a3d41f53b2aa7bc9f3e8d22183f762d",
+      "consumerDescriptorsSha256": "644caaf80828e3adcd286d75a0d6b8a2283283ad31eb779b96048a7638a1bfbd",
+      "compilerAdmissionsSha256": "cff6304aef7b3e7c69ac7c4941d275a685b945af2fdc79bf9dfee7ebfd1513f4",
+      "sourceGraphManifestSha256": "74e14f5650931ccc3de2a4a7ed6829f54197bb8100466bcb2eb0ad90d7b14a85",
+      "compilerSelfHosting": {
+        "schema": "psc1-installed-compiler-selfhosting/1",
+        "status": "qualified-finite-linux-modular-js-ts",
+        "engines": [
+          "js",
+          "ts"
+        ],
+        "qualificationRun": 40755246954,
+        "sourceCommit": "17ce19919175b60be06050188e2a546a8a72e689",
+        "sourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+        "sourceGraphManifestSha256": "74e14f5650931ccc3de2a4a7ed6829f54197bb8100466bcb2eb0ad90d7b14a85",
+        "receiptSha256": "fbf31688151efc29c6de9a74b678e10420c983a24069ecf68f57e4e87e78b9de",
+        "receiptPath": "dist/COMPILER_SELFHOST_QUALIFICATION.json",
+        "fixedPoint": "exact-G1-G2-G3-graph-files-and-npm-tarballs",
+        "qualifiedCorrectnessSeconds": 3600,
+        "performance240Qualified": false,
+        "installedHostQualification": "separate installation CI; not inherited from self-hosting",
+        "scope": "finite Linux JS/TS compiler graph; not universal toolchain release or native binary reproduction"
+      },
+      "compilerSourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+      "sourceUnits": 134,
+      "corePackages": 20,
+      "installedGraphFiles": 1479,
+      "installedGraphBytes": 108582986,
+      "defaultKernel": "official-Lean-4.35.0-Emscripten-linear-memory-Wasm",
+      "referenceCompilerExecuted": false,
+      "fullModularSelfHosting": false,
+      "standaloneCheckedHostQualified": false
+    },
+    "checks": {
+      "node": {
+        "qualified": true,
+        "runtimeVersion": "v22.23.3"
+      },
+      "bun": {
+        "qualified": true,
+        "runtimeVersion": "1.4.4"
+      },
+      "node24": {
+        "qualified": true,
+        "runtimeVersion": "v24.22.1"
+      },
+      "node26": {
+        "qualified": true,
+        "runtimeVersion": "v26.12.1"
+      }
+    },
+    "pins": {
+      "package": {
+        "run": 40799529998,
+        "job": 123204019596,
+        "artifact": 12864949039,
+        "commit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+        "zipSha256": "22a3ec56a18d59f851e1613580eb3705620be4b4e64da1fac063b708275f822a"
+      },
+      "node": {
+        "qualification": {
+          "run": 40799529998,
+          "job": 123205416567,
+          "artifact": 12866830382,
+          "commit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+          "zipSha256": "9fd18c4e8cf5da3a1c35f5d40574de74f9a680dc696f628737e1b992da007f47"
+        },
+        "boundaries": {
+          "run": 40799529998,
+          "job": 123205416589,
+          "artifact": 12866085209,
+          "commit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+          "zipSha256": "a709954c53a3f5cc14873c65abbeadc8341db3920c74a6e1d07ef0d9e7219f79"
+        },
+        "applications": {
+          "run": 40799529998,
+          "job": 123205416636,
+          "artifact": 12865334688,
+          "commit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+          "zipSha256": "c94979d8f9b11042993633cdc9b7b47219b0c2a34fcfc2cb0869de7396d25ec7"
+        }
+      },
+      "bun": {
+        "qualification": {
+          "run": 40799529998,
+          "job": 123205416723,
+          "artifact": 12865728390,
+          "commit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+          "zipSha256": "57be07a1acd420468d88448b145742d856d1271204e01d112d0ea0d949470620"
+        },
+        "boundaries": {
+          "run": 40799529998,
+          "job": 123205416625,
+          "artifact": 12865523001,
+          "commit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+          "zipSha256": "8628e4ae1561d4e6025a594ec61a6cb9ae1f2e6d05fc4286a89a913d58a998b4"
+        },
+        "applications": {
+          "run": 40799529998,
+          "job": 123205416602,
+          "artifact": 12865338345,
+          "commit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+          "zipSha256": "688beff9f39f95517e8861f763d1541b46c116c9934bde235877dc342fc7379d"
+        }
+      },
+      "node24": {
+        "run": 40799529998,
+        "job": 123205416644,
+        "artifact": 12865357671,
+        "commit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+        "zipSha256": "dbf7a1335bf27bd736131e074276f54f0bc190bf3fcbdb2b01b15f140c074743"
+      },
+      "node26": {
+        "run": 40799529998,
+        "job": 123205416545,
+        "artifact": 12864419777,
+        "commit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+        "zipSha256": "429eefed172b7b5cd36b8c379b7ef37b893c2524aeb0c60e01203a8f940666cd"
+      }
+    },
+    "optionalTargets": {
+      "run": 40799529998,
+      "job": 123204019596,
+      "artifact": 12864774827,
+      "commit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "zipSha256": "41fbe9d85933608ec17f898671c6600fee58658d97ff60da4977264f5058974e"
+    },
+    "sourceGate": {
+      "run": 40799548941,
+      "testedCommit": "103ee6344214f584997fb4b3c08af359e28cb80a",
+      "branchHeadCommit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "readiness": {
+        "counts": {
+          "implemented": 0,
+          "tested": 0,
+          "qualified": 37,
+          "blocked": 0
+        },
+        "releaseReady": true
+      }
+    },
+    "compilerQualification": {
+      "schema": "psc1-installed-compiler-selfhosting/1",
+      "status": "qualified-finite-linux-modular-js-ts",
+      "engines": [
+        "js",
+        "ts"
+      ],
+      "qualificationRun": 40755246954,
+      "sourceCommit": "17ce19919175b60be06050188e2a546a8a72e689",
+      "sourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+      "sourceGraphManifestSha256": "74e14f5650931ccc3de2a4a7ed6829f54197bb8100466bcb2eb0ad90d7b14a85",
+      "receiptSha256": "fbf31688151efc29c6de9a74b678e10420c983a24069ecf68f57e4e87e78b9de",
+      "receiptPath": "dist/COMPILER_SELFHOST_QUALIFICATION.json",
+      "fixedPoint": "exact-G1-G2-G3-graph-files-and-npm-tarballs",
+      "qualifiedCorrectnessSeconds": 3600,
+      "performance240Qualified": false,
+      "installedHostQualification": "separate installation CI; not inherited from self-hosting",
+      "scope": "finite Linux JS/TS compiler graph; not universal toolchain release or native binary reproduction"
+    },
+    "noMerge": true,
+    "noRegistryPublication": true,
+    "notQualified": [
+      "universal release",
+      "other platforms",
+      "standalone checked host",
+      "native binary reproduction",
+      "240-second self-compilation performance",
+      "new Rust/Wasm executor source cohort",
+      "full M3 semantic-family matrix for this installed cohort"
+    ],
+    "freshExtractedZip": {
+      "checksums": true,
+      "rootOnlyOfflineInstall": true,
+      "npmExecHelpInitCheckBuild": true,
+      "answer": "42"
+    },
+    "zip": "proofscript-0.1.0-psc1-modular.3-installable.zip",
+    "zipBytes": 9160194,
+    "zipSha256": "fcf24be0ba7ef2d8088b5f2a402a0537c2f6d208cdeedcf90bca587d8c2f83bd"
+  },
+  "requiredRuns": [
+    {
+      "id": 40799529998,
+      "commit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "scope": "new .3 installed package, both engines, Node/Bun, supported Node majors and actual ZIP"
+    },
+    {
+      "id": 40799548941,
+      "commit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "scope": "all16 selected source jobs;37 finite criteria;14 scoped target bundles"
+    },
+    {
+      "id": 40799529980,
+      "commit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "scope": "separate retained .11 reference CLI;all9 jobs"
+    },
+    {
+      "id": 40755246954,
+      "commit": "336ab495df5479a959a071166b7c2c6b24823b26",
+      "scope": "original genuine modular JS/TS G1/G2/G3 and exact source-graph/npm fixed points"
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 12867276735,
+      "run": 40799529998,
+      "commit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "name": "proofscript-selfhosted-installable-b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "bytes": 9164742,
+      "digest": "sha256:f77834362fb08e9da7de0e3a7a036fe034cfac27f4cda672d19809476a0557f6",
+      "expiresAt": "2027-01-27T01:17:38Z"
+    },
+    {
+      "id": 12866830382,
+      "run": 40799529998,
+      "commit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "name": "psc1-modular-installed-node-b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "bytes": 16540,
+      "digest": "sha256:9fd18c4e8cf5da3a1c35f5d40574de74f9a680dc696f628737e1b992da007f47",
+      "expiresAt": "2027-01-27T01:17:38Z"
+    },
+    {
+      "id": 12866085209,
+      "run": 40799529998,
+      "commit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "name": "psc1-modular-boundaries-node-b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "bytes": 1264,
+      "digest": "sha256:a709954c53a3f5cc14873c65abbeadc8341db3920c74a6e1d07ef0d9e7219f79",
+      "expiresAt": "2027-01-27T01:17:38Z"
+    },
+    {
+      "id": 12865728390,
+      "run": 40799529998,
+      "commit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "name": "psc1-modular-installed-bun-b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "bytes": 16553,
+      "digest": "sha256:57be07a1acd420468d88448b145742d856d1271204e01d112d0ea0d949470620",
+      "expiresAt": "2027-01-27T01:17:38Z"
+    },
+    {
+      "id": 12865523001,
+      "run": 40799529998,
+      "commit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "name": "psc1-modular-boundaries-bun-b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "bytes": 1248,
+      "digest": "sha256:8628e4ae1561d4e6025a594ec61a6cb9ae1f2e6d05fc4286a89a913d58a998b4",
+      "expiresAt": "2027-01-27T01:17:38Z"
+    },
+    {
+      "id": 12865357671,
+      "run": 40799529998,
+      "commit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "name": "psc1-modular-runtime-node24-b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "bytes": 2757,
+      "digest": "sha256:dbf7a1335bf27bd736131e074276f54f0bc190bf3fcbdb2b01b15f140c074743",
+      "expiresAt": "2027-01-27T01:17:38Z"
+    },
+    {
+      "id": 12865338345,
+      "run": 40799529998,
+      "commit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "name": "psc1-modular-installed-applications-bun-b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "bytes": 6302,
+      "digest": "sha256:688beff9f39f95517e8861f763d1541b46c116c9934bde235877dc342fc7379d",
+      "expiresAt": "2027-01-27T01:17:38Z"
+    },
+    {
+      "id": 12865334688,
+      "run": 40799529998,
+      "commit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "name": "psc1-modular-installed-applications-node-b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "bytes": 6064,
+      "digest": "sha256:c94979d8f9b11042993633cdc9b7b47219b0c2a34fcfc2cb0869de7396d25ec7",
+      "expiresAt": "2027-01-27T01:17:38Z"
+    },
+    {
+      "id": 12864949039,
+      "run": 40799529998,
+      "commit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "name": "psc1-modular-toolchain-package-b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "bytes": 10113268,
+      "digest": "sha256:22a3ec56a18d59f851e1613580eb3705620be4b4e64da1fac063b708275f822a",
+      "expiresAt": "2027-01-27T01:17:38Z"
+    },
+    {
+      "id": 12864774827,
+      "run": 40799529998,
+      "commit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "name": "psc1-modular-target-resources-b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "bytes": 178000866,
+      "digest": "sha256:41fbe9d85933608ec17f898671c6600fee58658d97ff60da4977264f5058974e",
+      "expiresAt": "2027-01-27T01:17:38Z"
+    },
+    {
+      "id": 12864419777,
+      "run": 40799529998,
+      "commit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "name": "psc1-modular-runtime-node26-b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "bytes": 2761,
+      "digest": "sha256:429eefed172b7b5cd36b8c379b7ef37b893c2524aeb0c60e01203a8f940666cd",
+      "expiresAt": "2027-01-27T01:17:38Z"
+    }
+  ],
+  "retainedCli": {
+    "run": 40799529980,
+    "commit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+    "status": "passed-all-nine-jobs",
+    "root": {
+      "commit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+      "sha256": "61fd6c4a2c9c68bf8b02342a8660ffcc328d8cf063650755c9a8ad47923446a3",
+      "bytes": 3835032,
+      "version": "0.1.0-psc1.11"
+    },
+    "scope": "frozen .11 reference cohort; not the new .3 root"
+  },
+  "sourceGate": {
+    "run": 40799548941,
+    "testedMerge": "103ee6344214f584997fb4b3c08af359e28cb80a",
+    "branchHeadCommit": "b616e2fe1cbe21646cb6b2f1f22825554ea7b1da",
+    "selectedPassed": 16,
+    "benchmark": "intentionally skipped",
+    "readiness": {
+      "counts": {
+        "implemented": 0,
+        "tested": 0,
+        "qualified": 37,
+        "blocked": 0
+      },
+      "releaseReady": true
+    },
+    "targetBundles": 14
+  },
+  "preservation": {
+    "leanVersion": "4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "compilerSeconds": 240,
+    "checkerSeconds": 120,
+    "g2G3CorrectnessSeconds": 3600,
+    "separatePerformanceSeconds": 240,
+    "heapMiB": 4096,
+    "stackMiB": 8,
+    "nativeAddressSpaceGiB": 4,
+    "fileBytes": 33554432,
+    "stageAndGraphAndWireBytes": 134217728,
+    "streamBytes": 33554432,
+    "valuesAndGraphFiles": 8192,
+    "units": 257,
+    "referenceFuel": 4096,
+    "initializerEdges": 131072,
+    "ordinaryCheckedSourceBodyPairing": true,
+    "strictOriginalAndTransformedIr": true,
+    "negativeTestsPreserved": true,
+    "pilotExpansionDeferred": true,
+    "separateCorrectnessSeconds": 1800,
+    "canonicalCompilerHostAndCheckerBodiesUnchanged": true,
+    "generatedOriginalFileProjectionExact": true,
+    "defaultKernel": "official Lean4.35.0 C++/Emscripten linear-memory Wasm",
+    "pythonPhpOptional": true,
+    "reference13AndM4PreviewPreserved": true,
+    "noRegistryPublication": true,
+    "noMerge": true
+  },
+  "attempts": [],
+  "scope": "finite Ubuntu24.04 installed modular JS/TS compiler/toolchain preview; source self-hosting and installed-host evidence remain distinct",
+  "remaining": [
+    "universal release",
+    "other platforms",
+    "standalone checked host",
+    "native binary reproduction",
+    "240-second self-compilation performance",
+    "new Rust/Wasm executor source cohort",
+    "full M3 semantic-family matrix for this installed cohort"
+  ],
+  "interpretation": "The .3 root adds checked host/API/package overlays to the exact qualified .2 G3 source graph. Source fixed-point receipts are not claims of .3 umbrella/native-binary reproduction or universal release. Legacy fullModularSelfHosting:false fields retain their conservative local/full-distribution scope; compilerSelfHosting explicitly records the actual qualified JS/TS graph. Independent admission and finite execution tests are not a compiler semantic-preservation or totality theorem.",
+  "defaultReferenceReplaced": false,
+  "noMerge": true,
+  "noRegistryPublication": true
+}

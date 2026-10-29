@@ -4,7 +4,8 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { readQualifiedArtifact, sha256 } from './kernel435-qualified-artifact.mjs';
-import { verify, readManifestBytes } from '../host-tools/executable/verify.mjs';
+import { verify } from '../host-tools/executable/verify.mjs';
+import { readQualifiedModularGraph } from './modular-toolchain-provenance.mjs';
 const input = JSON.parse(fs.readFileSync('scripts/modular-toolchain-input.json'));
 const out = path.resolve('dist/modular-toolchain');
 assert.equal(out, path.join(process.cwd(), 'dist/modular-toolchain'));
@@ -35,16 +36,10 @@ function run(exe, args, cwd = process.cwd()) {
   assert.equal(r.status, 0, r.stdout + r.stderr);
   return r.stdout;
 }
-const graphArchive = await readQualifiedArtifact(
-  input.graph.artifact,
-  path.join(out, 'graph-input'),
-);
-const graphRoot = path.join(graphArchive, 'compiler/candidate');
-const originalGraph = verify(
-  graphRoot,
-  readManifestBytes(path.join(graphArchive, 'compiler/manifest.json')),
-  input.graph.manifestSha256,
-);
+const qualified = await readQualifiedModularGraph(input.graph, path.join(out, 'graph-input'));
+const graphArchive = qualified.archive;
+const graphRoot = qualified.root;
+const originalGraph = qualified.manifest;
 assert.equal(originalGraph.sourceClosureDigest, input.graph.compilerSourceClosureDigest);
 const rootArchive = await readQualifiedArtifact(input.root, path.join(out, 'root-input'));
 const rootTars = files(rootArchive).filter((r) => path.basename(r.path) === input.root.tarball);
@@ -203,6 +198,7 @@ if (process.argv[2] !== 'inspect') {
       meta.dependencies[kernelName] = kernelVersion;
       meta.proofscript.defaultKernel = 'wasm';
       meta.proofscript.defaultEngine = 'js';
+      meta.proofscript.compilerSelfHosting = qualified.qualification;
       meta.exports['./io'] = {
         types: './dist/host/host-tools/typed-io.d.ts',
         import: './dist/host/host-tools/typed-io.mjs',
@@ -391,6 +387,7 @@ if (process.argv[2] !== 'inspect') {
     if(!['schema','version','compilerSourceClosureDigest','leanCommit','defaultEngine','defaultKernel',
       'engines','kernels','targetConsumers','dispatchPackages','hostFiles','runner'].includes(key))delete d[key];
   d.qualification='checked-modular-preview';d.fullModularSelfHosting=false;
+  d.compilerSelfHosting = qualified.qualification;
   write(path.join(out,'target-archive-correspondence.json'),json(archiveRepairs));
   d.hostFiles = [...runtimeFiles].sort().map((file) => {
     const b = fs.readFileSync(path.join(host, file));
@@ -462,7 +459,7 @@ if (process.argv[2] !== 'inspect') {
     type: 'module',
     license: 'Apache-2.0',
     engines: { node: '>=22.23.3' },
-    description: 'Checked modular compiler preview; JS/TS engines and independent Lean Wasm kernel',
+    description: 'Self-host-qualified modular JS/TS compiler with independent Lean Wasm checking',
     bin: { psc: './dist/psc.mjs', psc1: './dist/psc.mjs', proofscript: './dist/psc.mjs' },
     exports,
     files: ['dist', 'README.md', 'LICENSE', 'NOTICE'],
@@ -478,6 +475,7 @@ if (process.argv[2] !== 'inspect') {
       defaultKernel: 'wasm',
       defaultEngine: 'js',
       compilerSourceClosureDigest: d.compilerSourceClosureDigest,
+      compilerSelfHosting: qualified.qualification,
       fullModularSelfHosting: false,
       finalCrossPlatformRelease: false,
       previewOnly: true,
@@ -498,10 +496,12 @@ if (process.argv[2] !== 'inspect') {
       'This is a versioned preview. Lower packages expose source APIs and generated/* subpaths; their old ./compiler and checked-backend aliases are removed. Checked conveniences stay under proofscript and @proofscript/compiler.',
       'Python/PHP and target SDKs remain optional. Existing Rust/Wasm compiler executors refuse this newer source cohort. The qualified .13 distribution remains unchanged.',
       'The checked host requires the sealed umbrella installation scope; standalone lower generated modules resolve through ordinary dependencies, but standalone checked-host installation is not qualified.',
-      'No modular G2/G3, exact fixed point, native artifact reproduction, other-platform publication or registry publication is claimed.',
+      'The exact compiler graph has independently checked Linux JS/TS G1/G2/G3 and complete graph/npm fixed points. See dist/COMPILER_SELFHOST_QUALIFICATION.json and metadata.compilerSelfHosting. Installed-host evidence is separate.',
+      'Native binary reproduction, other-platform qualification, the 240-second self-compilation target and universal release remain unqualified. This is a Linux preview, not a universal toolchain release.',
       'Use psc --help, psc init, psc check, and psc build --out out --publication-protocol portable-file. Use --watch to rebuild captured inputs.',
     ].join('\n') + '\n',
   );
+  write(path.join(stage, 'dist/COMPILER_SELFHOST_QUALIFICATION.json'), qualified.receiptBytes);
   const bootstrapPin = '@proofscript/compiler/dist/host/DISTRIBUTION_PIN.mjs';
   // Break only the bootstrap seal self-reference. Its trusted code is also pinned per request.
   write(path.join(nodes, bootstrapPin), '// Pending bootstrap seal.\n');
@@ -511,6 +511,7 @@ if (process.argv[2] !== 'inspect') {
     version,
     compilerCommit: process.env.GITHUB_SHA,
     sourceGraph: { manifestSha256: input.graph.manifestSha256, manifest: originalGraph },
+    compilerSelfHosting: qualified.qualification,
     bootstrapPin,
     entry: Object.fromEntries(
       Object.entries(originalGraph.entry).map(([k, p]) => [k, p.replace(/^node_modules\//, '')]),
@@ -547,11 +548,12 @@ if (process.argv[2] !== 'inspect') {
       compilerSourceClosureDigest: d.compilerSourceClosureDigest,
       defaultKernel: 'wasm',
       engine: 'modular-js-ts',
+      compilerSelfHosting: qualified.qualification,
       publicApiPromotion: false,
       fullModularSelfHosting: false,
     }),
   );
-  write(path.join(out,'compiler-admissions.json'),fs.readFileSync(path.join(graphArchive,'compiler/admissions.json')));
+  write(path.join(out,'compiler-admissions.json'),fs.readFileSync(path.join(graphArchive,'admissions.json')));
   assert.equal(sha256(fs.readFileSync(path.join(out,'compiler-admissions.json'))),manifest.admissionsDigest);
   write(path.join(out,'consumer-descriptors.json'),json(d));
   const tarballs = path.join(out, 'tarballs');
@@ -572,6 +574,7 @@ if (process.argv[2] !== 'inspect') {
     consumerDescriptorsSha256: sha256(json(d)),
     compilerAdmissionsSha256: manifest.admissionsDigest,
     sourceGraphManifestSha256: input.graph.manifestSha256,
+    compilerSelfHosting: qualified.qualification,
     compilerSourceClosureDigest: d.compilerSourceClosureDigest,
     sourceUnits: manifest.units.length,
     corePackages: coreNames.length,

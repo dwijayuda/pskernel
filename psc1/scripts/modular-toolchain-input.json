@@ -1,16 +1,29 @@
 {
   "schema": "psc1-modular-toolchain-input/1",
   "graph": {
-    "schema": "psc1-modular-checked-input/1",
+    "schema": "psc1-qualified-modular-graph-input/1",
     "artifact": {
-      "run": 40666692730,
-      "job": 122743152998,
-      "artifact": 12805544463,
-      "commit": "4393ed1551aef8b6e5799b3a611cf084739618d8",
-      "zipSha256": "01eb8af4d455e41c919ad523355aa1e238485fe84fa7f2ea70ea3891ae366e38"
+      "run": 40755246954,
+      "job": 123052311598,
+      "artifact": 12852666295,
+      "commit": "336ab495df5479a959a071166b7c2c6b24823b26",
+      "zipSha256": "ea16cfb3d4c597d3b37fb22b1b1cffa2940f7075a0d17197140ca6d9e4825194"
     },
-    "manifestSha256": "f0b25fabaa702e949645eeee9adedf52237016b316aaeefb90bf806170c4b389",
-    "compilerSourceClosureDigest": "41eb40437e0df1722128c09c9b9da7cad0ccb1ad61371f23eb6bc2db4e9a1106"
+    "crossCheckArtifact": {
+      "run": 40755246954,
+      "job": 123052310924,
+      "artifact": 12851274486,
+      "commit": "336ab495df5479a959a071166b7c2c6b24823b26",
+      "zipSha256": "b49445fe4c4c5626f5a718b619024a6abbcfb3975b5f7f5e080ea1338f221715"
+    },
+    "manifestSha256": "74e14f5650931ccc3de2a4a7ed6829f54197bb8100466bcb2eb0ad90d7b14a85",
+    "compilerSourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+    "sourceCommit": "17ce19919175b60be06050188e2a546a8a72e689",
+    "qualificationReceipt": "docs/PSC1_PORTABLE_MODULAR_QUALIFICATION_2026-10-29.json",
+    "units": 134,
+    "packages": 15,
+    "files": 1131,
+    "bytes": 103951941
   },
   "root": {
     "run": 40666699859,
@@ -20,7 +33,7 @@
     "zipSha256": "0c27ddf0c4d63b1b3c63e6029d73c0e14391c6b6d6f374b980b252b26e5c60dd",
     "tarball": "proofscript-0.1.0-psc1.13.tgz"
   },
-  "version": "0.1.0-psc1-modular.1",
+  "version": "0.1.0-psc1-modular.3",
   "optional": {
     "run": 40666699859,
     "job": 122743404912,

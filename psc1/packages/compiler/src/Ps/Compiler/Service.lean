@@ -366,7 +366,7 @@ def compilePreparedWithQuote (quoteString : String -> String) (ioDispatcher : Bo
                           | Except.ok printed =>
                               let fields : List (Prod String String) := [
                                 ("admission", quoteString "not-run"),
-                                ("admissionRequest", psCompilerHostAdmissionRequestWithQuote quoteString
+                                ("admissionRequest", Ps.Internal.CompilerHost.psCompilerHostAdmissionRequestWithQuote quoteString
                                   request.requestId request.sourceClosureDigest (psBackendTargetName target) work.admissions),
                                 ("assurance", quoteString request.assurance),
                                 ("candidateOnly", "true"),

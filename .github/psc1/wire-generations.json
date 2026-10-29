@@ -1,13 +1,6 @@
 {
   "profile": "correctness-3600s",
-  "purpose": "reuse successful portable G1; fix single-directory artifact layout before genuine G2/G3",
-  "sourceDigest": "120bbbc52f94d19ca1db5c30bb1b6d8e31a49f1fb66a945cbb72d24905a00702",
-  "manifestSha256": "7a27e8c98a5eb0493f83b178e0b7d24aa9fd123743d45909891305c6e281fde8",
-  "seed": {
-    "run": 40890479241,
-    "job": 123505589331,
-    "artifact": 12904273528,
-    "commit": "d4f67cd4b5dbdd003bbe4497da21ffca4a0763b8",
-    "zipSha256": "e683a89d7285c1ce533501a9578ee2687289de1e21307f2c0224b97c0429613f"
-  }
+  "purpose": "corrected internal quote API; new complete source cohort; replace precursor only, preserve previous qualifications",
+  "canonicalCommit": "40542c95078d0460a186e49643adffef3093ef32",
+  "retainedPackage": "0.1.0-psc1.9"
 }

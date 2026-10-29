@@ -9,10 +9,72 @@ on:
   workflow_dispatch:
 permissions: {contents: read, actions: read}
 concurrency:
-  group: psc1-wire-generations-${{ github.sha }}
-  cancel-in-progress: false
+  group: psc1-wire-generations-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
+  seed:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    outputs:
+      artifact: ${{ steps.artifact.outputs.artifact-id }}
+      digest: ${{ steps.artifact.outputs.artifact-digest }}
+    defaults:
+      run: {shell: bash, working-directory: psc1}
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22.23.3'}
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        with:
+          path: psc1/.lake
+          key: psc1-wire-quote-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain','psc1/lakefile.lean','psc1/**/*.lean') }}
+          restore-keys: |
+            psc1-wire-quote-v1-${{ runner.os }}-
+            psc1-portable-modules-v1-${{ runner.os }}-
+      - uses: ./.github/actions/psc1-lean-launcher
+      - name: Locked SDKs and corrected-source native producers
+        run: |
+          npm ci --prefix .. --ignore-scripts --include=optional --no-audit --no-fund
+          npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
+          node ../.github/scripts/psc1-wire-quote-source-audit.mjs
+          lake build psc1 psc1_executable_packages psc1_portable_module_seed psc1_independent_checker psc1_unified_service_tests
+          lake env lean dist/wire-quote/LegacyEquations.lean
+          .lake/build/bin/psc1_unified_service_tests
+      - name: Preserve scalar ABI and independently checked JS/Rust transport
+        run: |
+          rustup toolchain install 1.90.0 --profile minimal
+          node scripts/prepare-rust-target-consumer.mjs
+          node scripts/compiler-host-protocol-tests.mjs
+      - name: Capture and independently admit corrected compiler source once
+        run: node host-tools/executable/build.mjs
+      - name: Exact native quote, portable parity and independently admitted application execution
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: node ../.github/scripts/psc1-wire-quote-qualify.mjs
+      - name: Portable G1, exact immutable renderer/IR match and independent admission
+        run: node host-tools/executable/prepare-generation.mjs
+      - uses: actions/upload-artifact@v4
+        id: artifact
+        with:
+          name: psc1-wire-portable-G1-${{ github.sha }}
+          path: psc1/dist/portable-modules/
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-wire-corrected-native-G1-${{ github.sha }}
+          path: |
+            psc1/dist/wire-quote/*.json
+            psc1/dist/wire-quote/*.lean
+            psc1/dist/executable-packages/compiler/
+            psc1/dist/scoped-correctness/compiler-host-protocol/
+          retention-days: 90
   qualification:
+    needs: seed
     strategy:
       fail-fast: false
       matrix: {engine: [js, ts]}
@@ -39,6 +101,8 @@ jobs:
       - uses: ./.github/actions/psc1-lean-launcher
       - env:
           GH_TOKEN: ${{ github.token }}
+          PSC1_SEED_ARTIFACT: ${{ needs.seed.outputs.artifact }}
+          PSC1_SEED_SHA256: ${{ needs.seed.outputs.digest }}
         run: node ../.github/scripts/psc1-wire-generation-restore.mjs
       - name: Independent checker and unchanged output consumers
         run: |

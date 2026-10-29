@@ -1,0 +1,22 @@
+name: PSC1 read-only persistent delivery report
+on:
+  push:
+    branches: [diagnostic/psc1-persistent-receipt-20261029]
+    paths:
+      - .github/psc1/persistent-delivery.json
+      - .github/scripts/psc1-persistent-delivery-report.mjs
+      - .github/workflows/diagnostic-psc1-persistent-report.yml
+  workflow_dispatch:
+permissions: {contents: read, actions: read}
+jobs:
+  report:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    defaults:
+      run: {shell: bash, working-directory: psc1}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22.23.3'}
+      - env: {GH_TOKEN: '${{ github.token }}'}
+        run: node ../.github/scripts/psc1-persistent-delivery-report.mjs

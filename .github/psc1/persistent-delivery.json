@@ -1,0 +1,9 @@
+{
+  "run": 40863008602,
+  "job": 123410688965,
+  "commit": "c83039f05a445f496f71aea2429ba75c61b81f40",
+  "artifact": 12892806521,
+  "zipSha256": "31a902490abbc1b93816b25123375e4928b85f43f9a23802605a771da81cde7a",
+  "comparisonSha256": "64e8d33bfd72094a68bba05783baf7ca1ba28d78f9a4097eb65b16ee3d847806",
+  "comparisonBytes": 9228
+}

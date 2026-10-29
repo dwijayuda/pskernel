@@ -1,14 +1,6 @@
 name: PSC1 checked wire transport adoption and delivery
 on:
-  push:
-    branches: [feat/psc1-wire-quote-20261029]
-    paths:
-      - psc1/host-tools/prepared-engine.mjs
-      - psc1/host-tools/wire-quote.mjs
-      - psc1/scripts/modular-toolchain-*
-      - psc1/docs/PSC1_WIRE_TRANSPORT_QUALIFICATION_2026-10-29.json
-      - .github/scripts/psc1-wire-transport-adopt.mjs
-      - .github/workflows/diagnostic-psc1-wire-transport-adopt.yml
+  # Historical .9 cohort: reproduce at 708f6b5c; do not run against newer graphs.
   workflow_dispatch:
 permissions: {contents: read, actions: read}
 concurrency:

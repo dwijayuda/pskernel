@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import assert from 'node:assert/strict';
 import { sha256 } from './tools.mjs';
+import { resourceIdentity } from '../resource-capture.mjs';
 
 export function readManifestBytes(file) {
   const stat = fs.lstatSync(file);
@@ -43,8 +44,8 @@ function checkedInventory(root, records, bootstrapPin = null) {
         const row = expected.get(file);
         assert.ok(stat.isFile() && row, 'PSC1_EXECUTABLE_UNEXPECTED_FILE');
         assert.equal(stat.size, row.bytes, 'PSC1_EXECUTABLE_FILE_SIZE');
-        const bytes = fs.readFileSync(absolute);
-        observed.push({ path: file, bytes: bytes.length, sha256: sha256(bytes) });
+        const identity = resourceIdentity(absolute);
+        observed.push({ path: file, bytes: identity.bytes, sha256: identity.sha256 });
       }
     }
   };

@@ -9,7 +9,7 @@ import {
   refuse,
 } from './cli-project.mjs';
 import { check, compile, build } from './universal.mjs';
-import { prepareWarmCompiler } from '../host-tools/warm-compiler.mjs';
+import { prepareWarmCompiler, prepareWarmKernel } from '../host-tools/warm-compiler.mjs';
 import crypto from 'node:crypto';
 export async function runWatchJob(file, expected, { warm = false } = {}) {
   const bytes = readInput(file).text;
@@ -34,7 +34,10 @@ export async function runWatchJob(file, expected, { warm = false } = {}) {
       );
   };
   const options = checkedOptions(parsed, captured);
-  if (warm) await prepareWarmCompiler(options.engine);
+  if (warm) {
+    await prepareWarmCompiler(options.engine);
+    if (options.kernel !== 'native') await prepareWarmKernel();
+  }
   const result =
     job.command === 'build'
       ? build(options, { beforePublish: assertCurrent })

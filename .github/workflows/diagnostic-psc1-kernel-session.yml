@@ -1,10 +1,5 @@
 name: PSC1 official kernel session probe
 on:
-  push:
-    branches: [feat/psc1-persistent-development-20261029]
-    paths:
-      - .github/scripts/psc1-kernel-session-probe.mjs
-      - .github/workflows/diagnostic-psc1-kernel-session.yml
   workflow_dispatch:
 permissions: {contents: read, actions: read}
 concurrency:

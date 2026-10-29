@@ -1,16 +1,18 @@
 # Fast installed .ps development
 
-The .5 Linux/Node host is [qualified by actual installed execution](../PSC1_DEVELOPMENT_QUALIFICATION_2026-10-29.json).
-It reuses the unchanged qualified JS/TS modular compiler graph and the official
-Lean 4.35.0 C++ kernel compiled to linear-memory WebAssembly.
+The .6 host has [finite Linux/Node qualification](../PSC1_PERSISTENT_QUALIFICATION_2026-10-29.json).
+The previous [.5 receipt](../PSC1_DEVELOPMENT_QUALIFICATION_2026-10-29.json) and
+[.4 cross-platform receipt](../PSC1_CROSS_PLATFORM_QUALIFICATION_2026-10-29.json)
+retain their distinct scopes. No compiler graph, kernel artifact or self-host
+qualification is relabelled.
 
-## Use it
+## Use
 
-Install the matching artifact tarballs rather than mixing distribution versions.
-Nothing is published to npm. With Node >=22.23.3:
+Install the matching root and optional SDK tarballs with the exact offline
+command in the delivery ZIP's INSTALL.md. Nothing is published to npm.
+Node >=22.23.3 is the compatibility minimum; qualification records its exact runtime.
 
 ```sh
-npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1-modular.5.tgz
 npm exec -- psc check Main.ps
 npm exec -- psc check Main.ps --watch
 npm exec -- psc build Main.ps --target js --out out --watch
@@ -18,60 +20,74 @@ npm exec -- psc build Main.ps --target ts --out out-ts --watch
 npm exec -- psc build Main.ps --target js --out audit --evidence full
 ```
 
-Strict TS output additionally needs the matching TypeScript and Linux-x64 SDK
-tarballs. The delivery ZIP includes these separately; its INSTALL.md records
-the exact offline installation command.
-Other backend consumers retain their existing explicit installation/refusal rules.
-A check without target checks the language; use `check --target ts` when target
-support and strict target compilation are also needed.
+Both .ps and supported .lean source use the same compiler APIs. A check without
+target omits emission; explicit --target/ABI retains complete target checks.
+TS output still requires its exact SDK. Rust and optional provider requirements
+and unsupported-ABI refusals remain. The two source grammars do not change which
+backend consumer is required.
 
-## Pass invariants and failures
+## Responsibilities and invariants
 
-| Stage | Invariant | Failure behavior / resources |
+| Component | Responsibility | Required invariant |
 | --- | --- | --- |
-| Capture | Exact declared source bytes, module order, grammar and entry | Superseded source refuses publication; no implicit discovery |
-| Preparation | Existing generated capture/preparation/closure functions | Strict original IR validation still runs on every cache hit |
-| Admission | Fresh official independent Lean admission on every request | Rejection fails closed; no acceptance cache |
-| Emit and consume | Original generated build service, strict transformed IR and existing target consumers | Source-only check cannot publish; target refusals unchanged |
-| Evidence | Compact receipt preserves request/source/tool identities and admission result | Full dumps opt in; validation is never optional |
-| Publication | Existing transactional protocol and final source identity guard | Failed rebuild retains the committed generation |
-| Warm watch | Private sequential Linux/Node worker, no network endpoint | 240s/request, 4096MiB heap, 8MiB stack, 64 attempts; owned group termination |
+| CLI capture/watch | Explicit source snapshots and bounded polling | Byte/config identity; superseded work cannot publish |
+| resource-capture.mjs | Coalesce duplicate reads during synchronous plan construction | Scope ends before execution; mutable resources are hashed fresh afterward |
+| running-executable.mjs | Narrow running-image identity optimization | Local ext4/XFS, same loaded inode/path and fresh ETXTBSY proof; otherwise fresh SHA-256 |
+| prepared-engine.mjs | Schedule unchanged generated preparation/build functions | Strict IR checks remain; exact source prefix reuse, suffix invalidation and reset on failure |
+| warm-compiler.mjs | Private loaded compiler capabilities | Exact selected adapter path/hash; source data cannot supply a callback |
+| warm-kernel.mjs | Supervise the official independent checker worker |120s/request,128MiB input,32MiB response,4096MiB heap/8MiB JS stack; checked response identity |
+| warm-kernel-worker.mjs | Execute the exact official Emscripten launcher and Wasm | Fresh VM context, instance, memory and logical environment for each request |
+| Existing target consumers/publisher | Validate requested output and commit it transactionally | Strict target checks, source guard, durable protocol and failure retention unchanged |
 
-Check preparation reuses exact in-memory module prefixes. A changed source
-invalidates the suffix; grammar/entry/source order and assurance bind the cache.
-Errors clear reuse. No disk cache can seed acceptance. Both JS and TS generated
-runtime representations have explicit host adapters. Compiler functions and
-generated graph bytes are unchanged.
+The VM is an adapter for trusted pinned kernel code, not a sandbox for source
+programs. The kernel remains the official Lean4.35.0 C++ kernel compiled with
+Emscripten into linear-memory WebAssembly. Neither a handwritten checker nor
+Wasm GC is introduced. Retaining a compiled WebAssembly.Module avoids repeated
+startup; it does not retain accepted declarations between requests.
 
-Resources are deduplicated within each capture/pass; fresh before/after comparisons
-remain. Ordinary requests call the real kernel directly, avoiding a separate health
-process. Explicit kernel metadata APIs still perform the health check.
+Setup coalescing never spans compiler/checker/consumer execution or publication.
+The executable optimization hashes the actual loaded image via /proc/self/exe,
+then checks pathname/inode binding and active write denial on every use.
+Only local ext4/XFS are enabled. Writable/unprovable images, unsupported hosts
+and replacements fall back to fresh reads/hashes. A different inode is never
+accepted through the retained image record. Receipt timings expose
+setupRunningExecutableBindings so the active path can be diagnosed.
+Linux kernel mechanisms are documented in
+[fs.h](https://github.com/torvalds/linux/blob/master/include/linux/fs.h)
+and [exec.c](https://github.com/torvalds/linux/blob/master/fs/exec.c).
 
-Builds retain their original generated candidate service and emitter. Warm watch
-keeps modules loaded, but does not reuse build preparation yet. Strict TS JS and
-declaration sidecars are still generated. Other operating systems and Bun retain
-the previous one-shot watch route; this new .5 host is only Linux/Node qualified.
+Preparation caches stay in private memory. Exact source bytes, module order,
+grammar, entry and assurance determine reuse. Source changes invalidate the
+affected prefix suffix; errors clear reuse. Build emission invokes the existing
+generated compilePreparedWithOutputAbi and existing backend emitters.24 exact
+candidate comparisons cover both generated data representations. Fresh independent
+admission and strict IR validation still run for every issued checked request.
 
-## Measurements and next work
+Unchanged successful check saves retain the previous result and emit an unchanged
+event, without a new request, new acceptance claim or publication. Failed attempts
+clear that reuse. Builds continue through output/publication validation.
+Watch uses one private sequential Linux/Node worker,240s/request,4096MiB heap,
+8MiB stack and64 attempts/lifetime; termination owns the process group.
+Other hosts/runtimes retain their previous one-shot route and lack new .6 evidence.
 
-[Baseline40835944173](https://github.com/dwijayuda/pskernel/actions/runs/40835944173)
-and [candidate40840703422](https://github.com/dwijayuda/pskernel/actions/runs/40840703422)
-each sample two cold processes on a tiny .ps program.
+## Evidence and remaining work
 
-| Operation | .4 mean | .5 mean |
-| --- | ---: | ---: |
-| check | 3824ms | 3403ms |
-| js | 4844ms | 4568ms |
-| ts | 5395ms | 5275ms |
+[Integrated qualification40860864442](https://github.com/dwijayuda/pskernel/actions/runs/40860864442)
+tests exact producer41d4b5db. Cold standalone commands still launch a compiler
+subprocess. Warm compiler/kernel reuse is available through Linux watch and
+private in-process infrastructure.
 
-A three-module leaf edit takes 2689ms and reuses two preparation modules. These
-are small observational samples, not universal performance claims. The build
-watch editMs field includes a subsequent negative test and is not a rebuild time.
-Resource verification still takes 1.2–1.36s/session; cold build gains are small.
+The delivery job compares .5/.6 on one runner, includes measurements and executes
+the existing multi-module CLI/JSON application's Unicode-record case. Read its
+COMPARISON.json and MEASUREMENTS.md. Timings are observational, not general bounds.
+Profile maxRssKiB covers the parent and workers, excluding subprocesses.
+The producer's watchBuild.editMs includes a later refusal test and is not isolated
+rebuild latency.
 
-Next measure repeated hashing/startup by stage before changing their architecture.
-A prepared build adapter or persistent independent kernel needs its own measured
-benefit and precise identity/resource design. Neither is required for this slice.
-Existing source/security regressions remain. New full installed qualification is
-manual; exact source adoption reuses the tested tarball without a rebuild, broad
-platform matrix or repeated G1/G2/G3.
+The dependency-ordered queue is: remaining graph identity/metadata costs; reusable
+target consumers compatible with the pinned native TypeScript7 checker; finer
+dependency invalidation; cold module loading; then measured algorithmic hotspots.
+No disk admission cache or general query framework is required for this milestone.
+Optional maps/declarations/archives require explicit output contracts and never
+replace strict target checking. Full installed qualification is manual; source
+adoption reuses the exact tested tarball, without new G1/G2/G3 or a platform matrix.

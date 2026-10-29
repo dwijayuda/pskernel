@@ -1,13 +1,5 @@
 name: PSC1 persistent development qualification
 on:
-  push:
-    branches: [feat/psc1-persistent-development-20261029]
-    paths:
-      - .github/psc1/persistent-candidate.json
-      - .github/scripts/psc1-persistent-stage.mjs
-      - .github/scripts/psc1-persistent-qualify.mjs
-      - .github/scripts/psc1-persistent-after.mjs
-      - .github/workflows/diagnostic-psc1-persistent-qualify.yml
   workflow_dispatch:
 permissions: {contents: read, actions: read}
 concurrency:

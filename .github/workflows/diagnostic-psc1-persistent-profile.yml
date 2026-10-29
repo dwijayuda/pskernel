@@ -1,10 +1,5 @@
 name: PSC1 persistent development profile
 on:
-  push:
-    branches: [feat/psc1-persistent-development-20261029]
-    paths:
-      - .github/scripts/psc1-persistent-profile*.mjs
-      - .github/workflows/diagnostic-psc1-persistent-profile.yml
   workflow_dispatch:
 permissions: {contents: read, actions: read}
 concurrency:

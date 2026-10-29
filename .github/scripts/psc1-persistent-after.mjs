@@ -8,8 +8,8 @@ try{
  run([path.resolve(path.dirname(process.execPath),'../lib/node_modules/npm/bin/npm-cli.js'),'install','--offline','--ignore-scripts','--no-audit','--no-fund','--cache',path.join(directory,'cache'),'--registry','http://127.0.0.1:9',path.join(input,'tarballs',receipt.tarball)]);
  fs.copyFileSync('../.github/scripts/psc1-persistent-profile-driver.mjs',path.join(directory,'profile.mjs'));
  const reports=[];
- for(const mode of ['cold-check','cold-build','warm-check','warm-build']){
-  const output=run([path.join(directory,'profile.mjs'),mode]),line=output.split('\n').find(l=>l.startsWith('PSC1_PERSISTENT_PROFILE '));assert.ok(line,output);const report=JSON.parse(line.slice('PSC1_PERSISTENT_PROFILE '.length));assert.ok(report.outcomes.every(x=>x.admission==='accepted'));reports.push(report);console.log(line);
+ for(const mode of ['cold-check','cold-build','warm-check','warm-build',...(process.env.PSC1_PROFILE_APPLICATION_FILE?['warm-app']:[])]){
+  const output=run([path.join(directory,'profile.mjs'),mode,...(mode==='warm-app'?[process.env.PSC1_PROFILE_APPLICATION_FILE]:[])]),line=output.split('\n').find(l=>l.startsWith('PSC1_PERSISTENT_PROFILE '));assert.ok(line,output);const report=JSON.parse(line.slice('PSC1_PERSISTENT_PROFILE '.length));assert.ok(report.outcomes.every(x=>x.admission==='accepted'));reports.push(report);console.log(line);
  }
  fs.mkdirSync('dist/persistent-results',{recursive:true});fs.writeFileSync('dist/persistent-results/profile.json',JSON.stringify({commit:process.env.GITHUB_SHA,receipt,reports},null,2)+'\n');
 }finally{fs.rmSync(directory,{recursive:true,force:true});}

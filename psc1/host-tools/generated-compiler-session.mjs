@@ -1,5 +1,6 @@
 // Host-only orchestration. Generated wire data cannot choose tools or publish.
 import fs from 'node:fs';
+import { resourceDigest } from './resource-capture.mjs';
 import { requireSupportedRuntime, syntaxArguments, runtimeArguments } from './runtime-policy.mjs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -39,7 +40,7 @@ function identity(file, expected) {
     !path.isAbsolute(file) ||
     !/^[0-9a-f]{64}$/.test(expected || '') ||
     !fs.lstatSync(file).isFile() ||
-    sha(fs.readFileSync(file)) !== expected
+    resourceDigest(file) !== expected
   )
     fail('PSC1_SERVICE_TOOL_IDENTITY_CHANGED');
   return { path: file, sha256: expected };
@@ -89,6 +90,7 @@ export function createGeneratedJsCompilerSession({
   checkerExecutable,
   checkerSha256,
   checkerScriptFile,
+  checkerExecute,
   checkerScriptSha256,
   publicationRoot,
   serviceDependencies = [],
@@ -115,6 +117,7 @@ export function createGeneratedJsCompilerSession({
     !['js-adapter', 'unified-embedded', 'unified-bundle'].includes(serviceKind) ||
     (target !== 'js' && serviceKind === 'js-adapter') ||
     (serviceExecute !== undefined && typeof serviceExecute !== 'function') ||
+    (checkerExecute !== undefined && typeof checkerExecute !== 'function') ||
     !path.isAbsolute(publicationRoot || '')
   )
     fail('PSC1_SERVICE_REQUEST_INVALID');
@@ -382,6 +385,7 @@ export function createGeneratedJsCompilerSession({
       canonicalAdmissions: admissions,
       checkerExecutable,
       checkerScript: checkerScriptFile,
+      checkerExecute,
     });
     events.push({
       role: 'independent-checker',
@@ -851,6 +855,9 @@ export function createGeneratedJsCompilerSession({
           logicalAdmission: 'accepted',
           evidence,
           timings: { ...timings, sessionMs: performance.now() - sessionStarted },
+          ...(typeof serviceExecute?.preparationMetrics === 'function'
+            ? { cache: clone(serviceExecute.preparationMetrics()) }
+            : {}),
           productionPublication: 'pending',
           ...(extraChecks.length ? { additionalAdmissions: clone(additionalAdmissions) } : {}),
           behaviorallyVerified: false,

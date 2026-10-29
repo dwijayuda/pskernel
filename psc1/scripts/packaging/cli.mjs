@@ -71,6 +71,10 @@ const developmentEpoch=JSON.parse(fs.readFileSync('docs/PSC1_DEVELOPMENT_QUALIFI
 assert.equal(developmentEpoch.status,'qualified-finite-linux-node');
 for(const pin of developmentEpoch.hostSources.pins.filter(pin=>/^psc1\/(host-tools|npm-cli)\//.test(pin.path)))
  platformHostPins.set(pin.path.slice(5),pin);
+const persistentEpoch=JSON.parse(fs.readFileSync('docs/PSC1_PERSISTENT_QUALIFICATION_2026-10-29.json'));
+assert.equal(persistentEpoch.status,'qualified-finite-linux-node');
+for(const pin of persistentEpoch.hostSources.pins.filter(pin=>/^psc1\/(host-tools|npm-cli)\//.test(pin.path)))
+ platformHostPins.set(pin.path.slice(5),pin);
 function referenceHostBytes(file){
  const pin=platformHostPins.get(file);
  if(!pin)return fs.readFileSync(file);

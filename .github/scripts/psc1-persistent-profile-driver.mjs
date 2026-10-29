@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import cp from 'node:child_process';
 import path from 'node:path';
+import assert from 'node:assert/strict';
 import {syncBuiltinESMExports} from 'node:module';
 import {pathToFileURL} from 'node:url';
 const mode=process.argv[2],rows=new Map(),children=[],phases=[];
@@ -23,13 +24,32 @@ if(mode.startsWith('warm')){
  const file=path.join(root,'node_modules/@proofscript/compiler/dist/host/host-tools/warm-compiler.mjs');
  const warm=await import(pathToFileURL(file));await warm.prepareWarmCompiler('js');if(warm.prepareWarmKernel)await warm.prepareWarmKernel();
 }
+const fixture=process.argv[3]?JSON.parse(fs.readFileSync(process.argv[3],'utf8')):undefined;
 const outcomes=[];
 for(let i=0;i<(mode.startsWith('warm')?3:1);i++){
  mark('request-'+i);
- const options={entryModule:'Main',sources:[{module:'Main',kind:'ps',text:'def answer : Nat := '+(42+i)+'\n'}]};
+ const options=mode==='warm-app'
+ ? {entryModule:fixture.entryModule,assurance:'ordinary-checked',outputAbi:'io-dispatcher',sources:fixture.sources.map((source,index)=>({...source,text:source.text+(index===fixture.sources.length-1?'\n-- profile edit '+i+'\n':'')}))}
+ : {entryModule:'Main',sources:[{module:'Main',kind:'ps',text:'def answer : Nat := '+(42+i)+'\n'}]};
+ const compileStarted=performance.now();
  const r=mode.includes('check')?api.check(options):api.build({...options,target:'js',out:path.resolve('profile-out-'+mode+'-'+i)});
- outcomes.push({status:r.status,admission:r.logicalAdmission,timings:r.timings,cache:r.cache});
+ const compileWallMs=performance.now()-compileStarted;
+ let application;
+ if(mode==='warm-app'){
+  const folder=path.resolve('application-'+i);fs.mkdirSync(folder);
+  fs.writeFileSync(path.join(folder,'input.json'),'[{"text":"A","count":2},{"text":"\\uD83D\\uDE00","count":-4}]');
+  const logFile=path.join(folder,'stdout.txt'),fd=fs.openSync(logFile,'w');
+  const {createTypedIo}=await import('proofscript/io');
+  const io=createTypedIo({abi:'psc1-node-linux-string-io/1',capabilities:['readUtf8','writeUtf8','writeLine'],required:['readUtf8','writeUtf8','writeLine'],root:folder,maxFileBytes:512,maxLineBytes:128,inputFd:0,outputFd:fd});
+  let accepted;try{const guest=await import(pathToFileURL(r.runtimeArtifact));accepted=guest.run(JSON.stringify(['transform','input.json','output.json']),request=>io.execute(request));}
+  finally{io.close();try{fs.closeSync(fd);}catch(error){if(error.code!=='EBADF')throw error;}}
+  assert.equal(accepted,true);
+  assert.equal(fs.readFileSync(path.join(folder,'output.json'),'utf8'),fixture.expected.output);
+  assert.equal(fs.readFileSync(logFile,'utf8'),fixture.expected.stdout);
+  application={case:'unicode-records',status:'passed',sources:fixture.sources.length};
+ }
+ outcomes.push({status:r.status,admission:r.logicalAdmission,compileWallMs,timings:r.timings,cache:r.cache??r.receipt?.cache,...(application?{application}:{})});
 }
 mark('done');
 const values=[...rows.values()],total=values.reduce((a,r)=>({reads:a.reads+r.reads,bytes:a.bytes+r.bytes,readMs:a.readMs+r.readMs}),{reads:0,bytes:0,readMs:0});
-console.log('PSC1_PERSISTENT_PROFILE '+JSON.stringify({mode,wallMs:performance.now()-started,total,phases,outcomes,children,byPhase:Object.fromEntries([...new Set(values.map(r=>r.phase))].map(p=>[p,values.filter(r=>r.phase===p).reduce((a,r)=>({reads:a.reads+r.reads,bytes:a.bytes+r.bytes,readMs:a.readMs+r.readMs}),{reads:0,bytes:0,readMs:0})])),maxRssKiB:process.resourceUsage().maxRSS,largest:values.sort((a,b)=>b.bytes-a.bytes).slice(0,24)}));
+console.log('PSC1_PERSISTENT_PROFILE '+JSON.stringify({mode,wallMs:performance.now()-started,total,phases,outcomes,children,byPhase:Object.fromEntries([...new Set(values.map(r=>r.phase))].map(p=>[p,values.filter(r=>r.phase===p).reduce((a,r)=>({reads:a.reads+r.reads,bytes:a.bytes+r.bytes,readMs:a.readMs+r.readMs}),{reads:0,bytes:0,readMs:0})])),maxRssKiB:process.resourceUsage().maxRSS,maxRssScope:'parent process including worker threads; subprocess memory excluded',largest:values.sort((a,b)=>b.bytes-a.bytes).slice(0,24)}));

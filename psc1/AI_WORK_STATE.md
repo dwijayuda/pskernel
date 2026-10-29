@@ -1040,3 +1040,8 @@ A cold Node/Linux JS/TS/Wasm-core routing proposal is staged separately for inst
 ### Final adoption and retired historical trigger (2026-10-30)
 
 New .10 source-adoption run 40969210436 passes at 65862d3b119398e781cf59638ac829cbdcf3cea6: all four current pins, current owned source against admitted G1, exact package bytes and ZIP read-back. The historical .9 adopter was also triggered by the generic modular-toolchain glob in run 40969210283; it correctly refused the changed source cohort. Its automatic push trigger is retired; retain manual reproduction at the recorded .9 commit. The new .10 adopter is the authoritative current check. No historical receipt or acceptance criterion is changed.
+
+
+### Frozen-package guard compatibility
+
+Retained CLI 40969210345 correctly stopped at its old current-host pin (16962 bytes vs 16602) after the new modular host was adopted. The legacy packager now first verifies the qualified .10 source pin, reads its exact prior bytes from the recorded base commit, and applies every existing historical host/payload comparison. This changes no frozen executable bytes and grants no exception to a mismatched hash. Run the existing retained CLI CI to verify the guard and preservation assertions; no G2/G3 repetition is needed.

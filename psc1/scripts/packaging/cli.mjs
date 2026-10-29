@@ -75,10 +75,25 @@ const persistentEpoch=JSON.parse(fs.readFileSync('docs/PSC1_PERSISTENT_QUALIFICA
 assert.equal(persistentEpoch.status,'qualified-finite-linux-node');
 for(const pin of persistentEpoch.hostSources.pins.filter(pin=>/^psc1\/(host-tools|npm-cli)\//.test(pin.path)))
  platformHostPins.set(pin.path.slice(5),pin);
+// Validate the qualified current epoch, then recover the exact historical host.
+// Never overlay a newer modular compiler host onto the frozen .11 distribution.
+const wireEpochFile='docs/PSC1_WIRE_INSTALLED_QUALIFICATION_2026-10-30.json';
+const wireEpoch=fs.existsSync(wireEpochFile)?JSON.parse(fs.readFileSync(wireEpochFile)):undefined;
+if(wireEpoch)assert.equal(wireEpoch.status,'qualified-finite-linux-node');
+const wireHostPins=new Map((wireEpoch?.hostSources.pins??[])
+ .filter(pin=>/^psc1\/(host-tools|npm-cli)\//.test(pin.path))
+ .map(pin=>[pin.path.slice(5),pin]));
 function referenceHostBytes(file){
+ let current=fs.readFileSync(file);
+ const wirePin=wireHostPins.get(file);
+ if(wirePin){
+  assert.equal(current.length,wirePin.bytes);
+  assert.equal(sha256(current),wirePin.sha256,'unqualified current wire host:'+file);
+  current=Buffer.from(run('git',['show',wireEpoch.baseCommit+':psc1/'+file]));
+ }
  const pin=platformHostPins.get(file);
- if(!pin)return fs.readFileSync(file);
- const current=fs.readFileSync(file);assert.equal(current.length,pin.bytes);
+ if(!pin)return current;
+ assert.equal(current.length,pin.bytes);
  assert.equal(sha256(current),pin.sha256,'unqualified current platform host:'+file);
  return Buffer.from(run('git',['show',platformEpoch.baseCommit+':psc1/'+file]));
 }

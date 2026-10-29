@@ -376,7 +376,7 @@ def compilePreparedWithQuote (quoteString : String -> String) (ioDispatcher : Bo
                                 ("origins", psJsonArray (psListReverse captured.originsRev)),
                                 ("partialNames", psJsonArray (psListMap
                                   (fun (name : PsName) => quoteString (psNameToString name)) work.partialNames)),
-                                ("protocol", psJsonQuote
+                                ("protocol", quoteString
                                   (if ioDispatcher then "psc1-compiler-service/2" else "psc1-compiler-service/1")),
                                 ("publicNames", psJsonArray (psListMap quoteString selected)),
                                 ("requestId", quoteString request.requestId),

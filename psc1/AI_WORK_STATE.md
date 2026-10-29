@@ -1,11 +1,48 @@
 # PSC1 AI work state
 
 Updated 2026-10-29 Asia/Jakarta. Active branch feat/psc1-wire-quote-20261029,
-from PR #214 qualified HEAD c83039f05a445f496f71aea2429ba75c61b81f40.
+from PR #215 qualified HEAD 7b9dc2725be226f401a8adcd2e6f0af391308504.
 Connected GitHub and Linux Actions only; previous platform evidence is retained. Expected-HEAD,
 single-parent/non-force history. No merge or npm registry publication.
 
-## Verified .9 delivery and scope
+## Current corrected-source checkpoint: full CI green, generations active
+
+[Source CI 40894666856](https://github.com/dwijayuda/pskernel/actions/runs/40894666856)
+passes all 16 selected jobs at implementation `efe35012851a8e81c92f84cfa0eb1c7bd058921c`;
+the benchmark is intentionally skipped. Retained frozen-compiler
+[CLI 40894659730](https://github.com/dwijayuda/pskernel/actions/runs/40894659730)
+passes all nine jobs, and existing npm 40894666645 passes. PR #215 remains at
+qualified `7b9dc2725be226f401a8adcd2e6f0af391308504`.
+
+The initial full-suite failure 40886789852 correctly refused a higher-order bridge
+helper exposed as public. It is now under `Ps.Internal.CompilerHost`; no scalar
+ABI exception was added. Corrected source `a1f49fb3195a9142f941de34c1e6565bf31146fb`,
+digest `67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad`,
+has passed native/portable G1, both legacy rfl equations (reported [propext]),
+JS/Rust transport, 4907 logical declarations, strict original/transformed IR,
+all 15 TS package checks, nine integrity negatives, exhaustive scalar quoting,
+26 candidate comparisons and independent native/Wasm application checks.
+Portable G1 is 120761 ms, peak RSS 1211096 KiB; manifest
+`210c9577643f26b91a80eae036f3f70272a606a55520fe9a974db47fd14023dc`.
+Exact receipts and artifact identities: [source checkpoint](docs/PSC1_WIRE_SOURCE_CHECKPOINT_2026-10-29.json).
+
+[Run 40894184363](https://github.com/dwijayuda/pskernel/actions/runs/40894184363)
+is executing genuine JS/TS G2/G3 with 3600-second per-request correctness limits;
+normal G1/compiler/tools/corpus stay at 240 seconds, checker at 120 seconds.
+The superseded pre-ABI-fix run 40891862487 was cancelled without promotion.
+The earlier 120bbbc5 G1 and paired measurements remain precursor evidence.
+
+Next: require terminal G2/G3 and exact graph/npm fixed points, then assemble .10
+and run the staged installed checks once. The cold Node/Linux JS/TS/Wasm-core
+adapter proposal is isolated at `qualify/psc1-wire-install-20261029`, commit
+`e3e095f1f2f86d957e3a759cab1ec9cbe0d26bef`; it must pass actual installed
+execution, admission, typing/integrity negatives, watch and measured application
+checks with positive native-quote counters before canonical adoption. Current
+canonical host API bytes remain the previously qualified bytes. The installable
+.9 graph still uses source17ce1991 and does not activate native quoting.
+No new-source root, fixed points, release, merge or publication is claimed yet.
+
+## Retained .9 delivery and historical scope
 
 [Adoption40885379578](https://github.com/dwijayuda/pskernel/actions/runs/40885379578)
 passes at708f6b5ca99eb44e2dc6608404dffeb5af717cd5. It verifies all four exact
@@ -977,4 +1014,4 @@ edit also reruns the existing CLI at the corrected documentation HEAD.
 
 The full source run 40886789852 passed its selected compiler/source/backend jobs but failed the default JS/Rust transport fixture: the added higher-order quote helper was accidentally public (PSC1_PUBLIC_NONSCALAR_SIGNATURE_UNQUALIFIED). Move it into Ps.Internal.CompilerHost, preserving the scalar ABI refusal and exact legacy bodies; re-qualify this corrected source cohort before promoting it. The installable retained-source .9 artifact remains valid and separate. Its default source graph does not enable native quote calls.
 
-Cold Node/Linux JS/TS/Rust/Wasm-core builds now select the same installed, hash-bound prepared adapter already used by warm builds; every original/transformed IR check, independent admission and publication boundary remains required. Other runtimes/platforms/targets retain their previous route. This host routing requires actual installed qualification; it is not yet claimed qualified. The earlier G1 and paired-quote measurements remain precursor evidence, not qualification of the namespace-corrected source. The in-progress precursor generations must not be promoted for this corrected source.
+A cold Node/Linux JS/TS/Wasm-core routing proposal is staged separately for installed qualification; canonical host API bytes were restored in efe35012. The proposal selects the same installed, hash-bound prepared adapter already used by warm builds; every original/transformed IR check, independent admission and publication boundary remains required. Other runtimes/platforms/targets retain their previous route. This host routing requires actual installed qualification; it is not yet claimed qualified. The earlier G1 and paired-quote measurements remain precursor evidence, not qualification of the namespace-corrected source. The in-progress precursor generations must not be promoted for this corrected source.

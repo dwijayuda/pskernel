@@ -1,5 +1,6 @@
 // Host scheduling only. Every language operation calls the unchanged generated compiler.
 import fs from 'node:fs';
+import { createCompilerDataEquality } from './compiler-data-equality.mjs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { verify, readManifestBytes } from './executable/verify.mjs';
@@ -84,6 +85,8 @@ export async function loadPreparedEngine({
     }
   }
   check();
+  const sameData = createCompilerDataEquality();
+  let emissionCache;
   let lastMetrics, previous;
   const constructor = (name) => {
     const value = runtime[name];
@@ -109,6 +112,7 @@ export async function loadPreparedEngine({
     variant === 'js' ? jsCons(item, jsNil()) : strings().cons(item, strings().nil);
 
   function prepare(request) {
+    const captureStarted = performance.now();
     const inputs = array(request.sources),
       old = previous;
     const compatible = old && old.kind === request.grammar && old.entry === request.entry;
@@ -149,14 +153,30 @@ export async function loadPreparedEngine({
           entryList(request.entry),
         ),
       );
+      const captureMs = performance.now() - captureStarted;
+      const semanticStarted = performance.now();
       const hit =
         compatible &&
         prefix === inputs.length &&
         prefix === old.inputs.length &&
         old.assurance === request.assurance;
-      const work = hit
-        ? old.work
-        : unwrap(service.Ps_Internal_CompilerService_prepare(request, captured));
+      const semanticInput = hit
+        ? old.semanticInput
+        : api.psCompilerPreparationElaborated(captured.state);
+      const comparisonStarted = performance.now();
+      const semanticHit = !!(
+        !hit &&
+        compatible &&
+        old.assurance === request.assurance &&
+        sameData(old.semanticInput, semanticInput)
+      );
+      const comparisonMs = performance.now() - comparisonStarted;
+      const work =
+        hit || semanticHit
+          ? old.work
+          : unwrap(service.Ps_Internal_CompilerService_prepare(request, captured));
+      const semanticMs = performance.now() - semanticStarted;
+      const validationStarted = performance.now();
       // Validate original IR even on a preparation hit. No target transform is claimed for check.
       unwrap(ir.psStrictValidateModule(work.raw));
       previous = {
@@ -166,11 +186,23 @@ export async function loadPreparedEngine({
         inputs,
         states,
         work,
+        semanticInput,
       };
       return {
         captured,
         work,
-        cache: { prefixModules: prefix, preparedModules: inputs.length - prefix, finishHit: !!hit },
+        cache: {
+          prefixModules: prefix,
+          preparedModules: inputs.length - prefix,
+          finishHit: !!hit,
+          semanticHit,
+        },
+        phases: {
+          captureMs,
+          semanticMs,
+          comparisonMs,
+          originalIrValidationMs: performance.now() - validationStarted,
+        },
       };
     } catch (error) {
       previous = undefined;
@@ -207,7 +239,7 @@ export async function loadPreparedEngine({
         const request = selected.fst;
         activeRequest = request;
         const io = selected.snd,
-          { captured, work, cache } = prepare(request);
+          { captured, work, cache, phases } = prepare(request);
         if (checking) {
           if (io) fail('CHECK_OUTPUT_ABI');
           const origins = array(captured.originsRev)
@@ -228,7 +260,7 @@ export async function loadPreparedEngine({
             partialNames: array(work.partialNames).map((name) => names.psNameToString(name)),
             origins,
             irValidation: 'strict-original-no-transform',
-            cache,
+            cache: { ...cache, phases },
             preparationMs: performance.now() - started,
           });
         }
@@ -241,21 +273,58 @@ export async function loadPreparedEngine({
             : constructor('PsBackendTarget')[targetName];
         if (!backendTarget) fail('TARGET_ABI');
         const emit = emitters.get(target);
+        const emitStarted = performance.now();
+        const emitterStats = { printMs: 0, comparisonMs: 0, hit: false };
         const output = unwrap(
           service.Ps_Internal_CompilerService_compilePreparedWithOutputAbi(
             io,
             backendTarget,
-            (module) => (selected) => emit(module, selected),
+            (module) => (selected) => {
+              const old = emissionCache,
+                comparisonStarted = performance.now();
+              const hit =
+                old?.target === target &&
+                sameData(old.module, module) &&
+                sameData(old.selected, selected);
+              emitterStats.comparisonMs += performance.now() - comparisonStarted;
+              if (hit) {
+                emitterStats.hit = true;
+                return old.result;
+              }
+              const printStarted = performance.now(),
+                result = emit(module, selected);
+              emitterStats.printMs += performance.now() - printStarted;
+              // At most one target result/input graph; do not accumulate target cohorts.
+              if (
+                tag(result) === 'ok' &&
+                typeof fields(result).value?.fst === 'string' &&
+                fields(result).value.fst.length <= 4194304
+              )
+                emissionCache = { target, module, selected, result };
+              else emissionCache = undefined;
+              return result;
+            },
             request,
             captured,
             fields(captured.entry).value,
             work,
           ),
         );
-        lastMetrics = { ...cache, preparationMs: performance.now() - started };
+        lastMetrics = {
+          ...cache,
+          preparationMs: performance.now() - started,
+          phases: {
+            ...phases,
+            emitMs: performance.now() - emitStarted,
+            printMs: emitterStats.printMs,
+            emitComparisonMs: emitterStats.comparisonMs,
+          },
+          emitterHit: emitterStats.hit,
+        };
         return output;
       } catch (error) {
         previous = undefined;
+        emissionCache = undefined;
         lastMetrics = undefined;
         if (error.compilerError && typeof error.compilerError === 'object') {
           const e = error.compilerError;
@@ -292,6 +361,7 @@ export async function loadPreparedEngine({
     },
     reset() {
       previous = undefined;
+      emissionCache = undefined;
     },
     identity: { manifestSha256, sourceClosureDigest: manifest.sourceClosureDigest, variant },
   });

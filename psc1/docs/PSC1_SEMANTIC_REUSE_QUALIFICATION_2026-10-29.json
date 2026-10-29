@@ -1,0 +1,2200 @@
+{
+  "schema": "psc1-semantic-reuse-qualification/1",
+  "status": "qualified-finite-linux-node",
+  "baseCommit": "c83039f05a445f496f71aea2429ba75c61b81f40",
+  "producerCommit": "57e72bce3bc1a329704696878ff07a53fb4c7ee3",
+  "producerQualification": {
+    "run": 40869848303,
+    "job": 123433804114,
+    "commit": "57e72bce3bc1a329704696878ff07a53fb4c7ee3",
+    "artifact": 12896251225,
+    "zipSha256": "f8dd6a58ef06541438b3064382a319b8d325f0cbb163414ae1c08c14090dcd0e"
+  },
+  "qualification": {
+    "run": 40870884480,
+    "job": 123437322049,
+    "commit": "018057cd6ab0f4b12456d444f25d9ccc6ac0c47f",
+    "artifact": 12895263788,
+    "zipSha256": "7bf9b568e8206f14fc056991a47aefb68ca313f9524e4091b845a1d37938f268"
+  },
+  "hostSources": {
+    "producerCommit": "57e72bce3bc1a329704696878ff07a53fb4c7ee3",
+    "baseCommit": "c83039f05a445f496f71aea2429ba75c61b81f40",
+    "pins": [
+      {
+        "path": "psc1/host-tools/prepared-engine.mjs",
+        "bytes": 13388,
+        "sha256": "0c0d3daad128b5ba81a90d5d0421ebda13797d864822ee9895988a0959677b67"
+      },
+      {
+        "path": "psc1/scripts/modular-toolchain-input.json",
+        "bytes": 1629,
+        "sha256": "bbf11ffbf2d7202acd98d41acfb3e304d16e23259cc40e730c8b9bd5bd7db373"
+      },
+      {
+        "path": "psc1/scripts/modular-toolchain-package.mjs",
+        "bytes": 33140,
+        "sha256": "2de83daf20becb060527bdb64c40426c5bd83f9ef042ae82fd7b21c34377c255"
+      },
+      {
+        "path": "psc1/host-tools/compiler-data-equality.mjs",
+        "bytes": 2553,
+        "sha256": "6c0439df403465e09eb23dcb01388af78b7c16f9b892eb5bde08cdd7e2669e28"
+      }
+    ]
+  },
+  "package": {
+    "schema": "psc1-modular-installed-package/1",
+    "testedCommit": "57e72bce3bc1a329704696878ff07a53fb4c7ee3",
+    "version": "0.1.0-psc1-modular.7",
+    "tarball": "proofscript-0.1.0-psc1-modular.7.tgz",
+    "bytes": 9837710,
+    "sha256": "ab0e2ce442f52311f9fad0e96cebc759c9848434ad49e8c06c6e2df9a76c9d79",
+    "manifestSha256": "59edd62ff10783112568772e9f98b65e1f90d73c828f3851840b17d560995033",
+    "consumerDescriptorsSha256": "99fea46764c46e7a3959e60f46c28b101ae8cba33abcaf29989503722d779932",
+    "compilerAdmissionsSha256": "cff6304aef7b3e7c69ac7c4941d275a685b945af2fdc79bf9dfee7ebfd1513f4",
+    "sourceGraphManifestSha256": "74e14f5650931ccc3de2a4a7ed6829f54197bb8100466bcb2eb0ad90d7b14a85",
+    "compilerSelfHosting": {
+      "schema": "psc1-installed-compiler-selfhosting/1",
+      "status": "qualified-finite-linux-modular-js-ts",
+      "engines": [
+        "js",
+        "ts"
+      ],
+      "qualificationRun": 40755246954,
+      "sourceCommit": "17ce19919175b60be06050188e2a546a8a72e689",
+      "sourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+      "sourceGraphManifestSha256": "74e14f5650931ccc3de2a4a7ed6829f54197bb8100466bcb2eb0ad90d7b14a85",
+      "receiptSha256": "fbf31688151efc29c6de9a74b678e10420c983a24069ecf68f57e4e87e78b9de",
+      "receiptPath": "dist/COMPILER_SELFHOST_QUALIFICATION.json",
+      "fixedPoint": "exact-G1-G2-G3-graph-files-and-npm-tarballs",
+      "qualifiedCorrectnessSeconds": 3600,
+      "performance240Qualified": false,
+      "installedHostQualification": "separate installation CI; not inherited from self-hosting",
+      "scope": "finite Linux JS/TS compiler graph; not universal toolchain release or native binary reproduction"
+    },
+    "compilerSourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+    "sourceUnits": 134,
+    "corePackages": 20,
+    "installedGraphFiles": 1493,
+    "installedGraphBytes": 108715653,
+    "defaultKernel": "official-Lean-4.35.0-Emscripten-linear-memory-Wasm",
+    "referenceCompilerExecuted": false,
+    "fullModularSelfHosting": false,
+    "standaloneCheckedHostQualified": false
+  },
+  "results": {
+    "schema": "psc1-development-qualification/1",
+    "testedCommit": "018057cd6ab0f4b12456d444f25d9ccc6ac0c47f",
+    "status": "passed",
+    "package": {
+      "schema": "psc1-modular-installed-package/1",
+      "testedCommit": "57e72bce3bc1a329704696878ff07a53fb4c7ee3",
+      "version": "0.1.0-psc1-modular.7",
+      "tarball": "proofscript-0.1.0-psc1-modular.7.tgz",
+      "bytes": 9837710,
+      "sha256": "ab0e2ce442f52311f9fad0e96cebc759c9848434ad49e8c06c6e2df9a76c9d79",
+      "manifestSha256": "59edd62ff10783112568772e9f98b65e1f90d73c828f3851840b17d560995033",
+      "consumerDescriptorsSha256": "99fea46764c46e7a3959e60f46c28b101ae8cba33abcaf29989503722d779932",
+      "compilerAdmissionsSha256": "cff6304aef7b3e7c69ac7c4941d275a685b945af2fdc79bf9dfee7ebfd1513f4",
+      "sourceGraphManifestSha256": "74e14f5650931ccc3de2a4a7ed6829f54197bb8100466bcb2eb0ad90d7b14a85",
+      "compilerSelfHosting": {
+        "schema": "psc1-installed-compiler-selfhosting/1",
+        "status": "qualified-finite-linux-modular-js-ts",
+        "engines": [
+          "js",
+          "ts"
+        ],
+        "qualificationRun": 40755246954,
+        "sourceCommit": "17ce19919175b60be06050188e2a546a8a72e689",
+        "sourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+        "sourceGraphManifestSha256": "74e14f5650931ccc3de2a4a7ed6829f54197bb8100466bcb2eb0ad90d7b14a85",
+        "receiptSha256": "fbf31688151efc29c6de9a74b678e10420c983a24069ecf68f57e4e87e78b9de",
+        "receiptPath": "dist/COMPILER_SELFHOST_QUALIFICATION.json",
+        "fixedPoint": "exact-G1-G2-G3-graph-files-and-npm-tarballs",
+        "qualifiedCorrectnessSeconds": 3600,
+        "performance240Qualified": false,
+        "installedHostQualification": "separate installation CI; not inherited from self-hosting",
+        "scope": "finite Linux JS/TS compiler graph; not universal toolchain release or native binary reproduction"
+      },
+      "compilerSourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+      "sourceUnits": 134,
+      "corePackages": 20,
+      "installedGraphFiles": 1493,
+      "installedGraphBytes": 108715653,
+      "defaultKernel": "official-Lean-4.35.0-Emscripten-linear-memory-Wasm",
+      "referenceCompilerExecuted": false,
+      "fullModularSelfHosting": false,
+      "standaloneCheckedHostQualified": false
+    },
+    "cases": [
+      {
+        "engine": "js",
+        "kind": "ps",
+        "target": "js",
+        "admissionAndExecution": true,
+        "minimalEvidence": true
+      },
+      {
+        "engine": "js",
+        "kind": "ps",
+        "target": "ts",
+        "admissionAndExecution": true,
+        "minimalEvidence": true
+      },
+      {
+        "engine": "js",
+        "kind": "ps",
+        "target": "wasm-core",
+        "admissionAndExecution": true,
+        "minimalEvidence": true
+      },
+      {
+        "engine": "js",
+        "kind": "ps",
+        "negative": "typing-refusal"
+      },
+      {
+        "engine": "js",
+        "kind": "lean",
+        "target": "js",
+        "admissionAndExecution": true,
+        "minimalEvidence": true
+      },
+      {
+        "engine": "js",
+        "kind": "lean",
+        "target": "ts",
+        "admissionAndExecution": true,
+        "minimalEvidence": true
+      },
+      {
+        "engine": "js",
+        "kind": "lean",
+        "target": "wasm-core",
+        "admissionAndExecution": true,
+        "minimalEvidence": true
+      },
+      {
+        "engine": "js",
+        "kind": "lean",
+        "negative": "typing-refusal"
+      },
+      {
+        "engine": "ts",
+        "kind": "ps",
+        "target": "js",
+        "admissionAndExecution": true,
+        "minimalEvidence": true
+      },
+      {
+        "engine": "ts",
+        "kind": "ps",
+        "target": "ts",
+        "admissionAndExecution": true,
+        "minimalEvidence": true
+      },
+      {
+        "engine": "ts",
+        "kind": "ps",
+        "target": "wasm-core",
+        "admissionAndExecution": true,
+        "minimalEvidence": true
+      },
+      {
+        "engine": "ts",
+        "kind": "ps",
+        "negative": "typing-refusal"
+      },
+      {
+        "engine": "ts",
+        "kind": "lean",
+        "target": "js",
+        "admissionAndExecution": true,
+        "minimalEvidence": true
+      },
+      {
+        "engine": "ts",
+        "kind": "lean",
+        "target": "ts",
+        "admissionAndExecution": true,
+        "minimalEvidence": true
+      },
+      {
+        "engine": "ts",
+        "kind": "lean",
+        "target": "wasm-core",
+        "admissionAndExecution": true,
+        "minimalEvidence": true
+      },
+      {
+        "engine": "ts",
+        "kind": "lean",
+        "negative": "typing-refusal"
+      }
+    ],
+    "samples": [
+      {
+        "command": "check",
+        "target": "language-only",
+        "repeat": 0,
+        "wallMs": 1450.945163999997,
+        "timings": {
+          "resourceVerificationMs": 314.8660039999999,
+          "compilerProcessMs": 637.8373220000001,
+          "independentKernelMs": 179.75218200000018,
+          "targetMs": 0,
+          "evidenceMs": 0,
+          "sessionMs": 1145.945817,
+          "setupMs": 248.474684,
+          "setupResourceReads": 1495,
+          "setupResourceBytes": 111083709,
+          "setupDuplicateReadsAvoided": 1779,
+          "setupDuplicateBytesAvoided": 237418804,
+          "setupReadAndHashMs": 86.60554800000072,
+          "setupRunningExecutableBindings": 1,
+          "publishMs": 0,
+          "totalMs": 1384.773181
+        }
+      },
+      {
+        "command": "build",
+        "target": "js",
+        "repeat": 0,
+        "wallMs": 1803.9565680000014,
+        "timings": {
+          "resourceVerificationMs": 322.27592400000015,
+          "compilerProcessMs": 713.1605410000001,
+          "independentKernelMs": 179.61785299999997,
+          "targetMs": 37.6803809999999,
+          "evidenceMs": 1.6565680000001066,
+          "sessionMs": 1268.536605,
+          "setupMs": 251.70665999999997,
+          "setupResourceReads": 1495,
+          "setupResourceBytes": 111083709,
+          "setupDuplicateReadsAvoided": 1779,
+          "setupDuplicateBytesAvoided": 237418804,
+          "setupReadAndHashMs": 86.48140299999957,
+          "setupRunningExecutableBindings": 1,
+          "publishMs": 227.46078399999988,
+          "totalMs": 1737.2777760000001
+        }
+      },
+      {
+        "command": "build",
+        "target": "ts",
+        "repeat": 0,
+        "wallMs": 2193.9036149999956,
+        "timings": {
+          "resourceVerificationMs": 426.26845000000014,
+          "compilerProcessMs": 712.955664,
+          "independentKernelMs": 172.30832999999984,
+          "targetMs": 215.91121900000007,
+          "evidenceMs": 2.1208420000000388,
+          "sessionMs": 1543.9766049999998,
+          "setupMs": 285.60195,
+          "setupResourceReads": 2025,
+          "setupResourceBytes": 141527197,
+          "setupDuplicateReadsAvoided": 2311,
+          "setupDuplicateBytesAvoided": 291963362,
+          "setupReadAndHashMs": 114.04736600000012,
+          "setupRunningExecutableBindings": 1,
+          "publishMs": 306.76119900000003,
+          "totalMs": 2125.862473
+        }
+      },
+      {
+        "command": "check",
+        "target": "language-only",
+        "repeat": 1,
+        "wallMs": 1446.8105789999972,
+        "timings": {
+          "resourceVerificationMs": 315.04617000000013,
+          "compilerProcessMs": 641.401429,
+          "independentKernelMs": 171.15164800000002,
+          "targetMs": 0,
+          "evidenceMs": 0,
+          "sessionMs": 1140.127445,
+          "setupMs": 249.34110300000003,
+          "setupResourceReads": 1495,
+          "setupResourceBytes": 111083709,
+          "setupDuplicateReadsAvoided": 1779,
+          "setupDuplicateBytesAvoided": 237418804,
+          "setupReadAndHashMs": 87.17493599999959,
+          "setupRunningExecutableBindings": 1,
+          "publishMs": 0,
+          "totalMs": 1380.661341
+        }
+      },
+      {
+        "command": "build",
+        "target": "js",
+        "repeat": 1,
+        "wallMs": 1800.2520220000006,
+        "timings": {
+          "resourceVerificationMs": 325.7702889999997,
+          "compilerProcessMs": 708.3928989999999,
+          "independentKernelMs": 176.73268599999983,
+          "targetMs": 37.32293800000002,
+          "evidenceMs": 1.7296739999999318,
+          "sessionMs": 1264.849827,
+          "setupMs": 255.61449000000002,
+          "setupResourceReads": 1495,
+          "setupResourceBytes": 111083709,
+          "setupDuplicateReadsAvoided": 1779,
+          "setupDuplicateBytesAvoided": 237418804,
+          "setupReadAndHashMs": 89.39289499999964,
+          "setupRunningExecutableBindings": 1,
+          "publishMs": 223.2738750000001,
+          "totalMs": 1732.556518
+        }
+      },
+      {
+        "command": "build",
+        "target": "ts",
+        "repeat": 1,
+        "wallMs": 2190.0906160000013,
+        "timings": {
+          "resourceVerificationMs": 426.3433969999998,
+          "compilerProcessMs": 717.5488170000001,
+          "independentKernelMs": 169.82975699999997,
+          "targetMs": 222.70793099999992,
+          "evidenceMs": 2.190401999999949,
+          "sessionMs": 1554.682879,
+          "setupMs": 289.48536099999995,
+          "setupResourceReads": 2025,
+          "setupResourceBytes": 141527197,
+          "setupDuplicateReadsAvoided": 2311,
+          "setupDuplicateBytesAvoided": 291963362,
+          "setupReadAndHashMs": 114.99986600000034,
+          "setupRunningExecutableBindings": 1,
+          "publishMs": 289.8127259999999,
+          "totalMs": 2121.897103
+        }
+      }
+    ],
+    "fullEvidencePreserved": true,
+    "kernelCases": 14,
+    "warmKernelCases": 14,
+    "preparedParity": {
+      "status": "passed",
+      "comparisons": 24,
+      "results": [
+        {
+          "variant": "js",
+          "target": "js",
+          "kind": "ps",
+          "status": "candidate",
+          "cache": {
+            "prefixModules": 0,
+            "preparedModules": 1,
+            "finishHit": false,
+            "semanticHit": false,
+            "preparationMs": 25.00588199999993,
+            "phases": {
+              "captureMs": 2.8462320000001,
+              "semanticMs": 7.090211000000181,
+              "comparisonMs": 0.00048100000003614696,
+              "originalIrValidationMs": 0.8796939999999722,
+              "emitMs": 12.379171000000042,
+              "printMs": 0.9976899999999205,
+              "emitComparisonMs": 0.0006609999998090643
+            },
+            "emitterHit": false
+          }
+        },
+        {
+          "variant": "js",
+          "target": "ts",
+          "kind": "ps",
+          "status": "candidate",
+          "cache": {
+            "prefixModules": 1,
+            "preparedModules": 0,
+            "finishHit": true,
+            "semanticHit": false,
+            "preparationMs": 10.332533999999896,
+            "phases": {
+              "captureMs": 0.05006500000013148,
+              "semanticMs": 0.0013519999999971333,
+              "comparisonMs": 0.0005310000001372828,
+              "originalIrValidationMs": 0.8866639999998824,
+              "emitMs": 8.227158999999801,
+              "printMs": 0.6872359999999844,
+              "emitComparisonMs": 0.0011820000001989683
+            },
+            "emitterHit": false
+          }
+        },
+        {
+          "variant": "js",
+          "target": "rust",
+          "kind": "ps",
+          "status": "candidate",
+          "cache": {
+            "prefixModules": 1,
+            "preparedModules": 0,
+            "finishHit": true,
+            "semanticHit": false,
+            "preparationMs": 27.570261999999957,
+            "phases": {
+              "captureMs": 0.07708499999989726,
+              "semanticMs": 0.0012710000000879518,
+              "comparisonMs": 0.00043000000005122274,
+              "originalIrValidationMs": 0.8736650000000736,
+              "emitMs": 23.801913000000013,
+              "printMs": 16.695157999999992,
+              "emitComparisonMs": 0.0009119999999711581
+            },
+            "emitterHit": false
+          }
+        },
+        {
+          "variant": "js",
+          "target": "wasm-core",
+          "kind": "ps",
+          "status": "candidate",
+          "cache": {
+            "prefixModules": 1,
+            "preparedModules": 0,
+            "finishHit": true,
+            "semanticHit": false,
+            "preparationMs": 36.59683499999983,
+            "phases": {
+              "captureMs": 0.051907999999912136,
+              "semanticMs": 0.0011319999998704589,
+              "comparisonMs": 0.00040999999964697054,
+              "originalIrValidationMs": 0.7830290000001696,
+              "emitMs": 34.500203000000056,
+              "printMs": 27.854006000000027,
+              "emitComparisonMs": 0.0008910000001378648
+            },
+            "emitterHit": false
+          }
+        },
+        {
+          "variant": "js",
+          "target": "js",
+          "kind": "lean",
+          "status": "candidate",
+          "cache": {
+            "prefixModules": 0,
+            "preparedModules": 1,
+            "finishHit": false,
+            "semanticHit": false,
+            "preparationMs": 17.14816400000018,
+            "phases": {
+              "captureMs": 2.2081279999997605,
+              "semanticMs": 5.237924000000021,
+              "comparisonMs": 0.000450999999884516,
+              "originalIrValidationMs": 0.7077670000003309,
+              "emitMs": 7.891978000000108,
+              "printMs": 0.8994430000002467,
+              "emitComparisonMs": 0.0016029999997044797
+            },
+            "emitterHit": false
+          }
+        },
+        {
+          "variant": "js",
+          "target": "ts",
+          "kind": "lean",
+          "status": "candidate",
+          "cache": {
+            "prefixModules": 1,
+            "preparedModules": 0,
+            "finishHit": true,
+            "semanticHit": false,
+            "preparationMs": 8.852184999999736,
+            "phases": {
+              "captureMs": 0.0530189999999493,
+              "semanticMs": 0.0013920000001235167,
+              "comparisonMs": 0.0005710000000362925,
+              "originalIrValidationMs": 0.7545480000003408,
+              "emitMs": 7.0060560000001715,
+              "printMs": 0.5867560000001504,
+              "emitComparisonMs": 0.001040999999986525
+            },
+            "emitterHit": false
+          }
+        },
+        {
+          "variant": "js",
+          "target": "rust",
+          "kind": "lean",
+          "status": "candidate",
+          "cache": {
+            "prefixModules": 1,
+            "preparedModules": 0,
+            "finishHit": true,
+            "semanticHit": false,
+            "preparationMs": 23.471896000000015,
+            "phases": {
+              "captureMs": 0.16337399999974878,
+              "semanticMs": 0.0016120000000228174,
+              "comparisonMs": 0.0006210000001374283,
+              "originalIrValidationMs": 0.7397149999997055,
+              "emitMs": 21.56019900000001,
+              "printMs": 11.024560000000292,
+              "emitComparisonMs": 0.0008809999999357387
+            },
+            "emitterHit": false
+          }
+        },
+        {
+          "variant": "js",
+          "target": "wasm-core",
+          "kind": "lean",
+          "status": "candidate",
+          "cache": {
+            "prefixModules": 1,
+            "preparedModules": 0,
+            "finishHit": true,
+            "semanticHit": false,
+            "preparationMs": 32.75668599999972,
+            "phases": {
+              "captureMs": 0.04996500000015658,
+              "semanticMs": 0.001291999999921245,
+              "comparisonMs": 0.0004510000007940107,
+              "originalIrValidationMs": 0.7552980000000389,
+              "emitMs": 30.862646999999924,
+              "printMs": 24.43895000000066,
+              "emitComparisonMs": 0.0010710000005929032
+            },
+            "emitterHit": false
+          }
+        },
+        {
+          "variant": "js",
+          "target": "js",
+          "kind": "ps",
+          "status": "candidate",
+          "cache": {
+            "prefixModules": 0,
+            "preparedModules": 2,
+            "finishHit": false,
+            "semanticHit": false,
+            "preparationMs": 28.838012000000163,
+            "phases": {
+              "captureMs": 4.774032000000261,
+              "semanticMs": 7.2312730000003285,
+              "comparisonMs": 0.00014000000010128133,
+              "originalIrValidationMs": 1.039733999999953,
+              "emitMs": 14.538698999999724,
+              "printMs": 1.9480499999999665,
+              "emitComparisonMs": 0.0010919999995167018
+            },
+            "emitterHit": false
+          }
+        },
+        {
+          "variant": "js",
+          "target": "js",
+          "kind": "ps",
+          "status": "candidate",
+          "cache": {
+            "prefixModules": 1,
+            "preparedModules": 1,
+            "finishHit": false,
+            "semanticHit": false,
+            "preparationMs": 25.22650700000031,
+            "phases": {
+              "captureMs": 2.840783000000556,
+              "semanticMs": 6.99986699999954,
+              "comparisonMs": 0.2963820000004489,
+              "originalIrValidationMs": 0.9659529999998995,
+              "emitMs": 11.432478999999148,
+              "printMs": 1.67766599999959,
+              "emitComparisonMs": 0.06571799999983341
+            },
+            "emitterHit": false
+          }
+        },
+        {
+          "variant": "js",
+          "target": "js",
+          "kind": "ps",
+          "status": "refused"
+        },
+        {
+          "variant": "js",
+          "target": "js",
+          "kind": "ps",
+          "status": "candidate",
+          "cache": {
+            "prefixModules": 0,
+            "preparedModules": 1,
+            "finishHit": false,
+            "semanticHit": false,
+            "preparationMs": 21.12806399999954,
+            "phases": {
+              "captureMs": 2.0618500000000495,
+              "semanticMs": 6.500301000000036,
+              "comparisonMs": 0.00015100000018719584,
+              "originalIrValidationMs": 1.068967000000157,
+              "emitMs": 10.72375000000011,
+              "printMs": 0.9522420000002967,
+              "emitComparisonMs": 0.0025040000000444707
+            },
+            "emitterHit": false
+          }
+        },
+        {
+          "variant": "ts",
+          "target": "js",
+          "kind": "ps",
+          "status": "candidate",
+          "cache": {
+            "prefixModules": 0,
+            "preparedModules": 1,
+            "finishHit": false,
+            "semanticHit": false,
+            "preparationMs": 28.1634039999999,
+            "phases": {
+              "captureMs": 3.090096999999332,
+              "semanticMs": 7.363239999999678,
+              "comparisonMs": 0.0003310000001874869,
+              "originalIrValidationMs": 0.9947060000004058,
+              "emitMs": 14.775853999999526,
+              "printMs": 0.9857619999993403,
+              "emitComparisonMs": 0.0007009999999354477
+            },
+            "emitterHit": false
+          }
+        },
+        {
+          "variant": "ts",
+          "target": "ts",
+          "kind": "ps",
+          "status": "candidate",
+          "cache": {
+            "prefixModules": 1,
+            "preparedModules": 0,
+            "finishHit": true,
+            "semanticHit": false,
+            "preparationMs": 12.429197999999815,
+            "phases": {
+              "captureMs": 0.05854700000054436,
+              "semanticMs": 0.0022429999999076244,
+              "comparisonMs": 0.00011999999969702912,
+              "originalIrValidationMs": 0.9456029999992097,
+              "emitMs": 9.882864000000154,
+              "printMs": 0.6852139999991778,
+              "emitComparisonMs": 0.0006409999996321858
+            },
+            "emitterHit": false
+          }
+        },
+        {
+          "variant": "ts",
+          "target": "rust",
+          "kind": "ps",
+          "status": "candidate",
+          "cache": {
+            "prefixModules": 1,
+            "preparedModules": 0,
+            "finishHit": true,
+            "semanticHit": false,
+            "preparationMs": 36.685035000000425,
+            "phases": {
+              "captureMs": 0.08528699999988021,
+              "semanticMs": 0.0007910000003903406,
+              "comparisonMs": 0.00011099999937869143,
+              "originalIrValidationMs": 0.9289480000006733,
+              "emitMs": 34.38108300000022,
+              "printMs": 22.636536999999407,
+              "emitComparisonMs": 0.0005810000002384186
+            },
+            "emitterHit": false
+          }
+        },
+        {
+          "variant": "ts",
+          "target": "wasm-core",
+          "kind": "ps",
+          "status": "candidate",
+          "cache": {
+            "prefixModules": 1,
+            "preparedModules": 0,
+            "finishHit": true,
+            "semanticHit": false,
+            "preparationMs": 42.23724900000161,
+            "phases": {
+              "captureMs": 0.15383999999903608,
+              "semanticMs": 0.0012920000008307397,
+              "comparisonMs": 0.00021999999989930075,
+              "originalIrValidationMs": 0.8858540000001085,
+              "emitMs": 40.122731000001295,
+              "printMs": 30.572512999999162,
+              "emitComparisonMs": 0.0004710000011982629
+            },
+            "emitterHit": false
+          }
+        },
+        {
+          "variant": "ts",
+          "target": "js",
+          "kind": "lean",
+          "status": "candidate",
+          "cache": {
+            "prefixModules": 0,
+            "preparedModules": 1,
+            "finishHit": false,
+            "semanticHit": false,
+            "preparationMs": 19.710696000000098,
+            "phases": {
+              "captureMs": 2.895916000001307,
+              "semanticMs": 6.130928999999014,
+              "comparisonMs": 0.0001609999999345746,
+              "originalIrValidationMs": 0.8183930000013788,
+              "emitMs": 8.825054000000819,
+              "printMs": 0.9034899999987829,
+              "emitComparisonMs": 0.0004910000006930204
+            },
+            "emitterHit": false
+          }
+        },
+        {
+          "variant": "ts",
+          "target": "ts",
+          "kind": "lean",
+          "status": "candidate",
+          "cache": {
+            "prefixModules": 1,
+            "preparedModules": 0,
+            "finishHit": true,
+            "semanticHit": false,
+            "preparationMs": 9.397660000000542,
+            "phases": {
+              "captureMs": 0.056114000000889064,
+              "semanticMs": 0.000661000000036438,
+              "comparisonMs": 0.00012000000060652383,
+              "originalIrValidationMs": 0.87547799999993,
+              "emitMs": 7.44941899999867,
+              "printMs": 0.6653239999996003,
+              "emitComparisonMs": 0.0003999999989900971
+            },
+            "emitterHit": false
+          }
+        },
+        {
+          "variant": "ts",
+          "target": "rust",
+          "kind": "lean",
+          "status": "candidate",
+          "cache": {
+            "prefixModules": 1,
+            "preparedModules": 0,
+            "finishHit": true,
+            "semanticHit": false,
+            "preparationMs": 21.820879000000787,
+            "phases": {
+              "captureMs": 0.06904399999984889,
+              "semanticMs": 0.0008909999996831175,
+              "comparisonMs": 0.00012000000060652383,
+              "originalIrValidationMs": 0.8254830000005313,
+              "emitMs": 18.59425899999951,
+              "printMs": 11.73633300000074,
+              "emitComparisonMs": 0.0005000000001018634
+            },
+            "emitterHit": false
+          }
+        },
+        {
+          "variant": "ts",
+          "target": "wasm-core",
+          "kind": "lean",
+          "status": "candidate",
+          "cache": {
+            "prefixModules": 1,
+            "preparedModules": 0,
+            "finishHit": true,
+            "semanticHit": false,
+            "preparationMs": 40.80987699999969,
+            "phases": {
+              "captureMs": 0.05597300000044925,
+              "semanticMs": 0.0007509999995818362,
+              "comparisonMs": 0.00011100000119768083,
+              "originalIrValidationMs": 0.8258139999998093,
+              "emitMs": 38.95147100000031,
+              "printMs": 30.844540000000052,
+              "emitComparisonMs": 0.00043000000005122274
+            },
+            "emitterHit": false
+          }
+        },
+        {
+          "variant": "ts",
+          "target": "js",
+          "kind": "ps",
+          "status": "candidate",
+          "cache": {
+            "prefixModules": 0,
+            "preparedModules": 2,
+            "finishHit": false,
+            "semanticHit": false,
+            "preparationMs": 29.824526000000333,
+            "phases": {
+              "captureMs": 5.223283999999694,
+              "semanticMs": 8.860877999999502,
+              "comparisonMs": 0.000240999999732594,
+              "originalIrValidationMs": 1.043298999999024,
+              "emitMs": 12.857178000000204,
+              "printMs": 2.1161210000009305,
+              "emitComparisonMs": 0.0003310000010969816
+            },
+            "emitterHit": false
+          }
+        },
+        {
+          "variant": "ts",
+          "target": "js",
+          "kind": "ps",
+          "status": "candidate",
+          "cache": {
+            "prefixModules": 1,
+            "preparedModules": 1,
+            "finishHit": false,
+            "semanticHit": false,
+            "preparationMs": 26.07857999999942,
+            "phases": {
+              "captureMs": 3.5010800000000017,
+              "semanticMs": 7.572342999999819,
+              "comparisonMs": 0.03910799999903247,
+              "originalIrValidationMs": 2.476329999999507,
+              "emitMs": 11.507901999999376,
+              "printMs": 1.7143210000012914,
+              "emitComparisonMs": 0.03759600000012142
+            },
+            "emitterHit": false
+          }
+        },
+        {
+          "variant": "ts",
+          "target": "js",
+          "kind": "ps",
+          "status": "refused"
+        },
+        {
+          "variant": "ts",
+          "target": "js",
+          "kind": "ps",
+          "status": "candidate",
+          "cache": {
+            "prefixModules": 0,
+            "preparedModules": 1,
+            "finishHit": false,
+            "semanticHit": false,
+            "preparationMs": 20.493929999998727,
+            "phases": {
+              "captureMs": 2.2972910000007687,
+              "semanticMs": 7.805818000000727,
+              "comparisonMs": 0.00015000000166764949,
+              "originalIrValidationMs": 0.7738959999987856,
+              "emitMs": 8.722858000000997,
+              "printMs": 1.0803340000002208,
+              "emitComparisonMs": 0.00036100000033911783
+            },
+            "emitterHit": false
+          }
+        }
+      ]
+    },
+    "tamperBeforeExecution": true,
+    "watchCheck": {
+      "leafEditMs": 804.0140459999966,
+      "unchangedMs": 182.55476300000737,
+      "unchangedDoesNotRequestAdmission": true,
+      "results": [
+        {
+          "cache": {
+            "prefixModules": 0,
+            "preparedModules": 3,
+            "finishHit": false,
+            "semanticHit": false,
+            "phases": {
+              "captureMs": 22.44097799999986,
+              "semanticMs": 27.626142999999956,
+              "comparisonMs": 0.0004409999999097636,
+              "originalIrValidationMs": 5.817288999999846
+            }
+          },
+          "timings": {
+            "resourceVerificationMs": 301.12222600000007,
+            "compilerProcessMs": 248.50269900000012,
+            "independentKernelMs": 62.221524000000045,
+            "targetMs": 0,
+            "evidenceMs": 0,
+            "sessionMs": 623.5614680000001,
+            "setupMs": 215.17539699999998,
+            "setupResourceReads": 1495,
+            "setupResourceBytes": 111083709,
+            "setupDuplicateReadsAvoided": 1779,
+            "setupDuplicateBytesAvoided": 237418804,
+            "setupReadAndHashMs": 74.0028999999995,
+            "setupRunningExecutableBindings": 1,
+            "publishMs": 0,
+            "totalMs": 830.5037460000001
+          }
+        },
+        {
+          "cache": {
+            "prefixModules": 2,
+            "preparedModules": 1,
+            "finishHit": false,
+            "semanticHit": false,
+            "phases": {
+              "captureMs": 3.831102000000101,
+              "semanticMs": 13.947301999999581,
+              "comparisonMs": 0.30823999999984153,
+              "originalIrValidationMs": 1.6130699999998797
+            }
+          },
+          "timings": {
+            "resourceVerificationMs": 294.89168099999983,
+            "compilerProcessMs": 206.848248,
+            "independentKernelMs": 12.605637999999999,
+            "targetMs": 0,
+            "evidenceMs": 0,
+            "sessionMs": 521.2163299999997,
+            "setupMs": 109.27656499999989,
+            "setupResourceReads": 1495,
+            "setupResourceBytes": 111083709,
+            "setupDuplicateReadsAvoided": 1779,
+            "setupDuplicateBytesAvoided": 237418804,
+            "setupReadAndHashMs": 73.79187499999944,
+            "setupRunningExecutableBindings": 1,
+            "publishMs": 0,
+            "totalMs": 625.8473550000001
+          }
+        },
+        {
+          "cache": {
+            "prefixModules": 0,
+            "preparedModules": 3,
+            "finishHit": false,
+            "semanticHit": false,
+            "phases": {
+              "captureMs": 8.258484999999837,
+              "semanticMs": 14.409601999999722,
+              "comparisonMs": 0.17420000000038272,
+              "originalIrValidationMs": 1.380851999999777
+            }
+          },
+          "timings": {
+            "resourceVerificationMs": 297.26062299999967,
+            "compilerProcessMs": 212.20995300000004,
+            "independentKernelMs": 16.177832999999737,
+            "targetMs": 0,
+            "evidenceMs": 0,
+            "sessionMs": 532.847953,
+            "setupMs": 107.71100799999977,
+            "setupResourceReads": 1495,
+            "setupResourceBytes": 111083709,
+            "setupDuplicateReadsAvoided": 1779,
+            "setupDuplicateBytesAvoided": 237418804,
+            "setupReadAndHashMs": 72.92305399997986,
+            "setupRunningExecutableBindings": 1,
+            "publishMs": 0,
+            "totalMs": 635.6202440000002
+          }
+        },
+        {
+          "cache": {
+            "prefixModules": 0,
+            "preparedModules": 3,
+            "finishHit": false,
+            "semanticHit": false,
+            "phases": {
+              "captureMs": 7.247373999999581,
+              "semanticMs": 10.580492999999478,
+              "comparisonMs": 0.0004909999997835257,
+              "originalIrValidationMs": 1.2539230000002135
+            }
+          },
+          "timings": {
+            "resourceVerificationMs": 296.8206760000003,
+            "compilerProcessMs": 208.46159500000067,
+            "independentKernelMs": 15.125465000000077,
+            "targetMs": 0,
+            "evidenceMs": 0,
+            "sessionMs": 527.8302020000001,
+            "setupMs": 111.8112170000004,
+            "setupResourceReads": 1495,
+            "setupResourceBytes": 111083709,
+            "setupDuplicateReadsAvoided": 1779,
+            "setupDuplicateBytesAvoided": 237418804,
+            "setupReadAndHashMs": 72.82913100000678,
+            "setupRunningExecutableBindings": 1,
+            "publishMs": 0,
+            "totalMs": 635.3125840000002
+          }
+        }
+      ],
+      "dependencyInvalidated": true,
+      "errorRepair": true
+    },
+    "watchCheckStopMs": 41,
+    "watchBuild": {
+      "target": "ts",
+      "editMs": 2209.930444999991,
+      "values": [
+        "42",
+        "43"
+      ],
+      "typingRefusalPreserved": true,
+      "cache": {
+        "prefixModules": 2,
+        "preparedModules": 1,
+        "finishHit": false,
+        "semanticHit": false,
+        "preparationMs": 49.07576300000028,
+        "phases": {
+          "captureMs": 4.090697999999975,
+          "semanticMs": 17.294742000000042,
+          "comparisonMs": 0.4356500000003507,
+          "originalIrValidationMs": 2.1375319999997373,
+          "emitMs": 23.13956999999982,
+          "printMs": 2.299804000000222,
+          "emitComparisonMs": 0.13984900000014022
+        },
+        "emitterHit": false
+      }
+    },
+    "watchBuildStopMs": 40,
+    "ordinaryPartialChecked": true
+  },
+  "realApplicationParity": {
+    "status": "passed",
+    "cases": 10,
+    "results": [
+      {
+        "variant": "js",
+        "edit": "initial",
+        "status": "candidate",
+        "cache": {
+          "prefixModules": 0,
+          "preparedModules": 11,
+          "finishHit": false,
+          "semanticHit": false,
+          "preparationMs": 14392.503696,
+          "phases": {
+            "captureMs": 3058.029155,
+            "semanticMs": 3246.286855000002,
+            "comparisonMs": 0.0006409999987226911,
+            "originalIrValidationMs": 380.9424949999993,
+            "emitMs": 7621.572203,
+            "printMs": 1559.2633300000016,
+            "emitComparisonMs": 0.0017230000012204982
+          },
+          "emitterHit": false
+        }
+      },
+      {
+        "variant": "js",
+        "edit": "comment",
+        "status": "candidate",
+        "cache": {
+          "prefixModules": 10,
+          "preparedModules": 1,
+          "finishHit": false,
+          "semanticHit": true,
+          "preparationMs": 6405.742938000003,
+          "phases": {
+            "captureMs": 9.888087999999698,
+            "semanticMs": 2.202172999997856,
+            "comparisonMs": 2.166266000000178,
+            "originalIrValidationMs": 347.7445030000017,
+            "emitMs": 5961.947663000006,
+            "printMs": 0,
+            "emitComparisonMs": 21.47881700000289
+          },
+          "emitterHit": true
+        }
+      },
+      {
+        "variant": "js",
+        "edit": "body",
+        "status": "candidate",
+        "cache": {
+          "prefixModules": 10,
+          "preparedModules": 1,
+          "finishHit": false,
+          "semanticHit": false,
+          "preparationMs": 11088.763605,
+          "phases": {
+            "captureMs": 9.796872999999323,
+            "semanticMs": 3076.4009880000085,
+            "comparisonMs": 0.14547000000311527,
+            "originalIrValidationMs": 352.6813039999979,
+            "emitMs": 7567.52283300001,
+            "printMs": 1552.4056449999916,
+            "emitComparisonMs": 17.001543000005768
+          },
+          "emitterHit": false
+        }
+      },
+      {
+        "variant": "js",
+        "edit": "refusal",
+        "status": "refused"
+      },
+      {
+        "variant": "js",
+        "edit": "recovery",
+        "status": "candidate",
+        "cache": {
+          "prefixModules": 0,
+          "preparedModules": 11,
+          "finishHit": false,
+          "semanticHit": false,
+          "preparationMs": 13697.084495000003,
+          "phases": {
+            "captureMs": 2778.3218160000106,
+            "semanticMs": 3017.851951000004,
+            "comparisonMs": 0.000411000000895001,
+            "originalIrValidationMs": 344.16461699998763,
+            "emitMs": 7481.224433999989,
+            "printMs": 1534.7135889999918,
+            "emitComparisonMs": 0.0015429999912157655
+          },
+          "emitterHit": false
+        }
+      },
+      {
+        "variant": "ts",
+        "edit": "initial",
+        "status": "candidate",
+        "cache": {
+          "prefixModules": 0,
+          "preparedModules": 11,
+          "finishHit": false,
+          "semanticHit": false,
+          "preparationMs": 16992.09651599999,
+          "phases": {
+            "captureMs": 4005.0954229999916,
+            "semanticMs": 4059.2063849999977,
+            "comparisonMs": 0.00035099999513477087,
+            "originalIrValidationMs": 396.82706199999666,
+            "emitMs": 8424.574510000006,
+            "printMs": 1572.6167009999917,
+            "emitComparisonMs": 0.0011529999901540577
+          },
+          "emitterHit": false
+        }
+      },
+      {
+        "variant": "ts",
+        "edit": "comment",
+        "status": "candidate",
+        "cache": {
+          "prefixModules": 10,
+          "preparedModules": 1,
+          "finishHit": false,
+          "semanticHit": true,
+          "preparationMs": 7167.842139000015,
+          "phases": {
+            "captureMs": 13.255372000014177,
+            "semanticMs": 1.5129480000177864,
+            "comparisonMs": 1.4821310000261292,
+            "originalIrValidationMs": 342.63878899998963,
+            "emitMs": 6698.031867000012,
+            "printMs": 0,
+            "emitComparisonMs": 10.27217599999858
+          },
+          "emitterHit": true
+        }
+      },
+      {
+        "variant": "ts",
+        "edit": "body",
+        "status": "candidate",
+        "cache": {
+          "prefixModules": 10,
+          "preparedModules": 1,
+          "finishHit": false,
+          "semanticHit": false,
+          "preparationMs": 12475.157750000013,
+          "phases": {
+            "captureMs": 14.089412000001175,
+            "semanticMs": 3778.2447530000063,
+            "comparisonMs": 0.07133200002135709,
+            "originalIrValidationMs": 351.68745299999136,
+            "emitMs": 8205.125364999985,
+            "printMs": 1484.022850999987,
+            "emitComparisonMs": 9.406190000008792
+          },
+          "emitterHit": false
+        }
+      },
+      {
+        "variant": "ts",
+        "edit": "refusal",
+        "status": "refused"
+      },
+      {
+        "variant": "ts",
+        "edit": "recovery",
+        "status": "candidate",
+        "cache": {
+          "prefixModules": 0,
+          "preparedModules": 11,
+          "finishHit": false,
+          "semanticHit": false,
+          "preparationMs": 16312.653041000012,
+          "phases": {
+            "captureMs": 3722.4060670000035,
+            "semanticMs": 3642.903380999982,
+            "comparisonMs": 0.00021999998716637492,
+            "originalIrValidationMs": 342.6514390000084,
+            "emitMs": 8491.825168999989,
+            "printMs": 1684.4723690000246,
+            "emitComparisonMs": 0.0019240000110585243
+          },
+          "emitterHit": false
+        }
+      }
+    ]
+  },
+  "comparison": {
+    "schema": "psc1-semantic-controlled-comparison/1",
+    "commit": "018057cd6ab0f4b12456d444f25d9ccc6ac0c47f",
+    "status": "passed",
+    "scope": "Linux Node22.23.3; 11-module PracticalCli.Run; comment-only leaf edits; warm means exclude first; observations not universal guarantee",
+    "stable": [
+      {
+        "label": "qualified-.6",
+        "meanMs": 7213.391799000001
+      },
+      {
+        "label": "candidate-.7",
+        "meanMs": 4565.7555655
+      }
+    ],
+    "speedup": 1.5798900522634651,
+    "reports": [
+      {
+        "label": "qualified-.6",
+        "sha256": "23ab4f5b3eba1744b54ce3c9bc66a69edc6504b0a5568129eb99b70aa381a2f2",
+        "report": {
+          "mode": "warm-app",
+          "wallMs": 25391.901671000003,
+          "total": {
+            "reads": 53504,
+            "bytes": 4059865889,
+            "readMs": 999.9692029995658
+          },
+          "phases": [
+            {
+              "phase": "module-import",
+              "wallMs": 10.657591
+            },
+            {
+              "phase": "prepare-warm",
+              "wallMs": 781.918175
+            },
+            {
+              "phase": "request-0",
+              "wallMs": 10156.098753
+            },
+            {
+              "phase": "request-1",
+              "wallMs": 7316.148350000001
+            },
+            {
+              "phase": "request-2",
+              "wallMs": 7125.827574000003
+            }
+          ],
+          "outcomes": [
+            {
+              "status": "accepted",
+              "admission": "accepted",
+              "compileWallMs": 10147.160451,
+              "timings": {
+                "resourceVerificationMs": 338.2825609999984,
+                "compilerProcessMs": 9075.558013,
+                "independentKernelMs": 188.24560699999893,
+                "targetMs": 47.43946900000083,
+                "evidenceMs": 2.759188999998514,
+                "sessionMs": 9677.16011,
+                "setupMs": 241.9840650000001,
+                "setupResourceReads": 1494,
+                "setupResourceBytes": 111078111,
+                "setupDuplicateReadsAvoided": 1774,
+                "setupDuplicateBytesAvoided": 237392522,
+                "setupReadAndHashMs": 97.10772700000166,
+                "setupRunningExecutableBindings": 1,
+                "publishMs": 238.34842199999912,
+                "totalMs": 10147.085619000001
+              },
+              "cache": {
+                "prefixModules": 0,
+                "preparedModules": 11,
+                "finishHit": false,
+                "preparationMs": 8845.614368999999
+              },
+              "application": {
+                "case": "unicode-records",
+                "status": "passed",
+                "sources": 11
+              }
+            },
+            {
+              "status": "accepted",
+              "admission": "accepted",
+              "compileWallMs": 7308.562714,
+              "timings": {
+                "resourceVerificationMs": 319.29370700000436,
+                "compilerProcessMs": 6450.657808,
+                "independentKernelMs": 108.27420500000153,
+                "targetMs": 47.48533099999986,
+                "evidenceMs": 2.6291049999999814,
+                "sessionMs": 6945.117441,
+                "setupMs": 138.12139200000092,
+                "setupResourceReads": 1494,
+                "setupResourceBytes": 111078111,
+                "setupDuplicateReadsAvoided": 1774,
+                "setupDuplicateBytesAvoided": 237392522,
+                "setupReadAndHashMs": 98.65268200000355,
+                "setupRunningExecutableBindings": 1,
+                "publishMs": 230.56273900000087,
+                "totalMs": 7308.553489
+              },
+              "cache": {
+                "prefixModules": 10,
+                "preparedModules": 1,
+                "finishHit": false,
+                "preparationMs": 6241.1749249999975
+              },
+              "application": {
+                "case": "unicode-records",
+                "status": "passed",
+                "sources": 11
+              }
+            },
+            {
+              "status": "accepted",
+              "admission": "accepted",
+              "compileWallMs": 7118.220884000002,
+              "timings": {
+                "resourceVerificationMs": 318.03617199999644,
+                "compilerProcessMs": 6275.195442,
+                "independentKernelMs": 100.71033299999908,
+                "targetMs": 45.04718800000046,
+                "evidenceMs": 2.5333629999986442,
+                "sessionMs": 6758.128246,
+                "setupMs": 133.51175700000022,
+                "setupResourceReads": 1494,
+                "setupResourceBytes": 111078111,
+                "setupDuplicateReadsAvoided": 1774,
+                "setupDuplicateBytesAvoided": 237392522,
+                "setupReadAndHashMs": 98.10383299995374,
+                "setupRunningExecutableBindings": 1,
+                "publishMs": 231.91461399999753,
+                "totalMs": 7118.210829
+              },
+              "cache": {
+                "prefixModules": 10,
+                "preparedModules": 1,
+                "finishHit": false,
+                "preparationMs": 6068.478376999999
+              },
+              "application": {
+                "case": "unicode-records",
+                "status": "passed",
+                "sources": 11
+              }
+            }
+          ],
+          "children": [
+            {
+              "phase": "request-0",
+              "exe": "node",
+              "args": [
+                "--check",
+                "/tmp/psc1-semantic-comparison-JXgyUg/profile-out-warm-app-0/generations/.stage-BnPHUP/target.mjs"
+              ],
+              "wallMs": 22.78610000000117,
+              "status": 0
+            },
+            {
+              "phase": "request-0",
+              "exe": "node",
+              "args": [
+                "--input-type=module",
+                "-e"
+              ],
+              "wallMs": 23.149744000000283,
+              "status": 0
+            },
+            {
+              "phase": "request-1",
+              "exe": "node",
+              "args": [
+                "--check",
+                "/tmp/psc1-semantic-comparison-JXgyUg/profile-out-warm-app-1/generations/.stage-Dzmfci/target.mjs"
+              ],
+              "wallMs": 24.876728999999614,
+              "status": 0
+            },
+            {
+              "phase": "request-1",
+              "exe": "node",
+              "args": [
+                "--input-type=module",
+                "-e"
+              ],
+              "wallMs": 21.87861100000009,
+              "status": 0
+            },
+            {
+              "phase": "request-2",
+              "exe": "node",
+              "args": [
+                "--check",
+                "/tmp/psc1-semantic-comparison-JXgyUg/profile-out-warm-app-2/generations/.stage-5svocM/target.mjs"
+              ],
+              "wallMs": 23.3592349999999,
+              "status": 0
+            },
+            {
+              "phase": "request-2",
+              "exe": "node",
+              "args": [
+                "--input-type=module",
+                "-e"
+              ],
+              "wallMs": 21.00072800000271,
+              "status": 0
+            }
+          ],
+          "byPhase": {
+            "module-import": {
+              "reads": 21,
+              "bytes": 129720,
+              "readMs": 1.3216470000000022
+            },
+            "prepare-warm": {
+              "reads": 8273,
+              "bytes": 581207931,
+              "readMs": 168.87863599999923
+            },
+            "request-0": {
+              "reads": 15072,
+              "bytes": 1242733528,
+              "readMs": 315.34955200006425
+            },
+            "request-1": {
+              "reads": 15069,
+              "bytes": 1117897346,
+              "readMs": 258.9124909999173
+            },
+            "request-2": {
+              "reads": 15069,
+              "bytes": 1117897364,
+              "readMs": 255.50687699958507
+            }
+          },
+          "maxRssKiB": 644656,
+          "maxRssScope": "parent process including worker threads; subprocess memory excluded",
+          "largest": [
+            {
+              "phase": "request-0",
+              "file": "/proc/self/exe",
+              "reads": 1,
+              "bytes": 124827920,
+              "readMs": 45.19107199999996,
+              "caller": "    at runningExecutableIdentity (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/running-executable.mjs:38:20) |     at resourceIdentity (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:17:19) |     at resourceDigest (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:39:41)"
+            },
+            {
+              "phase": "request-0",
+              "file": "/tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/dist/COMPILER_GRAPH.json",
+              "reads": 11,
+              "bytes": 26041433,
+              "readMs": 4.890844999996943,
+              "caller": "    at readManifestBytes (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:15:13) |     at resolveEngine (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/installed-engine-resolver.mjs:192:7) |     at createSessionFor (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/npm-cli/compiler-api.mjs:81:14)"
+            },
+            {
+              "phase": "request-1",
+              "file": "/tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/dist/COMPILER_GRAPH.json",
+              "reads": 11,
+              "bytes": 26041433,
+              "readMs": 4.042915999998513,
+              "caller": "    at readManifestBytes (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:15:13) |     at resolveEngine (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/installed-engine-resolver.mjs:192:7) |     at createSessionFor (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/npm-cli/compiler-api.mjs:81:14)"
+            },
+            {
+              "phase": "request-2",
+              "file": "/tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/dist/COMPILER_GRAPH.json",
+              "reads": 11,
+              "bytes": 26041433,
+              "readMs": 4.801001000003453,
+              "caller": "    at readManifestBytes (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:15:13) |     at resolveEngine (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/installed-engine-resolver.mjs:192:7) |     at createSessionFor (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/npm-cli/compiler-api.mjs:81:14)"
+            },
+            {
+              "phase": "request-0",
+              "file": "/tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/pskernel-lean-wasm/dist/implementation/wasm/pskernel-lean.wasm",
+              "reads": 10,
+              "bytes": 22120070,
+              "readMs": 2.6967950000019982,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-1",
+              "file": "/tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/pskernel-lean-wasm/dist/implementation/wasm/pskernel-lean.wasm",
+              "reads": 10,
+              "bytes": 22120070,
+              "readMs": 2.072151999998823,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-2",
+              "file": "/tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/pskernel-lean-wasm/dist/implementation/wasm/pskernel-lean.wasm",
+              "reads": 10,
+              "bytes": 22120070,
+              "readMs": 2.081969000002573,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-0",
+              "file": "/tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/foundation/src/ts/generated/Ps.Foundation.List.mts",
+              "reads": 10,
+              "bytes": 21808650,
+              "readMs": 2.3694869999995944,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-1",
+              "file": "/tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/foundation/src/ts/generated/Ps.Foundation.List.mts",
+              "reads": 10,
+              "bytes": 21808650,
+              "readMs": 1.9914750000007189,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-2",
+              "file": "/tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/foundation/src/ts/generated/Ps.Foundation.List.mts",
+              "reads": 10,
+              "bytes": 21808650,
+              "readMs": 2.0460149999962596,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-0",
+              "file": "/tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/foundation/dist/ts/generated/Ps.Foundation.List.mjs",
+              "reads": 10,
+              "bytes": 18597400,
+              "readMs": 2.4339729999959445,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-1",
+              "file": "/tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/foundation/dist/ts/generated/Ps.Foundation.List.mjs",
+              "reads": 10,
+              "bytes": 18597400,
+              "readMs": 1.7157420000039565,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-2",
+              "file": "/tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/foundation/dist/ts/generated/Ps.Foundation.List.mjs",
+              "reads": 10,
+              "bytes": 18597400,
+              "readMs": 1.7345419999946898,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-0",
+              "file": "/tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/foundation/dist/js/generated/Ps.Foundation.List.mjs",
+              "reads": 10,
+              "bytes": 17986520,
+              "readMs": 2.0637099999979682,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-1",
+              "file": "/tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/foundation/dist/js/generated/Ps.Foundation.List.mjs",
+              "reads": 10,
+              "bytes": 17986520,
+              "readMs": 1.6644440000036411,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-2",
+              "file": "/tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/foundation/dist/js/generated/Ps.Foundation.List.mjs",
+              "reads": 10,
+              "bytes": 17986520,
+              "readMs": 1.6906159999925876,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "prepare-warm",
+              "file": "/tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/pskernel-lean-wasm/dist/implementation/wasm/pskernel-lean.wasm",
+              "reads": 8,
+              "bytes": 17696056,
+              "readMs": 1.9490819999999758,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-0",
+              "file": "/tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/backend-ts/dist/ts/generated/Ps.BackendTs.Module.mjs",
+              "reads": 10,
+              "bytes": 12709200,
+              "readMs": 1.5634929999998803,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-1",
+              "file": "/tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/backend-ts/dist/ts/generated/Ps.BackendTs.Module.mjs",
+              "reads": 10,
+              "bytes": 12709200,
+              "readMs": 1.7319160000060947,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-2",
+              "file": "/tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/backend-ts/dist/ts/generated/Ps.BackendTs.Module.mjs",
+              "reads": 10,
+              "bytes": 12709200,
+              "readMs": 1.7044560000067577,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "prepare-warm",
+              "file": "/tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/dist/COMPILER_GRAPH.json",
+              "reads": 5,
+              "bytes": 11837015,
+              "readMs": 1.916524000000038,
+              "caller": "    at readManifestBytes (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:15:13) |     at resolveEngine (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/installed-engine-resolver.mjs:192:7) |     at Module.prepareWarmCompiler (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/warm-compiler.mjs:8:20)"
+            },
+            {
+              "phase": "prepare-warm",
+              "file": "/tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/foundation/src/ts/generated/Ps.Foundation.List.mts",
+              "reads": 5,
+              "bytes": 10904325,
+              "readMs": 1.0686860000000422,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "prepare-warm",
+              "file": "/tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/foundation/dist/ts/generated/Ps.Foundation.List.mjs",
+              "reads": 5,
+              "bytes": 9298700,
+              "readMs": 1.4523309999999583,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-0",
+              "file": "/tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/erasure/dist/ts/generated/Ps.Erasure.Expr.mjs",
+              "reads": 10,
+              "bytes": 9083060,
+              "readMs": 0.8921530000010307,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-JXgyUg/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            }
+          ]
+        }
+      },
+      {
+        "label": "candidate-.7",
+        "sha256": "ab0e2ce442f52311f9fad0e96cebc759c9848434ad49e8c06c6e2df9a76c9d79",
+        "report": {
+          "mode": "warm-app",
+          "wallMs": 19986.689409,
+          "total": {
+            "reads": 53549,
+            "bytes": 4060118305,
+            "readMs": 995.3402729999079
+          },
+          "phases": [
+            {
+              "phase": "module-import",
+              "wallMs": 10.528061999999998
+            },
+            {
+              "phase": "prepare-warm",
+              "wallMs": 781.613695
+            },
+            {
+              "phase": "request-0",
+              "wallMs": 10046.28144
+            },
+            {
+              "phase": "request-1",
+              "wallMs": 4615.190809
+            },
+            {
+              "phase": "request-2",
+              "wallMs": 4531.797462999999
+            }
+          ],
+          "outcomes": [
+            {
+              "status": "accepted",
+              "admission": "accepted",
+              "compileWallMs": 10037.401778,
+              "timings": {
+                "resourceVerificationMs": 317.9994989999984,
+                "compilerProcessMs": 9011.757798999999,
+                "independentKernelMs": 173.19602699999996,
+                "targetMs": 46.14944599999944,
+                "evidenceMs": 2.688536000001477,
+                "sessionMs": 9576.666845,
+                "setupMs": 242.43127299999992,
+                "setupResourceReads": 1495,
+                "setupResourceBytes": 111083709,
+                "setupDuplicateReadsAvoided": 1779,
+                "setupDuplicateBytesAvoided": 237418804,
+                "setupReadAndHashMs": 96.6870309999972,
+                "setupRunningExecutableBindings": 1,
+                "publishMs": 228.9698669999998,
+                "totalMs": 10037.327667000001
+              },
+              "cache": {
+                "prefixModules": 0,
+                "preparedModules": 11,
+                "finishHit": false,
+                "semanticHit": false,
+                "preparationMs": 8757.398243000001,
+                "phases": {
+                  "captureMs": 2049.905239,
+                  "semanticMs": 1950.6671150000002,
+                  "comparisonMs": 0.0005810000002384186,
+                  "originalIrValidationMs": 271.7787079999998,
+                  "emitMs": 4390.584639,
+                  "printMs": 931.5333270000001,
+                  "emitComparisonMs": 0.001382000000376138
+                },
+                "emitterHit": false
+              },
+              "application": {
+                "case": "unicode-records",
+                "status": "passed",
+                "sources": 11
+              }
+            },
+            {
+              "status": "accepted",
+              "admission": "accepted",
+              "compileWallMs": 4607.541142,
+              "timings": {
+                "resourceVerificationMs": 323.16517999999814,
+                "compilerProcessMs": 3751.083589,
+                "independentKernelMs": 108.72055999999975,
+                "targetMs": 45.42386299999998,
+                "evidenceMs": 2.6237550000005285,
+                "sessionMs": 4249.256873,
+                "setupMs": 135.99565599999914,
+                "setupResourceReads": 1495,
+                "setupResourceBytes": 111083709,
+                "setupDuplicateReadsAvoided": 1779,
+                "setupDuplicateBytesAvoided": 237418804,
+                "setupReadAndHashMs": 98.9001929999813,
+                "setupRunningExecutableBindings": 1,
+                "publishMs": 227.6356790000009,
+                "totalMs": 4607.532058999999
+              },
+              "cache": {
+                "prefixModules": 10,
+                "preparedModules": 1,
+                "finishHit": false,
+                "semanticHit": true,
+                "preparationMs": 3518.861519,
+                "phases": {
+                  "captureMs": 8.101649999998699,
+                  "semanticMs": 2.244622000000163,
+                  "comparisonMs": 2.130752000000939,
+                  "originalIrValidationMs": 197.58752699999968,
+                  "emitMs": 3267.1212430000014,
+                  "printMs": 0,
+                  "emitComparisonMs": 16.367841999999655
+                },
+                "emitterHit": true
+              },
+              "application": {
+                "case": "unicode-records",
+                "status": "passed",
+                "sources": 11
+              }
+            },
+            {
+              "status": "accepted",
+              "admission": "accepted",
+              "compileWallMs": 4523.969988999999,
+              "timings": {
+                "resourceVerificationMs": 320.55613800000174,
+                "compilerProcessMs": 3672.7748429999992,
+                "independentKernelMs": 105.31502700000055,
+                "targetMs": 49.43910599999799,
+                "evidenceMs": 2.738811999999598,
+                "sessionMs": 4168.325177000001,
+                "setupMs": 133.691014,
+                "setupResourceReads": 1495,
+                "setupResourceBytes": 111083709,
+                "setupDuplicateReadsAvoided": 1779,
+                "setupDuplicateBytesAvoided": 237418804,
+                "setupReadAndHashMs": 97.23344099992391,
+                "setupRunningExecutableBindings": 1,
+                "publishMs": 227.570719000003,
+                "totalMs": 4523.959714999999
+              },
+              "cache": {
+                "prefixModules": 10,
+                "preparedModules": 1,
+                "finishHit": false,
+                "semanticHit": true,
+                "preparationMs": 3452.315206000001,
+                "phases": {
+                  "captureMs": 8.63071200000013,
+                  "semanticMs": 0.5512940000007802,
+                  "comparisonMs": 0.4898910000010801,
+                  "originalIrValidationMs": 200.7108960000005,
+                  "emitMs": 3194.974478,
+                  "printMs": 0,
+                  "emitComparisonMs": 10.711330000001908
+                },
+                "emitterHit": true
+              },
+              "application": {
+                "case": "unicode-records",
+                "status": "passed",
+                "sources": 11
+              }
+            }
+          ],
+          "children": [
+            {
+              "phase": "request-0",
+              "exe": "node",
+              "args": [
+                "--check",
+                "/tmp/psc1-semantic-comparison-vWoniV/profile-out-warm-app-0/generations/.stage-C0cIvd/target.mjs"
+              ],
+              "wallMs": 23.811053000001266,
+              "status": 0
+            },
+            {
+              "phase": "request-0",
+              "exe": "node",
+              "args": [
+                "--input-type=module",
+                "-e"
+              ],
+              "wallMs": 20.94420100000025,
+              "status": 0
+            },
+            {
+              "phase": "request-1",
+              "exe": "node",
+              "args": [
+                "--check",
+                "/tmp/psc1-semantic-comparison-vWoniV/profile-out-warm-app-1/generations/.stage-0u4A1Q/target.mjs"
+              ],
+              "wallMs": 22.60164700000132,
+              "status": 0
+            },
+            {
+              "phase": "request-1",
+              "exe": "node",
+              "args": [
+                "--input-type=module",
+                "-e"
+              ],
+              "wallMs": 22.097453000000314,
+              "status": 0
+            },
+            {
+              "phase": "request-2",
+              "exe": "node",
+              "args": [
+                "--check",
+                "/tmp/psc1-semantic-comparison-vWoniV/profile-out-warm-app-2/generations/.stage-SDDTqP/target.mjs"
+              ],
+              "wallMs": 23.661905999997543,
+              "status": 0
+            },
+            {
+              "phase": "request-2",
+              "exe": "node",
+              "args": [
+                "--input-type=module",
+                "-e"
+              ],
+              "wallMs": 25.036654999999882,
+              "status": 0
+            }
+          ],
+          "byPhase": {
+            "module-import": {
+              "reads": 21,
+              "bytes": 129720,
+              "readMs": 1.2611559999999997
+            },
+            "prepare-warm": {
+              "reads": 8285,
+              "bytes": 581273507,
+              "readMs": 166.38181400000354
+            },
+            "request-0": {
+              "reads": 15083,
+              "bytes": 1242795812,
+              "readMs": 316.8481359999696
+            },
+            "request-1": {
+              "reads": 15080,
+              "bytes": 1117959633,
+              "readMs": 253.58227100004842
+            },
+            "request-2": {
+              "reads": 15080,
+              "bytes": 1117959633,
+              "readMs": 257.2668959998864
+            }
+          },
+          "maxRssKiB": 615880,
+          "maxRssScope": "parent process including worker threads; subprocess memory excluded",
+          "largest": [
+            {
+              "phase": "request-0",
+              "file": "/proc/self/exe",
+              "reads": 1,
+              "bytes": 124827920,
+              "readMs": 44.39905599999997,
+              "caller": "    at runningExecutableIdentity (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/running-executable.mjs:38:20) |     at resourceIdentity (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:17:19) |     at resourceDigest (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:39:41)"
+            },
+            {
+              "phase": "request-0",
+              "file": "/tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/dist/COMPILER_GRAPH.json",
+              "reads": 11,
+              "bytes": 26043677,
+              "readMs": 3.2814610000021958,
+              "caller": "    at readManifestBytes (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:15:13) |     at resolveEngine (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/installed-engine-resolver.mjs:192:7) |     at createSessionFor (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/npm-cli/compiler-api.mjs:81:14)"
+            },
+            {
+              "phase": "request-1",
+              "file": "/tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/dist/COMPILER_GRAPH.json",
+              "reads": 11,
+              "bytes": 26043677,
+              "readMs": 2.39151600000514,
+              "caller": "    at readManifestBytes (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:15:13) |     at resolveEngine (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/installed-engine-resolver.mjs:192:7) |     at createSessionFor (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/npm-cli/compiler-api.mjs:81:14)"
+            },
+            {
+              "phase": "request-2",
+              "file": "/tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/dist/COMPILER_GRAPH.json",
+              "reads": 11,
+              "bytes": 26043677,
+              "readMs": 2.4402660000050673,
+              "caller": "    at readManifestBytes (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:15:13) |     at resolveEngine (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/installed-engine-resolver.mjs:192:7) |     at createSessionFor (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/npm-cli/compiler-api.mjs:81:14)"
+            },
+            {
+              "phase": "request-0",
+              "file": "/tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/pskernel-lean-wasm/dist/implementation/wasm/pskernel-lean.wasm",
+              "reads": 10,
+              "bytes": 22120070,
+              "readMs": 1.8536989999989828,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-1",
+              "file": "/tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/pskernel-lean-wasm/dist/implementation/wasm/pskernel-lean.wasm",
+              "reads": 10,
+              "bytes": 22120070,
+              "readMs": 2.4297129999977187,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-2",
+              "file": "/tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/pskernel-lean-wasm/dist/implementation/wasm/pskernel-lean.wasm",
+              "reads": 10,
+              "bytes": 22120070,
+              "readMs": 2.957438000003094,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-0",
+              "file": "/tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/foundation/src/ts/generated/Ps.Foundation.List.mts",
+              "reads": 10,
+              "bytes": 21808650,
+              "readMs": 2.8859410000021626,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-1",
+              "file": "/tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/foundation/src/ts/generated/Ps.Foundation.List.mts",
+              "reads": 10,
+              "bytes": 21808650,
+              "readMs": 2.012618000000657,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-2",
+              "file": "/tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/foundation/src/ts/generated/Ps.Foundation.List.mts",
+              "reads": 10,
+              "bytes": 21808650,
+              "readMs": 2.135379000003013,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-0",
+              "file": "/tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/foundation/dist/ts/generated/Ps.Foundation.List.mjs",
+              "reads": 10,
+              "bytes": 18597400,
+              "readMs": 2.3375620000012987,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-1",
+              "file": "/tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/foundation/dist/ts/generated/Ps.Foundation.List.mjs",
+              "reads": 10,
+              "bytes": 18597400,
+              "readMs": 1.9668730000030337,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-2",
+              "file": "/tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/foundation/dist/ts/generated/Ps.Foundation.List.mjs",
+              "reads": 10,
+              "bytes": 18597400,
+              "readMs": 2.0868370000007417,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-0",
+              "file": "/tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/foundation/dist/js/generated/Ps.Foundation.List.mjs",
+              "reads": 10,
+              "bytes": 17986520,
+              "readMs": 1.9870370000007824,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-1",
+              "file": "/tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/foundation/dist/js/generated/Ps.Foundation.List.mjs",
+              "reads": 10,
+              "bytes": 17986520,
+              "readMs": 1.775353000000905,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-2",
+              "file": "/tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/foundation/dist/js/generated/Ps.Foundation.List.mjs",
+              "reads": 10,
+              "bytes": 17986520,
+              "readMs": 2.1161009999996168,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "prepare-warm",
+              "file": "/tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/pskernel-lean-wasm/dist/implementation/wasm/pskernel-lean.wasm",
+              "reads": 8,
+              "bytes": 17696056,
+              "readMs": 2.7849690000000464,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-0",
+              "file": "/tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/backend-ts/dist/ts/generated/Ps.BackendTs.Module.mjs",
+              "reads": 10,
+              "bytes": 12709200,
+              "readMs": 1.5022330000016382,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-1",
+              "file": "/tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/backend-ts/dist/ts/generated/Ps.BackendTs.Module.mjs",
+              "reads": 10,
+              "bytes": 12709200,
+              "readMs": 1.4828169999982492,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-2",
+              "file": "/tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/backend-ts/dist/ts/generated/Ps.BackendTs.Module.mjs",
+              "reads": 10,
+              "bytes": 12709200,
+              "readMs": 1.7756329999992886,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "prepare-warm",
+              "file": "/tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/dist/COMPILER_GRAPH.json",
+              "reads": 5,
+              "bytes": 11838035,
+              "readMs": 1.9641930000000016,
+              "caller": "    at readManifestBytes (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:15:13) |     at resolveEngine (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/installed-engine-resolver.mjs:192:7) |     at Module.prepareWarmCompiler (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/warm-compiler.mjs:8:20)"
+            },
+            {
+              "phase": "prepare-warm",
+              "file": "/tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/foundation/src/ts/generated/Ps.Foundation.List.mts",
+              "reads": 5,
+              "bytes": 10904325,
+              "readMs": 0.8793019999999387,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "prepare-warm",
+              "file": "/tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/foundation/dist/ts/generated/Ps.Foundation.List.mjs",
+              "reads": 5,
+              "bytes": 9298700,
+              "readMs": 1.3740519999999776,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            },
+            {
+              "phase": "request-0",
+              "file": "/tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/erasure/dist/ts/generated/Ps.Erasure.Expr.mjs",
+              "reads": 10,
+              "bytes": 9083060,
+              "readMs": 0.8875760000009905,
+              "caller": "    at resourceIdentity (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/resource-capture.mjs:26:16) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:47:26) |     at visit (file:///tmp/psc1-semantic-comparison-vWoniV/node_modules/proofscript/node_modules/@proofscript/compiler/dist/host/host-tools/executable/verify.mjs:35:9)"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "policies": {
+    "completePrivateGeneratedImmutableInputs": true,
+    "sharedIdentityRequiresImmutability": true,
+    "comparisonMaxNodes": 1000000,
+    "comparisonMaxMillis": 100,
+    "comparisonMaxOwnKeys": 8192,
+    "emitterCachedTargets": 1,
+    "emitterCachedSourceMaxCharacters": 4194304,
+    "cacheClearedOnError": true,
+    "unsupportedOrBudgetMiss": "recompute-with-original-generated-functions",
+    "independentAdmission": "fresh-every-issued-checked-request",
+    "irValidation": "strict-original-and-transformed-retained",
+    "compilerRequestSeconds": 240,
+    "kernelRequestSeconds": 120,
+    "semanticFuel": "unchanged",
+    "heapStackMemoryPolicies": "unchanged",
+    "sourceOrigins": "fresh-from-capture",
+    "admissionCache": false,
+    "diskCache": false
+  },
+  "retainedEvidence": {
+    "sourceGates": 40863053548,
+    "installedFrozen11": 40863008436,
+    "persistent6Qualification": 40860864442,
+    "persistent6Delivery": 40863008602,
+    "originalGraphAndG1G2G3": "unchanged-exact-identities-in-package-receipt"
+  },
+  "limitations": [
+    "Finite Linux/Node22.23.3 host qualification; new Windows/macOS/Bun host qualification pending; .4 cross-platform evidence retained.",
+    "Controlled application benchmark uses comment-only edits and excludes first request; it does not claim cold-start or semantic-body edit speedup.",
+    "Actual body edits, shifted origins, typing failures/recovery match original compiler candidate bytes in both engines; body edits recompute.",
+    "Fresh independent checking and strict IR remain required; finite tests are not a semantic preservation proof.",
+    "Remaining multi-second backend pipeline: target planning, validation, IR/wire encoding, generated recursive runtime/text/JSON work and allocation require finer source-level optimization.",
+    "Optional Python/PHP and original seven-backend source qualifications remain; no new Rust/Wasm compiler-executor or package publication claim."
+  ],
+  "diagnosedExperiments": [
+    {
+      "commit": "84038c5e4e126557a34d3f8ace4a0a3850c0d48d",
+      "run": 40868027763,
+      "reason": "100ms full-data fingerprint budget disabled semantic reuse; safe fallback."
+    },
+    {
+      "commit": "ea90cd65d5ab018b0051a7d2b14fea87bf6474f6",
+      "run": 40868629404,
+      "reason": "Batched fingerprint passed exact parity; JS representation exceeded node budget. Replaced with structural sharing rather than larger scans."
+    }
+  ]
+}

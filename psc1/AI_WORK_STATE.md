@@ -5,6 +5,53 @@ from PR #213 qualified HEAD b1d8d55cb664f1ab4b3d30973c10fbf950674c7d.
 Connected GitHub and Linux/Windows/macOS Actions only. Expected-HEAD,
 single-parent/non-force history. No merge or npm registry publication.
 
+## Qualified structural reuse — .7 Linux/Node milestone
+
+Installed [40870884480](https://github.com/dwijayuda/pskernel/actions/runs/40870884480)
+passes at018057cd6ab0f4b12456d444f25d9ccc6ac0c47f using exact producer
+57e72bce3bc1a329704696878ff07a53fb4c7ee3. Adopt its four CI-formatted source
+pins, not the abandoned fingerprints. [Qualification receipt](docs/PSC1_SEMANTIC_REUSE_QUALIFICATION_2026-10-29.json)
+records exact package/source/artifact identities and the diagnosed experiments.
+No compiler source, original134-unit G3 graph, Lean4.35.0 kernel, semantic fuel,
+strict IR, failure behavior or existing request/heap/stack policies change.
+
+Both generated JS/TS engines and both grammars pass12 actual JS/strict-TS/Wasm
+builds, four typing refusals,24 prepared/cold target candidate comparisons,
+14 original/14 warm independent-kernel fixtures, tamper refusal, full/minimal
+evidence, ordinary partial checking, dependency invalidation and live watch
+error/publication/shutdown. The producer additionally passes ten real11-module
+application candidate comparisons, including shifted origins, body changes,
+typing refusal/recovery in both engines, and three independently checked actual
+Unicode JSON/file-processing executions.
+
+Same-runner .6/.7 application comparison: stable warm means7213/4566ms,
+1.58x speedup (36.7% less time); six checked application executions pass.
+The first requests10147/10037ms show no material cold improvement.
+These are comment-only leaf-edit observations, not body-edit or universal bounds.
+Changed bodies miss comparison in0.07–0.15ms and recompute normally.
+New tiny-source CLI samples: check1447–1451ms, JS1800–1804ms, TS2190–2194ms;
+not cross-runner comparisons. Three-module watch check leaf edit804ms;
+unchanged-save182.6ms issues no new admission. watchBuild.editMs includes a
+later negative case and must not be described as isolated rebuild latency.
+
+Root proofscript-0.1.0-psc1-modular.7.tgz is9837710 bytes,
+SHA256 ab0e2ce442f52311f9fad0e96cebc759c9848434ad49e8c06c6e2df9a76c9d79.
+Canonical adoption verifies exact source pins and reuses that tested tarball,
+matching SDKs and results. Its separate delivery job must pass before claiming
+the new ZIP verified. .6 remains downloadable at artifact12892806521.
+New .7 host evidence is Linux/Node only; preserve .4 platform and all previous
+compiler/backend/self-host receipts. No merge or npm publication.
+
+Next: profile the remaining backend subpasses separately. Actual V8 samples
+show generated recursive runtime/Text insertion/JSON escaping and allocation;
+do not infer quadratic behavior from those samples (Text already uses balanced
+chunks). Optimize shared source/runtime algorithms with exact output parity,
+then regenerate/qualify changed compiler graphs only when source changes require it.
+Persistent target consumers and cold startup follow measured benefit. No general
+query framework, persistent admission cache or duplicate compiler is introduced.
+
+## Historical diagnostic checkpoints
+
 ## Structural-sharing producer passes; installed gate next
 
 [40869848303](https://github.com/dwijayuda/pskernel/actions/runs/40869848303)

@@ -1,12 +1,5 @@
 name: PSC1 semantic reuse installed qualification
 on:
-  push:
-    branches: [feat/psc1-semantic-incremental-20261029]
-    paths:
-      - .github/psc1/semantic-qualified-input.json
-      - .github/scripts/psc1-semantic-package-reuse.mjs
-      - .github/scripts/psc1-semantic-controlled.mjs
-      - .github/workflows/diagnostic-psc1-semantic-qualify.yml
   workflow_dispatch:
 permissions: {contents: read, actions: read}
 concurrency:

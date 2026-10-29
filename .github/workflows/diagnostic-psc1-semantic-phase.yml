@@ -1,12 +1,5 @@
 name: PSC1 real application semantic phase probe
 on:
-  push:
-    branches: [feat/psc1-semantic-incremental-20261029]
-    paths:
-      - .github/psc1/persistent-candidate.json
-      - .github/scripts/psc1-semantic-phase.mjs
-      - .github/scripts/psc1-semantic-parity.mjs
-      - .github/workflows/diagnostic-psc1-semantic-phase.yml
   workflow_dispatch:
 permissions: {contents: read, actions: read}
 concurrency:

@@ -1,0 +1,21 @@
+// Deliver exactly the installed bytes that just passed focused admission and execution.
+import fs from'node:fs';import path from'node:path';import assert from'node:assert/strict';import{spawnSync}from'node:child_process';import{sha256}from'../../psc1/scripts/kernel435-qualified-artifact.mjs';
+const pkg=JSON.parse(fs.readFileSync('dist/modular-toolchain/package-receipt.json')),result=JSON.parse(fs.readFileSync('dist/development-results/qualification.json')),comparison=JSON.parse(fs.readFileSync('dist/dedup-results/comparison.json')),pins=JSON.parse(fs.readFileSync('dist/wire-installed/pins.json')),q=JSON.parse(fs.readFileSync('docs/PSC1_WIRE_MODULAR_QUALIFICATION_2026-10-29.json'));
+assert.equal(result.status,'passed');assert.deepEqual(result.package,pkg);assert.equal(comparison.status,'passed');assert.equal(q.status,'qualified-finite-linux-modular-js-ts');assert.equal(pkg.compilerSourceClosureDigest,q.sourceClosureDigest);
+for(const pin of pins.pins){const b=fs.readFileSync(pin.path.slice(5));assert.equal(b.length,pin.bytes);assert.equal(sha256(b),pin.sha256);}
+const out='dist/proofscript-wire-quote-linux-x64';assert.ok(!fs.existsSync(out));fs.mkdirSync(out,{recursive:true});
+const copy=(source,name)=>fs.copyFileSync(source,path.join(out,name??path.basename(source))),tar=path.join('dist/modular-toolchain/tarballs',pkg.tarball),b=fs.readFileSync(tar);assert.equal(b.length,pkg.bytes);assert.equal(sha256(b),pkg.sha256);copy(tar);
+const sdkRoot='dist/modular-toolchain/typescript-platforms/linux-x64',sdk=JSON.parse(fs.readFileSync(path.join(sdkRoot,'resources.json')));for(const p of sdk.packages)copy(path.join(sdkRoot,p.tarball));
+for(const file of['LICENSE','NOTICE'])copy(file);
+const write=(file,value)=>fs.writeFileSync(path.join(out,file),typeof value==='string'?value:JSON.stringify(value,null,2)+'\n');
+write('SELFHOST_QUALIFICATION.json',q);write('INSTALL_QUALIFICATION.json',result);write('COMPARISON.json',comparison);write('HOST_PINS.json',pins);
+write('INSTALL.md','# ProofScript '+pkg.version+' Linux x64 preview\n\nNode >=22.23.3. These host changes are qualified on Linux/Node22.23.3. Extract this ZIP, then:\n\n'+
+'    npm init -y\n    npm install --offline --ignore-scripts ./'+pkg.tarball+' '+sdk.packages.map(p=>'./'+p.tarball).join(' ')+'\n    npm exec -- psc init\n    npm exec -- psc check\n    npm exec -- psc build --target ts --out out --watch\n\n'+
+'Native wire quoting is active in the qualified JS/TS compiler graph. The host retains exact original/transformed IR validation, independent Lean 4.35.0 Wasm admission and checked target publication. Check-only retains its own original-IR validation; builds use the generated validation once.\n\n'+
+'Cold Node/Linux JS/TS/Wasm-core builds use the sealed prepared adapter; other hosts and targets retain their existing route. Rust output remains supported with its optional SDK. Python/PHP remain optional providers. This ZIP contains the root and Linux TypeScript SDKs.\n\n'+
+'The compiler source has genuine Linux JS/TS G1/G2/G3 and exact graph/npm fixed points. The separate 240-second self-compilation target is not qualified. Native Rust/Wasm compiler executors are not qualified for this new source cohort and refuse it; previous qualified distributions are preserved.\n\n'+
+'Windows/macOS support for this new preview has not been re-qualified. Full audit dumps remain available with --evidence full. No registry publication or merge was performed.\n');
+const inventory=fs.readdirSync(out).sort().map(file=>({file,bytes:fs.statSync(path.join(out,file)).size,sha256:sha256(fs.readFileSync(path.join(out,file)))}));write('SHA256SUMS',inventory.map(i=>i.sha256+'  '+i.file).join('\n')+'\n');
+const receipt={schema:'psc1-wire-installed-delivery/1',testedCommit:process.env.GITHUB_SHA,status:'passed',package:pkg,hostSources:pins,selfhostRun:q.generationRun,nativeQuoteEnabled:true,independentCheckingPreserved:true,files:inventory};write('DELIVERY.json',receipt);
+const zip=spawnSync('python3',['-c','import pathlib,zipfile; r=pathlib.Path("dist/proofscript-wire-quote-linux-x64"); z=zipfile.ZipFile(str(r)+".zip","w",zipfile.ZIP_DEFLATED); [z.write(p,p.name) for p in sorted(r.iterdir())]; z.close()'],{encoding:'utf8',timeout:120000});assert.equal(zip.status,0,zip.stderr);
+console.log('PSC1_WIRE_INSTALLED_DELIVERY '+JSON.stringify(receipt));

@@ -7,11 +7,12 @@ single-parent/non-force history. No merge or npm registry publication.
 
 ## Installed development latency — verified Linux milestone
 
-Active branch `feat/psc1-development-speed-20261029`, from PR #212 HEAD
+Active branch `feat/psc1-development-speed-20261029`, draft [PR #213](https://github.com/dwijayuda/pskernel/pull/213), from PR #212 HEAD
 `b4facc22e7c576a112710e5081a84349c3f3a1e1`.
 [Focused installed qualification](https://github.com/dwijayuda/pskernel/actions/runs/40840703422)
 passes at producer `f61b5d8cefce07f2b9516db5edb300c8107e8fba`.
-Canonical adoption uses the exact CI-formatted sources and pins in
+Canonical source adoption commit `20ef104cd690a45fd2e4e1e9e9163f33b1631a4b`
+uses the exact CI-formatted sources and pins in
 [the receipt](PSC1_DEVELOPMENT_QUALIFICATION_2026-10-29.json).
 
 Implemented and tested:
@@ -52,6 +53,12 @@ unchanged. No new self-host chain or broad release matrix is required for this
 host-only slice. The .4 cross-platform ZIP remains its qualified platform reference;
 .5 Linux results do not qualify its new host on Windows/macOS/Bun.
 [Usage, invariants and next work](architecture/fast-development.md).
+
+Adoption follow-ups preserve the historical AST/layout epochs for the intentionally
+changed checked-command CLI; current bodies remain bound to qualified source pins.
+The final adoption job verifies exact sources/terminal qualification and reuses
+that same tested tarball; it does not repeat the installed suite. Draft PR remains
+unmerged, with no registry publication.
 
 Next, in dependency order: measure and remove repeated resource/startup work
 without moving or weakening trust boundaries; then consider warm build preparation

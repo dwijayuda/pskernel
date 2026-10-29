@@ -335,7 +335,8 @@ def outputTargetPlan (ioDispatcher : Bool) (target : PsBackendTarget)
     | Except.ok result => Except.ok result
   else targetPlan target source selected
 
-def compilePreparedWithOutputAbi (ioDispatcher : Bool) (target : PsBackendTarget)
+-- The serializer is transport only. Source data never selects it.
+def compilePreparedWithQuote (quoteString : String -> String) (ioDispatcher : Bool) (target : PsBackendTarget)
     (emit : PsValidatedIrModule -> List String -> Except Error (Prod String (List String)))
     (request : Request) (captured : Captured)
     (entry : PsSyntaxModule) (work : Semantic) : Except Error String :=
@@ -364,34 +365,41 @@ def compilePreparedWithOutputAbi (ioDispatcher : Bool) (target : PsBackendTarget
                           | Except.error error => Except.error error
                           | Except.ok printed =>
                               let fields : List (Prod String String) := [
-                                ("admission", psJsonQuote "not-run"),
-                                ("admissionRequest", psCompilerHostAdmissionRequest
+                                ("admission", quoteString "not-run"),
+                                ("admissionRequest", psCompilerHostAdmissionRequestWithQuote quoteString
                                   request.requestId request.sourceClosureDigest (psBackendTargetName target) work.admissions),
-                                ("assurance", psJsonQuote request.assurance),
+                                ("assurance", quoteString request.assurance),
                                 ("candidateOnly", "true"),
-                                ("grammar", psJsonQuote request.grammar),
+                                ("grammar", quoteString request.grammar),
                                 ("logicalDeclarations", psNatToString work.logicalCount),
                                 ("originalIr", originalIr),
                                 ("origins", psJsonArray (psListReverse captured.originsRev)),
                                 ("partialNames", psJsonArray (psListMap
-                                  (fun (name : PsName) => psJsonQuote (psNameToString name)) work.partialNames)),
+                                  (fun (name : PsName) => quoteString (psNameToString name)) work.partialNames)),
                                 ("protocol", psJsonQuote
                                   (if ioDispatcher then "psc1-compiler-service/2" else "psc1-compiler-service/1")),
-                                ("publicNames", psJsonArray (psListMap psJsonQuote selected)),
-                                ("requestId", psJsonQuote request.requestId),
-                                ("runtimeRequirements", psJsonArray (psListMap psJsonQuote printed.snd)),
-                                ("source", psJsonQuote printed.fst),
-                                ("sourceClosureDigest", psJsonQuote request.sourceClosureDigest),
+                                ("publicNames", psJsonArray (psListMap quoteString selected)),
+                                ("requestId", quoteString request.requestId),
+                                ("runtimeRequirements", psJsonArray (psListMap quoteString printed.snd)),
+                                ("source", quoteString printed.fst),
+                                ("sourceClosureDigest", quoteString request.sourceClosureDigest),
                                 ("sourceDeclarations", psNatToString (psListLength work.source)),
                                 ("specializedIr", specializedIr),
-                                ("status", psJsonQuote "candidate"),
-                                ("target", psJsonQuote (psBackendTargetName target))
+                                ("status", quoteString "candidate"),
+                                ("target", quoteString (psBackendTargetName target))
                               ];
                               let fields : List (Prod String String) :=
                                 if ioDispatcher then
-                                  List.cons (Prod.mk "outputAbi" (psJsonQuote "io-dispatcher")) fields
+                                  List.cons (Prod.mk "outputAbi" (quoteString "io-dispatcher")) fields
                                 else fields;
                               Except.ok (psJsonObject fields)
+
+def compilePreparedWithOutputAbi (ioDispatcher : Bool) (target : PsBackendTarget)
+    (emit : PsValidatedIrModule -> List String -> Except Error (Prod String (List String)))
+    (request : Request) (captured : Captured)
+    (entry : PsSyntaxModule) (work : Semantic) : Except Error String :=
+
+  compilePreparedWithQuote psJsonQuote ioDispatcher target emit request captured entry work
 
 def compilePrepared (target : PsBackendTarget)
     (emit : PsValidatedIrModule -> List String -> Except Error (Prod String (List String)))

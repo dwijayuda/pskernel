@@ -1,16 +1,23 @@
 import Ps.Bridge.Json
 
 /-- Portable transport only. These bytes are a request, never checking authority. -/
-def psCompilerHostAdmissionRequest
+def psCompilerHostAdmissionRequestWithQuote
+    (quoteString : String -> String)
     (requestId sourceClosureDigest target canonicalAdmissions : String) : String :=
   psJsonObject [
-    ("admissions", psJsonQuote canonicalAdmissions),
-    ("op", psJsonQuote "admit"),
-    ("protocol", psJsonQuote "psc1-compiler-host/1"),
-    ("requestId", psJsonQuote requestId),
-    ("sourceClosureDigest", psJsonQuote sourceClosureDigest),
-    ("target", psJsonQuote target)
+    ("admissions", quoteString canonicalAdmissions),
+    ("op", quoteString "admit"),
+    ("protocol", quoteString "psc1-compiler-host/1"),
+    ("requestId", quoteString requestId),
+    ("sourceClosureDigest", quoteString sourceClosureDigest),
+    ("target", quoteString target)
   ]
+
+/-- Legacy transport retains its original portable quoting implementation. -/
+def psCompilerHostAdmissionRequest
+    (requestId sourceClosureDigest target canonicalAdmissions : String) : String :=
+  psCompilerHostAdmissionRequestWithQuote psJsonQuote
+    requestId sourceClosureDigest target canonicalAdmissions
 
 /-- Compiler continuation correlation. Publication remains owned by the external
 host, which independently checks and retains the exact canonical graph bytes. -/

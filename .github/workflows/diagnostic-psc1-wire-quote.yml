@@ -1,0 +1,72 @@
+name: PSC1 native quoting compiler G1 qualification
+on:
+  push:
+    branches: [feat/psc1-wire-quote-20261029]
+    paths:
+      - psc1/packages/bridge/src/Ps/Bridge/CompilerHost.lean
+      - psc1/packages/compiler/src/Ps/Compiler/Service.lean
+      - .github/psc1/wire-quote-candidate.json
+      - .github/scripts/psc1-wire-quote-*.mjs
+      - .github/workflows/diagnostic-psc1-wire-quote.yml
+  workflow_dispatch:
+permissions: {contents: read, actions: read}
+concurrency:
+  group: psc1-wire-quote-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  compiler:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    defaults:
+      run: {shell: bash, working-directory: psc1}
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22.23.3'}
+      - uses: actions/cache@v4
+        with:
+          path: ~/.elan
+          key: psc1-elan-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain') }}
+      - uses: actions/cache/restore@v4
+        id: native
+        with:
+          path: psc1/.lake
+          key: psc1-wire-quote-v1-${{ runner.os }}-${{ hashFiles('psc1/lean-toolchain','psc1/lakefile.lean','psc1/**/*.lean') }}
+          restore-keys: |
+            psc1-portable-modules-v1-${{ runner.os }}-
+            psc1-executable-v1-${{ runner.os }}-
+            psc1-lake-v2-${{ runner.os }}-native-
+      - uses: ./.github/actions/psc1-lean-launcher
+      - name: Locked host and native TypeScript SDK
+        run: |
+          npm ci --prefix .. --ignore-scripts --include=optional --no-audit --no-fund
+          npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
+      - run: node scripts/readability-host-check.mjs
+      - name: Exact legacy body audit and bounded host proposal
+        run: node ../.github/scripts/psc1-wire-quote-source-audit.mjs
+      - name: Compile native producer, original service tests and independent checker
+        run: lake build psc1_executable_packages psc1_independent_checker psc1_unified_service_tests
+      - uses: actions/cache/save@v4
+        if: steps.native.outputs.cache-hit != 'true'
+        with:
+          path: psc1/.lake
+          key: ${{ steps.native.outputs.cache-primary-key }}
+      - name: Kernel-check definitional equations and original service regressions
+        run: |
+          lake env lean dist/wire-quote/LegacyEquations.lean
+          .lake/build/bin/psc1_unified_service_tests
+      - name: Generate and independently check complete source-owned JS/TS compiler graph
+        run: node host-tools/executable/build.mjs
+      - name: Actual generated quote and compiler parity, independent admission and execution
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: node ../.github/scripts/psc1-wire-quote-qualify.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-wire-quote-${{ github.sha }}
+          path: |
+            psc1/dist/wire-quote/*.json
+            psc1/dist/wire-quote/*.lean
+            psc1/dist/executable-packages/compiler/
+          retention-days: 90

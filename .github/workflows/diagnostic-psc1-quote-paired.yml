@@ -1,11 +1,5 @@
 name: PSC1 paired native and portable admission quoting
 on:
-  push:
-    branches: [feat/psc1-wire-quote-20261029]
-    paths:
-      - .github/psc1/quote-paired-input.json
-      - .github/scripts/psc1-quoting-paired*.mjs
-      - .github/workflows/diagnostic-psc1-quote-paired.yml
   workflow_dispatch:
 permissions: {contents: read, actions: read}
 concurrency:

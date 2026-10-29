@@ -5,7 +5,64 @@ from PR #214 qualified HEAD c83039f05a445f496f71aea2429ba75c61b81f40.
 Connected GitHub and Linux Actions only; previous platform evidence is retained. Expected-HEAD,
 single-parent/non-force history. No merge or npm registry publication.
 
-## Active follow-up: duplicate validation and admission transport
+## Verified transport and validation implementation
+
+PR #215 HEAD 7b9dc2725be226f401a8adcd2e6f0af391308504 is now fully green:
+[source40872117065](https://github.com/dwijayuda/pskernel/actions/runs/40872117065)
+and retained frozen-.11 [CLI40871621864](https://github.com/dwijayuda/pskernel/actions/runs/40871621864).
+The latter tests its own historical cohort; it is not new-source self-host evidence.
+
+[Transport qualification](docs/PSC1_WIRE_TRANSPORT_QUALIFICATION_2026-10-29.json) and [source-linked walkthrough](docs/evidence/PSC1_WIRE_TRANSPORT_2026-10-29.md)
+record two distinct implemented scopes:
+- Remove the duplicate warm-build original-IR pass. Check-only retains its check;
+  builds use the existing generated check before transforms. All transformed IR,
+  independent admission, resource, target and publication checks remain.
+- Add shared Lean serializer parameters while preserving old entry points.
+  Exact prior-body audits and two rfl equations pass, with observed [propext]
+  dependencies. A fixed private Node serializer verifies scalar UTF-8 and JSON
+  roundtrips, otherwise using the generated quoter. No project callbacks.
+
+[G1 compiler40879970347](https://github.com/dwijayuda/pskernel/actions/runs/40879970347)
+passes at7e25050ffd9027f22f8b4b723ad4b6c017e11bbc: 4907 independently admitted
+logical declarations, 134 units/15 strictly checked TS packages, nine integrity
+refusals, and both executing generated JS/TS compilers. Each matches all1,112,064
+Unicode scalars plus boundary/fallback cases. Across both engines,26 request cases
+match old .7 and new legacy candidate bytes; positive candidates admit natively,
+six actual large IO applications also admit through the official Wasm kernel.
+This is finite G1 transport evidence, not new G2/G3 or compiler preservation proof.
+
+[Paired40882916436](https://github.com/dwijayuda/pskernel/actions/runs/40882916436)
+compares the same prepared graph/policies with native versus generated portable
+quoting: JS body10885→8677ms/comment6293→4018ms; TS body11959→9170ms/
+comment6674→4179ms. Savings2.2–2.8s are candidate-only observations; both modes
+independently admit and execute every application. Initial JIT samples are not
+cold CLI speed claims.
+
+Installed [40881471194](https://github.com/dwijayuda/pskernel/actions/runs/40881471194)
+passes atae89810d3548731e3834041665ea16cbc5ddc228 with the exact four host pins.
+The .9 root is9838447 bytes, SHA256
+5197da266e3795406b127f6569f67ba8016d705fa602c03a4454a7cbc970b620.
+Both engines/grammars,12 real builds/four refusals,24 candidate comparisons,
+14 original/14 warm kernel fixtures, live watch/tamper/publication/shutdown pass.
+Its same-runner .7/.9 warm application means7369/6762ms are observational.
+The raw comparison label candidate-.8 is historical text; exact receipt and SHA
+identify .9. Preserve raw evidence; the future controller is corrected.
+
+**The .9 installed graph intentionally remains qualified source17ce1991,
+digest1f2f1e4a/manifest74e14f56. Native quoting is not active in that older graph.**
+New source7e25050f has digest120bbbc5/G1 manifest5ba70eff and executes fast quoting,
+but has not run its own G2/G3/fixed points or been promoted into the locked root.
+Keep the strict provenance gate. No old fixed-point receipt is relabelled.
+Canonical source adoption and ZIP delivery must verify terminal artifacts and
+exact pins before a delivery claim. No merge or npm publication.
+
+Dependency-ordered queue: preserve this verified host/G1 checkpoint; batch further
+shared-source work; run one manual new-cohort correctness chain before promotion.
+Existing requests took about50min each, so avoid repeating them for controller edits.
+Keep the separate240s performance target, official Lean4.35.0, all resource/fuel
+limits, seven-backend semantics, optional Python/PHP and prior platform evidence.
+
+## Historical active follow-up: duplicate validation and admission transport
 
 Branch `feat/psc1-wire-quote-20261029`, from PR #215 HEAD
 7b9dc2725be226f401a8adcd2e6f0af391308504. Live source40872117065 and retained

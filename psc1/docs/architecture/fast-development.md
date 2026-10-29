@@ -1,6 +1,8 @@
 # Fast installed .ps development
 
-The .7 host has [finite Linux/Node qualification](../PSC1_SEMANTIC_REUSE_QUALIFICATION_2026-10-29.json).
+The .9 retained-source host and the new G1 serializer have [separate finite Linux/Node qualification](../PSC1_WIRE_TRANSPORT_QUALIFICATION_2026-10-29.json).
+The [transport walkthrough](../evidence/PSC1_WIRE_TRANSPORT_2026-10-29.md) explains the checked boundaries and source-cohort promotion gate.
+The [.7 receipt](../PSC1_SEMANTIC_REUSE_QUALIFICATION_2026-10-29.json) retains its original scope.
 The [.6 receipt](../PSC1_PERSISTENT_QUALIFICATION_2026-10-29.json) preserves its prior scope.
 The previous [.5 receipt](../PSC1_DEVELOPMENT_QUALIFICATION_2026-10-29.json) and
 [.4 cross-platform receipt](../PSC1_CROSS_PLATFORM_QUALIFICATION_2026-10-29.json)

@@ -16,7 +16,7 @@ const prior=await readQualifiedArtifact(q.qualification,'dist/dedup-previous-pac
 const current=JSON.parse(fs.readFileSync('dist/modular-toolchain/package-receipt.json'));
 const roots=[
  {label:'qualified-.7',file:path.join(prior,'modular-toolchain/tarballs',q.package.tarball),sha256:q.package.sha256},
- {label:'candidate-.8',file:path.resolve('dist/modular-toolchain/tarballs',current.tarball),sha256:current.sha256}
+ {label:'candidate-'+current.version,file:path.resolve('dist/modular-toolchain/tarballs',current.tarball),sha256:current.sha256}
 ],reports=[];
 for(const root of roots){
  assert.equal(sha256(fs.readFileSync(root.file)),root.sha256);

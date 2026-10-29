@@ -1,13 +1,5 @@
 name: PSC1 native quoting compiler G1 qualification
 on:
-  push:
-    branches: [feat/psc1-wire-quote-20261029]
-    paths:
-      - psc1/packages/bridge/src/Ps/Bridge/CompilerHost.lean
-      - psc1/packages/compiler/src/Ps/Compiler/Service.lean
-      - .github/psc1/wire-quote-candidate.json
-      - .github/scripts/psc1-wire-quote-*.mjs
-      - .github/workflows/diagnostic-psc1-wire-quote.yml
   workflow_dispatch:
 permissions: {contents: read, actions: read}
 concurrency:

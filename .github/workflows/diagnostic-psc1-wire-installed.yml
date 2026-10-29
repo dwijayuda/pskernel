@@ -1,5 +1,8 @@
 name: PSC1 qualified wire quoting installed delivery
 on:
+  push:
+    branches: [qualify/psc1-wire-install-20261029]
+    paths: [.github/psc1/wire-installed-candidate.json]
   workflow_dispatch:
 permissions: {contents: read, actions: read}
 concurrency:

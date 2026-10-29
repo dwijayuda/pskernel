@@ -14,6 +14,11 @@ contains the tested root, matching TypeScript SDKs, installation instructions,
 checksums and exact qualification/comparison receipts. Sign in to GitHub first.
 Adoption40871621775 verifies the tested bytes at1e104ecc; no rebuild.
 
+[Verified .9 Linux ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40885379578/artifacts/12901169879)
+contains the tested retained-G3 root, matching TypeScript SDKs and scoped receipts.
+It includes duplicate-validation removal; native quoting is checked in the newer
+G1 compiler and awaits that cohort's own G2/G3 promotion. See INSTALL.md.
+
 ## Use
 
 Install the matching root and optional SDK tarballs with the exact offline

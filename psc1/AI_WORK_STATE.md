@@ -5,6 +5,29 @@ from PR #214 qualified HEAD c83039f05a445f496f71aea2429ba75c61b81f40.
 Connected GitHub and Linux Actions only; previous platform evidence is retained. Expected-HEAD,
 single-parent/non-force history. No merge or npm registry publication.
 
+## Verified .9 delivery and scope
+
+[Adoption40885379578](https://github.com/dwijayuda/pskernel/actions/runs/40885379578)
+passes at708f6b5ca99eb44e2dc6608404dffeb5af717cd5. It verifies all four exact
+host pins, current source against the passing G1 snapshot, both immutable
+qualification reports and the paired measurements; it reuses the tested tarball.
+
+[Verified Linux ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40885379578/artifacts/12901169879)
+(GitHub sign-in required), outer artifact SHA256:
+7ca0c059e3684c60b5e3afbb8c50b8e385145845af8ad697f7b97859bacab9b3.
+It contains .9 root5197da26..., matching TypeScript7.0.2 tarballs, Apache-2.0/
+notices, installation instructions, qualification/comparison/adoption receipts
+and SHA256SUMS. The installer explicitly states that native quoting is not active
+in the retained 17ce1991 G3 graph. The newer 120bbbc5 source cohort remains
+separately checked G1; new-cohort G2/G3/fixed-point promotion is still pending.
+No source qualification is silently inherited or downgraded.
+
+The retained G3 source17ce1991 compilePreparedWithOutputAbi body was also read
+directly and matches the prior7b9dc272 body exactly, confirming that it performs
+the required original-IR validation before transforms. The adapter removes only
+the redundant pass. New retained-CLI run40885379473 is separate; read it live
+before terminal claims. No merge or npm publication.
+
 ## Verified transport and validation implementation
 
 PR #215 HEAD 7b9dc2725be226f401a8adcd2e6f0af391308504 is now fully green:

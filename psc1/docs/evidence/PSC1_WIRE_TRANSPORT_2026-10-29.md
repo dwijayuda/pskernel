@@ -41,7 +41,7 @@ remain explicit. Nine graph-integrity negatives still refuse.
 
 Each generated JS/TS engine compares native and portable quote bytes over all
 1,112,064 Unicode scalars, control/escape boundaries and four fallback inputs.
-Each engine executes 13 candidate cases: both grammars, four core output targets,
+Each engine handles 13 compiler request cases: both grammars, four core output targets,
 typing refusals and an 11-module application with initial/body/comment edits.
 Candidate bytes match both the generated legacy service and qualified .7 reference.
 Successful candidates independently admit natively; all six large applications
@@ -72,6 +72,12 @@ The report's candidate-.8 label is historical controller text; the actual .9
 tarball SHA and package receipt identify the tested bytes. The controller is
 corrected for future runs. Earlier isolated .8 sampling measured 4.6% less time;
 none of these observations is a universal speed guarantee.
+
+[Canonical adoption40885379578](https://github.com/dwijayuda/pskernel/actions/runs/40885379578)
+passes exact source/package/report checks at708f6b5c.
+[Verified Linux .9 ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40885379578/artifacts/12901169879)
+requires GitHub sign-in. It reuses the tested tarball, includes matching TypeScript
+SDKs and records its limited installed-graph scope in INSTALL.md and receipts.
 
 ## Source cohorts and promotion
 

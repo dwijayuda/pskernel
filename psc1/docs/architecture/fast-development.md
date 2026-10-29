@@ -1,10 +1,16 @@
 # Fast installed .ps development
 
-The .6 host has [finite Linux/Node qualification](../PSC1_PERSISTENT_QUALIFICATION_2026-10-29.json).
+The .7 host has [finite Linux/Node qualification](../PSC1_SEMANTIC_REUSE_QUALIFICATION_2026-10-29.json).
+The [.6 receipt](../PSC1_PERSISTENT_QUALIFICATION_2026-10-29.json) preserves its prior scope.
 The previous [.5 receipt](../PSC1_DEVELOPMENT_QUALIFICATION_2026-10-29.json) and
 [.4 cross-platform receipt](../PSC1_CROSS_PLATFORM_QUALIFICATION_2026-10-29.json)
 retain their distinct scopes. No compiler graph, kernel artifact or self-host
 qualification is relabelled.
+
+[Verified .7 Linux x64 ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40871621775/artifacts/12895314098)
+contains the tested root, matching TypeScript SDKs, installation instructions,
+checksums and exact qualification/comparison receipts. Sign in to GitHub first.
+Adoption40871621775 verifies the tested bytes at1e104ecc; no rebuild.
 
 ## Use
 
@@ -69,6 +75,39 @@ clear that reuse. Builds continue through output/publication validation.
 Watch uses one private sequential Linux/Node worker,240s/request,4096MiB heap,
 8MiB stack and64 attempts/lifetime; termination owns the process group.
 Other hosts/runtimes retain their previous one-shot route and lack new .6 evidence.
+
+## Bounded reuse of compiler values
+
+[prepared-engine.mjs](../../host-tools/prepared-engine.mjs) invokes the unchanged
+generated [prepare/compilePreparedWithOutputAbi functions](../../packages/compiler/src/Ps/Compiler/Service.lean).
+Preparation is a pure function of assurance and the complete generated elaborated
+result, including environment and declarations. Fresh source capture, exact closure
+checking and origins remain outside reuse. A structural comparison accepts only
+equal private immutable inputs; it does not approximate equality from source text
+or public signatures. Changed bodies recompute. Request IDs/digests and origins
+are rendered freshly by the generated compiler.
+
+[compiler-data-equality.mjs](../../host-tools/compiler-data-equality.mjs) compares
+all own keys, property flags, values and hidden constructor symbols. Equal shared
+nodes can be skipped only because these private generated values are immutable;
+this is not a comparator for arbitrary stateful JavaScript objects. Distinct
+accessors, unsupported prototypes, cycles or traversal/time-budget exhaustion
+produce a cache miss. Iteration avoids recursion overflow. Bounds: one million
+visited nodes/keys,100ms comparison,8192 own keys/object.
+
+One target emitter input/result graph may be retained, with at most4,194,304
+source characters. Its complete validated-module and public-name inputs must
+match. The generated target pipeline, original/transformed IR validation, resource
+checks, independent kernel admission, target consumer and transactional publisher
+still run. Errors and reset discard reuse. There is no disk or admission cache.
+
+The .7 installed suite and exact parity gate pass both engines. A controlled
+same-runner11-module application comparison measures7213→4566ms stable warm
+comment-edit rebuilds; first requests10147/10037ms show no material cold gain.
+All six builds independently admit and execute Unicode JSON/file processing.
+These are finite observations, not body-edit or universal latency guarantees.
+Body changes/refusals/recovery are separately compared byte-for-byte with the
+original compiler, including comments prefixed to shift source positions.
 
 ## Evidence and remaining work
 

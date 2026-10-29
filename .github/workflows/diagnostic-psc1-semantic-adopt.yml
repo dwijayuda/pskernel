@@ -1,0 +1,41 @@
+name: PSC1 semantic reuse source adoption and delivery
+on:
+  push:
+    branches: [feat/psc1-semantic-incremental-20261029]
+    paths:
+      - psc1/host-tools/**
+      - psc1/scripts/modular-toolchain-*
+      - psc1/docs/PSC1_SEMANTIC_REUSE_QUALIFICATION_2026-10-29.json
+      - .github/scripts/psc1-semantic-adopt.mjs
+      - .github/workflows/diagnostic-psc1-semantic-adopt.yml
+  workflow_dispatch:
+permissions: {contents: read, actions: read}
+concurrency:
+  group: psc1-semantic-adopt-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  adopt:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run: {shell: bash, working-directory: psc1}
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22.23.3'}
+      - run: npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
+      - name: Preserve historical host correspondence and layout
+        run: |
+          node scripts/readability-host-check.mjs
+          node scripts/ci/repository-layout.mjs
+      - run: node ../.github/scripts/psc1-compiler-data-equality-test.mjs
+      - name: Bind exact tested source and package bytes; produce installation ZIP
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: node ../.github/scripts/psc1-semantic-adopt.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: proofscript-semantic-reuse-linux-x64-verified
+          path: psc1/dist/proofscript-semantic-reuse-linux-x64.zip
+          retention-days: 90

@@ -292,6 +292,7 @@ if (process.argv[2] !== 'inspect') {
     'host-tools/executable/loader.mjs',
     'host-tools/executable/tools.mjs',
     'host-tools/prepared-engine.mjs',
+    'host-tools/compiler-data-equality.mjs',
     'host-tools/warm-compiler.mjs',
     'host-tools/resource-capture.mjs',
     'host-tools/running-executable.mjs',

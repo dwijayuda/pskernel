@@ -1,9 +1,163 @@
 # PSC1 AI work state
 
-Updated 2026-10-29 Asia/Jakarta. Active branch feat/psc1-persistent-development-20261029,
-from PR #213 qualified HEAD b1d8d55cb664f1ab4b3d30973c10fbf950674c7d.
-Connected GitHub and Linux/Windows/macOS Actions only. Expected-HEAD,
+Updated 2026-10-29 Asia/Jakarta. Active branch feat/psc1-semantic-incremental-20261029,
+from PR #214 qualified HEAD c83039f05a445f496f71aea2429ba75c61b81f40.
+Connected GitHub and Linux Actions only; previous platform evidence is retained. Expected-HEAD,
 single-parent/non-force history. No merge or npm registry publication.
+
+## Verified .7 delivery
+
+Canonical adoption [40871621775](https://github.com/dwijayuda/pskernel/actions/runs/40871621775)
+passes at1e104ecc3c2a89678f41c8a1853437cd32d5b6b8. All four production pins,
+terminal qualification/package/source identities, unchanged compiler source,
+historical host correspondence and repository layout pass.
+[Download the verified Linux x64 ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40871621775/artifacts/12895314098)
+(GitHub sign-in required). Outer artifact SHA256:
+785ec1578d7ef4560ec39ed99eb45e9db22b397a9980f1d7314de32423172d0b.
+It contains the exact tested .7 root, two matching TypeScript7.0.2 SDK tarballs,
+Apache-2.0/notices, installation instructions, qualification/comparison/adoption
+receipts and SHA256SUMS. No rebuild or new compiler/self-host claim.
+Root SHA256 remains ab0e2ce442f52311f9fad0e96cebc759c9848434ad49e8c06c6e2df9a76c9d79.
+Retained CLI run40871621864 is separate and must be read live before terminal claims.
+
+## Qualified structural reuse — .7 Linux/Node milestone
+
+Installed [40870884480](https://github.com/dwijayuda/pskernel/actions/runs/40870884480)
+passes at018057cd6ab0f4b12456d444f25d9ccc6ac0c47f using exact producer
+57e72bce3bc1a329704696878ff07a53fb4c7ee3. Adopt its four CI-formatted source
+pins, not the abandoned fingerprints. [Qualification receipt](docs/PSC1_SEMANTIC_REUSE_QUALIFICATION_2026-10-29.json)
+records exact package/source/artifact identities and the diagnosed experiments.
+No compiler source, original134-unit G3 graph, Lean4.35.0 kernel, semantic fuel,
+strict IR, failure behavior or existing request/heap/stack policies change.
+
+Both generated JS/TS engines and both grammars pass12 actual JS/strict-TS/Wasm
+builds, four typing refusals,24 prepared/cold target candidate comparisons,
+14 original/14 warm independent-kernel fixtures, tamper refusal, full/minimal
+evidence, ordinary partial checking, dependency invalidation and live watch
+error/publication/shutdown. The producer additionally passes ten real11-module
+application candidate comparisons, including shifted origins, body changes,
+typing refusal/recovery in both engines, and three independently checked actual
+Unicode JSON/file-processing executions.
+
+Same-runner .6/.7 application comparison: stable warm means7213/4566ms,
+1.58x speedup (36.7% less time); six checked application executions pass.
+The first requests10147/10037ms show no material cold improvement.
+These are comment-only leaf-edit observations, not body-edit or universal bounds.
+Changed bodies miss comparison in0.07–0.15ms and recompute normally.
+New tiny-source CLI samples: check1447–1451ms, JS1800–1804ms, TS2190–2194ms;
+not cross-runner comparisons. Three-module watch check leaf edit804ms;
+unchanged-save182.6ms issues no new admission. watchBuild.editMs includes a
+later negative case and must not be described as isolated rebuild latency.
+
+Root proofscript-0.1.0-psc1-modular.7.tgz is9837710 bytes,
+SHA256 ab0e2ce442f52311f9fad0e96cebc759c9848434ad49e8c06c6e2df9a76c9d79.
+Canonical adoption verifies exact source pins and reuses that tested tarball,
+matching SDKs and results. Its separate delivery job must pass before claiming
+the new ZIP verified. .6 remains downloadable at artifact12892806521.
+New .7 host evidence is Linux/Node only; preserve .4 platform and all previous
+compiler/backend/self-host receipts. No merge or npm publication.
+
+Next: profile the remaining backend subpasses separately. Actual V8 samples
+show generated recursive runtime/Text insertion/JSON escaping and allocation;
+do not infer quadratic behavior from those samples (Text already uses balanced
+chunks). Optimize shared source/runtime algorithms with exact output parity,
+then regenerate/qualify changed compiler graphs only when source changes require it.
+Persistent target consumers and cold startup follow measured benefit. No general
+query framework, persistent admission cache or duplicate compiler is introduced.
+
+## Historical diagnostic checkpoints
+
+## Structural-sharing producer passes; installed gate next
+
+[40869848303](https://github.com/dwijayuda/pskernel/actions/runs/40869848303)
+passes at57e72bce3bc1a329704696878ff07a53fb4c7ee3. Exact staged production
+pins are recorded by that job; original compiler graph and kernel remain unchanged.
+Both JS/TS engines pass ten exact real-application cold/prepared candidate
+comparisons, including prefixed comments that shift source origins, actual
+body changes, typing refusal and recovery. Unchanged semantic preparation takes
+1.5–3.2ms rather than the observed initial3–4s; changed bodies miss comparison
+in0.07–0.15ms. Printing reuse hits only equivalent inputs. Three actual Unicode
+application builds independently admit and execute; warm total8.4–8.5s on this
+profiled runner. These are not cross-runner speedup claims or semantic-edit wins.
+
+Artifact12896251225 SHA256 f8dd6a58ef06541438b3064382a319b8d325f0cbb163414ae1c08c14090dcd0e
+holds the exact candidate .7 package and four formatted source pins. The next
+installed qualification reuses it and matching already-qualified TypeScript SDKs;
+no compiler rebuild, G2/G3 rerun or repeated large application parity matrix.
+A same-runner .6/.7 application comparison follows the preserved focused suite.
+The .7 root is not release-qualified until that gate and source adoption pass.
+Retained .6 source gates40863053548 and frozen.11 CLI40863008436 are now terminal green.
+
+## Structural sharing replaces the fingerprint experiment
+
+[40868629404](https://github.com/dwijayuda/pskernel/actions/runs/40868629404)
+passes at ea90cd65d5ab018b0051a7d2b14fea87bf6474f6: ten exact real-application
+candidate comparisons across JS/TS engines, including body change, typing refusal
+and recovery; three independently checked/actually executed Unicode applications.
+Fingerprint reuse works for TS, but JS data exceeds its node budget. CPU samples
+identify generated Text insertion, JSON escaping and allocation as hot paths;
+the official warm checker spends most of its wall time idle between requests.
+
+Replace optional hashing with bounded iterative comparison of complete private,
+immutable compiler values. Shared nodes from unchanged captured prefixes compare
+by identity; distinct nodes compare all own keys/descriptors/hidden symbols and
+values. Unsupported shapes/accessors/cycles/budget misses conservatively recompute.
+No source-text approximation, admission cache or handwritten frontend is added.
+Only one emitter input/result graph is retained, with at most4,194,304 source
+characters; originals/transforms still validate and all requests check independently.
+This next candidate remains experimental until its exact installed tests pass.
+
+## Pure-reuse diagnostic follow-up
+
+[40868027763](https://github.com/dwijayuda/pskernel/actions/runs/40868027763)
+passes at84038c5e4e126557a34d3f8ace4a0a3850c0d48d: bounded key safety
+and three genuinely checked/executed application compilations. The100ms
+semantic fingerprint budget missed conservatively; emitter reuse hit on the
+third request. Print-only work was1606ms before reuse, while the remaining
+backend pipeline still cost6154ms. No general semantic-edit acceleration claimed.
+The follow-up batches fingerprint hash writes, retains bounded fallbacks,
+adds CPU attribution and exact cold/warm candidate parity for both JS/TS engines
+over real application comment/body/refusal/recovery cases. The optional key
+budget is500ms; compiler/checker/fuel/memory limits are unchanged. .6 remains
+the qualified installable artifact until all .7 gates and adoption pass.
+
+## Bounded pure-compiler reuse experiment
+
+Phase probe [40865163111](https://github.com/dwijayuda/pskernel/actions/runs/40865163111)
+passes at040461b64154a23a4b4379eaa0e10cd58972aa3e. On warm comment-only leaf
+edits: capture/elaboration9.5–12.8ms, semantic preparation2620–2691ms,
+strict original IR264–292ms, backend pipeline5916–5936ms. These are observations
+from that runner, not comparable speedup claims against other runners.
+
+The .7 proposal tests bounded private value fingerprints of complete generated
+semantic-preparation inputs and emitter arguments, including hidden constructor
+symbols and UTF-16 code units. Unsupported shapes/cycles/budget misses disable
+reuse; no getter evaluation or persistent/admission cache. Generated functions
+remain the implementation. Fresh capture/origins, original/transformed IR,
+target checks, official independent admission and mutable-resource checks remain.
+Add print-only timing before attributing the whole backend pipeline to printing.
+This remains an experiment until genuine parity and installed checks pass.
+
+## Active real-application compiler profile
+
+Active branch `feat/psc1-semantic-incremental-20261029`, from PR #214 source
+adoption `c83039f05a445f496f71aea2429ba75c61b81f40`. The qualified .6 package
+and [delivery40863008602](https://github.com/dwijayuda/pskernel/actions/runs/40863008602)
+remain unchanged. [Read-only evidence40863787611](https://github.com/dwijayuda/pskernel/actions/runs/40863787611)
+recovers the same-runner comparison without recompilation: .5/.6 warm check
+2441/1086ms, warm JS build3439/1564ms, real CLI/JSON application19186/14292ms.
+Both installed packages execute the11-module,50478-byte application correctly
+after all three leaf edits. Artifact12892806521 contains the verified ZIP.
+Root SHA-256 remains23ab4f5b3eba1744b54ce3c9bc66a69edc6504b0a5568129eb99b70aa381a2f2.
+
+Further read-only phase evidence40864571265 shows that the real application's
+new compiler phase still takes12.5–12.6s, while independent admission takes
+178–184ms. The next step is instrumentation separating capture/elaboration,
+semantic preparation, strict original IR validation and backend emission before
+choosing an optimization. The .7 proposal is experimental host instrumentation,
+not qualified release or changed compiler semantics. Do not claim its package
+qualified until actual tests and source adoption pass.
+
 
 ## Persistent development sessions — qualified source milestone
 

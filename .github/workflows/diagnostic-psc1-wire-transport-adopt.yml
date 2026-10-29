@@ -1,0 +1,29 @@
+name: PSC1 checked wire transport adoption and delivery
+on:
+  # Historical .9 cohort: reproduce at 708f6b5c; do not run against newer graphs.
+  workflow_dispatch:
+permissions: {contents: read, actions: read}
+concurrency:
+  group: psc1-wire-transport-adopt-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  adopt:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run: {shell: bash, working-directory: psc1}
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22.23.3'}
+      - run: npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
+      - name: Historical host and repository correspondence
+        run: |
+          node scripts/readability-host-check.mjs
+          node scripts/ci/repository-layout.mjs
+      - env: {GH_TOKEN: '${{ github.token }}'}
+        run: node ../.github/scripts/psc1-wire-transport-adopt.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: {name: proofscript-wire-transport-linux-x64-verified, path: psc1/dist/proofscript-wire-transport-linux-x64.zip, retention-days: 90}

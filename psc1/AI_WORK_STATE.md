@@ -1,9 +1,188 @@
 # PSC1 AI work state
 
-Updated 2026-10-29 Asia/Jakarta. Active branch feat/psc1-semantic-incremental-20261029,
-from PR #214 qualified HEAD c83039f05a445f496f71aea2429ba75c61b81f40.
+Updated 2026-10-30 Asia/Jakarta. Active branch feat/psc1-wire-quote-20261029,
+from PR #215 qualified HEAD 7b9dc2725be226f401a8adcd2e6f0af391308504.
 Connected GitHub and Linux Actions only; previous platform evidence is retained. Expected-HEAD,
 single-parent/non-force history. No merge or npm registry publication.
+
+## Terminal production-head CI (2026-10-30)
+
+Implementation `d7f7fe99e13ccd6f60fd096b5191faee35ce9b02` is terminal green:
+[source 40969703214](https://github.com/dwijayuda/pskernel/actions/runs/40969703214)
+passes all 16 selected jobs (benchmark intentionally skipped),
+[npm 40969703130](https://github.com/dwijayuda/pskernel/actions/runs/40969703130) passes,
+and [retained CLI 40969696100](https://github.com/dwijayuda/pskernel/actions/runs/40969696100)
+passes all nine installed/runtime/installable jobs. The frozen CLI packager now
+validates the qualified current host epoch and recovers the exact historical
+bytes; every prior payload comparison and regression remains.
+
+The .10 [source adoption 40969210436](https://github.com/dwijayuda/pskernel/actions/runs/40969210436)
+passed at `65862d3b119398e781cf59638ac829cbdcf3cea6`, verifying all four tested
+source/metadata pins, current source against admitted G1 and ZIP read-back.
+[Verified Linux delivery](https://github.com/dwijayuda/pskernel/actions/runs/40969210436/artifacts/12939207933)
+contains the tested installable ZIP and adoption/checksum receipts. Inner compiler
+ZIP SHA256 `ff5054f9f126ded7cb63d11b9a816ce051f6be9ec0e9f974c276654dbd62b6df`;
+outer artifact SHA256 `7b0286defa52d50b3fbf3b30c38cd4f26efc155fc54aaf554a0f7fccdd495313`.
+No rebuilt/relabelled package or new G2/G3 run was used for host/docs maintenance.
+This final record changes documentation only. No merge or registry publication.
+
+## Qualified .10 source and installed compiler
+
+[Installed CI 40968122960](https://github.com/dwijayuda/pskernel/actions/runs/40968122960)
+passes at staged producer `d87c202e408a7f38c807ee804ea811ba5301eadb`. Canonical adoption uses its exact
+four formatted source/metadata pins and tested tarball; it does not rebuild or
+relabel a previous compiler. Root `proofscript-0.1.0-psc1-modular.10.tgz`: 9842556 bytes, SHA256
+`19f62a66f72e33664ce6b1ac6deb48242510b67de5ac94d0e5e065c16e05adb1`. The tested ZIP is in
+[artifact 12939127333](https://github.com/dwijayuda/pskernel/actions/runs/40968122960/artifacts/12939127333).
+The final source-adoption check passed, verifying current source/pins and ZIP read-back.
+
+The new installed JS/TS graph uses source `a1f49fb3195a9142f941de34c1e6565bf31146fb`, digest
+`67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad`, G1/G2/G3 manifest
+`210c9577643f26b91a80eae036f3f70272a606a55520fe9a974db47fd14023dc`. [Generations 40894184363](https://github.com/dwijayuda/pskernel/actions/runs/40894184363)
+passes both engines with zero native frontend calls, independent Lean admission,
+exact original/transformed IR and rendered-native references, all graph files and
+all 15 npm tarballs identical across G1/G2/G3 and across engines. Actual compiler
+requests: JS G2/G3 2866480/3089677 ms, peak RSS 4015232/4089932 KiB;
+TS 2896525/3078372 ms, 3848280/3874888 KiB. These qualify the separate 3600-second
+correctness profile; the 240-second performance target remains unqualified.
+
+Native string quoting is now **active in the installed compiler**, with the
+portable quoter as fallback. Cold Node/Linux JS/TS/Wasm-core builds use the
+installed sealed prepared adapter; other hosts/targets retain their existing
+route. Check-only retains adapter original-IR validation. Builds invoke the
+required generated original-IR validation once, then every transformed-IR,
+independent kernel, target-consumer and transactional-publication check.
+No project callback, IR/checker bypass or resource/fuel relaxation was added.
+The public scalar-ABI gate is retained; the quote helper is internal.
+
+The installed suite passes both engines/grammars, 12 actual JS/strict-TS/Wasm-core
+builds, four typing refusals, 24 exact prepared/legacy candidate comparisons,
+14 cold and 14 warm official-kernel cases, full/minimal evidence, tamper refusal,
+live watch dependency/error/publication/shutdown, and Unicode JSON/file execution.
+All 22 positive parity candidates and the measured real application have native
+quote calls with no fallback. On one runner, two steady warm comment-edit builds
+of the 11-module application average 6326.64 ms (.7) versus 4547.08 ms (.10),
+about 28% less time. These are finite observations, not a universal latency claim.
+The watchBuild.editMs field includes a later refusal case and is not edit latency.
+
+[Installed receipt](docs/PSC1_WIRE_INSTALLED_QUALIFICATION_2026-10-30.json) and
+[source-generation receipt](docs/PSC1_WIRE_MODULAR_QUALIFICATION_2026-10-29.json)
+contain exact producer commits, artifact SHA256s, measurements, tests and limits.
+Source implementation `efe35012851a8e81c92f84cfa0eb1c7bd058921c` passes
+[all 16 selected source jobs](https://github.com/dwijayuda/pskernel/actions/runs/40894666856),
+[nine retained CLI jobs](https://github.com/dwijayuda/pskernel/actions/runs/40894659730)
+and existing npm 40894666645. The source checkpoint added at b9af07e7 is a
+historical pre-generation snapshot; these newer receipts supersede its pending status.
+
+Preserve .7/.9/.13, previous platform evidence, all seven backend implementations,
+optional Python/PHP, official Lean 4.35.0 and the C++/Emscripten linear-memory
+Wasm kernel. This .10 host qualification is Linux x64/Node22.23.3; it does not
+inherit cross-platform or native Rust/Wasm compiler-executor qualification.
+No merge or registry publication. Next measured queue: graph identity/metadata
+costs, reusable pinned target consumers, finer invalidation and cold module loading.
+Further algorithm changes need actual profiles; unchanged-source generations
+must not be repeated for host/docs changes.
+
+## Retained .9 delivery and historical scope
+
+[Adoption40885379578](https://github.com/dwijayuda/pskernel/actions/runs/40885379578)
+passes at708f6b5ca99eb44e2dc6608404dffeb5af717cd5. It verifies all four exact
+host pins, current source against the passing G1 snapshot, both immutable
+qualification reports and the paired measurements; it reuses the tested tarball.
+
+[Verified Linux ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40885379578/artifacts/12901169879)
+(GitHub sign-in required), outer artifact SHA256:
+7ca0c059e3684c60b5e3afbb8c50b8e385145845af8ad697f7b97859bacab9b3.
+It contains .9 root5197da26..., matching TypeScript7.0.2 tarballs, Apache-2.0/
+notices, installation instructions, qualification/comparison/adoption receipts
+and SHA256SUMS. The installer explicitly states that native quoting is not active
+in the retained 17ce1991 G3 graph. The newer 120bbbc5 source cohort remains
+separately checked G1; new-cohort G2/G3/fixed-point promotion is still pending.
+No source qualification is silently inherited or downgraded.
+
+The retained G3 source17ce1991 compilePreparedWithOutputAbi body was also read
+directly and matches the prior7b9dc272 body exactly, confirming that it performs
+the required original-IR validation before transforms. The adapter removes only
+the redundant pass. New retained-CLI run40885379473 is separate; read it live
+before terminal claims. No merge or npm publication.
+
+## Historical transport and validation precursors
+
+PR #215 HEAD 7b9dc2725be226f401a8adcd2e6f0af391308504 is now fully green:
+[source40872117065](https://github.com/dwijayuda/pskernel/actions/runs/40872117065)
+and retained frozen-.11 [CLI40871621864](https://github.com/dwijayuda/pskernel/actions/runs/40871621864).
+The latter tests its own historical cohort; it is not new-source self-host evidence.
+
+[Transport qualification](docs/PSC1_WIRE_TRANSPORT_QUALIFICATION_2026-10-29.json) and [source-linked walkthrough](docs/evidence/PSC1_WIRE_TRANSPORT_2026-10-29.md)
+record two distinct implemented scopes:
+- Remove the duplicate warm-build original-IR pass. Check-only retains its check;
+  builds use the existing generated check before transforms. All transformed IR,
+  independent admission, resource, target and publication checks remain.
+- Add shared Lean serializer parameters while preserving old entry points.
+  Exact prior-body audits and two rfl equations pass, with observed [propext]
+  dependencies. A fixed private Node serializer verifies scalar UTF-8 and JSON
+  roundtrips, otherwise using the generated quoter. No project callbacks.
+
+[G1 compiler40879970347](https://github.com/dwijayuda/pskernel/actions/runs/40879970347)
+passes at7e25050ffd9027f22f8b4b723ad4b6c017e11bbc: 4907 independently admitted
+logical declarations, 134 units/15 strictly checked TS packages, nine integrity
+refusals, and both executing generated JS/TS compilers. Each matches all1,112,064
+Unicode scalars plus boundary/fallback cases. Across both engines,26 request cases
+match old .7 and new legacy candidate bytes; positive candidates admit natively,
+six actual large IO applications also admit through the official Wasm kernel.
+This is finite G1 transport evidence, not new G2/G3 or compiler preservation proof.
+
+[Paired40882916436](https://github.com/dwijayuda/pskernel/actions/runs/40882916436)
+compares the same prepared graph/policies with native versus generated portable
+quoting: JS body10885→8677ms/comment6293→4018ms; TS body11959→9170ms/
+comment6674→4179ms. Savings2.2–2.8s are candidate-only observations; both modes
+independently admit and execute every application. Initial JIT samples are not
+cold CLI speed claims.
+
+Installed [40881471194](https://github.com/dwijayuda/pskernel/actions/runs/40881471194)
+passes atae89810d3548731e3834041665ea16cbc5ddc228 with the exact four host pins.
+The .9 root is9838447 bytes, SHA256
+5197da266e3795406b127f6569f67ba8016d705fa602c03a4454a7cbc970b620.
+Both engines/grammars,12 real builds/four refusals,24 candidate comparisons,
+14 original/14 warm kernel fixtures, live watch/tamper/publication/shutdown pass.
+Its same-runner .7/.9 warm application means7369/6762ms are observational.
+The raw comparison label candidate-.8 is historical text; exact receipt and SHA
+identify .9. Preserve raw evidence; the future controller is corrected.
+
+**The .9 installed graph intentionally remains qualified source17ce1991,
+digest1f2f1e4a/manifest74e14f56. Native quoting is not active in that older graph.**
+New source7e25050f has digest120bbbc5/G1 manifest5ba70eff and executes fast quoting,
+but has not run its own G2/G3/fixed points or been promoted into the locked root.
+Keep the strict provenance gate. No old fixed-point receipt is relabelled.
+Canonical source adoption and ZIP delivery must verify terminal artifacts and
+exact pins before a delivery claim. No merge or npm publication.
+
+Dependency-ordered queue: preserve this verified host/G1 checkpoint; batch further
+shared-source work; run one manual new-cohort correctness chain before promotion.
+Existing requests took about50min each, so avoid repeating them for controller edits.
+Keep the separate240s performance target, official Lean4.35.0, all resource/fuel
+limits, seven-backend semantics, optional Python/PHP and prior platform evidence.
+
+## Historical active follow-up: duplicate validation and admission transport
+
+Branch `feat/psc1-wire-quote-20261029`, from PR #215 HEAD
+7b9dc2725be226f401a8adcd2e6f0af391308504. Live source40872117065 and retained
+CLI40871621864 had no failures and were still running when this branch started;
+re-query before final claims. Preserve .7 and all exact compiler/kernel evidence.
+
+The host-only .8 proposal removes the extra original-IR validation in warm builds.
+The existing generated compilePreparedWithOutputAbi validates original IR before
+any transform; check-only retains its adapter validation, including reuse hits.
+Installed qualification and a same-runner application comparison are required
+before canonical adoption. The qualified G3 graph is unchanged for this host slice.
+
+Next, add a serializer parameter in shared Lean transport source while preserving
+legacy entry points by applying psJsonQuote. A fixed private host native quoter
+must have exact Unicode/control byte parity, roundtrip checks and generated fallback;
+project data cannot select callbacks. Regenerate and independently check actual
+JS/TS compiler graphs. New source-cohort evidence must stay separate from .7's
+G1/G2/G3/fixed points. Do not silently relabel that evidence or weaken provenance.
+Full source-cohort self-hosting remains a later promotion gate, not an edit loop.
 
 ## Verified .7 delivery
 
@@ -870,3 +1049,20 @@ exclusion during M4 integration; M4 now imports executable helpers and the refer
 CLI workflow watches those dependencies. Successful native compilation is cached before
 candidate execution so test failures do not force identical rebuilds. The workflow
 edit also reruns the existing CLI at the corrected documentation HEAD.
+
+
+### Wire quoting: public ABI correction and cold routing (2026-10-29)
+
+The full source run 40886789852 passed its selected compiler/source/backend jobs but failed the default JS/Rust transport fixture: the added higher-order quote helper was accidentally public (PSC1_PUBLIC_NONSCALAR_SIGNATURE_UNQUALIFIED). Move it into Ps.Internal.CompilerHost, preserving the scalar ABI refusal and exact legacy bodies; re-qualify this corrected source cohort before promoting it. The installable retained-source .9 artifact remains valid and separate. Its default source graph does not enable native quote calls.
+
+A cold Node/Linux JS/TS/Wasm-core routing proposal is staged separately for installed qualification; canonical host API bytes were restored in efe35012. The proposal selects the same installed, hash-bound prepared adapter already used by warm builds; every original/transformed IR check, independent admission and publication boundary remains required. Other runtimes/platforms/targets retain their previous route. This host routing requires actual installed qualification; it is not yet claimed qualified. The earlier G1 and paired-quote measurements remain precursor evidence, not qualification of the namespace-corrected source. The in-progress precursor generations must not be promoted for this corrected source.
+
+
+### Final adoption and retired historical trigger (2026-10-30)
+
+New .10 source-adoption run 40969210436 passes at 65862d3b119398e781cf59638ac829cbdcf3cea6: all four current pins, current owned source against admitted G1, exact package bytes and ZIP read-back. The historical .9 adopter was also triggered by the generic modular-toolchain glob in run 40969210283; it correctly refused the changed source cohort. Its automatic push trigger is retired; retain manual reproduction at the recorded .9 commit. The new .10 adopter is the authoritative current check. No historical receipt or acceptance criterion is changed.
+
+
+### Frozen-package guard compatibility
+
+Retained CLI 40969210345 correctly stopped at its old current-host pin (16962 bytes vs 16602) after the new modular host was adopted. The legacy packager now first verifies the qualified .10 source pin, reads its exact prior bytes from the recorded base commit, and applies every existing historical host/payload comparison. This changes no frozen executable bytes and grants no exception to a mismatched hash. Retained CLI 40969696100 passes all nine jobs at d7f7fe99, verifying the guard, unchanged payloads and all existing regressions; no G2/G3 repetition was needed.

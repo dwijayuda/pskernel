@@ -1,0 +1,3841 @@
+{
+  "schema": "psc1-portable-modular-qualification/1",
+  "status": "qualified-finite-linux-modular-js-ts",
+  "branch": "qualify/psc1-wire-generations-20261029",
+  "pullRequest": 216,
+  "baseCommit": "7b9dc2725be226f401a8adcd2e6f0af391308504",
+  "sourceCommit": "a1f49fb3195a9142f941de34c1e6565bf31146fb",
+  "testedImplementationCommit": "a1f49fb3195a9142f941de34c1e6565bf31146fb",
+  "sourceClosureDigest": "67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad",
+  "nativeG0": {
+    "schema": "psc1-executable-production-build/1",
+    "testedCommit": "a1f49fb3195a9142f941de34c1e6565bf31146fb",
+    "sourceClosureDigest": "67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad",
+    "sourceModules": 133,
+    "compilerAssurance": "ordinary-checked",
+    "partialNames": [
+      "psBackendPublicTypeSupported",
+      "psJsNeedsUtf8Runtime",
+      "psTsNeedsUtf8Runtime",
+      "Ps.Internal.RustRuntimePlan.typeRequirements",
+      "Ps.Internal.RustRuntimePlan.exprRequirements"
+    ],
+    "logicalDeclarations": 4907,
+    "counts": [
+      3254,
+      4291,
+      4946
+    ],
+    "generatedUnits": 134,
+    "packages": [
+      "@proofscript/foundation",
+      "@proofscript/core",
+      "@proofscript/environment",
+      "@proofscript/bridge",
+      "@proofscript/compiler-ir",
+      "@proofscript/backend-common",
+      "@proofscript/syntax",
+      "@proofscript/meta",
+      "@proofscript/elab",
+      "@proofscript/erasure",
+      "@proofscript/backend-ts",
+      "@proofscript/backend-js",
+      "@proofscript/backend-rust",
+      "@proofscript/backend-wasm",
+      "@proofscript/compiler"
+    ],
+    "computedInitializers": 356,
+    "manifestSha256": "620849f5bfaf67ccf46e6c4d96608b94b016d7a3f3185ee1e90762eec2b5218e",
+    "logicalAdmission": {
+      "protocol": "psc1-compiler-host/1",
+      "requestId": "production-executable-compiler-build",
+      "target": "js",
+      "sourceClosureDigest": "67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad",
+      "admissionsDigest": "9ecda6b51f3a04bb40156fcf9dfcc37b28cd0320164a5e366e6f66ba09a0909e",
+      "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "accepted": true,
+      "behaviorallyVerified": false
+    },
+    "originalIrSha256": "c5ef0814e71e825f0c57cc865cf8206aa9869d894b5e5e2a77112f6566929043",
+    "transformedIrSha256": "6ac776ac5e18ac70bece1f384d43284a7fd6c7dba26bfd252c633be684c62da9",
+    "capture": {
+      "status": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 119035,
+      "stdoutBytes": 195,
+      "stderrBytes": 0,
+      "timeoutMs": 240000,
+      "timeoutPolicy": "standard-240s",
+      "maxBuffer": 33554432,
+      "maxRssKiB": 334096,
+      "sampledCpuSeconds": 119,
+      "peakTreeRssKiB": 332048,
+      "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+      "processGroup": 5255
+    },
+    "emission": {
+      "status": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 17086,
+      "stdoutBytes": 279,
+      "stderrBytes": 0,
+      "timeoutMs": 240000,
+      "timeoutPolicy": "standard-240s",
+      "maxBuffer": 33554432,
+      "maxRssKiB": 316012,
+      "sampledCpuSeconds": 17.06,
+      "peakTreeRssKiB": 316012,
+      "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+      "processGroup": 5287
+    },
+    "negativeCases": [
+      "altered-module",
+      "missing-module",
+      "extra-module",
+      "symlink-module",
+      "wrong-manifest-cohort",
+      "duplicate-owner",
+      "unsafe-path",
+      "wrong-runtime-owner",
+      "wrong-checker"
+    ],
+    "candidateFiles": 1131,
+    "candidateBytes": 103964218,
+    "typescriptResourcesSha256": "3d83f0b4ff6821d858736d463178d9f92baaeaa5ff59046cd762750d54b17e0c",
+    "claims": {
+      "wholeCompilerCapture": true,
+      "actualSourceOwnedBodies": true,
+      "strictOriginalAndTransformedIR": true,
+      "independentCanonicalCoreAdmission": true,
+      "strictTypeScript": true,
+      "compilerExecution": false,
+      "fullModularSelfHosting": false,
+      "rootUmbrellaPromotion": false,
+      "defaultDistributionChanged": false
+    }
+  },
+  "portableG1Seed": {
+    "schema": "psc1-portable-modular-G1/1",
+    "status": "passed-native-reference-and-portable-generation",
+    "sourceCommit": "a1f49fb3195a9142f941de34c1e6565bf31146fb",
+    "sourceClosureDigest": "67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad",
+    "sourceModules": 133,
+    "units": 134,
+    "packages": 15,
+    "manifestSha256": "210c9577643f26b91a80eae036f3f70272a606a55520fe9a974db47fd14023dc",
+    "files": 1131,
+    "bytes": 103964218,
+    "execution": {
+      "status": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 120761,
+      "stdoutBytes": 107,
+      "stderrBytes": 0,
+      "timeoutMs": 240000,
+      "timeoutPolicy": "standard-240s",
+      "maxBuffer": 33554432,
+      "maxRssKiB": 1211096,
+      "sampledCpuSeconds": 120.73,
+      "peakTreeRssKiB": 1211096,
+      "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+      "processGroup": 5902
+    },
+    "nativeSeedSha256": "30a379c96a6030436418510a8e19bbfa57fdc5085bd9835ac96c1bc05f5de9fc",
+    "nativeOracleScope": "comparison-only; never imported by a generation producer",
+    "independentAdmission": {
+      "protocol": "psc1-compiler-host/1",
+      "requestId": "production-executable-compiler-build",
+      "target": "js",
+      "sourceClosureDigest": "67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad",
+      "admissionsDigest": "9ecda6b51f3a04bb40156fcf9dfcc37b28cd0320164a5e366e6f66ba09a0909e",
+      "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "accepted": true,
+      "behaviorallyVerified": false,
+      "elapsedMs": 3139
+    },
+    "originalAndTransformedIrMatch": true,
+    "exactRenderedReferenceBytes": true,
+    "compilerSeconds": 240,
+    "checkerSeconds": 120,
+    "fullModularSelfHosting": false
+  },
+  "nativeG1Artifact": {
+    "run": 40894184363,
+    "job": 123518692995,
+    "artifact": 12907676205,
+    "commit": "a1f49fb3195a9142f941de34c1e6565bf31146fb",
+    "zipSha256": "56f527102991c7d0f5ffd1f8bdf744da4a29ca771a28d1693deca0888fda16b4"
+  },
+  "portableG1Artifact": {
+    "run": 40894184363,
+    "job": 123518692995,
+    "artifact": 12906249365,
+    "commit": "a1f49fb3195a9142f941de34c1e6565bf31146fb",
+    "zipSha256": "cfb0122875dfd4090973f5b63cd2c93c2b479249792af277a31b0e0d9a913cfd"
+  },
+  "generationRun": 40894184363,
+  "generations": {
+    "js": {
+      "status": "qualified-finite-linux-g1-g2-g3-fixed-point",
+      "report": {
+        "schema": "psc1-portable-modular-selfhost/1",
+        "testedCommit": "a1f49fb3195a9142f941de34c1e6565bf31146fb",
+        "sourceCommit": "a1f49fb3195a9142f941de34c1e6565bf31146fb",
+        "sourceClosureDigest": "67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad",
+        "variant": "js",
+        "profile": "correctness-3600s",
+        "status": "passed",
+        "fixedPoint": "exact-G1-G2-G3-graph-files-and-npm-tarballs",
+        "performanceQualification": "not-run",
+        "nativeFrontendCalls": 0,
+        "generationOutput": "genuine source-owned modules only; no whole-compiler bundle",
+        "nativeReferenceScope": "explicit corpus oracle only, outside all executable graphs",
+        "generations": [
+          {
+            "generation": 2,
+            "execution": {
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "elapsedMs": 2866480,
+              "stdoutBytes": 392,
+              "stderrBytes": 0,
+              "timeoutMs": 3600000,
+              "timeoutPolicy": "g2g3-correctness-3600s",
+              "maxBuffer": 33554432,
+              "maxRssKiB": 4015232,
+              "sampledCpuSeconds": 3449.27,
+              "peakTreeRssKiB": 3912064,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "processGroup": 2914
+            },
+            "independentAdmission": {
+              "protocol": "psc1-compiler-host/1",
+              "requestId": "production-executable-compiler-build",
+              "target": "js",
+              "sourceClosureDigest": "67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad",
+              "admissionsDigest": "9ecda6b51f3a04bb40156fcf9dfcc37b28cd0320164a5e366e6f66ba09a0909e",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "accepted": true,
+              "behaviorallyVerified": false,
+              "elapsedMs": 2838
+            },
+            "manifestSha256": "210c9577643f26b91a80eae036f3f70272a606a55520fe9a974db47fd14023dc",
+            "packages": [
+              {
+                "name": "@proofscript/foundation",
+                "filename": "proofscript-foundation-0.1.0-psc1-modular.2.tgz",
+                "bytes": 811872,
+                "sha256": "978fd5b13fe522b92d4413919a836478b63bda94a19066ef972e6112e8fc057d"
+              },
+              {
+                "name": "@proofscript/core",
+                "filename": "proofscript-core-0.1.0-psc1-modular.2.tgz",
+                "bytes": 291966,
+                "sha256": "148643c9dea17572ceb8b976cfd6b8093cdb714276b5d22d256643383fd10819"
+              },
+              {
+                "name": "@proofscript/environment",
+                "filename": "proofscript-environment-0.1.0-psc1-modular.2.tgz",
+                "bytes": 395605,
+                "sha256": "4f5dca123d0bd4c22c304d4050020757080c8d6e5f5ed47d4195f53f71f82fdc"
+              },
+              {
+                "name": "@proofscript/bridge",
+                "filename": "proofscript-bridge-0.1.0-psc1-modular.2.tgz",
+                "bytes": 254349,
+                "sha256": "2d15f64555bf1631e531c126e636d6f81c730f8c0a971e4c74fd81b84bc41176"
+              },
+              {
+                "name": "@proofscript/compiler-ir",
+                "filename": "proofscript-compiler-ir-0.1.0-psc1-modular.2.tgz",
+                "bytes": 614680,
+                "sha256": "1baa08cf81ff8af34309a7a4d2bf24c2b6c59e0913334774a3f9fc325ac4f751"
+              },
+              {
+                "name": "@proofscript/backend-common",
+                "filename": "proofscript-backend-common-0.1.0-psc1-modular.2.tgz",
+                "bytes": 242785,
+                "sha256": "1205bf87bb4450be8b6f44bb8542cca82b6a3e52486e4d177376bcfd53a0b0f5"
+              },
+              {
+                "name": "@proofscript/syntax",
+                "filename": "proofscript-syntax-0.1.0-psc1-modular.2.tgz",
+                "bytes": 1073110,
+                "sha256": "c214e4fceadfc1fe5a7a89132d7f47746286f50ec2598bcf1e1febc588bce7cc"
+              },
+              {
+                "name": "@proofscript/meta",
+                "filename": "proofscript-meta-0.1.0-psc1-modular.2.tgz",
+                "bytes": 320852,
+                "sha256": "f4c339e3b3e925bd5ebe5096be9777dbeaa9a2a8032939975a965c38ef0d6f69"
+              },
+              {
+                "name": "@proofscript/elab",
+                "filename": "proofscript-elab-0.1.0-psc1-modular.2.tgz",
+                "bytes": 1194502,
+                "sha256": "60cb8b0d74b80bd4eb3120809049f3aa583d108115bd36c6c4cae98ca2979edd"
+              },
+              {
+                "name": "@proofscript/erasure",
+                "filename": "proofscript-erasure-0.1.0-psc1-modular.2.tgz",
+                "bytes": 568012,
+                "sha256": "a02066bc05103a3e7d27fc07cec609cb906a35e00bceb81643f805d654f672af"
+              },
+              {
+                "name": "@proofscript/backend-ts",
+                "filename": "proofscript-backend-ts-0.1.0-psc1-modular.2.tgz",
+                "bytes": 434474,
+                "sha256": "211aef960d739bc6655bfc6a578b503ae258d482c37c37357eb018484ea42b41"
+              },
+              {
+                "name": "@proofscript/backend-js",
+                "filename": "proofscript-backend-js-0.1.0-psc1-modular.2.tgz",
+                "bytes": 519927,
+                "sha256": "d58fd6922d775eb00617e710c47ae03d8391b4b01b67c854fa3e7e035aa941ef"
+              },
+              {
+                "name": "@proofscript/backend-rust",
+                "filename": "proofscript-backend-rust-0.1.0-psc1-modular.2.tgz",
+                "bytes": 592973,
+                "sha256": "08963ca6b64e5ab372755feb8ec9c79ff45bdf49ac7252d26348e11dcbfd29cf"
+              },
+              {
+                "name": "@proofscript/backend-wasm",
+                "filename": "proofscript-backend-wasm-0.1.0-psc1-modular.2.tgz",
+                "bytes": 1098868,
+                "sha256": "fb934cbdbcc8cba6b330b1fb804415ac641e0bcf1bd2b00cf5436530979c404f"
+              },
+              {
+                "name": "@proofscript/compiler",
+                "filename": "proofscript-compiler-0.1.0-psc1-modular.2.tgz",
+                "bytes": 311132,
+                "sha256": "12c508c04c1ca06e1de441dd2eb871b4a5a897ec2f782218d2acfa3f209e55d6"
+              }
+            ],
+            "fullGraphByteIdentity": true,
+            "originalAndTransformedIrIdentity": true,
+            "renderedNativeReferenceIdentity": true,
+            "status": "qualified-generated-modular-compiler",
+            "executionEvidence": {
+              "schema": "psc1-executable-compiler-execution/1",
+              "testedCommit": "a1f49fb3195a9142f941de34c1e6565bf31146fb",
+              "manifestSha256": "210c9577643f26b91a80eae036f3f70272a606a55520fe9a974db47fd14023dc",
+              "compilerSourceClosureDigest": "67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad",
+              "observations": [
+                {
+                  "variant": "js",
+                  "case": "lean-js",
+                  "target": "js",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-js",
+                    "target": "js",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 633,
+                  "peakTreeRssKiB": 163072
+                },
+                {
+                  "variant": "ts",
+                  "case": "lean-js",
+                  "target": "js",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-js",
+                    "target": "js",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 847,
+                  "peakTreeRssKiB": 195820
+                },
+                {
+                  "variant": "js",
+                  "case": "lean-ts",
+                  "target": "ts",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-ts",
+                    "target": "ts",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 729,
+                  "peakTreeRssKiB": 163972
+                },
+                {
+                  "variant": "ts",
+                  "case": "lean-ts",
+                  "target": "ts",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-ts",
+                    "target": "ts",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 771,
+                  "peakTreeRssKiB": 195988
+                },
+                {
+                  "variant": "js",
+                  "case": "lean-rust",
+                  "target": "rust",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-rust",
+                    "target": "rust",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 794,
+                  "peakTreeRssKiB": 179712
+                },
+                {
+                  "variant": "ts",
+                  "case": "lean-rust",
+                  "target": "rust",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-rust",
+                    "target": "rust",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 940,
+                  "peakTreeRssKiB": 214300
+                },
+                {
+                  "variant": "js",
+                  "case": "lean-wasm-core",
+                  "target": "wasm-core",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-wasm-core",
+                    "target": "wasm-core",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 788,
+                  "peakTreeRssKiB": 167340
+                },
+                {
+                  "variant": "ts",
+                  "case": "lean-wasm-core",
+                  "target": "wasm-core",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-wasm-core",
+                    "target": "wasm-core",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 866,
+                  "peakTreeRssKiB": 201012
+                },
+                {
+                  "variant": "js",
+                  "case": "lean-invalid",
+                  "target": "js",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "4561c867783bd9ac5e7ad1b46bab21ec12bd65b4026f63946592696efcf66755",
+                  "admission": null,
+                  "elapsedMs": 537,
+                  "peakTreeRssKiB": 147980
+                },
+                {
+                  "variant": "ts",
+                  "case": "lean-invalid",
+                  "target": "js",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "4561c867783bd9ac5e7ad1b46bab21ec12bd65b4026f63946592696efcf66755",
+                  "admission": null,
+                  "elapsedMs": 678,
+                  "peakTreeRssKiB": 184852
+                },
+                {
+                  "variant": "js",
+                  "case": "ps-js",
+                  "target": "js",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-js",
+                    "target": "js",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 688,
+                  "peakTreeRssKiB": 164168
+                },
+                {
+                  "variant": "ts",
+                  "case": "ps-js",
+                  "target": "js",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-js",
+                    "target": "js",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 813,
+                  "peakTreeRssKiB": 195208
+                },
+                {
+                  "variant": "js",
+                  "case": "ps-ts",
+                  "target": "ts",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-ts",
+                    "target": "ts",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 670,
+                  "peakTreeRssKiB": 164000
+                },
+                {
+                  "variant": "ts",
+                  "case": "ps-ts",
+                  "target": "ts",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-ts",
+                    "target": "ts",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 825,
+                  "peakTreeRssKiB": 194756
+                },
+                {
+                  "variant": "js",
+                  "case": "ps-rust",
+                  "target": "rust",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-rust",
+                    "target": "rust",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 870,
+                  "peakTreeRssKiB": 179148
+                },
+                {
+                  "variant": "ts",
+                  "case": "ps-rust",
+                  "target": "rust",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-rust",
+                    "target": "rust",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 960,
+                  "peakTreeRssKiB": 213316
+                },
+                {
+                  "variant": "js",
+                  "case": "ps-wasm-core",
+                  "target": "wasm-core",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-wasm-core",
+                    "target": "wasm-core",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 781,
+                  "peakTreeRssKiB": 165028
+                },
+                {
+                  "variant": "ts",
+                  "case": "ps-wasm-core",
+                  "target": "wasm-core",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-wasm-core",
+                    "target": "wasm-core",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 947,
+                  "peakTreeRssKiB": 202476
+                },
+                {
+                  "variant": "js",
+                  "case": "ps-invalid",
+                  "target": "js",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "1ece0e2d5ed37a23d822b15ebaa8f94f890bc5d6fd0a15305357af20db8e2beb",
+                  "admission": null,
+                  "elapsedMs": 520,
+                  "peakTreeRssKiB": 137616
+                },
+                {
+                  "variant": "ts",
+                  "case": "ps-invalid",
+                  "target": "js",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "1ece0e2d5ed37a23d822b15ebaa8f94f890bc5d6fd0a15305357af20db8e2beb",
+                  "admission": null,
+                  "elapsedMs": 648,
+                  "peakTreeRssKiB": 162360
+                },
+                {
+                  "variant": "js",
+                  "case": "optional-python",
+                  "target": "python",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "7feff663ae6414b1ba4e92c6a9d0591aee7ee31ae863a0290caa861ea755dd9a",
+                  "admission": null,
+                  "elapsedMs": 500,
+                  "peakTreeRssKiB": 134384
+                },
+                {
+                  "variant": "ts",
+                  "case": "optional-python",
+                  "target": "python",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "7feff663ae6414b1ba4e92c6a9d0591aee7ee31ae863a0290caa861ea755dd9a",
+                  "admission": null,
+                  "elapsedMs": 626,
+                  "peakTreeRssKiB": 160152
+                },
+                {
+                  "variant": "js",
+                  "case": "optional-php",
+                  "target": "php",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "7feff663ae6414b1ba4e92c6a9d0591aee7ee31ae863a0290caa861ea755dd9a",
+                  "admission": null,
+                  "elapsedMs": 497,
+                  "peakTreeRssKiB": 147628
+                },
+                {
+                  "variant": "ts",
+                  "case": "optional-php",
+                  "target": "php",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "7feff663ae6414b1ba4e92c6a9d0591aee7ee31ae863a0290caa861ea755dd9a",
+                  "admission": null,
+                  "elapsedMs": 589,
+                  "peakTreeRssKiB": 168840
+                },
+                {
+                  "variant": "js",
+                  "case": "optional-unknown",
+                  "target": "unknown",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "7feff663ae6414b1ba4e92c6a9d0591aee7ee31ae863a0290caa861ea755dd9a",
+                  "admission": null,
+                  "elapsedMs": 508,
+                  "peakTreeRssKiB": 131768
+                },
+                {
+                  "variant": "ts",
+                  "case": "optional-unknown",
+                  "target": "unknown",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "7feff663ae6414b1ba4e92c6a9d0591aee7ee31ae863a0290caa861ea755dd9a",
+                  "admission": null,
+                  "elapsedMs": 656,
+                  "peakTreeRssKiB": 156660
+                }
+              ],
+              "runtimeCohortRefusals": [
+                "js",
+                "ts"
+              ],
+              "installedPackages": [
+                {
+                  "name": "@proofscript/foundation",
+                  "sha256": "978fd5b13fe522b92d4413919a836478b63bda94a19066ef972e6112e8fc057d",
+                  "tarball": "proofscript-foundation-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/core",
+                  "sha256": "148643c9dea17572ceb8b976cfd6b8093cdb714276b5d22d256643383fd10819",
+                  "tarball": "proofscript-core-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/environment",
+                  "sha256": "4f5dca123d0bd4c22c304d4050020757080c8d6e5f5ed47d4195f53f71f82fdc",
+                  "tarball": "proofscript-environment-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/bridge",
+                  "sha256": "2d15f64555bf1631e531c126e636d6f81c730f8c0a971e4c74fd81b84bc41176",
+                  "tarball": "proofscript-bridge-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/compiler-ir",
+                  "sha256": "1baa08cf81ff8af34309a7a4d2bf24c2b6c59e0913334774a3f9fc325ac4f751",
+                  "tarball": "proofscript-compiler-ir-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/backend-common",
+                  "sha256": "1205bf87bb4450be8b6f44bb8542cca82b6a3e52486e4d177376bcfd53a0b0f5",
+                  "tarball": "proofscript-backend-common-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/syntax",
+                  "sha256": "c214e4fceadfc1fe5a7a89132d7f47746286f50ec2598bcf1e1febc588bce7cc",
+                  "tarball": "proofscript-syntax-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/meta",
+                  "sha256": "f4c339e3b3e925bd5ebe5096be9777dbeaa9a2a8032939975a965c38ef0d6f69",
+                  "tarball": "proofscript-meta-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/elab",
+                  "sha256": "60cb8b0d74b80bd4eb3120809049f3aa583d108115bd36c6c4cae98ca2979edd",
+                  "tarball": "proofscript-elab-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/erasure",
+                  "sha256": "a02066bc05103a3e7d27fc07cec609cb906a35e00bceb81643f805d654f672af",
+                  "tarball": "proofscript-erasure-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/backend-ts",
+                  "sha256": "211aef960d739bc6655bfc6a578b503ae258d482c37c37357eb018484ea42b41",
+                  "tarball": "proofscript-backend-ts-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/backend-js",
+                  "sha256": "d58fd6922d775eb00617e710c47ae03d8391b4b01b67c854fa3e7e035aa941ef",
+                  "tarball": "proofscript-backend-js-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/backend-rust",
+                  "sha256": "08963ca6b64e5ab372755feb8ec9c79ff45bdf49ac7252d26348e11dcbfd29cf",
+                  "tarball": "proofscript-backend-rust-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/backend-wasm",
+                  "sha256": "fb934cbdbcc8cba6b330b1fb804415ac641e0bcf1bd2b00cf5436530979c404f",
+                  "tarball": "proofscript-backend-wasm-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/compiler",
+                  "sha256": "12c508c04c1ca06e1de441dd2eb871b4a5a897ec2f782218d2acfa3f209e55d6",
+                  "tarball": "proofscript-compiler-0.1.0-psc1-modular.2.tgz"
+                }
+              ],
+              "exactPackagedBytes": true,
+              "offlineMultiPackageInstallation": true,
+              "rustConsumer": {
+                "version": "1.90.0",
+                "locked": true,
+                "descriptorSha256": "b998579a8abfa1dcc4b15e769031cc51642fa3b8fc88ee72ab62c621691e5a40"
+              },
+              "scope": "complete modular JS/TS compiler candidates, two source grammars, four core targets, exact same-IR reference and independent application admission",
+              "remaining": [
+                "M4 checked root-only umbrella/CLI/watch",
+                "retained application and seven-backend qualification corpus",
+                "portable modular graph emission by generated compiler",
+                "new modular G1/G2/G3 and fixed points",
+                "platform/publication qualification"
+              ],
+              "fullModularSelfHosting": false,
+              "rootUmbrellaPromotion": false
+            }
+          },
+          {
+            "generation": 3,
+            "execution": {
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "elapsedMs": 3089677,
+              "stdoutBytes": 392,
+              "stderrBytes": 0,
+              "timeoutMs": 3600000,
+              "timeoutPolicy": "g2g3-correctness-3600s",
+              "maxBuffer": 33554432,
+              "maxRssKiB": 4089932,
+              "sampledCpuSeconds": 3685.04,
+              "peakTreeRssKiB": 3972044,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "processGroup": 4909
+            },
+            "independentAdmission": {
+              "protocol": "psc1-compiler-host/1",
+              "requestId": "production-executable-compiler-build",
+              "target": "js",
+              "sourceClosureDigest": "67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad",
+              "admissionsDigest": "9ecda6b51f3a04bb40156fcf9dfcc37b28cd0320164a5e366e6f66ba09a0909e",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "accepted": true,
+              "behaviorallyVerified": false,
+              "elapsedMs": 2815
+            },
+            "manifestSha256": "210c9577643f26b91a80eae036f3f70272a606a55520fe9a974db47fd14023dc",
+            "packages": [
+              {
+                "name": "@proofscript/foundation",
+                "filename": "proofscript-foundation-0.1.0-psc1-modular.2.tgz",
+                "bytes": 811872,
+                "sha256": "978fd5b13fe522b92d4413919a836478b63bda94a19066ef972e6112e8fc057d"
+              },
+              {
+                "name": "@proofscript/core",
+                "filename": "proofscript-core-0.1.0-psc1-modular.2.tgz",
+                "bytes": 291966,
+                "sha256": "148643c9dea17572ceb8b976cfd6b8093cdb714276b5d22d256643383fd10819"
+              },
+              {
+                "name": "@proofscript/environment",
+                "filename": "proofscript-environment-0.1.0-psc1-modular.2.tgz",
+                "bytes": 395605,
+                "sha256": "4f5dca123d0bd4c22c304d4050020757080c8d6e5f5ed47d4195f53f71f82fdc"
+              },
+              {
+                "name": "@proofscript/bridge",
+                "filename": "proofscript-bridge-0.1.0-psc1-modular.2.tgz",
+                "bytes": 254349,
+                "sha256": "2d15f64555bf1631e531c126e636d6f81c730f8c0a971e4c74fd81b84bc41176"
+              },
+              {
+                "name": "@proofscript/compiler-ir",
+                "filename": "proofscript-compiler-ir-0.1.0-psc1-modular.2.tgz",
+                "bytes": 614680,
+                "sha256": "1baa08cf81ff8af34309a7a4d2bf24c2b6c59e0913334774a3f9fc325ac4f751"
+              },
+              {
+                "name": "@proofscript/backend-common",
+                "filename": "proofscript-backend-common-0.1.0-psc1-modular.2.tgz",
+                "bytes": 242785,
+                "sha256": "1205bf87bb4450be8b6f44bb8542cca82b6a3e52486e4d177376bcfd53a0b0f5"
+              },
+              {
+                "name": "@proofscript/syntax",
+                "filename": "proofscript-syntax-0.1.0-psc1-modular.2.tgz",
+                "bytes": 1073110,
+                "sha256": "c214e4fceadfc1fe5a7a89132d7f47746286f50ec2598bcf1e1febc588bce7cc"
+              },
+              {
+                "name": "@proofscript/meta",
+                "filename": "proofscript-meta-0.1.0-psc1-modular.2.tgz",
+                "bytes": 320852,
+                "sha256": "f4c339e3b3e925bd5ebe5096be9777dbeaa9a2a8032939975a965c38ef0d6f69"
+              },
+              {
+                "name": "@proofscript/elab",
+                "filename": "proofscript-elab-0.1.0-psc1-modular.2.tgz",
+                "bytes": 1194502,
+                "sha256": "60cb8b0d74b80bd4eb3120809049f3aa583d108115bd36c6c4cae98ca2979edd"
+              },
+              {
+                "name": "@proofscript/erasure",
+                "filename": "proofscript-erasure-0.1.0-psc1-modular.2.tgz",
+                "bytes": 568012,
+                "sha256": "a02066bc05103a3e7d27fc07cec609cb906a35e00bceb81643f805d654f672af"
+              },
+              {
+                "name": "@proofscript/backend-ts",
+                "filename": "proofscript-backend-ts-0.1.0-psc1-modular.2.tgz",
+                "bytes": 434474,
+                "sha256": "211aef960d739bc6655bfc6a578b503ae258d482c37c37357eb018484ea42b41"
+              },
+              {
+                "name": "@proofscript/backend-js",
+                "filename": "proofscript-backend-js-0.1.0-psc1-modular.2.tgz",
+                "bytes": 519927,
+                "sha256": "d58fd6922d775eb00617e710c47ae03d8391b4b01b67c854fa3e7e035aa941ef"
+              },
+              {
+                "name": "@proofscript/backend-rust",
+                "filename": "proofscript-backend-rust-0.1.0-psc1-modular.2.tgz",
+                "bytes": 592973,
+                "sha256": "08963ca6b64e5ab372755feb8ec9c79ff45bdf49ac7252d26348e11dcbfd29cf"
+              },
+              {
+                "name": "@proofscript/backend-wasm",
+                "filename": "proofscript-backend-wasm-0.1.0-psc1-modular.2.tgz",
+                "bytes": 1098868,
+                "sha256": "fb934cbdbcc8cba6b330b1fb804415ac641e0bcf1bd2b00cf5436530979c404f"
+              },
+              {
+                "name": "@proofscript/compiler",
+                "filename": "proofscript-compiler-0.1.0-psc1-modular.2.tgz",
+                "bytes": 311132,
+                "sha256": "12c508c04c1ca06e1de441dd2eb871b4a5a897ec2f782218d2acfa3f209e55d6"
+              }
+            ],
+            "fullGraphByteIdentity": true,
+            "originalAndTransformedIrIdentity": true,
+            "renderedNativeReferenceIdentity": true,
+            "status": "qualified-generated-modular-compiler",
+            "executionEvidence": {
+              "schema": "psc1-executable-compiler-execution/1",
+              "testedCommit": "a1f49fb3195a9142f941de34c1e6565bf31146fb",
+              "manifestSha256": "210c9577643f26b91a80eae036f3f70272a606a55520fe9a974db47fd14023dc",
+              "compilerSourceClosureDigest": "67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad",
+              "observations": [
+                {
+                  "variant": "js",
+                  "case": "lean-js",
+                  "target": "js",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-js",
+                    "target": "js",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 702,
+                  "peakTreeRssKiB": 163812
+                },
+                {
+                  "variant": "ts",
+                  "case": "lean-js",
+                  "target": "js",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-js",
+                    "target": "js",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 801,
+                  "peakTreeRssKiB": 195204
+                },
+                {
+                  "variant": "js",
+                  "case": "lean-ts",
+                  "target": "ts",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-ts",
+                    "target": "ts",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 691,
+                  "peakTreeRssKiB": 163340
+                },
+                {
+                  "variant": "ts",
+                  "case": "lean-ts",
+                  "target": "ts",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-ts",
+                    "target": "ts",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 833,
+                  "peakTreeRssKiB": 197028
+                },
+                {
+                  "variant": "js",
+                  "case": "lean-rust",
+                  "target": "rust",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-rust",
+                    "target": "rust",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 843,
+                  "peakTreeRssKiB": 181056
+                },
+                {
+                  "variant": "ts",
+                  "case": "lean-rust",
+                  "target": "rust",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-rust",
+                    "target": "rust",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 914,
+                  "peakTreeRssKiB": 213252
+                },
+                {
+                  "variant": "js",
+                  "case": "lean-wasm-core",
+                  "target": "wasm-core",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-wasm-core",
+                    "target": "wasm-core",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 713,
+                  "peakTreeRssKiB": 167184
+                },
+                {
+                  "variant": "ts",
+                  "case": "lean-wasm-core",
+                  "target": "wasm-core",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-wasm-core",
+                    "target": "wasm-core",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 851,
+                  "peakTreeRssKiB": 200136
+                },
+                {
+                  "variant": "js",
+                  "case": "lean-invalid",
+                  "target": "js",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "4561c867783bd9ac5e7ad1b46bab21ec12bd65b4026f63946592696efcf66755",
+                  "admission": null,
+                  "elapsedMs": 521,
+                  "peakTreeRssKiB": 149528
+                },
+                {
+                  "variant": "ts",
+                  "case": "lean-invalid",
+                  "target": "js",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "4561c867783bd9ac5e7ad1b46bab21ec12bd65b4026f63946592696efcf66755",
+                  "admission": null,
+                  "elapsedMs": 610,
+                  "peakTreeRssKiB": 169248
+                },
+                {
+                  "variant": "js",
+                  "case": "ps-js",
+                  "target": "js",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-js",
+                    "target": "js",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 609,
+                  "peakTreeRssKiB": 156432
+                },
+                {
+                  "variant": "ts",
+                  "case": "ps-js",
+                  "target": "js",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-js",
+                    "target": "js",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 802,
+                  "peakTreeRssKiB": 195444
+                },
+                {
+                  "variant": "js",
+                  "case": "ps-ts",
+                  "target": "ts",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-ts",
+                    "target": "ts",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 615,
+                  "peakTreeRssKiB": 163868
+                },
+                {
+                  "variant": "ts",
+                  "case": "ps-ts",
+                  "target": "ts",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-ts",
+                    "target": "ts",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 759,
+                  "peakTreeRssKiB": 195656
+                },
+                {
+                  "variant": "js",
+                  "case": "ps-rust",
+                  "target": "rust",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-rust",
+                    "target": "rust",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 727,
+                  "peakTreeRssKiB": 181032
+                },
+                {
+                  "variant": "ts",
+                  "case": "ps-rust",
+                  "target": "rust",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-rust",
+                    "target": "rust",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 908,
+                  "peakTreeRssKiB": 213272
+                },
+                {
+                  "variant": "js",
+                  "case": "ps-wasm-core",
+                  "target": "wasm-core",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-wasm-core",
+                    "target": "wasm-core",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 713,
+                  "peakTreeRssKiB": 166920
+                },
+                {
+                  "variant": "ts",
+                  "case": "ps-wasm-core",
+                  "target": "wasm-core",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-wasm-core",
+                    "target": "wasm-core",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 935,
+                  "peakTreeRssKiB": 200580
+                },
+                {
+                  "variant": "js",
+                  "case": "ps-invalid",
+                  "target": "js",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "1ece0e2d5ed37a23d822b15ebaa8f94f890bc5d6fd0a15305357af20db8e2beb",
+                  "admission": null,
+                  "elapsedMs": 502,
+                  "peakTreeRssKiB": 143000
+                },
+                {
+                  "variant": "ts",
+                  "case": "ps-invalid",
+                  "target": "js",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "1ece0e2d5ed37a23d822b15ebaa8f94f890bc5d6fd0a15305357af20db8e2beb",
+                  "admission": null,
+                  "elapsedMs": 614,
+                  "peakTreeRssKiB": 166560
+                },
+                {
+                  "variant": "js",
+                  "case": "optional-python",
+                  "target": "python",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "7feff663ae6414b1ba4e92c6a9d0591aee7ee31ae863a0290caa861ea755dd9a",
+                  "admission": null,
+                  "elapsedMs": 471,
+                  "peakTreeRssKiB": 136324
+                },
+                {
+                  "variant": "ts",
+                  "case": "optional-python",
+                  "target": "python",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "7feff663ae6414b1ba4e92c6a9d0591aee7ee31ae863a0290caa861ea755dd9a",
+                  "admission": null,
+                  "elapsedMs": 587,
+                  "peakTreeRssKiB": 169592
+                },
+                {
+                  "variant": "js",
+                  "case": "optional-php",
+                  "target": "php",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "7feff663ae6414b1ba4e92c6a9d0591aee7ee31ae863a0290caa861ea755dd9a",
+                  "admission": null,
+                  "elapsedMs": 491,
+                  "peakTreeRssKiB": 134700
+                },
+                {
+                  "variant": "ts",
+                  "case": "optional-php",
+                  "target": "php",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "7feff663ae6414b1ba4e92c6a9d0591aee7ee31ae863a0290caa861ea755dd9a",
+                  "admission": null,
+                  "elapsedMs": 619,
+                  "peakTreeRssKiB": 160376
+                },
+                {
+                  "variant": "js",
+                  "case": "optional-unknown",
+                  "target": "unknown",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "7feff663ae6414b1ba4e92c6a9d0591aee7ee31ae863a0290caa861ea755dd9a",
+                  "admission": null,
+                  "elapsedMs": 477,
+                  "peakTreeRssKiB": 136576
+                },
+                {
+                  "variant": "ts",
+                  "case": "optional-unknown",
+                  "target": "unknown",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "7feff663ae6414b1ba4e92c6a9d0591aee7ee31ae863a0290caa861ea755dd9a",
+                  "admission": null,
+                  "elapsedMs": 597,
+                  "peakTreeRssKiB": 169644
+                }
+              ],
+              "runtimeCohortRefusals": [
+                "js",
+                "ts"
+              ],
+              "installedPackages": [
+                {
+                  "name": "@proofscript/foundation",
+                  "sha256": "978fd5b13fe522b92d4413919a836478b63bda94a19066ef972e6112e8fc057d",
+                  "tarball": "proofscript-foundation-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/core",
+                  "sha256": "148643c9dea17572ceb8b976cfd6b8093cdb714276b5d22d256643383fd10819",
+                  "tarball": "proofscript-core-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/environment",
+                  "sha256": "4f5dca123d0bd4c22c304d4050020757080c8d6e5f5ed47d4195f53f71f82fdc",
+                  "tarball": "proofscript-environment-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/bridge",
+                  "sha256": "2d15f64555bf1631e531c126e636d6f81c730f8c0a971e4c74fd81b84bc41176",
+                  "tarball": "proofscript-bridge-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/compiler-ir",
+                  "sha256": "1baa08cf81ff8af34309a7a4d2bf24c2b6c59e0913334774a3f9fc325ac4f751",
+                  "tarball": "proofscript-compiler-ir-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/backend-common",
+                  "sha256": "1205bf87bb4450be8b6f44bb8542cca82b6a3e52486e4d177376bcfd53a0b0f5",
+                  "tarball": "proofscript-backend-common-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/syntax",
+                  "sha256": "c214e4fceadfc1fe5a7a89132d7f47746286f50ec2598bcf1e1febc588bce7cc",
+                  "tarball": "proofscript-syntax-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/meta",
+                  "sha256": "f4c339e3b3e925bd5ebe5096be9777dbeaa9a2a8032939975a965c38ef0d6f69",
+                  "tarball": "proofscript-meta-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/elab",
+                  "sha256": "60cb8b0d74b80bd4eb3120809049f3aa583d108115bd36c6c4cae98ca2979edd",
+                  "tarball": "proofscript-elab-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/erasure",
+                  "sha256": "a02066bc05103a3e7d27fc07cec609cb906a35e00bceb81643f805d654f672af",
+                  "tarball": "proofscript-erasure-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/backend-ts",
+                  "sha256": "211aef960d739bc6655bfc6a578b503ae258d482c37c37357eb018484ea42b41",
+                  "tarball": "proofscript-backend-ts-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/backend-js",
+                  "sha256": "d58fd6922d775eb00617e710c47ae03d8391b4b01b67c854fa3e7e035aa941ef",
+                  "tarball": "proofscript-backend-js-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/backend-rust",
+                  "sha256": "08963ca6b64e5ab372755feb8ec9c79ff45bdf49ac7252d26348e11dcbfd29cf",
+                  "tarball": "proofscript-backend-rust-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/backend-wasm",
+                  "sha256": "fb934cbdbcc8cba6b330b1fb804415ac641e0bcf1bd2b00cf5436530979c404f",
+                  "tarball": "proofscript-backend-wasm-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/compiler",
+                  "sha256": "12c508c04c1ca06e1de441dd2eb871b4a5a897ec2f782218d2acfa3f209e55d6",
+                  "tarball": "proofscript-compiler-0.1.0-psc1-modular.2.tgz"
+                }
+              ],
+              "exactPackagedBytes": true,
+              "offlineMultiPackageInstallation": true,
+              "rustConsumer": {
+                "version": "1.90.0",
+                "locked": true,
+                "descriptorSha256": "b998579a8abfa1dcc4b15e769031cc51642fa3b8fc88ee72ab62c621691e5a40"
+              },
+              "scope": "complete modular JS/TS compiler candidates, two source grammars, four core targets, exact same-IR reference and independent application admission",
+              "remaining": [
+                "M4 checked root-only umbrella/CLI/watch",
+                "retained application and seven-backend qualification corpus",
+                "portable modular graph emission by generated compiler",
+                "new modular G1/G2/G3 and fixed points",
+                "platform/publication qualification"
+              ],
+              "fullModularSelfHosting": false,
+              "rootUmbrellaPromotion": false
+            }
+          }
+        ],
+        "g1ManifestSha256": "210c9577643f26b91a80eae036f3f70272a606a55520fe9a974db47fd14023dc",
+        "independentKernel": "official-Lean-4.35.0",
+        "semanticFuel": "unchanged",
+        "memoryStackPolicies": "unchanged",
+        "compilerRequestPolicy": "G1/corpus/tools 240s; only G2-self/G3-self use the explicit chosen wall-clock correctness profile",
+        "quarantinedNativeExecutables": [
+          {
+            "name": "psc1_independent_checker.hash",
+            "sha256": "43b3756e57b1d3dcf2eddd62d64e1c2f3d4dcf0055040665356805b6ad19201c"
+          },
+          {
+            "name": "psc1_independent_checker.rsp",
+            "sha256": "5a2fd2ef7334afadf437c951cbbd07d0179cb311c1959de369ba3d6323bba5d0"
+          },
+          {
+            "name": "psc1_independent_checker.trace",
+            "sha256": "a27c8902b9afd29c865c4038a6ea64fdbdea4b19e13b5f5b1ea845f85e8b053b"
+          }
+        ],
+        "correctnessQualification": "qualified-finite-linux-scope"
+      }
+    },
+    "ts": {
+      "status": "qualified-finite-linux-g1-g2-g3-fixed-point",
+      "report": {
+        "schema": "psc1-portable-modular-selfhost/1",
+        "testedCommit": "a1f49fb3195a9142f941de34c1e6565bf31146fb",
+        "sourceCommit": "a1f49fb3195a9142f941de34c1e6565bf31146fb",
+        "sourceClosureDigest": "67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad",
+        "variant": "ts",
+        "profile": "correctness-3600s",
+        "status": "passed",
+        "fixedPoint": "exact-G1-G2-G3-graph-files-and-npm-tarballs",
+        "performanceQualification": "not-run",
+        "nativeFrontendCalls": 0,
+        "generationOutput": "genuine source-owned modules only; no whole-compiler bundle",
+        "nativeReferenceScope": "explicit corpus oracle only, outside all executable graphs",
+        "generations": [
+          {
+            "generation": 2,
+            "execution": {
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "elapsedMs": 2896525,
+              "stdoutBytes": 392,
+              "stderrBytes": 0,
+              "timeoutMs": 3600000,
+              "timeoutPolicy": "g2g3-correctness-3600s",
+              "maxBuffer": 33554432,
+              "maxRssKiB": 3848280,
+              "sampledCpuSeconds": 3388.01,
+              "peakTreeRssKiB": 3722968,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "processGroup": 3141
+            },
+            "independentAdmission": {
+              "protocol": "psc1-compiler-host/1",
+              "requestId": "production-executable-compiler-build",
+              "target": "js",
+              "sourceClosureDigest": "67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad",
+              "admissionsDigest": "9ecda6b51f3a04bb40156fcf9dfcc37b28cd0320164a5e366e6f66ba09a0909e",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "accepted": true,
+              "behaviorallyVerified": false,
+              "elapsedMs": 3149
+            },
+            "manifestSha256": "210c9577643f26b91a80eae036f3f70272a606a55520fe9a974db47fd14023dc",
+            "packages": [
+              {
+                "name": "@proofscript/foundation",
+                "filename": "proofscript-foundation-0.1.0-psc1-modular.2.tgz",
+                "bytes": 811872,
+                "sha256": "978fd5b13fe522b92d4413919a836478b63bda94a19066ef972e6112e8fc057d"
+              },
+              {
+                "name": "@proofscript/core",
+                "filename": "proofscript-core-0.1.0-psc1-modular.2.tgz",
+                "bytes": 291966,
+                "sha256": "148643c9dea17572ceb8b976cfd6b8093cdb714276b5d22d256643383fd10819"
+              },
+              {
+                "name": "@proofscript/environment",
+                "filename": "proofscript-environment-0.1.0-psc1-modular.2.tgz",
+                "bytes": 395605,
+                "sha256": "4f5dca123d0bd4c22c304d4050020757080c8d6e5f5ed47d4195f53f71f82fdc"
+              },
+              {
+                "name": "@proofscript/bridge",
+                "filename": "proofscript-bridge-0.1.0-psc1-modular.2.tgz",
+                "bytes": 254349,
+                "sha256": "2d15f64555bf1631e531c126e636d6f81c730f8c0a971e4c74fd81b84bc41176"
+              },
+              {
+                "name": "@proofscript/compiler-ir",
+                "filename": "proofscript-compiler-ir-0.1.0-psc1-modular.2.tgz",
+                "bytes": 614680,
+                "sha256": "1baa08cf81ff8af34309a7a4d2bf24c2b6c59e0913334774a3f9fc325ac4f751"
+              },
+              {
+                "name": "@proofscript/backend-common",
+                "filename": "proofscript-backend-common-0.1.0-psc1-modular.2.tgz",
+                "bytes": 242785,
+                "sha256": "1205bf87bb4450be8b6f44bb8542cca82b6a3e52486e4d177376bcfd53a0b0f5"
+              },
+              {
+                "name": "@proofscript/syntax",
+                "filename": "proofscript-syntax-0.1.0-psc1-modular.2.tgz",
+                "bytes": 1073110,
+                "sha256": "c214e4fceadfc1fe5a7a89132d7f47746286f50ec2598bcf1e1febc588bce7cc"
+              },
+              {
+                "name": "@proofscript/meta",
+                "filename": "proofscript-meta-0.1.0-psc1-modular.2.tgz",
+                "bytes": 320852,
+                "sha256": "f4c339e3b3e925bd5ebe5096be9777dbeaa9a2a8032939975a965c38ef0d6f69"
+              },
+              {
+                "name": "@proofscript/elab",
+                "filename": "proofscript-elab-0.1.0-psc1-modular.2.tgz",
+                "bytes": 1194502,
+                "sha256": "60cb8b0d74b80bd4eb3120809049f3aa583d108115bd36c6c4cae98ca2979edd"
+              },
+              {
+                "name": "@proofscript/erasure",
+                "filename": "proofscript-erasure-0.1.0-psc1-modular.2.tgz",
+                "bytes": 568012,
+                "sha256": "a02066bc05103a3e7d27fc07cec609cb906a35e00bceb81643f805d654f672af"
+              },
+              {
+                "name": "@proofscript/backend-ts",
+                "filename": "proofscript-backend-ts-0.1.0-psc1-modular.2.tgz",
+                "bytes": 434474,
+                "sha256": "211aef960d739bc6655bfc6a578b503ae258d482c37c37357eb018484ea42b41"
+              },
+              {
+                "name": "@proofscript/backend-js",
+                "filename": "proofscript-backend-js-0.1.0-psc1-modular.2.tgz",
+                "bytes": 519927,
+                "sha256": "d58fd6922d775eb00617e710c47ae03d8391b4b01b67c854fa3e7e035aa941ef"
+              },
+              {
+                "name": "@proofscript/backend-rust",
+                "filename": "proofscript-backend-rust-0.1.0-psc1-modular.2.tgz",
+                "bytes": 592973,
+                "sha256": "08963ca6b64e5ab372755feb8ec9c79ff45bdf49ac7252d26348e11dcbfd29cf"
+              },
+              {
+                "name": "@proofscript/backend-wasm",
+                "filename": "proofscript-backend-wasm-0.1.0-psc1-modular.2.tgz",
+                "bytes": 1098868,
+                "sha256": "fb934cbdbcc8cba6b330b1fb804415ac641e0bcf1bd2b00cf5436530979c404f"
+              },
+              {
+                "name": "@proofscript/compiler",
+                "filename": "proofscript-compiler-0.1.0-psc1-modular.2.tgz",
+                "bytes": 311132,
+                "sha256": "12c508c04c1ca06e1de441dd2eb871b4a5a897ec2f782218d2acfa3f209e55d6"
+              }
+            ],
+            "fullGraphByteIdentity": true,
+            "originalAndTransformedIrIdentity": true,
+            "renderedNativeReferenceIdentity": true,
+            "status": "qualified-generated-modular-compiler",
+            "executionEvidence": {
+              "schema": "psc1-executable-compiler-execution/1",
+              "testedCommit": "a1f49fb3195a9142f941de34c1e6565bf31146fb",
+              "manifestSha256": "210c9577643f26b91a80eae036f3f70272a606a55520fe9a974db47fd14023dc",
+              "compilerSourceClosureDigest": "67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad",
+              "observations": [
+                {
+                  "variant": "js",
+                  "case": "lean-js",
+                  "target": "js",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-js",
+                    "target": "js",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 815,
+                  "peakTreeRssKiB": 163112
+                },
+                {
+                  "variant": "ts",
+                  "case": "lean-js",
+                  "target": "js",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-js",
+                    "target": "js",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 1009,
+                  "peakTreeRssKiB": 195612
+                },
+                {
+                  "variant": "js",
+                  "case": "lean-ts",
+                  "target": "ts",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-ts",
+                    "target": "ts",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 810,
+                  "peakTreeRssKiB": 163960
+                },
+                {
+                  "variant": "ts",
+                  "case": "lean-ts",
+                  "target": "ts",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-ts",
+                    "target": "ts",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 1008,
+                  "peakTreeRssKiB": 195552
+                },
+                {
+                  "variant": "js",
+                  "case": "lean-rust",
+                  "target": "rust",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-rust",
+                    "target": "rust",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 949,
+                  "peakTreeRssKiB": 180416
+                },
+                {
+                  "variant": "ts",
+                  "case": "lean-rust",
+                  "target": "rust",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-rust",
+                    "target": "rust",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 1149,
+                  "peakTreeRssKiB": 212828
+                },
+                {
+                  "variant": "js",
+                  "case": "lean-wasm-core",
+                  "target": "wasm-core",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-wasm-core",
+                    "target": "wasm-core",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 922,
+                  "peakTreeRssKiB": 166900
+                },
+                {
+                  "variant": "ts",
+                  "case": "lean-wasm-core",
+                  "target": "wasm-core",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-wasm-core",
+                    "target": "wasm-core",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 1115,
+                  "peakTreeRssKiB": 200644
+                },
+                {
+                  "variant": "js",
+                  "case": "lean-invalid",
+                  "target": "js",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "4561c867783bd9ac5e7ad1b46bab21ec12bd65b4026f63946592696efcf66755",
+                  "admission": null,
+                  "elapsedMs": 648,
+                  "peakTreeRssKiB": 129804
+                },
+                {
+                  "variant": "ts",
+                  "case": "lean-invalid",
+                  "target": "js",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "4561c867783bd9ac5e7ad1b46bab21ec12bd65b4026f63946592696efcf66755",
+                  "admission": null,
+                  "elapsedMs": 801,
+                  "peakTreeRssKiB": 184072
+                },
+                {
+                  "variant": "js",
+                  "case": "ps-js",
+                  "target": "js",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-js",
+                    "target": "js",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 827,
+                  "peakTreeRssKiB": 163252
+                },
+                {
+                  "variant": "ts",
+                  "case": "ps-js",
+                  "target": "js",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-js",
+                    "target": "js",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 1036,
+                  "peakTreeRssKiB": 195168
+                },
+                {
+                  "variant": "js",
+                  "case": "ps-ts",
+                  "target": "ts",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-ts",
+                    "target": "ts",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 822,
+                  "peakTreeRssKiB": 165892
+                },
+                {
+                  "variant": "ts",
+                  "case": "ps-ts",
+                  "target": "ts",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-ts",
+                    "target": "ts",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 1031,
+                  "peakTreeRssKiB": 195548
+                },
+                {
+                  "variant": "js",
+                  "case": "ps-rust",
+                  "target": "rust",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-rust",
+                    "target": "rust",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 973,
+                  "peakTreeRssKiB": 181000
+                },
+                {
+                  "variant": "ts",
+                  "case": "ps-rust",
+                  "target": "rust",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-rust",
+                    "target": "rust",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 1145,
+                  "peakTreeRssKiB": 213148
+                },
+                {
+                  "variant": "js",
+                  "case": "ps-wasm-core",
+                  "target": "wasm-core",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-wasm-core",
+                    "target": "wasm-core",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 914,
+                  "peakTreeRssKiB": 166704
+                },
+                {
+                  "variant": "ts",
+                  "case": "ps-wasm-core",
+                  "target": "wasm-core",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-wasm-core",
+                    "target": "wasm-core",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 1125,
+                  "peakTreeRssKiB": 200868
+                },
+                {
+                  "variant": "js",
+                  "case": "ps-invalid",
+                  "target": "js",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "1ece0e2d5ed37a23d822b15ebaa8f94f890bc5d6fd0a15305357af20db8e2beb",
+                  "admission": null,
+                  "elapsedMs": 640,
+                  "peakTreeRssKiB": 129984
+                },
+                {
+                  "variant": "ts",
+                  "case": "ps-invalid",
+                  "target": "js",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "1ece0e2d5ed37a23d822b15ebaa8f94f890bc5d6fd0a15305357af20db8e2beb",
+                  "admission": null,
+                  "elapsedMs": 809,
+                  "peakTreeRssKiB": 184008
+                },
+                {
+                  "variant": "js",
+                  "case": "optional-python",
+                  "target": "python",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "7feff663ae6414b1ba4e92c6a9d0591aee7ee31ae863a0290caa861ea755dd9a",
+                  "admission": null,
+                  "elapsedMs": 622,
+                  "peakTreeRssKiB": 129568
+                },
+                {
+                  "variant": "ts",
+                  "case": "optional-python",
+                  "target": "python",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "7feff663ae6414b1ba4e92c6a9d0591aee7ee31ae863a0290caa861ea755dd9a",
+                  "admission": null,
+                  "elapsedMs": 771,
+                  "peakTreeRssKiB": 163140
+                },
+                {
+                  "variant": "js",
+                  "case": "optional-php",
+                  "target": "php",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "7feff663ae6414b1ba4e92c6a9d0591aee7ee31ae863a0290caa861ea755dd9a",
+                  "admission": null,
+                  "elapsedMs": 616,
+                  "peakTreeRssKiB": 129964
+                },
+                {
+                  "variant": "ts",
+                  "case": "optional-php",
+                  "target": "php",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "7feff663ae6414b1ba4e92c6a9d0591aee7ee31ae863a0290caa861ea755dd9a",
+                  "admission": null,
+                  "elapsedMs": 783,
+                  "peakTreeRssKiB": 184024
+                },
+                {
+                  "variant": "js",
+                  "case": "optional-unknown",
+                  "target": "unknown",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "7feff663ae6414b1ba4e92c6a9d0591aee7ee31ae863a0290caa861ea755dd9a",
+                  "admission": null,
+                  "elapsedMs": 618,
+                  "peakTreeRssKiB": 130248
+                },
+                {
+                  "variant": "ts",
+                  "case": "optional-unknown",
+                  "target": "unknown",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "7feff663ae6414b1ba4e92c6a9d0591aee7ee31ae863a0290caa861ea755dd9a",
+                  "admission": null,
+                  "elapsedMs": 773,
+                  "peakTreeRssKiB": 183508
+                }
+              ],
+              "runtimeCohortRefusals": [
+                "js",
+                "ts"
+              ],
+              "installedPackages": [
+                {
+                  "name": "@proofscript/foundation",
+                  "sha256": "978fd5b13fe522b92d4413919a836478b63bda94a19066ef972e6112e8fc057d",
+                  "tarball": "proofscript-foundation-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/core",
+                  "sha256": "148643c9dea17572ceb8b976cfd6b8093cdb714276b5d22d256643383fd10819",
+                  "tarball": "proofscript-core-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/environment",
+                  "sha256": "4f5dca123d0bd4c22c304d4050020757080c8d6e5f5ed47d4195f53f71f82fdc",
+                  "tarball": "proofscript-environment-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/bridge",
+                  "sha256": "2d15f64555bf1631e531c126e636d6f81c730f8c0a971e4c74fd81b84bc41176",
+                  "tarball": "proofscript-bridge-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/compiler-ir",
+                  "sha256": "1baa08cf81ff8af34309a7a4d2bf24c2b6c59e0913334774a3f9fc325ac4f751",
+                  "tarball": "proofscript-compiler-ir-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/backend-common",
+                  "sha256": "1205bf87bb4450be8b6f44bb8542cca82b6a3e52486e4d177376bcfd53a0b0f5",
+                  "tarball": "proofscript-backend-common-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/syntax",
+                  "sha256": "c214e4fceadfc1fe5a7a89132d7f47746286f50ec2598bcf1e1febc588bce7cc",
+                  "tarball": "proofscript-syntax-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/meta",
+                  "sha256": "f4c339e3b3e925bd5ebe5096be9777dbeaa9a2a8032939975a965c38ef0d6f69",
+                  "tarball": "proofscript-meta-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/elab",
+                  "sha256": "60cb8b0d74b80bd4eb3120809049f3aa583d108115bd36c6c4cae98ca2979edd",
+                  "tarball": "proofscript-elab-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/erasure",
+                  "sha256": "a02066bc05103a3e7d27fc07cec609cb906a35e00bceb81643f805d654f672af",
+                  "tarball": "proofscript-erasure-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/backend-ts",
+                  "sha256": "211aef960d739bc6655bfc6a578b503ae258d482c37c37357eb018484ea42b41",
+                  "tarball": "proofscript-backend-ts-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/backend-js",
+                  "sha256": "d58fd6922d775eb00617e710c47ae03d8391b4b01b67c854fa3e7e035aa941ef",
+                  "tarball": "proofscript-backend-js-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/backend-rust",
+                  "sha256": "08963ca6b64e5ab372755feb8ec9c79ff45bdf49ac7252d26348e11dcbfd29cf",
+                  "tarball": "proofscript-backend-rust-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/backend-wasm",
+                  "sha256": "fb934cbdbcc8cba6b330b1fb804415ac641e0bcf1bd2b00cf5436530979c404f",
+                  "tarball": "proofscript-backend-wasm-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/compiler",
+                  "sha256": "12c508c04c1ca06e1de441dd2eb871b4a5a897ec2f782218d2acfa3f209e55d6",
+                  "tarball": "proofscript-compiler-0.1.0-psc1-modular.2.tgz"
+                }
+              ],
+              "exactPackagedBytes": true,
+              "offlineMultiPackageInstallation": true,
+              "rustConsumer": {
+                "version": "1.90.0",
+                "locked": true,
+                "descriptorSha256": "b998579a8abfa1dcc4b15e769031cc51642fa3b8fc88ee72ab62c621691e5a40"
+              },
+              "scope": "complete modular JS/TS compiler candidates, two source grammars, four core targets, exact same-IR reference and independent application admission",
+              "remaining": [
+                "M4 checked root-only umbrella/CLI/watch",
+                "retained application and seven-backend qualification corpus",
+                "portable modular graph emission by generated compiler",
+                "new modular G1/G2/G3 and fixed points",
+                "platform/publication qualification"
+              ],
+              "fullModularSelfHosting": false,
+              "rootUmbrellaPromotion": false
+            }
+          },
+          {
+            "generation": 3,
+            "execution": {
+              "status": 0,
+              "signal": null,
+              "error": null,
+              "elapsedMs": 3078372,
+              "stdoutBytes": 392,
+              "stderrBytes": 0,
+              "timeoutMs": 3600000,
+              "timeoutPolicy": "g2g3-correctness-3600s",
+              "maxBuffer": 33554432,
+              "maxRssKiB": 3874888,
+              "sampledCpuSeconds": 3587.6,
+              "peakTreeRssKiB": 3772488,
+              "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+              "processGroup": 5149
+            },
+            "independentAdmission": {
+              "protocol": "psc1-compiler-host/1",
+              "requestId": "production-executable-compiler-build",
+              "target": "js",
+              "sourceClosureDigest": "67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad",
+              "admissionsDigest": "9ecda6b51f3a04bb40156fcf9dfcc37b28cd0320164a5e366e6f66ba09a0909e",
+              "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+              "accepted": true,
+              "behaviorallyVerified": false,
+              "elapsedMs": 3158
+            },
+            "manifestSha256": "210c9577643f26b91a80eae036f3f70272a606a55520fe9a974db47fd14023dc",
+            "packages": [
+              {
+                "name": "@proofscript/foundation",
+                "filename": "proofscript-foundation-0.1.0-psc1-modular.2.tgz",
+                "bytes": 811872,
+                "sha256": "978fd5b13fe522b92d4413919a836478b63bda94a19066ef972e6112e8fc057d"
+              },
+              {
+                "name": "@proofscript/core",
+                "filename": "proofscript-core-0.1.0-psc1-modular.2.tgz",
+                "bytes": 291966,
+                "sha256": "148643c9dea17572ceb8b976cfd6b8093cdb714276b5d22d256643383fd10819"
+              },
+              {
+                "name": "@proofscript/environment",
+                "filename": "proofscript-environment-0.1.0-psc1-modular.2.tgz",
+                "bytes": 395605,
+                "sha256": "4f5dca123d0bd4c22c304d4050020757080c8d6e5f5ed47d4195f53f71f82fdc"
+              },
+              {
+                "name": "@proofscript/bridge",
+                "filename": "proofscript-bridge-0.1.0-psc1-modular.2.tgz",
+                "bytes": 254349,
+                "sha256": "2d15f64555bf1631e531c126e636d6f81c730f8c0a971e4c74fd81b84bc41176"
+              },
+              {
+                "name": "@proofscript/compiler-ir",
+                "filename": "proofscript-compiler-ir-0.1.0-psc1-modular.2.tgz",
+                "bytes": 614680,
+                "sha256": "1baa08cf81ff8af34309a7a4d2bf24c2b6c59e0913334774a3f9fc325ac4f751"
+              },
+              {
+                "name": "@proofscript/backend-common",
+                "filename": "proofscript-backend-common-0.1.0-psc1-modular.2.tgz",
+                "bytes": 242785,
+                "sha256": "1205bf87bb4450be8b6f44bb8542cca82b6a3e52486e4d177376bcfd53a0b0f5"
+              },
+              {
+                "name": "@proofscript/syntax",
+                "filename": "proofscript-syntax-0.1.0-psc1-modular.2.tgz",
+                "bytes": 1073110,
+                "sha256": "c214e4fceadfc1fe5a7a89132d7f47746286f50ec2598bcf1e1febc588bce7cc"
+              },
+              {
+                "name": "@proofscript/meta",
+                "filename": "proofscript-meta-0.1.0-psc1-modular.2.tgz",
+                "bytes": 320852,
+                "sha256": "f4c339e3b3e925bd5ebe5096be9777dbeaa9a2a8032939975a965c38ef0d6f69"
+              },
+              {
+                "name": "@proofscript/elab",
+                "filename": "proofscript-elab-0.1.0-psc1-modular.2.tgz",
+                "bytes": 1194502,
+                "sha256": "60cb8b0d74b80bd4eb3120809049f3aa583d108115bd36c6c4cae98ca2979edd"
+              },
+              {
+                "name": "@proofscript/erasure",
+                "filename": "proofscript-erasure-0.1.0-psc1-modular.2.tgz",
+                "bytes": 568012,
+                "sha256": "a02066bc05103a3e7d27fc07cec609cb906a35e00bceb81643f805d654f672af"
+              },
+              {
+                "name": "@proofscript/backend-ts",
+                "filename": "proofscript-backend-ts-0.1.0-psc1-modular.2.tgz",
+                "bytes": 434474,
+                "sha256": "211aef960d739bc6655bfc6a578b503ae258d482c37c37357eb018484ea42b41"
+              },
+              {
+                "name": "@proofscript/backend-js",
+                "filename": "proofscript-backend-js-0.1.0-psc1-modular.2.tgz",
+                "bytes": 519927,
+                "sha256": "d58fd6922d775eb00617e710c47ae03d8391b4b01b67c854fa3e7e035aa941ef"
+              },
+              {
+                "name": "@proofscript/backend-rust",
+                "filename": "proofscript-backend-rust-0.1.0-psc1-modular.2.tgz",
+                "bytes": 592973,
+                "sha256": "08963ca6b64e5ab372755feb8ec9c79ff45bdf49ac7252d26348e11dcbfd29cf"
+              },
+              {
+                "name": "@proofscript/backend-wasm",
+                "filename": "proofscript-backend-wasm-0.1.0-psc1-modular.2.tgz",
+                "bytes": 1098868,
+                "sha256": "fb934cbdbcc8cba6b330b1fb804415ac641e0bcf1bd2b00cf5436530979c404f"
+              },
+              {
+                "name": "@proofscript/compiler",
+                "filename": "proofscript-compiler-0.1.0-psc1-modular.2.tgz",
+                "bytes": 311132,
+                "sha256": "12c508c04c1ca06e1de441dd2eb871b4a5a897ec2f782218d2acfa3f209e55d6"
+              }
+            ],
+            "fullGraphByteIdentity": true,
+            "originalAndTransformedIrIdentity": true,
+            "renderedNativeReferenceIdentity": true,
+            "status": "qualified-generated-modular-compiler",
+            "executionEvidence": {
+              "schema": "psc1-executable-compiler-execution/1",
+              "testedCommit": "a1f49fb3195a9142f941de34c1e6565bf31146fb",
+              "manifestSha256": "210c9577643f26b91a80eae036f3f70272a606a55520fe9a974db47fd14023dc",
+              "compilerSourceClosureDigest": "67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad",
+              "observations": [
+                {
+                  "variant": "js",
+                  "case": "lean-js",
+                  "target": "js",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-js",
+                    "target": "js",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 817,
+                  "peakTreeRssKiB": 163700
+                },
+                {
+                  "variant": "ts",
+                  "case": "lean-js",
+                  "target": "js",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-js",
+                    "target": "js",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 1040,
+                  "peakTreeRssKiB": 195084
+                },
+                {
+                  "variant": "js",
+                  "case": "lean-ts",
+                  "target": "ts",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-ts",
+                    "target": "ts",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 815,
+                  "peakTreeRssKiB": 163360
+                },
+                {
+                  "variant": "ts",
+                  "case": "lean-ts",
+                  "target": "ts",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-ts",
+                    "target": "ts",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 1011,
+                  "peakTreeRssKiB": 194424
+                },
+                {
+                  "variant": "js",
+                  "case": "lean-rust",
+                  "target": "rust",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-rust",
+                    "target": "rust",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 967,
+                  "peakTreeRssKiB": 180848
+                },
+                {
+                  "variant": "ts",
+                  "case": "lean-rust",
+                  "target": "rust",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-rust",
+                    "target": "rust",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 1151,
+                  "peakTreeRssKiB": 212680
+                },
+                {
+                  "variant": "js",
+                  "case": "lean-wasm-core",
+                  "target": "wasm-core",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-wasm-core",
+                    "target": "wasm-core",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 902,
+                  "peakTreeRssKiB": 167144
+                },
+                {
+                  "variant": "ts",
+                  "case": "lean-wasm-core",
+                  "target": "wasm-core",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-lean-wasm-core",
+                    "target": "wasm-core",
+                    "sourceClosureDigest": "9896226e7bd1156285efac5acdd3e023761cecceaa02bdf6a48e8dfb8da2bdd2",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 1120,
+                  "peakTreeRssKiB": 201572
+                },
+                {
+                  "variant": "js",
+                  "case": "lean-invalid",
+                  "target": "js",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "4561c867783bd9ac5e7ad1b46bab21ec12bd65b4026f63946592696efcf66755",
+                  "admission": null,
+                  "elapsedMs": 640,
+                  "peakTreeRssKiB": 130068
+                },
+                {
+                  "variant": "ts",
+                  "case": "lean-invalid",
+                  "target": "js",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "4561c867783bd9ac5e7ad1b46bab21ec12bd65b4026f63946592696efcf66755",
+                  "admission": null,
+                  "elapsedMs": 801,
+                  "peakTreeRssKiB": 183572
+                },
+                {
+                  "variant": "js",
+                  "case": "ps-js",
+                  "target": "js",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-js",
+                    "target": "js",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 825,
+                  "peakTreeRssKiB": 163312
+                },
+                {
+                  "variant": "ts",
+                  "case": "ps-js",
+                  "target": "js",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-js",
+                    "target": "js",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 1012,
+                  "peakTreeRssKiB": 195460
+                },
+                {
+                  "variant": "js",
+                  "case": "ps-ts",
+                  "target": "ts",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-ts",
+                    "target": "ts",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 813,
+                  "peakTreeRssKiB": 163460
+                },
+                {
+                  "variant": "ts",
+                  "case": "ps-ts",
+                  "target": "ts",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-ts",
+                    "target": "ts",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 1001,
+                  "peakTreeRssKiB": 195324
+                },
+                {
+                  "variant": "js",
+                  "case": "ps-rust",
+                  "target": "rust",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-rust",
+                    "target": "rust",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 967,
+                  "peakTreeRssKiB": 181016
+                },
+                {
+                  "variant": "ts",
+                  "case": "ps-rust",
+                  "target": "rust",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-rust",
+                    "target": "rust",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 1167,
+                  "peakTreeRssKiB": 213376
+                },
+                {
+                  "variant": "js",
+                  "case": "ps-wasm-core",
+                  "target": "wasm-core",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-wasm-core",
+                    "target": "wasm-core",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 915,
+                  "peakTreeRssKiB": 167512
+                },
+                {
+                  "variant": "ts",
+                  "case": "ps-wasm-core",
+                  "target": "wasm-core",
+                  "status": "candidate",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                  "admission": {
+                    "protocol": "psc1-compiler-host/1",
+                    "requestId": "production-module-ps-wasm-core",
+                    "target": "wasm-core",
+                    "sourceClosureDigest": "3de29c8b5fa19399ec14ca3b91bd5107e1fff0c28bbf984627e2990b3ab26ab4",
+                    "admissionsDigest": "ae63081c2ec669ba9862e9e1064f67caecfb42be0a509fe8836f1284460df148",
+                    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+                    "accepted": true,
+                    "behaviorallyVerified": false
+                  },
+                  "elapsedMs": 1115,
+                  "peakTreeRssKiB": 202076
+                },
+                {
+                  "variant": "js",
+                  "case": "ps-invalid",
+                  "target": "js",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "1ece0e2d5ed37a23d822b15ebaa8f94f890bc5d6fd0a15305357af20db8e2beb",
+                  "admission": null,
+                  "elapsedMs": 640,
+                  "peakTreeRssKiB": 130116
+                },
+                {
+                  "variant": "ts",
+                  "case": "ps-invalid",
+                  "target": "js",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "1ece0e2d5ed37a23d822b15ebaa8f94f890bc5d6fd0a15305357af20db8e2beb",
+                  "admission": null,
+                  "elapsedMs": 797,
+                  "peakTreeRssKiB": 184840
+                },
+                {
+                  "variant": "js",
+                  "case": "optional-python",
+                  "target": "python",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "7feff663ae6414b1ba4e92c6a9d0591aee7ee31ae863a0290caa861ea755dd9a",
+                  "admission": null,
+                  "elapsedMs": 616,
+                  "peakTreeRssKiB": 129936
+                },
+                {
+                  "variant": "ts",
+                  "case": "optional-python",
+                  "target": "python",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "7feff663ae6414b1ba4e92c6a9d0591aee7ee31ae863a0290caa861ea755dd9a",
+                  "admission": null,
+                  "elapsedMs": 771,
+                  "peakTreeRssKiB": 184348
+                },
+                {
+                  "variant": "js",
+                  "case": "optional-php",
+                  "target": "php",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "7feff663ae6414b1ba4e92c6a9d0591aee7ee31ae863a0290caa861ea755dd9a",
+                  "admission": null,
+                  "elapsedMs": 619,
+                  "peakTreeRssKiB": 130116
+                },
+                {
+                  "variant": "ts",
+                  "case": "optional-php",
+                  "target": "php",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "7feff663ae6414b1ba4e92c6a9d0591aee7ee31ae863a0290caa861ea755dd9a",
+                  "admission": null,
+                  "elapsedMs": 771,
+                  "peakTreeRssKiB": 184108
+                },
+                {
+                  "variant": "js",
+                  "case": "optional-unknown",
+                  "target": "unknown",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "7feff663ae6414b1ba4e92c6a9d0591aee7ee31ae863a0290caa861ea755dd9a",
+                  "admission": null,
+                  "elapsedMs": 620,
+                  "peakTreeRssKiB": 129164
+                },
+                {
+                  "variant": "ts",
+                  "case": "optional-unknown",
+                  "target": "unknown",
+                  "status": "refused",
+                  "exactReferenceBytes": true,
+                  "sourceClosureDigest": "7feff663ae6414b1ba4e92c6a9d0591aee7ee31ae863a0290caa861ea755dd9a",
+                  "admission": null,
+                  "elapsedMs": 769,
+                  "peakTreeRssKiB": 183984
+                }
+              ],
+              "runtimeCohortRefusals": [
+                "js",
+                "ts"
+              ],
+              "installedPackages": [
+                {
+                  "name": "@proofscript/foundation",
+                  "sha256": "978fd5b13fe522b92d4413919a836478b63bda94a19066ef972e6112e8fc057d",
+                  "tarball": "proofscript-foundation-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/core",
+                  "sha256": "148643c9dea17572ceb8b976cfd6b8093cdb714276b5d22d256643383fd10819",
+                  "tarball": "proofscript-core-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/environment",
+                  "sha256": "4f5dca123d0bd4c22c304d4050020757080c8d6e5f5ed47d4195f53f71f82fdc",
+                  "tarball": "proofscript-environment-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/bridge",
+                  "sha256": "2d15f64555bf1631e531c126e636d6f81c730f8c0a971e4c74fd81b84bc41176",
+                  "tarball": "proofscript-bridge-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/compiler-ir",
+                  "sha256": "1baa08cf81ff8af34309a7a4d2bf24c2b6c59e0913334774a3f9fc325ac4f751",
+                  "tarball": "proofscript-compiler-ir-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/backend-common",
+                  "sha256": "1205bf87bb4450be8b6f44bb8542cca82b6a3e52486e4d177376bcfd53a0b0f5",
+                  "tarball": "proofscript-backend-common-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/syntax",
+                  "sha256": "c214e4fceadfc1fe5a7a89132d7f47746286f50ec2598bcf1e1febc588bce7cc",
+                  "tarball": "proofscript-syntax-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/meta",
+                  "sha256": "f4c339e3b3e925bd5ebe5096be9777dbeaa9a2a8032939975a965c38ef0d6f69",
+                  "tarball": "proofscript-meta-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/elab",
+                  "sha256": "60cb8b0d74b80bd4eb3120809049f3aa583d108115bd36c6c4cae98ca2979edd",
+                  "tarball": "proofscript-elab-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/erasure",
+                  "sha256": "a02066bc05103a3e7d27fc07cec609cb906a35e00bceb81643f805d654f672af",
+                  "tarball": "proofscript-erasure-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/backend-ts",
+                  "sha256": "211aef960d739bc6655bfc6a578b503ae258d482c37c37357eb018484ea42b41",
+                  "tarball": "proofscript-backend-ts-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/backend-js",
+                  "sha256": "d58fd6922d775eb00617e710c47ae03d8391b4b01b67c854fa3e7e035aa941ef",
+                  "tarball": "proofscript-backend-js-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/backend-rust",
+                  "sha256": "08963ca6b64e5ab372755feb8ec9c79ff45bdf49ac7252d26348e11dcbfd29cf",
+                  "tarball": "proofscript-backend-rust-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/backend-wasm",
+                  "sha256": "fb934cbdbcc8cba6b330b1fb804415ac641e0bcf1bd2b00cf5436530979c404f",
+                  "tarball": "proofscript-backend-wasm-0.1.0-psc1-modular.2.tgz"
+                },
+                {
+                  "name": "@proofscript/compiler",
+                  "sha256": "12c508c04c1ca06e1de441dd2eb871b4a5a897ec2f782218d2acfa3f209e55d6",
+                  "tarball": "proofscript-compiler-0.1.0-psc1-modular.2.tgz"
+                }
+              ],
+              "exactPackagedBytes": true,
+              "offlineMultiPackageInstallation": true,
+              "rustConsumer": {
+                "version": "1.90.0",
+                "locked": true,
+                "descriptorSha256": "b998579a8abfa1dcc4b15e769031cc51642fa3b8fc88ee72ab62c621691e5a40"
+              },
+              "scope": "complete modular JS/TS compiler candidates, two source grammars, four core targets, exact same-IR reference and independent application admission",
+              "remaining": [
+                "M4 checked root-only umbrella/CLI/watch",
+                "retained application and seven-backend qualification corpus",
+                "portable modular graph emission by generated compiler",
+                "new modular G1/G2/G3 and fixed points",
+                "platform/publication qualification"
+              ],
+              "fullModularSelfHosting": false,
+              "rootUmbrellaPromotion": false
+            }
+          }
+        ],
+        "g1ManifestSha256": "210c9577643f26b91a80eae036f3f70272a606a55520fe9a974db47fd14023dc",
+        "independentKernel": "official-Lean-4.35.0",
+        "semanticFuel": "unchanged",
+        "memoryStackPolicies": "unchanged",
+        "compilerRequestPolicy": "G1/corpus/tools 240s; only G2-self/G3-self use the explicit chosen wall-clock correctness profile",
+        "quarantinedNativeExecutables": [
+          {
+            "name": "psc1_independent_checker.hash",
+            "sha256": "43b3756e57b1d3dcf2eddd62d64e1c2f3d4dcf0055040665356805b6ad19201c"
+          },
+          {
+            "name": "psc1_independent_checker.rsp",
+            "sha256": "5a2fd2ef7334afadf437c951cbbd07d0179cb311c1959de369ba3d6323bba5d0"
+          },
+          {
+            "name": "psc1_independent_checker.trace",
+            "sha256": "a27c8902b9afd29c865c4038a6ea64fdbdea4b19e13b5f5b1ea845f85e8b053b"
+          }
+        ],
+        "correctnessQualification": "qualified-finite-linux-scope"
+      }
+    }
+  },
+  "quoteQualification": {
+    "schema": "psc1-wire-quote-g1-qualification/1",
+    "testedCommit": "a1f49fb3195a9142f941de34c1e6565bf31146fb",
+    "status": "passed",
+    "scope": "new G1 JS/TS graph and host serialization; not G2/G3/fixed points or default root promotion",
+    "variants": [
+      {
+        "variant": "js",
+        "status": "passed",
+        "scalarCount": 1112064,
+        "chunks": 272,
+        "unicode": {
+          "nativeCalls": 280,
+          "nativeInputBytes": 4399002,
+          "fallbackCalls": 4
+        },
+        "rows": [
+          {
+            "kind": "lean",
+            "target": "js",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 356.60681799999975,
+            "priorMs": 414.6317909999998,
+            "fastMs": 267.1670760000002,
+            "metrics": {
+              "prefixModules": 0,
+              "preparedModules": 1,
+              "finishHit": false,
+              "semanticHit": false,
+              "nativeQuoteCalls": 16,
+              "nativeQuoteInputBytes": 625,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 36.59522799999968,
+              "phases": {
+                "captureMs": 4.429638000000068,
+                "semanticMs": 12.51250200000004,
+                "comparisonMs": 0.0004610000000866421,
+                "originalIrValidationMs": 0.036207999999987805,
+                "emitMs": 16.466432000000168,
+                "printMs": 1.7835289999998167,
+                "emitComparisonMs": 0.0010729999999057327
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "lean",
+            "target": "ts",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 299.70796599999994,
+            "priorMs": 343.08426099999997,
+            "fastMs": 271.2185879999997,
+            "metrics": {
+              "prefixModules": 1,
+              "preparedModules": 0,
+              "finishHit": true,
+              "semanticHit": false,
+              "nativeQuoteCalls": 16,
+              "nativeQuoteInputBytes": 621,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 18.091403999999784,
+              "phases": {
+                "captureMs": 0.07437800000025163,
+                "semanticMs": 0.0016630000000077416,
+                "comparisonMs": 0.0004909999997835257,
+                "originalIrValidationMs": 0.014046000000234926,
+                "emitMs": 14.837130999999317,
+                "printMs": 1.2094270000006873,
+                "emitComparisonMs": 0.0010619999993650708
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "lean",
+            "target": "rust",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 363.0795359999993,
+            "priorMs": 427.91421900000023,
+            "fastMs": 311.4168520000003,
+            "metrics": {
+              "prefixModules": 1,
+              "preparedModules": 0,
+              "finishHit": true,
+              "semanticHit": false,
+              "nativeQuoteCalls": 18,
+              "nativeQuoteInputBytes": 808,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 54.72257900000022,
+              "phases": {
+                "captureMs": 0.11265999999977794,
+                "semanticMs": 0.0016729999997551204,
+                "comparisonMs": 0.0005110000001877779,
+                "originalIrValidationMs": 0.012163000000327884,
+                "emitMs": 52.30358500000057,
+                "printMs": 40.9291860000003,
+                "emitComparisonMs": 0.0012930000002597808
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "lean",
+            "target": "wasm-core",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 404.7926400000006,
+            "priorMs": 468.6428910000004,
+            "fastMs": 355.0229639999998,
+            "metrics": {
+              "prefixModules": 1,
+              "preparedModules": 0,
+              "finishHit": true,
+              "semanticHit": false,
+              "nativeQuoteCalls": 17,
+              "nativeQuoteInputBytes": 3217,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 74.98143900000014,
+              "phases": {
+                "captureMs": 0.07585099999960221,
+                "semanticMs": 0.0018730000001596636,
+                "comparisonMs": 0.0005409999994299142,
+                "originalIrValidationMs": 0.011561000000256172,
+                "emitMs": 72.5924300000006,
+                "printMs": 56.183585999999195,
+                "emitComparisonMs": 0.002704999999878055
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "ps",
+            "target": "js",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 329.6196399999999,
+            "priorMs": 380.62770099999943,
+            "fastMs": 309.3701039999996,
+            "metrics": {
+              "prefixModules": 0,
+              "preparedModules": 1,
+              "finishHit": false,
+              "semanticHit": false,
+              "nativeQuoteCalls": 16,
+              "nativeQuoteInputBytes": 623,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 28.01220999999896,
+              "phases": {
+                "captureMs": 3.4215759999988222,
+                "semanticMs": 9.300326999999015,
+                "comparisonMs": 0.00044100000013713725,
+                "originalIrValidationMs": 0.012102999999115127,
+                "emitMs": 13.364212000000407,
+                "printMs": 3.217434999998659,
+                "emitComparisonMs": 0.001452999998946325
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "ps",
+            "target": "ts",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 325.1721840000009,
+            "priorMs": 386.58842899999945,
+            "fastMs": 261.1599449999994,
+            "metrics": {
+              "prefixModules": 1,
+              "preparedModules": 0,
+              "finishHit": true,
+              "semanticHit": false,
+              "nativeQuoteCalls": 16,
+              "nativeQuoteInputBytes": 619,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 15.686924999999974,
+              "phases": {
+                "captureMs": 0.07623199999943608,
+                "semanticMs": 0.0017430000007152557,
+                "comparisonMs": 0.000490999998874031,
+                "originalIrValidationMs": 0.014667000001281849,
+                "emitMs": 11.125803000000815,
+                "printMs": 0.9845569999997679,
+                "emitComparisonMs": 0.0016630000009172363
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "ps",
+            "target": "rust",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 291.60155400000076,
+            "priorMs": 350.49714099999983,
+            "fastMs": 267.8893479999988,
+            "metrics": {
+              "prefixModules": 1,
+              "preparedModules": 0,
+              "finishHit": true,
+              "semanticHit": false,
+              "nativeQuoteCalls": 18,
+              "nativeQuoteInputBytes": 806,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 28.602177000000665,
+              "phases": {
+                "captureMs": 0.1586860000006709,
+                "semanticMs": 0.0021239999987301417,
+                "comparisonMs": 0.0005909999999857973,
+                "originalIrValidationMs": 0.013184999999793945,
+                "emitMs": 26.702151000001322,
+                "printMs": 16.001350999998976,
+                "emitComparisonMs": 0.0017939999997906853
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "ps",
+            "target": "wasm-core",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 320.9250280000015,
+            "priorMs": 381.57571899999857,
+            "fastMs": 284.0036110000001,
+            "metrics": {
+              "prefixModules": 1,
+              "preparedModules": 0,
+              "finishHit": true,
+              "semanticHit": false,
+              "nativeQuoteCalls": 17,
+              "nativeQuoteInputBytes": 3215,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 57.027766999999585,
+              "phases": {
+                "captureMs": 0.08626100000037695,
+                "semanticMs": 0.0020130000011704396,
+                "comparisonMs": 0.0007819999991625082,
+                "originalIrValidationMs": 0.011511000000609783,
+                "emitMs": 55.10016999999971,
+                "printMs": 45.36490199999935,
+                "emitComparisonMs": 0.0014429999991989462
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "lean",
+            "target": "js",
+            "assurance": "checked",
+            "io": false,
+            "status": "refused",
+            "legacyMs": 244.12513500000023,
+            "priorMs": 292.0381500000003,
+            "fastMs": 234.9331999999995,
+            "canonicalAdmission": null
+          },
+          {
+            "kind": "ps",
+            "target": "js",
+            "assurance": "checked",
+            "io": false,
+            "status": "refused",
+            "legacyMs": 249.02006100000108,
+            "priorMs": 300.76939400000083,
+            "fastMs": 237.34261699999843,
+            "canonicalAdmission": null
+          },
+          {
+            "kind": "lean",
+            "target": "js",
+            "assurance": "ordinary-checked",
+            "io": true,
+            "status": "candidate",
+            "legacyMs": 16362.515042,
+            "priorMs": 16423.915795,
+            "fastMs": 12505.690010000006,
+            "metrics": {
+              "prefixModules": 0,
+              "preparedModules": 11,
+              "finishHit": false,
+              "semanticHit": false,
+              "nativeQuoteCalls": 29,
+              "nativeQuoteInputBytes": 801312,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 12269.016856999995,
+              "phases": {
+                "captureMs": 3143.0424730000013,
+                "semanticMs": 3278.5194489999994,
+                "comparisonMs": 0.00035099999513477087,
+                "originalIrValidationMs": 0.027862000002642162,
+                "emitMs": 5752.404972999997,
+                "printMs": 1650.7247440000065,
+                "emitComparisonMs": 0.0015530000018770806
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "e3d2565456e90f2949a8b331d2e0060342e78ea5be1af8d83fc1842898d57eb9",
+            "independentWasmAccepted": true,
+            "actualApplication": "passed",
+            "edit": "initial"
+          },
+          {
+            "kind": "lean",
+            "target": "js",
+            "assurance": "ordinary-checked",
+            "io": true,
+            "status": "candidate",
+            "legacyMs": 14562.092636000001,
+            "priorMs": 14830.31270699999,
+            "fastMs": 9144.115699000002,
+            "metrics": {
+              "prefixModules": 10,
+              "preparedModules": 1,
+              "finishHit": false,
+              "semanticHit": false,
+              "nativeQuoteCalls": 29,
+              "nativeQuoteInputBytes": 802558,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 8904.286041999992,
+              "phases": {
+                "captureMs": 13.546805999998469,
+                "semanticMs": 3252.0733559999935,
+                "comparisonMs": 0.6903679999959422,
+                "originalIrValidationMs": 0.02255199999490287,
+                "emitMs": 5534.753669999991,
+                "printMs": 1598.9980329999962,
+                "emitComparisonMs": 22.8615060000011
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "fe3883c9ce071d575f56862c891a915f0f4a97e47ae8bf21d136db18b0305d58",
+            "independentWasmAccepted": true,
+            "actualApplication": "passed",
+            "edit": "body"
+          },
+          {
+            "kind": "lean",
+            "target": "js",
+            "assurance": "ordinary-checked",
+            "io": true,
+            "status": "candidate",
+            "legacyMs": 14563.695529999997,
+            "priorMs": 14440.541614999995,
+            "fastMs": 4219.528475000014,
+            "metrics": {
+              "prefixModules": 10,
+              "preparedModules": 1,
+              "finishHit": false,
+              "semanticHit": true,
+              "nativeQuoteCalls": 29,
+              "nativeQuoteInputBytes": 802558,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 3985.1734510000097,
+              "phases": {
+                "captureMs": 13.596929999999702,
+                "semanticMs": 2.307626000008895,
+                "comparisonMs": 2.276508000009926,
+                "originalIrValidationMs": 0.003296000009868294,
+                "emitMs": 3875.997709999996,
+                "printMs": 0,
+                "emitComparisonMs": 19.773443999991287
+              },
+              "emitterHit": true
+            },
+            "canonicalAdmission": "fe3883c9ce071d575f56862c891a915f0f4a97e47ae8bf21d136db18b0305d58",
+            "independentWasmAccepted": true,
+            "actualApplication": "passed",
+            "edit": "comment"
+          }
+        ]
+      },
+      {
+        "variant": "ts",
+        "status": "passed",
+        "scalarCount": 1112064,
+        "chunks": 272,
+        "unicode": {
+          "nativeCalls": 280,
+          "nativeInputBytes": 4399002,
+          "fallbackCalls": 4
+        },
+        "rows": [
+          {
+            "kind": "lean",
+            "target": "js",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 387.5820910000002,
+            "priorMs": 440.9594780000002,
+            "fastMs": 272.54002400000036,
+            "metrics": {
+              "prefixModules": 0,
+              "preparedModules": 1,
+              "finishHit": false,
+              "semanticHit": false,
+              "nativeQuoteCalls": 16,
+              "nativeQuoteInputBytes": 625,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 42.4576790000001,
+              "phases": {
+                "captureMs": 4.696052000000236,
+                "semanticMs": 13.291610000000219,
+                "comparisonMs": 0.0004909999997835257,
+                "originalIrValidationMs": 0.04112699999996039,
+                "emitMs": 20.552346999999827,
+                "printMs": 1.6639949999998862,
+                "emitComparisonMs": 0.0024350000003323657
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "lean",
+            "target": "ts",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 292.3099979999997,
+            "priorMs": 347.5018689999997,
+            "fastMs": 249.30496799999946,
+            "metrics": {
+              "prefixModules": 1,
+              "preparedModules": 0,
+              "finishHit": true,
+              "semanticHit": false,
+              "nativeQuoteCalls": 16,
+              "nativeQuoteInputBytes": 621,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 16.832948000000215,
+              "phases": {
+                "captureMs": 0.08105199999954493,
+                "semanticMs": 0.0019430000002103043,
+                "comparisonMs": 0.0005320000000210712,
+                "originalIrValidationMs": 0.01389500000004773,
+                "emitMs": 14.1618840000001,
+                "printMs": 1.1620080000002417,
+                "emitComparisonMs": 0.0013019999996686238
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "lean",
+            "target": "rust",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 348.9463939999996,
+            "priorMs": 414.11110200000076,
+            "fastMs": 323.60006299999986,
+            "metrics": {
+              "prefixModules": 1,
+              "preparedModules": 0,
+              "finishHit": true,
+              "semanticHit": false,
+              "nativeQuoteCalls": 18,
+              "nativeQuoteInputBytes": 808,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 55.008568000000196,
+              "phases": {
+                "captureMs": 0.16257299999961106,
+                "semanticMs": 0.0016229999991992372,
+                "comparisonMs": 0.0004199999993943493,
+                "originalIrValidationMs": 0.011402000000089174,
+                "emitMs": 52.831224999999904,
+                "printMs": 39.942778000000544,
+                "emitComparisonMs": 0.0014329999994515674
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "lean",
+            "target": "wasm-core",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 408.1575240000002,
+            "priorMs": 491.4883970000001,
+            "fastMs": 306.8981880000001,
+            "metrics": {
+              "prefixModules": 1,
+              "preparedModules": 0,
+              "finishHit": true,
+              "semanticHit": false,
+              "nativeQuoteCalls": 17,
+              "nativeQuoteInputBytes": 3217,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 73.75458499999968,
+              "phases": {
+                "captureMs": 0.16537799999969138,
+                "semanticMs": 0.0017630000002100132,
+                "comparisonMs": 0.0004310000003897585,
+                "originalIrValidationMs": 0.017281999999795516,
+                "emitMs": 69.08650600000055,
+                "printMs": 56.61765000000014,
+                "emitComparisonMs": 0.0014430000001084409
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "ps",
+            "target": "js",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 282.0904099999998,
+            "priorMs": 322.60725099999945,
+            "fastMs": 265.7631970000002,
+            "metrics": {
+              "prefixModules": 0,
+              "preparedModules": 1,
+              "finishHit": false,
+              "semanticHit": false,
+              "nativeQuoteCalls": 16,
+              "nativeQuoteInputBytes": 623,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 30.420400000000882,
+              "phases": {
+                "captureMs": 4.441197000000102,
+                "semanticMs": 10.601080000000366,
+                "comparisonMs": 0.00044100000013713725,
+                "originalIrValidationMs": 0.015468999999939115,
+                "emitMs": 13.618780000000697,
+                "printMs": 1.4155419999988226,
+                "emitComparisonMs": 0.0011319999994157115
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "ps",
+            "target": "ts",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 274.0583999999999,
+            "priorMs": 341.5423810000011,
+            "fastMs": 246.37407800000074,
+            "metrics": {
+              "prefixModules": 1,
+              "preparedModules": 0,
+              "finishHit": true,
+              "semanticHit": false,
+              "nativeQuoteCalls": 16,
+              "nativeQuoteInputBytes": 619,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 15.21653200000037,
+              "phases": {
+                "captureMs": 0.08463699999992969,
+                "semanticMs": 0.0016639999994367827,
+                "comparisonMs": 0.0005110000001877779,
+                "originalIrValidationMs": 0.015197999999145395,
+                "emitMs": 12.288297999999486,
+                "printMs": 1.1250890000010259,
+                "emitComparisonMs": 0.0014819999996689148
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "ps",
+            "target": "rust",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 300.04997399999957,
+            "priorMs": 357.0814140000002,
+            "fastMs": 265.8431700000001,
+            "metrics": {
+              "prefixModules": 1,
+              "preparedModules": 0,
+              "finishHit": true,
+              "semanticHit": false,
+              "nativeQuoteCalls": 18,
+              "nativeQuoteInputBytes": 806,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 32.218746000000465,
+              "phases": {
+                "captureMs": 0.07910699999956705,
+                "semanticMs": 0.001602999998794985,
+                "comparisonMs": 0.0005509999991772929,
+                "originalIrValidationMs": 0.01325399999950605,
+                "emitMs": 30.61107600000105,
+                "printMs": 20.164554000000862,
+                "emitComparisonMs": 0.00141299999995681
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "ps",
+            "target": "wasm-core",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 322.00574699999925,
+            "priorMs": 375.7617200000004,
+            "fastMs": 290.4911140000004,
+            "metrics": {
+              "prefixModules": 1,
+              "preparedModules": 0,
+              "finishHit": true,
+              "semanticHit": false,
+              "nativeQuoteCalls": 17,
+              "nativeQuoteInputBytes": 3215,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 61.91938300000038,
+              "phases": {
+                "captureMs": 0.07671299999856274,
+                "semanticMs": 0.0016030000006139744,
+                "comparisonMs": 0.0005110000001877779,
+                "originalIrValidationMs": 0.01101100000050792,
+                "emitMs": 60.11372400000073,
+                "printMs": 49.92168700000002,
+                "emitComparisonMs": 0.0015829999993002275
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "lean",
+            "target": "js",
+            "assurance": "checked",
+            "io": false,
+            "status": "refused",
+            "legacyMs": 244.70762300000024,
+            "priorMs": 297.6324690000001,
+            "fastMs": 256.99486700000125,
+            "canonicalAdmission": null
+          },
+          {
+            "kind": "ps",
+            "target": "js",
+            "assurance": "checked",
+            "io": false,
+            "status": "refused",
+            "legacyMs": 292.4670960000003,
+            "priorMs": 296.5288619999992,
+            "fastMs": 236.30129500000112,
+            "canonicalAdmission": null
+          },
+          {
+            "kind": "lean",
+            "target": "js",
+            "assurance": "ordinary-checked",
+            "io": true,
+            "status": "candidate",
+            "legacyMs": 18366.175011,
+            "priorMs": 18858.403790999997,
+            "fastMs": 13882.744097000003,
+            "metrics": {
+              "prefixModules": 0,
+              "preparedModules": 11,
+              "finishHit": false,
+              "semanticHit": false,
+              "nativeQuoteCalls": 29,
+              "nativeQuoteInputBytes": 801312,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 13644.563450999995,
+              "phases": {
+                "captureMs": 3907.6266719999985,
+                "semanticMs": 3751.567025999997,
+                "comparisonMs": 0.00016999999934341758,
+                "originalIrValidationMs": 0.05037399999855552,
+                "emitMs": 5861.985951000002,
+                "printMs": 1739.529677999999,
+                "emitComparisonMs": 0.0016630000027362257
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "e3d2565456e90f2949a8b331d2e0060342e78ea5be1af8d83fc1842898d57eb9",
+            "independentWasmAccepted": true,
+            "actualApplication": "passed",
+            "edit": "initial"
+          },
+          {
+            "kind": "lean",
+            "target": "js",
+            "assurance": "ordinary-checked",
+            "io": true,
+            "status": "candidate",
+            "legacyMs": 16679.144697000003,
+            "priorMs": 17104.926987999992,
+            "fastMs": 10124.900586999996,
+            "metrics": {
+              "prefixModules": 10,
+              "preparedModules": 1,
+              "finishHit": false,
+              "semanticHit": false,
+              "nativeQuoteCalls": 29,
+              "nativeQuoteInputBytes": 802558,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 9885.920941000004,
+              "phases": {
+                "captureMs": 18.07944299999508,
+                "semanticMs": 3746.98449100001,
+                "comparisonMs": 0.5032490000012331,
+                "originalIrValidationMs": 0.020056999986991286,
+                "emitMs": 5982.235106000007,
+                "printMs": 1638.8096610000066,
+                "emitComparisonMs": 14.447082999991835
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "fe3883c9ce071d575f56862c891a915f0f4a97e47ae8bf21d136db18b0305d58",
+            "independentWasmAccepted": true,
+            "actualApplication": "passed",
+            "edit": "body"
+          },
+          {
+            "kind": "lean",
+            "target": "js",
+            "assurance": "ordinary-checked",
+            "io": true,
+            "status": "candidate",
+            "legacyMs": 16442.923019999987,
+            "priorMs": 16948.92366,
+            "fastMs": 4381.438498000003,
+            "metrics": {
+              "prefixModules": 10,
+              "preparedModules": 1,
+              "finishHit": false,
+              "semanticHit": true,
+              "nativeQuoteCalls": 29,
+              "nativeQuoteInputBytes": 802558,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 4144.223939000018,
+              "phases": {
+                "captureMs": 16.443800999986706,
+                "semanticMs": 1.238359999988461,
+                "comparisonMs": 1.2087959999917075,
+                "originalIrValidationMs": 0.0033159999875351787,
+                "emitMs": 3981.862513,
+                "printMs": 0,
+                "emitComparisonMs": 11.416831999988062
+              },
+              "emitterHit": true
+            },
+            "canonicalAdmission": "fe3883c9ce071d575f56862c891a915f0f4a97e47ae8bf21d136db18b0305d58",
+            "independentWasmAccepted": true,
+            "actualApplication": "passed",
+            "edit": "comment"
+          }
+        ]
+      }
+    ],
+    "manifestSha256": "620849f5bfaf67ccf46e6c4d96608b94b016d7a3f3185ee1e90762eec2b5218e",
+    "newCompilerSourceClosureDigest": "67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad"
+  },
+  "legacyBodyAudit": {
+    "status": "passed",
+    "base": "7b9dc2725be226f401a8adcd2e6f0af391308504",
+    "sourceFiles": [
+      "packages/bridge/src/Ps/Bridge/CompilerHost.lean",
+      "packages/compiler/src/Ps/Compiler/Service.lean"
+    ],
+    "hostPins": [
+      {
+        "path": "psc1/host-tools/prepared-engine.mjs",
+        "bytes": 14392,
+        "sha256": "bc051bf666c7d1e81aec82f3c4476a49b41825f98d8d98d1c1395eaf47b7b418"
+      },
+      {
+        "path": "psc1/host-tools/wire-quote.mjs",
+        "bytes": 1345,
+        "sha256": "b693634f79976ebbdeca23c854727c24e32967611d4b3f09e01fab7faac40411"
+      }
+    ]
+  },
+  "legacyEquations": {
+    "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "names": [
+      "psWireLegacyAdmissionEquation",
+      "Ps.Internal.CompilerService.psWireLegacyCompilerEquation"
+    ],
+    "proof": "rfl",
+    "reportedAxioms": [
+      "propext"
+    ],
+    "sourceAuditBase": "7b9dc2725be226f401a8adcd2e6f0af391308504"
+  },
+  "sourceGate": {
+    "run": 40894666856,
+    "commit": "efe35012851a8e81c92f84cfa0eb1c7bd058921c",
+    "status": "success",
+    "passedJobs": 16,
+    "intentionallySkipped": [
+      "benchmark"
+    ]
+  },
+  "preservation": {
+    "leanVersion": "4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "compilerSeconds": 240,
+    "checkerSeconds": 120,
+    "g2G3CorrectnessSeconds": 3600,
+    "separatePerformanceSeconds": 240,
+    "heapMiB": 4096,
+    "stackMiB": 8,
+    "nativeAddressSpaceGiB": 4,
+    "fileBytes": 33554432,
+    "stageAndGraphAndWireBytes": 134217728,
+    "streamBytes": 33554432,
+    "valuesAndGraphFiles": 8192,
+    "units": 257,
+    "referenceFuel": 4096,
+    "initializerEdges": 131072,
+    "ordinaryCheckedSourceBodyPairing": true,
+    "strictOriginalAndTransformedIr": true,
+    "negativeTestsPreserved": true,
+    "pilotExpansionDeferred": true
+  },
+  "preserved": {
+    "previousQualifiedCompiler": "17ce19919175b60be06050188e2a546a8a72e689",
+    "previousSourceDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+    "previousQualificationRun": 40755246954,
+    "previousReceiptsUnmodified": true,
+    "retainedHostPackage": "0.1.0-psc1-modular.9",
+    "oldRootPackage": "0.1.0-psc1.13"
+  },
+  "priorAttempts": [
+    {
+      "run": 40886789852,
+      "status": "failure",
+      "reason": "private quote helper accidentally exposed as a public non-scalar signature; moved under Ps.Internal.CompilerHost; scalar ABI refusal retained"
+    },
+    {
+      "run": 40891862487,
+      "status": "cancelled",
+      "reason": "superseded pre-ABI-fix source; stop wasted compiler requests; never promote this cohort"
+    }
+  ],
+  "scope": "finite Linux JS/TS generated compiler execution; independent official Lean checking; exact source-derived IR, rendered graph and npm package fixed points; installed host qualification remains separate",
+  "notQualified": [
+    "240-second G2/G3 performance profile",
+    "new-source native Rust/Wasm compiler executors",
+    "new-source cross-platform installed host",
+    "universal release",
+    "global compiler preservation theorem"
+  ],
+  "noMerge": true,
+  "noRegistryPublication": true,
+  "generationArtifacts": {
+    "js": {
+      "run": 40894184363,
+      "job": 123526654849,
+      "artifact": 12913883768,
+      "commit": "a1f49fb3195a9142f941de34c1e6565bf31146fb",
+      "zipSha256": "7d6f3b9cf0d0968db077476df90de1dccaaed0dff15b53e3ef602459508075e3"
+    },
+    "ts": {
+      "run": 40894184363,
+      "job": 123526656592,
+      "artifact": 12914632762,
+      "commit": "a1f49fb3195a9142f941de34c1e6565bf31146fb",
+      "zipSha256": "4050e08c4c4d93e01c4fd58d5955ea6df7929cc5768f21c278d5efb369ef0327"
+    }
+  },
+  "retainedCli": {
+    "run": 40894659730,
+    "commit": "efe35012851a8e81c92f84cfa0eb1c7bd058921c",
+    "status": "success",
+    "scope": "retained frozen source only"
+  },
+  "performance": {
+    "profile": "correctness-3600s",
+    "performance240Qualified": false,
+    "observations": {
+      "js": [
+        {
+          "generation": 2,
+          "elapsedMs": 2866480,
+          "maxRssKiB": 4015232,
+          "peakTreeRssKiB": 3912064
+        },
+        {
+          "generation": 3,
+          "elapsedMs": 3089677,
+          "maxRssKiB": 4089932,
+          "peakTreeRssKiB": 3972044
+        }
+      ],
+      "ts": [
+        {
+          "generation": 2,
+          "elapsedMs": 2896525,
+          "maxRssKiB": 3848280,
+          "peakTreeRssKiB": 3722968
+        },
+        {
+          "generation": 3,
+          "elapsedMs": 3078372,
+          "maxRssKiB": 3874888,
+          "peakTreeRssKiB": 3772488
+        }
+      ]
+    }
+  }
+}

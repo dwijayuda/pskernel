@@ -1,0 +1,1022 @@
+{
+  "schema": "psc1-wire-source-checkpoint/1",
+  "status": "qualified-G1-and-source-regressions; G2-G3-running",
+  "branch": "feat/psc1-wire-quote-20261029",
+  "implementationCommit": "efe35012851a8e81c92f84cfa0eb1c7bd058921c",
+  "sourceCommit": "a1f49fb3195a9142f941de34c1e6565bf31146fb",
+  "sourceClosureDigest": "67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad",
+  "sourceGate": {
+    "run": 40894666856,
+    "status": "success",
+    "passedJobs": 16,
+    "intentionallySkipped": [
+      "benchmark"
+    ]
+  },
+  "retainedCli": {
+    "run": 40894659730,
+    "status": "success",
+    "passedJobs": 9,
+    "scope": "retained frozen compiler, separate from new-source self-hosting"
+  },
+  "existingNpm": {
+    "run": 40894666645,
+    "status": "success"
+  },
+  "nativeG1Artifact": {
+    "run": 40894184363,
+    "job": 123518692995,
+    "artifact": 12907676205,
+    "commit": "a1f49fb3195a9142f941de34c1e6565bf31146fb",
+    "zipSha256": "56f527102991c7d0f5ffd1f8bdf744da4a29ca771a28d1693deca0888fda16b4"
+  },
+  "portableG1Artifact": {
+    "run": 40894184363,
+    "job": 123518692995,
+    "artifact": 12906249365,
+    "commit": "a1f49fb3195a9142f941de34c1e6565bf31146fb",
+    "zipSha256": "cfb0122875dfd4090973f5b63cd2c93c2b479249792af277a31b0e0d9a913cfd"
+  },
+  "nativeG1": {
+    "schema": "psc1-executable-production-build/1",
+    "testedCommit": "a1f49fb3195a9142f941de34c1e6565bf31146fb",
+    "sourceClosureDigest": "67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad",
+    "sourceModules": 133,
+    "compilerAssurance": "ordinary-checked",
+    "partialNames": [
+      "psBackendPublicTypeSupported",
+      "psJsNeedsUtf8Runtime",
+      "psTsNeedsUtf8Runtime",
+      "Ps.Internal.RustRuntimePlan.typeRequirements",
+      "Ps.Internal.RustRuntimePlan.exprRequirements"
+    ],
+    "logicalDeclarations": 4907,
+    "counts": [
+      3254,
+      4291,
+      4946
+    ],
+    "generatedUnits": 134,
+    "packages": [
+      "@proofscript/foundation",
+      "@proofscript/core",
+      "@proofscript/environment",
+      "@proofscript/bridge",
+      "@proofscript/compiler-ir",
+      "@proofscript/backend-common",
+      "@proofscript/syntax",
+      "@proofscript/meta",
+      "@proofscript/elab",
+      "@proofscript/erasure",
+      "@proofscript/backend-ts",
+      "@proofscript/backend-js",
+      "@proofscript/backend-rust",
+      "@proofscript/backend-wasm",
+      "@proofscript/compiler"
+    ],
+    "computedInitializers": 356,
+    "manifestSha256": "620849f5bfaf67ccf46e6c4d96608b94b016d7a3f3185ee1e90762eec2b5218e",
+    "logicalAdmission": {
+      "protocol": "psc1-compiler-host/1",
+      "requestId": "production-executable-compiler-build",
+      "target": "js",
+      "sourceClosureDigest": "67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad",
+      "admissionsDigest": "9ecda6b51f3a04bb40156fcf9dfcc37b28cd0320164a5e366e6f66ba09a0909e",
+      "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "accepted": true,
+      "behaviorallyVerified": false
+    },
+    "originalIrSha256": "c5ef0814e71e825f0c57cc865cf8206aa9869d894b5e5e2a77112f6566929043",
+    "transformedIrSha256": "6ac776ac5e18ac70bece1f384d43284a7fd6c7dba26bfd252c633be684c62da9",
+    "capture": {
+      "status": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 119035,
+      "stdoutBytes": 195,
+      "stderrBytes": 0,
+      "timeoutMs": 240000,
+      "timeoutPolicy": "standard-240s",
+      "maxBuffer": 33554432,
+      "maxRssKiB": 334096,
+      "sampledCpuSeconds": 119,
+      "peakTreeRssKiB": 332048,
+      "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+      "processGroup": 5255
+    },
+    "emission": {
+      "status": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 17086,
+      "stdoutBytes": 279,
+      "stderrBytes": 0,
+      "timeoutMs": 240000,
+      "timeoutPolicy": "standard-240s",
+      "maxBuffer": 33554432,
+      "maxRssKiB": 316012,
+      "sampledCpuSeconds": 17.06,
+      "peakTreeRssKiB": 316012,
+      "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+      "processGroup": 5287
+    },
+    "negativeCases": [
+      "altered-module",
+      "missing-module",
+      "extra-module",
+      "symlink-module",
+      "wrong-manifest-cohort",
+      "duplicate-owner",
+      "unsafe-path",
+      "wrong-runtime-owner",
+      "wrong-checker"
+    ],
+    "candidateFiles": 1131,
+    "candidateBytes": 103964218,
+    "typescriptResourcesSha256": "3d83f0b4ff6821d858736d463178d9f92baaeaa5ff59046cd762750d54b17e0c",
+    "claims": {
+      "wholeCompilerCapture": true,
+      "actualSourceOwnedBodies": true,
+      "strictOriginalAndTransformedIR": true,
+      "independentCanonicalCoreAdmission": true,
+      "strictTypeScript": true,
+      "compilerExecution": false,
+      "fullModularSelfHosting": false,
+      "rootUmbrellaPromotion": false,
+      "defaultDistributionChanged": false
+    }
+  },
+  "portableG1": {
+    "schema": "psc1-portable-modular-G1/1",
+    "status": "passed-native-reference-and-portable-generation",
+    "sourceCommit": "a1f49fb3195a9142f941de34c1e6565bf31146fb",
+    "sourceClosureDigest": "67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad",
+    "sourceModules": 133,
+    "units": 134,
+    "packages": 15,
+    "manifestSha256": "210c9577643f26b91a80eae036f3f70272a606a55520fe9a974db47fd14023dc",
+    "files": 1131,
+    "bytes": 103964218,
+    "execution": {
+      "status": 0,
+      "signal": null,
+      "error": null,
+      "elapsedMs": 120761,
+      "stdoutBytes": 107,
+      "stderrBytes": 0,
+      "timeoutMs": 240000,
+      "timeoutPolicy": "standard-240s",
+      "maxBuffer": 33554432,
+      "maxRssKiB": 1211096,
+      "sampledCpuSeconds": 120.73,
+      "peakTreeRssKiB": 1211096,
+      "memoryMeasurement": "Linux wait4 child maxRSS plus sampled descendant RSS sum; 100ms sampling target; shared pages may be counted twice",
+      "processGroup": 5902
+    },
+    "nativeSeedSha256": "30a379c96a6030436418510a8e19bbfa57fdc5085bd9835ac96c1bc05f5de9fc",
+    "nativeOracleScope": "comparison-only; never imported by a generation producer",
+    "independentAdmission": {
+      "protocol": "psc1-compiler-host/1",
+      "requestId": "production-executable-compiler-build",
+      "target": "js",
+      "sourceClosureDigest": "67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad",
+      "admissionsDigest": "9ecda6b51f3a04bb40156fcf9dfcc37b28cd0320164a5e366e6f66ba09a0909e",
+      "checkerCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+      "accepted": true,
+      "behaviorallyVerified": false,
+      "elapsedMs": 3139
+    },
+    "originalAndTransformedIrMatch": true,
+    "exactRenderedReferenceBytes": true,
+    "compilerSeconds": 240,
+    "checkerSeconds": 120,
+    "fullModularSelfHosting": false
+  },
+  "quoteQualification": {
+    "schema": "psc1-wire-quote-g1-qualification/1",
+    "testedCommit": "a1f49fb3195a9142f941de34c1e6565bf31146fb",
+    "status": "passed",
+    "scope": "new G1 JS/TS graph and host serialization; not G2/G3/fixed points or default root promotion",
+    "variants": [
+      {
+        "variant": "js",
+        "status": "passed",
+        "scalarCount": 1112064,
+        "chunks": 272,
+        "unicode": {
+          "nativeCalls": 280,
+          "nativeInputBytes": 4399002,
+          "fallbackCalls": 4
+        },
+        "rows": [
+          {
+            "kind": "lean",
+            "target": "js",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 356.60681799999975,
+            "priorMs": 414.6317909999998,
+            "fastMs": 267.1670760000002,
+            "metrics": {
+              "prefixModules": 0,
+              "preparedModules": 1,
+              "finishHit": false,
+              "semanticHit": false,
+              "nativeQuoteCalls": 16,
+              "nativeQuoteInputBytes": 625,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 36.59522799999968,
+              "phases": {
+                "captureMs": 4.429638000000068,
+                "semanticMs": 12.51250200000004,
+                "comparisonMs": 0.0004610000000866421,
+                "originalIrValidationMs": 0.036207999999987805,
+                "emitMs": 16.466432000000168,
+                "printMs": 1.7835289999998167,
+                "emitComparisonMs": 0.0010729999999057327
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "lean",
+            "target": "ts",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 299.70796599999994,
+            "priorMs": 343.08426099999997,
+            "fastMs": 271.2185879999997,
+            "metrics": {
+              "prefixModules": 1,
+              "preparedModules": 0,
+              "finishHit": true,
+              "semanticHit": false,
+              "nativeQuoteCalls": 16,
+              "nativeQuoteInputBytes": 621,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 18.091403999999784,
+              "phases": {
+                "captureMs": 0.07437800000025163,
+                "semanticMs": 0.0016630000000077416,
+                "comparisonMs": 0.0004909999997835257,
+                "originalIrValidationMs": 0.014046000000234926,
+                "emitMs": 14.837130999999317,
+                "printMs": 1.2094270000006873,
+                "emitComparisonMs": 0.0010619999993650708
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "lean",
+            "target": "rust",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 363.0795359999993,
+            "priorMs": 427.91421900000023,
+            "fastMs": 311.4168520000003,
+            "metrics": {
+              "prefixModules": 1,
+              "preparedModules": 0,
+              "finishHit": true,
+              "semanticHit": false,
+              "nativeQuoteCalls": 18,
+              "nativeQuoteInputBytes": 808,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 54.72257900000022,
+              "phases": {
+                "captureMs": 0.11265999999977794,
+                "semanticMs": 0.0016729999997551204,
+                "comparisonMs": 0.0005110000001877779,
+                "originalIrValidationMs": 0.012163000000327884,
+                "emitMs": 52.30358500000057,
+                "printMs": 40.9291860000003,
+                "emitComparisonMs": 0.0012930000002597808
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "lean",
+            "target": "wasm-core",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 404.7926400000006,
+            "priorMs": 468.6428910000004,
+            "fastMs": 355.0229639999998,
+            "metrics": {
+              "prefixModules": 1,
+              "preparedModules": 0,
+              "finishHit": true,
+              "semanticHit": false,
+              "nativeQuoteCalls": 17,
+              "nativeQuoteInputBytes": 3217,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 74.98143900000014,
+              "phases": {
+                "captureMs": 0.07585099999960221,
+                "semanticMs": 0.0018730000001596636,
+                "comparisonMs": 0.0005409999994299142,
+                "originalIrValidationMs": 0.011561000000256172,
+                "emitMs": 72.5924300000006,
+                "printMs": 56.183585999999195,
+                "emitComparisonMs": 0.002704999999878055
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "ps",
+            "target": "js",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 329.6196399999999,
+            "priorMs": 380.62770099999943,
+            "fastMs": 309.3701039999996,
+            "metrics": {
+              "prefixModules": 0,
+              "preparedModules": 1,
+              "finishHit": false,
+              "semanticHit": false,
+              "nativeQuoteCalls": 16,
+              "nativeQuoteInputBytes": 623,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 28.01220999999896,
+              "phases": {
+                "captureMs": 3.4215759999988222,
+                "semanticMs": 9.300326999999015,
+                "comparisonMs": 0.00044100000013713725,
+                "originalIrValidationMs": 0.012102999999115127,
+                "emitMs": 13.364212000000407,
+                "printMs": 3.217434999998659,
+                "emitComparisonMs": 0.001452999998946325
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "ps",
+            "target": "ts",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 325.1721840000009,
+            "priorMs": 386.58842899999945,
+            "fastMs": 261.1599449999994,
+            "metrics": {
+              "prefixModules": 1,
+              "preparedModules": 0,
+              "finishHit": true,
+              "semanticHit": false,
+              "nativeQuoteCalls": 16,
+              "nativeQuoteInputBytes": 619,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 15.686924999999974,
+              "phases": {
+                "captureMs": 0.07623199999943608,
+                "semanticMs": 0.0017430000007152557,
+                "comparisonMs": 0.000490999998874031,
+                "originalIrValidationMs": 0.014667000001281849,
+                "emitMs": 11.125803000000815,
+                "printMs": 0.9845569999997679,
+                "emitComparisonMs": 0.0016630000009172363
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "ps",
+            "target": "rust",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 291.60155400000076,
+            "priorMs": 350.49714099999983,
+            "fastMs": 267.8893479999988,
+            "metrics": {
+              "prefixModules": 1,
+              "preparedModules": 0,
+              "finishHit": true,
+              "semanticHit": false,
+              "nativeQuoteCalls": 18,
+              "nativeQuoteInputBytes": 806,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 28.602177000000665,
+              "phases": {
+                "captureMs": 0.1586860000006709,
+                "semanticMs": 0.0021239999987301417,
+                "comparisonMs": 0.0005909999999857973,
+                "originalIrValidationMs": 0.013184999999793945,
+                "emitMs": 26.702151000001322,
+                "printMs": 16.001350999998976,
+                "emitComparisonMs": 0.0017939999997906853
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "ps",
+            "target": "wasm-core",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 320.9250280000015,
+            "priorMs": 381.57571899999857,
+            "fastMs": 284.0036110000001,
+            "metrics": {
+              "prefixModules": 1,
+              "preparedModules": 0,
+              "finishHit": true,
+              "semanticHit": false,
+              "nativeQuoteCalls": 17,
+              "nativeQuoteInputBytes": 3215,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 57.027766999999585,
+              "phases": {
+                "captureMs": 0.08626100000037695,
+                "semanticMs": 0.0020130000011704396,
+                "comparisonMs": 0.0007819999991625082,
+                "originalIrValidationMs": 0.011511000000609783,
+                "emitMs": 55.10016999999971,
+                "printMs": 45.36490199999935,
+                "emitComparisonMs": 0.0014429999991989462
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "lean",
+            "target": "js",
+            "assurance": "checked",
+            "io": false,
+            "status": "refused",
+            "legacyMs": 244.12513500000023,
+            "priorMs": 292.0381500000003,
+            "fastMs": 234.9331999999995,
+            "canonicalAdmission": null
+          },
+          {
+            "kind": "ps",
+            "target": "js",
+            "assurance": "checked",
+            "io": false,
+            "status": "refused",
+            "legacyMs": 249.02006100000108,
+            "priorMs": 300.76939400000083,
+            "fastMs": 237.34261699999843,
+            "canonicalAdmission": null
+          },
+          {
+            "kind": "lean",
+            "target": "js",
+            "assurance": "ordinary-checked",
+            "io": true,
+            "status": "candidate",
+            "legacyMs": 16362.515042,
+            "priorMs": 16423.915795,
+            "fastMs": 12505.690010000006,
+            "metrics": {
+              "prefixModules": 0,
+              "preparedModules": 11,
+              "finishHit": false,
+              "semanticHit": false,
+              "nativeQuoteCalls": 29,
+              "nativeQuoteInputBytes": 801312,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 12269.016856999995,
+              "phases": {
+                "captureMs": 3143.0424730000013,
+                "semanticMs": 3278.5194489999994,
+                "comparisonMs": 0.00035099999513477087,
+                "originalIrValidationMs": 0.027862000002642162,
+                "emitMs": 5752.404972999997,
+                "printMs": 1650.7247440000065,
+                "emitComparisonMs": 0.0015530000018770806
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "e3d2565456e90f2949a8b331d2e0060342e78ea5be1af8d83fc1842898d57eb9",
+            "independentWasmAccepted": true,
+            "actualApplication": "passed",
+            "edit": "initial"
+          },
+          {
+            "kind": "lean",
+            "target": "js",
+            "assurance": "ordinary-checked",
+            "io": true,
+            "status": "candidate",
+            "legacyMs": 14562.092636000001,
+            "priorMs": 14830.31270699999,
+            "fastMs": 9144.115699000002,
+            "metrics": {
+              "prefixModules": 10,
+              "preparedModules": 1,
+              "finishHit": false,
+              "semanticHit": false,
+              "nativeQuoteCalls": 29,
+              "nativeQuoteInputBytes": 802558,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 8904.286041999992,
+              "phases": {
+                "captureMs": 13.546805999998469,
+                "semanticMs": 3252.0733559999935,
+                "comparisonMs": 0.6903679999959422,
+                "originalIrValidationMs": 0.02255199999490287,
+                "emitMs": 5534.753669999991,
+                "printMs": 1598.9980329999962,
+                "emitComparisonMs": 22.8615060000011
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "fe3883c9ce071d575f56862c891a915f0f4a97e47ae8bf21d136db18b0305d58",
+            "independentWasmAccepted": true,
+            "actualApplication": "passed",
+            "edit": "body"
+          },
+          {
+            "kind": "lean",
+            "target": "js",
+            "assurance": "ordinary-checked",
+            "io": true,
+            "status": "candidate",
+            "legacyMs": 14563.695529999997,
+            "priorMs": 14440.541614999995,
+            "fastMs": 4219.528475000014,
+            "metrics": {
+              "prefixModules": 10,
+              "preparedModules": 1,
+              "finishHit": false,
+              "semanticHit": true,
+              "nativeQuoteCalls": 29,
+              "nativeQuoteInputBytes": 802558,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 3985.1734510000097,
+              "phases": {
+                "captureMs": 13.596929999999702,
+                "semanticMs": 2.307626000008895,
+                "comparisonMs": 2.276508000009926,
+                "originalIrValidationMs": 0.003296000009868294,
+                "emitMs": 3875.997709999996,
+                "printMs": 0,
+                "emitComparisonMs": 19.773443999991287
+              },
+              "emitterHit": true
+            },
+            "canonicalAdmission": "fe3883c9ce071d575f56862c891a915f0f4a97e47ae8bf21d136db18b0305d58",
+            "independentWasmAccepted": true,
+            "actualApplication": "passed",
+            "edit": "comment"
+          }
+        ]
+      },
+      {
+        "variant": "ts",
+        "status": "passed",
+        "scalarCount": 1112064,
+        "chunks": 272,
+        "unicode": {
+          "nativeCalls": 280,
+          "nativeInputBytes": 4399002,
+          "fallbackCalls": 4
+        },
+        "rows": [
+          {
+            "kind": "lean",
+            "target": "js",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 387.5820910000002,
+            "priorMs": 440.9594780000002,
+            "fastMs": 272.54002400000036,
+            "metrics": {
+              "prefixModules": 0,
+              "preparedModules": 1,
+              "finishHit": false,
+              "semanticHit": false,
+              "nativeQuoteCalls": 16,
+              "nativeQuoteInputBytes": 625,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 42.4576790000001,
+              "phases": {
+                "captureMs": 4.696052000000236,
+                "semanticMs": 13.291610000000219,
+                "comparisonMs": 0.0004909999997835257,
+                "originalIrValidationMs": 0.04112699999996039,
+                "emitMs": 20.552346999999827,
+                "printMs": 1.6639949999998862,
+                "emitComparisonMs": 0.0024350000003323657
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "lean",
+            "target": "ts",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 292.3099979999997,
+            "priorMs": 347.5018689999997,
+            "fastMs": 249.30496799999946,
+            "metrics": {
+              "prefixModules": 1,
+              "preparedModules": 0,
+              "finishHit": true,
+              "semanticHit": false,
+              "nativeQuoteCalls": 16,
+              "nativeQuoteInputBytes": 621,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 16.832948000000215,
+              "phases": {
+                "captureMs": 0.08105199999954493,
+                "semanticMs": 0.0019430000002103043,
+                "comparisonMs": 0.0005320000000210712,
+                "originalIrValidationMs": 0.01389500000004773,
+                "emitMs": 14.1618840000001,
+                "printMs": 1.1620080000002417,
+                "emitComparisonMs": 0.0013019999996686238
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "lean",
+            "target": "rust",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 348.9463939999996,
+            "priorMs": 414.11110200000076,
+            "fastMs": 323.60006299999986,
+            "metrics": {
+              "prefixModules": 1,
+              "preparedModules": 0,
+              "finishHit": true,
+              "semanticHit": false,
+              "nativeQuoteCalls": 18,
+              "nativeQuoteInputBytes": 808,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 55.008568000000196,
+              "phases": {
+                "captureMs": 0.16257299999961106,
+                "semanticMs": 0.0016229999991992372,
+                "comparisonMs": 0.0004199999993943493,
+                "originalIrValidationMs": 0.011402000000089174,
+                "emitMs": 52.831224999999904,
+                "printMs": 39.942778000000544,
+                "emitComparisonMs": 0.0014329999994515674
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "lean",
+            "target": "wasm-core",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 408.1575240000002,
+            "priorMs": 491.4883970000001,
+            "fastMs": 306.8981880000001,
+            "metrics": {
+              "prefixModules": 1,
+              "preparedModules": 0,
+              "finishHit": true,
+              "semanticHit": false,
+              "nativeQuoteCalls": 17,
+              "nativeQuoteInputBytes": 3217,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 73.75458499999968,
+              "phases": {
+                "captureMs": 0.16537799999969138,
+                "semanticMs": 0.0017630000002100132,
+                "comparisonMs": 0.0004310000003897585,
+                "originalIrValidationMs": 0.017281999999795516,
+                "emitMs": 69.08650600000055,
+                "printMs": 56.61765000000014,
+                "emitComparisonMs": 0.0014430000001084409
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "ps",
+            "target": "js",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 282.0904099999998,
+            "priorMs": 322.60725099999945,
+            "fastMs": 265.7631970000002,
+            "metrics": {
+              "prefixModules": 0,
+              "preparedModules": 1,
+              "finishHit": false,
+              "semanticHit": false,
+              "nativeQuoteCalls": 16,
+              "nativeQuoteInputBytes": 623,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 30.420400000000882,
+              "phases": {
+                "captureMs": 4.441197000000102,
+                "semanticMs": 10.601080000000366,
+                "comparisonMs": 0.00044100000013713725,
+                "originalIrValidationMs": 0.015468999999939115,
+                "emitMs": 13.618780000000697,
+                "printMs": 1.4155419999988226,
+                "emitComparisonMs": 0.0011319999994157115
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "ps",
+            "target": "ts",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 274.0583999999999,
+            "priorMs": 341.5423810000011,
+            "fastMs": 246.37407800000074,
+            "metrics": {
+              "prefixModules": 1,
+              "preparedModules": 0,
+              "finishHit": true,
+              "semanticHit": false,
+              "nativeQuoteCalls": 16,
+              "nativeQuoteInputBytes": 619,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 15.21653200000037,
+              "phases": {
+                "captureMs": 0.08463699999992969,
+                "semanticMs": 0.0016639999994367827,
+                "comparisonMs": 0.0005110000001877779,
+                "originalIrValidationMs": 0.015197999999145395,
+                "emitMs": 12.288297999999486,
+                "printMs": 1.1250890000010259,
+                "emitComparisonMs": 0.0014819999996689148
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "ps",
+            "target": "rust",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 300.04997399999957,
+            "priorMs": 357.0814140000002,
+            "fastMs": 265.8431700000001,
+            "metrics": {
+              "prefixModules": 1,
+              "preparedModules": 0,
+              "finishHit": true,
+              "semanticHit": false,
+              "nativeQuoteCalls": 18,
+              "nativeQuoteInputBytes": 806,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 32.218746000000465,
+              "phases": {
+                "captureMs": 0.07910699999956705,
+                "semanticMs": 0.001602999998794985,
+                "comparisonMs": 0.0005509999991772929,
+                "originalIrValidationMs": 0.01325399999950605,
+                "emitMs": 30.61107600000105,
+                "printMs": 20.164554000000862,
+                "emitComparisonMs": 0.00141299999995681
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "ps",
+            "target": "wasm-core",
+            "assurance": "checked",
+            "io": false,
+            "status": "candidate",
+            "legacyMs": 322.00574699999925,
+            "priorMs": 375.7617200000004,
+            "fastMs": 290.4911140000004,
+            "metrics": {
+              "prefixModules": 1,
+              "preparedModules": 0,
+              "finishHit": true,
+              "semanticHit": false,
+              "nativeQuoteCalls": 17,
+              "nativeQuoteInputBytes": 3215,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 61.91938300000038,
+              "phases": {
+                "captureMs": 0.07671299999856274,
+                "semanticMs": 0.0016030000006139744,
+                "comparisonMs": 0.0005110000001877779,
+                "originalIrValidationMs": 0.01101100000050792,
+                "emitMs": 60.11372400000073,
+                "printMs": 49.92168700000002,
+                "emitComparisonMs": 0.0015829999993002275
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "6803c0509a64f4ca371c2df4871bec3a311bb009f83a8c4802af83ffc7c7c0c1"
+          },
+          {
+            "kind": "lean",
+            "target": "js",
+            "assurance": "checked",
+            "io": false,
+            "status": "refused",
+            "legacyMs": 244.70762300000024,
+            "priorMs": 297.6324690000001,
+            "fastMs": 256.99486700000125,
+            "canonicalAdmission": null
+          },
+          {
+            "kind": "ps",
+            "target": "js",
+            "assurance": "checked",
+            "io": false,
+            "status": "refused",
+            "legacyMs": 292.4670960000003,
+            "priorMs": 296.5288619999992,
+            "fastMs": 236.30129500000112,
+            "canonicalAdmission": null
+          },
+          {
+            "kind": "lean",
+            "target": "js",
+            "assurance": "ordinary-checked",
+            "io": true,
+            "status": "candidate",
+            "legacyMs": 18366.175011,
+            "priorMs": 18858.403790999997,
+            "fastMs": 13882.744097000003,
+            "metrics": {
+              "prefixModules": 0,
+              "preparedModules": 11,
+              "finishHit": false,
+              "semanticHit": false,
+              "nativeQuoteCalls": 29,
+              "nativeQuoteInputBytes": 801312,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 13644.563450999995,
+              "phases": {
+                "captureMs": 3907.6266719999985,
+                "semanticMs": 3751.567025999997,
+                "comparisonMs": 0.00016999999934341758,
+                "originalIrValidationMs": 0.05037399999855552,
+                "emitMs": 5861.985951000002,
+                "printMs": 1739.529677999999,
+                "emitComparisonMs": 0.0016630000027362257
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "e3d2565456e90f2949a8b331d2e0060342e78ea5be1af8d83fc1842898d57eb9",
+            "independentWasmAccepted": true,
+            "actualApplication": "passed",
+            "edit": "initial"
+          },
+          {
+            "kind": "lean",
+            "target": "js",
+            "assurance": "ordinary-checked",
+            "io": true,
+            "status": "candidate",
+            "legacyMs": 16679.144697000003,
+            "priorMs": 17104.926987999992,
+            "fastMs": 10124.900586999996,
+            "metrics": {
+              "prefixModules": 10,
+              "preparedModules": 1,
+              "finishHit": false,
+              "semanticHit": false,
+              "nativeQuoteCalls": 29,
+              "nativeQuoteInputBytes": 802558,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 9885.920941000004,
+              "phases": {
+                "captureMs": 18.07944299999508,
+                "semanticMs": 3746.98449100001,
+                "comparisonMs": 0.5032490000012331,
+                "originalIrValidationMs": 0.020056999986991286,
+                "emitMs": 5982.235106000007,
+                "printMs": 1638.8096610000066,
+                "emitComparisonMs": 14.447082999991835
+              },
+              "emitterHit": false
+            },
+            "canonicalAdmission": "fe3883c9ce071d575f56862c891a915f0f4a97e47ae8bf21d136db18b0305d58",
+            "independentWasmAccepted": true,
+            "actualApplication": "passed",
+            "edit": "body"
+          },
+          {
+            "kind": "lean",
+            "target": "js",
+            "assurance": "ordinary-checked",
+            "io": true,
+            "status": "candidate",
+            "legacyMs": 16442.923019999987,
+            "priorMs": 16948.92366,
+            "fastMs": 4381.438498000003,
+            "metrics": {
+              "prefixModules": 10,
+              "preparedModules": 1,
+              "finishHit": false,
+              "semanticHit": true,
+              "nativeQuoteCalls": 29,
+              "nativeQuoteInputBytes": 802558,
+              "quoteFallbackCalls": 0,
+              "preparationMs": 4144.223939000018,
+              "phases": {
+                "captureMs": 16.443800999986706,
+                "semanticMs": 1.238359999988461,
+                "comparisonMs": 1.2087959999917075,
+                "originalIrValidationMs": 0.0033159999875351787,
+                "emitMs": 3981.862513,
+                "printMs": 0,
+                "emitComparisonMs": 11.416831999988062
+              },
+              "emitterHit": true
+            },
+            "canonicalAdmission": "fe3883c9ce071d575f56862c891a915f0f4a97e47ae8bf21d136db18b0305d58",
+            "independentWasmAccepted": true,
+            "actualApplication": "passed",
+            "edit": "comment"
+          }
+        ]
+      }
+    ],
+    "manifestSha256": "620849f5bfaf67ccf46e6c4d96608b94b016d7a3f3185ee1e90762eec2b5218e",
+    "newCompilerSourceClosureDigest": "67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad"
+  },
+  "legacyBodyAudit": {
+    "status": "passed",
+    "base": "7b9dc2725be226f401a8adcd2e6f0af391308504",
+    "sourceFiles": [
+      "packages/bridge/src/Ps/Bridge/CompilerHost.lean",
+      "packages/compiler/src/Ps/Compiler/Service.lean"
+    ],
+    "hostPins": [
+      {
+        "path": "psc1/host-tools/prepared-engine.mjs",
+        "bytes": 14392,
+        "sha256": "bc051bf666c7d1e81aec82f3c4476a49b41825f98d8d98d1c1395eaf47b7b418"
+      },
+      {
+        "path": "psc1/host-tools/wire-quote.mjs",
+        "bytes": 1345,
+        "sha256": "b693634f79976ebbdeca23c854727c24e32967611d4b3f09e01fab7faac40411"
+      }
+    ]
+  },
+  "generationRun": 40894184363,
+  "generations": {
+    "js": {
+      "job": 123526654849,
+      "status": "running"
+    },
+    "ts": {
+      "job": 123526656592,
+      "status": "running"
+    }
+  },
+  "installation": {
+    "retainedVersion": "0.1.0-psc1-modular.9",
+    "nativeQuotingInRetainedRoot": false,
+    "nextVersion": "0.1.0-psc1-modular.10",
+    "stagedBranch": "qualify/psc1-wire-install-20261029",
+    "stagedCommit": "e3e095f1f2f86d957e3a759cab1ec9cbe0d26bef",
+    "status": "await genuine fixed points, then focused actual installed qualification; no gate bypass"
+  },
+  "notClaimed": [
+    "G2/G3 success",
+    "new-source root promotion",
+    "240-second self-compilation performance",
+    "new-source cross-platform qualification"
+  ],
+  "noMerge": true,
+  "noPublication": true
+}

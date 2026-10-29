@@ -1,5 +1,6 @@
 // Host scheduling only. Every language operation calls the unchanged generated compiler.
 import fs from 'node:fs';
+import { createNativeWireQuoter } from './wire-quote.mjs';
 import { createCompilerDataEquality } from './compiler-data-equality.mjs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -54,12 +55,14 @@ export async function loadPreparedEngine({
   if (!['js', 'ts'].includes(variant)) fail('VARIANT');
   const check = () => verify(root, readManifestBytes(manifestFile), manifestSha256);
   const manifest = check();
-  const load = (owner, name) =>
-    import(
-      pathToFileURL(
-        path.join(root, '@proofscript', owner, 'dist', variant, 'generated', name + '.mjs'),
-      )
+  const load = (owner, name) => {
+    const suffix = '@proofscript/' + owner + '/dist/' + variant + '/generated/' + name + '.mjs';
+    const matches = manifest.files.filter(
+      (row) => row.path === suffix || row.path.endsWith('/' + suffix),
     );
+    if (matches.length !== 1) fail('MODULE_OWNER:' + name);
+    return import(pathToFileURL(path.join(root, matches[0].path)));
+  };
   const [service, api, ir, json, names, runtime] = await Promise.all([
     load('compiler', 'Ps.Compiler.Service'),
     load('compiler', 'Ps.Compiler.Api'),
@@ -86,6 +89,8 @@ export async function loadPreparedEngine({
   }
   check();
   const sameData = createCompilerDataEquality();
+  const wireQuoter = createNativeWireQuoter(json.psJsonQuote);
+  const nativeQuoteEntry = service.Ps_Internal_CompilerService_compilePreparedWithQuote;
   let emissionCache;
   let lastMetrics, previous;
   const constructor = (name) => {
@@ -111,7 +116,7 @@ export async function loadPreparedEngine({
   const entryList = (item) =>
     variant === 'js' ? jsCons(item, jsNil()) : strings().cons(item, strings().nil);
 
-  function prepare(request) {
+  function prepare(request, checkOnly) {
     const captureStarted = performance.now();
     const inputs = array(request.sources),
       old = previous;
@@ -177,8 +182,9 @@ export async function loadPreparedEngine({
           : unwrap(service.Ps_Internal_CompilerService_prepare(request, captured));
       const semanticMs = performance.now() - semanticStarted;
       const validationStarted = performance.now();
-      // Validate original IR even on a preparation hit. No target transform is claimed for check.
-      unwrap(ir.psStrictValidateModule(work.raw));
+      // Check-only validates here, including reuse hits. Builds validate in the
+      // unchanged generated compilePrepared entry point before any transform.
+      if (checkOnly) unwrap(ir.psStrictValidateModule(work.raw));
       previous = {
         kind: request.grammar,
         entry: request.entry,
@@ -214,6 +220,7 @@ export async function loadPreparedEngine({
       check();
       const started = performance.now();
       lastMetrics = undefined;
+      const quoteBefore = wireQuoter.metrics();
       let activeRequest,
         activeTarget,
         checkingRequest = false;
@@ -239,7 +246,7 @@ export async function loadPreparedEngine({
         const request = selected.fst;
         activeRequest = request;
         const io = selected.snd,
-          { captured, work, cache, phases } = prepare(request);
+          { captured, work, cache, phases } = prepare(request, checking);
         if (checking) {
           if (io) fail('CHECK_OUTPUT_ABI');
           const origins = array(captured.originsRev)
@@ -276,7 +283,9 @@ export async function loadPreparedEngine({
         const emitStarted = performance.now();
         const emitterStats = { printMs: 0, comparisonMs: 0, hit: false };
         const output = unwrap(
-          service.Ps_Internal_CompilerService_compilePreparedWithOutputAbi(
+          (typeof nativeQuoteEntry === 'function'
+            ? (...args) => nativeQuoteEntry(wireQuoter.quoteString, ...args)
+            : service.Ps_Internal_CompilerService_compilePreparedWithOutputAbi)(
             io,
             backendTarget,
             (module) => (selected) => {
@@ -310,8 +319,12 @@ export async function loadPreparedEngine({
             work,
           ),
         );
+        const quoteAfter = wireQuoter.metrics();
         lastMetrics = {
           ...cache,
+          nativeQuoteCalls: quoteAfter.nativeCalls - quoteBefore.nativeCalls,
+          nativeQuoteInputBytes: quoteAfter.nativeInputBytes - quoteBefore.nativeInputBytes,
+          quoteFallbackCalls: quoteAfter.fallbackCalls - quoteBefore.fallbackCalls,
           preparationMs: performance.now() - started,
           phases: {
             ...phases,

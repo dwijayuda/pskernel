@@ -1,16 +1,28 @@
 # Fast installed .ps development
 
-The .7 host has [finite Linux/Node qualification](../PSC1_SEMANTIC_REUSE_QUALIFICATION_2026-10-29.json).
-The [.6 receipt](../PSC1_PERSISTENT_QUALIFICATION_2026-10-29.json) preserves its prior scope.
-The previous [.5 receipt](../PSC1_DEVELOPMENT_QUALIFICATION_2026-10-29.json) and
-[.4 cross-platform receipt](../PSC1_CROSS_PLATFORM_QUALIFICATION_2026-10-29.json)
-retain their distinct scopes. No compiler graph, kernel artifact or self-host
-qualification is relabelled.
+The .10 installed compiler activates native wire string quoting and removes duplicate
+build validation. [Installed qualification](../PSC1_WIRE_INSTALLED_QUALIFICATION_2026-10-30.json)
+and [source fixed points](../PSC1_WIRE_MODULAR_QUALIFICATION_2026-10-29.json) have distinct
+finite Linux scopes. The default checker remains official Lean 4.35.0 C++/Emscripten
+linear-memory Wasm; the kernel and strict IR/publication boundaries are unchanged.
 
-[Verified .7 Linux x64 ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40871621775/artifacts/12895314098)
-contains the tested root, matching TypeScript SDKs, installation instructions,
-checksums and exact qualification/comparison receipts. Sign in to GitHub first.
-Adoption40871621775 verifies the tested bytes at1e104ecc; no rebuild.
+[Verified .10 Linux x64 artifact](https://github.com/dwijayuda/pskernel/actions/runs/40969210436/artifacts/12939207933)
+contains proofscript-wire-quote-linux-x64.zip and the passed source-adoption receipt: the tested root, matching TypeScript
+SDKs, instructions and exact receipts/checksums. Native quoting is active, with
+portable fallback. The same-runner 11-module application averages 6326.64 ms (.7)
+versus 4547.08 ms (.10) for two steady warm comment edits: about 28% less time.
+This does not predict arbitrary programs or cold/body-edit latency.
+
+The [.9](../PSC1_WIRE_TRANSPORT_QUALIFICATION_2026-10-29.json),
+[.7](../PSC1_SEMANTIC_REUSE_QUALIFICATION_2026-10-29.json),
+[.6](../PSC1_PERSISTENT_QUALIFICATION_2026-10-29.json),
+[.5](../PSC1_DEVELOPMENT_QUALIFICATION_2026-10-29.json) and
+[.4 cross-platform](../PSC1_CROSS_PLATFORM_QUALIFICATION_2026-10-29.json)
+receipts preserve their historical cohorts. No graph or qualification is relabelled.
+The new .10 host is qualified on Linux/Node22.23.3; other-platform and new-source
+Rust/Wasm compiler executors remain separate work. The 240-second self-compilation
+target is unqualified; JS/TS G2/G3 and exact graph/npm fixed points passed under
+the separate 3600-second correctness profile.
 
 ## Use
 
@@ -64,8 +76,10 @@ and [exec.c](https://github.com/torvalds/linux/blob/master/fs/exec.c).
 
 Preparation caches stay in private memory. Exact source bytes, module order,
 grammar, entry and assurance determine reuse. Source changes invalidate the
-affected prefix suffix; errors clear reuse. Build emission invokes the existing
-generated compilePreparedWithOutputAbi and existing backend emitters.24 exact
+affected prefix suffix; errors clear reuse. Build emission invokes the generated compilePreparedWithQuote entry and existing
+backend emitters. Its legacy wrapper supplies psJsonQuote; the fixed Node host
+supplies the guarded native string serializer. The generated entry validates
+original IR before transforms; check-only validates in the adapter. 24 exact
 candidate comparisons cover both generated data representations. Fresh independent
 admission and strict IR validation still run for every issued checked request.
 
@@ -74,12 +88,12 @@ event, without a new request, new acceptance claim or publication. Failed attemp
 clear that reuse. Builds continue through output/publication validation.
 Watch uses one private sequential Linux/Node worker,240s/request,4096MiB heap,
 8MiB stack and64 attempts/lifetime; termination owns the process group.
-Other hosts/runtimes retain their previous one-shot route and lack new .6 evidence.
+Other hosts/runtimes retain their previous route and lack this new .10 host evidence.
 
 ## Bounded reuse of compiler values
 
 [prepared-engine.mjs](../../host-tools/prepared-engine.mjs) invokes the unchanged
-generated [prepare/compilePreparedWithOutputAbi functions](../../packages/compiler/src/Ps/Compiler/Service.lean).
+generated [preparation/build functions](../../packages/compiler/src/Ps/Compiler/Service.lean).
 Preparation is a pure function of assurance and the complete generated elaborated
 result, including environment and declarations. Fresh source capture, exact closure
 checking and origins remain outside reuse. A structural comparison accepts only

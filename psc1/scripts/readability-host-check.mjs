@@ -25,7 +25,18 @@ const developmentPins=new Map(developmentReceipt.hostSources.pins.map(pin=>[pin.
 const persistentReceipt=JSON.parse(fs.readFileSync(path.join(root,'docs/PSC1_PERSISTENT_QUALIFICATION_2026-10-29.json')));
 assert.equal(persistentReceipt.status,'qualified-finite-linux-node');
 const persistentPins=new Map(persistentReceipt.hostSources.pins.map(pin=>[pin.path.slice(5),pin]));
+const wireInstalledFile='docs/PSC1_WIRE_INSTALLED_QUALIFICATION_2026-10-30.json';
+const wireInstalledReceipt=fs.existsSync(path.join(root,wireInstalledFile))
+ ?JSON.parse(fs.readFileSync(path.join(root,wireInstalledFile))):undefined;
+if(wireInstalledReceipt)assert.equal(wireInstalledReceipt.status,'qualified-finite-linux-node');
+const wireInstalledPins=new Map((wireInstalledReceipt?.hostSources.pins??[]).map(pin=>[pin.path.slice(5),pin]));
 function qualifiedPersistentSource(file,source){
+ const wirePin=wireInstalledPins.get(file);
+ if(wirePin){
+  assert.equal(Buffer.byteLength(source),wirePin.bytes);
+  assert.equal(createHash('sha256').update(source).digest('hex'),wirePin.sha256,file+': unqualified wire host bytes');
+  source=readAt(wireInstalledReceipt.baseCommit,file);
+ }
  const pin=persistentPins.get(file);if(!pin)return source;
  assert.equal(Buffer.byteLength(source),pin.bytes);
  assert.equal(createHash('sha256').update(source).digest('hex'),pin.sha256,file+': unqualified persistent host bytes');
@@ -177,6 +188,7 @@ fs.mkdirSync(out, {recursive: true});
 fs.writeFileSync(path.join(out, 'host.json'), JSON.stringify({
   schema: 'psc1-readability-host/1', commit: process.env.GITHUB_SHA,
   baseline, cleanupCommit, featureBaselines, featureQualification, layoutCheckpoint, runtimeFeatureBaseline, modularFeatureBaseline, modularFeatureParent, modularFeatureQualification, platformFeatureQualification,
+  wireInstalledQualification:wireInstalledReceipt?wireInstalledFile:null,
   mode: propose ? 'proposal-not-qualification' : 'check',
   formatter: 'prettier@3.6.2', parser: '@babel/parser@7.28.0', results,
 }, null, 2) + '\n');

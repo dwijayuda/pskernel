@@ -16,7 +16,8 @@ const compileMs=performance.now()-compilation;
 async function execute(input,command='--check'){
  const bytes=Buffer.from(input??''),out=[],err=[];let cursor=0;
  const append=(a,c)=>{if(c!==null){if(a.length>=33554432)throw Error('KERNEL_PROBE_OUTPUT_LIMIT');a.push(c);}};
- const processView={argv:[process.execPath,launcher,command],env:{...process.env},platform:process.platform,versions:process.versions,version:process.version,hrtime:process.hrtime,cwd:()=>process.cwd(),exitCode:0};
+ const processView=Object.assign(Object.create(process),{argv:[process.execPath,launcher,command],env:{...process.env}});
+ Object.defineProperty(processView,'exitCode',{value:0,writable:true,configurable:true});
  const Module={arguments:[command],stdin:()=>cursor<bytes.length?bytes[cursor++]:null,stdout:c=>append(out,c),stderr:c=>append(err,c),
   instantiateWasm(imports,success){const instance=new WebAssembly.Instance(compiled,imports);success(instance);return instance.exports;}};
  const context=vm.createContext({Module,require:createRequire(launcher),module:{exports:{}},__filename:launcher,__dirname:path.dirname(launcher),process:processView,console,Buffer,TextDecoder,TextEncoder,performance,setTimeout,clearTimeout});

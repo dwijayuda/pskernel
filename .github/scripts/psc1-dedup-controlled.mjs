@@ -34,5 +34,5 @@ for(const root of roots){
 }
 const stable=reports.map(r=>({label:r.label,meanMs:r.report.outcomes.slice(1).reduce((n,o)=>n+o.compileWallMs,0)/2}));
 const comparison={schema:'psc1-semantic-controlled-comparison/1',commit:process.env.GITHUB_SHA,status:'passed',scope:'Linux Node22.23.3; 11-module PracticalCli.Run; comment-only leaf edits; warm means exclude first; observations not universal guarantee',stable,speedup:stable[0].meanMs/stable[1].meanMs,reports};
-fs.mkdirSync('dist/dedup-results',{recursive:true});fs.writeFileSync('dist/semantic-results/comparison.json',JSON.stringify(comparison,null,2)+'\n');
+fs.mkdirSync('dist/dedup-results',{recursive:true});fs.writeFileSync('dist/dedup-results/comparison.json',JSON.stringify(comparison,null,2)+'\n');
 console.log('PSC1_DEDUP_CONTROLLED_COMPARISON '+JSON.stringify(comparison));

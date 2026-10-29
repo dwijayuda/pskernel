@@ -46,6 +46,10 @@ try{
  fs.writeFileSync(path.join(directory,'fixtures.json'),JSON.stringify(fixtures));
  fs.writeFileSync(path.join(directory,'kernel.mjs'),"import fs from'node:fs';import assert from'node:assert/strict';import{checkCanonicalAdmissions,createIndependentKernelToolchain}from'proofscript';for(const f of JSON.parse(fs.readFileSync('fixtures.json'))){const r=await checkCanonicalAdmissions(f.input);assert.equal(r.accepted,f.accepted,f.id);}assert.equal((await createIndependentKernelToolchain()).metadata.leanVersion,'4.35.0');");
  ok(process.execPath,[path.join(directory,'kernel.mjs')]);report.kernelCases=fixtures.length;
+ const warmKernelTest=path.join(directory,'warm-kernel.mjs');
+ fs.writeFileSync(warmKernelTest,"import fs from'node:fs';import assert from'node:assert/strict';import{prepareWarmKernel,closeWarmKernel}from'@proofscript/compiler/warm-internal';import{warmKernel}from"+JSON.stringify(pathToFileURL(path.join(root,'node_modules/@proofscript/compiler/dist/host/host-tools/warm-kernel.mjs')).href)+";import{checkCanonicalAdmissions}from'proofscript';await prepareWarmKernel();try{const run=warmKernel();assert.equal(typeof run,'function');for(const f of JSON.parse(fs.readFileSync('fixtures.json'))){const direct=run(f.input),cold=await checkCanonicalAdmissions(f.input);assert.deepEqual(direct,cold.results.wasm,f.id);assert.equal(direct.accepted,f.accepted);}}finally{await closeWarmKernel();}");
+ ok(process.execPath,[warmKernelTest]);report.warmKernelCases=fixtures.length;
+
  const graph=JSON.parse(fs.readFileSync(path.join(root,'dist/COMPILER_GRAPH.json'))),row=graph.files.find(r=>r.path.includes('/dist/js/generated/')&&r.path.endsWith('.mjs'));
  const file=path.join(root,'node_modules',row.path),before=fs.readFileSync(file);
  try{fs.appendFileSync(file,'\n// tampered');const r=call(process.execPath,[cli,'check','Main.ps']);assert.notEqual(r.status,0);assert.match(r.stderr,/PSC1_EXECUTABLE/);report.tamperBeforeExecution=true;}

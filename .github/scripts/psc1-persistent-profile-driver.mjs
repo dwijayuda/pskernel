@@ -21,7 +21,7 @@ mark('prepare-warm');
 if(mode.startsWith('warm')){
  const root=path.dirname(new URL(import.meta.resolve('proofscript/package.json')).pathname);
  const file=path.join(root,'node_modules/@proofscript/compiler/dist/host/host-tools/warm-compiler.mjs');
- const warm=await import(pathToFileURL(file));await warm.prepareWarmCompiler('js');
+ const warm=await import(pathToFileURL(file));await warm.prepareWarmCompiler('js');if(warm.prepareWarmKernel)await warm.prepareWarmKernel();
 }
 const outcomes=[];
 for(let i=0;i<(mode.startsWith('warm')?3:1);i++){
@@ -32,4 +32,4 @@ for(let i=0;i<(mode.startsWith('warm')?3:1);i++){
 }
 mark('done');
 const values=[...rows.values()],total=values.reduce((a,r)=>({reads:a.reads+r.reads,bytes:a.bytes+r.bytes,readMs:a.readMs+r.readMs}),{reads:0,bytes:0,readMs:0});
-console.log('PSC1_PERSISTENT_PROFILE '+JSON.stringify({mode,wallMs:performance.now()-started,total,phases,outcomes,children,byPhase:Object.fromEntries([...new Set(values.map(r=>r.phase))].map(p=>[p,values.filter(r=>r.phase===p).reduce((a,r)=>({reads:a.reads+r.reads,bytes:a.bytes+r.bytes,readMs:a.readMs+r.readMs}),{reads:0,bytes:0,readMs:0})])),largest:values.sort((a,b)=>b.bytes-a.bytes).slice(0,24)}));
+console.log('PSC1_PERSISTENT_PROFILE '+JSON.stringify({mode,wallMs:performance.now()-started,total,phases,outcomes,children,byPhase:Object.fromEntries([...new Set(values.map(r=>r.phase))].map(p=>[p,values.filter(r=>r.phase===p).reduce((a,r)=>({reads:a.reads+r.reads,bytes:a.bytes+r.bytes,readMs:a.readMs+r.readMs}),{reads:0,bytes:0,readMs:0})])),maxRssKiB:process.resourceUsage().maxRSS,largest:values.sort((a,b)=>b.bytes-a.bytes).slice(0,24)}));

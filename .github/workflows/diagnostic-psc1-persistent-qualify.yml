@@ -27,6 +27,7 @@ jobs:
       - run: npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
       - run: node scripts/readability-host-check.mjs
       - run: node ../.github/scripts/psc1-persistent-stage.mjs
+      - run: node ../.github/scripts/psc1-resource-capture-test.mjs
       - name: Assemble original qualified compiler graph with proposed host
         env: {GH_TOKEN: '${{ github.token }}'}
         run: node scripts/modular-toolchain-package.mjs build

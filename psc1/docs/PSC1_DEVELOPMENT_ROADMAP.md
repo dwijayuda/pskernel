@@ -1,46 +1,66 @@
 # PSC1 development roadmap
 
-Updated 2026-10-29 Asia/Jakarta. This is the authoritative remaining-work queue.
+Updated 2026-10-30 Asia/Jakarta. This is the authoritative remaining-work queue.
 Practical Core v1 remains frozen at14 feature families and 37 finite criteria.
 Completed detail is preserved in [the previous roadmap](history/ROADMAP_BEFORE_LAYOUT_2026-10-26.md)
 and [dated evidence](evidence/README.md).
 
-## Current corrected-source checkpoint: full CI green, generations active
+## Qualified .10 source and installed compiler
 
-[Source CI 40894666856](https://github.com/dwijayuda/pskernel/actions/runs/40894666856)
-passes all 16 selected jobs at implementation `efe35012851a8e81c92f84cfa0eb1c7bd058921c`;
-the benchmark is intentionally skipped. Retained frozen-compiler
-[CLI 40894659730](https://github.com/dwijayuda/pskernel/actions/runs/40894659730)
-passes all nine jobs, and existing npm 40894666645 passes. PR #215 remains at
-qualified `7b9dc2725be226f401a8adcd2e6f0af391308504`.
+[Installed CI 40968122960](https://github.com/dwijayuda/pskernel/actions/runs/40968122960)
+passes at staged producer `d87c202e408a7f38c807ee804ea811ba5301eadb`. Canonical adoption uses its exact
+four formatted source/metadata pins and tested tarball; it does not rebuild or
+relabel a previous compiler. Root `proofscript-0.1.0-psc1-modular.10.tgz`: 9842556 bytes, SHA256
+`19f62a66f72e33664ce6b1ac6deb48242510b67de5ac94d0e5e065c16e05adb1`. The tested ZIP is in
+[artifact 12939127333](https://github.com/dwijayuda/pskernel/actions/runs/40968122960/artifacts/12939127333).
+The final source-adoption check verifies current source/pins and reads the ZIP back.
 
-The initial full-suite failure 40886789852 correctly refused a higher-order bridge
-helper exposed as public. It is now under `Ps.Internal.CompilerHost`; no scalar
-ABI exception was added. Corrected source `a1f49fb3195a9142f941de34c1e6565bf31146fb`,
-digest `67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad`,
-has passed native/portable G1, both legacy rfl equations (reported [propext]),
-JS/Rust transport, 4907 logical declarations, strict original/transformed IR,
-all 15 TS package checks, nine integrity negatives, exhaustive scalar quoting,
-26 candidate comparisons and independent native/Wasm application checks.
-Portable G1 is 120761 ms, peak RSS 1211096 KiB; manifest
-`210c9577643f26b91a80eae036f3f70272a606a55520fe9a974db47fd14023dc`.
-Exact receipts and artifact identities: [source checkpoint](PSC1_WIRE_SOURCE_CHECKPOINT_2026-10-29.json).
+The new installed JS/TS graph uses source `a1f49fb3195a9142f941de34c1e6565bf31146fb`, digest
+`67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad`, G1/G2/G3 manifest
+`210c9577643f26b91a80eae036f3f70272a606a55520fe9a974db47fd14023dc`. [Generations 40894184363](https://github.com/dwijayuda/pskernel/actions/runs/40894184363)
+passes both engines with zero native frontend calls, independent Lean admission,
+exact original/transformed IR and rendered-native references, all graph files and
+all 15 npm tarballs identical across G1/G2/G3 and across engines. Actual compiler
+requests: JS G2/G3 2866480/3089677 ms, peak RSS 4015232/4089932 KiB;
+TS 2896525/3078372 ms, 3848280/3874888 KiB. These qualify the separate 3600-second
+correctness profile; the 240-second performance target remains unqualified.
 
-[Run 40894184363](https://github.com/dwijayuda/pskernel/actions/runs/40894184363)
-is executing genuine JS/TS G2/G3 with 3600-second per-request correctness limits;
-normal G1/compiler/tools/corpus stay at 240 seconds, checker at 120 seconds.
-The superseded pre-ABI-fix run 40891862487 was cancelled without promotion.
-The earlier 120bbbc5 G1 and paired measurements remain precursor evidence.
+Native string quoting is now **active in the installed compiler**, with the
+portable quoter as fallback. Cold Node/Linux JS/TS/Wasm-core builds use the
+installed sealed prepared adapter; other hosts/targets retain their existing
+route. Check-only retains adapter original-IR validation. Builds invoke the
+required generated original-IR validation once, then every transformed-IR,
+independent kernel, target-consumer and transactional-publication check.
+No project callback, IR/checker bypass or resource/fuel relaxation was added.
+The public scalar-ABI gate is retained; the quote helper is internal.
 
-Next: require terminal G2/G3 and exact graph/npm fixed points, then assemble .10
-and run the staged installed checks once. The cold Node/Linux JS/TS/Wasm-core
-adapter proposal is isolated at `qualify/psc1-wire-install-20261029`, commit
-`e3e095f1f2f86d957e3a759cab1ec9cbe0d26bef`; it must pass actual installed
-execution, admission, typing/integrity negatives, watch and measured application
-checks with positive native-quote counters before canonical adoption. Current
-canonical host API bytes remain the previously qualified bytes. The installable
-.9 graph still uses source17ce1991 and does not activate native quoting.
-No new-source root, fixed points, release, merge or publication is claimed yet.
+The installed suite passes both engines/grammars, 12 actual JS/strict-TS/Wasm-core
+builds, four typing refusals, 24 exact prepared/legacy candidate comparisons,
+14 cold and 14 warm official-kernel cases, full/minimal evidence, tamper refusal,
+live watch dependency/error/publication/shutdown, and Unicode JSON/file execution.
+All 22 positive parity candidates and the measured real application have native
+quote calls with no fallback. On one runner, two steady warm comment-edit builds
+of the 11-module application average 6326.64 ms (.7) versus 4547.08 ms (.10),
+about 28% less time. These are finite observations, not a universal latency claim.
+The watchBuild.editMs field includes a later refusal case and is not edit latency.
+
+[Installed receipt](PSC1_WIRE_INSTALLED_QUALIFICATION_2026-10-30.json) and
+[source-generation receipt](PSC1_WIRE_MODULAR_QUALIFICATION_2026-10-29.json)
+contain exact producer commits, artifact SHA256s, measurements, tests and limits.
+Source implementation `efe35012851a8e81c92f84cfa0eb1c7bd058921c` passes
+[all 16 selected source jobs](https://github.com/dwijayuda/pskernel/actions/runs/40894666856),
+[nine retained CLI jobs](https://github.com/dwijayuda/pskernel/actions/runs/40894659730)
+and existing npm 40894666645. The source checkpoint added at b9af07e7 is a
+historical pre-generation snapshot; these newer receipts supersede its pending status.
+
+Preserve .7/.9/.13, previous platform evidence, all seven backend implementations,
+optional Python/PHP, official Lean 4.35.0 and the C++/Emscripten linear-memory
+Wasm kernel. This .10 host qualification is Linux x64/Node22.23.3; it does not
+inherit cross-platform or native Rust/Wasm compiler-executor qualification.
+No merge or registry publication. Next measured queue: graph identity/metadata
+costs, reusable pinned target consumers, finer invalidation and cold module loading.
+Further algorithm changes need actual profiles; unchanged-source generations
+must not be repeated for host/docs changes.
 
 ## Retained .9 delivery and historical scope
 
@@ -65,7 +85,7 @@ the required original-IR validation before transforms. The adapter removes only
 the redundant pass. New retained-CLI run40885379473 is separate; read it live
 before terminal claims. No merge or npm publication.
 
-## Verified transport and validation implementation
+## Historical transport and validation precursors
 
 PR #215 HEAD 7b9dc2725be226f401a8adcd2e6f0af391308504 is now fully green:
 [source40872117065](https://github.com/dwijayuda/pskernel/actions/runs/40872117065)
@@ -764,7 +784,7 @@ PR #197 implementation 9aefeeb and documentation refresh c5c15582 pass all 42 pa
 | 1 | Repository organization | Qualified: [receipt](PSC1_LAYOUT_QUALIFICATION_2026-10-26.json). Source 40344469855 passes 37/37; installed40344458391 and current-source WasmG1/40344458240 pass. Canonical owners/compatibility paths, exact move/path checks, generated navigation and unchanged frozen payloads. Human understanding is separate. |
 | 2 | Independent maintainer trial | Pending human participation; the user can arrange a maintainer. Record commit, navigation mistakes, elapsed time, assistance and a real small change. No AI/CI comprehension claim. |
 | 3 | Compiler-origin structured diagnostics/editor integration | Pending: actual spans/provenance, both grammars, machine/human consumers and malformed-input refusals. |
-| 4 | Runtime compatibility, checked watch and licensing | Qualified Linux milestone, PR#193 /fdc52207fdf3d809ad99b05a5b738aca21b95139: Node>=22.23.3, Bun>=1.4.4; actual Node22.23.3/24.21.0/26.12.1 and Bun1.4.4; older Node/Bun refusals;55 CLI requests,11 full watch cases,16 applications/264 observations,32 publications/143 refusals; all61 SDK pins unchanged. Apache-2.0 source/cohort, vendor notices retained. [Receipt](PSC1_RUNTIME_WATCH_QUALIFICATION_2026-10-27.json). Semantic incremental caching remains deferred. |
+| 4 | Runtime compatibility, checked watch and licensing | Qualified Linux milestone, PR#193 /fdc52207fdf3d809ad99b05a5b738aca21b95139: Node>=22.23.3, Bun>=1.4.4; actual Node22.23.3/24.21.0/26.12.1 and Bun1.4.4; older Node/Bun refusals;55 CLI requests,11 full watch cases,16 applications/264 observations,32 publications/143 refusals; all61 SDK pins unchanged. Apache-2.0 source/cohort, vendor notices retained. [Receipt](PSC1_RUNTIME_WATCH_QUALIFICATION_2026-10-27.json). Semantic incremental caching is qualified in PR #215; preserve its finite receipt and refusal/invalidation boundaries. |
 | 5 | Fully modular executable compiler | M1/M2 candidate graph and finite M3 application/semantic/seven-target execution are qualified in PR #205–#207; see the [current plan](architecture/executable-package-modularity.md) and [M3 receipt](PSC1_MODULAR_SEMANTIC_QUALIFICATION_2026-10-28.json). M4 finite Linux installed umbrella/thin CLI/watch is qualified in PR #208 ([receipt](PSC1_MODULAR_INSTALLED_QUALIFICATION_2026-10-28.json)); M5 finite Linux modular JS/TS G1/G2/G3, full graphs and all15 npm tarballs qualify in40755246954 ([receipt](PSC1_PORTABLE_MODULAR_QUALIFICATION_2026-10-29.json)). Preserve .13, existing package names, independent checking and resource policies. Pilot expansion stays deferred. PR #211 now qualifies the .3 finite Linux installed Node/Bun root, CLI/watch, seven-target and real-application scope ([receipt](PSC1_SELFHOSTED_INSTALLED_QUALIFICATION_2026-10-29.json)). PR #212/.4 qualifies finite Node Linux/Windows/macOS installed JS/TS engines and JS/TS/Wasm-core output ([receipt](PSC1_CROSS_PLATFORM_QUALIFICATION_2026-10-29.json));240s performance, new compiled Rust/Wasm executors and final default promotion remain pending. |
 | 6 | Component String/IO and export selection | Pending: reuse shared/native ABI; both grammars/four engines, actual validation/execution, exact exports and refusals. Public component ABI currently Bool only. |
 | 7 | Full Python/PHP practical applications | Pending: real CLI/JSON/file/multi-module observations against checked reference; retain corpus/Unicode/integer/loop/IO tests. Providers remain optional. |

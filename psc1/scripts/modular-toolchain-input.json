@@ -3,27 +3,27 @@
   "graph": {
     "schema": "psc1-qualified-modular-graph-input/1",
     "artifact": {
-      "run": 40755246954,
-      "job": 123052311598,
-      "artifact": 12852666295,
-      "commit": "336ab495df5479a959a071166b7c2c6b24823b26",
-      "zipSha256": "ea16cfb3d4c597d3b37fb22b1b1cffa2940f7075a0d17197140ca6d9e4825194"
+      "run": 40894184363,
+      "job": 123526654849,
+      "artifact": 12913883768,
+      "commit": "a1f49fb3195a9142f941de34c1e6565bf31146fb",
+      "zipSha256": "7d6f3b9cf0d0968db077476df90de1dccaaed0dff15b53e3ef602459508075e3"
     },
     "crossCheckArtifact": {
-      "run": 40755246954,
-      "job": 123052310924,
-      "artifact": 12851274486,
-      "commit": "336ab495df5479a959a071166b7c2c6b24823b26",
-      "zipSha256": "b49445fe4c4c5626f5a718b619024a6abbcfb3975b5f7f5e080ea1338f221715"
+      "run": 40894184363,
+      "job": 123526656592,
+      "artifact": 12914632762,
+      "commit": "a1f49fb3195a9142f941de34c1e6565bf31146fb",
+      "zipSha256": "4050e08c4c4d93e01c4fd58d5955ea6df7929cc5768f21c278d5efb369ef0327"
     },
-    "manifestSha256": "74e14f5650931ccc3de2a4a7ed6829f54197bb8100466bcb2eb0ad90d7b14a85",
-    "compilerSourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
-    "sourceCommit": "17ce19919175b60be06050188e2a546a8a72e689",
-    "qualificationReceipt": "docs/PSC1_PORTABLE_MODULAR_QUALIFICATION_2026-10-29.json",
+    "manifestSha256": "210c9577643f26b91a80eae036f3f70272a606a55520fe9a974db47fd14023dc",
+    "compilerSourceClosureDigest": "67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad",
+    "sourceCommit": "a1f49fb3195a9142f941de34c1e6565bf31146fb",
+    "qualificationReceipt": "docs/PSC1_WIRE_MODULAR_QUALIFICATION_2026-10-29.json",
     "units": 134,
     "packages": 15,
     "files": 1131,
-    "bytes": 103951941
+    "bytes": 103964218
   },
   "root": {
     "run": 40666699859,
@@ -33,7 +33,7 @@
     "zipSha256": "0c27ddf0c4d63b1b3c63e6029d73c0e14391c6b6d6f374b980b252b26e5c60dd",
     "tarball": "proofscript-0.1.0-psc1.13.tgz"
   },
-  "version": "0.1.0-psc1-modular.9",
+  "version": "0.1.0-psc1-modular.10",
   "optional": {
     "run": 40666699859,
     "job": 122743404912,

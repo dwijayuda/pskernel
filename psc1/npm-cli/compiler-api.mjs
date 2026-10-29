@@ -82,16 +82,9 @@ function createSessionFor(selected, publicationRoot) {
     providers = selected.kernel === 'both' ? ['wasm', 'native'] : [selected.kernel];
   const checking = selected.operation === 'check';
   const prepared = engine.preparedCandidate;
-  // The installed, hash-bound adapter owns serialization. Cold Node/Linux core
-  // builds may use it too; other hosts retain their qualified legacy route.
-  const coldPrepared =
-    process.platform === 'linux' &&
-    process.release?.name === 'node' &&
-    !process.versions.bun &&
-    ['js', 'ts', 'rust', 'wasm-core'].includes(selected.target);
   const service = checking
     ? engine.checkCandidate
-    : prepared && (coldPrepared || warmCompiler(prepared.path, prepared.sha256))
+    : prepared && warmCompiler(prepared.path, prepared.sha256)
       ? prepared
       : engine.candidate;
   if (checking && !service) fail('CHECK_SERVICE_UNAVAILABLE');

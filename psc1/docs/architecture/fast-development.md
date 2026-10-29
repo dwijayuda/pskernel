@@ -7,6 +7,11 @@ The previous [.5 receipt](../PSC1_DEVELOPMENT_QUALIFICATION_2026-10-29.json) and
 retain their distinct scopes. No compiler graph, kernel artifact or self-host
 qualification is relabelled.
 
+[Verified .7 Linux x64 ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40871621775/artifacts/12895314098)
+contains the tested root, matching TypeScript SDKs, installation instructions,
+checksums and exact qualification/comparison receipts. Sign in to GitHub first.
+Adoption40871621775 verifies the tested bytes at1e104ecc; no rebuild.
+
 ## Use
 
 Install the matching root and optional SDK tarballs with the exact offline

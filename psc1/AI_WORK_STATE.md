@@ -1,9 +1,24 @@
 # PSC1 AI work state
 
 Updated 2026-10-29 Asia/Jakarta. Active branch feat/psc1-semantic-incremental-20261029,
-from PR #213 qualified HEAD b1d8d55cb664f1ab4b3d30973c10fbf950674c7d.
-Connected GitHub and Linux/Windows/macOS Actions only. Expected-HEAD,
+from PR #214 qualified HEAD c83039f05a445f496f71aea2429ba75c61b81f40.
+Connected GitHub and Linux Actions only; previous platform evidence is retained. Expected-HEAD,
 single-parent/non-force history. No merge or npm registry publication.
+
+## Verified .7 delivery
+
+Canonical adoption [40871621775](https://github.com/dwijayuda/pskernel/actions/runs/40871621775)
+passes at1e104ecc3c2a89678f41c8a1853437cd32d5b6b8. All four production pins,
+terminal qualification/package/source identities, unchanged compiler source,
+historical host correspondence and repository layout pass.
+[Download the verified Linux x64 ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40871621775/artifacts/12895314098)
+(GitHub sign-in required). Outer artifact SHA256:
+785ec1578d7ef4560ec39ed99eb45e9db22b397a9980f1d7314de32423172d0b.
+It contains the exact tested .7 root, two matching TypeScript7.0.2 SDK tarballs,
+Apache-2.0/notices, installation instructions, qualification/comparison/adoption
+receipts and SHA256SUMS. No rebuild or new compiler/self-host claim.
+Root SHA256 remains ab0e2ce442f52311f9fad0e96cebc759c9848434ad49e8c06c6e2df9a76c9d79.
+Retained CLI run40871621864 is separate and must be read live before terminal claims.
 
 ## Qualified structural reuse — .7 Linux/Node milestone
 

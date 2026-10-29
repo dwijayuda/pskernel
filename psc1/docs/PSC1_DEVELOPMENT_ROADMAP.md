@@ -5,6 +5,27 @@ Practical Core v1 remains frozen at14 feature families and 37 finite criteria.
 Completed detail is preserved in [the previous roadmap](history/ROADMAP_BEFORE_LAYOUT_2026-10-26.md)
 and [dated evidence](evidence/README.md).
 
+## Active real-application compiler profile
+
+Active branch `feat/psc1-semantic-incremental-20261029`, from PR #214 source
+adoption `c83039f05a445f496f71aea2429ba75c61b81f40`. The qualified .6 package
+and [delivery40863008602](https://github.com/dwijayuda/pskernel/actions/runs/40863008602)
+remain unchanged. [Read-only evidence40863787611](https://github.com/dwijayuda/pskernel/actions/runs/40863787611)
+recovers the same-runner comparison without recompilation: .5/.6 warm check
+2441/1086ms, warm JS build3439/1564ms, real CLI/JSON application19186/14292ms.
+Both installed packages execute the11-module,50478-byte application correctly
+after all three leaf edits. Artifact12892806521 contains the verified ZIP.
+Root SHA-256 remains23ab4f5b3eba1744b54ce3c9bc66a69edc6504b0a5568129eb99b70aa381a2f2.
+
+Further read-only phase evidence40864571265 shows that the real application's
+new compiler phase still takes12.5–12.6s, while independent admission takes
+178–184ms. The next step is instrumentation separating capture/elaboration,
+semantic preparation, strict original IR validation and backend emission before
+choosing an optimization. The .7 proposal is experimental host instrumentation,
+not qualified release or changed compiler semantics. Do not claim its package
+qualified until actual tests and source adoption pass.
+
+
 ## Persistent development sessions — qualified source milestone
 
 Active branch `feat/psc1-persistent-development-20261029`, from PR #213 HEAD

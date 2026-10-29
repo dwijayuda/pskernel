@@ -47,8 +47,34 @@ try{
  fs.writeFileSync(path.join(directory,'kernel.mjs'),"import fs from'node:fs';import assert from'node:assert/strict';import{checkCanonicalAdmissions,createIndependentKernelToolchain}from'proofscript';for(const f of JSON.parse(fs.readFileSync('fixtures.json'))){const r=await checkCanonicalAdmissions(f.input);assert.equal(r.accepted,f.accepted,f.id);}assert.equal((await createIndependentKernelToolchain()).metadata.leanVersion,'4.35.0');");
  ok(process.execPath,[path.join(directory,'kernel.mjs')]);report.kernelCases=fixtures.length;
  const warmKernelTest=path.join(directory,'warm-kernel.mjs');
- fs.writeFileSync(warmKernelTest,"import fs from'node:fs';import assert from'node:assert/strict';import{prepareWarmKernel,closeWarmKernel}from'@proofscript/compiler/warm-internal';import{warmKernel}from"+JSON.stringify(pathToFileURL(path.join(root,'node_modules/@proofscript/compiler/dist/host/host-tools/warm-kernel.mjs')).href)+";import{checkCanonicalAdmissions}from'proofscript';await prepareWarmKernel();try{const run=warmKernel();assert.equal(typeof run,'function');for(const f of JSON.parse(fs.readFileSync('fixtures.json'))){const direct=run(f.input),cold=await checkCanonicalAdmissions(f.input);assert.deepEqual(direct,cold.results.wasm,f.id);assert.equal(direct.accepted,f.accepted);}}finally{await closeWarmKernel();}");
+ fs.writeFileSync(warmKernelTest,"import fs from'node:fs';import assert from'node:assert/strict';import{prepareWarmKernel,closeWarmKernel}from"+JSON.stringify(pathToFileURL(path.join(root,'node_modules/@proofscript/compiler/dist/host/host-tools/warm-compiler.mjs')).href)+";import{warmKernel}from"+JSON.stringify(pathToFileURL(path.join(root,'node_modules/@proofscript/compiler/dist/host/host-tools/warm-kernel.mjs')).href)+";import{checkCanonicalAdmissions}from'proofscript';await prepareWarmKernel();try{const run=warmKernel();assert.equal(typeof run,'function');for(const f of JSON.parse(fs.readFileSync('fixtures.json'))){const direct=run(f.input),cold=await checkCanonicalAdmissions(f.input);assert.deepEqual(direct,cold.results.wasm,f.id);assert.equal(direct.accepted,f.accepted);}}finally{await closeWarmKernel();}");
  ok(process.execPath,[warmKernelTest]);report.warmKernelCases=fixtures.length;
+ const compareFile=path.join(directory,'prepared-parity.mjs');
+ const installedHost=path.join(root,'node_modules/@proofscript/compiler/dist/host');
+ fs.writeFileSync(compareFile,`import assert from'node:assert/strict';import{pathToFileURL}from'node:url';
+ import{loadDistribution,resolveEngine}from${JSON.stringify(pathToFileURL(path.join(installedHost,'host-tools/installed-engine-resolver.mjs')).href)};
+ import{compilerSourceClosureDigest}from${JSON.stringify(pathToFileURL(path.join(installedHost,'host-tools/compiler-host-protocol.mjs')).href)};
+ const d=loadDistribution(),results=[];
+ for(const variant of['js','ts']){
+  const e=resolveEngine(variant,d),original=await import(pathToFileURL(e.candidate.path)),prepared=await import(pathToFileURL(e.preparedCandidate.path));
+  let serial=0;
+  const compare=(sources,target,assurance='checked')=>{
+   const request=['psc1-unified-compiler-service/2',target,['psc1-compiler-service/1','parity-'+(++serial),compilerSourceClosureDigest(sources),sources[0].kind,assurance,'Main',sources.map(s=>[s.module,s.text])]];
+   const text=JSON.stringify(request),expected=original.psCompilerServiceCandidate(text),actual=prepared.psCompilerServiceCandidate(text);
+   assert.equal(actual,expected,variant+':'+target+':'+sources[0].kind);
+   results.push({variant,target,kind:sources[0].kind,status:JSON.parse(actual).status,cache:prepared.psCompilerPreparationMetrics()});
+   return prepared.psCompilerPreparationMetrics();
+  };
+  for(const kind of['ps','lean'])for(const target of['js','ts','rust','wasm-core'])compare([{module:'Main',kind,text:'def answer : Nat := 42\\n'}],target);
+  const base={module:'Base',kind:'ps',text:'def base : Nat := 40\\n'};
+  compare([base,{module:'Main',kind:'ps',text:'import Base\\ndef answer : Nat := base + 2\\n'}],'js');
+  const hit=compare([base,{module:'Main',kind:'ps',text:'import Base\\ndef answer : Nat := base + 3\\n'}],'js');assert.equal(hit.prefixModules,1);
+  compare([base,{module:'Main',kind:'ps',text:'import Base\\ndef answer : Nat := true\\n'}],'js');
+  compare([{module:'Main',kind:'ps',text:'def answer : Nat := 42\\n'}],'js','ordinary-checked');
+ }
+ console.log(JSON.stringify({status:'passed',comparisons:results.length,results}));`);
+ const parity=JSON.parse(ok(process.execPath,[compareFile]));assert.equal(parity.status,'passed');report.preparedParity=parity;
+
 
  const graph=JSON.parse(fs.readFileSync(path.join(root,'dist/COMPILER_GRAPH.json'))),row=graph.files.find(r=>r.path.includes('/dist/js/generated/')&&r.path.endsWith('.mjs'));
  const file=path.join(root,'node_modules',row.path),before=fs.readFileSync(file);
@@ -99,7 +125,8 @@ try{
   const pointer=fs.readlinkSync(path.join(project,'out/current'));
   fs.writeFileSync(path.join(project,'Main.ps'),'import Middle\ndef answer : Nat := true\n');
   await b.until(()=>b.stderr().includes('failed; waiting for changes'));assert.equal(fs.readlinkSync(path.join(project,'out/current')),pointer);
-  report.watchBuild={target:'ts',editMs:performance.now()-start,values:['42','43'],typingRefusalPreserved:true};
+  report.watchBuild={target:'ts',editMs:performance.now()-start,values:['42','43'],typingRefusalPreserved:true,cache:b.results[1].receipt.cache};
+  assert.equal(b.results[1].receipt.cache.prefixModules,2);assert.equal(b.results[1].receipt.cache.preparedModules,1);
  }finally{report.watchBuildStopMs=await b.stop();}
  const ordinary=invoke('check',{entryModule:'Main',assurance:'ordinary-checked',sources:[{module:'Main',kind:'lean',text:'partial def again (n : Nat) : Nat := again n\n'}]});
  assert.equal(ordinary.logicalAdmission,'accepted');report.ordinaryPartialChecked=true;

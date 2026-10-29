@@ -21,7 +21,7 @@ try{
  const root=path.join(directory,'node_modules/proofscript'),host=path.join(root,'node_modules/@proofscript/compiler/dist/host/host-tools');
  const graph=JSON.parse(fs.readFileSync(path.join(root,'dist/COMPILER_GRAPH.json')));
  const load=name=>{const matches=graph.files.filter(row=>row.path.endsWith('/dist/js/generated/'+name+'.mjs'));assert.equal(matches.length,1,name);return import(pathToFileURL(path.join(root,'node_modules',matches[0].path)));};
- const [service,api,json,ir,encoder,emitter,protocol]=await Promise.all([load('Ps.Compiler.Service'),load('Ps.Compiler.Api'),load('Ps.Bridge.Json'),load('Ps.CompilerIr.Validate'),load('Ps.CompilerIr.Encode'),load('Ps.BackendJs.Emit'),import(pathToFileURL(path.join(host,'compiler-host-protocol.mjs')))]);
+ const [service,api,json,ir,encoder,emitter,protocol,hostBridge]=await Promise.all([load('Ps.Compiler.Service'),load('Ps.Compiler.Api'),load('Ps.Bridge.Json'),load('Ps.CompilerIr.Validate'),load('Ps.CompilerIr.Encode'),load('Ps.BackendJs.Emit'),import(pathToFileURL(path.join(host,'compiler-host-protocol.mjs'))),load('Ps.Bridge.CompilerHost')]);
  const fields=v=>v?.['$ps$fields']??v,tag=v=>v?.['$ps$tag'],unwrap=r=>{assert.equal(tag(r),'ok',String(fields(r)?.error?.phase)+':'+fields(r)?.error?.code);return fields(r).value;},nil=()=>({'$ps$tag':'nil','$ps$fields':{}}),cons=(head,tail)=>({'$ps$tag':'cons','$ps$fields':{head,tail}});
  const requestFields=['psc1-compiler-service/2','ir-cost',protocol.compilerSourceClosureDigest(sources),'lean','ordinary-checked','PracticalCli.Run',sources.map(s=>[s.module,s.text]),'io-dispatcher'];
  const selected=unwrap(service.Ps_Internal_CompilerService_decodeOutputRequestFields(fields(unwrap(json.psJsonParse(JSON.stringify(requestFields)))).values)),request=selected.fst;
@@ -32,9 +32,13 @@ try{
  let closed;
  const wire=time('pipelineMs',()=>unwrap(service.Ps_Internal_CompilerService_compilePreparedWithOutputAbi(selected.snd,{'$ps$tag':'js','$ps$fields':{}},module=>names=>{closed=module;return time('printMs',()=>emitter.Ps_Internal_JsCompilerService_emit(module,names));},request,captured,fields(captured.entry).value,work)));
  const candidate=JSON.parse(wire);assert.equal(candidate.status,'candidate');
+ const admissionWrapper=time('isolatedAdmissionWrapperMs',()=>hostBridge.psCompilerHostAdmissionRequest(request.requestId,request.sourceClosureDigest,'js',work.admissions));
+ assert.deepEqual(JSON.parse(admissionWrapper),candidate.admissionRequest);
+ const quotedAdmissions=time('isolatedAdmissionsQuoteMs',()=>json.psJsonQuote(work.admissions)),quotedSource=time('isolatedPrintedSourceQuoteMs',()=>json.psJsonQuote(candidate.source));
+ assert.equal(JSON.parse(quotedAdmissions),work.admissions);assert.equal(JSON.parse(quotedSource),candidate.source);
  const original=time('isolatedOriginalEncodingMs',()=>unwrap(encoder.psIrEncodeModule(work.raw))),specialized=time('isolatedSpecializedEncodingMs',()=>unwrap(encoder.psIrEncodeModule(closed.raw)));
  assert.deepEqual(JSON.parse(original),candidate.originalIr);assert.deepEqual(JSON.parse(specialized),candidate.specializedIr);
  const nativeOriginal=time('nativeOriginalStringifyMs',()=>JSON.stringify(candidate.originalIr)),nativeSpecialized=time('nativeSpecializedStringifyMs',()=>JSON.stringify(candidate.specializedIr));
- const report={schema:'psc1-ir-encoding-cost/1',commit:process.env.GITHUB_SHA,packageSha256:q.package.sha256,status:'passed',scope:'isolated encoders after actual generated pipeline; warmed JIT; observational, not additive stage attribution or new qualification',timings,bytes:{original:Buffer.byteLength(original),specialized:Buffer.byteLength(specialized),wire:Buffer.byteLength(wire),printed:Buffer.byteLength(candidate.source)},nativeBytes:{original:Buffer.byteLength(nativeOriginal),specialized:Buffer.byteLength(nativeSpecialized)}};
+ const report={schema:'psc1-ir-encoding-cost/1',commit:process.env.GITHUB_SHA,packageSha256:q.package.sha256,status:'passed',scope:'isolated encoders after actual generated pipeline; warmed JIT; observational, not additive stage attribution or new qualification',timings,bytes:{admissions:Buffer.byteLength(work.admissions),admissionWrapper:Buffer.byteLength(admissionWrapper),original:Buffer.byteLength(original),specialized:Buffer.byteLength(specialized),wire:Buffer.byteLength(wire),printed:Buffer.byteLength(candidate.source)},nativeBytes:{original:Buffer.byteLength(nativeOriginal),specialized:Buffer.byteLength(nativeSpecialized)}};
  fs.mkdirSync('dist/ir-cost',{recursive:true});fs.writeFileSync('dist/ir-cost/report.json',JSON.stringify(report,null,2)+'\n');console.log('PSC1_IR_ENCODING_COST '+JSON.stringify(report));
 }finally{fs.rmSync(directory,{recursive:true,force:true});}

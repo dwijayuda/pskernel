@@ -1,9 +1,26 @@
 # PSC1 AI work state
 
-Updated 2026-10-29 Asia/Jakarta. Active branch feat/psc1-persistent-development-20261029,
+Updated 2026-10-29 Asia/Jakarta. Active branch feat/psc1-semantic-incremental-20261029,
 from PR #213 qualified HEAD b1d8d55cb664f1ab4b3d30973c10fbf950674c7d.
 Connected GitHub and Linux/Windows/macOS Actions only. Expected-HEAD,
 single-parent/non-force history. No merge or npm registry publication.
+
+## Bounded pure-compiler reuse experiment
+
+Phase probe [40865163111](https://github.com/dwijayuda/pskernel/actions/runs/40865163111)
+passes at040461b64154a23a4b4379eaa0e10cd58972aa3e. On warm comment-only leaf
+edits: capture/elaboration9.5–12.8ms, semantic preparation2620–2691ms,
+strict original IR264–292ms, backend pipeline5916–5936ms. These are observations
+from that runner, not comparable speedup claims against other runners.
+
+The .7 proposal tests bounded private value fingerprints of complete generated
+semantic-preparation inputs and emitter arguments, including hidden constructor
+symbols and UTF-16 code units. Unsupported shapes/cycles/budget misses disable
+reuse; no getter evaluation or persistent/admission cache. Generated functions
+remain the implementation. Fresh capture/origins, original/transformed IR,
+target checks, official independent admission and mutable-resource checks remain.
+Add print-only timing before attributing the whole backend pipeline to printing.
+This remains an experiment until genuine parity and installed checks pass.
 
 ## Active real-application compiler profile
 

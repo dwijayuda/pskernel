@@ -1,0 +1,21 @@
+// Acceleration keys must fall back rather than change compiler acceptance.
+import assert from 'node:assert/strict';
+import {createCompilerDataFingerprint} from '../../psc1/host-tools/compiler-data-fingerprint.mjs';
+const key=createCompilerDataFingerprint({maxMillis:1000});
+assert.equal(key({a:1n,b:['x']}),key({a:1n,b:['x']}));
+assert.notEqual(key({a:1n}),key({a:1}));
+assert.notEqual(key('\ud800'),key('\ufffd'));
+assert.notEqual(key(-0),key(0));
+assert.notEqual(key([,]),key([undefined]));
+const a=Symbol('constructor'),b=Symbol('constructor');
+assert.notEqual(key({[a]:'same'}),key({[b]:'same'}));
+const shared={value:1};assert.equal(key([shared,shared]),key([{value:1},{value:1}]));
+assert.notEqual(key({a:1,b:2}),key({a:2,b:1}));
+assert.equal(key({get x(){throw Error('getter must not execute');}}),undefined);
+const cycle={};cycle.self=cycle;assert.equal(key(cycle),undefined);
+assert.equal(key(new Map()),undefined);assert.equal(key(()=>0),undefined);
+assert.equal(createCompilerDataFingerprint({maxNodes:2})({a:{b:1}}),undefined);
+assert.equal(createCompilerDataFingerprint({maxBytes:1})('long'),undefined);
+const changed={n:1};const prior=key(changed);changed.n=2;assert.notEqual(key(changed),prior);
+let deep=0;for(let i=0;i<12000;i++)deep={next:deep};assert.equal(typeof key(deep),'string');
+console.log('PSC1_COMPILER_DATA_KEYS '+JSON.stringify({status:'passed',cases:17,deepNodes:12000}));

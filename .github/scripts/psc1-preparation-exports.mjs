@@ -12,6 +12,25 @@ try{
  const rows=[];
  for(const [owner,name]of[['compiler','Ps.Compiler.Service'],['compiler','Ps.Compiler.Api'],['compiler-ir','Ps.CompilerIr.Validate'],['bridge','Ps.Bridge.Json'],['foundation','runtime']]){
  const file=path.join(nodes,'@proofscript',owner,'dist/js/generated',name+'.mjs'),mod=await import(pathToFileURL(file));
+ const source=fs.readFileSync(file,'utf8');
+ if(owner==='foundation')console.log('PSC1_RUNTIME_EXPORTS '+JSON.stringify(Object.keys(mod).filter(n=>!n.startsWith('_psc1'))));
+ for(const needle of owner==='compiler'&&name.endsWith('Service')?['Ps_Internal_CompilerService_captureWorker','Ps_Internal_CompilerService_compileWithOutputAbi','Ps_Internal_CompilerService_prepare','Ps_Internal_CompilerService_decode']:owner==='compiler'?['psCompilerPreparationStart','psCompilerParseSource']:[]){
+ const matches=[...source.matchAll(new RegExp('(?:export )?(?:function|const) '+needle.replaceAll('.filter(n=>owner!=='foundation'||/Except|Option|List|psFn_|PsCompilerSourceKind/.test(n)).slice(0,100);
+ rows.push({owner,name,exports:selected.map(n=>({name:n,type:typeof mod[n],keys:mod[n]&&typeof mod[n]==='object'?Object.keys(mod[n]).slice(0,15):undefined})),
+ names:m.owners.filter(([n])=>n.includes(name.replace('Ps.Compiler.',''))).slice(0,12)});
+ console.log('PSC1_PREPARATION_EXPORTS '+JSON.stringify(rows.at(-1)));
+ }
+ fs.mkdirSync('dist/development-profile',{recursive:true});fs.writeFileSync('dist/development-profile/exports.json',JSON.stringify(rows,null,2));
+}finally{fs.rmSync(directory,{recursive:true,force:true});}
+,'\\.filter(n=>owner!=='foundation'||/Except|Option|List|psFn_|PsCompilerSourceKind/.test(n)).slice(0,100);
+ rows.push({owner,name,exports:selected.map(n=>({name:n,type:typeof mod[n],keys:mod[n]&&typeof mod[n]==='object'?Object.keys(mod[n]).slice(0,15):undefined})),
+ names:m.owners.filter(([n])=>n.includes(name.replace('Ps.Compiler.',''))).slice(0,12)});
+ console.log('PSC1_PREPARATION_EXPORTS '+JSON.stringify(rows.at(-1)));
+ }
+ fs.mkdirSync('dist/development-profile',{recursive:true});fs.writeFileSync('dist/development-profile/exports.json',JSON.stringify(rows,null,2));
+}finally{fs.rmSync(directory,{recursive:true,force:true});}
+)+'\\b','g'))];
+ console.log('PSC1_GENERATED_BODY '+JSON.stringify({needle,snippets:matches.map(m=>source.slice(m.index,m.index+2100))}));}
  const selected=Object.keys(mod).filter(n=>owner!=='foundation'||/Except|Option|List|psFn_|PsCompilerSourceKind/.test(n)).slice(0,100);
  rows.push({owner,name,exports:selected.map(n=>({name:n,type:typeof mod[n],keys:mod[n]&&typeof mod[n]==='object'?Object.keys(mod[n]).slice(0,15):undefined})),
  names:m.owners.filter(([n])=>n.includes(name.replace('Ps.Compiler.',''))).slice(0,12)});

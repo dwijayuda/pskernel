@@ -2,7 +2,8 @@
 import fs from 'node:fs';import path from 'node:path';import assert from 'node:assert/strict';
 import {spawnSync}from'node:child_process';import{createRequire}from'node:module';import{createHash}from'node:crypto';
 const proposalFile='../.github/psc1/persistent-candidate.json';
-const receipt=JSON.parse(fs.readFileSync('docs/PSC1_PERSISTENT_QUALIFICATION_2026-10-29.json'));
+const receiptFile=['docs/PSC1_WIRE_TRANSPORT_QUALIFICATION_2026-10-29.json','docs/PSC1_SEMANTIC_REUSE_QUALIFICATION_2026-10-29.json','docs/PSC1_PERSISTENT_QUALIFICATION_2026-10-29.json'].find(file=>fs.existsSync(file));
+assert.ok(receiptFile);const receipt=JSON.parse(fs.readFileSync(receiptFile));
 const p=fs.existsSync(proposalFile)?JSON.parse(fs.readFileSync(proposalFile)):{schema:'psc1-persistent-candidate/1',baseCommit:receipt.baseCommit,files:Object.fromEntries(receipt.hostSources.pins.map(pin=>[pin.path,fs.readFileSync(pin.path.slice(5),'utf8')]))};
 assert.equal(p.schema,'psc1-persistent-candidate/1');
 const require=createRequire(path.resolve('host-tools/package.json')),prettier=require('prettier'),{parse}=require('@babel/parser');

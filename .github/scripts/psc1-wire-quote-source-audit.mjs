@@ -18,7 +18,11 @@ const proof='import Ps.Compiler.Service\n\n'+oldB.replace('def psCompilerHostAdm
  '\ntheorem psWireLegacyCompilerEquation : compilePreparedWithOutputAbi = psWireReferenceCompilePrepared := rfl\nend Ps.Internal.CompilerService\n'+
  '#print axioms psWireLegacyAdmissionEquation\n#print axioms Ps.Internal.CompilerService.psWireLegacyCompilerEquation\n';
 fs.mkdirSync('dist/wire-quote',{recursive:true});fs.writeFileSync('dist/wire-quote/LegacyEquations.lean',proof);
-const proposal=JSON.parse(fs.readFileSync('../.github/psc1/wire-quote-candidate.json')),require=(await import('node:module')).createRequire(path.resolve('host-tools/package.json')),prettier=require('prettier'),{parse}=require('@babel/parser');
+const proposalFile='../.github/psc1/wire-quote-candidate.json';
+const proposal=fs.existsSync(proposalFile)?JSON.parse(fs.readFileSync(proposalFile)):{
+ files:Object.fromEntries(JSON.parse(fs.readFileSync('docs/PSC1_WIRE_TRANSPORT_QUALIFICATION_2026-10-29.json')).legacyAudit.hostPins.map(pin=>[pin.path,fs.readFileSync(pin.path.slice(5),'utf8')]))
+};
+const require=(await import('node:module')).createRequire(path.resolve('host-tools/package.json')),prettier=require('prettier'),{parse}=require('@babel/parser');
 const ast=s=>JSON.parse(JSON.stringify(parse(s,{sourceType:'module'}),(key,v)=>['start','end','loc','extra','comments','leadingComments','trailingComments','innerComments'].includes(key)?undefined:v));
 const pins=[],sources={};
 for(const [file,source]of Object.entries(proposal.files)){assert.ok(['psc1/host-tools/prepared-engine.mjs','psc1/host-tools/wire-quote.mjs'].includes(file));const formatted=await prettier.format(source,{parser:'babel',singleQuote:true,printWidth:100,quoteProps:'preserve'});assert.deepEqual(ast(formatted),ast(source));fs.writeFileSync(file.slice(5),formatted);sources[file]=formatted;pins.push({path:file,bytes:Buffer.byteLength(formatted),sha256:createHash('sha256').update(formatted).digest('hex')});console.log('PSC1_QUOTE_HOST_SOURCE '+JSON.stringify({file,source:formatted}));}

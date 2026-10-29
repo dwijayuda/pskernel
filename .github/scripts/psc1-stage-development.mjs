@@ -9,7 +9,7 @@ const sources={},pins=[];
 for(const [file,source]of Object.entries(p.files)){
  assert.ok(file.startsWith('psc1/')&&!file.includes('..'));
  const target=file.slice(5);let text=source;
- if(guarded.has(target)){text=await prettier.format(text,{parser:'babel',singleQuote:true,printWidth:100});assert.deepEqual(ast(text),ast(source));console.log('PSC1_DEVELOPMENT_FORMAT '+JSON.stringify({file,source:text}));}
+ if(file.endsWith('.mjs')){text=await prettier.format(text,{parser:'babel',singleQuote:true,printWidth:100});assert.deepEqual(ast(text),ast(source));console.log('PSC1_DEVELOPMENT_FORMAT '+JSON.stringify({file,source:text}));}
  fs.mkdirSync(path.dirname(target),{recursive:true});fs.writeFileSync(target,text);
  if(file.endsWith('.mjs')){const r=spawnSync(process.execPath,['--check',target],{encoding:'utf8'});assert.equal(r.status,0,r.stderr);}
  sources[file]=text;pins.push({path:file,bytes:Buffer.byteLength(text),sha256:createHash('sha256').update(text).digest('hex')});

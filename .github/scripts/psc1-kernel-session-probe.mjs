@@ -20,7 +20,7 @@ async function execute(input,command='--check'){
  const Module={arguments:[command],stdin:()=>cursor<bytes.length?bytes[cursor++]:null,stdout:c=>append(out,c),stderr:c=>append(err,c),
   instantiateWasm(imports,success){const instance=new WebAssembly.Instance(compiled,imports);success(instance);return instance.exports;}};
  const context=vm.createContext({Module,require:createRequire(launcher),module:{exports:{}},__filename:launcher,__dirname:path.dirname(launcher),process:processView,console,Buffer,TextDecoder,TextEncoder,performance,setTimeout,clearTimeout});
- await script.runInContext(context,{timeout:120000});
+ try{await script.runInContext(context,{timeout:120000});}catch(error){console.error('PSC1_KERNEL_PROBE_FAILURE '+String(error?.message||error));throw new Error('PSC1_KERNEL_PROBE:'+String(error?.message||error));}
  assert.equal(processView.exitCode,0,Buffer.from(err).toString());
  const text=Buffer.from(out).toString('utf8').trim();assert.ok(text.length,text+Buffer.from(err).toString());
  return JSON.parse(text);

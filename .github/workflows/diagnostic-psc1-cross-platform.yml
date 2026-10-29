@@ -1,0 +1,152 @@
+name: PSC1 cross-platform installed npm qualification
+on:
+  push:
+    branches: [feat/psc1-cross-platform-npm-20261029]
+    paths:
+      - .github/psc1/platform-host-candidate.json
+      - .github/scripts/psc1-stage-platform-host.mjs
+      - .github/scripts/psc1-platform-qualify.mjs
+      - .github/scripts/psc1-cross-platform-delivery.mjs
+      - .github/workflows/diagnostic-psc1-cross-platform.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: psc1-cross-platform-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - run: npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
+      - name: Preserve historical host boundaries before staging the proposed feature
+        run: node scripts/readability-host-check.mjs
+      - run: node ../.github/scripts/psc1-stage-platform-host.mjs
+      - name: Assemble once from the qualified compiler graph
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/modular-toolchain-package.mjs build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-cross-platform-package
+          path: |
+            psc1/dist/modular-toolchain/package-receipt.json
+            psc1/dist/modular-toolchain/compiler-admissions.json
+            psc1/dist/modular-toolchain/consumer-descriptors.json
+            psc1/dist/modular-toolchain/tarballs/
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-platform-host-candidate
+          path: psc1/dist/platform-host-candidate/
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-typescript-linux-x64
+          path: psc1/dist/modular-toolchain/typescript-platforms/linux-x64/
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-typescript-darwin-x64
+          path: psc1/dist/modular-toolchain/typescript-platforms/darwin-x64/
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-typescript-darwin-arm64
+          path: psc1/dist/modular-toolchain/typescript-platforms/darwin-arm64/
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-typescript-win32-x64
+          path: psc1/dist/modular-toolchain/typescript-platforms/win32-x64/
+          retention-days: 90
+  qualify:
+    needs: package
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { runner: ubuntu-24.04, key: linux-x64, label: linux-x64 }
+          - { runner: windows-2025, key: win32-x64, label: windows-x64 }
+          - { runner: macos-15-intel, key: darwin-x64, label: macos-x64 }
+          - { runner: macos-15, key: darwin-arm64, label: macos-arm64 }
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-cross-platform-package
+          path: psc1/dist/modular-toolchain
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-typescript-${{ matrix.key }}
+          path: psc1/dist/platform-typescript
+      - name: Focused installed CLI, watch, checked output and refusals
+        env:
+          PSC1_PLATFORM_LABEL: ${{ matrix.label }}
+        run: node ../.github/scripts/psc1-platform-qualify.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-platform-result-${{ matrix.label }}
+          path: psc1/dist/platform-results/
+          retention-days: 90
+  delivery:
+    needs: [package, qualify]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-cross-platform-package
+          path: psc1/dist/modular-toolchain
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-platform-host-candidate
+          path: psc1/dist/platform-host-candidate
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: psc1-platform-result-*
+          path: psc1/dist/all-platform-results
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: psc1-typescript-*
+          path: psc1/dist/all-platform-typescript
+      - run: node ../.github/scripts/psc1-cross-platform-delivery.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: proofscript-cross-platform-installable
+          path: |
+            psc1/dist/cross-platform-delivery/*-cross-platform.zip
+            psc1/dist/cross-platform-delivery/delivery.json
+          retention-days: 90

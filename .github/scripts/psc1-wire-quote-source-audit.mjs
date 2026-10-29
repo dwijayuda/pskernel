@@ -5,12 +5,12 @@ const read=file=>{const r=spawnSync('git',['show',base+':psc1/'+file],{encoding:
 const bfile='packages/bridge/src/Ps/Bridge/CompilerHost.lean',sfile='packages/compiler/src/Ps/Compiler/Service.lean',oldBridge=read(bfile),oldService=read(sfile),bridge=fs.readFileSync(bfile,'utf8'),service=fs.readFileSync(sfile,'utf8');
 const block=(text,start,end)=>{const a=text.indexOf(start),b=text.indexOf(end,a);assert.ok(a>=0&&b>a);return text.slice(a,b);};
 const oldB=block(oldBridge,'def psCompilerHostAdmissionRequest\n','/-- Compiler continuation');
-const newB=block(bridge,'def psCompilerHostAdmissionRequestWithQuote','/-- Legacy transport');
+const newB=block(bridge,'def psCompilerHostAdmissionRequestWithQuote','\nend Ps.Internal.CompilerHost');
 const body=text=>text.slice(text.indexOf(' :=')+3).trim();
 assert.equal(body(newB).replace(/\bquoteString\b/g,'psJsonQuote'),body(oldB));
 const oldS=block(oldService,'def compilePreparedWithOutputAbi (','\ndef compilePrepared (');
 const newS=block(service,'def compilePreparedWithQuote (','\ndef compilePreparedWithOutputAbi (');
-assert.equal(body(newS).replace(/\bquoteString\b/g,'psJsonQuote').replace('psCompilerHostAdmissionRequestWithQuote psJsonQuote','psCompilerHostAdmissionRequest'),body(oldS));
+assert.equal(body(newS).replace(/\bquoteString\b/g,'psJsonQuote').replace('Ps.Internal.CompilerHost.psCompilerHostAdmissionRequestWithQuote psJsonQuote','psCompilerHostAdmissionRequest'),body(oldS));
 const diff=spawnSync('git',['diff','--name-only',base,'--','packages','host','lakefile.lean','lean-toolchain'],{encoding:'utf8'});assert.equal(diff.status,0);assert.deepEqual(diff.stdout.trim().split('\n').sort(),[bfile,sfile].map(file=>'psc1/'+file).sort());
 const proof='import Ps.Compiler.Service\n\n'+oldB.replace('def psCompilerHostAdmissionRequest\n','def psWireReferenceAdmissionRequest\n')+
  '\ntheorem psWireLegacyAdmissionEquation : psCompilerHostAdmissionRequest = psWireReferenceAdmissionRequest := rfl\n\nnamespace Ps.Internal.CompilerService\n'+

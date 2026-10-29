@@ -1,5 +1,7 @@
 import Ps.Bridge.Json
 
+namespace Ps.Internal.CompilerHost
+
 /-- Portable transport only. These bytes are a request, never checking authority. -/
 def psCompilerHostAdmissionRequestWithQuote
     (quoteString : String -> String)
@@ -13,10 +15,12 @@ def psCompilerHostAdmissionRequestWithQuote
     ("target", quoteString target)
   ]
 
+end Ps.Internal.CompilerHost
+
 /-- Legacy transport retains its original portable quoting implementation. -/
 def psCompilerHostAdmissionRequest
     (requestId sourceClosureDigest target canonicalAdmissions : String) : String :=
-  psCompilerHostAdmissionRequestWithQuote psJsonQuote
+  Ps.Internal.CompilerHost.psCompilerHostAdmissionRequestWithQuote psJsonQuote
     requestId sourceClosureDigest target canonicalAdmissions
 
 /-- Compiler continuation correlation. Publication remains owned by the external

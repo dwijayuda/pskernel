@@ -971,3 +971,10 @@ exclusion during M4 integration; M4 now imports executable helpers and the refer
 CLI workflow watches those dependencies. Successful native compilation is cached before
 candidate execution so test failures do not force identical rebuilds. The workflow
 edit also reruns the existing CLI at the corrected documentation HEAD.
+
+
+### Wire quoting: public ABI correction and cold routing (2026-10-29)
+
+The full source run 40886789852 passed its selected compiler/source/backend jobs but failed the default JS/Rust transport fixture: the added higher-order quote helper was accidentally public (PSC1_PUBLIC_NONSCALAR_SIGNATURE_UNQUALIFIED). Move it into Ps.Internal.CompilerHost, preserving the scalar ABI refusal and exact legacy bodies; re-qualify this corrected source cohort before promoting it. The installable retained-source .9 artifact remains valid and separate. Its default source graph does not enable native quote calls.
+
+Cold Node/Linux JS/TS/Rust/Wasm-core builds now select the same installed, hash-bound prepared adapter already used by warm builds; every original/transformed IR check, independent admission and publication boundary remains required. Other runtimes/platforms/targets retain their previous route. This host routing requires actual installed qualification; it is not yet claimed qualified. The earlier G1 and paired-quote measurements remain precursor evidence, not qualification of the namespace-corrected source. The in-progress precursor generations must not be promoted for this corrected source.

@@ -1,0 +1,36 @@
+name: PSC1 installed modular final evidence
+on:
+  push:
+    branches: [feat/psc1-selfhosted-npm-20261029]
+    paths:
+      - '.github/psc1/verify-installed-evidence.mjs'
+      - '.github/workflows/diagnostic-psc1-installed-evidence.yml'
+      - 'psc1/docs/PSC1_SELFHOSTED_INSTALLED_QUALIFICATION_2026-10-29.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Validate completed CI and exact qualified implementation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node ../.github/psc1/verify-installed-evidence.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-selfhosted-installed-final-evidence-${{ github.sha }}
+          path: psc1/dist/installed-final-evidence/
+          retention-days: 90

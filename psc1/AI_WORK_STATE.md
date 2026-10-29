@@ -1,6 +1,6 @@
 # PSC1 AI work state
 
-Updated 2026-10-29 Asia/Jakarta. Active integration branch
+Updated 2026-10-29 Asia/Jakarta. Active qualified installed-preview branch
 feat/psc1-selfhosted-npm-20261029 from verified PR #209 HEAD
 2cb55ddc93404d840b07cc3faad5accd1cee62b0.
 Initial production modularity implementation PR #205,
@@ -8,29 +8,72 @@ stacked on plan PR #204 / b400552324956d9c3a684c9231f60f70066e1629.
 GitHub/Linux CI only; expected-HEAD, single-parent/non-force history.
 No merge or registry publication.
 
-## Active integration: install the exact qualified M5 compiler
+## Verified integration: self-host-qualified compiler in proofscript
 
-Continue from PR #209 /2cb55ddc93404d840b07cc3faad5accd1cee62b0 on
-feat/psc1-selfhosted-npm-20261029. Candidate installed version0.1.0-psc1-modular.3
-reuses the unchanged .2 G3 compiler graph. Before copying any implementation,
-assembly validates both JS and TS successful40755246954 artifacts, exact G2/G3
-manifests, admissions and all15 tarballs against the committed M5 receipt.
-All generated bodies remain byte-identical; the existing M4 host, thin psc,
-20-package umbrella and real default Lean4.35.0 linear-memory Wasm kernel are reused.
+PR #211 continues from PR #209 /2cb55ddc93404d840b07cc3faad5accd1cee62b0.
+Implementation b616e2fe1cbe21646cb6b2f1f22825554ea7b1da passes
+[installed qualification40799529998](https://github.com/dwijayuda/pskernel/actions/runs/40799529998),
+all10 jobs. Version0.1.0-psc1-modular.3 bundles20 core packages,134 actual
+source-owned units, the thin psc CLI and the unchanged genuine official Lean4.35.0
+C++/Emscripten linear-memory Wasm kernel. Python/PHP and target SDKs remain optional.
 
-New installation qualification is pending actual CI: root-only local/global npm,
-both JS/TS engines, Node/Bun, seven targets, watch, authority/resource refusals,
-Unicode IO, strict consumer typing and retained real applications. Node24/26
-receive fresh root-only/compiler/kernel smoke checks. The delivery job requires
-the current PR source gate and every installed test to succeed before assembling
-a ZIP; it installs and executes the extracted ZIP again with an empty npm cache.
+Assembly validates both original JS/TS40755246954 artifacts, G2/G3 manifests,
+independent admissions, complete source graphs and all15 original npm tarballs.
+Every original generated implementation file remains exact; only explicit
+package/host overlays are added. The same133-module compiler source remains
+17ce19919175b60be06050188e2a546a8a72e689, closure
+1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb.
+The source graph manifest remains74e14f5650931ccc3de2a4a7ed6829f54197bb8100466bcb2eb0ad90d7b14a85;
+all4905 logical declarations are also re-admitted by the installed default
+Wasm kernel on both Node/Bun, digest
+cff6304aef7b3e7c69ac7c4941d275a685b945af2fdc79bf9dfee7ebfd1513f4.
+Original source self-hosting and new installed-host qualification remain distinct.
 
-No compiler source, checker, strict IR, source pairing, resource/semantic-fuel
-policy or qualified frozen executable changes. Python/PHP remain optional;
-Rust/Wasm output backends remain core, and older compiler executors still refuse
-the new cohort. The old.13 reference and M4.1 preview remain preserved.
-No merge or npm publication. This in-progress integration does not inherit
-installed qualification from either previous preview.
+Fresh root-only npm/compiler/kernel tests pass Node22.23.3,24.22.1,26.12.1 and
+Bun1.4.4. Node/Bun both engines pass128 checked seven-target builds/20 source or
+assurance refusals, global root-only installation,18 retained watch cases,
+46 metadata/resource/cycle/consumer refusals,16 Unicode IO builds/8 unsupported
+IO-ABI refusals,4 strict NodeNext/Bundler consumers and live TS-watch edits on both
+hosts (two successful builds per host; shutdown101ms). All32 real application
+builds/528 behavior cases pass:11-module CLI/JSON/file/compiler-like programs,
+both grammars/engines and JS/strict TS outputs. Maximum observed application-case
+time/RSS:Node11726ms/165428KiB; Bun4132ms/107488KiB. These concurrent CI case
+measurements are not compiler memory measurements or universal benchmarks.
+
+[Current source40799548941](https://github.com/dwijayuda/pskernel/actions/runs/40799548941)
+passes all16 selected jobs,37/37 finite Core criteria,zero blockers and14 target
+bundles (tested merge103ee6344214f584997fb4b3c08af359e28cb80a; benchmark skipped).
+[Retained CLI40799529980](https://github.com/dwijayuda/pskernel/actions/runs/40799529980)
+passes all9 jobs, preserving the separate frozen.11 reference, older-runtime
+refusals and original native guardian/cancellation regressions. Its tarball hash
+61fd6c4a2c9c68bf8b02342a8660ffcc328d8cf063650755c9a8ad47923446a3
+belongs to that reference scope, not this new root.
+
+[Verified ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40799529998/artifacts/12867276735)
+contains the exact root tarball, notices, installation instructions, original
+compiler receipt, installed qualification and SHA256SUMS. GitHub wraps the inner
+installable ZIP and delivery.json; extract both layers. Inner ZIP:9160194 bytes,
+SHA256 fcf24be0ba7ef2d8088b5f2a402a0537c2f6d208cdeedcf90bca587d8c2f83bd.
+Root proofscript-0.1.0-psc1-modular.3.tgz:9820916 bytes,
+SHA2569a0bc7727c009b071d9835db536a6856bb20b294b8e6d5ff18ef79e68bdb0b57.
+The delivery job independently extracts/checksums the ZIP, installs its root
+offline with an empty npm cache and executes npm psc help/init/check/build,
+observing answer42. It never rebuilds the tested tarball.
+[Matching optional SDK/provider resources](https://github.com/dwijayuda/pskernel/actions/runs/40799529998/artifacts/12864774827)
+remain separate. Installed graph:1479 files/108582986 bytes, below128MiB.
+
+Canonical compiler/checked host/checker bodies, strict original/transformed IR,
+source pairing, ordinary240s requests,120s checking, heap/stack/fuel and all
+graph/file/traversal bounds remain unchanged. No new G2/G3 run is needed for
+byte-identical compiler payloads; the original3600s correctness and240s performance
+profiles remain separate. Preserve.13/M4.1, frozen Rust/Wasm executors and history.
+This is a finite Linux installed preview, not universal release, standalone checked
+host qualification, native binary reproduction, a compiler preservation theorem
+or240s self-compilation. New Rust/Wasm executors and the complete M3 semantic-family
+matrix for this installed cohort remain open. No merge or npm registry publication.
+
+[Exact installed receipt](docs/PSC1_SELFHOSTED_INSTALLED_QUALIFICATION_2026-10-29.json)
+and [integration guide](docs/architecture/selfhosted-installed-toolchain.md).
 
 ## Preserved M5: JS/TS G1/G2/G3 and exact modular fixed points qualified
 
@@ -109,9 +152,10 @@ This completes finite Linux modular JS/TS reproduction, not universal release,
 240-second performance, a semantic preservation theorem or totality.
 New.2 packages are candidates, not a promoted proofscript root. M4.1 root/.13,
 thin psc, default genuine C++/Emscripten linear-memory Wasm kernel, optional
-Python/PHP and qualified frozen Rust/Wasm stay preserved. New-cohort Bun/full
-M3/M4 application matrices, standalone checked host, other platforms and final
-root promotion remain unqualified. No merge or registry publication.
+Python/PHP and qualified frozen Rust/Wasm stay preserved. The original generation receipt covers pinned Node. The integration above adds
+Node/Bun installed and M4-equivalent application coverage; the complete M3
+semantic-family matrix, standalone checked host, other platforms and final default
+promotion remain unqualified. No merge or registry publication.
 
 [Exact qualification receipt](docs/PSC1_PORTABLE_MODULAR_QUALIFICATION_2026-10-29.json)
 and [portable architecture](docs/architecture/portable-modular-generation.md).
@@ -427,8 +471,8 @@ Apache-2.0 and upstream notices, semantic fuel,240s ordinary compiler/tool reque
    earlier source/graph/kernel qualifications; do not inherit their self-host receipts.
 2. M5 is qualified in its finite Linux JS/TS scope:40755246954, exact source17ce1991,
    complete graph and 15 npm tarballs. Preserve its source, measurements and artifacts.
-3. Before root promotion, run the applicable new-cohort installed Node/Bun/application
-   gates and platform consumers. Optimize toward240s using actual workload profiles;
+3. The .3 installed Node/Bun/application gates now pass above. Retain platform and
+   final-default-promotion gates. Optimize toward240s using actual workload profiles;
    do not adopt the parked type-key experiment without its own exact proof/evidence.
 4. Follow the roadmap for component String/IO, actual non-JS IO apps, optional
    executors, platform consumers and authorized final promotion.

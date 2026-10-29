@@ -1,5 +1,10 @@
 # Installed modular compiler preview
 
+Historical scope: M4 version0.1.0-psc1-modular.1. For the current self-host-qualified
+.3 installed preview and verified ZIP, see the
+[integration guide](selfhosted-installed-toolchain.md). The M4 receipts below remain
+unchanged historical evidence.
+
 The preview keeps proofscript as the installation umbrella. Its three-line psc
 launcher calls @proofscript/cli. That package owns the existing project capture,
 diagnostics and watch supervisor; @proofscript/compiler owns checked execution

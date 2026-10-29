@@ -14,10 +14,10 @@ try{
  const file=path.join(nodes,'@proofscript',owner,'dist/js/generated',name+'.mjs'),mod=await import(pathToFileURL(file));
  const source=fs.readFileSync(file,'utf8');
  if(owner==='foundation')console.log('PSC1_RUNTIME_EXPORTS '+JSON.stringify({names:Object.keys(mod).filter(n=>!n.startsWith('_psc1')).slice(-160),prefix:source.slice(0,5000)}));
- for(const needle of owner==='compiler'&&name.endsWith('Service')?['Ps_Internal_CompilerService_captureWorker','Ps_Internal_CompilerService_compileWithOutputAbi','Ps_Internal_CompilerService_prepare','Ps_Internal_CompilerService_decode']:owner==='compiler'?['psCompilerPreparationStart','psCompilerParseSource']:[]){
+ for(const needle of owner==='compiler'&&name.endsWith('Service')?['Ps_Internal_CompilerService_compilePreparedWithOutputAbi','Ps_Internal_CompilerService_captureWorker','Ps_Internal_CompilerService_compileWithOutputAbi','Ps_Internal_CompilerService_prepare','Ps_Internal_CompilerService_decode']:owner==='compiler'?['psCompilerPreparationStart','psCompilerParseSource']:[]){
  const i=source.indexOf('function '+needle),j=source.indexOf('const '+needle);
  const at=i>=0?i:j;
- console.log('PSC1_GENERATED_BODY '+JSON.stringify({needle,source:at>=0?source.slice(at,at+2300):'not-found'}));}
+ console.log('PSC1_GENERATED_BODY '+JSON.stringify({needle,source:at>=0?source.slice(at,at+(needle.endsWith('compilePreparedWithOutputAbi')?12000:800)):'not-found'}));}
  const selected=Object.keys(mod).filter(n=>owner!=='foundation'||/Except|Option|List|psFn_|PsCompilerSourceKind/.test(n)).slice(0,100);
  rows.push({owner,name,exports:selected.map(n=>({name:n,type:typeof mod[n],keys:mod[n]&&typeof mod[n]==='object'?Object.keys(mod[n]).slice(0,15):undefined})),
  names:m.owners.filter(([n])=>n.includes(name.replace('Ps.Compiler.',''))).slice(0,12)});

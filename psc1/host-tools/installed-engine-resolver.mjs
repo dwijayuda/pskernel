@@ -1,5 +1,6 @@
 // Trusted installed-package selection only. Compiler wire data never selects tools.
 import fs from 'node:fs';
+import { resourceDigest } from './resource-capture.mjs';
 import { requireSupportedRuntime, defaultPublicationProtocol } from './runtime-policy.mjs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -43,7 +44,7 @@ export function verifyFile(root, record, maxBytes = 128 * 1024 * 1024, allowEmpt
   for (let p = file; p !== root; p = path.dirname(p))
     if (fs.lstatSync(p).isSymbolicLink()) fail('RESOURCE_SYMLINK');
   const stat = fs.lstatSync(file);
-  if (!stat.isFile() || stat.size !== record.bytes || hash(fs.readFileSync(file)) !== record.sha256)
+  if (!stat.isFile() || stat.size !== record.bytes || resourceDigest(file) !== record.sha256)
     fail('RESOURCE_IDENTITY:' + record.path);
   return { path: file, sha256: record.sha256 };
 }
@@ -205,6 +206,9 @@ export function resolveEngine(engine = 'js', distribution = loadDistribution()) 
       candidateKind: 'embedded',
       checkCandidate: descriptor.checkCandidate
         ? verifyFile(installationRoot, descriptor.checkCandidate)
+        : undefined,
+      preparedCandidate: descriptor.preparedCandidate
+        ? verifyFile(installationRoot, descriptor.preparedCandidate)
         : undefined,
       pins: [
         ...common,

@@ -15,25 +15,39 @@ const checkerIdentity = Object.freeze({
   profile: 'lean4.35-core',
 });
 
-export function runIndependentChecker(executable, canonicalAdmissions, checkerScript) {
+export function runIndependentChecker(
+  executable,
+  canonicalAdmissions,
+  checkerScript,
+  checkerExecute,
+) {
   if (
     checkerScript !== undefined &&
     (typeof checkerScript !== 'string' || !path.isAbsolute(checkerScript))
   )
     fail('PSC1_CHECKER_SCRIPT_INVALID');
-  const result = spawnSync(
-    executable,
-    executable === process.execPath
-      ? runtimeArguments(checkerScript ? [checkerScript, '--check'] : ['--check'])
-      : checkerScript
-        ? [checkerScript, '--check']
-        : ['--check'],
-    { input: canonicalAdmissions, encoding: 'utf8', timeout: 120000, maxBuffer: 32 * 1024 * 1024 },
-  );
-  if (result.error || result.status !== 0) fail('PSC1_CHECKER_PROCESS_FAILED');
+  if (checkerExecute !== undefined && typeof checkerExecute !== 'function')
+    fail('PSC1_CHECKER_CAPABILITY_INVALID');
+  const result = checkerExecute
+    ? null
+    : spawnSync(
+        executable,
+        executable === process.execPath
+          ? runtimeArguments(checkerScript ? [checkerScript, '--check'] : ['--check'])
+          : checkerScript
+            ? [checkerScript, '--check']
+            : ['--check'],
+        {
+          input: canonicalAdmissions,
+          encoding: 'utf8',
+          timeout: 120000,
+          maxBuffer: 32 * 1024 * 1024,
+        },
+      );
+  if (result && (result.error || result.status !== 0)) fail('PSC1_CHECKER_PROCESS_FAILED');
   let response;
   try {
-    response = JSON.parse(result.stdout);
+    response = checkerExecute ? checkerExecute(canonicalAdmissions) : JSON.parse(result.stdout);
   } catch {
     fail('PSC1_CHECKER_RESPONSE_INVALID');
   }
@@ -74,6 +88,7 @@ export function createCompilerHostSession({
   canonicalAdmissions,
   checkerExecutable,
   checkerScript,
+  checkerExecute,
 }) {
   if (
     typeof requestId !== 'string' ||
@@ -118,7 +133,12 @@ export function createCompilerHostSession({
         fail('PSC1_HOST_REQUEST_MISMATCH');
       state = 'checking';
       try {
-        const checker = runIndependentChecker(checkerExecutable, admissions, checkerScript);
+        const checker = runIndependentChecker(
+          checkerExecutable,
+          admissions,
+          checkerScript,
+          checkerExecute,
+        );
         state = 'admitted';
         return Object.freeze({
           protocol: 'psc1-compiler-host/1',

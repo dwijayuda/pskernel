@@ -1,0 +1,25 @@
+name: PSC1 persistent development profile
+on:
+  workflow_dispatch:
+permissions: {contents: read, actions: read}
+concurrency:
+  group: psc1-persistent-profile-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  profile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run: {shell: bash, working-directory: psc1}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22.23.3'}
+      - env: {GH_TOKEN: '${{ github.token }}'}
+        run: node ../.github/scripts/psc1-persistent-profile.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-persistent-profile-${{ github.sha }}
+          path: psc1/dist/persistent-profile/
+          retention-days: 30

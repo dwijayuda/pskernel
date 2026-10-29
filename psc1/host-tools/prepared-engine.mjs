@@ -48,7 +48,7 @@ export async function loadPreparedEngine({
   manifestFile,
   manifestSha256,
   variant,
-  outputs = true,
+  outputs = false,
 }) {
   if (!['js', 'ts'].includes(variant)) fail('VARIANT');
   const check = () => verify(root, readManifestBytes(manifestFile), manifestSha256);
@@ -67,8 +67,24 @@ export async function loadPreparedEngine({
     load('foundation', 'Ps.Foundation.Name'),
     load('foundation', 'runtime'),
   ]);
+  const emitters = new Map();
+  if (outputs) {
+    for (const [target, name, exportName] of [
+      ['js', 'Ps.BackendJs.Emit', 'Ps_Internal_JsCompilerService_emit'],
+      ['ts', 'Ps.BackendTs.Emit', 'Ps_Internal_TsCompilerService_emit'],
+      ['rust', 'Ps.BackendRust.Emit', 'Ps_Internal_RustCompilerService_emit'],
+      ['wasm-core', 'Ps.BackendWasm.Emit', 'Ps_Internal_WasmCompilerService_emit'],
+    ]) {
+      const suffix = '/dist/' + variant + '/generated/' + name + '.mjs',
+        matches = manifest.files.filter((row) => row.path.endsWith(suffix));
+      if (matches.length !== 1) fail('EMITTER_OWNER:' + target);
+      const module = await import(pathToFileURL(path.join(root, matches[0].path)).href);
+      if (typeof module[exportName] !== 'function') fail('EMITTER_EXPORT:' + target);
+      emitters.set(target, module[exportName]);
+    }
+  }
   check();
-  let previous;
+  let lastMetrics, previous;
   const constructor = (name) => {
     const value = runtime[name];
     if (!value || typeof value !== 'object') fail('DATA_ABI:' + name);
@@ -165,18 +181,24 @@ export async function loadPreparedEngine({
     candidate(text) {
       check();
       const started = performance.now();
+      lastMetrics = undefined;
       let activeRequest,
         activeTarget,
         checkingRequest = false;
       try {
         const outer = JSON.parse(text);
-        if (!Array.isArray(outer) || outer.length !== 3 || outer[0] !== 'psc1-check-service/1')
+        if (
+          !Array.isArray(outer) ||
+          outer.length !== 3 ||
+          !['psc1-check-service/1', 'psc1-unified-compiler-service/2'].includes(outer[0])
+        )
           fail('REQUEST');
         const checking = outer[0] === 'psc1-check-service/1',
           target = checking ? 'check' : outer[1];
         checkingRequest = checking;
         activeTarget = target;
         if (checking && outer[1] !== 'check') fail('REQUEST');
+        if (!checking && (!outputs || !emitters.has(target))) fail('TARGET');
         const value = unwrap(json.psJsonParse(JSON.stringify(outer[2])));
         if (tag(value) !== 'array') fail('REQUEST');
         const selected = unwrap(
@@ -210,9 +232,31 @@ export async function loadPreparedEngine({
             preparationMs: performance.now() - started,
           });
         }
-        fail('CHECK_OPERATION_REQUIRED');
+        const targetName = { 'js': 'js', 'ts': 'ts', 'rust': 'rust', 'wasm-core': 'wasmCore' }[
+          target
+        ];
+        const backendTarget =
+          variant === 'js'
+            ? { '$ps$tag': targetName, '$ps$fields': {} }
+            : constructor('PsBackendTarget')[targetName];
+        if (!backendTarget) fail('TARGET_ABI');
+        const emit = emitters.get(target);
+        const output = unwrap(
+          service.Ps_Internal_CompilerService_compilePreparedWithOutputAbi(
+            io,
+            backendTarget,
+            (module) => (selected) => emit(module, selected),
+            request,
+            captured,
+            fields(captured.entry).value,
+            work,
+          ),
+        );
+        lastMetrics = { ...cache, preparationMs: performance.now() - started };
+        return output;
       } catch (error) {
         previous = undefined;
+        lastMetrics = undefined;
         if (error.compilerError && typeof error.compilerError === 'object') {
           const e = error.compilerError;
           if (checkingRequest)
@@ -222,11 +266,29 @@ export async function loadPreparedEngine({
               phase: e.phase,
               code: e.code,
             });
+          const targetName = { 'js': 'js', 'ts': 'ts', 'rust': 'rust', 'wasm-core': 'wasmCore' }[
+            activeTarget
+          ];
+          if (targetName) {
+            const backendTarget =
+              variant === 'js'
+                ? { '$ps$tag': targetName, '$ps$fields': {} }
+                : constructor('PsBackendTarget')[targetName];
+            return service.Ps_Internal_CompilerService_refused(
+              backendTarget,
+              activeRequest?.requestId ?? '',
+              activeRequest?.sourceClosureDigest ?? '',
+              e,
+            );
+          }
         }
         throw error;
       } finally {
         check();
       }
+    },
+    metrics() {
+      return lastMetrics ? { ...lastMetrics } : undefined;
     },
     reset() {
       previous = undefined;

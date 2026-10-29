@@ -22,7 +22,17 @@ const platformFeatureFiles=new Set(['host-tools/installed-engine-resolver.mjs','
 const developmentReceipt=JSON.parse(fs.readFileSync(path.join(root,'docs/PSC1_DEVELOPMENT_QUALIFICATION_2026-10-29.json')));
 assert.equal(developmentReceipt.status,'qualified-finite-linux-node');
 const developmentPins=new Map(developmentReceipt.hostSources.pins.map(pin=>[pin.path.slice(5),pin]));
+const persistentReceipt=JSON.parse(fs.readFileSync(path.join(root,'docs/PSC1_PERSISTENT_QUALIFICATION_2026-10-29.json')));
+assert.equal(persistentReceipt.status,'qualified-finite-linux-node');
+const persistentPins=new Map(persistentReceipt.hostSources.pins.map(pin=>[pin.path.slice(5),pin]));
+function qualifiedPersistentSource(file,source){
+ const pin=persistentPins.get(file);if(!pin)return source;
+ assert.equal(Buffer.byteLength(source),pin.bytes);
+ assert.equal(createHash('sha256').update(source).digest('hex'),pin.sha256,file+': unqualified persistent host bytes');
+ return readAt(persistentReceipt.baseCommit,file);
+}
 function qualifiedDevelopmentSource(file,source){
+ source=qualifiedPersistentSource(file,source);
  const pin=developmentPins.get(file);assert.ok(pin,file+': missing development pin');
  assert.equal(Buffer.byteLength(source),pin.bytes);
  assert.equal(createHash('sha256').update(source).digest('hex'),pin.sha256,file+': unqualified development bytes');

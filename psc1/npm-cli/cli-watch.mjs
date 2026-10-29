@@ -38,7 +38,8 @@ export async function watchProject({ command, parsed, execute, diagnostic, mode 
     dirty = true;
   let changedAt = 0,
     stopped = 0,
-    attempt = 0;
+    attempt = 0,
+    lastSuccessfulCheck;
   const notify = (event, fields = {}) => {
     if (mode === 'json')
       process.stderr.write(
@@ -107,6 +108,12 @@ export async function watchProject({ command, parsed, execute, diagnostic, mode 
           cwd: process.cwd(),
           captureIdentity: captureIdentity(captured),
         });
+        // No new request or admission claim for a byte-identical successful check.
+        // Builds still revalidate their publication; errors always clear this reuse.
+        if (command === 'check' && job === lastSuccessfulCheck) {
+          notify('unchanged', { logicalAdmission: 'not-run', previousResult: 'retained' });
+          continue;
+        }
         if (Buffer.byteLength(job) > MAX_INPUT_BYTES)
           refuse('INPUT_KIND_SIZE', 'Watch request exceeds 128 MiB.');
         directory = fs.mkdtempSync(path.join(os.tmpdir(), 'proofscript-watch-'));
@@ -119,11 +126,13 @@ export async function watchProject({ command, parsed, execute, diagnostic, mode 
           'cli-watch-worker.mjs',
         );
         if (stopped) break;
+        lastSuccessfulCheck = command === 'check' && code === 0 ? job : undefined;
         notify(code === 0 ? 'ready' : 'failed; waiting for changes', {
           exitCode: code,
           elapsedMs: Date.now() - started,
         });
       } catch (error) {
+        lastSuccessfulCheck = undefined;
         diagnostic(error, mode);
         notify('failed; waiting for changes', { elapsedMs: Date.now() - started });
       } finally {

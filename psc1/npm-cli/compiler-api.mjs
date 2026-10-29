@@ -1,9 +1,11 @@
 // Installed host API. Reuses the existing checked session; no compiler semantics here.
 import fs from 'node:fs';
+import { captureResourceSetup, resourceDigest } from '../host-tools/resource-capture.mjs';
 import { runtimeArguments, defaultPublicationProtocol } from '../host-tools/runtime-policy.mjs';
 import path from 'node:path';
 import os from 'node:os';
 import crypto from 'node:crypto';
+import { warmKernel } from '../host-tools/warm-kernel.mjs';
 import { warmCompiler } from '../host-tools/warm-compiler.mjs';
 import { spawnSync } from 'node:child_process';
 import { createGeneratedJsCompilerSession } from '../host-tools/generated-compiler-session.mjs';
@@ -74,12 +76,17 @@ function selection(options = {}) {
 }
 // Only the installed host composes tool paths, pins and independent checkers.
 // Source/project/wire data never supplies these capabilities.
-function sessionFor(selected, publicationRoot) {
+function createSessionFor(selected, publicationRoot) {
   const d = loadDistribution(),
     engine = resolveEngine(selected.engine, d),
     providers = selected.kernel === 'both' ? ['wasm', 'native'] : [selected.kernel];
   const checking = selected.operation === 'check';
-  const service = checking ? engine.checkCandidate : engine.candidate;
+  const prepared = engine.preparedCandidate;
+  const service = checking
+    ? engine.checkCandidate
+    : prepared && warmCompiler(prepared.path, prepared.sha256)
+      ? prepared
+      : engine.candidate;
   if (checking && !service) fail('CHECK_SERVICE_UNAVAILABLE');
   const deps = [...engine.pins, ...commonPins(d)];
   for (const provider of providers) deps.push(...resolveKernel(provider, d).pins);
@@ -138,13 +145,37 @@ function sessionFor(selected, publicationRoot) {
             (row) => row.path === 'host-tools/execution/unified-candidate-runner.mjs',
           ).sha256,
     checkerExecutable: process.execPath,
-    checkerSha256: hash(fs.readFileSync(process.execPath)),
+    checkerSha256: resourceDigest(process.execPath),
+    checkerExecute: selected.kernel !== 'native' ? warmKernel() : undefined,
     checkerScriptFile: script,
     checkerScriptSha256: scriptSha,
     publicationRoot,
     serviceDependencies: [...new Map(deps.map((p) => [p.path, p])).values()],
     additionalCheckers: extra,
   });
+}
+const setupMetrics = new WeakMap();
+function sessionFor(selected, publicationRoot) {
+  const started = performance.now(),
+    captured = captureResourceSetup(() => createSessionFor(selected, publicationRoot));
+  setupMetrics.set(captured.value, {
+    setupMs: performance.now() - started,
+    setupResourceReads: captured.metrics.uniqueReads,
+    setupResourceBytes: captured.metrics.uniqueBytes,
+    setupDuplicateReadsAvoided: captured.metrics.duplicateReadsAvoided,
+    setupDuplicateBytesAvoided: captured.metrics.duplicateBytesAvoided,
+    setupReadAndHashMs: captured.metrics.readAndHashMs,
+    setupRunningExecutableBindings: captured.metrics.runningExecutableBindings,
+  });
+  return captured.value;
+}
+function completeTimings(session, receipt, started, publishMs = 0) {
+  return {
+    ...receipt.timings,
+    ...setupMetrics.get(session),
+    publishMs,
+    totalMs: performance.now() - started,
+  };
 }
 export function getCompilerMetadata() {
   return describeInstallation();
@@ -157,6 +188,7 @@ export async function checkCanonicalAdmissions(source, { provider = 'wasm' } = {
 // Language checking uses the same generated preparation and strict original IR validator.
 // An explicitly requested target/ABI retains the existing complete target-check path.
 export function check(options) {
+  const started = performance.now();
   if (options?.target !== undefined || options?.outputAbi !== undefined) {
     const r = compile(options);
     return Object.freeze({ ...r, source: undefined });
@@ -164,10 +196,8 @@ export function check(options) {
   const selected = selection(options),
     temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'proofscript-check-'));
   try {
-    const receipt = sessionFor(
-      { ...selected, operation: 'check' },
-      path.join(temporary, 'store'),
-    ).execute();
+    const session = sessionFor({ ...selected, operation: 'check' }, path.join(temporary, 'store')),
+      receipt = session.execute();
     return Object.freeze({
       status: 'accepted',
       engine: selected.engine,
@@ -180,7 +210,7 @@ export function check(options) {
       targetGeneration: 'not-run',
       publication: 'not-requested',
       cache: receipt.cache,
-      timings: receipt.timings,
+      timings: completeTimings(session, receipt, started),
       receipt,
       formalPreservation: 'not-provided',
     });
@@ -190,6 +220,7 @@ export function check(options) {
 }
 
 export function compile(options) {
+  const started = performance.now();
   const selected = selection(options),
     temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'proofscript-checked-'));
   try {
@@ -223,7 +254,7 @@ export function compile(options) {
       receipt,
       logicalAdmission: 'accepted',
       evidence: receipt.evidence,
-      timings: receipt.timings,
+      timings: completeTimings(session, receipt, started),
       irValidation: 'original-and-transformed-by-pinned-compiler',
       publication: 'not-requested',
       formalPreservation: 'not-provided',
@@ -234,6 +265,7 @@ export function compile(options) {
 }
 // A trusted host may veto publication after checking; it cannot manufacture admission.
 export function build(options, { beforePublish } = {}) {
+  const started = performance.now();
   if (beforePublish !== undefined && typeof beforePublish !== 'function') fail('PUBLICATION_GUARD');
   if (typeof options?.out !== 'string' || !options.out) fail('OUTPUT_DIRECTORY');
   const selected = selection(options);
@@ -241,7 +273,9 @@ export function build(options, { beforePublish } = {}) {
   const session = sessionFor(selected, path.resolve(options.out)),
     receipt = session.execute();
   if (beforePublish) beforePublish();
-  const published = session.publish();
+  const publishStarted = performance.now(),
+    published = session.publish(),
+    publishMs = performance.now() - publishStarted;
   return Object.freeze({
     status: 'accepted',
     engine: selected.engine,
@@ -251,7 +285,7 @@ export function build(options, { beforePublish } = {}) {
     compilerSourceClosureDigest: loadDistribution().compilerSourceClosureDigest,
     logicalAdmission: 'accepted',
     evidence: receipt.evidence,
-    timings: receipt.timings,
+    timings: completeTimings(session, receipt, started, publishMs),
     sourceClosureDigest: receipt.sourceClosureDigest,
     artifact: published.immutableTarget,
     runtimeArtifact: published.runtimeTarget,

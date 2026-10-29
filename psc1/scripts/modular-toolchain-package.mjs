@@ -293,6 +293,10 @@ if (process.argv[2] !== 'inspect') {
     'host-tools/executable/tools.mjs',
     'host-tools/prepared-engine.mjs',
     'host-tools/warm-compiler.mjs',
+    'host-tools/resource-capture.mjs',
+    'host-tools/running-executable.mjs',
+    'host-tools/warm-kernel.mjs',
+    'host-tools/warm-kernel-worker.mjs',
   ])
     runtimeFiles.add(file);
   for (const file of runtimeFiles) {
@@ -319,6 +323,21 @@ if (process.argv[2] !== 'inspect') {
         .replace('../host-tools/executable/loader.mjs', '../host-tools/prepared-engine.mjs'),
     );
     runtimeFiles.add(checkFile);
+    const preparedFile = 'modular/prepared-' + variant + '.mjs';
+    const preparedAdapter =
+      adapter
+        .replaceAll('loadExecutableCompiler', 'loadPreparedEngine')
+        .replace('../host-tools/executable/loader.mjs', '../host-tools/prepared-engine.mjs')
+        .replace(
+          'manifestSha256:expectedGraphManifestSha256,variant:',
+          'manifestSha256:expectedGraphManifestSha256,outputs:true,variant:',
+        ) +
+      'export function psCompilerPreparationMetrics(){return engine.metrics();}\\n'.replace(
+        '\\n',
+        '\n',
+      );
+    write(path.join(host, preparedFile), preparedAdapter);
+    runtimeFiles.add(preparedFile);
     const file = 'modular/' + variant + '.mjs';
     write(path.join(host, file), adapter);
     runtimeFiles.add(file);
@@ -341,6 +360,11 @@ if (process.argv[2] !== 'inspect') {
           candidate: { path: file, bytes: b.length, sha256: sha256(b) },
           checkCandidate: (() => {
             const path = 'modular/check-' + variant + '.mjs',
+              bytes = fs.readFileSync(host + '/' + path);
+            return { path, bytes: bytes.length, sha256: sha256(bytes) };
+          })(),
+          preparedCandidate: (() => {
+            const path = 'modular/prepared-' + variant + '.mjs',
               bytes = fs.readFileSync(host + '/' + path);
             return { path, bytes: bytes.length, sha256: sha256(bytes) };
           })(),

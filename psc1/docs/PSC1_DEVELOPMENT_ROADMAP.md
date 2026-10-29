@@ -5,6 +5,65 @@ Practical Core v1 remains frozen at14 feature families and 37 finite criteria.
 Completed detail is preserved in [the previous roadmap](history/ROADMAP_BEFORE_LAYOUT_2026-10-26.md)
 and [dated evidence](evidence/README.md).
 
+## Persistent development sessions — qualified source milestone
+
+Active branch `feat/psc1-persistent-development-20261029`, from PR #213 HEAD
+`b1d8d55cb664f1ab4b3d30973c10fbf950674c7d`.
+[Integrated qualification40860864442](https://github.com/dwijayuda/pskernel/actions/runs/40860864442)
+passes at `41d4b5db9fc51b7d117c261cd51e9bad05a76d0a`. Adopt exactly its15
+formatted source pins, recorded in [the receipt](PSC1_PERSISTENT_QUALIFICATION_2026-10-29.json).
+Compiler source/1131 original graph files, official kernel artifacts, Lean4.35.0
+and original JS/TS G1/G2/G3 fixed-point evidence remain unchanged.
+
+Implemented and tested:
+- synchronous setup-only read/hash coalescing; fresh mutable-resource checks at
+  all existing execution/publication boundaries;
+- a narrow Linux ext4/XFS optimization for the executing binary: hash the loaded
+  image, freshly bind its inode/path and require ETXTBSY on each use; any unknown
+  filesystem, permission ambiguity, replacement or unsupported host uses fresh
+  hashing. This is not an mtime cache;
+- a bounded private independent-kernel worker. Reuse exact official compiled
+  Wasm code and launcher script, but create fresh VM context, Wasm instance,
+  linear memory and logical checking state for every request. Keep120s,
+  32MiB response,128MiB input,4096MiB V8 heap/8MiB JS stack and original Wasm/fuel
+  limits. No acceptance cache or replacement checker;
+- prepared build scheduling through existing generated frontend, strict IR,
+  transformations and all four core emitters.24 candidate byte comparisons
+  cover JS/TS engine variants, both grammars, JS/TS/Rust/Wasm outputs, changed
+  dependencies, refusals and assurance; this is not new Rust executor qualification;
+- actual JS/strict-TS/Wasm builds, four typing refusals,14 original and14 warm
+  kernel fixture comparisons, source tamper refusal, error repair, publication
+  preservation and worker shutdown;
+- byte-identical successful check saves report unchanged and retain the previous
+  result without issuing another request/admission claim (182ms observed).
+  Builds still revalidate publication. Real source changes always check anew.
+
+The final producer's tiny-source diagnostic samples are2.34s cold check,
+2.90s cold JS build, about1.00s stable warm check and1.40s stable warm JS build.
+Earlier same-source samples are faster; do not claim a universal bound. A real
+three-module check leaf edit takes1069ms, with two modules reused.
+The watchBuild.editMs field includes a subsequent negative test; do not present
+it as isolated rebuild latency. The delivery job performs a controlled .5/.6
+comparison on one runner and executes the existing CLI/JSON application.
+
+The new root is `proofscript-0.1.0-psc1-modular.6.tgz`,9836728 bytes,
+SHA-256 `23ab4f5b3eba1744b54ce3c9bc66a69edc6504b0a5568129eb99b70aa381a2f2`.
+Canonical adoption verifies exact passing source/package identities and reuses
+that tarball rather than rebuilding or repeating self-hosting. Its delivery
+contains ADOPTION.json, COMPARISON.json, installation instructions and hashes.
+Previous .5 and .4 remain their qualified references; .6 is Linux/Node qualified,
+with Windows/macOS/Bun fast-path qualification pending. No merge/publication.
+
+Next measured queue: remaining graph verification/metadata work; persistent
+target consumers; dependency-directed preparation beyond prefixes; cold startup;
+then finer algorithmic work if actual applications expose it. Persistent disk IR
+or admission caches are not introduced. Extra deliverables may become optional
+only with explicit output contracts; strict checking remains mandatory.
+[Architecture and usage](architecture/fast-development.md).
+Prior PR #213 retained.11 run40842650301 and source run40842871739 are terminal green.
+Prototype/harness failures and earlier pending descriptions below are historical.
+
+
 ## Installed development latency — verified Linux milestone
 
 Active branch `feat/psc1-development-speed-20261029`, draft [PR #213](https://github.com/dwijayuda/pskernel/pull/213), from PR #212 HEAD

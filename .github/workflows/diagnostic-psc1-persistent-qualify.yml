@@ -1,0 +1,38 @@
+name: PSC1 persistent development qualification
+on:
+  workflow_dispatch:
+permissions: {contents: read, actions: read}
+concurrency:
+  group: psc1-persistent-qualify-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  installed:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run: {shell: bash, working-directory: psc1}
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22.23.3'}
+      - run: npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
+      - run: node scripts/readability-host-check.mjs
+      - run: node ../.github/scripts/psc1-persistent-stage.mjs
+      - run: node ../.github/scripts/psc1-resource-capture-test.mjs
+      - name: Assemble original qualified compiler graph with proposed host
+        env: {GH_TOKEN: '${{ github.token }}'}
+        run: node scripts/modular-toolchain-package.mjs build
+      - run: node ../.github/scripts/psc1-persistent-qualify.mjs
+      - run: node ../.github/scripts/psc1-persistent-after.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-persistent-compiler-${{ github.sha }}
+          path: |
+            psc1/dist/persistent-candidate/
+            psc1/dist/development-results/
+            psc1/dist/persistent-results/
+            psc1/dist/modular-toolchain/package-receipt.json
+            psc1/dist/modular-toolchain/tarballs/
+          retention-days: 30

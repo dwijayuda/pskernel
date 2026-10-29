@@ -66,6 +66,23 @@ checksums, notices, exact source pins and actual platform receipts.
 Final canonical adoption is checked by the focused platform-adoption workflow;
 it extracts and verifies the same ZIP without rebuilding it.
 
+### Canonical adoption and retained reference follow-up
+
+[Adoption40815403860](https://github.com/dwijayuda/pskernel/actions/runs/40815403860)
+passes at25dbdaa024386e9904dcf3c413e7100035e4d148: all11 exact source pins,
+unchanged compiler sources, complete historical AST/format guards and16 extracted
+ZIP checksums; no repeated compilation. [Verified artifact](https://github.com/dwijayuda/pskernel/actions/runs/40815403860/artifacts/12872291923).
+
+The automatic retained.11 run40815403827 fails its old current-production hash
+assumption for transactional-publication.mjs after intentional platform adoption.
+The .4 four-platform qualification is passing. The reference assembler now captures
+those finite affected host files from immutable pre-platform2c278ab9 and separately
+verifies every current source against the platform receipt. Existing reference
+regression bodies, old compiler/kernel/provider payload checks and all negatives
+remain intact. The retry is pending; do not confuse this historical-host assembly
+failure with compiler/platform execution failure. Broad source gates40815408758
+were selected automatically; no extra G1/G2/G3 was dispatched.
+
 ## Verified integration: self-host-qualified compiler in proofscript
 
 PR #211 continues from PR #209 /2cb55ddc93404d840b07cc3faad5accd1cee62b0.

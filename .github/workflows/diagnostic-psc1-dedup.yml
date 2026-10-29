@@ -1,0 +1,44 @@
+name: PSC1 warm-build validation dedup qualification
+on:
+  push:
+    branches: [feat/psc1-wire-quote-20261029]
+    paths:
+      - .github/psc1/persistent-candidate.json
+      - .github/scripts/psc1-dedup-controlled.mjs
+      - .github/workflows/diagnostic-psc1-dedup.yml
+  workflow_dispatch:
+permissions: {contents: read, actions: read}
+concurrency:
+  group: psc1-dedup-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  installed:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run: {shell: bash, working-directory: psc1}
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22.23.3'}
+      - run: npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
+      - run: node scripts/readability-host-check.mjs
+      - run: node ../.github/scripts/psc1-persistent-stage.mjs
+      - env: {GH_TOKEN: '${{ github.token }}'}
+        run: node scripts/modular-toolchain-package.mjs build
+      - run: node ../.github/scripts/psc1-persistent-qualify.mjs
+      - env: {GH_TOKEN: '${{ github.token }}'}
+        run: node ../.github/scripts/psc1-dedup-controlled.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-dedup-${{ github.sha }}
+          path: |
+            psc1/dist/development-results/
+            psc1/dist/dedup-results/
+            psc1/dist/persistent-candidate/
+            psc1/dist/modular-toolchain/package-receipt.json
+            psc1/dist/modular-toolchain/tarballs/
+            psc1/dist/modular-toolchain/typescript-platforms/linux-x64/
+          retention-days: 30

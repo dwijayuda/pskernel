@@ -5,6 +5,27 @@ Practical Core v1 remains frozen at14 feature families and 37 finite criteria.
 Completed detail is preserved in [the previous roadmap](history/ROADMAP_BEFORE_LAYOUT_2026-10-26.md)
 and [dated evidence](evidence/README.md).
 
+## Active follow-up: duplicate validation and admission transport
+
+Branch `feat/psc1-wire-quote-20261029`, from PR #215 HEAD
+7b9dc2725be226f401a8adcd2e6f0af391308504. Live source40872117065 and retained
+CLI40871621864 had no failures and were still running when this branch started;
+re-query before final claims. Preserve .7 and all exact compiler/kernel evidence.
+
+The host-only .8 proposal removes the extra original-IR validation in warm builds.
+The existing generated compilePreparedWithOutputAbi validates original IR before
+any transform; check-only retains its adapter validation, including reuse hits.
+Installed qualification and a same-runner application comparison are required
+before canonical adoption. The qualified G3 graph is unchanged for this host slice.
+
+Next, add a serializer parameter in shared Lean transport source while preserving
+legacy entry points by applying psJsonQuote. A fixed private host native quoter
+must have exact Unicode/control byte parity, roundtrip checks and generated fallback;
+project data cannot select callbacks. Regenerate and independently check actual
+JS/TS compiler graphs. New source-cohort evidence must stay separate from .7's
+G1/G2/G3/fixed points. Do not silently relabel that evidence or weaken provenance.
+Full source-cohort self-hosting remains a later promotion gate, not an edit loop.
+
 ## Verified .7 delivery
 
 Canonical adoption [40871621775](https://github.com/dwijayuda/pskernel/actions/runs/40871621775)

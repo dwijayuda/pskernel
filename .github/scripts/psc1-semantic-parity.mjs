@@ -8,7 +8,7 @@ const fixture=JSON.parse(fs.readFileSync(process.argv[2],'utf8')),distribution=l
 for(const variant of ['js','ts']){
  const engine=resolveEngine(variant,distribution),cold=await import(pathToFileURL(engine.candidate.path)),warm=await import(pathToFileURL(engine.preparedCandidate.path));
  for(const edit of ['initial','comment','body','refusal','recovery']){
-  const sources=fixture.sources.map((source,index)=>({...source,text:source.text+(index===fixture.sources.length-1?'\n-- parity '+edit+'\n':'')}));
+  const sources=fixture.sources.map((source,index)=>({...source,text:(index===fixture.sources.length-1?'\n-- parity '+edit+'\n':'')+source.text}));
   if(edit==='body')sources.at(-1).text=sources.at(-1).text.replace('Result.ok success => success','Result.ok success => false');
   if(edit==='refusal')sources.at(-1).text=sources.at(-1).text.replace('Result.ok success => success','Result.ok success => 42');
   const fields=['psc1-compiler-service/2',variant+'-'+edit,compilerSourceClosureDigest(sources),'lean','ordinary-checked',fixture.entryModule,sources.map(s=>[s.module,s.text]),'io-dispatcher'];

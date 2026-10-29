@@ -5,6 +5,25 @@ Practical Core v1 remains frozen at14 feature families and 37 finite criteria.
 Completed detail is preserved in [the previous roadmap](history/ROADMAP_BEFORE_LAYOUT_2026-10-26.md)
 and [dated evidence](evidence/README.md).
 
+## Structural sharing replaces the fingerprint experiment
+
+[40868629404](https://github.com/dwijayuda/pskernel/actions/runs/40868629404)
+passes at ea90cd65d5ab018b0051a7d2b14fea87bf6474f6: ten exact real-application
+candidate comparisons across JS/TS engines, including body change, typing refusal
+and recovery; three independently checked/actually executed Unicode applications.
+Fingerprint reuse works for TS, but JS data exceeds its node budget. CPU samples
+identify generated Text insertion, JSON escaping and allocation as hot paths;
+the official warm checker spends most of its wall time idle between requests.
+
+Replace optional hashing with bounded iterative comparison of complete private,
+immutable compiler values. Shared nodes from unchanged captured prefixes compare
+by identity; distinct nodes compare all own keys/descriptors/hidden symbols and
+values. Unsupported shapes/accessors/cycles/budget misses conservatively recompute.
+No source-text approximation, admission cache or handwritten frontend is added.
+Only one emitter input/result graph is retained, with at most4,194,304 source
+characters; originals/transforms still validate and all requests check independently.
+This next candidate remains experimental until its exact installed tests pass.
+
 ## Active real-application compiler profile
 
 Active branch `feat/psc1-semantic-incremental-20261029`, from PR #214 source

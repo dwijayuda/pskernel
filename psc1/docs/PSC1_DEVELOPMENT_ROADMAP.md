@@ -5,6 +5,27 @@ Practical Core v1 remains frozen at14 feature families and 37 finite criteria.
 Completed detail is preserved in [the previous roadmap](history/ROADMAP_BEFORE_LAYOUT_2026-10-26.md)
 and [dated evidence](evidence/README.md).
 
+## Structural-sharing producer passes; installed gate next
+
+[40869848303](https://github.com/dwijayuda/pskernel/actions/runs/40869848303)
+passes at57e72bce3bc1a329704696878ff07a53fb4c7ee3. Exact staged production
+pins are recorded by that job; original compiler graph and kernel remain unchanged.
+Both JS/TS engines pass ten exact real-application cold/prepared candidate
+comparisons, including prefixed comments that shift source origins, actual
+body changes, typing refusal and recovery. Unchanged semantic preparation takes
+1.5–3.2ms rather than the observed initial3–4s; changed bodies miss comparison
+in0.07–0.15ms. Printing reuse hits only equivalent inputs. Three actual Unicode
+application builds independently admit and execute; warm total8.4–8.5s on this
+profiled runner. These are not cross-runner speedup claims or semantic-edit wins.
+
+Artifact12896251225 SHA256 f8dd6a58ef06541438b3064382a319b8d325f0cbb163414ae1c08c14090dcd0e
+holds the exact candidate .7 package and four formatted source pins. The next
+installed qualification reuses it and matching already-qualified TypeScript SDKs;
+no compiler rebuild, G2/G3 rerun or repeated large application parity matrix.
+A same-runner .6/.7 application comparison follows the preserved focused suite.
+The .7 root is not release-qualified until that gate and source adoption pass.
+Retained .6 source gates40863053548 and frozen.11 CLI40863008436 are now terminal green.
+
 ## Structural sharing replaces the fingerprint experiment
 
 [40868629404](https://github.com/dwijayuda/pskernel/actions/runs/40868629404)

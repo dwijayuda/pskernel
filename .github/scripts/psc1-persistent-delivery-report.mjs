@@ -8,3 +8,9 @@ const r=spawnSync('python3',['-c','import zipfile,sys; z=zipfile.ZipFile(sys.arg
 assert.equal(r.error,undefined);assert.equal(r.status,0,r.stderr);assert.equal(Buffer.byteLength(r.stdout),input.comparisonBytes);assert.equal(sha256(r.stdout),input.comparisonSha256);
 const report=JSON.parse(r.stdout);assert.equal(report.status,'passed');assert.equal(report.commit,input.commit);
 console.log('PSC1_CONTROLLED_DELIVERY_REPORT '+JSON.stringify(report));
+
+for(const [label,file]of [['before','persistent-profile/results.json'],['after','persistent-results/profile.json']]){
+ const report=JSON.parse(fs.readFileSync(path.join(archive,file)));
+ const app=report.reports.find(row=>row.mode==='warm-app');assert.ok(app);
+ console.log('PSC1_REAL_APPLICATION_PHASES '+JSON.stringify({label,phases:app.phases,outcomes:app.outcomes,children:app.children,maxRssKiB:app.maxRssKiB}));
+}

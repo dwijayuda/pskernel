@@ -1,7 +1,8 @@
 // Deliver exactly the installed bytes that just passed focused admission and execution.
 import fs from'node:fs';import path from'node:path';import assert from'node:assert/strict';import{spawnSync}from'node:child_process';import{sha256}from'../../psc1/scripts/kernel435-qualified-artifact.mjs';
 const pkg=JSON.parse(fs.readFileSync('dist/modular-toolchain/package-receipt.json')),result=JSON.parse(fs.readFileSync('dist/development-results/qualification.json')),comparison=JSON.parse(fs.readFileSync('dist/dedup-results/comparison.json')),pins=JSON.parse(fs.readFileSync('dist/wire-installed/pins.json')),q=JSON.parse(fs.readFileSync('docs/PSC1_WIRE_MODULAR_QUALIFICATION_2026-10-29.json'));
-assert.equal(result.status,'passed');assert.deepEqual(result.package,pkg);assert.equal(comparison.status,'passed');assert.equal(q.status,'qualified-finite-linux-modular-js-ts');assert.equal(pkg.compilerSourceClosureDigest,q.sourceClosureDigest);
+assert.equal(result.status,'passed');assert.deepEqual(result.package,pkg);assert.equal(comparison.status,'passed');
+const measured=comparison.reports.find(r=>r.label==='candidate-'+pkg.version);assert.ok(measured);assert.ok(measured.report.outcomes.every(r=>r.cache?.nativeQuoteCalls>0&&r.cache.quoteFallbackCalls===0),'actual installed application must use native quoting');assert.equal(q.status,'qualified-finite-linux-modular-js-ts');assert.equal(pkg.compilerSourceClosureDigest,q.sourceClosureDigest);
 for(const pin of pins.pins){const b=fs.readFileSync(pin.path.slice(5));assert.equal(b.length,pin.bytes);assert.equal(sha256(b),pin.sha256);}
 const out='dist/proofscript-wire-quote-linux-x64';assert.ok(!fs.existsSync(out));fs.mkdirSync(out,{recursive:true});
 const copy=(source,name)=>fs.copyFileSync(source,path.join(out,name??path.basename(source))),tar=path.join('dist/modular-toolchain/tarballs',pkg.tarball),b=fs.readFileSync(tar);assert.equal(b.length,pkg.bytes);assert.equal(sha256(b),pkg.sha256);copy(tar);

@@ -5,6 +5,48 @@ Practical Core v1 remains frozen at14 feature families and 37 finite criteria.
 Completed detail is preserved in [the previous roadmap](history/ROADMAP_BEFORE_LAYOUT_2026-10-26.md)
 and [dated evidence](evidence/README.md).
 
+## Active persistent-development optimization
+
+Active branch `feat/psc1-persistent-development-20261029` from qualified PR #213
+HEAD `b1d8d55cb664f1ab4b3d30973c10fbf950674c7d`. Previous retained .11
+run40842650301 and source run40842871739 are now terminal success.
+
+The accepted optimization queue is: attribute every stage/read; remove duplicate
+setup reads; retain independent kernel code with isolated request state; extend
+preparation reuse to builds; then address remaining measured work. All repository
+edits and execution use connected GitHub/Linux Actions. No merge/publication.
+
+- Baseline trace40853660419 at5628c5bd passes. A cold tiny JS API build reads
+  2129271455 bytes in13755 reads; the125MB Node executable is read9 times.
+  Warm builds still read2351322909 bytes/request. These are diagnostic samples.
+- Setup-only coalescing40854289152 atb26379af passes the existing focused
+  installed checks. It avoids1748 duplicate setup reads/237307745 bytes.
+  New timing fields identify publication at about0.9s, principally resource checks.
+  It is a qualified experiment, not canonical product adoption.
+- Official kernel probe40854955353 atf8b0dae1 passes all14 fixtures forward
+  and reverse, with byte-identical responses to the existing checker. Exact
+  official launcher/Wasm bytes stay unchanged; compiled code is reused while
+  each request gets fresh VM state, Wasm instance and linear memory.
+  After first execution, fixture calls take roughly9–21ms. No acceptance cache.
+- Candidate10b1567f passes executable integrity tests, including ETXTBSY
+  detection and changed-path replacement refusal. Its integrated qualification
+  stops at a test harness import that assumed flattened npm packages. This is
+  fixed using the actual nested implementation path; do not call that run green.
+- Candidate39631b19 is pending integrated qualification. It adds a bounded
+  worker for official kernel requests (120s,32MiB response,existing semantic
+  and Wasm limits), setup-only hash coalescing, a narrow ext4/XFS running-image
+  optimization with fresh inode/write-denial checks and fresh-hash fallback,
+  and prepared build scheduling through unchanged generated backend APIs.
+  The exact transformed compiler graph, kernels and prior self-host receipts
+  are preserved. Canonical host files remain unchanged until source adoption.
+
+Next: inspect actual integrated failures and timings; validate prepared candidate
+bytes, dependency invalidation, refusals, source guards and publication; adopt
+only exact formatted passing bytes with an installable artifact. Keep .5 and .4
+as their previously qualified references. Persistent disk caches, finer query
+invalidation, optional output artifacts and target-consumer sessions remain
+subsequent measured work, not new release prerequisites.
+
 ## Installed development latency — verified Linux milestone
 
 Active branch `feat/psc1-development-speed-20261029`, draft [PR #213](https://github.com/dwijayuda/pskernel/pull/213), from PR #212 HEAD

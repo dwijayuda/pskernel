@@ -1,0 +1,5 @@
+{
+  "profile": "correctness-3600s",
+  "purpose": "one new-source promotion chain; preserve .7/.9 and separate240s target",
+  "sourceDigest": "120bbbc52f94d19ca1db5c30bb1b6d8e31a49f1fb66a945cbb72d24905a00702"
+}

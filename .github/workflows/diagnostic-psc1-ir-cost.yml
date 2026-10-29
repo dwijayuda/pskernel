@@ -5,6 +5,9 @@ on:
     paths: [.github/scripts/psc1-ir-encoding-cost.mjs, .github/workflows/diagnostic-psc1-ir-cost.yml]
   workflow_dispatch:
 permissions: {contents: read, actions: read}
+concurrency:
+  group: psc1-ir-cost-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   profile:
     runs-on: ubuntu-24.04

@@ -72,7 +72,7 @@ try{
   compare([base,{module:'Main',kind:'ps',text:'import Base\\ndef answer : Nat := true\\n'}],'js');
   compare([{module:'Main',kind:'ps',text:'def answer : Nat := 42\\n'}],'js','ordinary-checked');
  }
- console.log(JSON.stringify({status:'passed',comparisons:results.length,results}));`);
+ assert.ok(results.some(r=>r.cache?.finishHit===true));console.log(JSON.stringify({status:'passed',comparisons:results.length,results}));`);
  const parity=JSON.parse(ok(process.execPath,[compareFile]));assert.equal(parity.status,'passed');report.preparedParity=parity;
 
 
@@ -104,15 +104,17 @@ try{
   let start=performance.now();fs.writeFileSync(path.join(project,'Main.ps'),'import Middle\ndef answer : Nat := middle + 2\n');
   await w.until(()=>w.results.length===2);assert.equal(w.results[1].cache.prefixModules,2);assert.equal(w.results[1].cache.preparedModules,1);
   const leafMs=performance.now()-start;
+  const unchangedStart=performance.now();
   fs.writeFileSync(path.join(project,'Main.ps'),'import Middle\ndef answer : Nat := middle + 2\n');
-  await w.until(()=>w.results.length===3);assert.equal(w.results[2].cache.finishHit,true);
+  await w.until(()=>w.stderr().includes('unchanged'));assert.equal(w.results.length,2);
+  const unchangedMs=performance.now()-unchangedStart;
   fs.writeFileSync(path.join(project,'Base.ps'),'def base : Nat := 41\n');
-  await w.until(()=>w.results.length===4);assert.equal(w.results[3].cache.prefixModules,0);assert.equal(w.results[3].cache.preparedModules,3);
+  await w.until(()=>w.results.length===3);assert.equal(w.results[2].cache.prefixModules,0);assert.equal(w.results[2].cache.preparedModules,3);
   fs.writeFileSync(path.join(project,'Main.ps'),'import Middle\ndef answer : Nat := true\n');
   await w.until(()=>w.stderr().includes('failed; waiting for changes'));
   fs.writeFileSync(path.join(project,'Main.ps'),'import Middle\ndef answer : Nat := middle + 1\n');
-  await w.until(()=>w.results.length===5);assert.equal(w.results[4].logicalAdmission,'accepted');
-  report.watchCheck={leafEditMs:leafMs,results:w.results.map(r=>({cache:r.cache,timings:r.timings})),dependencyInvalidated:true,errorRepair:true};
+  await w.until(()=>w.results.length===4);assert.equal(w.results[3].logicalAdmission,'accepted');
+  report.watchCheck={leafEditMs:leafMs,unchangedMs,unchangedDoesNotRequestAdmission:true,results:w.results.map(r=>({cache:r.cache,timings:r.timings})),dependencyInvalidated:true,errorRepair:true};
  }finally{report.watchCheckStopMs=await w.stop();}
  fs.writeFileSync(path.join(project,'Base.ps'),'def base : Nat := 40\n');
  const b=await watch('build','ts');

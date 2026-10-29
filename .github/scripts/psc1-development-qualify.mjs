@@ -1,6 +1,6 @@
 // Focused installed .ps development checks; no G2/G3 or broad backend rebuild.
 import fs from'node:fs';import path from'node:path';import os from'node:os';import assert from'node:assert/strict';
-import{spawnSync}from'node:child_process';import{createHash}from'node:crypto';import{pathToFileURL}from'node:url';
+import{spawn,spawnSync}from'node:child_process';import{createHash}from'node:crypto';import{pathToFileURL}from'node:url';
 import{fixtures}from'../../psc1/scripts/kernel435-fixtures.mjs';
 const input=path.resolve('dist/modular-toolchain'),receipt=JSON.parse(fs.readFileSync(path.join(input,'package-receipt.json')));
 const directory=fs.mkdtempSync(path.join(fs.realpathSync(os.tmpdir()),'psc1-development-qualification-'));
@@ -50,6 +50,55 @@ try{
  const file=path.join(root,'node_modules',row.path),before=fs.readFileSync(file);
  try{fs.appendFileSync(file,'\n// tampered');const r=call(process.execPath,[cli,'check','Main.ps']);assert.notEqual(r.status,0);assert.match(r.stderr,/PSC1_EXECUTABLE/);report.tamperBeforeExecution=true;}
  finally{fs.writeFileSync(file,before);}
+ // Actual persistent watch: exact prefix reuse, dependency invalidation and error repair.
+ const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+ const project=path.join(directory,'project');fs.mkdirSync(project);
+ fs.writeFileSync(path.join(project,'Base.ps'),'def base : Nat := 40\n');
+ fs.writeFileSync(path.join(project,'Middle.ps'),'import Base\ndef middle : Nat := base + 1\n');
+ fs.writeFileSync(path.join(project,'Main.ps'),'import Middle\ndef answer : Nat := middle + 1\n');
+ fs.writeFileSync(path.join(project,'proofscript.json'),JSON.stringify({schema:'proofscript-project/1',entryModule:'Main',
+  files:[{module:'Base',path:'Base.ps'},{module:'Middle',path:'Middle.ps'},{module:'Main',path:'Main.ps'}]}));
+ async function watch(command,target){
+  let text='',stderr='',exit;const results=[];
+  const child=spawn(process.execPath,[cli,command,'-p',path.join(project,'proofscript.json'),'--watch','--diagnostics=json',
+   ...(target?['--target',target,'--out',path.join(project,'out')]:[])],{cwd:directory,stdio:['ignore','pipe','pipe']});
+  child.stdout.on('data',b=>{text+=b;assert.ok(text.length<33554432);for(;;){const n=text.indexOf('\n');if(n<0)break;results.push(JSON.parse(text.slice(0,n)));text=text.slice(n+1);}});
+  child.stderr.on('data',b=>{stderr+=b;assert.ok(stderr.length<33554432);});child.on('close',code=>exit=code);
+  const until=async predicate=>{const start=Date.now();while(!predicate()){assert.equal(exit,undefined,stderr);assert.ok(Date.now()-start<240000,stderr);await sleep(20);}};
+  const stop=async()=>{child.kill('SIGTERM');const start=Date.now();while(exit===undefined){assert.ok(Date.now()-start<5000,'watch stop deadline');await sleep(20);}assert.equal(exit,143);return Date.now()-start;};
+  return{results,until,stop,stderr:()=>stderr};
+ }
+ const w=await watch('check');
+ try{
+  await w.until(()=>w.results.length===1);assert.equal(w.results[0].cache.preparedModules,3);
+  let start=performance.now();fs.writeFileSync(path.join(project,'Main.ps'),'import Middle\ndef answer : Nat := middle + 2\n');
+  await w.until(()=>w.results.length===2);assert.equal(w.results[1].cache.prefixModules,2);assert.equal(w.results[1].cache.preparedModules,1);
+  const leafMs=performance.now()-start;
+  fs.writeFileSync(path.join(project,'Main.ps'),'import Middle\ndef answer : Nat := middle + 2\n');
+  await w.until(()=>w.results.length===3);assert.equal(w.results[2].cache.finishHit,true);
+  fs.writeFileSync(path.join(project,'Base.ps'),'def base : Nat := 41\n');
+  await w.until(()=>w.results.length===4);assert.equal(w.results[3].cache.prefixModules,0);assert.equal(w.results[3].cache.preparedModules,3);
+  fs.writeFileSync(path.join(project,'Main.ps'),'import Middle\ndef answer : Nat := true\n');
+  await w.until(()=>w.stderr().includes('failed; waiting for changes'));
+  fs.writeFileSync(path.join(project,'Main.ps'),'import Middle\ndef answer : Nat := middle + 1\n');
+  await w.until(()=>w.results.length===5);assert.equal(w.results[4].logicalAdmission,'accepted');
+  report.watchCheck={leafEditMs:leafMs,results:w.results.map(r=>({cache:r.cache,timings:r.timings})),dependencyInvalidated:true,errorRepair:true};
+ }finally{report.watchCheckStopMs=await w.stop();}
+ fs.writeFileSync(path.join(project,'Base.ps'),'def base : Nat := 40\n');
+ const b=await watch('build','ts');
+ try{
+  await b.until(()=>b.results.length===1);
+  const value=r=>ok(process.execPath,['--input-type=module','-e','const m=await import('+JSON.stringify(pathToFileURL(r.runtimeArtifact).href)+');console.log(String(m.answer));']).trim();
+  assert.equal(value(b.results[0]),'42');
+  const start=performance.now();fs.writeFileSync(path.join(project,'Main.ps'),'import Middle\ndef answer : Nat := middle + 2\n');
+  await b.until(()=>b.results.length===2);assert.equal(value(b.results[1]),'43');
+  const pointer=fs.readlinkSync(path.join(project,'out/current'));
+  fs.writeFileSync(path.join(project,'Main.ps'),'import Middle\ndef answer : Nat := true\n');
+  await b.until(()=>b.stderr().includes('failed; waiting for changes'));assert.equal(fs.readlinkSync(path.join(project,'out/current')),pointer);
+  report.watchBuild={target:'ts',editMs:performance.now()-start,values:['42','43'],typingRefusalPreserved:true};
+ }finally{report.watchBuildStopMs=await b.stop();}
+ const ordinary=invoke('check',{entryModule:'Main',assurance:'ordinary-checked',sources:[{module:'Main',kind:'lean',text:'partial def again (n : Nat) : Nat := again n\n'}]});
+ assert.equal(ordinary.logicalAdmission,'accepted');report.ordinaryPartialChecked=true;
  report.status='passed';
 }finally{
  fs.mkdirSync('dist/development-results',{recursive:true});fs.writeFileSync('dist/development-results/qualification.json',JSON.stringify(report,null,2)+'\n');

@@ -6,6 +6,7 @@ import { spawnSync } from 'node:child_process';
 import { readQualifiedArtifact, sha256 } from './kernel435-qualified-artifact.mjs';
 import { verify } from '../host-tools/executable/verify.mjs';
 import { readQualifiedModularGraph } from './modular-toolchain-provenance.mjs';
+import { preparePlatformTypeScript } from './modular-toolchain-platform-resources.mjs';
 const input = JSON.parse(fs.readFileSync('scripts/modular-toolchain-input.json'));
 const out = path.resolve('dist/modular-toolchain');
 assert.equal(out, path.join(process.cwd(), 'dist/modular-toolchain'));
@@ -230,7 +231,7 @@ if (process.argv[2] !== 'inspect') {
           ["meta.name + ' ' + meta.version", "'proofscript ' + meta.version"],
         ],
         'cli-watch-worker.mjs': [["'./universal.mjs'", "'@proofscript/compiler'"]],
-        'cli-project.mjs': [],
+        'cli-project.mjs': [["'../host-tools/runtime-policy.mjs'", "'@proofscript/compiler/runtime-policy'"]],
         'cli-watch.mjs': [],
       };
       const provenance = [];
@@ -377,10 +378,15 @@ if (process.argv[2] !== 'inspect') {
       archiveSha256:actualSha,payloadPinsPreserved:true,compilerDependencyRemoved:descriptor.package.startsWith('@proofscript/backend-')});
     descriptor.tarball=path.basename(packedFile);descriptor.tarballSha256=actualSha;
   }
+  await preparePlatformTypeScript({out,distribution:d,files,write,json,run,sha256});
   const compilerPackage=path.join(nodes,'@proofscript/compiler/package.json');
   const compilerMeta=JSON.parse(fs.readFileSync(compilerPackage));
   for(const name of ['@proofscript/backend-python','@proofscript/backend-php'])
     compilerMeta.peerDependencies[name]=version;
+  for(const descriptor of Object.values(d.targetConsumers.ts.platformDependencies)){
+    compilerMeta.peerDependencies[descriptor.package]=descriptor.version;
+    compilerMeta.peerDependenciesMeta[descriptor.package]={optional:true};
+  }
   write(compilerPackage,json(compilerMeta));
   installedPackages.find(row=>row.name==='@proofscript/compiler').peerDependencies=compilerMeta.peerDependencies;
   for(const key of Object.keys(d))
@@ -498,7 +504,9 @@ if (process.argv[2] !== 'inspect') {
       'The checked host requires the sealed umbrella installation scope; standalone lower generated modules resolve through ordinary dependencies, but standalone checked-host installation is not qualified.',
       'The exact compiler graph has independently checked Linux JS/TS G1/G2/G3 and complete graph/npm fixed points. See dist/COMPILER_SELFHOST_QUALIFICATION.json and metadata.compilerSelfHosting. Installed-host evidence is separate.',
       'Native binary reproduction, other-platform qualification, the 240-second self-compilation target and universal release remain unqualified. This is a Linux preview, not a universal toolchain release.',
-      'Use psc --help, psc init, psc check, and psc build --out out --publication-protocol portable-file. Use --watch to rebuild captured inputs.',
+      'Use psc --help, psc init, psc check, and psc build --out out. Use --watch to rebuild captured inputs.',
+      'Linux keeps its existing default; macOS defaults to durable portable-file. Windows defaults to portable-atomic (complete atomic visibility, without a power-loss durability claim). Explicit durable protocols are never downgraded.',
+      'TypeScript7.0.2 validation selects the exact pinned optional consumer for Linux x64, macOS Intel/Apple Silicon or Windows x64. Rust and scripting-provider SDK platform restrictions remain explicit.',
     ].join('\n') + '\n',
   );
   write(path.join(stage, 'dist/COMPILER_SELFHOST_QUALIFICATION.json'), qualified.receiptBytes);

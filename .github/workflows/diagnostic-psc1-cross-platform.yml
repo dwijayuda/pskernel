@@ -3,11 +3,7 @@ on:
   push:
     branches: [feat/psc1-cross-platform-npm-20261029]
     paths:
-      - .github/psc1/platform-host-candidate.json
-      - .github/scripts/psc1-stage-platform-host.mjs
-      - .github/scripts/psc1-platform-qualify.mjs
-      - .github/scripts/psc1-cross-platform-delivery.mjs
-      - .github/workflows/diagnostic-psc1-cross-platform.yml
+      - .github/psc1/cross-platform-requalify.json
   workflow_dispatch:
 permissions:
   contents: read

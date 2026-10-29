@@ -23,7 +23,7 @@ export async function watchProject({command, parsed, execute, diagnostic, mode})
     else process.stderr.write('[psc watch] ' + event +
       (fields.elapsedMs === undefined ? '' : ' (' + fields.elapsedMs + ' ms)') + '\n');
   };
-  const handlers = new Map([['SIGINT', 130], ['SIGTERM', 143]].map(([signal, code]) => {
+  const handlers = new Map([['SIGINT', 130], ['SIGTERM', 143], ...(process.platform === 'win32' ? [['SIGBREAK', 130]] : [])].map(([signal, code]) => {
     const handler = () => { stopped = code; };
     process.on(signal, handler);
     return [signal, handler];

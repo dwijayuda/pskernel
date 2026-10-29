@@ -1,6 +1,6 @@
 // Trusted installed-package selection only. Compiler wire data never selects tools.
 import fs from 'node:fs';
-import { requireSupportedRuntime } from './runtime-policy.mjs';
+import { requireSupportedRuntime, defaultPublicationProtocol } from './runtime-policy.mjs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import os from 'node:os';
@@ -110,7 +110,9 @@ function packagePins(descriptor) {
   if (
     !descriptor ||
     (descriptor.package !== 'typescript' &&
-      descriptor.package !== '@typescript/typescript-linux-x64' &&
+      !/^@typescript\/typescript-(linux-x64|darwin-x64|darwin-arm64|win32-x64)$/.test(
+        descriptor.package,
+      ) &&
       !/^@proofscript\/[a-z0-9-]+$/.test(descriptor.package || '')) ||
     !Array.isArray(descriptor.files) ||
     !descriptor.files.length
@@ -326,18 +328,31 @@ export function resolveCheckedTarget(
     distribution.targetConsumers.ts.version !== '7.0.2'
   )
     fail('CHECKED_TARGET_CONSUMER');
-  const resolved = packagePins(distribution.targetConsumers.ts);
+  const key = process.platform + '-' + process.arch;
+  const expected = {
+    'linux-x64': '@typescript/typescript-linux-x64',
+    'darwin-x64': '@typescript/typescript-darwin-x64',
+    'darwin-arm64': '@typescript/typescript-darwin-arm64',
+    'win32-x64': '@typescript/typescript-win32-x64',
+  }[key];
+  const descriptor =
+    key === 'linux-x64'
+      ? distribution.targetConsumers.ts.dependencies?.[0]
+      : distribution.targetConsumers.ts.platformDependencies?.[key];
   if (
-    process.platform !== 'linux' ||
-    process.arch !== 'x64' ||
-    distribution.targetConsumers.ts.platform !== 'linux-x64' ||
-    distribution.targetConsumers.ts.dependencies?.length !== 1 ||
-    distribution.targetConsumers.ts.dependencies[0].package !==
-      '@typescript/typescript-linux-x64' ||
-    distribution.targetConsumers.ts.dependencies[0].version !== '7.0.2'
+    !expected ||
+    !descriptor ||
+    descriptor.package !== expected ||
+    descriptor.version !== '7.0.2' ||
+    (key === 'linux-x64'
+      ? distribution.targetConsumers.ts.platform !== 'linux-x64' ||
+        distribution.targetConsumers.ts.dependencies?.length !== 1 ||
+        (descriptor.platform !== undefined && descriptor.platform !== key)
+      : descriptor.platform !== key)
   )
     fail('TYPESCRIPT_CONSUMER_PLATFORM');
-  const native = packagePins(distribution.targetConsumers.ts.dependencies[0]);
+  const resolved = packagePins(distribution.targetConsumers.ts);
+  const native = packagePins(descriptor);
   return {
     typescript: {
       entry: resolved.entry.path,
@@ -438,9 +453,10 @@ export function describeInstallation() {
     leanCommit,
     engines,
     checkedTargets: ['js', 'ts', 'rust', 'wasm-core', 'wasm-component', 'python', 'php'],
-    publicationProtocols: ['legacy-symlink', 'portable-file'],
+    publicationProtocols: ['legacy-symlink', 'portable-file', 'portable-atomic'],
+    defaultPublicationProtocol,
     candidateTargets: ['js', 'ts', 'rust', 'wasm-core'],
-    publicationPlatforms: ['linux'],
+    publicationPlatforms: ['linux', 'darwin', 'win32'],
     finalCrossPlatformRelease: false,
   });
 }

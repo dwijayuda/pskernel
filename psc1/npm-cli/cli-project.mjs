@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import {defaultPublicationProtocol} from '../host-tools/runtime-policy.mjs';
 
 export const MAX_INPUT_BYTES = 128 * 1024 * 1024;
 const maxProjectFiles = 4096;
@@ -55,7 +56,7 @@ const values = new Map([
   ['--target', ['js', 'ts', 'rust', 'wasm-core', 'wasm-component', 'python', 'php']],
   ['--assurance', ['checked', 'ordinary-checked']],
   ['--output-abi', ['scalar', 'io-dispatcher']],
-  ['--publication-protocol', ['portable-file', 'legacy-symlink']],
+  ['--publication-protocol', ['portable-file', 'legacy-symlink', 'portable-atomic']],
   ['--out', null], ['--project', null], ['--rust-toolchain-root', null],
 ]);
 const aliases = new Map([['-p', '--project'], ['-o', '--out']]);
@@ -206,10 +207,10 @@ export function describeProject(parsed, captured) {
       target: parsed.options.get('--target') || 'js',
       assurance: parsed.options.get('--assurance') || captured.project.assurance || 'checked',
       outputAbi: parsed.options.get('--output-abi') || 'scalar',
-      publicationProtocol: parsed.options.get('--publication-protocol') || 'legacy-symlink',
+      publicationProtocol: parsed.options.get('--publication-protocol') || defaultPublicationProtocol,
       ...(parsed.options.has('--out') ? {out: path.resolve(parsed.options.get('--out'))} : {})},
     defaults: {engine: 'js', kernel: 'wasm', target: 'js',
-      outputAbi: 'scalar', publicationProtocol: 'legacy-symlink'},
+      outputAbi: 'scalar', publicationProtocol: defaultPublicationProtocol},
     logicalAdmission: 'not-run', publication: 'not-requested'};
 }
 

@@ -1,0 +1,651 @@
+{
+  "schema": "psc1-cross-platform-delivery/1",
+  "status": "qualified-finite-installed-node",
+  "testedCommit": "1c913c5c12049468d78b324a69356e047b3c7fc9",
+  "qualificationRun": 40814345252,
+  "package": {
+    "schema": "psc1-modular-installed-package/1",
+    "testedCommit": "1c913c5c12049468d78b324a69356e047b3c7fc9",
+    "version": "0.1.0-psc1-modular.4",
+    "tarball": "proofscript-0.1.0-psc1-modular.4.tgz",
+    "bytes": 9824032,
+    "sha256": "97f0bd6809c9f2a910b64ca96977c0725c6810291ea2f5991ce74fdfcf142446",
+    "manifestSha256": "79000c9019015d5891104a4e6224535eb0675b5d033d842bfa0d9c588d4a872c",
+    "consumerDescriptorsSha256": "6f693e297e604d9682a14cd814dcd89b526f56d419e0742f65fd2479f23253e6",
+    "compilerAdmissionsSha256": "cff6304aef7b3e7c69ac7c4941d275a685b945af2fdc79bf9dfee7ebfd1513f4",
+    "sourceGraphManifestSha256": "74e14f5650931ccc3de2a4a7ed6829f54197bb8100466bcb2eb0ad90d7b14a85",
+    "compilerSelfHosting": {
+      "schema": "psc1-installed-compiler-selfhosting/1",
+      "status": "qualified-finite-linux-modular-js-ts",
+      "engines": [
+        "js",
+        "ts"
+      ],
+      "qualificationRun": 40755246954,
+      "sourceCommit": "17ce19919175b60be06050188e2a546a8a72e689",
+      "sourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+      "sourceGraphManifestSha256": "74e14f5650931ccc3de2a4a7ed6829f54197bb8100466bcb2eb0ad90d7b14a85",
+      "receiptSha256": "fbf31688151efc29c6de9a74b678e10420c983a24069ecf68f57e4e87e78b9de",
+      "receiptPath": "dist/COMPILER_SELFHOST_QUALIFICATION.json",
+      "fixedPoint": "exact-G1-G2-G3-graph-files-and-npm-tarballs",
+      "qualifiedCorrectnessSeconds": 3600,
+      "performance240Qualified": false,
+      "installedHostQualification": "separate installation CI; not inherited from self-hosting",
+      "scope": "finite Linux JS/TS compiler graph; not universal toolchain release or native binary reproduction"
+    },
+    "compilerSourceClosureDigest": "1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb",
+    "sourceUnits": 134,
+    "corePackages": 20,
+    "installedGraphFiles": 1479,
+    "installedGraphBytes": 108656179,
+    "defaultKernel": "official-Lean-4.35.0-Emscripten-linear-memory-Wasm",
+    "referenceCompilerExecuted": false,
+    "fullModularSelfHosting": false,
+    "standaloneCheckedHostQualified": false
+  },
+  "reports": [
+    {
+      "schema": "psc1-cross-platform-installed/1",
+      "status": "passed",
+      "testedCommit": "1c913c5c12049468d78b324a69356e047b3c7fc9",
+      "platform": "linux",
+      "arch": "x64",
+      "node": "v22.23.3",
+      "tarballSha256": "97f0bd6809c9f2a910b64ca96977c0725c6810291ea2f5991ce74fdfcf142446",
+      "records": [
+        {
+          "engine": "js",
+          "kind": "lean",
+          "target": "js",
+          "durability": "confirmed",
+          "sourceClosureDigest": "3005e86768adb48e3f150a83878e469decf8c01ab4df0d69af1e6d58c119d906"
+        },
+        {
+          "engine": "js",
+          "kind": "lean",
+          "target": "wasm-core",
+          "durability": "confirmed",
+          "sourceClosureDigest": "3005e86768adb48e3f150a83878e469decf8c01ab4df0d69af1e6d58c119d906"
+        },
+        {
+          "engine": "js",
+          "kind": "ps",
+          "target": "js",
+          "durability": "confirmed",
+          "sourceClosureDigest": "eab1de07659670bdef1015a6dc36ab81eb261dc81608f0c61be6dedea38a84ae"
+        },
+        {
+          "engine": "js",
+          "kind": "ps",
+          "target": "wasm-core",
+          "durability": "confirmed",
+          "sourceClosureDigest": "eab1de07659670bdef1015a6dc36ab81eb261dc81608f0c61be6dedea38a84ae"
+        },
+        {
+          "engine": "ts",
+          "kind": "lean",
+          "target": "js",
+          "durability": "confirmed",
+          "sourceClosureDigest": "3005e86768adb48e3f150a83878e469decf8c01ab4df0d69af1e6d58c119d906"
+        },
+        {
+          "engine": "ts",
+          "kind": "lean",
+          "target": "wasm-core",
+          "durability": "confirmed",
+          "sourceClosureDigest": "3005e86768adb48e3f150a83878e469decf8c01ab4df0d69af1e6d58c119d906"
+        },
+        {
+          "engine": "ts",
+          "kind": "ps",
+          "target": "js",
+          "durability": "confirmed",
+          "sourceClosureDigest": "eab1de07659670bdef1015a6dc36ab81eb261dc81608f0c61be6dedea38a84ae"
+        },
+        {
+          "engine": "ts",
+          "kind": "ps",
+          "target": "wasm-core",
+          "durability": "confirmed",
+          "sourceClosureDigest": "eab1de07659670bdef1015a6dc36ab81eb261dc81608f0c61be6dedea38a84ae"
+        },
+        {
+          "engine": "js",
+          "kind": "lean",
+          "target": "ts",
+          "durability": "confirmed"
+        },
+        {
+          "engine": "js",
+          "kind": "ps",
+          "target": "ts",
+          "durability": "confirmed"
+        },
+        {
+          "engine": "ts",
+          "kind": "lean",
+          "target": "ts",
+          "durability": "confirmed"
+        },
+        {
+          "engine": "ts",
+          "kind": "ps",
+          "target": "ts",
+          "durability": "confirmed"
+        }
+      ],
+      "negativeCases": [
+        "typing-refusal-preserves-publication",
+        "tampered-module-before-import",
+        "optional-sdk-tamper-before-execution"
+      ],
+      "publication": [
+        {
+          "protocol": "legacy-symlink",
+          "initialDurability": "confirmed",
+          "precommitPreserved": true,
+          "postcommitUncertainty": true,
+          "staleSessionRefused": true
+        },
+        {
+          "protocol": "portable-file",
+          "initialDurability": "confirmed",
+          "precommitPreserved": true,
+          "postcommitUncertainty": true,
+          "staleSessionRefused": true
+        },
+        {
+          "protocol": "portable-atomic",
+          "initialDurability": "visibility-only",
+          "precommitPreserved": true,
+          "postcommitUncertainty": true,
+          "staleSessionRefused": true
+        }
+      ],
+      "offlineRootOnlyInstall": true,
+      "defaultPublicationProtocol": "legacy-symlink",
+      "realKernelAcceptanceAndRejection": true,
+      "compileWithoutPublication": true,
+      "watch": {
+        "engine": "ts",
+        "builds": 3,
+        "values": [
+          "42",
+          "43",
+          "44"
+        ],
+        "typingRefusalPreserved": true,
+        "stopMethod": "SIGTERM",
+        "stopMs": 101,
+        "exit": {
+          "code": 143,
+          "signal": null
+        }
+      },
+      "globalRootOnlyInstall": true
+    },
+    {
+      "schema": "psc1-cross-platform-installed/1",
+      "status": "passed",
+      "testedCommit": "1c913c5c12049468d78b324a69356e047b3c7fc9",
+      "platform": "darwin",
+      "arch": "arm64",
+      "node": "v22.23.3",
+      "tarballSha256": "97f0bd6809c9f2a910b64ca96977c0725c6810291ea2f5991ce74fdfcf142446",
+      "records": [
+        {
+          "engine": "js",
+          "kind": "lean",
+          "target": "js",
+          "durability": "confirmed",
+          "sourceClosureDigest": "3005e86768adb48e3f150a83878e469decf8c01ab4df0d69af1e6d58c119d906"
+        },
+        {
+          "engine": "js",
+          "kind": "lean",
+          "target": "wasm-core",
+          "durability": "confirmed",
+          "sourceClosureDigest": "3005e86768adb48e3f150a83878e469decf8c01ab4df0d69af1e6d58c119d906"
+        },
+        {
+          "engine": "js",
+          "kind": "ps",
+          "target": "js",
+          "durability": "confirmed",
+          "sourceClosureDigest": "eab1de07659670bdef1015a6dc36ab81eb261dc81608f0c61be6dedea38a84ae"
+        },
+        {
+          "engine": "js",
+          "kind": "ps",
+          "target": "wasm-core",
+          "durability": "confirmed",
+          "sourceClosureDigest": "eab1de07659670bdef1015a6dc36ab81eb261dc81608f0c61be6dedea38a84ae"
+        },
+        {
+          "engine": "ts",
+          "kind": "lean",
+          "target": "js",
+          "durability": "confirmed",
+          "sourceClosureDigest": "3005e86768adb48e3f150a83878e469decf8c01ab4df0d69af1e6d58c119d906"
+        },
+        {
+          "engine": "ts",
+          "kind": "lean",
+          "target": "wasm-core",
+          "durability": "confirmed",
+          "sourceClosureDigest": "3005e86768adb48e3f150a83878e469decf8c01ab4df0d69af1e6d58c119d906"
+        },
+        {
+          "engine": "ts",
+          "kind": "ps",
+          "target": "js",
+          "durability": "confirmed",
+          "sourceClosureDigest": "eab1de07659670bdef1015a6dc36ab81eb261dc81608f0c61be6dedea38a84ae"
+        },
+        {
+          "engine": "ts",
+          "kind": "ps",
+          "target": "wasm-core",
+          "durability": "confirmed",
+          "sourceClosureDigest": "eab1de07659670bdef1015a6dc36ab81eb261dc81608f0c61be6dedea38a84ae"
+        },
+        {
+          "engine": "js",
+          "kind": "lean",
+          "target": "ts",
+          "durability": "confirmed"
+        },
+        {
+          "engine": "js",
+          "kind": "ps",
+          "target": "ts",
+          "durability": "confirmed"
+        },
+        {
+          "engine": "ts",
+          "kind": "lean",
+          "target": "ts",
+          "durability": "confirmed"
+        },
+        {
+          "engine": "ts",
+          "kind": "ps",
+          "target": "ts",
+          "durability": "confirmed"
+        }
+      ],
+      "negativeCases": [
+        "typing-refusal-preserves-publication",
+        "unsupported-rust-sdk-platform",
+        "tampered-module-before-import",
+        "optional-sdk-tamper-before-execution"
+      ],
+      "publication": [
+        {
+          "protocol": "portable-file",
+          "initialDurability": "confirmed",
+          "precommitPreserved": true,
+          "postcommitUncertainty": true,
+          "staleSessionRefused": true
+        }
+      ],
+      "offlineRootOnlyInstall": true,
+      "defaultPublicationProtocol": "portable-file",
+      "realKernelAcceptanceAndRejection": true,
+      "compileWithoutPublication": true,
+      "watch": {
+        "engine": "ts",
+        "builds": 3,
+        "values": [
+          "42",
+          "43",
+          "44"
+        ],
+        "typingRefusalPreserved": true,
+        "stopMethod": "SIGTERM",
+        "stopMs": 106,
+        "exit": {
+          "code": 143,
+          "signal": null
+        }
+      },
+      "globalRootOnlyInstall": true
+    },
+    {
+      "schema": "psc1-cross-platform-installed/1",
+      "status": "passed",
+      "testedCommit": "1c913c5c12049468d78b324a69356e047b3c7fc9",
+      "platform": "darwin",
+      "arch": "x64",
+      "node": "v22.23.3",
+      "tarballSha256": "97f0bd6809c9f2a910b64ca96977c0725c6810291ea2f5991ce74fdfcf142446",
+      "records": [
+        {
+          "engine": "js",
+          "kind": "lean",
+          "target": "js",
+          "durability": "confirmed",
+          "sourceClosureDigest": "3005e86768adb48e3f150a83878e469decf8c01ab4df0d69af1e6d58c119d906"
+        },
+        {
+          "engine": "js",
+          "kind": "lean",
+          "target": "wasm-core",
+          "durability": "confirmed",
+          "sourceClosureDigest": "3005e86768adb48e3f150a83878e469decf8c01ab4df0d69af1e6d58c119d906"
+        },
+        {
+          "engine": "js",
+          "kind": "ps",
+          "target": "js",
+          "durability": "confirmed",
+          "sourceClosureDigest": "eab1de07659670bdef1015a6dc36ab81eb261dc81608f0c61be6dedea38a84ae"
+        },
+        {
+          "engine": "js",
+          "kind": "ps",
+          "target": "wasm-core",
+          "durability": "confirmed",
+          "sourceClosureDigest": "eab1de07659670bdef1015a6dc36ab81eb261dc81608f0c61be6dedea38a84ae"
+        },
+        {
+          "engine": "ts",
+          "kind": "lean",
+          "target": "js",
+          "durability": "confirmed",
+          "sourceClosureDigest": "3005e86768adb48e3f150a83878e469decf8c01ab4df0d69af1e6d58c119d906"
+        },
+        {
+          "engine": "ts",
+          "kind": "lean",
+          "target": "wasm-core",
+          "durability": "confirmed",
+          "sourceClosureDigest": "3005e86768adb48e3f150a83878e469decf8c01ab4df0d69af1e6d58c119d906"
+        },
+        {
+          "engine": "ts",
+          "kind": "ps",
+          "target": "js",
+          "durability": "confirmed",
+          "sourceClosureDigest": "eab1de07659670bdef1015a6dc36ab81eb261dc81608f0c61be6dedea38a84ae"
+        },
+        {
+          "engine": "ts",
+          "kind": "ps",
+          "target": "wasm-core",
+          "durability": "confirmed",
+          "sourceClosureDigest": "eab1de07659670bdef1015a6dc36ab81eb261dc81608f0c61be6dedea38a84ae"
+        },
+        {
+          "engine": "js",
+          "kind": "lean",
+          "target": "ts",
+          "durability": "confirmed"
+        },
+        {
+          "engine": "js",
+          "kind": "ps",
+          "target": "ts",
+          "durability": "confirmed"
+        },
+        {
+          "engine": "ts",
+          "kind": "lean",
+          "target": "ts",
+          "durability": "confirmed"
+        },
+        {
+          "engine": "ts",
+          "kind": "ps",
+          "target": "ts",
+          "durability": "confirmed"
+        }
+      ],
+      "negativeCases": [
+        "typing-refusal-preserves-publication",
+        "unsupported-rust-sdk-platform",
+        "tampered-module-before-import",
+        "optional-sdk-tamper-before-execution"
+      ],
+      "publication": [
+        {
+          "protocol": "portable-file",
+          "initialDurability": "confirmed",
+          "precommitPreserved": true,
+          "postcommitUncertainty": true,
+          "staleSessionRefused": true
+        }
+      ],
+      "offlineRootOnlyInstall": true,
+      "defaultPublicationProtocol": "portable-file",
+      "realKernelAcceptanceAndRejection": true,
+      "compileWithoutPublication": true,
+      "watch": {
+        "engine": "ts",
+        "builds": 3,
+        "values": [
+          "42",
+          "43",
+          "44"
+        ],
+        "typingRefusalPreserved": true,
+        "stopMethod": "SIGTERM",
+        "stopMs": 52,
+        "exit": {
+          "code": 143,
+          "signal": null
+        }
+      },
+      "globalRootOnlyInstall": true
+    },
+    {
+      "schema": "psc1-cross-platform-installed/1",
+      "status": "passed",
+      "testedCommit": "1c913c5c12049468d78b324a69356e047b3c7fc9",
+      "platform": "win32",
+      "arch": "x64",
+      "node": "v22.23.3",
+      "tarballSha256": "97f0bd6809c9f2a910b64ca96977c0725c6810291ea2f5991ce74fdfcf142446",
+      "records": [
+        {
+          "engine": "js",
+          "kind": "lean",
+          "target": "js",
+          "durability": "visibility-only",
+          "sourceClosureDigest": "3005e86768adb48e3f150a83878e469decf8c01ab4df0d69af1e6d58c119d906"
+        },
+        {
+          "engine": "js",
+          "kind": "lean",
+          "target": "wasm-core",
+          "durability": "visibility-only",
+          "sourceClosureDigest": "3005e86768adb48e3f150a83878e469decf8c01ab4df0d69af1e6d58c119d906"
+        },
+        {
+          "engine": "js",
+          "kind": "ps",
+          "target": "js",
+          "durability": "visibility-only",
+          "sourceClosureDigest": "eab1de07659670bdef1015a6dc36ab81eb261dc81608f0c61be6dedea38a84ae"
+        },
+        {
+          "engine": "js",
+          "kind": "ps",
+          "target": "wasm-core",
+          "durability": "visibility-only",
+          "sourceClosureDigest": "eab1de07659670bdef1015a6dc36ab81eb261dc81608f0c61be6dedea38a84ae"
+        },
+        {
+          "engine": "ts",
+          "kind": "lean",
+          "target": "js",
+          "durability": "visibility-only",
+          "sourceClosureDigest": "3005e86768adb48e3f150a83878e469decf8c01ab4df0d69af1e6d58c119d906"
+        },
+        {
+          "engine": "ts",
+          "kind": "lean",
+          "target": "wasm-core",
+          "durability": "visibility-only",
+          "sourceClosureDigest": "3005e86768adb48e3f150a83878e469decf8c01ab4df0d69af1e6d58c119d906"
+        },
+        {
+          "engine": "ts",
+          "kind": "ps",
+          "target": "js",
+          "durability": "visibility-only",
+          "sourceClosureDigest": "eab1de07659670bdef1015a6dc36ab81eb261dc81608f0c61be6dedea38a84ae"
+        },
+        {
+          "engine": "ts",
+          "kind": "ps",
+          "target": "wasm-core",
+          "durability": "visibility-only",
+          "sourceClosureDigest": "eab1de07659670bdef1015a6dc36ab81eb261dc81608f0c61be6dedea38a84ae"
+        },
+        {
+          "engine": "js",
+          "kind": "lean",
+          "target": "ts",
+          "durability": "visibility-only"
+        },
+        {
+          "engine": "js",
+          "kind": "ps",
+          "target": "ts",
+          "durability": "visibility-only"
+        },
+        {
+          "engine": "ts",
+          "kind": "lean",
+          "target": "ts",
+          "durability": "visibility-only"
+        },
+        {
+          "engine": "ts",
+          "kind": "ps",
+          "target": "ts",
+          "durability": "visibility-only"
+        }
+      ],
+      "negativeCases": [
+        "typing-refusal-preserves-publication",
+        "durable-protocol-not-silently-downgraded",
+        "unsupported-rust-sdk-platform",
+        "tampered-module-before-import",
+        "optional-sdk-tamper-before-execution"
+      ],
+      "publication": [
+        {
+          "protocol": "portable-atomic",
+          "initialDurability": "visibility-only",
+          "precommitPreserved": true,
+          "postcommitUncertainty": true,
+          "staleSessionRefused": true
+        }
+      ],
+      "offlineRootOnlyInstall": true,
+      "defaultPublicationProtocol": "portable-atomic",
+      "realKernelAcceptanceAndRejection": true,
+      "compileWithoutPublication": true,
+      "watch": {
+        "engine": "ts",
+        "builds": 3,
+        "values": [
+          "42",
+          "43",
+          "44"
+        ],
+        "typingRefusalPreserved": true,
+        "stopMethod": "Windows taskkill owned tree",
+        "stopMs": 159,
+        "exit": {
+          "code": 1,
+          "signal": null
+        }
+      },
+      "globalRootOnlyInstall": true
+    }
+  ],
+  "compilerGraphReused": true,
+  "selfHostingRerun": false,
+  "scope": "Node 22.23.3; Linux x64, Windows x64, macOS x64/arm64; JS/TS engines and JS/TS/Wasm-core output. Windows atomic visibility only; no power-loss directory-durability claim. Rust/component SDK and optional Python/PHP remain separately restricted. Not universal release readiness.",
+  "zip": "proofscript-0.1.0-psc1-modular.4-cross-platform.zip",
+  "zipBytes": 48024239,
+  "zipSha256": "a657e8d11ef37a9c63035981c8172d75c9a70acd6ed6b574bcfe1b1356d6ba89",
+  "files": 16,
+  "baseCommit": "2c278ab9a47c24ef8635f99b41629fc79fd82699",
+  "hostSources": {
+    "producerCommit": "1c913c5c12049468d78b324a69356e047b3c7fc9",
+    "pins": [
+      {
+        "path": "psc1/host-tools/runtime-policy.mjs",
+        "bytes": 1832,
+        "sha256": "39051f87f5ac71a28c06721eece926abfb89fe6356a94a17079a3b19acc3f801"
+      },
+      {
+        "path": "psc1/host-tools/transactional-publication.mjs",
+        "bytes": 10067,
+        "sha256": "dcfafa4f027553f08881da578fee974d7a741e59bd0c8f62e06885b5f53c5fed"
+      },
+      {
+        "path": "psc1/npm-cli/compiler-api.mjs",
+        "bytes": 13035,
+        "sha256": "8bb2520d3178bb32b4cd9c593a45481bf0652dd70f2e9e4f642712cd5e23087f"
+      },
+      {
+        "path": "psc1/npm-cli/cli-project.mjs",
+        "bytes": 13809,
+        "sha256": "fd632c07a7223b7bdc2582bf17415eb24e46eaf4f4a89bedb48de93e5bca1bd3"
+      },
+      {
+        "path": "psc1/npm-cli/proofscript-cli.mjs",
+        "bytes": 10741,
+        "sha256": "e8bbc6553d1408bdaa4d3c19d24be2c0d1c8a7ffc5632bbacd8e6f88c96efb54"
+      },
+      {
+        "path": "psc1/npm-cli/universal.d.ts",
+        "bytes": 4445,
+        "sha256": "75efbd5b1f3aa504bf04461bc97561c8b1595770be44f0dab0329f6fbdbd52e8"
+      },
+      {
+        "path": "psc1/host-tools/installed-engine-resolver.mjs",
+        "bytes": 18440,
+        "sha256": "0981cd8f7dd0dd69cf1fc22077f12adb6efd744f63aec4d33397797e45220cef"
+      },
+      {
+        "path": "psc1/scripts/modular-toolchain-platform-resources.mjs",
+        "bytes": 3391,
+        "sha256": "f3f603028b23afa9e62967cf7e591e588bf79ab4ad0847a23bf410fb6d7a0eb7"
+      },
+      {
+        "path": "psc1/scripts/modular-toolchain-package.mjs",
+        "bytes": 30187,
+        "sha256": "e5532254e976ce8c4d788b402d18b9d21e26a276dcd8ddf540478ca20026ac60"
+      },
+      {
+        "path": "psc1/scripts/modular-toolchain-input.json",
+        "bytes": 1629,
+        "sha256": "6374a77e01cc844e7e69d2f92d3e9261026a162526ef7630a93f05ebf3f200bf"
+      },
+      {
+        "path": "psc1/npm-cli/cli-watch.mjs",
+        "bytes": 3617,
+        "sha256": "11eb293fc723adfdfed3db71dc3282fd577ab1a93425643f04468295824b0709"
+      }
+    ],
+    "baseCommit": "2c278ab9a47c24ef8635f99b41629fc79fd82699"
+  },
+  "artifact": {
+    "id": 12872251721,
+    "url": "https://github.com/dwijayuda/pskernel/actions/runs/40814345252/artifacts/12872251721",
+    "sha256": "24523b7c4c7bc656dae3b3693f334b4d1631a82b6f6d70a3d2b9afe3932a30c3"
+  },
+  "preservedQualifications": {
+    "selfHostRun": 40755246954,
+    "installedLinuxRun": 40799529998,
+    "sourceRun": 40799548941,
+    "retainedCliRun": 40799529980
+  },
+  "adoption": "Canonical adoption must match hostSources exactly; current-HEAD source/ZIP verification is separate from producer qualification."
+}

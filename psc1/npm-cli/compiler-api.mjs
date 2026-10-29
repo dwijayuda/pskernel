@@ -1,6 +1,6 @@
 // Installed host API. Reuses the existing checked session; no compiler semantics here.
 import fs from 'node:fs';
-import { runtimeArguments } from '../host-tools/runtime-policy.mjs';
+import { runtimeArguments, defaultPublicationProtocol } from '../host-tools/runtime-policy.mjs';
 import path from 'node:path';
 import os from 'node:os';
 import crypto from 'node:crypto';
@@ -19,7 +19,11 @@ import {
   kernelHandle,
   hash,
 } from '../host-tools/installed-engine-resolver.mjs';
-import { readPublication as readPublishedGeneration } from '../host-tools/transactional-publication.mjs';
+import {
+  readPublication as readPublishedGeneration,
+  publicationProtocols,
+  requirePublicationPlatform,
+} from '../host-tools/transactional-publication.mjs';
 const fail = (message) => {
   throw Error('PSC1_UNIVERSAL_' + message);
 };
@@ -33,14 +37,13 @@ function selection(options = {}) {
     assurance = options.assurance || 'checked',
     outputAbi = options.outputAbi ?? 'scalar',
     target = options.target ?? 'js',
-    publicationProtocol = options.publicationProtocol ?? 'legacy-symlink';
+    publicationProtocol = options.publicationProtocol ?? defaultPublicationProtocol;
   if (!['checked', 'ordinary-checked'].includes(assurance)) fail('ASSURANCE');
   if (!['scalar', 'io-dispatcher'].includes(outputAbi)) fail('OUTPUT_ABI');
   if (!['wasm', 'native', 'both'].includes(kernel)) fail('KERNEL');
   if (!['js', 'ts', 'rust', 'wasm-core', 'wasm-component', 'python', 'php'].includes(target))
     fail('CHECKED_TARGET_UNSUPPORTED');
-  if (!['legacy-symlink', 'portable-file'].includes(publicationProtocol))
-    fail('PUBLICATION_PROTOCOL');
+  if (!publicationProtocols.includes(publicationProtocol)) fail('PUBLICATION_PROTOCOL');
   const sources = clone(options.sources);
   compilerSourceClosureDigest(sources);
   if (
@@ -182,12 +185,10 @@ export function compile(options) {
 // A trusted host may veto publication after checking; it cannot manufacture admission.
 export function build(options, { beforePublish } = {}) {
   if (beforePublish !== undefined && typeof beforePublish !== 'function') fail('PUBLICATION_GUARD');
-  // Both pointer layouts require qualified Linux durability. Other platforms use compile().
-  if (process.platform !== 'linux')
-    fail('PUBLICATION_PLATFORM_UNQUALIFIED: use the checked compile API or compile stdout command');
   if (typeof options?.out !== 'string' || !options.out) fail('OUTPUT_DIRECTORY');
-  const selected = selection(options),
-    session = sessionFor(selected, path.resolve(options.out)),
+  const selected = selection(options);
+  requirePublicationPlatform(selected.publicationProtocol);
+  const session = sessionFor(selected, path.resolve(options.out)),
     receipt = session.execute();
   if (beforePublish) beforePublish();
   const published = session.publish();
@@ -210,7 +211,7 @@ export function build(options, { beforePublish } = {}) {
     formalPreservation: 'not-provided',
   });
 }
-export function readPublication({ out, publicationProtocol = 'legacy-symlink' }) {
+export function readPublication({ out, publicationProtocol = defaultPublicationProtocol }) {
   if (typeof out !== 'string' || !out) fail('OUTPUT_DIRECTORY');
   return readPublishedGeneration(path.resolve(out), publicationProtocol);
 }

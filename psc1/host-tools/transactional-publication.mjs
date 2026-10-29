@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import crypto from 'node:crypto';
+import {defaultPublicationProtocol} from './runtime-policy.mjs';
 const sha = (value) => crypto.createHash('sha256').update(value).digest('hex');
 const json = (value) => JSON.stringify(value, null, 2) + '\n';
 const fail = (code) => {
@@ -16,14 +17,16 @@ const inspect = (file) => {
     throw e;
   }
 };
-export const publicationProtocols = Object.freeze(['legacy-symlink', 'portable-file']);
+export const publicationProtocols = Object.freeze(['legacy-symlink', 'portable-file', 'portable-atomic']);
 export function requirePublicationPlatform(protocol) {
   if (!publicationProtocols.includes(protocol)) fail('PUBLICATION_PROTOCOL');
-  // The portable layout needs no symlink privilege. Enabling another OS still
-  // requires its actual directory-durability and atomic-replace release evidence.
-  if (process.platform !== 'linux') fail('PUBLICATION_PLATFORM_UNQUALIFIED');
+  const supported = protocol === 'legacy-symlink' ? ['linux']
+    : protocol === 'portable-file' ? ['linux', 'darwin'] : ['linux', 'darwin', 'win32'];
+  if (!supported.includes(process.platform)) fail('PUBLICATION_PLATFORM_UNQUALIFIED');
 }
-function syncDirectory(directory) {
+function syncDirectory(directory, protocol = 'legacy-symlink') {
+  // Atomic visibility does not claim directory/power-loss durability.
+  if (protocol === 'portable-atomic') return;
   const fd = fs.openSync(directory, 'r');
   try {
     fs.fsyncSync(fd);
@@ -35,17 +38,17 @@ function requireDirectory(file) {
   const stat = inspect(file);
   if (!stat || !stat.isDirectory() || stat.isSymbolicLink()) fail('STORE_INVALID');
 }
-function ensureDirectory(file) {
+function ensureDirectory(file, protocol) {
   const stat = inspect(file);
   if (stat) {
     requireDirectory(file);
     return;
   }
   const parent = path.dirname(file);
-  ensureDirectory(parent);
+  ensureDirectory(parent, protocol);
   fs.mkdirSync(file, { mode: 0o700 });
-  // Compile-only temporary staging remains portable; durability is qualified on Linux.
-  if (process.platform === 'linux') syncDirectory(parent);
+  // Compile-only staging is portable. Durable publication still requires its platform gate.
+  if (['linux', 'darwin'].includes(process.platform)) syncDirectory(parent, protocol);
 }
 function committedFailure(cause, result) {
   const error = Error('PSC1_SERVICE_PUBLICATION_COMMITTED_DURABILITY_UNCERTAIN', { cause });
@@ -61,7 +64,7 @@ function regular(file, limit = 128 * 1024 * 1024) {
   return fs.readFileSync(file);
 }
 function pointer(root, protocol) {
-  const file = path.join(root, protocol === 'portable-file' ? 'current.json' : 'current');
+  const file = path.join(root, protocol !== 'legacy-symlink' ? 'current.json' : 'current');
   const stat = inspect(file);
   if (!stat) return null;
   if (protocol === 'legacy-symlink') {
@@ -110,7 +113,7 @@ function verifyGeneration(directory, generation, expectedFiles) {
   }
   return manifest;
 }
-export function readPublication(root, protocol = 'legacy-symlink') {
+export function readPublication(root, protocol = defaultPublicationProtocol) {
   if (!publicationProtocols.includes(protocol)) fail('PUBLICATION_PROTOCOL');
   root = path.resolve(root);
   if (!inspect(root)) return null;
@@ -128,17 +131,18 @@ export function readPublication(root, protocol = 'legacy-symlink') {
     manifestSha256: value.generation,
     target: path.join(directory, targetFile),
     protocol,
-    durability: 'recorded-commit',
+    durability: protocol === 'portable-atomic' ? 'visibility-only' : 'recorded-commit',
     manifest,
   });
 }
-export function openPublicationStore(root, protocol = 'legacy-symlink') {
-  requirePublicationPlatform(protocol);
+export function openPublicationStore(root, protocol = defaultPublicationProtocol) {
+  // Execution may use temporary staging without requesting publication.
+  if (!publicationProtocols.includes(protocol)) fail('PUBLICATION_PROTOCOL');
   root = path.resolve(root);
   for (const directory of [root, path.join(root, 'generations')]) {
-    ensureDirectory(directory);
+    ensureDirectory(directory, protocol);
   }
-  const pointerName = protocol === 'portable-file' ? 'current.json' : 'current';
+  const pointerName = protocol !== 'legacy-symlink' ? 'current.json' : 'current';
   if (
     fs
       .readdirSync(root)
@@ -184,18 +188,18 @@ export function openPublicationStore(root, protocol = 'legacy-symlink') {
           generation = sha(text);
         fs.writeFileSync(path.join(stage, 'manifest.json'), text, { flag: 'wx' });
         for (const name of fs.readdirSync(stage)) {
-          const file = fs.openSync(path.join(stage, name), 'r');
+          const file = fs.openSync(path.join(stage, name), process.platform === 'win32' ? 'r+' : 'r');
           try {
             fs.fsyncSync(file);
           } finally {
             fs.closeSync(file);
           }
         }
-        syncDirectory(stage);
+        syncDirectory(stage, protocol);
         const directory = path.join(root, 'generations', generation);
         if (inspect(directory)) fail('GENERATION_ALREADY_EXISTS');
         fs.renameSync(stage, directory);
-        syncDirectory(path.join(root, 'generations'));
+        syncDirectory(path.join(root, 'generations'), protocol);
         fault('after-seal');
         verify();
         verifyGeneration(directory, generation, manifest.files);
@@ -219,7 +223,7 @@ export function openPublicationStore(root, protocol = 'legacy-symlink') {
             fs.closeSync(file);
           }
         }
-        syncDirectory(root);
+        syncDirectory(root, protocol);
         fault('before-commit');
         fs.renameSync(temporary, path.join(root, pointerName));
         temporary = undefined;
@@ -234,10 +238,10 @@ export function openPublicationStore(root, protocol = 'legacy-symlink') {
             ? { currentAlias: path.join(root, 'current', targetFile) }
             : {}),
           protocol,
-          durability: 'confirmed',
+          durability: protocol === 'portable-atomic' ? 'visibility-only' : 'confirmed',
         });
         fault('after-commit');
-        syncDirectory(root);
+        syncDirectory(root, protocol);
         return result;
       } catch (error) {
         if (committed) {

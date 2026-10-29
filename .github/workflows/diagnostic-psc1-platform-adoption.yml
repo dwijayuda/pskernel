@@ -1,0 +1,56 @@
+name: PSC1 qualified platform source adoption
+on:
+  push:
+    branches: [feat/psc1-cross-platform-npm-20261029]
+    paths:
+      - psc1/host-tools/**
+      - psc1/npm-cli/**
+      - psc1/scripts/modular-toolchain-*
+      - psc1/scripts/readability-host-check.mjs
+      - psc1/docs/PSC1_CROSS_PLATFORM_QUALIFICATION_2026-10-29.json
+      - psc1/AI_WORK_STATE.md
+      - psc1/docs/PSC1_DEVELOPMENT_ROADMAP.md
+      - .github/workflows/diagnostic-psc1-platform-adoption.yml
+      - .github/scripts/psc1-platform-adoption.mjs
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: psc1-platform-adoption-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - run: npm ci --prefix host-tools --ignore-scripts --no-audit --no-fund
+      - name: Historical correspondence, qualified platform source and formatting
+        run: |
+          node scripts/readability-host-check.mjs
+          node scripts/ci/repository-layout.mjs
+      - uses: actions/download-artifact@v4
+        with:
+          name: proofscript-cross-platform-installable
+          run-id: 40814345252
+          github-token: ${{ github.token }}
+          path: psc1/dist/qualified-platform-delivery
+      - name: Exact source adoption, terminal CI and extracted ZIP hashes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node ../.github/scripts/psc1-platform-adoption.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: proofscript-cross-platform-verified-${{ github.sha }}
+          path: psc1/dist/qualified-platform-delivery/
+          retention-days: 90

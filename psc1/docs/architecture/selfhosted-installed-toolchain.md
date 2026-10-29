@@ -1,99 +1,103 @@
 # Installing the self-host-qualified modular compiler
 
-Status: finite Linux installed preview qualified at b616e2fe, 2026-10-29 Asia/Jakarta.
-[Installed CI40799529998](https://github.com/dwijayuda/pskernel/actions/runs/40799529998),
-[source40799548941](https://github.com/dwijayuda/pskernel/actions/runs/40799548941) and
-[retained CLI40799529980](https://github.com/dwijayuda/pskernel/actions/runs/40799529980) pass.
-[Exact receipt](../PSC1_SELFHOSTED_INSTALLED_QUALIFICATION_2026-10-29.json).
-The [roadmap](../PSC1_DEVELOPMENT_ROADMAP.md) is the remaining-work authority;
-[work state](../../AI_WORK_STATE.md) records actual CI and any failures.
+The .4 preview extends PR #211 with installed Node22.23.3 qualification on
+Linux x64, Windows x64, macOS Intel and Apple Silicon.
+[Platform CI](https://github.com/dwijayuda/pskernel/actions/runs/40814345252) and
+[exact receipt](../PSC1_CROSS_PLATFORM_QUALIFICATION_2026-10-29.json).
+The [roadmap](../PSC1_DEVELOPMENT_ROADMAP.md) remains the work authority.
 
-## Compiler payload and package identities
+## Install and use
 
-The installed preview0.1.0-psc1-modular.3 embeds the exact .2 G3 compiler graph
-qualified in PR #209. It does not compile a different frontend or rewrite generated
-bodies. The [input](../../scripts/modular-toolchain-input.json) pins both successful
-JS/TS generation artifacts and their SHA256 digests.
-
-[Provenance validation](../../scripts/modular-toolchain-provenance.mjs) checks the
-committed M5 receipt against the actual archived reports, G2/G3 manifests,
-independent admissions, graph inventories and all15 tarballs. Both producers must
-match. No generated module is imported during that acquisition/validation step.
-
-[Assembly](../../scripts/modular-toolchain-package.mjs) retains every original
-generated file except explicitly versioned package metadata. The existing
-[installed verifier](../../host-tools/executable/verify.mjs) requires the exact
-source-graph projection and complete installed inventory before runtime import.
-The .3 version distinguishes host/API overlays from original .2 candidate tarballs.
-All qualified compiler sources, .13 and M4.1 remain preserved.
-
-## User-facing layout
-
-Install proofscript alone; its20 exact core dependencies are bundled.
-The three-line psc launcher calls @proofscript/cli. Real generated bodies live
-under their source-responsible @proofscript packages; no whole-compiler bundle
-is hidden under dist/implementation. Stable proofscript/* subpaths avoid relying
-on npm hoisting. Python/PHP and target SDKs remain optional.
-
-Default independent checking uses the unchanged official Lean4.35.0 C++ kernel
-compiled with Emscripten to linear-memory Wasm. Rust/Wasm are output backends;
-older compiled compiler executors refuse this new source cohort. Neither source
-nor project configuration chooses a checker, tool, graph or publication capability.
-
-dist/COMPILER_SELFHOST_QUALIFICATION.json preserves the complete original compiler
-receipt; compilerSelfHosting in metadata records its hash, source graph and finite
-JS/TS fixed-point scope. Existing fullModularSelfHosting:false fields retain their
-conservative local artifact/universal-distribution boundary. The explicit compiler
-qualification is separate from current installed-host qualification and240s performance.
-
-## Checking, failure and resource boundaries
-
-Ordinary compilation/tools240s, checker120s, heap/stack, semantic fuel,
-32MiB files/streams,128MiB graph/stage,8192 files/values,257 units and graph
-traversal bounds remain unchanged. Longer self-host correctness requests stay
-manual and separate; installation does not inherit an extended compilation timeout.
-
-Missing/tampered files, manifests, owners, checker identities, packages or consumers
-refuse before import/publication. Tests retain runtime/peer cycle refusals,
-unsupported ABI/source-cohort refusals and previous-generation preservation.
-This relies on trusted bootstrap and stable resources; hashes are not a signature,
-sandbox, totality or semantic-preservation theorem.
-
-## Qualification and ZIP
-
-One exact tarball is shared by package smoke, seven-target/global/watch,
-boundary/IO/types and real application jobs on Node/Bun. Additional Node24/26
-jobs install that same tarball and run real compiler/kernel tests. Full source
-qualification remains a separate required gate.
-
-The delivery job reads only successful current-head artifacts and the terminal
-PR source gate. It builds a ZIP without rebuilding the package, verifies all ZIP
-checksums, installs its extracted root with an empty npm cache/offline registry,
-then executes npm psc help/init/check/build and checks the produced answer42.
-The ZIP includes notices, installation instructions, focused receipts and hashes.
-Matching optional target/provider resources are delivered separately.
-
-Other-platform consumers/durability, native binary reproduction, standalone checked
-host, full M3 semantic-family execution for this installed cohort,240s self-compilation,
-registry publication and universal release are separate gates.
-
-## Download and verified use
-
-[Verified artifact](https://github.com/dwijayuda/pskernel/actions/runs/40799529998/artifacts/12867276735).
-Extract GitHub's outer artifact ZIP, then the inner installable ZIP. Its INSTALL.txt
-and SHA256SUMS accompany proofscript-0.1.0-psc1-modular.3.tgz.
+Extract GitHub's outer artifact ZIP and its inner cross-platform ZIP. Open a
+terminal in the extracted proofscript directory:
 
 ```sh
-npm install --offline --ignore-scripts ./proofscript-0.1.0-psc1-modular.3.tgz
-npx --no-install psc --help
-npx --no-install psc init
-npx --no-install psc check
-npx --no-install psc build --out out --publication-protocol portable-file
+npm install --offline --ignore-scripts --no-audit --no-fund ./proofscript-0.1.0-psc1-modular.4.tgz
+npx --offline psc --version
+npx --offline psc init
+npx --offline psc check
+npx --offline psc build Main.ps --out out --watch
 ```
 
-All20 core packages and the default independent kernel are included. This is an
-unpublished preview, so installing the registry package does not select this ZIP.
-The same tarball passes Node22.23.3/24.22.1/26.12.1 and Bun1.4.4; Node/Bun both
-engines pass128 seven-target builds,32 real-application builds/528 cases and the
-retained watch/resource/typing/IO scopes. The source gate qualifies37/37 finite
-Core criteria. Other-platform consumers/publication remain unqualified.
+Node>=22.23.3 is the declared minimum. The four-platform .4 matrix tests22.23.3;
+earlier .3 Linux Node24/26/Bun results remain their own evidence. The package is
+unpublished: installing the registry name does not select this preview.
+
+The root includes20 core packages,134 source-owned units, the thin psc command
+and the unchanged official Lean4.35.0 C++/Emscripten linear-memory Wasm kernel.
+It has no hidden whole-compiler dist/implementation bundle. Public proofscript/*
+subpaths avoid depending on npm hoisting. Use --engine ts for the TS-generated
+compiler. Python/PHP and target SDKs remain optional.
+
+JS and Wasm-core outputs need no external target SDK. For checked TS output,
+install the common typescript7.0.2 tarball plus the one native archive listed in
+optional/typescript/<platform>.json. Those archives are included for linux-x64,
+win32-x64, darwin-x64 and darwin-arm64; do not install all native archives together.
+Then run psc build Main.ps --target ts --out out-ts. The resolver verifies exact
+package names, versions, SHA-pinned regular files and the matching platform before
+running the existing strict TypeScript consumer. Compilation never fetches tools.
+
+## Publication and failure behavior
+
+| Host | Default protocol | Reported success |
+| --- | --- | --- |
+| Linux | legacy-symlink | confirmed directory/file flush |
+| macOS | portable-file | confirmed directory/file flush |
+| Windows | portable-atomic | visibility-only |
+
+All profiles expose a complete immutable checked generation through one atomic
+pointer replacement. portable-atomic explicitly omits directory/power-loss durability.
+Windows durable portable-file remains refused; there is no silent fallback.
+A precommit failure preserves the previous generation. After the commit point,
+failure reports COMMITTED_DURABILITY_UNCERTAIN with committedPublication;
+it never promises rollback. The tests inject both classes of failure and refuse
+stale publication sessions. These filesystem checks are not power-loss certification.
+
+compile() executes the complete checked session without publishing. build() and
+psc build apply the selected protocol. Watch captures bounded dependencies and
+rejects stale results. A type error leaves the previous output available; repairing
+the source resumes publication. Unix shutdown is tested with SIGTERM; Windows
+automated qualification uses taskkill for the owned tree. Interactive Windows
+Ctrl+C/Break behavior remains a separate trial.
+
+## Compiler identity, checking and resource limits
+
+[Provenance acquisition](../../scripts/modular-toolchain-provenance.mjs) validates
+the original successful JS/TS G2/G3 artifacts, manifests, independent admissions,
+complete source graph and all15 generated npm archives. [Assembly](../../scripts/modular-toolchain-package.mjs)
+retains those generated implementations and adds only versioned package/host overlays.
+[Installed verification](../../host-tools/executable/verify.mjs) checks the exact
+source-graph projection and full installed inventory before importing generated code.
+
+The original compiler source remains17ce19919175b60be06050188e2a546a8a72e689,
+closure1f2f1e4a035a32faa6035aeae000e9c92305f8fb34e58b8cc2210504e38213cb.
+dist/COMPILER_SELFHOST_QUALIFICATION.json records the original finite Linux
+JS/TS G1/G2/G3 graph/npm fixed points. It is distinct from installed-host evidence.
+No unchanged self-hosting chain was rerun for this platform fix.
+
+Missing/tampered graphs, checkers, SDKs or resources refuse before execution or
+publication. Project metadata cannot select tools or acquire checking authority.
+Ordinary requests/tools remain240s, checker120s, with existing memory/stack/fuel,
+file/graph/traversal bounds and strict original/transformed IR checks.
+The manual3600s G2/G3 correctness profile does not extend installed compilation.
+
+## What this milestone qualifies
+
+One identical root tarball passes local/global offline installation and CLI
+registration on four OS/architecture combinations. Each tests both complete
+compiler engines, both grammars, actual JS/strict TS/Wasm-core behavior with large
+integers and Unicode, real independent kernel acceptance/rejection and watch
+edit/reject/repair. The ZIP contains the tested tarball, optional platform TS SDKs,
+licenses, instructions, source/package/platform receipts and SHA256SUMS.
+Final adoption verifies exact tested host bytes and extracted ZIP hashes without
+rebuilding that tarball.
+
+Prior .3 [Linux installed](../PSC1_SELFHOSTED_INSTALLED_QUALIFICATION_2026-10-29.json)
+and [M5 self-host](../PSC1_PORTABLE_MODULAR_QUALIFICATION_2026-10-29.json) evidence
+remain preserved. Native Rust/component SDK consumers and optional Python/PHP
+retain their separate Linux scope. Older compiled Rust/Wasm compiler executors
+refuse this newer source cohort. New native executors, full cross-platform M3
+coverage, standalone checked-host installation, binary reproduction, interactive
+Windows cancellation,240s self-compilation and final release remain separate work.
+Hash checking relies on trusted bootstrap/stable resources; it is not a signature,
+sandbox or semantic-preservation theorem. No merge or registry publication occurred.

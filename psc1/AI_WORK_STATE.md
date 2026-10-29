@@ -1,12 +1,87 @@
 # PSC1 AI work state
 
-Updated 2026-10-29 Asia/Jakarta. Active qualified installed-preview branch
-feat/psc1-selfhosted-npm-20261029 from verified PR #209 HEAD
-2cb55ddc93404d840b07cc3faad5accd1cee62b0.
-Initial production modularity implementation PR #205,
-stacked on plan PR #204 / b400552324956d9c3a684c9231f60f70066e1629.
-GitHub/Linux CI only; expected-HEAD, single-parent/non-force history.
-No merge or registry publication.
+Updated 2026-10-29 Asia/Jakarta. Active branch feat/psc1-cross-platform-npm-20261029,
+PR #212 from PR #211 HEAD2c278ab9a47c24ef8635f99b41629fc79fd82699.
+Connected GitHub and Linux/Windows/macOS Actions only. Expected-HEAD,
+single-parent/non-force history. No merge or npm registry publication.
+
+## Cross-platform npm/CLI milestone — PR #212
+
+Continue from PR #211 HEAD2c278ab9a47c24ef8635f99b41629fc79fd82699.
+The user's platform request authorizes Windows/macOS GitHub Actions in addition
+to Linux; all repository work remains connected-GitHub/Actions only.
+[Focused qualification40814345252](https://github.com/dwijayuda/pskernel/actions/runs/40814345252)
+tests producer1c913c5c12049468d78b324a69356e047b3c7fc9.
+The exact tested host/package sources are adopted, including pinned formatting
+that preserves each proposed AST. The historical cleanup/layout/runtime/modular
+AST guards remain intact; the new platform behavior has its own source pins and receipt.
+
+The same root proofscript-0.1.0-psc1-modular.4.tgz is installed offline with an empty
+npm cache on Linux x64, Windows x64, macOS Intel and Apple Silicon, Node22.23.3.
+Core package count20; source-owned units134. Independent official Lean4.35.0
+C++/Emscripten linear-memory Wasm remains the default. The unchanged source graph,
+all original JS/TS G1/G2/G3 fixed-point evidence and earlier Linux Node/Bun,
+seven-target and real-application evidence remain separately preserved.
+No compiler regeneration or G2/G3 rerun is needed for these host-only changes.
+
+Each platform executes both JS/TS engines, both .lean/.ps inputs and JS/strict
+TS/Wasm-core outputs:12 builds per platform,48 total, with actual Nat42,
+large negative Int and Unicode String observations. Additional real CLI init/check/
+build, compile without publication, watch42→43→type error→44, local/global
+offline root installation and npm command registration pass. Real kernel acceptance
+and rejection, module-before-import tamper, optional-SDK tamper, typing refusals,
+precommit preservation, postcommit uncertainty and stale-session refusal pass.
+The earlier diagnostic40812222220 also passes all14 kernel cases and complete4905
+compiler admissions on Windows and both macOS architectures using the exact same
+unchanged kernel payload; that diagnostic alone did not qualify compilation.
+
+Publication defaults are explicit: Linux legacy-symlink, macOS portable-file,
+Windows portable-atomic. The Windows profile guarantees complete atomic visibility
+and returns durability:visibility-only; it does not claim power-loss directory
+durability. Explicit durable portable-file still refuses on Windows. File flushing
+uses a writable handle there; durable paths retain their directory fsync failures.
+Unix watch shutdown uses SIGTERM; Windows automated shutdown exercises taskkill of
+the owned tree, not interactive Ctrl+C/Break. SIGBREAK handling is implemented but
+interactive console behavior is not separately qualified.
+
+TypeScript7.0.2 platform SDKs reuse exact package-lock/SHA512 pins and strict file
+inventories. Only the two matching optional SDK tarballs are installed per worker.
+All four native SDK archives and common TypeScript archive are included in the ZIP.
+Python/PHP stay optional; Rust/component SDKs and old Rust/Wasm compiler executors
+retain their existing platform/source-cohort refusals. This finite Node platform
+milestone does not claim cross-platform native executors, full M3 semantics on each
+OS, native binary reproduction, Windows crash durability, registry release or
+240s self-compilation. Ordinary240s/compiler,120s/checker, memory/stack/fuel,
+strict original/transformed IR and independent admission policies are unchanged.
+No merge, force-push or npm publication.
+
+[Exact platform/source receipt](docs/PSC1_CROSS_PLATFORM_QUALIFICATION_2026-10-29.json)
+and [installation guide](docs/architecture/selfhosted-installed-toolchain.md).
+
+[Verified cross-platform ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40814345252/artifacts/12872251721):48024239 bytes,
+SHA256 a657e8d11ef37a9c63035981c8172d75c9a70acd6ed6b574bcfe1b1356d6ba89.
+Root:9824032 bytes, SHA256 97f0bd6809c9f2a910b64ca96977c0725c6810291ea2f5991ce74fdfcf142446.
+The archive includes the root and all four optional native TypeScript SDKs,
+checksums, notices, exact source pins and actual platform receipts.
+Final canonical adoption is checked by the focused platform-adoption workflow;
+it extracts and verifies the same ZIP without rebuilding it.
+
+### Canonical adoption and retained reference follow-up
+
+[Adoption40815403860](https://github.com/dwijayuda/pskernel/actions/runs/40815403860)
+passes at25dbdaa024386e9904dcf3c413e7100035e4d148: all11 exact source pins,
+unchanged compiler sources, complete historical AST/format guards and16 extracted
+ZIP checksums; no repeated compilation. [Verified artifact](https://github.com/dwijayuda/pskernel/actions/runs/40815403860/artifacts/12872291923).
+
+The automatic retained.11 run40815403827 fails its old current-production hash
+assumption for transactional-publication.mjs after intentional platform adoption.
+The .4 four-platform qualification is passing. The reference assembler now captures
+those finite affected host files from immutable pre-platform2c278ab9 and separately
+verifies every current source against the platform receipt. Existing reference
+regression bodies, old compiler/kernel/provider payload checks and all negatives
+remain intact. The retry is pending; do not confuse this historical-host assembly
+failure with compiler/platform execution failure. Broad source gates40815408758
+were selected automatically; no extra G1/G2/G3 was dispatched.
 
 ## Verified integration: self-host-qualified compiler in proofscript
 

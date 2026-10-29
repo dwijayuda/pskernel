@@ -1,6 +1,7 @@
 // A bounded correspondence guard for the first handwritten host cleanup.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import{createHash}from'node:crypto';
 import path from 'node:path';
 import {spawnSync} from 'node:child_process';
 import {createRequire} from 'node:module';
@@ -16,6 +17,10 @@ const runtimeFeatureBaseline = '91bcbd107f375eea5cf5f87f15a9be9fe561b7c4';
 const modularFeatureBaseline = '8ed9e07ab2342a2afb41fdcce637826aa4d06dfc';
 const modularFeatureParent = '415dbba4b5c1627185fc0ee8cdf29a83b15b6f08';
 const modularFeatureFiles = new Set(['host-tools/installed-engine-resolver.mjs','npm-cli/universal.mjs']);
+const platformFeatureQualification='docs/PSC1_CROSS_PLATFORM_QUALIFICATION_2026-10-29.json';
+const platformFeatureFiles=new Set(['host-tools/installed-engine-resolver.mjs','npm-cli/universal.mjs']);
+const platformReceipt=JSON.parse(fs.readFileSync(path.join(root,platformFeatureQualification)));
+assert.equal(platformReceipt.status,'qualified-finite-installed-node');
 const modularFeatureQualification = 'docs/PSC1_MODULAR_HOST_RUNTIME_QUALIFICATION_2026-10-28.json';
 function readAt(commit, file) {
   const r = spawnSync('git', ['show', commit + ':psc1/' + file], {
@@ -94,7 +99,16 @@ for (const file of files) {
     assert.deepEqual(executableAst(readAt(modularFeatureParent, canonicalFiles[file] ?? file)),
       executableAst(readAt(runtimeFeatureBaseline, canonicalFiles[file] ?? file)),
       file + ': historical runtime/watch correspondence changed');
-  assert.deepEqual(executableAst(source), executableAst(readAt(currentFeatureBaseline, canonicalFiles[file] ?? file)),
+  if(platformFeatureFiles.has(file)){
+    // Retain the exact prior feature epoch, then require separately qualified new bytes.
+    const previous=readAt(platformReceipt.baseCommit,canonicalFiles[file]??file);
+    assert.deepEqual(executableAst(previous),executableAst(readAt(currentFeatureBaseline,canonicalFiles[file]??file)),
+      file+': previous modular feature correspondence changed');
+    const pin=platformReceipt.hostSources.pins.find(p=>p.path==='psc1/'+(canonicalFiles[file]??file));
+    assert.ok(pin,file+': missing qualified platform pin');
+    assert.equal(Buffer.byteLength(source),pin.bytes);
+    assert.equal(createHash('sha256').update(source).digest('hex'),pin.sha256,file+': unqualified platform host bytes');
+  }else assert.deepEqual(executableAst(source), executableAst(readAt(currentFeatureBaseline, canonicalFiles[file] ?? file)),
     file + ': host differs from its separately tested feature baseline');
   const formatted = await prettier.format(source, formatOptions);
   assert.deepEqual(executableAst(formatted), executableAst(source),
@@ -140,7 +154,7 @@ const out = path.join(root, 'dist/readability');
 fs.mkdirSync(out, {recursive: true});
 fs.writeFileSync(path.join(out, 'host.json'), JSON.stringify({
   schema: 'psc1-readability-host/1', commit: process.env.GITHUB_SHA,
-  baseline, cleanupCommit, featureBaselines, featureQualification, layoutCheckpoint, runtimeFeatureBaseline, modularFeatureBaseline, modularFeatureParent, modularFeatureQualification,
+  baseline, cleanupCommit, featureBaselines, featureQualification, layoutCheckpoint, runtimeFeatureBaseline, modularFeatureBaseline, modularFeatureParent, modularFeatureQualification, platformFeatureQualification,
   mode: propose ? 'proposal-not-qualification' : 'check',
   formatter: 'prettier@3.6.2', parser: '@babel/parser@7.28.0', results,
 }, null, 2) + '\n');

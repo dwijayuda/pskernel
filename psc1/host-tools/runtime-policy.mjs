@@ -28,3 +28,7 @@ export function runtimeArguments(args) {
   return requireSupportedRuntime().name === 'bun'
     ? ['--no-install', '--no-macros', '--no-env-file', ...args] : args;
 }
+
+// Host-selected defaults; stronger protocols are never silently downgraded.
+export const defaultPublicationProtocol = process.platform === 'win32' ? 'portable-atomic'
+  : process.platform === 'darwin' ? 'portable-file' : 'legacy-symlink';

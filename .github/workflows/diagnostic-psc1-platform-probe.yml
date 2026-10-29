@@ -1,0 +1,50 @@
+name: PSC1 focused packaged host probe
+on:
+  push:
+    branches: [feat/psc1-cross-platform-npm-20261029]
+    paths:
+      - '.github/workflows/diagnostic-psc1-platform-probe.yml'
+      - '.github/scripts/psc1-platform-probe.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  probe:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-2025
+            label: windows-x64
+          - runner: macos-15-intel
+            label: macos-x64
+          - runner: macos-15
+            label: macos-arm64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 12
+    env:
+      PSC1_PLATFORM_LABEL: ${{ matrix.label }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: psc1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - uses: actions/download-artifact@v4
+        with:
+          name: psc1-modular-toolchain-package-b616e2fe1cbe21646cb6b2f1f22825554ea7b1da
+          run-id: 40799529998
+          github-token: ${{ github.token }}
+          path: psc1/dist/platform-input
+      - name: Exact offline npm install, actual kernel and filesystem capability probe
+        run: node ../.github/scripts/psc1-platform-probe.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: psc1-platform-probe-${{ matrix.label }}-${{ github.sha }}
+          path: psc1/dist/platform-probe/
+          retention-days: 90

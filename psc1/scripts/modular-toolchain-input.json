@@ -33,7 +33,7 @@
     "zipSha256": "0c27ddf0c4d63b1b3c63e6029d73c0e14391c6b6d6f374b980b252b26e5c60dd",
     "tarball": "proofscript-0.1.0-psc1.13.tgz"
   },
-  "version": "0.1.0-psc1-modular.3",
+  "version": "0.1.0-psc1-modular.4",
   "optional": {
     "run": 40666699859,
     "job": 122743404912,

@@ -5,6 +5,67 @@ Practical Core v1 remains frozen at14 feature families and 37 finite criteria.
 Completed detail is preserved in [the previous roadmap](history/ROADMAP_BEFORE_LAYOUT_2026-10-26.md)
 and [dated evidence](evidence/README.md).
 
+## Cross-platform npm/CLI milestone — PR #212
+
+Continue from PR #211 HEAD2c278ab9a47c24ef8635f99b41629fc79fd82699.
+The user's platform request authorizes Windows/macOS GitHub Actions in addition
+to Linux; all repository work remains connected-GitHub/Actions only.
+[Focused qualification40814345252](https://github.com/dwijayuda/pskernel/actions/runs/40814345252)
+tests producer1c913c5c12049468d78b324a69356e047b3c7fc9.
+The exact tested host/package sources are adopted, including pinned formatting
+that preserves each proposed AST. The historical cleanup/layout/runtime/modular
+AST guards remain intact; the new platform behavior has its own source pins and receipt.
+
+The same root proofscript-0.1.0-psc1-modular.4.tgz is installed offline with an empty
+npm cache on Linux x64, Windows x64, macOS Intel and Apple Silicon, Node22.23.3.
+Core package count20; source-owned units134. Independent official Lean4.35.0
+C++/Emscripten linear-memory Wasm remains the default. The unchanged source graph,
+all original JS/TS G1/G2/G3 fixed-point evidence and earlier Linux Node/Bun,
+seven-target and real-application evidence remain separately preserved.
+No compiler regeneration or G2/G3 rerun is needed for these host-only changes.
+
+Each platform executes both JS/TS engines, both .lean/.ps inputs and JS/strict
+TS/Wasm-core outputs:12 builds per platform,48 total, with actual Nat42,
+large negative Int and Unicode String observations. Additional real CLI init/check/
+build, compile without publication, watch42→43→type error→44, local/global
+offline root installation and npm command registration pass. Real kernel acceptance
+and rejection, module-before-import tamper, optional-SDK tamper, typing refusals,
+precommit preservation, postcommit uncertainty and stale-session refusal pass.
+The earlier diagnostic40812222220 also passes all14 kernel cases and complete4905
+compiler admissions on Windows and both macOS architectures using the exact same
+unchanged kernel payload; that diagnostic alone did not qualify compilation.
+
+Publication defaults are explicit: Linux legacy-symlink, macOS portable-file,
+Windows portable-atomic. The Windows profile guarantees complete atomic visibility
+and returns durability:visibility-only; it does not claim power-loss directory
+durability. Explicit durable portable-file still refuses on Windows. File flushing
+uses a writable handle there; durable paths retain their directory fsync failures.
+Unix watch shutdown uses SIGTERM; Windows automated shutdown exercises taskkill of
+the owned tree, not interactive Ctrl+C/Break. SIGBREAK handling is implemented but
+interactive console behavior is not separately qualified.
+
+TypeScript7.0.2 platform SDKs reuse exact package-lock/SHA512 pins and strict file
+inventories. Only the two matching optional SDK tarballs are installed per worker.
+All four native SDK archives and common TypeScript archive are included in the ZIP.
+Python/PHP stay optional; Rust/component SDKs and old Rust/Wasm compiler executors
+retain their existing platform/source-cohort refusals. This finite Node platform
+milestone does not claim cross-platform native executors, full M3 semantics on each
+OS, native binary reproduction, Windows crash durability, registry release or
+240s self-compilation. Ordinary240s/compiler,120s/checker, memory/stack/fuel,
+strict original/transformed IR and independent admission policies are unchanged.
+No merge, force-push or npm publication.
+
+[Exact platform/source receipt](PSC1_CROSS_PLATFORM_QUALIFICATION_2026-10-29.json)
+and [installation guide](architecture/selfhosted-installed-toolchain.md).
+
+[Verified cross-platform ZIP](https://github.com/dwijayuda/pskernel/actions/runs/40814345252/artifacts/12872251721):48024239 bytes,
+SHA256 a657e8d11ef37a9c63035981c8172d75c9a70acd6ed6b574bcfe1b1356d6ba89.
+Root:9824032 bytes, SHA256 97f0bd6809c9f2a910b64ca96977c0725c6810291ea2f5991ce74fdfcf142446.
+The archive includes the root and all four optional native TypeScript SDKs,
+checksums, notices, exact source pins and actual platform receipts.
+Final canonical adoption is checked by the focused platform-adoption workflow;
+it extracts and verifies the same ZIP without rebuilding it.
+
 ## Current change and preserved qualifications
 
 PR#193 qualifies runtime/watch and Apache-2.0 package cohort .11 at
@@ -319,12 +380,12 @@ PR #197 implementation 9aefeeb and documentation refresh c5c15582 pass all 42 pa
 | 2 | Independent maintainer trial | Pending human participation; the user can arrange a maintainer. Record commit, navigation mistakes, elapsed time, assistance and a real small change. No AI/CI comprehension claim. |
 | 3 | Compiler-origin structured diagnostics/editor integration | Pending: actual spans/provenance, both grammars, machine/human consumers and malformed-input refusals. |
 | 4 | Runtime compatibility, checked watch and licensing | Qualified Linux milestone, PR#193 /fdc52207fdf3d809ad99b05a5b738aca21b95139: Node>=22.23.3, Bun>=1.4.4; actual Node22.23.3/24.21.0/26.12.1 and Bun1.4.4; older Node/Bun refusals;55 CLI requests,11 full watch cases,16 applications/264 observations,32 publications/143 refusals; all61 SDK pins unchanged. Apache-2.0 source/cohort, vendor notices retained. [Receipt](PSC1_RUNTIME_WATCH_QUALIFICATION_2026-10-27.json). Semantic incremental caching remains deferred. |
-| 5 | Fully modular executable compiler | M1/M2 candidate graph and finite M3 application/semantic/seven-target execution are qualified in PR #205–#207; see the [current plan](architecture/executable-package-modularity.md) and [M3 receipt](PSC1_MODULAR_SEMANTIC_QUALIFICATION_2026-10-28.json). M4 finite Linux installed umbrella/thin CLI/watch is qualified in PR #208 ([receipt](PSC1_MODULAR_INSTALLED_QUALIFICATION_2026-10-28.json)); M5 finite Linux modular JS/TS G1/G2/G3, full graphs and all15 npm tarballs qualify in40755246954 ([receipt](PSC1_PORTABLE_MODULAR_QUALIFICATION_2026-10-29.json)). Preserve .13, existing package names, independent checking and resource policies. Pilot expansion stays deferred. PR #211 now qualifies the .3 finite Linux installed Node/Bun root, CLI/watch, seven-target and real-application scope ([receipt](PSC1_SELFHOSTED_INSTALLED_QUALIFICATION_2026-10-29.json)). Platform qualification,240s performance, new compiled Rust/Wasm executors and final default promotion remain pending. |
+| 5 | Fully modular executable compiler | M1/M2 candidate graph and finite M3 application/semantic/seven-target execution are qualified in PR #205–#207; see the [current plan](architecture/executable-package-modularity.md) and [M3 receipt](PSC1_MODULAR_SEMANTIC_QUALIFICATION_2026-10-28.json). M4 finite Linux installed umbrella/thin CLI/watch is qualified in PR #208 ([receipt](PSC1_MODULAR_INSTALLED_QUALIFICATION_2026-10-28.json)); M5 finite Linux modular JS/TS G1/G2/G3, full graphs and all15 npm tarballs qualify in40755246954 ([receipt](PSC1_PORTABLE_MODULAR_QUALIFICATION_2026-10-29.json)). Preserve .13, existing package names, independent checking and resource policies. Pilot expansion stays deferred. PR #211 now qualifies the .3 finite Linux installed Node/Bun root, CLI/watch, seven-target and real-application scope ([receipt](PSC1_SELFHOSTED_INSTALLED_QUALIFICATION_2026-10-29.json)). PR #212/.4 qualifies finite Node Linux/Windows/macOS installed JS/TS engines and JS/TS/Wasm-core output ([receipt](PSC1_CROSS_PLATFORM_QUALIFICATION_2026-10-29.json));240s performance, new compiled Rust/Wasm executors and final default promotion remain pending. |
 | 6 | Component String/IO and export selection | Pending: reuse shared/native ABI; both grammars/four engines, actual validation/execution, exact exports and refusals. Public component ABI currently Bool only. |
 | 7 | Full Python/PHP practical applications | Pending: real CLI/JSON/file/multi-module observations against checked reference; retain corpus/Unicode/integer/loop/IO tests. Providers remain optional. |
 | 8 | Automatic source-package capture | Pending: bounded deterministic order, exact identities, cycle/missing/stale refusals, real multi-package applications. Metadata never executes code or grants authority. |
 | 9 | Native publication committed-outcome parity | Pending: retain transaction and explicitly report post-commit uncertainty. No false rollback guarantee. |
-| 10 | Additional platform consumers/publication | Blocked on actual permitted platform execution. Linux does not qualify macOS/Windows durability or SDK/provider consumers. |
+| 10 | Additional platform consumers/publication | PR #212 qualifies Node22.23.3 Linux x64, Windows x64, macOS x64/arm64, JS/TS engines and JS/strict TS/Wasm-core output. Windows portable-atomic is explicitly visibility-only; durable portable-file refuses. Native Rust/component consumers, Python/PHP platform expansion, interactive Windows cancellation and crash durability remain pending. |
 | 11 | Clean reproduction/final universal release | Pending: exact final source/package/platform identities and required generations; authorization before merge/publication. |
 | 12 | Original240-second self-compilation target | Unqualified: optimize measured compiler workloads; retain separate correctness profiles and safety policies. |
 | 13 | Broader features/extensions and R4 transformations | Deferred beyond frozen v1 or explicit semantic obligations. Preserve working features; packages cannot acquire checker/host/FFI/publication authority. |

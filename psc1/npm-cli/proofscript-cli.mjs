@@ -4,7 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import {spawn} from 'node:child_process';
+import {spawn, spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {watchProject} from './cli-watch.mjs';
 import {runtimeArguments} from '../host-tools/runtime-policy.mjs';
@@ -36,7 +36,7 @@ Options:
   --kernel wasm|native|both      Independent checker (default genuine Lean Wasm)
   --assurance checked|ordinary-checked
   --output-abi scalar|io-dispatcher
-  --publication-protocol legacy-symlink|portable-file
+  --publication-protocol legacy-symlink|portable-file|portable-atomic
   --rust-toolchain-root path     Explicit host-owned Rust output SDK
   -p, --project path             Source data only; cannot choose tools or output
   -o, --out directory            Required for build; forbidden for check/compile
@@ -107,7 +107,14 @@ async function execute(args, mode, worker = 'universal-cli.mjs') {
   const kill = signal => {
     try {
       if (process.platform !== 'win32' && child.pid) process.kill(-child.pid, signal);
-      else child.kill(signal);
+      else if (child.pid && child.exitCode === null && child.signalCode === null) {
+        // A console cancellation owns this exact child tree; never use a PATH-selected tool.
+        const systemRoot = process.env.SystemRoot || process.env.WINDIR;
+        if (!systemRoot || !path.isAbsolute(systemRoot)) refuse('CANCELLATION_PLATFORM', 'Windows system directory unavailable.');
+        const result = spawnSync(path.join(systemRoot, 'System32', 'taskkill.exe'),
+          ['/PID', String(child.pid), '/T', '/F'], {timeout: 5000, maxBuffer: 1048576, windowsHide: true});
+        if (result.error) throw result.error;
+      }
     } catch (error) { if (error.code !== 'ESRCH') throw error; }
   };
   child.stdout.pipe(process.stdout);
@@ -118,7 +125,7 @@ async function execute(args, mode, worker = 'universal-cli.mjs') {
     if (bytes > 32 * 1024 * 1024) { overflow = true; kill('SIGKILL'); }
     else parts.push(chunk);
   });
-  const signals = new Map(['SIGINT', 'SIGTERM'].map(signal => {
+  const signals = new Map((process.platform === 'win32' ? ['SIGINT', 'SIGTERM', 'SIGBREAK'] : ['SIGINT', 'SIGTERM']).map(signal => {
     const handler = () => {
       requestedSignal = signal; kill(signal);
       escalation ??= setTimeout(() => kill('SIGKILL'), 2000);
@@ -137,7 +144,7 @@ async function execute(args, mode, worker = 'universal-cli.mjs') {
   else if (overflow) diagnostic('PSC1_CLI_DIAGNOSTIC_LIMIT: child stderr exceeded32MiB.', mode);
   else if (stderr && outcome.code !== 0) diagnostic(stderr, mode);
   else if (stderr) process.stderr.write(stderr);
-  if (requestedSignal) return requestedSignal === 'SIGINT' ? 130 : 143;
+  if (requestedSignal) return requestedSignal === 'SIGTERM' ? 143 : 130;
   return launchError || overflow ? 1 :
     outcome.code ?? (outcome.signal === 'SIGINT' ? 130 : outcome.signal === 'SIGTERM' ? 143 : 1);
 }

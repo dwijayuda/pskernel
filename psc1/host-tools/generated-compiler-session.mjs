@@ -74,12 +74,15 @@ export function createGeneratedJsCompilerSession({
   outputAbi = 'scalar',
   target = 'js',
   publicationProtocol = 'legacy-symlink',
+  evidence = 'full',
+  operation = 'compile',
   serviceKind = 'js-adapter',
   typescript,
   rust,
   componentTools,
   optionalProvider,
   serviceFile,
+  serviceExecute,
   serviceSha256,
   runnerFile,
   runnerSha256,
@@ -91,16 +94,27 @@ export function createGeneratedJsCompilerSession({
   serviceDependencies = [],
   additionalCheckers = [],
 }) {
+  const sessionStarted = performance.now();
+  const timings = {
+    resourceVerificationMs: 0,
+    compilerProcessMs: 0,
+    independentKernelMs: 0,
+    targetMs: 0,
+    evidenceMs: 0,
+  };
   requireSupportedRuntime();
   if (
     typeof requestId !== 'string' ||
     !requestId ||
     typeof entryModule !== 'string' ||
     !['checked', 'ordinary-checked'].includes(assurance) ||
+    !['full', 'minimal'].includes(evidence) ||
+    !['compile', 'check'].includes(operation) ||
     !['scalar', 'io-dispatcher'].includes(outputAbi) ||
     !['js', 'ts', 'rust', 'wasm-core', 'wasm-component', 'python', 'php'].includes(target) ||
     !['js-adapter', 'unified-embedded', 'unified-bundle'].includes(serviceKind) ||
     (target !== 'js' && serviceKind === 'js-adapter') ||
+    (serviceExecute !== undefined && typeof serviceExecute !== 'function') ||
     !path.isAbsolute(publicationRoot || '')
   )
     fail('PSC1_SERVICE_REQUEST_INVALID');
@@ -114,20 +128,35 @@ export function createGeneratedJsCompilerSession({
     !captured.some((row) => row.module === entryModule)
   )
     fail('PSC1_SERVICE_CAPTURE_INVALID');
+  // Coalesce aliases within this capture, never across verification boundaries.
+  const capturedTools = new Map();
+  const captureIdentity = (file, expected) => {
+    const prior = capturedTools.get(file);
+    if (prior) {
+      if (prior.sha256 !== expected) fail('PSC1_SERVICE_TOOL_IDENTITY_CHANGED');
+      return prior;
+    }
+    const pin = identity(file, expected);
+    capturedTools.set(file, pin);
+    return pin;
+  };
   const tools = {
-    service: identity(serviceFile, serviceSha256),
-    runner: identity(runnerFile, runnerSha256),
-    checker: identity(checkerExecutable, checkerSha256),
-    node: identity(process.execPath, sha(fs.readFileSync(process.execPath))),
+    service: captureIdentity(serviceFile, serviceSha256),
+    runner: captureIdentity(runnerFile, runnerSha256),
+    checker: captureIdentity(checkerExecutable, checkerSha256),
+    node:
+      checkerExecutable === process.execPath
+        ? captureIdentity(process.execPath, checkerSha256)
+        : captureIdentity(process.execPath, sha(fs.readFileSync(process.execPath))),
   };
   if (checkerScriptFile !== undefined)
-    tools.checkerScript = identity(checkerScriptFile, checkerScriptSha256);
+    tools.checkerScript = captureIdentity(checkerScriptFile, checkerScriptSha256);
   // Trusted host-selected dependencies bind imported generated engine bytes too.
   // Generated wire fields cannot add paths or choose a checker.
   if (!Array.isArray(serviceDependencies)) fail('PSC1_SERVICE_DEPENDENCIES_INVALID');
   serviceDependencies.forEach((tool, index) => {
     if (!tool || typeof tool !== 'object') fail('PSC1_SERVICE_DEPENDENCIES_INVALID');
-    tools['dependency' + index] = identity(tool.path, tool.sha256);
+    tools['dependency' + index] = captureIdentity(tool.path, tool.sha256);
   });
   if (!Array.isArray(additionalCheckers) || additionalCheckers.length > 2)
     fail('PSC1_SERVICE_ADDITIONAL_CHECKERS_INVALID');
@@ -138,7 +167,7 @@ export function createGeneratedJsCompilerSession({
       additionalCheckers.slice(0, index).some((prior) => prior.name === checker.name)
     )
       fail('PSC1_SERVICE_ADDITIONAL_CHECKERS_INVALID');
-    const script = identity(checker.scriptFile, checker.scriptSha256);
+    const script = captureIdentity(checker.scriptFile, checker.scriptSha256);
     tools['additional-checker-' + index] = script;
     return { name: checker.name, script };
   });
@@ -146,7 +175,7 @@ export function createGeneratedJsCompilerSession({
     if (target !== 'ts' || !Array.isArray(typescript.pins))
       fail('PSC1_SERVICE_TYPESCRIPT_CONSUMER');
     typescript.pins.forEach((pin, index) => {
-      tools['typescript-' + index] = identity(pin.path, pin.sha256);
+      tools['typescript-' + index] = captureIdentity(pin.path, pin.sha256);
     });
     if (
       ![typescript.entry, typescript.executable].every((file) =>
@@ -158,7 +187,7 @@ export function createGeneratedJsCompilerSession({
   if (rust) {
     if (target !== 'rust' || !Array.isArray(rust.pins)) fail('PSC1_SERVICE_RUST_CONSUMER');
     rust.pins.forEach((pin, index) => {
-      tools['rust-' + index] = identity(pin.path, pin.sha256);
+      tools['rust-' + index] = captureIdentity(pin.path, pin.sha256);
     });
     if (![rust.rustc, rust.inspector].every((file) => rust.pins.some((pin) => pin.path === file)))
       fail('PSC1_SERVICE_RUST_ENTRY');
@@ -174,14 +203,21 @@ export function createGeneratedJsCompilerSession({
     )
       fail('PSC1_SERVICE_DISPATCH_CONSUMER');
     consumer.pins.forEach((pin, index) => {
-      tools[label + '-' + index] = identity(pin.path, pin.sha256);
+      tools[label + '-' + index] = captureIdentity(pin.path, pin.sha256);
     });
     if (!consumer.pins.some((pin) => pin.path === consumer.executable))
       fail('PSC1_SERVICE_DISPATCH_ENTRY');
   }
   const additionalAdmissions = [];
-  const verifyTools = () =>
-    Object.values(tools).forEach((tool) => identity(tool.path, tool.sha256));
+  const verificationTools = [...capturedTools.values()];
+  const verifyTools = () => {
+    const started = performance.now();
+    try {
+      verificationTools.forEach((tool) => identity(tool.path, tool.sha256));
+    } finally {
+      timings.resourceVerificationMs += performance.now() - started;
+    }
+  };
   const scalarRequest = [
     'psc1-compiler-service/1',
     requestId,
@@ -196,9 +232,11 @@ export function createGeneratedJsCompilerSession({
       ? scalarRequest
       : ['psc1-compiler-service/2', ...scalarRequest.slice(1), 'io-dispatcher'];
   const requestText = JSON.stringify(
-    serviceKind === 'js-adapter'
-      ? inner
-      : ['psc1-unified-compiler-service/2', compilerTarget, inner],
+    operation === 'check'
+      ? ['psc1-check-service/1', 'check', inner]
+      : serviceKind === 'js-adapter'
+        ? inner
+        : ['psc1-unified-compiler-service/2', compilerTarget, inner],
   );
   const request = Object.freeze({
     requestId,
@@ -226,8 +264,12 @@ export function createGeneratedJsCompilerSession({
       : {}),
   });
   const root = path.resolve(publicationRoot);
-  const publication = openPublicationStore(root, publicationProtocol);
-  const stage = fs.mkdtempSync(path.join(root, 'generations/.stage-'));
+  const publication =
+    operation === 'check' ? null : openPublicationStore(root, publicationProtocol);
+  if (operation === 'check') fs.mkdirSync(root, { recursive: true, mode: 0o700 });
+  const stage = fs.mkdtempSync(
+    path.join(root, operation === 'check' ? '.check-' : 'generations/.stage-'),
+  );
   fs.chmodSync(stage, 0o700);
   let state = 'pending',
     sealedFiles,
@@ -332,6 +374,83 @@ export function createGeneratedJsCompilerSession({
     }
     return result.stdout;
   };
+  function admit(admissions, admissionTarget, wire) {
+    const checkerSession = createCompilerHostSession({
+      requestId,
+      target: admissionTarget,
+      sources: captured,
+      canonicalAdmissions: admissions,
+      checkerExecutable,
+      checkerScript: checkerScriptFile,
+    });
+    events.push({
+      role: 'independent-checker',
+      executable: checkerExecutable,
+      checkerSha256,
+      admissionsSha256: sha(admissions),
+      state: 'before',
+    });
+    const kernelStarted = performance.now();
+    receipt = checkerSession.admit(JSON.stringify(wire));
+    timings.independentKernelMs = performance.now() - kernelStarted;
+    verifyTools();
+    events.push({
+      role: 'independent-checker',
+      state: 'accepted',
+      checkerCommit: receipt.checkerCommit,
+      admissionsSha256: receipt.admissionsDigest,
+    });
+    // Mandatory independent official Lean admission above is preserved. Extra host-selected providers
+    // check the identical captured canonical bytes before any publication can occur.
+    for (const checker of extraChecks) {
+      verifyTools();
+      const started = Date.now();
+      const checked = spawnSync(process.execPath, runtimeArguments([checker.script.path]), {
+        input: admissions,
+        encoding: 'utf8',
+        timeout: 120000,
+        maxBuffer: 32 * 1024 * 1024,
+        killSignal: 'SIGKILL',
+        windowsHide: true,
+      });
+      events.push({
+        role: 'additional-independent-checker',
+        name: checker.name,
+        executable: process.execPath,
+        scriptSha256: checker.script.sha256,
+        status: checked.status,
+        signal: checked.signal,
+        elapsedMs: Date.now() - started,
+        admissionsSha256: sha(admissions),
+        error: checked.error?.message || null,
+      });
+      verifyTools();
+      if (checked.error || checked.status !== 0) fail('PSC1_SERVICE_ADDITIONAL_CHECKER_PROCESS');
+      let result;
+      try {
+        result = JSON.parse(checked.stdout);
+      } catch {
+        fail('PSC1_SERVICE_ADDITIONAL_CHECKER_JSON');
+      }
+      if (
+        result.protocol !== 'pskernel-lean/1' ||
+        result.provider !== 'lean4-cpp' ||
+        result.leanVersion !== '4.35.0' ||
+        result.leanCommit !== receipt.checkerCommit ||
+        result.profile !== 'lean4.35-core' ||
+        result.accepted !== true
+      )
+        fail('PSC1_SERVICE_ADDITIONAL_CHECKER_REFUSED');
+      additionalAdmissions.push({
+        name: checker.name,
+        scriptSha256: checker.script.sha256,
+        admissionsSha256: sha(admissions),
+        checkerCommit: result.leanCommit,
+        accepted: true,
+        responseSha256: sha(checked.stdout),
+      });
+    }
+  }
   return Object.freeze({
     request,
     stagingDirectory: stage,
@@ -350,16 +469,37 @@ export function createGeneratedJsCompilerSession({
       try {
         verifyTools();
         fs.writeFileSync(path.join(stage, 'request.json'), requestText);
-        const stdout = run('generated-compiler', [
-          runnerFile,
-          serviceFile,
-          serviceSha256,
-          ...(serviceKind === 'js-adapter'
-            ? []
-            : [serviceKind === 'unified-embedded' ? 'embedded' : 'bundle']),
-          path.join(stage, 'request.json'),
-          path.join(stage, 'candidate.json'),
-        ]);
+        const compilerStarted = performance.now();
+        const stdout = serviceExecute
+          ? (() => {
+              const response = serviceExecute(requestText);
+              if (typeof response !== 'string' || Buffer.byteLength(response) > 128 * 1024 * 1024)
+                fail('PSC1_SERVICE_RESPONSE_LIMIT');
+              fs.writeFileSync(path.join(stage, 'candidate.json'), response, { flag: 'wx' });
+              events.push({
+                role: 'generated-compiler',
+                transport: 'private-loaded-engine',
+                elapsedMs: performance.now() - compilerStarted,
+                status: 0,
+              });
+              return JSON.stringify({
+                protocol: 'psc1-generated-service-run/1',
+                serviceSha256,
+                requestSha256: request.requestSha256,
+                responseSha256: sha(response),
+              });
+            })()
+          : run('generated-compiler', [
+              runnerFile,
+              serviceFile,
+              serviceSha256,
+              ...(serviceKind === 'js-adapter'
+                ? []
+                : [serviceKind === 'unified-embedded' ? 'embedded' : 'bundle']),
+              path.join(stage, 'request.json'),
+              path.join(stage, 'candidate.json'),
+            ]);
+        timings.compilerProcessMs = performance.now() - compilerStarted;
         verifyTools();
         if (sha(boundedRead(path.join(stage, 'request.json'))) !== request.requestSha256)
           fail('PSC1_SERVICE_REQUEST_CHANGED');
@@ -377,6 +517,107 @@ export function createGeneratedJsCompilerSession({
           fail('PSC1_SERVICE_RESPONSE_FIELDS');
         if (candidate.status !== 'candidate')
           fail('PSC1_SERVICE_COMPILER_REFUSED:' + candidate.phase);
+        if (operation === 'check') {
+          const fields = [
+            'protocol',
+            'status',
+            'candidateOnly',
+            'admission',
+            'requestId',
+            'sourceClosureDigest',
+            'grammar',
+            'assurance',
+            'admissions',
+            'sourceDeclarations',
+            'logicalDeclarations',
+            'partialNames',
+            'origins',
+            'irValidation',
+            'cache',
+            'preparationMs',
+          ];
+          if (
+            Object.keys(candidate).sort().join(',') !== fields.sort().join(',') ||
+            candidate.protocol !== 'psc1-check-candidate/1' ||
+            candidate.status !== 'candidate' ||
+            candidate.candidateOnly !== true ||
+            candidate.admission !== 'not-run' ||
+            candidate.requestId !== requestId ||
+            candidate.sourceClosureDigest !== sourceClosureDigest ||
+            candidate.grammar !== grammar ||
+            candidate.assurance !== assurance ||
+            candidate.irValidation !== 'strict-original-no-transform' ||
+            typeof candidate.admissions !== 'string' ||
+            !Array.isArray(candidate.origins) ||
+            candidate.origins.length !== captured.length
+          )
+            fail('PSC1_SERVICE_CHECK_RESPONSE');
+          let count = 0;
+          for (let i = 0; i < captured.length; i++) {
+            const row = candidate.origins[i];
+            if (
+              !Array.isArray(row) ||
+              row.length !== 4 ||
+              row[0] !== captured[i].module ||
+              row[1] !== Buffer.byteLength(captured[i].text) ||
+              !Array.isArray(row[3])
+            )
+              fail('PSC1_SERVICE_ORIGIN_MISMATCH');
+            for (let j = 0; j < row[3].length; j++) {
+              const origin = row[3][j];
+              if (
+                !Array.isArray(origin) ||
+                origin.length !== 5 ||
+                origin[0] !== j ||
+                typeof origin[1] !== 'string' ||
+                !Array.isArray(origin[4])
+              )
+                fail('PSC1_SERVICE_ORIGIN_MISMATCH');
+              for (let k = 0; k < origin[4].length; k++) {
+                if (
+                  !Array.isArray(origin[4][k]) ||
+                  origin[4][k].length !== 2 ||
+                  origin[4][k][0] !== k ||
+                  typeof origin[4][k][1] !== 'string'
+                )
+                  fail('PSC1_SERVICE_ORIGIN_MISMATCH');
+                count++;
+              }
+            }
+          }
+          validateClosureCounts(
+            {
+              assurance,
+              sourceCoreDeclarations: candidate.sourceDeclarations,
+              coreDeclarations: candidate.logicalDeclarations,
+              partialNames: candidate.partialNames,
+            },
+            count,
+            assurance,
+          );
+          admit(candidate.admissions, 'check', {
+            protocol: 'psc1-compiler-host/1',
+            op: 'admit',
+            requestId,
+            target: 'check',
+            sourceClosureDigest,
+            admissions: candidate.admissions,
+          });
+          verifyTools();
+          state = 'admitted-check-only';
+          return Object.freeze({
+            ...request,
+            logicalAdmission: 'accepted',
+            admissionsSha256: receipt.admissionsDigest,
+            irValidation: 'strict-original-no-transform',
+            targetGeneration: 'not-run',
+            productionPublication: 'not-requested',
+            cache: candidate.cache,
+            preparationMs: candidate.preparationMs,
+            timings: { ...timings, sessionMs: performance.now() - sessionStarted },
+            ...(extraChecks.length ? { additionalAdmissions: clone(additionalAdmissions) } : {}),
+          });
+        }
         const fields = [
           'admission',
           'admissionRequest',
@@ -477,80 +718,8 @@ export function createGeneratedJsCompilerSession({
             fail('PSC1_SERVICE_IR_SHAPE');
         }
         const admissions = candidate.admissionRequest?.admissions;
-        const checkerSession = createCompilerHostSession({
-          requestId,
-          target: compilerTarget,
-          sources: captured,
-          canonicalAdmissions: admissions,
-          checkerExecutable,
-          checkerScript: checkerScriptFile,
-        });
-        events.push({
-          role: 'independent-checker',
-          executable: checkerExecutable,
-          checkerSha256,
-          admissionsSha256: sha(admissions),
-          state: 'before',
-        });
-        receipt = checkerSession.admit(JSON.stringify(candidate.admissionRequest));
-        verifyTools();
-        events.push({
-          role: 'independent-checker',
-          state: 'accepted',
-          checkerCommit: receipt.checkerCommit,
-          admissionsSha256: receipt.admissionsDigest,
-        });
-        // Mandatory independent official Lean admission above is preserved. Extra host-selected providers
-        // check the identical captured canonical bytes before any publication can occur.
-        for (const checker of extraChecks) {
-          verifyTools();
-          const started = Date.now();
-          const checked = spawnSync(process.execPath, runtimeArguments([checker.script.path]), {
-            input: admissions,
-            encoding: 'utf8',
-            timeout: 120000,
-            maxBuffer: 32 * 1024 * 1024,
-            killSignal: 'SIGKILL',
-            windowsHide: true,
-          });
-          events.push({
-            role: 'additional-independent-checker',
-            name: checker.name,
-            executable: process.execPath,
-            scriptSha256: checker.script.sha256,
-            status: checked.status,
-            signal: checked.signal,
-            elapsedMs: Date.now() - started,
-            admissionsSha256: sha(admissions),
-            error: checked.error?.message || null,
-          });
-          verifyTools();
-          if (checked.error || checked.status !== 0)
-            fail('PSC1_SERVICE_ADDITIONAL_CHECKER_PROCESS');
-          let result;
-          try {
-            result = JSON.parse(checked.stdout);
-          } catch {
-            fail('PSC1_SERVICE_ADDITIONAL_CHECKER_JSON');
-          }
-          if (
-            result.protocol !== 'pskernel-lean/1' ||
-            result.provider !== 'lean4-cpp' ||
-            result.leanVersion !== '4.35.0' ||
-            result.leanCommit !== receipt.checkerCommit ||
-            result.profile !== 'lean4.35-core' ||
-            result.accepted !== true
-          )
-            fail('PSC1_SERVICE_ADDITIONAL_CHECKER_REFUSED');
-          additionalAdmissions.push({
-            name: checker.name,
-            scriptSha256: checker.script.sha256,
-            admissionsSha256: sha(admissions),
-            checkerCommit: result.leanCommit,
-            accepted: true,
-            responseSha256: sha(checked.stdout),
-          });
-        }
+        admit(admissions, compilerTarget, candidate.admissionRequest);
+        const targetStarted = performance.now();
         targetArtifact = prepareCheckedTarget(
           stage,
           candidate,
@@ -575,21 +744,35 @@ export function createGeneratedJsCompilerSession({
             JSON.stringify(candidate.publicNames),
           ]);
         }
-        fs.writeFileSync(path.join(stage, 'admissions.json'), admissions);
-        fs.writeFileSync(
-          path.join(stage, 'original-ir.json'),
-          JSON.stringify(candidate.originalIr),
-        );
-        fs.writeFileSync(
-          path.join(stage, 'specialized-ir.json'),
-          JSON.stringify(candidate.specializedIr),
-        );
-        fs.writeFileSync(path.join(stage, 'sources.json'), json(captured));
+        timings.targetMs = performance.now() - targetStarted;
+        const evidenceStarted = performance.now();
+        if (evidence === 'full') {
+          fs.writeFileSync(path.join(stage, 'admissions.json'), admissions);
+          fs.writeFileSync(
+            path.join(stage, 'original-ir.json'),
+            JSON.stringify(candidate.originalIr),
+          );
+          fs.writeFileSync(
+            path.join(stage, 'specialized-ir.json'),
+            JSON.stringify(candidate.specializedIr),
+          );
+          fs.writeFileSync(path.join(stage, 'sources.json'), json(captured));
+        } else {
+          // Wire files have already been consumed, checked and bound in memory.
+          fs.unlinkSync(path.join(stage, 'request.json'));
+          fs.unlinkSync(path.join(stage, 'candidate.json'));
+        }
         fs.writeFileSync(
           path.join(stage, 'session.json'),
           json({
             request,
-            tools,
+            ...(evidence === 'full'
+              ? { tools }
+              : {
+                  resourceManifestSha256: sha(json(tools)),
+                  resourceFiles: verificationTools.length,
+                }),
+            evidence,
             receipt,
             execution,
             events,
@@ -621,18 +804,23 @@ export function createGeneratedJsCompilerSession({
           }),
         );
         const expectedFiles = [
-          'admissions.json',
-          'candidate.json',
-          'original-ir.json',
-          'request.json',
+          ...(evidence === 'full'
+            ? [
+                'admissions.json',
+                'candidate.json',
+                'original-ir.json',
+                'request.json',
+                'sources.json',
+                'specialized-ir.json',
+              ]
+            : []),
           'session.json',
-          'sources.json',
-          'specialized-ir.json',
           ...targetArtifact.files,
         ].sort();
         if (fs.readdirSync(stage).sort().join(',') !== expectedFiles.join(','))
           fail('PSC1_SERVICE_ARTIFACT_CHANGED');
         sealedFiles = inventory(stage);
+        timings.evidenceMs = performance.now() - evidenceStarted;
         verifyTools();
         state = 'admitted-target-checked';
         return Object.freeze({
@@ -661,6 +849,8 @@ export function createGeneratedJsCompilerSession({
           targetArtifact: clone(targetArtifact),
           execution: clone(execution),
           logicalAdmission: 'accepted',
+          evidence,
+          timings: { ...timings, sessionMs: performance.now() - sessionStarted },
           productionPublication: 'pending',
           ...(extraChecks.length ? { additionalAdmissions: clone(additionalAdmissions) } : {}),
           behaviorallyVerified: false,

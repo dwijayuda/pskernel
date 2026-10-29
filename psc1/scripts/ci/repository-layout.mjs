@@ -82,7 +82,7 @@ const read=file=>fs.readFileSync(file,'utf8');
 // Original move evidence remains reproducible at its qualified checkpoint.
 // Runtime/watch behavior has a distinct installed/runtime qualification, not an exact-move claim.
 const layoutCheckpoint='94e0c13f6a4b434f73c859cc0c716cb6fb8d1340';
-const changedOwners=new Set(['npm-cli/compiler-api.mjs','host-tools/generated-compiler-session.mjs','test/installed/cli.test.mjs','test/host/cli.test.mjs']);
+const changedOwners=new Set(['npm-cli/checked-command-cli.mjs','npm-cli/compiler-api.mjs','host-tools/generated-compiler-session.mjs','test/installed/cli.test.mjs','test/host/cli.test.mjs']);
 function migrationRead(file){
  if(!changedOwners.has(file))return read(file);
  const r=spawnSync('git',['show',layoutCheckpoint+':psc1/'+file],{encoding:'utf8',timeout:10000,maxBuffer:2*1024*1024});

@@ -4,12 +4,18 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import {spawn, spawnSync} from 'node:child_process';
-import {fileURLToPath} from 'node:url';
-import {watchProject} from './cli-watch.mjs';
-import {runtimeArguments} from '../host-tools/runtime-policy.mjs';
-import {captureProject, describeProject, initializeProject, parseCompilation,
-  refuse} from './cli-project.mjs';
+import { spawn, spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { watchProject } from './cli-watch.mjs';
+import { createWatchClient } from './cli-watch-client.mjs';
+import { runtimeArguments } from '../host-tools/runtime-policy.mjs';
+import {
+  captureProject,
+  describeProject,
+  initializeProject,
+  parseCompilation,
+  refuse,
+} from './cli-project.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const usage = `ProofScript — independently checked .ps and .lean compilation
@@ -36,6 +42,7 @@ Options:
   --kernel wasm|native|both      Independent checker (default genuine Lean Wasm)
   --assurance checked|ordinary-checked
   --output-abi scalar|io-dispatcher
+  --evidence minimal|full       Include full intermediate evidence when requested
   --publication-protocol legacy-symlink|portable-file|portable-atomic
   --rust-toolchain-root path     Explicit host-owned Rust output SDK
   -p, --project path             Source data only; cannot choose tools or output
@@ -60,22 +67,46 @@ pinned optional packages. No install/compile command downloads a missing SDK.
 Current checked publication is Linux-qualified; compile does not publish.
 `;
 const hints = [
-  [/OPTIONAL_PACKAGE_MISSING/, 'Install the exact optional package named in the diagnostic; no fallback is used.'],
-  [/RUNTIME_VERSION|NODE_PIN/, 'Use Node >=22.23.3 or Bun >=1.4.4. Exact CI versions are reproduction records, not installation pins.'],
-  [/WATCH_SUPERSEDED/, 'The watch supervisor will retry the latest inputs; the previous checked generation is preserved.'],
+  [
+    /OPTIONAL_PACKAGE_MISSING/,
+    'Install the exact optional package named in the diagnostic; no fallback is used.',
+  ],
+  [
+    /RUNTIME_VERSION|NODE_PIN/,
+    'Use Node >=22.23.3 or Bun >=1.4.4. Exact CI versions are reproduction records, not installation pins.',
+  ],
+  [
+    /WATCH_SUPERSEDED/,
+    'The watch supervisor will retry the latest inputs; the previous checked generation is preserved.',
+  ],
   [/ENOENT/, 'Check declared source paths. Watch mode resumes when missing files are restored.'],
   [/OUTPUT_DIRECTORY/, 'Pass --out directory to psc build.'],
-  [/PUBLICATION_PLATFORM_UNQUALIFIED/, 'Use psc compile on this platform; publication needs platform qualification.'],
-  [/COMMITTED_DURABILITY_UNCERTAIN/, 'Publication may already be committed. Inspect the store; do not assume rollback.'],
-  [/PROJECT_FIELDS/, 'Project JSON selects sources only; pass host options explicitly on the command line.'],
+  [
+    /PUBLICATION_PLATFORM_UNQUALIFIED/,
+    'Use psc compile on this platform; publication needs platform qualification.',
+  ],
+  [
+    /COMMITTED_DURABILITY_UNCERTAIN/,
+    'Publication may already be committed. Inspect the store; do not assume rollback.',
+  ],
+  [
+    /PROJECT_FIELDS/,
+    'Project JSON selects sources only; pass host options explicitly on the command line.',
+  ],
 ];
 function diagnostic(error, mode, fallbackCode = 'PSC1_CLI_EXECUTION_FAILED') {
   const message = String(error?.message || error).trim();
   const code = error?.cliCode || message.match(/\bPSC1_[A-Z0-9_]+/)?.[0] || fallbackCode;
   const hint = error?.cliHint || hints.find(([pattern]) => pattern.test(message))?.[1];
   if (mode === 'json')
-    console.error(JSON.stringify({schema: 'proofscript-cli-diagnostic/1',
-      code, message, ...(hint ? {hint} : {})}));
+    console.error(
+      JSON.stringify({
+        schema: 'proofscript-cli-diagnostic/1',
+        code,
+        message,
+        ...(hint ? { hint } : {}),
+      }),
+    );
   else {
     console.error(message.includes(code) ? message : code + ': ' + message);
     if (hint) console.error('Hint: ' + hint);
@@ -83,9 +114,13 @@ function diagnostic(error, mode, fallbackCode = 'PSC1_CLI_EXECUTION_FAILED') {
 }
 function presentation(args) {
   const rest = [];
-  let mode = 'text', seen = false;
+  let mode = 'text',
+    seen = false;
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === '--') { rest.push(...args.slice(i)); break; }
+    if (args[i] === '--') {
+      rest.push(...args.slice(i));
+      break;
+    }
     if (args[i] === '--diagnostics' || args[i].startsWith('--diagnostics=')) {
       if (seen) refuse('ARGUMENT', 'Duplicate --diagnostics.');
       seen = true;
@@ -94,49 +129,80 @@ function presentation(args) {
         refuse('ARGUMENT', '--diagnostics must be text or json.');
     } else rest.push(args[i]);
   }
-  return {args: rest, mode};
+  return { args: rest, mode };
 }
 // Individual compiler/tool/checker limits remain inside the unchanged host.
 // Stream stdout without changing JSON receipts; cap diagnostic buffering at32MiB.
 // Signals are forwarded and retain130/143. No shell, downloader or fallback.
+let persistentWatch;
 async function execute(args, mode, worker = 'universal-cli.mjs') {
-  if (!['universal-cli.mjs', 'cli-watch-worker.mjs'].includes(worker)) refuse('WORKER', 'Unknown CLI worker.');
-  const child = spawn(process.execPath, runtimeArguments([path.join(here, worker), ...args]),
-    {stdio: ['inherit', 'pipe', 'pipe'], detached: process.platform !== 'win32', windowsHide: true});
+  if (worker === 'cli-watch-worker.mjs' && process.platform === 'linux' && !process.versions.bun) {
+    persistentWatch ??= createWatchClient({
+      file: path.join(here, 'cli-watch-server.mjs'),
+      diagnostic,
+      mode,
+    });
+    return persistentWatch.execute(args);
+  }
+  if (!['universal-cli.mjs', 'cli-watch-worker.mjs'].includes(worker))
+    refuse('WORKER', 'Unknown CLI worker.');
+  const child = spawn(process.execPath, runtimeArguments([path.join(here, worker), ...args]), {
+    stdio: ['inherit', 'pipe', 'pipe'],
+    detached: process.platform !== 'win32',
+    windowsHide: true,
+  });
   let requestedSignal, escalation;
-  const kill = signal => {
+  const kill = (signal) => {
     try {
       if (process.platform !== 'win32' && child.pid) process.kill(-child.pid, signal);
       else if (child.pid && child.exitCode === null && child.signalCode === null) {
         // A console cancellation owns this exact child tree; never use a PATH-selected tool.
         const systemRoot = process.env.SystemRoot || process.env.WINDIR;
-        if (!systemRoot || !path.isAbsolute(systemRoot)) refuse('CANCELLATION_PLATFORM', 'Windows system directory unavailable.');
-        const result = spawnSync(path.join(systemRoot, 'System32', 'taskkill.exe'),
-          ['/PID', String(child.pid), '/T', '/F'], {timeout: 5000, maxBuffer: 1048576, windowsHide: true});
+        if (!systemRoot || !path.isAbsolute(systemRoot))
+          refuse('CANCELLATION_PLATFORM', 'Windows system directory unavailable.');
+        const result = spawnSync(
+          path.join(systemRoot, 'System32', 'taskkill.exe'),
+          ['/PID', String(child.pid), '/T', '/F'],
+          { timeout: 5000, maxBuffer: 1048576, windowsHide: true },
+        );
         if (result.error) throw result.error;
       }
-    } catch (error) { if (error.code !== 'ESRCH') throw error; }
+    } catch (error) {
+      if (error.code !== 'ESRCH') throw error;
+    }
   };
   child.stdout.pipe(process.stdout);
   const parts = [];
-  let bytes = 0, overflow = false, launchError;
-  child.stderr.on('data', chunk => {
+  let bytes = 0,
+    overflow = false,
+    launchError;
+  child.stderr.on('data', (chunk) => {
     bytes += chunk.length;
-    if (bytes > 32 * 1024 * 1024) { overflow = true; kill('SIGKILL'); }
-    else parts.push(chunk);
+    if (bytes > 32 * 1024 * 1024) {
+      overflow = true;
+      kill('SIGKILL');
+    } else parts.push(chunk);
   });
-  const signals = new Map((process.platform === 'win32' ? ['SIGINT', 'SIGTERM', 'SIGBREAK'] : ['SIGINT', 'SIGTERM']).map(signal => {
-    const handler = () => {
-      requestedSignal = signal; kill(signal);
-      escalation ??= setTimeout(() => kill('SIGKILL'), 2000);
-      escalation.unref();
-    };
-    process.on(signal, handler);
-    return [signal, handler];
-  }));
-  child.on('error', error => { launchError = error; });
-  const outcome = await new Promise(resolve =>
-    child.on('close', (code, signal) => resolve({code, signal})));
+  const signals = new Map(
+    (process.platform === 'win32' ? ['SIGINT', 'SIGTERM', 'SIGBREAK'] : ['SIGINT', 'SIGTERM']).map(
+      (signal) => {
+        const handler = () => {
+          requestedSignal = signal;
+          kill(signal);
+          escalation ??= setTimeout(() => kill('SIGKILL'), 2000);
+          escalation.unref();
+        };
+        process.on(signal, handler);
+        return [signal, handler];
+      },
+    ),
+  );
+  child.on('error', (error) => {
+    launchError = error;
+  });
+  const outcome = await new Promise((resolve) =>
+    child.on('close', (code, signal) => resolve({ code, signal })),
+  );
   clearTimeout(escalation);
   for (const [signal, handler] of signals) process.off(signal, handler);
   const stderr = Buffer.concat(parts).toString('utf8');
@@ -145,15 +211,17 @@ async function execute(args, mode, worker = 'universal-cli.mjs') {
   else if (stderr && outcome.code !== 0) diagnostic(stderr, mode);
   else if (stderr) process.stderr.write(stderr);
   if (requestedSignal) return requestedSignal === 'SIGTERM' ? 143 : 130;
-  return launchError || overflow ? 1 :
-    outcome.code ?? (outcome.signal === 'SIGINT' ? 130 : outcome.signal === 'SIGTERM' ? 143 : 1);
+  return launchError || overflow
+    ? 1
+    : (outcome.code ??
+        (outcome.signal === 'SIGINT' ? 130 : outcome.signal === 'SIGTERM' ? 143 : 1));
 }
 
-let temporary, mode = process.argv.slice(2).some(a =>
-  a === '--diagnostics=json') ? 'json' : 'text';
+let temporary,
+  mode = process.argv.slice(2).some((a) => a === '--diagnostics=json') ? 'json' : 'text';
 try {
   let args;
-  ({args, mode} = presentation(process.argv.slice(2)));
+  ({ args, mode } = presentation(process.argv.slice(2)));
   if (args[0] === 'generated') args = args.slice(1);
   if (!args.length || args[0] === 'help' || args.includes('--help') || args.includes('-h')) {
     console.log(usage);
@@ -162,27 +230,35 @@ try {
     console.log(meta.name + ' ' + meta.version);
   } else if (['init', '--init'].includes(args[0])) {
     const result = initializeProject(args.slice(1));
-    console.log('Created ' + result.created.join(' and ') + '.\nNext:\n  ' + result.next.join('\n  '));
+    console.log(
+      'Created ' + result.created.join(' and ') + '.\nNext:\n  ' + result.next.join('\n  '),
+    );
   } else if (args[0] === '--identity' || args[0] === 'kernel') {
     process.exitCode = await execute(args, mode);
   } else {
-    const command = ['check', 'compile', 'build'].includes(args[0]) ? args.shift() :
-      args[0]?.startsWith('-') ? 'check' : undefined;
+    const command = ['check', 'compile', 'build'].includes(args[0])
+      ? args.shift()
+      : args[0]?.startsWith('-')
+        ? 'check'
+        : undefined;
     if (!command) refuse('COMMAND', 'Unknown command: ' + args[0]);
     const parsed = parseCompilation(args);
     if (command !== 'build' && parsed.options.has('--out'))
       refuse('OUT_REQUIRES_BUILD', '--out requires psc build.');
     if (command === 'build' && !parsed.showConfig && !parsed.options.has('--out'))
-      refuse('OUTPUT_DIRECTORY', 'psc build requires an output directory.',
-        'Run psc build --out dist/app.');
+      refuse(
+        'OUTPUT_DIRECTORY',
+        'psc build requires an output directory.',
+        'Run psc build --out dist/app.',
+      );
     const captured = captureProject(parsed);
     if (parsed.showConfig) console.log(JSON.stringify(describeProject(parsed, captured), null, 2));
     else if (parsed.watch) {
-      process.exitCode = await watchProject({command, parsed, execute, diagnostic, mode});
+      process.exitCode = await watchProject({ command, parsed, execute, diagnostic, mode });
     } else {
       temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'proofscript-cli-project-'));
       const project = path.join(temporary, 'sources.json');
-      fs.writeFileSync(project, JSON.stringify(captured.project), {flag: 'wx', mode: 0o600});
+      fs.writeFileSync(project, JSON.stringify(captured.project), { flag: 'wx', mode: 0o600 });
       const forwarded = [command, '--project', project];
       for (const [key, value] of parsed.options)
         if (key !== '--project') forwarded.push(key, value);
@@ -193,5 +269,6 @@ try {
   diagnostic(error, mode);
   process.exitCode = 1;
 } finally {
-  if (temporary) fs.rmSync(temporary, {recursive: true, force: true});
+  await persistentWatch?.close();
+  if (temporary) fs.rmSync(temporary, { recursive: true, force: true });
 }

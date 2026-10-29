@@ -1,5 +1,11 @@
 # ProofScript CLI
 
+Current modular .5 Linux/Node usage, check-only behavior, compact evidence and
+warm watch are documented in [Fast installed development](../architecture/fast-development.md).
+Its [qualification receipt](../PSC1_DEVELOPMENT_QUALIFICATION_2026-10-29.json) binds
+exact artifacts and platform scope. The remainder below records the retained .11
+reference CLI; its 500ms polling/full-rebuild descriptions are historical.
+
 This guide covers the runtime/watch candidate `proofscript@0.1.0-psc1.11`.
 Its [runtime/watch receipt](../PSC1_RUNTIME_WATCH_QUALIFICATION_2026-10-27.json)
 records qualification separately; the previous .9 layout evidence below does not

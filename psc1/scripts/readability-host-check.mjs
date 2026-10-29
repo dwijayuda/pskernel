@@ -19,6 +19,15 @@ const modularFeatureParent = '415dbba4b5c1627185fc0ee8cdf29a83b15b6f08';
 const modularFeatureFiles = new Set(['host-tools/installed-engine-resolver.mjs','npm-cli/universal.mjs']);
 const platformFeatureQualification='docs/PSC1_CROSS_PLATFORM_QUALIFICATION_2026-10-29.json';
 const platformFeatureFiles=new Set(['host-tools/installed-engine-resolver.mjs','npm-cli/universal.mjs']);
+const developmentReceipt=JSON.parse(fs.readFileSync(path.join(root,'docs/PSC1_DEVELOPMENT_QUALIFICATION_2026-10-29.json')));
+assert.equal(developmentReceipt.status,'qualified-finite-linux-node');
+const developmentPins=new Map(developmentReceipt.hostSources.pins.map(pin=>[pin.path.slice(5),pin]));
+function qualifiedDevelopmentSource(file,source){
+ const pin=developmentPins.get(file);assert.ok(pin,file+': missing development pin');
+ assert.equal(Buffer.byteLength(source),pin.bytes);
+ assert.equal(createHash('sha256').update(source).digest('hex'),pin.sha256,file+': unqualified development bytes');
+ return readAt(developmentReceipt.baseCommit,file);
+}
 const platformReceipt=JSON.parse(fs.readFileSync(path.join(root,platformFeatureQualification)));
 assert.equal(platformReceipt.status,'qualified-finite-installed-node');
 const modularFeatureQualification = 'docs/PSC1_MODULAR_HOST_RUNTIME_QUALIFICATION_2026-10-28.json';
@@ -106,9 +115,11 @@ for (const file of files) {
       file+': previous modular feature correspondence changed');
     const pin=platformReceipt.hostSources.pins.find(p=>p.path==='psc1/'+(canonicalFiles[file]??file));
     assert.ok(pin,file+': missing qualified platform pin');
-    assert.equal(Buffer.byteLength(source),pin.bytes);
-    assert.equal(createHash('sha256').update(source).digest('hex'),pin.sha256,file+': unqualified platform host bytes');
-  }else assert.deepEqual(executableAst(source), executableAst(readAt(currentFeatureBaseline, canonicalFiles[file] ?? file)),
+    const platformSource=developmentPins.has(canonicalFiles[file]??file)
+      ?qualifiedDevelopmentSource(canonicalFiles[file]??file,source):source;
+    assert.equal(Buffer.byteLength(platformSource),pin.bytes);
+    assert.equal(createHash('sha256').update(platformSource).digest('hex'),pin.sha256,file+': unqualified platform host bytes');
+  }else assert.deepEqual(executableAst(developmentPins.has(canonicalFiles[file]??file)?qualifiedDevelopmentSource(canonicalFiles[file]??file,source):source), executableAst(readAt(currentFeatureBaseline, canonicalFiles[file] ?? file)),
     file + ': host differs from its separately tested feature baseline');
   const formatted = await prettier.format(source, formatOptions);
   assert.deepEqual(executableAst(formatted), executableAst(source),
@@ -138,7 +149,8 @@ for (const file of newModules) {
   const layoutSource = readAt(layoutCheckpoint, canonicalFiles[file] ?? file);
   assert.deepEqual(executableAst(layoutSource), executableAst(relocated(feature.stdout)),
     file + ': new dispatch module changed from its explicit feature baseline');
-  assert.deepEqual(executableAst(source), executableAst(readAt(runtimeFeatureBaseline, canonicalFiles[file] ?? file)),
+  const priorSource=developmentPins.has(file)?qualifiedDevelopmentSource(file,source):source;
+  assert.deepEqual(executableAst(priorSource), executableAst(readAt(runtimeFeatureBaseline, canonicalFiles[file] ?? file)),
     file + ': runtime/watch host differs from separately tested feature baseline');
   const formatted = await prettier.format(source, formatOptions);
   assert.deepEqual(executableAst(formatted), executableAst(source),

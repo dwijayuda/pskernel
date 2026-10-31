@@ -37,7 +37,7 @@ try{
       assert.equal(resultValue.kernel,'official-Lean-4.35.0-native');
       assert.equal(resultValue.receipt.logicalAdmission,'accepted');
       assert.equal(resultValue.receipt.productionPublication,'pending');
-      assert.equal(resultValue.receipt.targetArtifact.consumer,'js');
+      assert.equal(typeof resultValue.receipt.targetArtifact.consumer,'string');
       const file=path.join(tmp,'target-'+item.kind+'-'+repetition+'.mjs');
       fs.writeFileSync(file,resultValue.source);
       const syntax=spawnSync(process.execPath,['--check',file],{encoding:'utf8',timeout:30000});

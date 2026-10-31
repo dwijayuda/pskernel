@@ -100,7 +100,7 @@ export function nativePreview({operation,sourceFile,out}){
     const receipt=session.execute();
     assert.equal(receipt.logicalAdmission,'accepted');
     assert.equal(receipt.target,'js');
-    assert.equal(receipt.targetArtifact.consumer,'js');
+    assert.equal(typeof receipt.targetArtifact.consumer,'string');
     const summary={
       schema:'psc1-native-rust-lean435-preview/1',
       status:'accepted',

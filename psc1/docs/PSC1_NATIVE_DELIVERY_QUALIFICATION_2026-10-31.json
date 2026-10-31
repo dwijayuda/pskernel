@@ -1,0 +1,95 @@
+{
+  "schema": "psc1-native-delivery-record/1",
+  "status": "qualified-finite-linux-x64-native-G1-package",
+  "date": "2026-10-31",
+  "implementationCommit": "2d4edd272577f2b44a3fde41b1a0b927b822e413",
+  "authority": "Summary transcribed from the actual successful job report; full machine report remains in the artifact. This record grants no admission authority.",
+  "qualification": {
+    "run": 41179915274,
+    "job": 124475029582,
+    "artifact": 13034039084,
+    "conclusion": "success",
+    "artifactZipSha256": "1d6fcfb68e6466f54a03e816bb27bdff37b9fc81f84adf8870450cf3f3374619",
+    "artifactZipBytes": 12556220,
+    "artifactExpiresAt": "2027-01-29T07:16:00Z",
+    "downloadUrl": "https://github.com/dwijayuda/pskernel/actions/runs/41179915274/artifacts/13034039084"
+  },
+  "package": {
+    "file": "proofscript-native-linux-x64.tar.gz",
+    "bytes": 12701770,
+    "sha256": "7637b93e42cf297056f92bf9d0f8f3d37e846be8f7f855e08b11cac489695c7d",
+    "manifestSha256": "a7ac7ce4d17ca1d1ff6e16c97f001bd37ea86c9853f8064a6da6a03f3484c96b",
+    "platform": "linux-x64-glibc",
+    "testedNode": "22.23.3",
+    "nodeHostRequired": true,
+    "compilerSdkRequiredForJsOutput": false,
+    "installTimeBuild": false,
+    "packagedOutputTargets": ["js"]
+  },
+  "compiler": {
+    "kind": "generated-rust-native-G1",
+    "sourceModules": 133,
+    "sourceClosureDigest": "67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad",
+    "sourceCommit": "a3013ea35c48fde083f9efa0a8a4a963e6a3fcb5",
+    "g1Run": 41177075940,
+    "g1Job": 124466784147,
+    "g1Artifact": 13033925109,
+    "g1ArtifactZipSha256": "475f3043e3b80dc92f0714221afcb573b3fd77a056ee444548b49e60b4537895",
+    "originalBinaryBytes": 40843784,
+    "packagedBinaryBytes": 35368000,
+    "originalBinarySha256": "1467e30ba1dc579b389758a393b3d4781ae24835585429690317411902e92e75",
+    "packagedBinarySha256": "06fd0fec62600e3d8b341caa2113e1772402f4b14d0d4d53c96511628eeca45f",
+    "rustOptimizationLevel": 0,
+    "rustCodegenUnits": 256,
+    "nativeG2G3Qualified": false,
+    "performance240Qualified": false
+  },
+  "kernel": {
+    "kind": "official-Lean-native",
+    "version": "4.35.0",
+    "leanCommit": "eb6cafb7290e8bd5f2937522d8d804f58f02bafc",
+    "binaryBytes": 4079232,
+    "binarySha256": "1415522ad1fa22ea919d796dc0d689be5c65275c0a24fe43a6ac7f675d32239b",
+    "sourceQualificationRun": 40155475188,
+    "freshAdmissionPerRequest": true
+  },
+  "elf": {
+    "stripApplied": true,
+    "programHeadersAndEntryIdentical": true,
+    "allocatedSectionsIdentical": 30,
+    "identitySha256": "d164fbae62d3f43f55e61605406fbd0d747c7df78bdcee5c7bf2478a1c3fd09e",
+    "restoredNonloadedMetadata": [{"section":".init_array","field":"sh_entsize","original":0,"stripped":8,"offset":35367352,"outsideAllLoadableSegments":true}],
+    "mismatchPolicy": "retain exact original binary; never weaken the identity comparison"
+  },
+  "checks": {
+    "relocatedArchive": true,
+    "noCompilerSdkOnPath": true,
+    "sourceGrammars": ["ps", "lean"],
+    "corpus": ["lean-modules", "ps-integer-unicode", "ps-list-literal", "lean-handler-pattern", "lean-ordinary-loop"],
+    "actualCorpusRuntimeObservations": 5,
+    "exactSourceOriginalIrSpecializedIrAdmissionParity": true,
+    "nativeKernelFixtures": 14,
+    "negativeCases": ["typing-refusal", "prior-publication-retained", "compiler-tamper-refusal", "kernel-tamper-refusal", "host-guard-tamper-refusal"]
+  },
+  "comparison": {
+    "sameRunner": true,
+    "sameKernel": true,
+    "sameSourceInputs": true,
+    "samplesPerVariant": 6,
+    "trialsPerGrammarPerVariant": 3,
+    "workspaceWallMs": [1494.0305230000013,1480.958107999999,1501.2402379999985,1511.2682480000003,1510.044468,1530.5924530000011],
+    "packedWallMs": [1324.360764000001,1301.8501490000017,1304.7050109999982,1304.0124720000022,1312.1901309999994,1313.637773999999],
+    "workspaceMedianMs": 1505.6423529999993,
+    "packedMedianMs": 1308.4475709999988,
+    "observedReduction": 0.13097053334551134,
+    "scope": "alternating cold-process tiny Bool program compilation; not cold filesystem, full compiler rebuild, body-edit, or Rust-vs-JS performance"
+  },
+  "priorAttempts": [
+    {"run":41179542999,"commit":"d0f1be75f045e480f3e8852e5260a056f70465b6","result":"strict ELF comparison rejected GNU strip metadata normalization; no package delivered"},
+    {"run":41179694832,"commit":"97e4feab77cb40c04b3f19d9142f8db6c51d3614","result":"passed with exact original unstripped binary; separate same-runner cold median 1512.0762349999986 to 1366.1436084999987 ms"}
+  ],
+  "formalCompilerPreservation": "not-provided",
+  "universalDistributionChanged": false,
+  "merge": false,
+  "npmPublication": false
+}

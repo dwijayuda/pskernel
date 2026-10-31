@@ -1,0 +1,113 @@
+name: PSC1 native npm Linux and Windows cross build
+on:
+  push:
+    branches: [feat/psc1-native-npm-windows-20261031]
+    paths:
+      - '.github/workflows/psc1-native-npm-windows.yml'
+      - 'psc1/scripts/native-npm-*'
+      - 'psc1/scripts/native-windows-*'
+      - 'psc1/host-tools/native-windows-*'
+      - 'psc1/host-tools/generated-rust-windows-*'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: psc1-native-npm-windows-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  native-npm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: psc1
+        shell: bash
+    env:
+      WINEPREFIX: ${{ runner.temp }}/psc1-native-wine
+      WINEARCH: win64
+      WINEDEBUG: '-all'
+      WINEDLLOVERRIDES: 'mscoree,mshtml='
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Install Linux-hosted Windows cross tools and compatibility runner
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends gcc-mingw-w64-x86-64-posix binutils-mingw-w64-x86-64 wine64 wine xvfb xauth
+          rustup toolchain install 1.90.0 --profile minimal
+          rustup default 1.90.0
+          rustup target add x86_64-pc-windows-gnu --toolchain 1.90.0
+      - name: Verify input artifacts, exact G1 source and existing native kernels
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          node --check scripts/native-npm-build.mjs
+          node --check scripts/native-npm-runtime.mjs
+          node --check scripts/native-npm-installed.mjs
+          node --check host-tools/generated-rust-windows-transport.mjs
+          node scripts/native-npm-build.mjs prepare
+      - name: Cross compile the actual generated Rust compiler and Windows lifecycle guard
+        env:
+          CARGO_TARGET_DIR: ${{ github.workspace }}/psc1/dist/native-npm/cargo
+          CARGO_TARGET_X86_64_PC_WINDOWS_GNU_LINKER: x86_64-w64-mingw32-gcc-posix
+          RUSTFLAGS: '-C target-feature=+crt-static -C link-arg=-static-libgcc -C link-arg=-Wl,--stack,8388608'
+        run: |
+          set -euo pipefail
+          timeout 240s cargo build --release --locked --target x86_64-pc-windows-gnu --manifest-path dist/native-npm/windows-source/Cargo.toml
+          x86_64-w64-mingw32-gcc-posix -std=c11 -municode -O2 -Wall -Wextra -static host-tools/native-windows-job.c -o dist/native-npm/psc-job.exe
+          x86_64-w64-mingw32-gcc-posix -std=c11 -municode -O2 -Wall -Wextra -static scripts/native-windows-fixture.c -o dist/native-npm/tests/native-windows-fixture.exe
+          x86_64-w64-mingw32-objdump -p dist/native-npm/cargo/x86_64-pc-windows-gnu/release/psc1-generated-target.exe > dist/native-npm/WINDOWS_PE.txt
+      - name: Assemble actual npm packages, retaining existing names and no install scripts
+        run: node scripts/native-npm-build.mjs assemble
+      - name: Install and execute the packed native packages on Linux without compiler SDKs
+        run: |
+          node dist/native-npm/tests/native-npm-installed.mjs dist/native-npm/delivery/proofscript-0.1.0-psc1-native.1.tgz dist/native-npm/delivery/QUALIFICATION-linux-x64.json
+      - name: Download checksum-verified real Windows Node and npm for compatibility tests
+        run: |
+          set -euo pipefail
+          mkdir -p dist/native-npm/windows-node
+          curl --fail --location --retry 3 https://nodejs.org/dist/v22.23.3/SHASUMS256.txt -o dist/native-npm/windows-node/SHASUMS256.txt
+          curl --fail --location --retry 3 https://nodejs.org/dist/v22.23.3/node-v22.23.3-win-x64.zip -o dist/native-npm/windows-node/node-v22.23.3-win-x64.zip
+          (cd dist/native-npm/windows-node && grep ' node-v22.23.3-win-x64.zip$' SHASUMS256.txt | sha256sum -c -)
+          unzip -q dist/native-npm/windows-node/node-v22.23.3-win-x64.zip -d dist/native-npm/windows-node
+      - name: Real Windows npm offline installation, native execution and process-tree tests under Wine
+        timeout-minutes: 15
+        run: |
+          set -euo pipefail
+          xvfb-run -a node scripts/native-npm-wine.mjs
+      - name: Bind both installed receipts to the delivered package hashes
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';import crypto from 'node:crypto';import assert from 'node:assert/strict';
+          const directory='dist/native-npm/delivery';
+          const build=JSON.parse(fs.readFileSync(directory+'/BUILD.json'));
+          const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
+          const digest=sha(fs.readFileSync(directory+'/'+build.rootTarball));
+          const reports=['linux-x64','win32-x64'].map(platform=>{const r=JSON.parse(fs.readFileSync(directory+'/QUALIFICATION-'+platform+'.json'));assert.equal(r.status,'passed');assert.equal(r.rootTarballSha256,digest);return r;});
+          const result={schema:'psc1-native-npm-delivery/1',status:'passed',sourceCommit:process.env.GITHUB_SHA,rootTarball:build.rootTarball,rootTarballSha256:digest,packages:build.packages,qualifications:reports.map(r=>({platform:r.platform,observations:r.observations.length,npmInstalls:r.installs.length,negativeCases:r.negatives.length,windowsExecutionEnvironment:r.windowsExecutionEnvironment})),nativeWindowsHostQualified:false,compilerGeneration:'G1',nodeHostRequired:true,outputTargets:['js'],npmPublished:false};
+          fs.writeFileSync(directory+'/QUALIFICATION.json',JSON.stringify(result,null,2)+'\n');console.log('PSC1_NATIVE_NPM_DELIVERY: '+JSON.stringify(result));
+          JS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: psc1-native-npm-windows-linux-${{ github.sha }}
+          path: psc1/dist/native-npm/delivery/
+          if-no-files-found: error
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: psc1-native-npm-diagnostics-${{ github.sha }}
+          path: |
+            psc1/dist/native-npm/INPUTS.json
+            psc1/dist/native-npm/WINDOWS_PE.txt
+            psc1/dist/native-npm/delivery/*.json
+            psc1/dist/native-npm/wine-*.txt
+          if-no-files-found: warn
+          retention-days: 90

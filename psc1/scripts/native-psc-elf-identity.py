@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""Compare Linux ELF64 execution sections before/after symbol stripping.
+"""Keep symbol stripping only when the ELF execution identity is unchanged.
 
-This is packaging identity evidence, not a proof of compiler preservation.
-No binary is executed here. Reject unsupported ELF layouts instead of guessing.
+Unsupported layouts fail. A rejected strip candidate is replaced by the exact
+original compiler bytes and explicitly reported, never silently qualified.
+This is packaging identity evidence, not compiler semantic preservation.
 """
 import hashlib
 import json
 import pathlib
+import shutil
 import struct
 import sys
 
@@ -46,9 +48,21 @@ def inspect(filename):
 
 if __name__ == '__main__':
     assert len(sys.argv) == 3
-    before, after = (inspect(name) for name in sys.argv[1:])
-    assert before == after, 'stripping changed loadable ELF execution data'
+    source, candidate = map(pathlib.Path, sys.argv[1:])
+    before, proposed = inspect(source), inspect(candidate)
+    changes = {key: {'original': before[key], 'proposed': proposed[key]}
+               for key in before if before[key] != proposed[key]}
+    applied = not changes
+    if not applied:
+        print('PSC1_NATIVE_STRIP_REJECTED: ' + json.dumps(changes), file=sys.stderr)
+        shutil.copyfile(source, candidate)
+        assert source.read_bytes() == candidate.read_bytes(), 'original binary restoration failed'
+    after = inspect(candidate)
+    assert before == after, 'final binary changed ELF execution identity'
     print(json.dumps({'schema': 'psc1-native-elf-strip-identity/1', 'passed': True,
+                      'stripApplied': applied,
+                      'selection': 'stripped-execution-identical' if applied else 'exact-original-binary',
+                      'rejectedCandidateDifferences': changes,
                       'allocatedSections': len(before['allocatedSections']),
                       'identitySha256': hashlib.sha256(json.dumps(before, sort_keys=True).encode()).hexdigest(),
-                      'scope': 'same program headers, entry and allocated sections; not semantic preservation theorem'}))
+                      'scope': 'same program headers, entry and allocated sections; original bytes retained on strip mismatch'}))

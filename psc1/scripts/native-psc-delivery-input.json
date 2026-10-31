@@ -1,0 +1,24 @@
+{
+  "schema": "psc1-native-delivery-input/1",
+  "g1": {
+    "run": 41177075940,
+    "job": 124466784147,
+    "artifact": 13033925109,
+    "commit": "a3013ea35c48fde083f9efa0a8a4a963e6a3fcb5",
+    "zipSha256": "475f3043e3b80dc92f0714221afcb573b3fd77a056ee444548b49e60b4537895",
+    "directory": "generated-unified-rust-compiler",
+    "manifestSha256": "61b72852ce617e0ec3435e2301c64f3a082361763c7a76f52c4361ff701149c8",
+    "executableSha256": "1467e30ba1dc579b389758a393b3d4781ae24835585429690317411902e92e75",
+    "sourceClosureDigest": "67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad"
+  },
+  "kernel": {
+    "run": 40155475188,
+    "job": 121055846346,
+    "artifact": 12584263337,
+    "commit": "4deb99def1dcb18fe348a184e70f8e3a74c03f04",
+    "zipSha256": "a5cefb58f4eaf4a558b390294d24c555b763c3a0ef7f7e68aab7cfc324f58b2f",
+    "tarball": "proofscript-pskernel-lean-4.35.0.tgz",
+    "tarballSha256": "c8ffd49220328ec2a96ac1c4388d828df255cc21537b2484b523710fe6c17371",
+    "executableSha256": "1415522ad1fa22ea919d796dc0d689be5c65275c0a24fe43a6ac7f675d32239b"
+  }
+}

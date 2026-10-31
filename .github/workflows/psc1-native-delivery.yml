@@ -1,0 +1,57 @@
+name: PSC1 measured native compiler delivery
+on:
+  push:
+    branches: [perf/psc1-native-delivery-20261031]
+    paths:
+      - '.github/workflows/psc1-native-delivery.yml'
+      - 'psc1/scripts/native-psc-delivery*'
+      - 'psc1/scripts/native-psc-runtime.mjs'
+      - 'psc1/scripts/native-psc-elf-identity.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: psc1-native-delivery-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  delivery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: psc1
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.23.3'
+      - name: Validate delivery sources without installing compiler SDKs
+        run: |
+          set -euo pipefail
+          node --check scripts/native-psc-runtime.mjs
+          node --check scripts/native-psc-delivery.mjs
+          python3 -m py_compile scripts/native-psc-elf-identity.py
+      - name: Reuse admitted native G1 and kernel, package and measure checked execution
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/native-psc-delivery.mjs
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: psc1-native-checked-delivery-${{ github.sha }}
+          path: psc1/dist/native-delivery/delivery/
+          if-no-files-found: error
+          retention-days: 90
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: psc1-native-delivery-diagnostics-${{ github.sha }}
+          path: |
+            psc1/dist/native-delivery/proofscript-native-linux-x64/NATIVE_MANIFEST.json
+            psc1/dist/native-delivery/proofscript-native-linux-x64/evidence/
+          if-no-files-found: warn
+          retention-days: 90

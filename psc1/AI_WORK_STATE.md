@@ -1,5 +1,20 @@
 # PSC1 AI work state
 
+## Native Rust + official Lean 4.35 developer preview (new branch, pending CI)
+
+Branch `feat/psc1-native-rust-lean435-20261031` starts at exactly
+`48500a3ae3e2224dd7bfaa217ffdde69f6e17d2b` (qualified PR #216).
+A separate Linux-only workflow builds an actual generated Rust-native PSC1 G1
+compiler and the independent native Lean checker, then tries a bounded checked
+JS-output CLI with both ProofScript and subset Lean source, positive/refusal
+cases, transactional publication and measured phases. This is intentionally
+not a promotion of the current modular JS/TS source cohort or full Rust
+self-hosting qualification. CI outcome and exact artifact SHA are pending.
+No merge, source rewrite, npm publish, unchecked kernel or policy relaxation.
+See `docs/architecture/native-rust-lean435-preview.md`.
+
+
+
 Updated 2026-10-30 Asia/Jakarta. Active branch feat/psc1-wire-quote-20261029,
 from PR #215 qualified HEAD 7b9dc2725be226f401a8adcd2e6f0af391308504.
 Connected GitHub and Linux Actions only; previous platform evidence is retained. Expected-HEAD,

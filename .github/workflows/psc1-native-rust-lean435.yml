@@ -63,12 +63,12 @@ jobs:
           node scripts/native-psc-preview.mjs --help
           node packages/pskernel-lean/host/check-pin.mjs
           node scripts/generated-target-contract-tests.mjs
-          node scripts/generated-target-source-audit.mjs rust unified
       - name: Build genuinely native Lean4.35 seed, native checker and source test
         run: |
           set -euo pipefail
-          lake build psc1_unified_service_seed psc1_independent_checker psc1_unified_service_tests
+          lake build psc1_unified_service_seed psc1_independent_checker psc1_unified_service_tests psc1_source_census_probe
           .lake/build/bin/psc1_unified_service_tests
+          node scripts/generated-target-source-audit.mjs rust unified
       - name: Generate and build the native Rust PSC G1, independently admit four output targets
         timeout-minutes: 75
         run: |

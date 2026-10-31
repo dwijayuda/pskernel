@@ -1,37 +1,58 @@
-# Native PSC1 delivery work state — 2026-10-31
+# Native PSC1 delivery — verified milestone, 2026-10-31
 
-Base: a3013ea35c48fde083f9efa0a8a4a963e6a3fcb5, PR217 native preview.
-Work branch: perf/psc1-native-delivery-20261031.
+The current-source Rust G1 and native checked host passed run41177075940 at
+a3013ea35c48fde083f9efa0a8a4a963e6a3fcb5. The source closure is133 modules,
+digest67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad.
+It matches the modular JS/TS source closure; Rust G2/G3 are not qualified.
 
-Actual baseline run 41177075940 / job124466784147 **passed** current-source
-Rust-native G1 (133 owned source modules; source digest67ce17c1a92b893af8ce7bb915a64164236cedd31ed256f7952fc95dc52565ad),
-all four output-target G1 corpora/refusals, and the native Lean checked preview.
-The immutable artifact13033925109 has ZIP SHA256
-475f3043e3b80dc92f0714221afcb573b3fd77a056ee444548b49e60b4537895.
-This is the same source closure as the modular JS/TS cohort, but is not its
-Rust G2/G3/fixed-point or installed-engine qualification.
+## Tested package
 
-Tiny cold CLI samples were about2.56–2.59s total,0.48–0.49s compiler transport,
-0.038–0.042s native kernel. The existing preview reads the complete generated
-Rust artifact/source inventory on each call. That is diagnostic/build evidence,
-not needed for repeatedly executing the already qualified exact binary.
+Implementation2d4edd272577f2b44a3fde41b1a0b927b822e413 passed Linux
+[run41179915274](https://github.com/dwijayuda/pskernel/actions/runs/41179915274),
+job124475029582. [Artifact13034039084](https://github.com/dwijayuda/pskernel/actions/runs/41179915274/artifacts/13034039084)
+contains the exact tested native tarball, full machine QUALIFICATION.json,
+SHA256SUMS and installation instructions. No compiler/kernel rebuild was
+performed for this packaging experiment.
 
-This follow-up reuses the exact admitted binary, strips only non-allocated ELF
-symbols, and verifies unchanged program headers/entry/allocated sections. It
-packages the existing checked host and exact official native Lean4.35 provider,
-with runtime-only identity manifests. Generated Rust sources and qualification
-reports remain in immutable inputs/evidence, not the request hot path.
+The archive is12701770bytes, SHA256
+7637b93e42cf297056f92bf9d0f8f3d37e846be8f7f855e08b11cac489695c7d.
+The artifact ZIP SHA256 is
+1d6fcfb68e6466f54a03e816bb27bdff37b9fc81f84adf8870450cf3f3374619.
 
-CI qualifies relocated extraction, empty SDK PATH, actual five-corpus JS runtime
-observations, exact source/IR/admission parity, fourteen native-kernel fixtures,
-tampering refusal and preservation of prior publication. A same-runner alternating
-cold comparison uses the same official native kernel for both the workspace
-control and packaged host. It does not relabel the historical Lake checker or
-make any full-self-build claim. The new package outcome and measured improvement
-are pending its actual CI. No merge, npm publication, semantic/fuel relaxation,
-proof-admission cache, new frontend or kernel replacement is authorized.
+The runtime-only manifest omits generated source/build evidence from per-request
+verification but retains exact binary and every runtime-host identity check.
+Setup coalescing is scoped to construction, never admission or publication.
+The official native Lean4.35 kernel is reused from its qualified slim package.
+Node remains host orchestration; no Lean/Rust SDK or install-time build is
+required for packaged JS output. Linux x64/glibc only, tested Node22.23.3.
 
-The original opt0/256-codegen-unit native compiler remains; no unchecked compiler
-source optimization is hidden in packaging. Node remains the host, and output is
-JS. Rust G2/G3, release-native optimization and broader platform/output delivery
-remain separate work. Only adopt a passed package with its exact tested SHA.
+## Measurements and limitations
+
+Same-runner, same-kernel paired median: workspace1505.642353ms ->
+package1308.447571ms,13.0971% less time, six trials per variant across two grammars.
+Exact emitted source, both IR values and admissions agree. This is a tiny-program
+cold-process result, not a full-self-build result or a cross-engine comparison.
+
+Compiler binary40843784->35368000bytes. A strict ELF comparison first rejected
+GNU strip because it changed only `.init_array.sh_entsize` from0to8; the first
+successful package retained the original executable. The final package restores
+that original metadata outside all loadable segments, then requires identical
+program headers/entry and all30 allocated sections. Executable instructions and
+allocated data are not patched. Unexplained differences still retain original
+bytes instead. Full actual runtime parity and corruption refusals then pass.
+
+Five corpus programs execute with exact source/IR/admission parity. Fourteen
+native kernel fixtures, typed-source refusal, compiler/kernel/host corruption
+refusal, relocation/SDK-free PATH and previous-publication preservation pass.
+The qualification tests the archive after extraction, not merely the assembly
+folder. The raw reports remain immutable and earlier failures are preserved.
+
+## Next measured work
+
+Preserve this downloadable G1 package. Profile the current Rust G1 on the exact
+full compiler request before choosing lookup/string/allocation/IR optimizations.
+Separate native compiler execution from Rust tool build time and native kernel
+admission. Current opt0/256-unit build policy and all semantic/resource limits
+remain unchanged. Actual Rust G2/G3, full-self-build performance, broader packaged
+targets/platforms and a Node-free host remain incomplete. No main merge or npm
+publication. See the canonical AI_WORK_STATE.md and exact qualification summary.

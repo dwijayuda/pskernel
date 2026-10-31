@@ -24,7 +24,7 @@ jobs:
         working-directory: psc1
         shell: bash
     env:
-      WINEPREFIX: ${{ runner.temp }}/psc1-native-wine
+      WINEPREFIX: /tmp/psc1-native-wine-${{ github.run_id }}
       WINEARCH: win64
       WINEDEBUG: '-all'
       WINEDLLOVERRIDES: 'mscoree,mshtml='

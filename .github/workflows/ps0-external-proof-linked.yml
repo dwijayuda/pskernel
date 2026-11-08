@@ -330,6 +330,11 @@ jobs:
         run: |
           set -o pipefail
           python3 tests/run-prelude-grammar.py 2>&1 | tee build/project-logs/prelude-grammar.log
+      - name: Qualify relocated native grammar host metadata
+        if: success() || failure()
+        run: |
+          set -o pipefail
+          python3 tests/run-relocated-grammar.py 2>&1 | tee build/project-logs/relocated-grammar.log
       - name: Qualify actual pinned compiler declaration head migration
         if: success() || failure()
         run: |
@@ -360,6 +365,8 @@ jobs:
           name: ps0-project-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
           path: |
             experiments/ps0/build/project-logs/
+            experiments/ps0/build/relocated-grammar-*/*.json
+            experiments/ps0/build/relocated-grammar-*/*.log
             experiments/ps0/build/command-operands-*/
             experiments/ps0/build/modern-frontend-startup-*/
             experiments/ps0/build/prelude-grammar-*/

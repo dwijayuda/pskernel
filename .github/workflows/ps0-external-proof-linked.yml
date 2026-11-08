@@ -310,6 +310,11 @@ jobs:
         run: |
           set -euo pipefail
           python3 tests/run-categories.py 2>&1 | tee build/project-logs/categories.log
+      - name: Qualify binder/default and mixed-signature operands
+        if: success() || failure()
+        run: |
+          set -o pipefail
+          python3 tests/run-binders.py 2>&1 | tee build/project-logs/binders.log
       - name: Qualify original UTF-8 source provenance
         if: success() || failure()
         run: |
@@ -322,6 +327,7 @@ jobs:
           name: ps0-project-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
           path: |
             experiments/ps0/build/project-logs/
+            experiments/ps0/build/binders-*/binder-evidence.json
             experiments/ps0/build/source-fidelity-*/
             experiments/ps0/build/project-test-*/source-origins/
             experiments/ps0/build/project-test-*/published/project-build.json

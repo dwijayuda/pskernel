@@ -80,14 +80,34 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22.23.3'
-      - uses: leanprover/lean-action@v1
-        with:
-          lake-package-directory: experiments/ps0
-          auto-config: false
-          build: false
-          test: false
-          lint: false
-          use-github-cache: false
+      - name: Install pinned Lean with bounded download retries
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --retry 5 --retry-all-errors \
+            https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            -o "$RUNNER_TEMP/ps0-elan-init.sh"
+          ps0_elan_installed=0
+          for ps0_attempt in 1 2 3 4 5; do
+            if sh "$RUNNER_TEMP/ps0-elan-init.sh" -y --default-toolchain none --no-modify-path; then
+              ps0_elan_installed=1
+              break
+            fi
+            sleep "$((ps0_attempt * 2))"
+          done
+          test "$ps0_elan_installed" = 1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          ps0_toolchain="$(cat lean-toolchain)"
+          ps0_lean_installed=0
+          for ps0_attempt in 1 2 3; do
+            if "$HOME/.elan/bin/elan" toolchain install "$ps0_toolchain"; then
+              ps0_lean_installed=1
+              break
+            fi
+            sleep "$((ps0_attempt * 2))"
+          done
+          test "$ps0_lean_installed" = 1
+          "$HOME/.elan/bin/lean" --version
+          "$HOME/.elan/bin/lake" --version
       - name: Install replay sandbox and pinned TypeScript
         run: |
           set -euo pipefail
@@ -158,14 +178,34 @@ jobs:
           ref: ${{ env.PS0_SOURCE_SHA }}
           sparse-checkout: experiments/ps0
           persist-credentials: false
-      - uses: leanprover/lean-action@v1
-        with:
-          lake-package-directory: experiments/ps0
-          auto-config: false
-          build: false
-          test: false
-          lint: false
-          use-github-cache: false
+      - name: Install pinned Lean with bounded download retries
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --retry 5 --retry-all-errors \
+            https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            -o "$RUNNER_TEMP/ps0-elan-init.sh"
+          ps0_elan_installed=0
+          for ps0_attempt in 1 2 3 4 5; do
+            if sh "$RUNNER_TEMP/ps0-elan-init.sh" -y --default-toolchain none --no-modify-path; then
+              ps0_elan_installed=1
+              break
+            fi
+            sleep "$((ps0_attempt * 2))"
+          done
+          test "$ps0_elan_installed" = 1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          ps0_toolchain="$(cat lean-toolchain)"
+          ps0_lean_installed=0
+          for ps0_attempt in 1 2 3; do
+            if "$HOME/.elan/bin/elan" toolchain install "$ps0_toolchain"; then
+              ps0_lean_installed=1
+              break
+            fi
+            sleep "$((ps0_attempt * 2))"
+          done
+          test "$ps0_lean_installed" = 1
+          "$HOME/.elan/bin/lean" --version
+          "$HOME/.elan/bin/lake" --version
       - name: Record exact source and build clean PS0
         run: |
           set -euo pipefail

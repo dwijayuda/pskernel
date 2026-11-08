@@ -11,18 +11,18 @@ jobs:
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     env:
-      PS0_SOURCE_SHA: '46541521a95ac7829279faf441f922a977061f6f'
-      PS0_BUILD_RUN: '42484334810'
-      PS0_BUILD_ARTIFACT: '13620495494'
+      PS0_SOURCE_SHA: 'fb86cc425f0688bf3c6e98ff6c7adb8e899fe883'
+      PS0_BUILD_RUN: '42488162021'
+      PS0_BUILD_ARTIFACT: '13622010384'
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
       - uses: actions/download-artifact@v4
         with:
-          artifact-ids: 13620495494
+          artifact-ids: 13622010384
           github-token: ${{ github.token }}
-          run-id: 42484334810
+          run-id: 42488162021
           path: compiler-evidence
           merge-multiple: true
       - name: Audit exact compiler link map and available ELF evidence

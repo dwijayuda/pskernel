@@ -41,3 +41,30 @@ jobs:
         with:
           name: ps0-native-census-summary-${{ github.run_id }}
           path: evidence/source-census/summary.json
+
+  compiler-head-evidence:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-prelude-compiler-head-probe-42521772271
+          run-id: 42521772271
+          github-token: ${{ github.token }}
+          path: probe
+      - name: Inspect exact compiler head parity evidence
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root=Path('probe')
+          files=list(root.rglob('compiler-heads-*/evidence.json'))
+          assert len(files)==1, files
+          evidence=json.loads(files[0].read_text())
+          assert evidence['source']=='704c5614e15981145260f5aac1ea8a891875cf12'
+          assert evidence['pinned_blob']=='20b7acf5d684789ab52b81dda7def4b19568213c'
+          assert all(c['native']==c['ps'] for c in evidence['comparisons'].values())
+          print('PS0_COMPILER_HEAD_EVIDENCE_IDENTITY: PASS')
+          print(json.dumps(evidence,indent=2))
+          print(json.dumps(json.loads((files[0].parent/'plan.json').read_text()),indent=2))
+          PY

@@ -42,6 +42,10 @@ if full:
     needed = re.findall(r'Shared library: \[([^\]]+)\]', dynamic)
     sdk_source_shared = [name for name in needed if
                          name.startswith(('libleanshared', 'libInit_shared', 'libLake_shared'))]
+if full:
+    print('PS0_DRIVER_SHA256: ' + data['driver_sha256'], flush=True)
+    print('PS0_ELF_NEEDED: ' + ', '.join(needed), flush=True)
+    print('PS0_RUNTIME_SMOKE: ' + data.get('runtime_smoke', 'PENDING'), flush=True)
 print('PS0_LINK_CRITICAL_REBUILT_OBJECTS: ' + ', '.join(critical), flush=True)
 print('PS0_LINK_SDK_SOURCE_ARCHIVE_LINES: ' + str(len(fallback)), flush=True)
 for line in fallback[:100]:
@@ -51,6 +55,7 @@ result = {
     'source_commit': source, 'build_run': run, 'artifact_id': artifact,
     'module_count': data['module_count'],
     'metadata_sha256': digest(data_path), 'link_map_sha256': digest(link_map),
+    'driver_sha256': data.get('driver_sha256'),
     'critical_rebuilt_objects': critical, 'critical_native_symbols': critical_symbols,
     'linked_archive_names': archive_names, 'sdk_source_archive_lines': fallback,
     'needed_libraries': needed, 'sdk_source_shared_libraries': sdk_source_shared,

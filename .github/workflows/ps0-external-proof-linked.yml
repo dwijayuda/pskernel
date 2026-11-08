@@ -315,6 +315,11 @@ jobs:
         run: |
           set -o pipefail
           python3 tests/run-binders.py 2>&1 | tee build/project-logs/binders.log
+      - name: Census actual native source commands
+        if: success() || failure()
+        run: |
+          set -o pipefail
+          python3 tests/run-source-census.py 2>&1 | tee build/project-logs/source-census.log
       - name: Qualify original UTF-8 source provenance
         if: success() || failure()
         run: |
@@ -328,6 +333,7 @@ jobs:
           path: |
             experiments/ps0/build/project-logs/
             experiments/ps0/build/binders-*/binder-evidence.json
+            experiments/ps0/build/source-census-*/
             experiments/ps0/build/source-fidelity-*/
             experiments/ps0/build/project-test-*/source-origins/
             experiments/ps0/build/project-test-*/published/project-build.json

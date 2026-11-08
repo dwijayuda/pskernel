@@ -237,3 +237,91 @@ jobs:
             experiments/ps0/build/native-logs/
             experiments/ps0/build/native-test-*/published/native-build.json
           if-no-files-found: warn
+
+  project-build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: experiments/ps0
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          persist-credentials: false
+      - name: Read exact source pin
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          pin=json.load(open('ci/ps0-source.json'))
+          assert pin['repository']=='dwijayuda/lean4'
+          assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('PS0_SOURCE_SHA='+pin['commit']+'\n')
+          PY
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: ${{ env.PS0_SOURCE_SHA }}
+          sparse-checkout: experiments/ps0
+          persist-credentials: false
+      - name: Install pinned Lean with bounded download retries
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --location --retry 5 --retry-all-errors \
+            https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            -o "$RUNNER_TEMP/ps0-elan-init.sh"
+          ps0_elan_installed=0
+          for ps0_attempt in 1 2 3 4 5; do
+            if sh "$RUNNER_TEMP/ps0-elan-init.sh" -y --default-toolchain none --no-modify-path; then
+              ps0_elan_installed=1
+              break
+            fi
+            sleep "$((ps0_attempt * 2))"
+          done
+          test "$ps0_elan_installed" = 1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          ps0_toolchain="$(cat lean-toolchain)"
+          ps0_lean_installed=0
+          for ps0_attempt in 1 2 3; do
+            if "$HOME/.elan/bin/elan" toolchain install "$ps0_toolchain"; then
+              ps0_lean_installed=1
+              break
+            fi
+            sleep "$((ps0_attempt * 2))"
+          done
+          test "$ps0_lean_installed" = 1
+          "$HOME/.elan/bin/lean" --version
+          "$HOME/.elan/bin/lake" --version
+      - name: Record exact source and build clean PS0
+        run: |
+          set -euo pipefail
+          mkdir -p build/project-logs
+          test "$(git rev-parse HEAD)" = "$PS0_SOURCE_SHA"
+          printf '%s\n' "$PS0_SOURCE_SHA" > build/project-logs/source-sha.txt
+          printf '%s\n' "$GITHUB_SHA" > build/project-logs/runner-sha.txt
+          test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
+          lake build PS0 ps0 2>&1 | tee build/project-logs/build.log
+          lake exe ps0 environment | tee build/project-logs/environment.json
+      - name: Check existing thin adapters and native language
+        id: adapters
+        run: |
+          set -euo pipefail
+          for file in native_capabilities.ps registered_syntax.ps host_category_bridge.ps host_postfix_calls.ps standard_host_declarations.ps implicit_public_module.ps explicit_private_module.ps; do
+            lake exe ps0 check "tests/v1/$file"
+          done 2>&1 | tee build/project-logs/adapters.log
+      - name: Build recursive projects and qualify module boundaries
+        if: success() || steps.adapters.outcome == 'failure'
+        run: |
+          set -euo pipefail
+          python3 tests/run-project.py 2>&1 | tee build/project-logs/native.log
+      - name: Retain project evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ps0-project-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
+          path: |
+            experiments/ps0/build/project-logs/
+            experiments/ps0/build/project-test-*/published/project-build.json
+          if-no-files-found: warn

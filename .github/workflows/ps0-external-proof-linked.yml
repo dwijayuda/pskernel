@@ -79,6 +79,7 @@ jobs:
       - name: Qualify exact prelude grammar and real compiler source heads
         run: |
           set -euo pipefail
+          python3 tests/run-modern-frontend-startup.py
           python3 tests/run-prelude-grammar.py
           python3 tests/run-compiler-heads.py
       - name: Retain focused evidence
@@ -88,6 +89,7 @@ jobs:
           name: ps0-prelude-compiler-head-probe-${{ github.run_id }}
           path: |
             experiments/ps0/build/prelude-grammar-*/
+            experiments/ps0/build/modern-frontend-startup-*/
             experiments/ps0/build/compiler-heads-*/*.json
             experiments/ps0/build/compiler-heads-*/*.log
             experiments/ps0/build/compiler-heads-*/original/src/

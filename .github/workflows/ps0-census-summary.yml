@@ -153,3 +153,42 @@ jobs:
         with:
           name: ps0-actual-compiler-binder-default-audit-${{ github.run_id }}
           path: binder-default-audit.json
+
+  mixed-default-host-evidence:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-project-7fea6986042ba76fd1f1a028474209dc5f3bc519-42532092264
+          run-id: 42532092264
+          github-token: ${{ github.token }}
+          path: probe
+      - name: Inspect actual mixed default compiler and native host evidence
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          files=list(Path('probe').rglob('compiler-heads-*/evidence.json'))
+          assert len(files)==4, files
+          total=0
+          for file in sorted(files):
+              data=json.loads(file.read_text())
+              assert data['source']=='7fea6986042ba76fd1f1a028474209dc5f3bc519'
+              assert all(c['native']==c['ps'] for c in data['comparisons'].values())
+              total+=len(data['converted_declarations'])
+              print(json.dumps(data,indent=2))
+              if data['module'] in ['Lean.Compiler.LCNF.ScopeM','Lean.Compiler.LCNF.OtherDecl']:
+                  print(json.dumps(json.loads((file.parent/'plan.json').read_text()),indent=2))
+          assert total==15, total
+          hosts=list(Path('probe').rglob('relocated-grammar-*/evidence.json'))
+          assert len(hosts)==1, hosts
+          host=json.loads(hosts[0].read_text())
+          assert host['source']=='7fea6986042ba76fd1f1a028474209dc5f3bc519'
+          assert all(v['source_sha256']==v['published_sha256'] for v in host['host_metadata'].values())
+          print(json.dumps({k:v for k,v in host.items() if k!='host_metadata'},indent=2))
+          print('PS0_NATIVE_HOST_METADATA_FILES',len(host['host_metadata']))
+          print('PS0_NATIVE_HOST_METADATA_MANIFEST_SHA256',hashlib.sha256(json.dumps(host['host_metadata'],sort_keys=True).encode()).hexdigest())
+          print('PS0_NATIVE_HOST_METADATA_IR_FILES',sum('.ir' in name for name in host['host_metadata']))
+          print('PS0_MIXED_DEFAULT_AND_HOST_EVIDENCE: PASS; converted_heads=15; modules=4')
+          PY

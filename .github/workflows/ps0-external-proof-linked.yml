@@ -311,6 +311,7 @@ jobs:
           set -euo pipefail
           python3 tests/run-categories.py 2>&1 | tee build/project-logs/categories.log
       - name: Qualify original UTF-8 source provenance
+        if: success() || failure()
         run: |
           set -o pipefail
           python3 tests/run-source-fidelity.py 2>&1 | tee build/project-logs/source-fidelity.log

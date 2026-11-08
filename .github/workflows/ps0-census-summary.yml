@@ -1,0 +1,43 @@
+name: PS0 pinned native source census summary
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-census-summary.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  census-summary:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-compiler-stage1-abf3585d99c921fe02697b679867a0a55e433168-42517718338
+          run-id: 42517718338
+          github-token: ${{ github.token }}
+          path: evidence
+      - name: Inspect exact native compiler census
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root=Path('evidence')
+          migration=json.loads((root/'migration.json').read_text())
+          summary=json.loads((root/'source-census/summary.json').read_text())
+          assert migration['source_commit']=='abf3585d99c921fe02697b679867a0a55e433168'
+          assert summary['source_commit']==migration['source_commit']
+          assert summary['lean_commit']=='eb6cafb7290e8bd5f2937522d8d804f58f02bafc'
+          assert summary['module_count']==2566
+          assert hashlib.sha256((root/'migrated-ps0').read_bytes()).hexdigest()==migration['driver_sha256']
+          print('PS0_NATIVE_CENSUS_PINNED_IDENTITY: PASS')
+          print(json.dumps({k:v for k,v in summary.items() if k!='modules'},indent=2))
+          print('PS0_NATIVE_CENSUS_TOP_MODULE_COMMAND_COUNTS')
+          for name, data in sorted(summary['modules'].items(), key=lambda x:x[1]['command_count'],reverse=True)[:30]:
+              print(name,data['command_count'])
+          print('PS0_NATIVE_CENSUS_SCOPE: native-compatible baseline; canonical PS grammar incomplete')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ps0-native-census-summary-${{ github.run_id }}
+          path: evidence/source-census/summary.json

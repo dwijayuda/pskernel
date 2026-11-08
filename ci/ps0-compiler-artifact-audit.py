@@ -25,8 +25,8 @@ critical = ['Lean/Elab/Frontend', 'Lean/Compiler/LCNF/EmitC', 'PS0/LakeFrontend'
 for module in critical:
     assert '/artifacts/ir/' + module + '.c.o' in text, ('missing rebuilt compiler object', module)
 fallback = sorted(set(line.strip() for line in text.splitlines()
-                      if re.search(r'/(?:libLean|libStd|libInit)\.a\(', line)))
-archive_names = sorted(set(re.findall(r'([^\\s()/]+\\.a)\\(', text)))
+                      if re.search(r'(?:^|[\s/])(?:libLean|libStd|libInit)\.a\(', line)))
+archive_names = sorted(set(re.findall(r'([^\s()/]+\.a)\(', text)))
 critical_symbols = ['l_Lean_Elab_runFrontend', 'l_Lean_Compiler_LCNF_emitC', 'l_PS0_LakeFrontend_compile']
 for symbol in critical_symbols:
     assert symbol in text, ('missing native compiler symbol', symbol)

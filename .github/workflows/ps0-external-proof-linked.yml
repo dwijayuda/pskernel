@@ -343,7 +343,14 @@ jobs:
           path: |
             experiments/ps0/build/project-logs/
             experiments/ps0/build/prelude-grammar-*/
-            experiments/ps0/build/compiler-heads-*/
+            experiments/ps0/build/compiler-heads-*/*.json
+            experiments/ps0/build/compiler-heads-*/*.log
+            experiments/ps0/build/compiler-heads-*/original/src/
+            experiments/ps0/build/compiler-heads-*/converted/src/
+            experiments/ps0/build/compiler-heads-*/baseline/ir/Lean/Compiler/ClosedTermCache.c
+            experiments/ps0/build/compiler-heads-*/baseline/lib/lean/Lean/Compiler/ClosedTermCache.olean
+            experiments/ps0/build/compiler-heads-*/migrated/ir/Lean/Compiler/ClosedTermCache.c
+            experiments/ps0/build/compiler-heads-*/migrated/lib/lean/Lean/Compiler/ClosedTermCache.olean
             experiments/ps0/build/binders-*/binder-evidence.json
             experiments/ps0/build/source-census-*/
             experiments/ps0/build/source-fidelity-*/

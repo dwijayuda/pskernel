@@ -335,6 +335,11 @@ jobs:
         run: |
           set -o pipefail
           python3 tests/run-modern-frontend-startup.py 2>&1 | tee build/project-logs/modern-startup.log
+      - name: Qualify scoped and mutual PS command operands
+        if: success() || failure()
+        run: |
+          set -o pipefail
+          python3 tests/run-command-operands.py 2>&1 | tee build/project-logs/command-operands.log
       - name: Qualify original UTF-8 source provenance
         if: success() || failure()
         run: |
@@ -347,6 +352,7 @@ jobs:
           name: ps0-project-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
           path: |
             experiments/ps0/build/project-logs/
+            experiments/ps0/build/command-operands-*/
             experiments/ps0/build/modern-frontend-startup-*/
             experiments/ps0/build/prelude-grammar-*/
             experiments/ps0/build/compiler-heads-*/*.json

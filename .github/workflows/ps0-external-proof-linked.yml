@@ -320,6 +320,21 @@ jobs:
         run: |
           set -o pipefail
           python3 tests/run-source-census.py 2>&1 | tee build/project-logs/source-census.log
+      - name: Qualify prelude PS grammar without hidden logical imports
+        if: success() || failure()
+        run: |
+          set -o pipefail
+          python3 tests/run-prelude-grammar.py 2>&1 | tee build/project-logs/prelude-grammar.log
+      - name: Qualify actual pinned compiler declaration head migration
+        if: success() || failure()
+        run: |
+          set -o pipefail
+          python3 tests/run-compiler-heads.py 2>&1 | tee build/project-logs/compiler-heads.log
+      - name: Qualify modern native frontend startup hooks
+        if: success() || failure()
+        run: |
+          set -o pipefail
+          python3 tests/run-modern-frontend-startup.py 2>&1 | tee build/project-logs/modern-startup.log
       - name: Qualify original UTF-8 source provenance
         if: success() || failure()
         run: |
@@ -332,6 +347,16 @@ jobs:
           name: ps0-project-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
           path: |
             experiments/ps0/build/project-logs/
+            experiments/ps0/build/modern-frontend-startup-*/
+            experiments/ps0/build/prelude-grammar-*/
+            experiments/ps0/build/compiler-heads-*/*.json
+            experiments/ps0/build/compiler-heads-*/*.log
+            experiments/ps0/build/compiler-heads-*/original/src/
+            experiments/ps0/build/compiler-heads-*/converted/src/
+            experiments/ps0/build/compiler-heads-*/baseline/ir/Lean/Compiler/ClosedTermCache.c
+            experiments/ps0/build/compiler-heads-*/baseline/lib/lean/Lean/Compiler/ClosedTermCache.olean
+            experiments/ps0/build/compiler-heads-*/migrated/ir/Lean/Compiler/ClosedTermCache.c
+            experiments/ps0/build/compiler-heads-*/migrated/lib/lean/Lean/Compiler/ClosedTermCache.olean
             experiments/ps0/build/binders-*/binder-evidence.json
             experiments/ps0/build/source-census-*/
             experiments/ps0/build/source-fidelity-*/
@@ -339,4 +364,151 @@ jobs:
             experiments/ps0/build/project-test-*/source-census/
             experiments/ps0/build/project-test-*/published/project-build.json
             experiments/ps0/build/project-test-*/project-evidence.json
+          if-no-files-found: warn
+
+  compiler-stage1:
+    needs: project-build
+    runs-on: ubuntu-22.04
+    timeout-minutes: 240
+    env:
+      LAKE_ARTIFACT_CACHE: 'false'
+    defaults:
+      run:
+        working-directory: experiments/ps0
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          persist-credentials: false
+      - name: Read exact source pin
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          pin=json.load(open('ci/ps0-source.json'))
+          assert pin['repository']=='dwijayuda/lean4'
+          assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('PS0_SOURCE_SHA='+pin['commit']+'\n')
+          PY
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: ${{ env.PS0_SOURCE_SHA }}
+          sparse-checkout: experiments/ps0
+          persist-credentials: false
+      - name: Install pinned Lean with bounded download retries
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/ps0-elan-installer"
+          curl --fail --silent --show-error --location --connect-timeout 20 --max-time 120 \
+            --retry 5 --retry-max-time 300 --retry-all-errors \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            -o "$RUNNER_TEMP/ps0-elan.tar.gz"
+          echo "42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63  $RUNNER_TEMP/ps0-elan.tar.gz" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/ps0-elan.tar.gz" -C "$RUNNER_TEMP/ps0-elan-installer"
+          "$RUNNER_TEMP/ps0-elan-installer/elan-init" -y --default-toolchain none --no-modify-path
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          ps0_toolchain="$(cat lean-toolchain)"
+          ps0_lean_installed=0
+          for ps0_attempt in 1 2 3; do
+            if "$HOME/.elan/bin/elan" toolchain install "$ps0_toolchain"; then
+              ps0_lean_installed=1
+              break
+            fi
+            sleep "$((ps0_attempt * 2))"
+          done
+          test "$ps0_lean_installed" = 1
+          "$HOME/.elan/bin/lean" --version
+          "$HOME/.elan/bin/lake" --version
+      - name: Build the pinned bootstrap PS0 driver
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PS0_SOURCE_SHA"
+          lake build PS0 ps0
+      - name: Compile the complete pinned source forest from ps
+        run: |
+          set -euo pipefail
+          python3 tests/run-compiler-ps.py
+          python3 tests/run-compiler-census.py
+      - name: Retain stage-one compiler and exact module evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ps0-compiler-stage1-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
+          path: experiments/ps0/build/compiler-evidence/
+          if-no-files-found: warn
+
+  compiler-stage2:
+    needs: compiler-stage1
+    runs-on: ubuntu-22.04
+    timeout-minutes: 240
+    env:
+      LAKE_ARTIFACT_CACHE: 'false'
+    defaults:
+      run:
+        working-directory: experiments/ps0
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          persist-credentials: false
+      - name: Read exact source pin
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          pin=json.load(open('ci/ps0-source.json'))
+          assert pin['repository']=='dwijayuda/lean4'
+          assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('PS0_SOURCE_SHA='+pin['commit']+'\n')
+          PY
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: ${{ env.PS0_SOURCE_SHA }}
+          sparse-checkout: experiments/ps0
+          persist-credentials: false
+      - name: Install pinned Lean with bounded download retries
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/ps0-elan-installer"
+          curl --fail --silent --show-error --location --connect-timeout 20 --max-time 120 \
+            --retry 5 --retry-max-time 300 --retry-all-errors \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            -o "$RUNNER_TEMP/ps0-elan.tar.gz"
+          echo "42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63  $RUNNER_TEMP/ps0-elan.tar.gz" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/ps0-elan.tar.gz" -C "$RUNNER_TEMP/ps0-elan-installer"
+          "$RUNNER_TEMP/ps0-elan-installer/elan-init" -y --default-toolchain none --no-modify-path
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          ps0_toolchain="$(cat lean-toolchain)"
+          ps0_lean_installed=0
+          for ps0_attempt in 1 2 3; do
+            if "$HOME/.elan/bin/elan" toolchain install "$ps0_toolchain"; then
+              ps0_lean_installed=1
+              break
+            fi
+            sleep "$((ps0_attempt * 2))"
+          done
+          test "$ps0_lean_installed" = 1
+          "$HOME/.elan/bin/lean" --version
+          "$HOME/.elan/bin/lake" --version
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-compiler-stage1-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
+          path: stage-one
+      - name: Recompile the same ps forest with the migrated compiler
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PS0_SOURCE_SHA"
+          chmod +x "$GITHUB_WORKSPACE/stage-one/migrated-ps0"
+          python3 tests/run-compiler-ps.py --driver "$GITHUB_WORKSPACE/stage-one/migrated-ps0" --compare "$GITHUB_WORKSPACE/stage-one/migration.json"
+          python3 tests/run-compiler-census.py
+      - name: Retain stage-two fixed-point evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ps0-compiler-stage2-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
+          path: experiments/ps0/build/compiler-evidence/
           if-no-files-found: warn

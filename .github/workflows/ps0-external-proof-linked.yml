@@ -325,6 +325,11 @@ jobs:
         run: |
           set -o pipefail
           python3 tests/run-owned-macros.py 2>&1 | tee build/project-logs/owned-macros.log
+      - name: Qualify owned lambda binder and body operands
+        if: success() || failure()
+        run: |
+          set -o pipefail
+          python3 tests/run-lambdas.py 2>&1 | tee build/project-logs/lambdas.log
       - name: Census actual native source commands
         if: success() || failure()
         run: |
@@ -374,6 +379,8 @@ jobs:
             experiments/ps0/build/relocated-grammar-*/*.log
             experiments/ps0/build/owned-macros-*/*.json
             experiments/ps0/build/owned-macros-*/*.log
+            experiments/ps0/build/lambdas-*/*.json
+            experiments/ps0/build/lambdas-*/*.log
             experiments/ps0/build/command-operands-*/
             experiments/ps0/build/modern-frontend-startup-*/
             experiments/ps0/build/prelude-grammar-*/

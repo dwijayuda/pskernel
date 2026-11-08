@@ -122,3 +122,34 @@ jobs:
           print(json.dumps({k:v for k,v in summary.items() if k!='modules'},indent=2))
           print('PS0_FIXED_POINT_SCOPE: native-compatible source forest; canonical ProofScript grammar remains incomplete')
           PY
+
+      - name: Audit actual small compiler binder default roles
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          rows=[]
+          for path in Path('stage2/source-census/Lean/Compiler').rglob('*.json'):
+              snapshot=json.loads(path.read_text())
+              defaults=[]
+              heads=[]
+              for command in snapshot['commands']:
+                  decl=command['declaration']
+                  if not decl or decl['production']!='Lean.Parser.Command.definition':
+                      continue
+                  heads.append(decl['sourceName'])
+                  for binder in decl['signatureSyntax']['args'][0]['args']:
+                      parts=binder['args']
+                      if binder['kind']=='Lean.Parser.Term.explicitBinder' and len(parts)==5 and parts[3]['args']:
+                          defaults.append({'name':decl['sourceName'],'typed':bool(parts[2]['args']),'kind':parts[3]['args'][0]['kind']})
+              if defaults:
+                  rows.append({'module':snapshot['module'],'source_bytes':len(snapshot['nativeSource'].encode()),'heads':heads,'defaults':defaults})
+          rows.sort(key=lambda r:r['source_bytes'])
+          Path('binder-default-audit.json').write_text(json.dumps(rows,indent=2)+'\n')
+          print('PS0_ACTUAL_COMPILER_BINDER_DEFAULT_AUDIT: inspection only')
+          print(json.dumps(rows[:20],indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ps0-actual-compiler-binder-default-audit-${{ github.run_id }}
+          path: binder-default-audit.json

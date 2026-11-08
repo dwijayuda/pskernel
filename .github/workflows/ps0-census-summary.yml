@@ -94,3 +94,31 @@ jobs:
               print(json.dumps(evidence,indent=2))
               print(json.dumps(json.loads((file.parent/'plan.json').read_text()),indent=2))
           PY
+
+  runtime-fixed-point-evidence:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-compiler-stage2-28904e5a7ccb19a15e311ecc654541dc0ee639ec-42522976977
+          run-id: 42522976977
+          github-token: ${{ github.token }}
+          path: stage2
+      - name: Inspect exact full compiler fixed point
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root=Path('stage2')
+          data=json.loads((root/'migration.json').read_text())
+          assert data['source_commit']=='28904e5a7ccb19a15e311ecc654541dc0ee639ec'
+          assert data['fixed_point']=={'changed_c': [], 'changed_olean': []}
+          summary=json.loads((root/'source-census/summary.json').read_text())
+          assert summary['module_count']==2567
+          assert hashlib.sha256((root/'migrated-ps0').read_bytes()).hexdigest()==data['driver_sha256']
+          print('PS0_RUNTIME_COMPILER_FIXED_POINT_EVIDENCE: PASS')
+          print(json.dumps({k:v for k,v in data.items() if k not in ['outputs','modules','inputs']},indent=2))
+          print(json.dumps({k:v for k,v in summary.items() if k!='modules'},indent=2))
+          print('PS0_FIXED_POINT_SCOPE: native-compatible source forest; canonical ProofScript grammar remains incomplete')
+          PY

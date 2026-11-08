@@ -315,6 +315,11 @@ jobs:
         run: |
           set -o pipefail
           python3 tests/run-binders.py 2>&1 | tee build/project-logs/binders.log
+      - name: Qualify native binder lexical fidelity
+        if: success() || failure()
+        run: |
+          set -o pipefail
+          python3 tests/run-binder-lexical.py 2>&1 | tee build/project-logs/binder-lexical.log
       - name: Census actual native source commands
         if: success() || failure()
         run: |
@@ -330,6 +335,7 @@ jobs:
         run: |
           set -o pipefail
           python3 tests/run-compiler-heads.py 2>&1 | tee build/project-logs/compiler-heads.log
+          python3 tests/run-compiler-heads.py --fixture DeclHash --module Lean.Compiler.LCNF.DeclHash --blob 5f818560cb8fcba0df6f64acb6bdc01c48425189 --declarations hashParams,hashAlt,hashAlts,hashCode 2>&1 | tee build/project-logs/compiler-mutual-heads.log
       - name: Qualify modern native frontend startup hooks
         if: success() || failure()
         run: |
@@ -363,6 +369,11 @@ jobs:
             experiments/ps0/build/compiler-heads-*/baseline/lib/lean/Lean/Compiler/ClosedTermCache.olean
             experiments/ps0/build/compiler-heads-*/migrated/ir/Lean/Compiler/ClosedTermCache.c
             experiments/ps0/build/compiler-heads-*/migrated/lib/lean/Lean/Compiler/ClosedTermCache.olean
+            experiments/ps0/build/compiler-heads-*/baseline/ir/Lean/Compiler/LCNF/DeclHash.c
+            experiments/ps0/build/compiler-heads-*/baseline/lib/lean/Lean/Compiler/LCNF/DeclHash.olean
+            experiments/ps0/build/compiler-heads-*/migrated/ir/Lean/Compiler/LCNF/DeclHash.c
+            experiments/ps0/build/compiler-heads-*/migrated/lib/lean/Lean/Compiler/LCNF/DeclHash.olean
+            experiments/ps0/build/binder-lexical-*/
             experiments/ps0/build/binders-*/binder-evidence.json
             experiments/ps0/build/source-census-*/
             experiments/ps0/build/source-fidelity-*/

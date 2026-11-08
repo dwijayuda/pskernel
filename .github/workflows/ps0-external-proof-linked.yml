@@ -336,6 +336,7 @@ jobs:
             experiments/ps0/build/source-census-*/
             experiments/ps0/build/source-fidelity-*/
             experiments/ps0/build/project-test-*/source-origins/
+            experiments/ps0/build/project-test-*/source-census/
             experiments/ps0/build/project-test-*/published/project-build.json
             experiments/ps0/build/project-test-*/project-evidence.json
           if-no-files-found: warn

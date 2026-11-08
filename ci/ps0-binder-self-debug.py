@@ -16,7 +16,7 @@ driver.chmod(0o755)
 baseline = json.loads((stage / 'migration.json').read_text())
 sha = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
 assert sha(driver) == baseline['driver_sha256']
-assert baseline['source_commit'] == os.environ['PS0_SOURCE_SHA']
+assert baseline['source_commit'] == '9826bdd9dc422fe021de953a570972d7b85df2f4'
 sdk = Path(subprocess.check_output(['lean', '--print-prefix'], text=True).strip())
 source = WORK / 'src'
 
@@ -83,3 +83,7 @@ result = {
 (WORK / 'diagnostic.json').write_text(json.dumps(result, indent=2) + '\n')
 print(json.dumps(result, indent=2), flush=True)
 print('PS0_BINDER_SELF_REBUILD_DIAGNOSTIC: recorded', flush=True)
+if os.environ.get('PS0_EXPECT_BINDER_REBUILD_PASS') == 'true':
+    assert migrated_result.returncode == 0, 'migrated native compiler must rebuild binder descriptors'
+    assert interpreted.returncode == 0 and all(comparison.values())
+    print('PS0_BINDER_SELF_REBUILD: PASS', flush=True)

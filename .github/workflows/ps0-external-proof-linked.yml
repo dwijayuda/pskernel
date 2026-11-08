@@ -330,6 +330,11 @@ jobs:
         run: |
           set -o pipefail
           python3 tests/run-compiler-heads.py 2>&1 | tee build/project-logs/compiler-heads.log
+      - name: Qualify modern native frontend startup hooks
+        if: success() || failure()
+        run: |
+          set -o pipefail
+          python3 tests/run-modern-frontend-startup.py 2>&1 | tee build/project-logs/modern-startup.log
       - name: Qualify original UTF-8 source provenance
         if: success() || failure()
         run: |
@@ -342,6 +347,7 @@ jobs:
           name: ps0-project-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
           path: |
             experiments/ps0/build/project-logs/
+            experiments/ps0/build/modern-frontend-startup-*/
             experiments/ps0/build/prelude-grammar-*/
             experiments/ps0/build/compiler-heads-*/*.json
             experiments/ps0/build/compiler-heads-*/*.log

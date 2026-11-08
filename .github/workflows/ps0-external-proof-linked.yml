@@ -325,6 +325,11 @@ jobs:
         run: |
           set -o pipefail
           python3 tests/run-prelude-grammar.py 2>&1 | tee build/project-logs/prelude-grammar.log
+      - name: Qualify actual pinned compiler declaration head migration
+        if: success() || failure()
+        run: |
+          set -o pipefail
+          python3 tests/run-compiler-heads.py 2>&1 | tee build/project-logs/compiler-heads.log
       - name: Qualify original UTF-8 source provenance
         if: success() || failure()
         run: |
@@ -338,6 +343,7 @@ jobs:
           path: |
             experiments/ps0/build/project-logs/
             experiments/ps0/build/prelude-grammar-*/
+            experiments/ps0/build/compiler-heads-*/
             experiments/ps0/build/binders-*/binder-evidence.json
             experiments/ps0/build/source-census-*/
             experiments/ps0/build/source-fidelity-*/

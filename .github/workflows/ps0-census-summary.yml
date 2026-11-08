@@ -226,3 +226,41 @@ jobs:
           print('PS0_FRESH_HOST_METADATA_MANIFEST_SHA256',hashlib.sha256(json.dumps(host['host_metadata'],sort_keys=True).encode()).hexdigest())
           print('PS0_FRESH_SOURCE_CENSUS_MODES',json.dumps(summary['declaration_modes'],sort_keys=True))
           PY
+
+  lambda-compiler-evidence:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-project-7f885fcc1caa9277e3633c849d086bb2614e143e-42537205963
+          run-id: 42537205963
+          github-token: ${{ github.token }}
+          path: lambda
+      - name: Inspect original lambda body ranges and strict compiler output
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          files=list(Path('lambda').rglob('compiler-heads-*/evidence.json'))
+          assert len(files)==4, files
+          for file in sorted(files):
+              data=json.loads(file.read_text())
+              assert data['source']=='7f885fcc1caa9277e3633c849d086bb2614e143e'
+              assert all(v['native']==v['ps'] for v in data['comparisons'].values())
+              print(json.dumps(data,indent=2))
+              if data['module']=='Lean.Compiler.LCNF.DeclHash':
+                  plan=json.loads((file.parent/'plan.json').read_text())
+                  assert len(plan['edits'])==18, plan
+                  census=json.loads((file.parent/'original-census.json').read_text())
+                  def declarations(commands):
+                      for command in commands:
+                          if command['declaration']:
+                              yield command['declaration']
+                          yield from declarations(command.get('nestedCommands',[]))
+                  owned=[d for d in declarations(census['commands']) if d.get('lambdaBodyApplications')]
+                  assert [d['sourceName'] for d in owned]==['hashAlts'], owned
+                  print(json.dumps(plan,indent=2))
+                  print('PS0_ORIGINAL_LAMBDA_BODY_ROLE',json.dumps(owned[0]['lambdaBodyApplications'],sort_keys=True))
+          print('PS0_LAMBDA_COMPILER_EVIDENCE: PASS')
+          PY

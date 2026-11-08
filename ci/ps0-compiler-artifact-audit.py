@@ -26,6 +26,12 @@ for module in critical:
     assert '/artifacts/ir/' + module + '.c.o' in text, ('missing rebuilt compiler object', module)
 fallback = sorted(set(line.strip() for line in text.splitlines()
                       if re.search(r'/(?:libLean|libStd|libInit)\.a\(', line)))
+archive_names = sorted(set(re.findall(r'([^\\s()/]+\\.a)\\(', text)))
+critical_symbols = ['l_Lean_Elab_runFrontend', 'l_Lean_Compiler_LCNF_emitC', 'l_PS0_LakeFrontend_compile']
+for symbol in critical_symbols:
+    assert symbol in text, ('missing native compiler symbol', symbol)
+print('PS0_LINK_ARCHIVES: ' + ', '.join(archive_names), flush=True)
+print('PS0_LINK_COMPILER_SYMBOLS: ' + ', '.join(critical_symbols), flush=True)
 needed = []
 sdk_source_shared = []
 if full:
@@ -45,7 +51,8 @@ result = {
     'source_commit': source, 'build_run': run, 'artifact_id': artifact,
     'module_count': data['module_count'],
     'metadata_sha256': digest(data_path), 'link_map_sha256': digest(link_map),
-    'critical_rebuilt_objects': critical, 'sdk_source_archive_lines': fallback,
+    'critical_rebuilt_objects': critical, 'critical_native_symbols': critical_symbols,
+    'linked_archive_names': archive_names, 'sdk_source_archive_lines': fallback,
     'needed_libraries': needed, 'sdk_source_shared_libraries': sdk_source_shared,
     'elf_audit': 'EXECUTED' if full else 'NOT_AVAILABLE_BINARY_NOT_RETAINED',
     'compiler_runtime_smoke': data.get('runtime_smoke', 'FAILED_NOT_QUALIFIED'),

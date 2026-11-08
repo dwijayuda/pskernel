@@ -320,6 +320,21 @@ jobs:
         run: |
           set -o pipefail
           python3 tests/run-source-census.py 2>&1 | tee build/project-logs/source-census.log
+      - name: Qualify prelude PS grammar without hidden logical imports
+        if: success() || failure()
+        run: |
+          set -o pipefail
+          python3 tests/run-prelude-grammar.py 2>&1 | tee build/project-logs/prelude-grammar.log
+      - name: Qualify actual pinned compiler declaration head migration
+        if: success() || failure()
+        run: |
+          set -o pipefail
+          python3 tests/run-compiler-heads.py 2>&1 | tee build/project-logs/compiler-heads.log
+      - name: Qualify modern native frontend startup hooks
+        if: success() || failure()
+        run: |
+          set -o pipefail
+          python3 tests/run-modern-frontend-startup.py 2>&1 | tee build/project-logs/modern-startup.log
       - name: Qualify original UTF-8 source provenance
         if: success() || failure()
         run: |
@@ -332,6 +347,16 @@ jobs:
           name: ps0-project-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
           path: |
             experiments/ps0/build/project-logs/
+            experiments/ps0/build/modern-frontend-startup-*/
+            experiments/ps0/build/prelude-grammar-*/
+            experiments/ps0/build/compiler-heads-*/*.json
+            experiments/ps0/build/compiler-heads-*/*.log
+            experiments/ps0/build/compiler-heads-*/original/src/
+            experiments/ps0/build/compiler-heads-*/converted/src/
+            experiments/ps0/build/compiler-heads-*/baseline/ir/Lean/Compiler/ClosedTermCache.c
+            experiments/ps0/build/compiler-heads-*/baseline/lib/lean/Lean/Compiler/ClosedTermCache.olean
+            experiments/ps0/build/compiler-heads-*/migrated/ir/Lean/Compiler/ClosedTermCache.c
+            experiments/ps0/build/compiler-heads-*/migrated/lib/lean/Lean/Compiler/ClosedTermCache.olean
             experiments/ps0/build/binders-*/binder-evidence.json
             experiments/ps0/build/source-census-*/
             experiments/ps0/build/source-fidelity-*/

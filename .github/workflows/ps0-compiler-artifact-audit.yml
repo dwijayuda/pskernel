@@ -1,0 +1,35 @@
+name: PS0 compiler artifact link audit
+on:
+  push:
+    branches: [ci/ps0-compiler-audit-20261108]
+    paths: [.github/workflows/ps0-compiler-artifact-audit.yml, ci/ps0-compiler-artifact-audit.py]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  native-link-audit:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    env:
+      PS0_SOURCE_SHA: '46541521a95ac7829279faf441f922a977061f6f'
+      PS0_BUILD_RUN: '42484334810'
+      PS0_BUILD_ARTIFACT: '13620495494'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          artifact-ids: 13620495494
+          github-token: ${{ github.token }}
+          run-id: 42484334810
+          path: compiler-evidence
+          merge-multiple: true
+      - name: Audit exact compiler link map and available ELF evidence
+        run: python3 ci/ps0-compiler-artifact-audit.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-compiler-link-audit-${{ github.run_id }}
+          path: compiler-artifact-audit.json
+          if-no-files-found: warn

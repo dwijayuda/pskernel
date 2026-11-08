@@ -192,3 +192,37 @@ jobs:
           print('PS0_NATIVE_HOST_METADATA_IR_FILES',sum('.ir' in name for name in host['host_metadata']))
           print('PS0_MIXED_DEFAULT_AND_HOST_EVIDENCE: PASS; converted_heads=15; modules=4')
           PY
+
+  ps-built-grammar-host-evidence:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-compiler-stage1-2cba0bc26df49c52d653598fd9c791f23209199c-42532849633
+          run-id: 42532849633
+          github-token: ${{ github.token }}
+          path: fresh
+      - name: Inspect grammar host freshly compiled from ps
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root=Path('fresh')
+          migration=json.loads((root/'migration.json').read_text())
+          host=json.loads((root/'native-grammar-host.json').read_text())
+          summary=json.loads((root/'source-census/summary.json').read_text())
+          assert migration['source_commit']==host['source']=='2cba0bc26df49c52d653598fd9c791f23209199c'
+          assert migration['module_count']==summary['module_count']==2567
+          assert migration['runtime_smoke']=='PASS'
+          assert migration['runtime_grammar_host']['status']=='PASS'
+          assert host['driver_sha256']==migration['driver_sha256']
+          assert hashlib.sha256((root/'migrated-ps0').read_bytes()).hexdigest()==host['driver_sha256']
+          assert hashlib.sha256((root/'native-grammar-host.json').read_bytes()).hexdigest()==migration['runtime_grammar_host']['evidence_sha256']
+          assert len(host['host_metadata'])==migration['runtime_grammar_host']['metadata_files']==200
+          assert all(v['source_sha256']==v['published_sha256'] for v in host['host_metadata'].values())
+          print('PS0_FRESH_PS_BUILT_GRAMMAR_HOST_EVIDENCE: PASS')
+          print(json.dumps({k:v for k,v in migration.items() if k not in ['inputs','outputs']},indent=2))
+          print('PS0_FRESH_HOST_METADATA_MANIFEST_SHA256',hashlib.sha256(json.dumps(host['host_metadata'],sort_keys=True).encode()).hexdigest())
+          print('PS0_FRESH_SOURCE_CENSUS_MODES',json.dumps(summary['declaration_modes'],sort_keys=True))
+          PY

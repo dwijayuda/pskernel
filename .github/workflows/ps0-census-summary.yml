@@ -68,3 +68,29 @@ jobs:
           print(json.dumps(evidence,indent=2))
           print(json.dumps(json.loads((files[0].parent/'plan.json').read_text()),indent=2))
           PY
+
+  mutual-compiler-head-evidence:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-project-3c47198c4ed8f43a4967deef199ea61fa5e8d592-42528176757
+          run-id: 42528176757
+          github-token: ${{ github.token }}
+          path: probe
+      - name: Inspect pinned recursive compiler parity evidence
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          files=list(Path('probe').rglob('compiler-heads-*/evidence.json'))
+          assert len(files)==2, files
+          for file in files:
+              evidence=json.loads(file.read_text())
+              assert evidence['source']=='3c47198c4ed8f43a4967deef199ea61fa5e8d592'
+              assert all(c['native']==c['ps'] for c in evidence['comparisons'].values())
+              print('PS0_MUTUAL_COMPILER_EVIDENCE_IDENTITY: PASS')
+              print(json.dumps(evidence,indent=2))
+              print(json.dumps(json.loads((file.parent/'plan.json').read_text()),indent=2))
+          PY

@@ -49,6 +49,11 @@ migrated_out, migrated_result = build(driver, 'migrated-default')
 setup_path = migrated_out / 'ir/PS0/Binders.setup.json'
 assert setup_path.is_file(), migrated_result.stdout
 setup = json.loads(setup_path.read_text())
+assert setup['options']['interpreter.prefer_native'] is False, setup['options']
+assert migrated_result.returncode == 0, 'native Lake stage options must prevent linked-code reuse'
+for suffix in ['ir/PS0/Binders.c', 'lib/lean/PS0/Binders.olean']:
+    assert sha(sdk_out / suffix) == sha(migrated_out / suffix), suffix
+print('PS0_BINDER_STAGE_OPTIONS_AND_OUTPUTS: PASS', flush=True)
 false_setup = WORK / 'interpreted.setup.json'
 options = setup.setdefault('options', {})
 assert isinstance(options, dict), options

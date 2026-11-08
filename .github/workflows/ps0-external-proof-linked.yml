@@ -300,10 +300,15 @@ jobs:
             lake exe ps0 check "tests/v1/$file"
           done 2>&1 | tee build/project-logs/adapters.log
       - name: Build recursive projects and qualify module boundaries
+        id: recursive
         if: success() || steps.adapters.outcome == 'failure'
         run: |
           set -euo pipefail
           python3 tests/run-project.py 2>&1 | tee build/project-logs/native.log
+      - name: Qualify mapped standard category operands
+        if: success() || steps.recursive.outcome == 'failure'
+        run: |
+          set -euo pipefail
           python3 tests/run-categories.py 2>&1 | tee build/project-logs/categories.log
       - name: Retain project evidence
         if: always()

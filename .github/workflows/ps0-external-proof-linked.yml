@@ -820,6 +820,8 @@ jobs:
           name: ps0-compiler-fixtures-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
           path: |
             experiments/ps0/build/compiler-fixture-logs/
+            experiments/ps0/build/index-operands-*/*.json
+            experiments/ps0/build/index-operands-*/*.log
             experiments/ps0/build/ellipsis-*/*.json
             experiments/ps0/build/ellipsis-*/*.log
             experiments/ps0/build/lambdas-*/*.json

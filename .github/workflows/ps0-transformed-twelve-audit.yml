@@ -83,7 +83,7 @@ jobs:
           targets={
               'Init.Data.Range.Polymorphic.Internal.SignedBitVec':['rotate'],
               'Init.Data.Range.Polymorphic.Char':[''],
-              'Std.Time.Zoned.Database.TzIf':['parseDataBlock','parseData'],
+              'Std.Time.Zoned.Database.TzIf':['parseTZifV1'],
               'Std.Data.ExtDTreeMap.Basic':['beq','Const.beq'],
               'Lean.Data.Options':['getOptionDeclsArray']}
           research=[]

@@ -74,9 +74,9 @@ jobs:
           assert hashlib.sha256(planned).hexdigest()==plan['result_sha256']
           assert b'\xcf\x80 / \xf0\x9f\x98\x80' in raw and b'\xcf\x80 / \xf0\x9f\x98\x80' in planned
           controls=(work/'native-dependent-if.log').read_text()
-assert 'PS0_NATIVE_DEPENDENT_IF_CONTROL:h:Lean.binderIdent' in controls
-assert 'PS0_NATIVE_DEPENDENT_IF_CONTROL:_:Lean.binderIdent' in controls
-elf=work/'OrdinaryHostOrigins'
+          assert 'PS0_NATIVE_DEPENDENT_IF_CONTROL:h:Lean.binderIdent' in controls
+          assert 'PS0_NATIVE_DEPENDENT_IF_CONTROL:_:Lean.binderIdent' in controls
+          elf=work/'OrdinaryHostOrigins'
           assert elf.read_bytes().startswith(b'\x7fELF')
           digest=hashlib.sha256(elf.read_bytes()).hexdigest()
           assert digest==e['native_executable_sha256']

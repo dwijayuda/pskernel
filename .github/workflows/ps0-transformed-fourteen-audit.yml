@@ -1,0 +1,127 @@
+name: PS0 transformed graph fourteen evidence
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-transformed-fourteen-audit.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  transformed-graph-fourteen-modes:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42638383959
+          name: ps0-transformed-corpus-fdfcf5f974c2791ae84f20569b87eee96aa57b00-42638383959
+          github-token: ${{ github.token }}
+          path: transformed-nine
+      - name: Audit retained mapped source observations against successful Lake jobs
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' | tee transformed-fourteen-modes.log
+          from pathlib import Path
+          from collections import Counter
+          import hashlib,json,re
+          source='fdfcf5f974c2791ae84f20569b87eee96aa57b00'
+          folder=next(Path('transformed-nine').rglob('failed-build.json')).parent
+          failed=json.loads((folder/'failed-build.json').read_text())
+          assert failed['source_commit']==source and failed['source_grammar'] is True
+          assert failed['status']=='FAILED' and failed['module_count']==2569
+          inventory=json.loads((folder/'input-inventory.json').read_text())
+          assert inventory['source_commit']==source and inventory['module_count']==2569
+          log=(folder/'compiler-build.log').read_text()
+          built=set(re.findall(r'^[✔⚠] \[\d+/\d+\] Built ([A-Za-z][A-Za-z0-9_\u0027.]*) (?:\(|$)',log,re.M))
+          assert built and built<=set(inventory['inputs'])
+          sha=lambda data:hashlib.sha256(data).hexdigest()
+          def declarations(commands):
+              for command in commands:
+                  if command['declaration'] is not None: yield command['declaration']
+                  yield from declarations(command.get('nestedCommands',[]))
+          productions={k:'PS0.StandardAdapters.ps0Standard'+v for k,v in [('function','Function'),('const','Const'),('def','Def')]}
+          reports=[]; captured=set(); families=Counter(); heads=0; escapes=[]
+          for path in sorted((folder/'partial-source-census').rglob('*.json')):
+              census=json.loads(path.read_text()); module=census['module']; captured.add(module)
+              if module not in built: continue
+              rel=Path(*module.split('.')).with_suffix('.ps')
+              raw=(folder/'transformed-source'/rel).read_bytes()
+              assert census['nativeSource'].encode()==raw
+              assert sha(raw)==inventory['inputs'][module]['ps_sha256']
+              plan_path=folder/('self-source-plans' if module.startswith('PS0') else 'current-source-plans')/module/'plan.json'
+              plan=json.loads(plan_path.read_text()); assert sha(raw)==plan['result_sha256']
+              observed=list(declarations(census['commands']))
+              escaped=[{'module':module,'name':d['sourceName'],'production':d['production'],'mode':d['mode'],'keywordRange':d['keywordRange']} for d in observed if d['mode']!='mapped-ps']
+              escapes.extend(escaped)
+              definitions=[d for d in observed if d['production'] in set(productions.values())|{'Lean.Parser.Command.definition'}]
+              assert len(definitions)==len(plan['strategies']),module
+              for strategy,declaration in zip(plan['strategies'],definitions) if not escaped else []:
+                  assert declaration['sourceName']==strategy['sourceName']
+                  assert declaration['production']==productions[strategy['targetKeyword']]
+                  span=declaration['keywordRange']
+                  assert raw[span['start']:span['end']].decode()==strategy['targetKeyword']
+              kinds=Counter(d['production'] for d in observed); families.update(kinds); heads+=len(definitions)
+              reports.append({'module':module,'definitions':len(definitions),'fully_mapped_mode':not escaped,'source_sha256':sha(raw),
+                              'census_sha256':sha(path.read_bytes()),'productions':dict(kinds)})
+          assert built<=captured,(built-captured)
+          assert len(reports)==len(built)
+          summary={'source':source,'run':42638383959,'job':129232543506,
+                   'prepared_inputs':2569,'successful_lake_modules_with_retained_source_observations':len(reports),
+                   'fully_mapped_mode_modules':sum(r['fully_mapped_mode'] for r in reports),
+                   'native_compatible_escapes':escapes,
+                   'definition_heads_in_those_observations':heads,'production_counts':dict(families),
+                   'censuses_without_successful_lake_job':sorted(captured-built),
+                   'successful_lake_modules_with_warnings':sorted(set(re.findall(r'^⚠ \[\d+/\d+\] Built ([A-Za-z][A-Za-z0-9_\u0027.]*) (?:\(|$)',log,re.M))),
+                   'refreshed_native_censuses':len(json.loads((folder/'source-plan-summary.json').read_text())['refreshed_declaration_censuses']),
+                   'reused_native_censuses':len(json.loads((folder/'source-plan-summary.json').read_text())['reused_native_censuses']),
+                   'scope':'successful native Lake job log entries plus retained source observations/plan identity; no retained target C/public olean rehash, runtime, full graph or fixed point acceptance',
+                   'full_graph_build':False,'canonical_fixed_point':False,
+                   'grammar_migration_complete':False,'verified_execution':False}
+          Path('transformed-fourteen-modes.json').write_text(json.dumps({'summary':summary,'modules':reports},indent=2)+'\n')
+          print('PS0_TRANSFORMED_MODE_AUDIT:'+json.dumps(summary,sort_keys=True))
+          assert not escapes,'Native-compatible standard declarations do not satisfy the all-PS goal'
+          research=[]
+          failure_sites={'Lean.Linter.AmbiguousOpen':[46,51],'Lean.Parser.Basic':[1946,1949],
+                         'Lean.Elab.SetOption':[92],'Lean.DefEqAttrib':[170],
+                         'Lean.Meta.SynthInstance':[967,1013],'Lean.Compiler.LCNF.CompilerM':[569]}
+          def command_nodes(commands):
+              for command in commands:
+                  yield command
+                  yield from command_nodes(command.get('nestedCommands',[]))
+          for module,sites in failure_sites.items():
+              raw=(folder/'transformed-source'/Path(*module.split('.')).with_suffix('.ps')).read_bytes()
+              native=json.loads((folder/'current-source-plans'/module/'native-census.json').read_text())
+              plan=json.loads((folder/'current-source-plans'/module/'plan.json').read_text())
+              ps_lines=raw.decode().splitlines()
+              native_bytes=native['nativeSource'].encode()
+              native_lines=native_bytes.splitlines(keepends=True)
+              contexts=[]
+              for line in sites:
+                  start=sum(len(x) for x in native_lines[:max(0,line-9)])
+                  stop=sum(len(x) for x in native_lines[:line+8])
+                  commands=[c for c in command_nodes(native['commands']) if c['declaration'] and
+                            c.get('range') and c['range']['start']<=stop and c['range']['end']>=start]
+                  contexts.append({'line':line,'transformed_start_line':max(1,line-8),
+                                   'transformed_lines':ps_lines[max(0,line-9):line+8],
+                                   'native_lines':b''.join(native_lines[max(0,line-9):line+8]).decode(),
+                                   'native_commands':commands,
+                                   'nearby_edits':[e for e in plan['edits'] if start<=e['start']<=stop]})
+              research.append({'module':module,'input':inventory['inputs'][module],'contexts':contexts})
+          Path('transformed-fourteen-boundary-shapes.json').write_text(json.dumps(research,indent=2)+chr(10))
+          print('PS0_TRANSFORMED_BOUNDARY_CONTEXTS:'+json.dumps([
+              {'module':r['module'],'contexts':[{'line':c['line'],'transformed_start_line':c['transformed_start_line'],
+                'transformed_lines':c['transformed_lines'],'native_lines':c['native_lines'],
+                'declarations':[n['declaration']['sourceName'] for n in c['native_commands']],
+                'nearby_edits':c['nearby_edits']} for c in r['contexts']]} for r in research],sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-transformed-fourteen-modes-${{ github.run_id }}
+          path: |
+            transformed-fourteen-modes.json
+            transformed-fourteen-modes.log
+            transformed-fourteen-boundary-shapes.json
+          if-no-files-found: error
+

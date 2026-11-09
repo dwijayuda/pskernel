@@ -366,7 +366,7 @@ jobs:
           python3 tests/run-compiler-heads.py --fixture EmitUtil --module Lean.Compiler.LCNF.EmitUtil --blob a1283439481c82fe7835b7b2d743e5e57bfd1111 --declarations collectUsedDecls,usesModuleFrom --owned-value-calls usesModuleFrom 2>&1 | tee build/project-logs/compiler-emission-heads.log
           python3 tests/run-compiler-heads.py --fixture TelescopeProbe --module Lean.Compiler.TelescopeProbe --blob 61b472c934e79b57492cf596ede396f7740230db --declarations ALL 2>&1 | tee build/project-logs/compiler-telescope-probe.log
           python3 tests/run-compiler-heads.py --fixture LCNFBasic --module Lean.Compiler.LCNF.Basic --blob 82c8dee0b9d13f09d58a6404dd5d5abf797d236e --declarations ALL 2>&1 | tee build/project-logs/compiler-lcnf-basic.log
-          python3 tests/run-compiler-heads.py --fixture DeclarationForms --module Lean.Compiler.DeclarationForms --blob 1ca3c9c225c082c656b63e9b61012fcfee8fbd1b --declarations ALL 2>&1 | tee build/project-logs/compiler-declaration-forms.log
+          python3 tests/run-compiler-heads.py --fixture DeclarationForms --module Lean.Compiler.DeclarationForms --blob 4549f712507f2b4d94b287ee5a085debb753d42e --declarations ALL 2>&1 | tee build/project-logs/compiler-declaration-forms.log
       - name: Qualify modern native frontend startup hooks
         if: success() || failure()
         run: |
@@ -615,11 +615,16 @@ jobs:
         run: |
           set -euo pipefail
           python3 tests/run-compiler-heads.py --fixture TelescopeProbe --module Lean.Compiler.TelescopeProbe --blob 61b472c934e79b57492cf596ede396f7740230db --declarations ALL 2>&1 | tee build/compiler-fixture-logs/telescope.log
+      - name: Inspect native where-field parser boundaries
+        if: success() || failure()
+        run: |
+          set -euo pipefail
+          lake env lean tests/debug-where-layout.lean 2>&1 | tee build/compiler-fixture-logs/where-parser.log
       - name: Qualify equation theorems, instance operands and native where fields
         if: success() || failure()
         run: |
           set -euo pipefail
-          python3 tests/run-compiler-heads.py --fixture DeclarationForms --module Lean.Compiler.DeclarationForms --blob 1ca3c9c225c082c656b63e9b61012fcfee8fbd1b --declarations ALL 2>&1 | tee build/compiler-fixture-logs/declaration-forms.log
+          python3 tests/run-compiler-heads.py --fixture DeclarationForms --module Lean.Compiler.DeclarationForms --blob 4549f712507f2b4d94b287ee5a085debb753d42e --declarations ALL 2>&1 | tee build/compiler-fixture-logs/declaration-forms.log
       - name: Qualify all pinned Basic definitions and telescope source productions
         if: success() || failure()
         run: |

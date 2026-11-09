@@ -802,6 +802,11 @@ jobs:
           set -euo pipefail
           python3 tests/run-where-local-helpers.py 2>&1 | tee build/compiler-fixture-logs/where-local.log
           python3 tests/run-return-boundary.py 2>&1 | tee build/compiler-fixture-logs/return-boundary.log
+      - name: Qualify ordinary native host values origins and eleven call-gap boundaries
+        run: |
+          set -euo pipefail
+          python3 tests/run-match-host-bodies.py 2>&1 | tee build/compiler-fixture-logs/ordinary-host.log
+          python3 tests/run-host-island-gaps.py --cases match,pattern-lambda,record-field,do-if,do-match,do-have,do-for,do-try,proof-if,typed-term,tactic-body 2>&1 | tee build/compiler-fixture-logs/ordinary-host-gaps.log
       - name: Qualify native indexed access and pipeline operands
         if: success() || failure()
         run: |
@@ -850,6 +855,14 @@ jobs:
             experiments/ps0/build/where-local-*/*.ps
             experiments/ps0/build/where-local-*/*.json
             experiments/ps0/build/where-local-*/*.log
+            experiments/ps0/build/match-host-*/*.json
+            experiments/ps0/build/match-host-*/*.log
+            experiments/ps0/build/match-host-*/*.ps
+            experiments/ps0/build/match-host-*/*.c
+            experiments/ps0/build/match-host-*/*.olean
+            experiments/ps0/build/match-host-*/OrdinaryHostOrigins
+            experiments/ps0/build/host-island-gaps-*/*.json
+            experiments/ps0/build/host-island-gaps-*/*.log
             experiments/ps0/build/local-mixed-*/*.c
             experiments/ps0/build/local-mixed-*/*.olean
             experiments/ps0/build/local-mixed-*/*.ps

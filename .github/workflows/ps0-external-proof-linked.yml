@@ -1170,7 +1170,8 @@ jobs:
       - name: Qualify native do layout and PS element boundaries
         run: |
           set -euo pipefail
-          python3 tests/run-do-layout.py 2>&1 | tee build/do-layout-logs/do-layout.log
+          python3 tests/run-do-layout.py
+          python3 tests/run-local-recursion.py 2>&1 | tee build/do-layout-logs/do-layout.log
       - name: Qualify native local signatures and do output parity
         if: success() || failure()
         run: |

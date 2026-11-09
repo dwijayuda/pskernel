@@ -24,7 +24,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"cbabb1069028551fafb61dbd4e4db84587112003"}
+          pin={"repository":"dwijayuda/lean4","commit":"79ec94005d79670bcad20b0de695d4aa8a13ae83"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -143,7 +143,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"cbabb1069028551fafb61dbd4e4db84587112003"}
+          pin={"repository":"dwijayuda/lean4","commit":"79ec94005d79670bcad20b0de695d4aa8a13ae83"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -258,7 +258,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"cbabb1069028551fafb61dbd4e4db84587112003"}
+          pin={"repository":"dwijayuda/lean4","commit":"79ec94005d79670bcad20b0de695d4aa8a13ae83"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -345,6 +345,15 @@ jobs:
           name: ps0-compiler-listattach-5a5cfe9e35d012c11e735123f941d07a7fdcf85e-42630740875
           github-token: ${{ github.token }}
           path: retained-listattach
+      - name: Bound native and PS nested parenthesis parsing
+        run: |
+          python3 - <<'PY'
+          import pathlib,subprocess
+          result=subprocess.run(['lake','env','lean','--run','tests/inspect-parenthesis-budget.lean'],capture_output=True,text=True,timeout=60)
+          pathlib.Path('build/compiler-fixture-logs/paren-budget.log').write_text(result.stdout+result.stderr)
+          print(result.stdout+result.stderr,flush=True)
+          assert result.returncode==0,result.returncode
+          PY
       - name: Qualify ordinary host values origins and native linking
         run: python3 tests/run-match-host-bodies.py
       - name: Reject six known ordinary host gaps
@@ -381,7 +390,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"cbabb1069028551fafb61dbd4e4db84587112003"}
+          pin={"repository":"dwijayuda/lean4","commit":"79ec94005d79670bcad20b0de695d4aa8a13ae83"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -513,7 +522,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"cbabb1069028551fafb61dbd4e4db84587112003"}
+          pin={"repository":"dwijayuda/lean4","commit":"79ec94005d79670bcad20b0de695d4aa8a13ae83"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -632,7 +641,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"cbabb1069028551fafb61dbd4e4db84587112003"}
+          pin={"repository":"dwijayuda/lean4","commit":"79ec94005d79670bcad20b0de695d4aa8a13ae83"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -748,7 +757,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"cbabb1069028551fafb61dbd4e4db84587112003"}
+          pin={"repository":"dwijayuda/lean4","commit":"79ec94005d79670bcad20b0de695d4aa8a13ae83"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -869,7 +878,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"cbabb1069028551fafb61dbd4e4db84587112003"}
+          pin={"repository":"dwijayuda/lean4","commit":"79ec94005d79670bcad20b0de695d4aa8a13ae83"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -988,7 +997,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"cbabb1069028551fafb61dbd4e4db84587112003"}
+          pin={"repository":"dwijayuda/lean4","commit":"79ec94005d79670bcad20b0de695d4aa8a13ae83"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -1108,7 +1117,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"cbabb1069028551fafb61dbd4e4db84587112003"}
+          pin={"repository":"dwijayuda/lean4","commit":"79ec94005d79670bcad20b0de695d4aa8a13ae83"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -1227,7 +1236,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"cbabb1069028551fafb61dbd4e4db84587112003"}
+          pin={"repository":"dwijayuda/lean4","commit":"79ec94005d79670bcad20b0de695d4aa8a13ae83"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -1432,7 +1441,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"cbabb1069028551fafb61dbd4e4db84587112003"}
+          pin={"repository":"dwijayuda/lean4","commit":"79ec94005d79670bcad20b0de695d4aa8a13ae83"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -1552,7 +1561,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"cbabb1069028551fafb61dbd4e4db84587112003"}
+          pin={"repository":"dwijayuda/lean4","commit":"79ec94005d79670bcad20b0de695d4aa8a13ae83"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           pin['commit']='6dc96dd983c0d37fc91bf39d05777540f4f1322d'
@@ -1656,5 +1665,241 @@ jobs:
         with:
           name: ps0-operator-baseline-${{ github.run_id }}
           path: experiments/ps0/build/native-logs/
+          if-no-files-found: error
+
+
+  compiler-prelude:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: experiments/ps0
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          persist-credentials: false
+      - name: Read exact source pin
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          pin={"repository":"dwijayuda/lean4","commit":"79ec94005d79670bcad20b0de695d4aa8a13ae83"}
+          assert pin['repository']=='dwijayuda/lean4'
+          assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('PS0_SOURCE_SHA='+pin['commit']+'\n')
+          PY
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: ${{ env.PS0_SOURCE_SHA }}
+          sparse-checkout: experiments/ps0
+          persist-credentials: false
+      - uses: actions/cache/restore@v4
+        id: ps0-elan-input
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/restore@v4
+        id: ps0-lean-input
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Install checksum-verified pinned Linux Lean inputs
+        run: |
+          set -euo pipefail
+          ps0_fetch_input() {
+            local ps0_url="$1" ps0_api="$2" ps0_target="$3" ps0_digest="$4"
+            if test ! -f "$ps0_target"; then
+              if ! curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                --retry 5 --retry-max-time 300 --retry-all-errors "$ps0_url" -o "$ps0_target"; then
+                curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                  --retry 5 --retry-max-time 300 --retry-all-errors \
+                  -H 'Accept: application/octet-stream' -H 'X-GitHub-Api-Version: 2022-11-28' \
+                  "$ps0_api" -o "$ps0_target"
+              fi
+            fi
+            printf '%s  %s\n' "$ps0_digest" "$ps0_target" | sha256sum -c -
+          }
+          test "$(cat lean-toolchain)" = leanprover/lean4:v4.35.0
+          ps0_fetch_input \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            https://api.github.com/repos/leanprover/elan/releases/assets/529114798 \
+            "$RUNNER_TEMP/ps0-elan.tar.gz" \
+            42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+          ps0_fetch_input \
+            https://github.com/leanprover/lean4/releases/download/v4.35.0/lean-4.35.0-linux.tar.zst \
+            https://api.github.com/repos/leanprover/lean4/releases/assets/634574462 \
+            "$RUNNER_TEMP/ps0-lean.tar.zst" \
+            7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+          mkdir -p "$RUNNER_TEMP/ps0-elan-installer" "$RUNNER_TEMP/ps0-lean-verified"
+          tar -xzf "$RUNNER_TEMP/ps0-elan.tar.gz" -C "$RUNNER_TEMP/ps0-elan-installer"
+          "$RUNNER_TEMP/ps0-elan-installer/elan-init" -y --default-toolchain none --no-modify-path
+          tar --zstd -xf "$RUNNER_TEMP/ps0-lean.tar.zst" --strip-components=1 -C "$RUNNER_TEMP/ps0-lean-verified"
+          "$HOME/.elan/bin/elan" toolchain link ps0-pinned-lean-4.35.0 "$RUNNER_TEMP/ps0-lean-verified"
+          export ELAN_TOOLCHAIN=ps0-pinned-lean-4.35.0
+          echo "ELAN_TOOLCHAIN=$ELAN_TOOLCHAIN" >> "$GITHUB_ENV"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          test "$("$HOME/.elan/bin/lean" --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          "$HOME/.elan/bin/lean" --version
+          "$HOME/.elan/bin/lake" --version
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-elan-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-lean-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Record exact source and build clean PS0
+        run: |
+          set -euo pipefail
+          mkdir -p build/compiler-prelude-logs
+          test "$(git rev-parse HEAD)" = "$PS0_SOURCE_SHA"
+          printf '%s\n' "$PS0_SOURCE_SHA" > build/compiler-prelude-logs/source-sha.txt
+          printf '%s\n' "$GITHUB_SHA" > build/compiler-prelude-logs/runner-sha.txt
+          test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
+          lake build PS0 ps0 2>&1 | tee build/compiler-prelude-logs/build.log
+          lake exe ps0 environment | tee build/compiler-prelude-logs/environment.json
+      - name: Qualify entire pinned Init.Prelude through native Lake
+        run: |
+          set -euo pipefail
+          python3 tests/run-compiler-heads.py --fixture InitPrelude --module Init.Prelude --blob 58a4c37053f30d37b824190b934e759c16e53d7a --declarations ALL --sdk-source --roots Init --bootstrap 2>&1 | tee build/compiler-prelude-logs/prelude.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-compiler-prelude-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
+          path: |
+            experiments/ps0/build/compiler-prelude-logs/
+            experiments/ps0/build/compiler-heads-*-InitPrelude/*.json
+            experiments/ps0/build/compiler-heads-*-InitPrelude/*.log
+            experiments/ps0/build/compiler-heads-*-InitPrelude/*.diff
+            experiments/ps0/build/compiler-heads-*-InitPrelude/original/src/
+            experiments/ps0/build/compiler-heads-*-InitPrelude/converted/src/
+            experiments/ps0/build/compiler-heads-*-InitPrelude/migrated/lib/lean/**/*.ilean.ps0-source-census.json
+            experiments/ps0/build/compiler-heads-*-InitPrelude/baseline/ir/Init/Prelude.c
+            experiments/ps0/build/compiler-heads-*-InitPrelude/baseline/lib/lean/Init/Prelude.olean
+            experiments/ps0/build/compiler-heads-*-InitPrelude/migrated/ir/Init/Prelude.c
+            experiments/ps0/build/compiler-heads-*-InitPrelude/migrated/lib/lean/Init/Prelude.olean
+          if-no-files-found: error
+  compiler-associative:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: experiments/ps0
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          persist-credentials: false
+      - name: Read exact source pin
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          pin={"repository":"dwijayuda/lean4","commit":"79ec94005d79670bcad20b0de695d4aa8a13ae83"}
+          assert pin['repository']=='dwijayuda/lean4'
+          assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('PS0_SOURCE_SHA='+pin['commit']+'\n')
+          PY
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: ${{ env.PS0_SOURCE_SHA }}
+          sparse-checkout: experiments/ps0
+          persist-credentials: false
+      - uses: actions/cache/restore@v4
+        id: ps0-elan-input
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/restore@v4
+        id: ps0-lean-input
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Install checksum-verified pinned Linux Lean inputs
+        run: |
+          set -euo pipefail
+          ps0_fetch_input() {
+            local ps0_url="$1" ps0_api="$2" ps0_target="$3" ps0_digest="$4"
+            if test ! -f "$ps0_target"; then
+              if ! curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                --retry 5 --retry-max-time 300 --retry-all-errors "$ps0_url" -o "$ps0_target"; then
+                curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                  --retry 5 --retry-max-time 300 --retry-all-errors \
+                  -H 'Accept: application/octet-stream' -H 'X-GitHub-Api-Version: 2022-11-28' \
+                  "$ps0_api" -o "$ps0_target"
+              fi
+            fi
+            printf '%s  %s\n' "$ps0_digest" "$ps0_target" | sha256sum -c -
+          }
+          test "$(cat lean-toolchain)" = leanprover/lean4:v4.35.0
+          ps0_fetch_input \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            https://api.github.com/repos/leanprover/elan/releases/assets/529114798 \
+            "$RUNNER_TEMP/ps0-elan.tar.gz" \
+            42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+          ps0_fetch_input \
+            https://github.com/leanprover/lean4/releases/download/v4.35.0/lean-4.35.0-linux.tar.zst \
+            https://api.github.com/repos/leanprover/lean4/releases/assets/634574462 \
+            "$RUNNER_TEMP/ps0-lean.tar.zst" \
+            7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+          mkdir -p "$RUNNER_TEMP/ps0-elan-installer" "$RUNNER_TEMP/ps0-lean-verified"
+          tar -xzf "$RUNNER_TEMP/ps0-elan.tar.gz" -C "$RUNNER_TEMP/ps0-elan-installer"
+          "$RUNNER_TEMP/ps0-elan-installer/elan-init" -y --default-toolchain none --no-modify-path
+          tar --zstd -xf "$RUNNER_TEMP/ps0-lean.tar.zst" --strip-components=1 -C "$RUNNER_TEMP/ps0-lean-verified"
+          "$HOME/.elan/bin/elan" toolchain link ps0-pinned-lean-4.35.0 "$RUNNER_TEMP/ps0-lean-verified"
+          export ELAN_TOOLCHAIN=ps0-pinned-lean-4.35.0
+          echo "ELAN_TOOLCHAIN=$ELAN_TOOLCHAIN" >> "$GITHUB_ENV"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          test "$("$HOME/.elan/bin/lean" --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          "$HOME/.elan/bin/lean" --version
+          "$HOME/.elan/bin/lake" --version
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-elan-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-lean-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Record exact source and build clean PS0
+        run: |
+          set -euo pipefail
+          mkdir -p build/compiler-associative-logs
+          test "$(git rev-parse HEAD)" = "$PS0_SOURCE_SHA"
+          printf '%s\n' "$PS0_SOURCE_SHA" > build/compiler-associative-logs/source-sha.txt
+          printf '%s\n' "$GITHUB_SHA" > build/compiler-associative-logs/runner-sha.txt
+          test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
+          lake build PS0 ps0 2>&1 | tee build/compiler-associative-logs/build.log
+          lake exe ps0 environment | tee build/compiler-associative-logs/environment.json
+      - name: Qualify entire pinned Std.Data.Internal.List.Associative through native Lake
+        run: |
+          set -euo pipefail
+          python3 tests/run-compiler-heads.py --fixture Associative --module Std.Data.Internal.List.Associative --blob a662911b51429329607eaea56ab8d04990df2901 --declarations ALL --sdk-source --roots Std --bootstrap 2>&1 | tee build/compiler-associative-logs/finbasic.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-compiler-associative-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
+          path: |
+            experiments/ps0/build/compiler-associative-logs/
+            experiments/ps0/build/compiler-heads-*-Associative/*.json
+            experiments/ps0/build/compiler-heads-*-Associative/*.log
+            experiments/ps0/build/compiler-heads-*-Associative/*.diff
+            experiments/ps0/build/compiler-heads-*-Associative/original/src/
+            experiments/ps0/build/compiler-heads-*-Associative/converted/src/
+            experiments/ps0/build/compiler-heads-*-Associative/migrated/lib/lean/**/*.ilean.ps0-source-census.json
+            experiments/ps0/build/compiler-heads-*-Associative/baseline/ir/Std/Data/Internal/List/Associative.c
+            experiments/ps0/build/compiler-heads-*-Associative/baseline/lib/lean/Std/Data/Internal/List/Associative.olean
+            experiments/ps0/build/compiler-heads-*-Associative/migrated/ir/Std/Data/Internal/List/Associative.c
+            experiments/ps0/build/compiler-heads-*-Associative/migrated/lib/lean/Std/Data/Internal/List/Associative.olean
           if-no-files-found: error
 

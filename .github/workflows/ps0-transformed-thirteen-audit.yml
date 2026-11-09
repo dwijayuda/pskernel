@@ -72,7 +72,7 @@ jobs:
                    'native_compatible_escapes':escapes,
                    'definition_heads_in_those_observations':heads,'production_counts':dict(families),
                    'censuses_without_successful_lake_job':sorted(captured-built),
-                   'successful_lake_modules_with_warnings':sorted(set(re.findall(r'^⚠ \\[\\d+/\\d+\\] Built ([A-Za-z][A-Za-z0-9_\\u0027.]*) (?:\\(|$)',log,re.M))),
+                   'successful_lake_modules_with_warnings':sorted(set(re.findall(r'^⚠ \[\d+/\d+\] Built ([A-Za-z][A-Za-z0-9_\u0027.]*) (?:\(|$)',log,re.M))),
                    'refreshed_native_censuses':len(json.loads((folder/'source-plan-summary.json').read_text())['refreshed_declaration_censuses']),
                    'reused_native_censuses':len(json.loads((folder/'source-plan-summary.json').read_text())['reused_native_censuses']),
                    'scope':'successful native Lake job log entries plus retained source observations/plan identity; no retained target C/public olean rehash, runtime, full graph or fixed point acceptance',
@@ -95,6 +95,19 @@ jobs:
                                        'valueSyntax':d['valueSyntax']})
                   previous=command
           assert len(research)==2
+          index_shapes={}
+          def collect_indexes(value):
+              if isinstance(value,dict):
+                  kind=value.get('kind','')
+                  if kind in ['«term__[_]»',"«term__[_]'_»",'«term__[_]_?»','«term__[_]_!»']:
+                      key=(kind,len(value['args']))
+                      index_shapes[key]={'kind':kind,'arity':len(value['args']),
+                                         'children':[{'kind':x['kind'],'atom':x['atom']} for x in value['args']]}
+                  for child in value.values(): collect_indexes(child)
+              elif isinstance(value,list):
+                  for child in value: collect_indexes(child)
+          collect_indexes(json.loads((folder/'current-source-plans/Lean.Environment/native-census.json').read_text()))
+          print('PS0_NATIVE_INDEX_VARIANTS:'+json.dumps(list(index_shapes.values()),sort_keys=True))
           Path('transformed-thirteen-boundary-shapes.json').write_text(json.dumps(research,indent=2)+chr(10))
           print('PS0_TRANSFORMED_BOUNDARY_SHAPES:'+json.dumps(research,sort_keys=True))
           PY

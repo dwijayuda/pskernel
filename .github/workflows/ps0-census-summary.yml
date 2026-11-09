@@ -1408,3 +1408,121 @@ jobs:
             ellipsis-retained-log-rehash.log
             ellipsis-retained-log-roles.log
           if-no-files-found: error
+
+  native-pratt-do-rehash:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: ec35e2f50009a7b794141fe57c88d990b25f9df3
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42575555454
+          name: ps0-compiler-fixtures-ec35e2f50009a7b794141fe57c88d990b25f9df3-42575555454
+          github-token: ${{ github.token }}
+          path: native-pratt-do-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42575555454
+          name: ps0-compiler-prelude-ec35e2f50009a7b794141fe57c88d990b25f9df3-42575555454
+          github-token: ${{ github.token }}
+          path: native-pratt-do-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42575555454
+          name: ps0-compiler-core-ec35e2f50009a7b794141fe57c88d990b25f9df3-42575555454
+          github-token: ${{ github.token }}
+          path: native-pratt-do-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42575555454
+          name: ps0-compiler-natbasic-ec35e2f50009a7b794141fe57c88d990b25f9df3-42575555454
+          github-token: ${{ github.token }}
+          path: native-pratt-do-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42575555454
+          name: ps0-compiler-finbasic-ec35e2f50009a7b794141fe57c88d990b25f9df3-42575555454
+          github-token: ${{ github.token }}
+          path: native-pratt-do-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42575555454
+          name: ps0-do-layout-ec35e2f50009a7b794141fe57c88d990b25f9df3-42575555454
+          github-token: ${{ github.token }}
+          path: native-pratt-do-artifact
+      - name: Rehash compiler outputs and check actual owned do roles
+        run: |
+          set -euo pipefail
+          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py native-pratt-do-artifact --source ec35e2f50009a7b794141fe57c88d990b25f9df3 --output native-pratt-do-rehash.json | tee native-pratt-do-rehash.log
+          python3 - <<'PY' | tee native-pratt-do-roles.log
+          from pathlib import Path
+          from collections import Counter
+          import hashlib,json
+          root=Path('native-pratt-do-artifact')
+          def decls(commands):
+              for command in commands:
+                  if command['declaration'] is not None:
+                      yield command['declaration']
+                  yield from decls(command.get('nestedCommands',[]))
+          families={'Lean.Parser.Command.'+n:'PS0.StandardAdapters.ps0Standard'+n.title() for n in ['abbrev','theorem','opaque','axiom','instance','example']}
+          checked=0
+          for path in root.rglob('original-census.json'):
+              original=json.loads(path.read_text()); module=original['module']
+              observed=json.loads((path.parent/'migrated/lib/lean'/Path(*module.split('.')).with_suffix('.ilean.ps0-source-census.json')).read_text())
+              expected=Counter((d['sourceName'],families[d['production']]) for d in decls(original['commands']) if d['production'] in families)
+              actual=Counter((d['sourceName'],d['production']) for d in decls(observed['commands']) if d['production'] in families.values())
+              assert actual==expected,(module,actual,expected)
+              assert all(d['mode']=='mapped-ps' for d in decls(observed['commands']))
+              if module=='Lean.Compiler.DoLayoutProbe':
+                  rows={d['sourceName']:d for d in decls(observed['commands'])}
+                  for name in ['layoutValue','nestedValue','localDefault','localShared','unitReturn']:
+                      assert rows[name]['valueRootKind']=='ps0HostDo'
+                      assert rows[name]['doSequenceKind']=='Lean.Parser.Term.doSeqIndent'
+                  print('PS0_NATIVE_DO_ROLES:'+json.dumps([{k:r.get(k) for k in ['sourceName','valueRootKind','doSequenceKind','doElementKinds']} for r in rows.values()],sort_keys=True))
+              checked+=1
+          assert checked==8,checked
+          seen=set()
+          for path in root.rglob('evidence.json'):
+              folder=path.parent
+              if folder.name.startswith('ellipsis-'):
+                  value=json.loads(path.read_text()); assert value['source']=='ec35e2f50009a7b794141fe57c88d990b25f9df3'
+                  data=Path('experiments/ps0/tests/v1/ellipsis_operands.ps').read_bytes()
+                  assert hashlib.sha256(data).hexdigest()==value['fixture_sha256']
+                  assert value['original_native_node_identity'] is True
+                  assert value['oracle'] in (folder/'runtime.log').read_text()
+                  assert 'PS0V1-CALL-ORDER' in (folder/'named-before-ellipsis.log').read_text()
+                  for name in ['nonterminal-ellipsis','repeated-ellipsis']:
+                      assert "unexpected '..'" in (folder/(name+'.log')).read_text()
+                  seen.add('ellipsis'); print('PS0_NATIVE_ELLIPSIS_EVIDENCE:'+json.dumps(value,sort_keys=True))
+              if folder.name.startswith('do-layout-'):
+                  value=json.loads(path.read_text()); assert value['source']=='ec35e2f50009a7b794141fe57c88d990b25f9df3'
+                  data=Path('experiments/ps0/tests/v1/do_layout_operands.ps').read_bytes()
+                  assert hashlib.sha256(data).hexdigest()==value['fixture_sha256']
+                  assert value['oracle'] in (folder/'runtime.log').read_text()
+                  for name in ['return-gap','let-gap','statement-gap']:
+                      assert 'PS0V1-CALL-GAP' in (folder/(name+'.log')).read_text()
+                  assert 'PS0V1-CALL-ORDER' in (folder/'return-order.log').read_text()
+                  assert 'IO Unit' in (folder/'statement-type.log').read_text()
+                  seen.add('layout'); print('PS0_NATIVE_DO_EVIDENCE:'+json.dumps(value,sort_keys=True))
+          assert seen=={'layout','ellipsis'},seen
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-native-pratt-do-rehash-${{ github.run_id }}
+          path: |
+            native-pratt-do-rehash.json
+            native-pratt-do-rehash.log
+            native-pratt-do-roles.log
+          if-no-files-found: error

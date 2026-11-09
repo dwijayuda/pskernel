@@ -23,7 +23,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"c6e2e05d0361fb451267f29a44b1ab3434016f8e"}
+          pin={"repository":"dwijayuda/lean4","commit":"d8816d4933580d6b183075fd65649fdc72b18e57"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -141,7 +141,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"c6e2e05d0361fb451267f29a44b1ab3434016f8e"}
+          pin={"repository":"dwijayuda/lean4","commit":"d8816d4933580d6b183075fd65649fdc72b18e57"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -256,7 +256,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"c6e2e05d0361fb451267f29a44b1ab3434016f8e"}
+          pin={"repository":"dwijayuda/lean4","commit":"d8816d4933580d6b183075fd65649fdc72b18e57"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -346,7 +346,7 @@ jobs:
       - name: Qualify ordinary host values origins and native linking
         run: python3 tests/run-match-host-bodies.py
       - name: Reject six known ordinary host gaps
-        run: python3 tests/run-host-island-gaps.py --cases match,pattern-lambda,record-field,do-if,do-match,do-have
+        run: python3 tests/run-host-island-gaps.py --cases match,pattern-lambda,record-field,do-if,do-match,do-have,do-for,do-try
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -378,7 +378,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"c6e2e05d0361fb451267f29a44b1ab3434016f8e"}
+          pin={"repository":"dwijayuda/lean4","commit":"d8816d4933580d6b183075fd65649fdc72b18e57"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:

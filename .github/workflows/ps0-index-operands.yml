@@ -26,7 +26,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"619d9246ddf717c4b23500d8c613c0cceb62f470"}
+          pin={"repository":"dwijayuda/lean4","commit":"72f800f4fd127f429563814f9e1d16643d3cb956"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -132,6 +132,8 @@ jobs:
           PY
       - name: Retain native local declaration layouts
         run: lake env lean tests/debug-local-layout.lean 2>&1 | tee build/compiler-fixture-logs/local-layout.log
+      - name: Qualify local mixed binder syntax and native linking
+        run: python3 tests/run-local-mixed-binders.py
       - name: Qualify native indexed access and source fidelity
         working-directory: experiments/ps0
         run: python3 tests/run-index-operands.py
@@ -162,7 +164,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"619d9246ddf717c4b23500d8c613c0cceb62f470"}
+          pin={"repository":"dwijayuda/lean4","commit":"72f800f4fd127f429563814f9e1d16643d3cb956"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:

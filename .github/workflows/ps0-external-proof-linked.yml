@@ -800,8 +800,8 @@ jobs:
         if: success() || failure()
         run: |
           set -euo pipefail
-          python3 tests/run-where-local-helpers.py
-          python3 tests/run-return-boundary.py 2>&1 | tee build/compiler-fixture-logs/where-local.log
+          python3 tests/run-where-local-helpers.py 2>&1 | tee build/compiler-fixture-logs/where-local.log
+          python3 tests/run-return-boundary.py 2>&1 | tee build/compiler-fixture-logs/return-boundary.log
       - name: Qualify native indexed access and pipeline operands
         if: success() || failure()
         run: |
@@ -843,6 +843,8 @@ jobs:
           name: ps0-compiler-fixtures-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
           path: |
             experiments/ps0/build/compiler-fixture-logs/
+            experiments/ps0/build/return-boundary-*/*.json
+            experiments/ps0/build/return-boundary-*/*.log
             experiments/ps0/build/where-local-*/*.c
             experiments/ps0/build/where-local-*/*.olean
             experiments/ps0/build/where-local-*/*.ps

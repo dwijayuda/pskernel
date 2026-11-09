@@ -596,7 +596,12 @@ jobs:
           test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
           lake build PS0 ps0 2>&1 | tee build/compiler-fixture-logs/build.log
           lake exe ps0 environment | tee build/compiler-fixture-logs/environment.json
+      - name: Qualify nested section delimiter hygiene
+        run: |
+          set -euo pipefail
+          python3 tests/run-lambdas.py 2>&1 | tee build/compiler-fixture-logs/lambdas.log
       - name: Qualify all pinned Basic definitions and telescope source productions
+        if: success() || failure()
         run: |
           set -euo pipefail
           python3 tests/run-compiler-heads.py --fixture LCNFBasic --module Lean.Compiler.LCNF.Basic --blob 82c8dee0b9d13f09d58a6404dd5d5abf797d236e --declarations ALL 2>&1 | tee build/compiler-fixture-logs/basic.log
@@ -606,6 +611,8 @@ jobs:
           name: ps0-compiler-fixtures-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
           path: |
             experiments/ps0/build/compiler-fixture-logs/
+            experiments/ps0/build/lambdas-*/*.json
+            experiments/ps0/build/lambdas-*/*.log
             experiments/ps0/build/compiler-heads-*/*.json
             experiments/ps0/build/compiler-heads-*/*.log
             experiments/ps0/build/compiler-heads-*/*.diff

@@ -499,6 +499,11 @@ jobs:
             experiments/ps0/build/ellipsis-*/*.log
             experiments/ps0/build/lambdas-*/*.json
             experiments/ps0/build/lambdas-*/*.log
+            experiments/ps0/build/where-local-*/*.c
+            experiments/ps0/build/where-local-*/*.olean
+            experiments/ps0/build/where-local-*/*.ps
+            experiments/ps0/build/where-local-*/*.json
+            experiments/ps0/build/where-local-*/*.log
             experiments/ps0/build/local-mixed-*/*.c
             experiments/ps0/build/local-mixed-*/*.olean
             experiments/ps0/build/local-mixed-*/*.ps
@@ -789,6 +794,11 @@ jobs:
         run: |
           set -euo pipefail
           python3 tests/run-local-mixed-binders.py 2>&1 | tee build/compiler-fixture-logs/local-mixed.log
+      - name: Qualify where helper scopes proof tails and native bootstrap parity
+        if: success() || failure()
+        run: |
+          set -euo pipefail
+          python3 tests/run-where-local-helpers.py 2>&1 | tee build/compiler-fixture-logs/where-local.log
       - name: Qualify native indexed access and pipeline operands
         if: success() || failure()
         run: |
@@ -830,6 +840,11 @@ jobs:
           name: ps0-compiler-fixtures-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
           path: |
             experiments/ps0/build/compiler-fixture-logs/
+            experiments/ps0/build/where-local-*/*.c
+            experiments/ps0/build/where-local-*/*.olean
+            experiments/ps0/build/where-local-*/*.ps
+            experiments/ps0/build/where-local-*/*.json
+            experiments/ps0/build/where-local-*/*.log
             experiments/ps0/build/local-mixed-*/*.c
             experiments/ps0/build/local-mixed-*/*.olean
             experiments/ps0/build/local-mixed-*/*.ps

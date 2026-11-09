@@ -26,7 +26,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"3e067b19d9d56f49355dc5b321525fbe35633dc9"}
+          pin={"repository":"dwijayuda/lean4","commit":"fb333da70680b40a73afc7a0b4ce2e51df10b05d"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -140,7 +140,7 @@ jobs:
       - name: Qualify native match host bodies and source-only prelude parity
         run: python3 tests/run-match-host-bodies.py
       - name: Test-first ordinary host gap boundaries
-        run: python3 tests/run-host-island-gaps.py --cases match,pattern-lambda
+        run: python3 tests/run-host-island-gaps.py
       - name: Qualify native empty-return line boundaries
         run: python3 tests/run-return-boundary.py
       - name: Retain native where-local and finally layouts

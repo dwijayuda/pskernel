@@ -1,0 +1,145 @@
+name: PS0 SynthInstance native syntax inspection
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-synth-native-syntax-inspection.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  retained-private-constants:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: experiments/ps0
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          persist-credentials: false
+      - name: Read exact source pin
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          pin={"repository":"dwijayuda/lean4","commit":"d8816d4933580d6b183075fd65649fdc72b18e57"}
+          assert pin['repository']=='dwijayuda/lean4'
+          assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('PS0_SOURCE_SHA='+pin['commit']+'\n')
+          PY
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: ${{ env.PS0_SOURCE_SHA }}
+          sparse-checkout: experiments/ps0
+          persist-credentials: false
+      - uses: actions/cache/restore@v4
+        id: ps0-elan-input
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/restore@v4
+        id: ps0-lean-input
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Install checksum-verified pinned Linux Lean inputs
+        run: |
+          set -euo pipefail
+          ps0_fetch_input() {
+            local ps0_url="$1" ps0_api="$2" ps0_target="$3" ps0_digest="$4"
+            if test ! -f "$ps0_target"; then
+              if ! curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                --retry 5 --retry-max-time 300 --retry-all-errors "$ps0_url" -o "$ps0_target"; then
+                curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                  --retry 5 --retry-max-time 300 --retry-all-errors \
+                  -H 'Accept: application/octet-stream' -H 'X-GitHub-Api-Version: 2022-11-28' \
+                  "$ps0_api" -o "$ps0_target"
+              fi
+            fi
+            printf '%s  %s\n' "$ps0_digest" "$ps0_target" | sha256sum -c -
+          }
+          test "$(cat lean-toolchain)" = leanprover/lean4:v4.35.0
+          ps0_fetch_input \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            https://api.github.com/repos/leanprover/elan/releases/assets/529114798 \
+            "$RUNNER_TEMP/ps0-elan.tar.gz" \
+            42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+          ps0_fetch_input \
+            https://github.com/leanprover/lean4/releases/download/v4.35.0/lean-4.35.0-linux.tar.zst \
+            https://api.github.com/repos/leanprover/lean4/releases/assets/634574462 \
+            "$RUNNER_TEMP/ps0-lean.tar.zst" \
+            7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+          mkdir -p "$RUNNER_TEMP/ps0-elan-installer" "$RUNNER_TEMP/ps0-lean-verified"
+          tar -xzf "$RUNNER_TEMP/ps0-elan.tar.gz" -C "$RUNNER_TEMP/ps0-elan-installer"
+          "$RUNNER_TEMP/ps0-elan-installer/elan-init" -y --default-toolchain none --no-modify-path
+          tar --zstd -xf "$RUNNER_TEMP/ps0-lean.tar.zst" --strip-components=1 -C "$RUNNER_TEMP/ps0-lean-verified"
+          "$HOME/.elan/bin/elan" toolchain link ps0-pinned-lean-4.35.0 "$RUNNER_TEMP/ps0-lean-verified"
+          export ELAN_TOOLCHAIN=ps0-pinned-lean-4.35.0
+          echo "ELAN_TOOLCHAIN=$ELAN_TOOLCHAIN" >> "$GITHUB_ENV"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          test "$("$HOME/.elan/bin/lean" --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          "$HOME/.elan/bin/lean" --version
+          "$HOME/.elan/bin/lake" --version
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-elan-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-lean-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42695756448
+          name: ps0-compiler-synthinstance14-c6e2e05d0361fb451267f29a44b1ab3434016f8e-42695756448
+          github-token: ${{ github.token }}
+          path: experiments/ps0/retained-synth
+      - name: Compare final private constants with a native self control
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json,subprocess
+          root=next(Path('retained-synth').rglob('c-parity-olean-diagnostic.log')).parent
+          a=root/'baseline/lib/lean/Lean/Meta/SynthInstance.olean'
+          b=root/'migrated/lib/lean/Lean/Meta/SynthInstance.olean'
+          out=Path('build/private-constant-inspection');out.mkdir(parents=True)
+          def compare(label,other):
+              result=subprocess.run(['lake','env','lean','--run','tests/compare-compiler-olean.lean',str(a),str(other),'--all-parts'],capture_output=True,text=True,timeout=300)
+              (out/(label+'.log')).write_text(result.stdout+result.stderr)
+              assert result.returncode==0,(result.stdout+result.stderr)[:8000]
+              return json.loads(result.stdout)
+          self_check=compare('native-self',a)
+          assert not self_check['changedConstants'],'diagnostic must coalesce private overrides before comparing bodies'
+          details=compare('native-ps',b)
+          assert set(details['native']['constantNames'])==set(details['ps']['constantNames'])
+          assert set(details['native']['extraConstNames'])==set(details['ps']['extraConstNames'])
+          syntax=subprocess.run(['python3','tests/compare-lowered-native-syntax.py',str(root/'original-census.json'),str(root/'migrated/lib/lean/Lean/Meta/SynthInstance.ilean.ps0-source-census.json'),str(out/'lowered-syntax.json')],capture_output=True,text=True,timeout=60)
+          print(syntax.stdout,flush=True)
+          assert syntax.returncode==0,syntax.stderr
+          print('PS0_PRIVATE_CONSTANT_NAME_SETS: PASS')
+          summary=[]
+          for row in details['changedConstants']:
+              result={k:row.get(k) for k in ['name','typeEqual','valueEqual','hintsEqual']}
+              for field in ['Type','Value']:
+                  left,right=row.get('native'+field),row.get('ps'+field)
+                  if left is not None and right is not None:
+                      first=next((i for i,(x,y) in enumerate(zip(left,right)) if x!=y),min(len(left),len(right)))
+                      result[field.lower()+'_first_difference']={'offset':first,'native':left[max(0,first-150):first+600],'ps':right[max(0,first-150):first+600]}
+              summary.append(result)
+          (out/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
+          print('PS0_PRIVATE_CONSTANT_SELF_CONTROL: PASS')
+          print('PS0_PRIVATE_CONSTANT_DIFFERENCES:'+json.dumps(summary,sort_keys=True))
+          
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-private-constants-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
+          path: experiments/ps0/build/private-constant-inspection/
+          if-no-files-found: error

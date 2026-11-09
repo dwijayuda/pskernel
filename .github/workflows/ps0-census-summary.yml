@@ -296,3 +296,62 @@ jobs:
           print('PS0_STAGE_TWO_HOST_METADATA_MANIFEST_SHA256',hashlib.sha256(json.dumps(host['host_metadata'],sort_keys=True).encode()).hexdigest())
           print('PS0_STAGE_TWO_CENSUS_MODES',json.dumps(census['declaration_modes'],sort_keys=True))
           PY
+
+  operator-compiler-evidence:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-project-90e32a5ec5ce258e0310c1084512e076d283d682-42542351315
+          run-id: 42542351315
+          github-token: ${{ github.token }}
+          path: operators
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-operator-baseline-42542351315
+          run-id: 42542351315
+          github-token: ${{ github.token }}
+          path: baseline
+      - name: Inspect exact operator and native compiler evidence
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root=Path('operators')
+          files=list(root.rglob('compiler-heads-*/evidence.json'))
+          assert len(files)==4, files
+          count=0
+          for file in sorted(files):
+              data=json.loads(file.read_text())
+              assert data['source']=='90e32a5ec5ce258e0310c1084512e076d283d682'
+              assert all(v['native']==v['ps'] for v in data['comparisons'].values())
+              count+=len(data['converted_declarations'])
+              print('PS0_OPERATOR_MODULE_EVIDENCE',json.dumps(data,sort_keys=True))
+          assert count==15, count
+          owned=list(root.rglob('operators-*/evidence.json'))
+          assert len(owned)==1, owned
+          evidence=json.loads(owned[0].read_text())
+          assert evidence['source']=='90e32a5ec5ce258e0310c1084512e076d283d682'
+          assert evidence['oracle']=='PS0_OPERATORS:17:6:5:512:8:1:10:10:4:2:4'
+          print('PS0_OPERATOR_OPERAND_EVIDENCE',json.dumps(evidence,sort_keys=True))
+          inventory=owned[0].parent/'native-descriptors.log'
+          line=next(line for line in inventory.read_text().splitlines() if line.startswith('{"lean_commit"'))
+          data=json.loads(line)
+          assert data['lean_commit']=='eb6cafb7290e8bd5f2937522d8d804f58f02bafc'
+          assert len(data['operators'])==86
+          print('PS0_OPERATOR_DESCRIPTOR_EVIDENCE',json.dumps({'lean_commit':data['lean_commit'],'count':len(data['operators']),'file_sha256':hashlib.sha256(inventory.read_bytes()).hexdigest()},sort_keys=True))
+          hosts=list(root.rglob('relocated-grammar-*/evidence.json'))
+          assert len(hosts)==1, hosts
+          data=json.loads(hosts[0].read_text())
+          assert data['source']=='90e32a5ec5ce258e0310c1084512e076d283d682'
+          assert all(v['source_sha256']==v['published_sha256'] for v in data['host_metadata'].values())
+          assert 'PS0/Operators.olean' in data['host_metadata']
+          print('PS0_OPERATOR_HOST_EVIDENCE',json.dumps({'source':data['source'],'driver_sha256':data['driver_sha256'],'metadata_files':len(data['host_metadata']),'raw_evidence_sha256':hashlib.sha256(hosts[0].read_bytes()).hexdigest(),'sorted_metadata_sha256':hashlib.sha256(json.dumps(data['host_metadata'],sort_keys=True).encode()).hexdigest()},sort_keys=True))
+          files=list(Path('baseline').rglob('operator-baseline.json'))
+          assert len(files)==1, files
+          data=json.loads(files[0].read_text())
+          assert data['source']=='6dc96dd983c0d37fc91bf39d05777540f4f1322d' and data['status']=='PASS' and data['checker_exit']!=0
+          print('PS0_OPERATOR_PRE_ADAPTER_EVIDENCE',json.dumps(data,sort_keys=True))
+          print('PS0_OPERATOR_COMPILER_EVIDENCE: PASS')
+          PY

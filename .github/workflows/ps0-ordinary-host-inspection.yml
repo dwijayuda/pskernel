@@ -102,6 +102,29 @@ jobs:
           print('PS0_ORDINARY_HOST_INSPECTION:'+json.dumps(report,sort_keys=True))
           
           PY
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42703611899
+          name: ps0-aggregate-host-gaps-008de4640aa6c9ce3bb16c086365d3c52e74e235-42703611899
+          github-token: ${{ github.token }}
+          path: aggregate
+      - name: Inspect actual native aggregate and binder production shapes
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          reports=[]
+          for file in sorted(Path('aggregate').rglob('*-native-census.json')):
+              census=json.loads(file.read_text())
+              declaration=next(row['declaration'] for row in census['commands'] if row.get('declaration') and row['declaration']['sourceName']=='bad')
+              value=declaration['valueSyntax']
+              report=dict(case=file.stem,module=census['module'],value=value)
+              reports.append(report)
+              print('PS0_NATIVE_AGGREGATE_SHAPE:'+json.dumps(report,sort_keys=True))
+          assert len(reports)==8,len(reports)
+          Path('inspection/native-aggregate-shapes.json').write_text(json.dumps(reports,indent=2)+'\\n')
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:

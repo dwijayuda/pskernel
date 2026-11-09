@@ -767,3 +767,97 @@ jobs:
             telescope-comment-rehash.json
             telescope-comment-rehash.log
           if-no-files-found: error
+
+
+  complete-comment-plan-inspection:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f
+          sparse-checkout: experiments/ps0
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42553687595
+          name: ps0-corpus-source-plan-bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f-42553687595
+          github-token: ${{ github.token }}
+          path: corpus-plan-artifact
+      - name: Reconstruct every complete source plan and require unchanged line counts
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' | tee corpus-plan-inspection.log
+          from pathlib import Path
+          from collections import Counter
+          import hashlib, json
+          root = Path('corpus-plan-artifact')
+          inventory = json.loads(Path('experiments/ps0/compiler-source-inventory.json').read_text())
+          paths = [path for path in root.rglob('evidence.json') if path.parent.name.startswith('corpus-source-plan-')]
+          assert len(paths) == 1
+          path = paths[0]
+          report = json.loads(path.read_text())
+          assert report['source'] == 'bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f'
+          assert report['count'] == len(report['modules']) == inventory['count'] == 2546
+          assert report['inventory_sha256'] == hashlib.sha256(Path('experiments/ps0/compiler-source-inventory.json').read_bytes()).hexdigest()
+          entries = {entry['module']: entry for entry in inventory['entries']}
+          counts, strategies, gaps, headers, line_changes = Counter(), Counter(), [], [], []
+          definition_count = 0
+          for module in report['modules']:
+              name = module['module']
+              assert module['blob'] == entries[name]['blob']
+              directory = path.parent / 'modules' / name
+              original = (directory / 'original.ps').read_bytes()
+              census_bytes = (directory / 'native-census.json').read_bytes()
+              census = json.loads(census_bytes)
+              assert census['module'] == name
+              assert census['nativeSource'].encode() == original
+              if hashlib.sha256(original).hexdigest() != module['original_sha256']:
+                  headers.append(name)
+              else:
+                  blob = hashlib.sha1(b'blob ' + str(len(original)).encode() + b'\0' + original).hexdigest()
+                  assert blob == entries[name]['blob']
+              counts[module['status']] += 1
+              if module['status'] != 'planned-unvalidated':
+                  gaps.append(dict(module=name, status=module['status'], log=(directory/'plan.log').read_text()[-1800:]))
+                  continue
+              plan = json.loads((directory / 'plan.json').read_text())
+              converted = (directory / 'converted.ps').read_bytes()
+              assert hashlib.sha256(census_bytes).hexdigest() == module['census_sha256']
+              assert hashlib.sha256(original).hexdigest() == plan['source_sha256']
+              assert hashlib.sha256(converted).hexdigest() == plan['result_sha256'] == module['converted_sha256']
+              cursor, chunks = 0, []
+              for edit in plan['edits']:
+                  assert cursor <= edit['start'] <= edit['end'] <= len(original)
+                  assert original[edit['start']:edit['end']].decode() == edit['old']
+                  chunks += [original[cursor:edit['start']], edit['new'].encode()]
+                  cursor = edit['end']
+              chunks.append(original[cursor:])
+              assert b''.join(chunks) == converted
+              definition_count += len(plan['declarations'])
+              strategies.update(strategy['targetKeyword'] for strategy in plan['strategies'])
+              if original.count(b'\n') != converted.count(b'\n'):
+                  line_changes.append(name)
+          assert dict(counts) == report['status_counts']
+          assert dict(counts) == {'planned-unvalidated': 2546}
+          assert not line_changes
+          assert sorted(headers) == ['Lean', 'LeanChecker', 'LeanExport', 'LeanIR', 'Leanc']
+          summary = dict(source=report['source'], modules=len(entries), status_counts=dict(counts),
+                         planned_definition_count=definition_count, strategy_counts=dict(strategies),
+                         native_header_adapter_modules=sorted(headers), original_planner_line_count_changes=len(line_changes),
+                         gaps=gaps, grammar_migration_complete=False, verified_execution=False,
+                         scope='source identity/census and source edit reconstruction; no converted parse/build/parity acceptance')
+          Path('corpus-plan-inspection.json').write_text(json.dumps(summary, indent=2)+'\n')
+          print('PS0_CORPUS_PLAN_INDEPENDENT_INSPECTION:'+json.dumps(summary, sort_keys=True))
+          
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-complete-comment-plan-inspection-${{ github.run_id }}
+          path: |
+            corpus-plan-inspection.json
+            corpus-plan-inspection.log
+          if-no-files-found: error

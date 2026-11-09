@@ -24,7 +24,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"3e3381ae058f154648e1c85a07d0f00799b70b5e"}
+          pin={"repository":"dwijayuda/lean4","commit":"f89de60f6081cdce5853f001f5e7104860133cfb"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -119,7 +119,14 @@ jobs:
         run: |
           python3 - <<'PY'
           import pathlib,subprocess
-          result=subprocess.run(['lake','env','lean','--run','tests/inspect-parenthesis-budget.lean'],capture_output=True,text=True,timeout=60)
+          try:
+              result=subprocess.run(['lake','env','lean','--run','tests/inspect-parenthesis-budget.lean'],capture_output=True,text=True,timeout=60)
+          except subprocess.TimeoutExpired as error:
+              partial=error.stdout or b''
+              if isinstance(partial,bytes): partial=partial.decode(errors='replace')
+              pathlib.Path('build/compiler-fixture-logs/paren-budget.log').write_text(partial)
+              print(partial,flush=True)
+              raise
           pathlib.Path('build/compiler-fixture-logs/paren-budget.log').write_text(result.stdout+result.stderr)
           print(result.stdout+result.stderr,flush=True)
           assert result.returncode==0,result.returncode

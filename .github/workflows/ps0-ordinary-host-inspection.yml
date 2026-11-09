@@ -14,17 +14,24 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: dwijayuda/lean4
-          ref: e8cddaade5840641a5e428fdbbb1cebac2d44861
+          ref: f88a0f71c63634888d390ac8e6b92243ddad5287
           sparse-checkout: experiments/ps0/tests/v1/ordinary_host_origins.ps
           sparse-checkout-cone-mode: false
           persist-credentials: false
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42701804872
-          name: ps0-host-operand-parity-e8cddaade5840641a5e428fdbbb1cebac2d44861-42701804872
+          run-id: 42706720256
+          name: ps0-host-operand-parity-f88a0f71c63634888d390ac8e6b92243ddad5287-42706720256
           github-token: ${{ github.token }}
           path: retained
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42706720256
+          name: ps0-compiler-synthinstance14-f88a0f71c63634888d390ac8e6b92243ddad5287-42706720256
+          github-token: ${{ github.token }}
+          path: synth-retained
       - name: Rehash actual compiler outputs ELF source maps and plans
         run: |
           python3 - <<'PY'
@@ -35,7 +42,7 @@ jobs:
           assert len(matches)==1,matches
           work=matches[0].parent
           e=json.loads(matches[0].read_text())
-          assert e['source']=='e8cddaade5840641a5e428fdbbb1cebac2d44861'
+          assert e['source']=='f88a0f71c63634888d390ac8e6b92243ddad5287'
           assert e['mapped_definitions']==33 and e['mapped_theorems']==30
           assert e['source_origin_cases']==11
           assert e['logical_imports']==['Init']
@@ -93,37 +100,32 @@ jobs:
               assert row['native_baseline_passed'] and row['ps_exit_code']!=0 and row['invalid_host_gap_rejected']
               assert 'PS0V1-CALL-GAP' in (gap_files[0].parent/(row['case']+'-ps.log')).read_text()
           out=Path('inspection');out.mkdir()
-          report=dict(status='PASS',producer_source=e['source'],producer_run=42701804872,producer_runner='ed67c31b6ac6601128bbf58b3220f3aae458a26f',
+          report=dict(status='PASS',producer_source=e['source'],producer_run=42706720256,producer_runner='805caf3c15305e7e43f8a332d6fb56cf86b3ddd4',
               actual_compiler_files_rehashed=6,actual_native_elf_files_rehashed=1,hashes=hashes,comparisons=e['comparisons'],
               mapped_definitions=33,mapped_theorems=30,source_origin_cases=11,invalid_host_gaps_rejected=11,
-              evidence=e,scope='finite ordinary match, pattern lambda, record, condition, do-match, named-have, for collection/body and try/catch/finally roles; loop annotations and broader compiler C parity remain open',
+              evidence=e,scope='finite ordinary match, pattern lambda, record, condition, do-match, named-have, for collection/body and try/catch/finally roles; loop annotations and other ordinary roles and broader matrix qualification remain open',
               grammar_migration_complete=False,verified_execution=False)
+          synthroot=Path('synth-retained')
+          synthfiles=list(synthroot.glob('compiler-heads-*-SynthInstance14/evidence.json'))
+          assert len(synthfiles)==1,synthfiles
+          sw=synthfiles[0].parent
+          se=json.loads(synthfiles[0].read_text())
+          assert se['source']==e['source'] and se['module']=='Lean.Meta.SynthInstance'
+          assert se['compiler_pipeline']=='native-lake-eager'
+          synthhashes={}
+          for relative,comparison in se['comparisons'].items():
+              assert relative.endswith(('.c','.olean')),relative
+              assert comparison['native']==comparison['ps'],comparison
+              for label,directory in [('native','baseline'),('ps','migrated')]:
+                  file=sw/directory/relative
+                  actual=hashlib.sha256(file.read_bytes()).hexdigest()
+                  assert actual==comparison[label],(relative,label,actual)
+                  synthhashes[str(file.relative_to(synthroot))]=actual
+          assert len(synthhashes)==4,synthhashes
+          report['synthinstance']={'status':'PASS_FINITE_NATIVE_C_PUBLIC_OLEAN_PARITY','actual_compiler_files_rehashed':4,'hashes':synthhashes,'evidence':se}
           (out/'inspection.json').write_text(json.dumps(report,indent=2)+'\n')
           print('PS0_ORDINARY_HOST_INSPECTION:'+json.dumps(report,sort_keys=True))
           
-          PY
-      - uses: actions/download-artifact@v4
-        with:
-          repository: dwijayuda/pskernel
-          run-id: 42703611899
-          name: ps0-aggregate-host-gaps-008de4640aa6c9ce3bb16c086365d3c52e74e235-42703611899
-          github-token: ${{ github.token }}
-          path: aggregate
-      - name: Inspect actual native aggregate and binder production shapes
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          import json
-          reports=[]
-          for file in sorted(Path('aggregate').rglob('*-native-census.json')):
-              census=json.loads(file.read_text())
-              declaration=next(row['declaration'] for row in census['commands'] if row.get('declaration') and row['declaration']['sourceName']=='bad')
-              value=declaration['valueSyntax']
-              report=dict(case=file.stem,module=census['module'],value=value)
-              reports.append(report)
-              print('PS0_NATIVE_AGGREGATE_SHAPE:'+json.dumps(report,sort_keys=True))
-          assert len(reports)==8,len(reports)
-          Path('inspection/native-aggregate-shapes.json').write_text(json.dumps(reports,indent=2)+'\\n')
           PY
       - uses: actions/upload-artifact@v4
         if: always()

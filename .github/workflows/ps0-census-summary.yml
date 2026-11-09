@@ -579,3 +579,37 @@ jobs:
           path: audit/native-header-adapters.json
           if-no-files-found: error
 
+
+  declaration-tail-raw-output-evidence:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-project-3b23a3520c270bb892462f0600abb8b7eed25c2c-42547214639
+          run-id: 42547214639
+          github-token: ${{ github.token }}
+          path: raw-tails
+      - name: Rehash actual native and PS C and public olean files
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root=Path('raw-tails')
+          files=list(root.rglob('compiler-heads-*/evidence.json'))
+          assert len(files)==5, files
+          total=0
+          for file in sorted(files):
+              data=json.loads(file.read_text())
+              assert data['source']=='3b23a3520c270bb892462f0600abb8b7eed25c2c'
+              for relative, expected in data['comparisons'].items():
+                  native=hashlib.sha256((file.parent/'baseline'/relative).read_bytes()).hexdigest()
+                  ps=hashlib.sha256((file.parent/'migrated'/relative).read_bytes()).hexdigest()
+                  assert native==ps==expected['native']==expected['ps'], (data['module'],relative)
+              total+=len(data['converted_declarations'])
+              print('PS0_DECLARATION_TAIL_RAW_MODULE_EVIDENCE',json.dumps(data,sort_keys=True))
+              if data['module']=='Lean.Compiler.LCNF.EmitUtil':
+                  print('PS0_DECLARATION_TAIL_RAW_PLAN',json.dumps(json.loads((file.parent/'plan.json').read_text()),sort_keys=True))
+          assert total==17, total
+          print('PS0_DECLARATION_TAIL_RAW_OUTPUT_REHASH: PASS; modules=5; heads=17; files=20')
+          PY

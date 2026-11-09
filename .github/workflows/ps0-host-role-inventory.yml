@@ -1,7 +1,5 @@
 name: PS0 native host role inventory
 on:
-  pull_request:
-    paths: [.github/workflows/ps0-host-role-inventory.yml]
   workflow_dispatch:
 permissions:
   contents: read

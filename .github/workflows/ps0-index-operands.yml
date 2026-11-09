@@ -1,8 +1,6 @@
 name: PS0 native indexing qualification
 
 on:
-  pull_request:
-    paths: [.github/workflows/ps0-index-operands.yml]
   workflow_dispatch:
 
 permissions:

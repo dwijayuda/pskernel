@@ -1,8 +1,6 @@
 name: PS0 ordinary host island gap probe
 
 on:
-  pull_request:
-    paths: [.github/workflows/ps0-host-island-gaps.yml]
   workflow_dispatch:
 
 permissions:

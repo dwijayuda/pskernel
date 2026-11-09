@@ -26,7 +26,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"72f800f4fd127f429563814f9e1d16643d3cb956"}
+          pin={"repository":"dwijayuda/lean4","commit":"dba1e900188f74ece9c701f1a97678599e1d68f7"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -164,7 +164,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"72f800f4fd127f429563814f9e1d16643d3cb956"}
+          pin={"repository":"dwijayuda/lean4","commit":"dba1e900188f74ece9c701f1a97678599e1d68f7"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:

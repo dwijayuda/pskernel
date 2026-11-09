@@ -403,6 +403,7 @@ jobs:
             experiments/ps0/build/prelude-grammar-*/
             experiments/ps0/build/compiler-heads-*/*.json
             experiments/ps0/build/compiler-heads-*/*.log
+            experiments/ps0/build/compiler-heads-*/*.diff
             experiments/ps0/build/compiler-heads-*/original/src/
             experiments/ps0/build/compiler-heads-*/converted/src/
             experiments/ps0/build/compiler-heads-*/baseline/ir/Lean/Compiler/ClosedTermCache.c
@@ -606,6 +607,7 @@ jobs:
             experiments/ps0/build/compiler-fixture-logs/
             experiments/ps0/build/compiler-heads-*/*.json
             experiments/ps0/build/compiler-heads-*/*.log
+            experiments/ps0/build/compiler-heads-*/*.diff
             experiments/ps0/build/compiler-heads-*/original/src/
             experiments/ps0/build/compiler-heads-*/converted/src/
             experiments/ps0/build/compiler-heads-*/baseline/ir/Lean/Compiler/LCNF/Basic.c

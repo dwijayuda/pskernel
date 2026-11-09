@@ -18,6 +18,13 @@ jobs:
           name: ps0-transformed-corpus-fdfcf5f974c2791ae84f20569b87eee96aa57b00-42638383959
           github-token: ${{ github.token }}
           path: transformed-nine
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42553687595
+          name: ps0-corpus-source-plan-bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f-42553687595
+          github-token: ${{ github.token }}
+          path: original-source-plans
       - name: Audit retained mapped source observations against successful Lake jobs
         run: |
           set -euo pipefail
@@ -91,8 +98,12 @@ jobs:
                   yield from command_nodes(command.get('nestedCommands',[]))
           for module,sites in failure_sites.items():
               raw=(folder/'transformed-source'/Path(*module.split('.')).with_suffix('.ps')).read_bytes()
-              native=json.loads((folder/'current-source-plans'/module/'native-census.json').read_text())
+              native_path=folder/'current-source-plans'/module/'native-census.json'
+              if not native_path.is_file():
+                  native_path=next(Path('original-source-plans').rglob(module+'/native-census.json'))
+              native=json.loads(native_path.read_text())
               plan=json.loads((folder/'current-source-plans'/module/'plan.json').read_text())
+              assert sha(native['nativeSource'].encode())==plan['source_sha256'],module
               ps_lines=raw.decode().splitlines()
               native_bytes=native['nativeSource'].encode()
               native_lines=native_bytes.splitlines(keepends=True)

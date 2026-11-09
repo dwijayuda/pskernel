@@ -257,7 +257,7 @@ jobs:
                       assert rows[name]['doSequenceKind']=='Lean.Parser.Term.doSeqIndent'
                   print('PS0_NATIVE_DO_ROLES:'+json.dumps([{k:r.get(k) for k in ['sourceName','valueRootKind','doSequenceKind','doElementKinds']} for r in rows.values()],sort_keys=True))
               checked+=1
-          assert checked==35,checked
+          assert checked==37,checked
           for path in root.rglob('evidence.json'):
               if not path.parent.name.startswith('compiler-heads-'):
                   continue

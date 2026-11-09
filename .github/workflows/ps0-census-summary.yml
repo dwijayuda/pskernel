@@ -861,3 +861,107 @@ jobs:
             corpus-plan-inspection.json
             corpus-plan-inspection.log
           if-no-files-found: error
+
+
+  telescope-native-bootstrap-fixed-point:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42552622266
+          name: ps0-compiler-stage1-cd3b62f8003ecd88b5943cb0666cccfc32662f1f-42552622266
+          github-token: ${{ github.token }}
+          path: native-stage-one
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42552622266
+          name: ps0-compiler-stage2-cd3b62f8003ecd88b5943cb0666cccfc32662f1f-42552622266
+          github-token: ${{ github.token }}
+          path: native-stage-two
+      - name: Check complete native-compatible compiler fixed point and retained executables
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' | tee telescope-bootstrap-inspection.log
+          from pathlib import Path
+          import hashlib, json
+          sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+          a,b=[json.loads(Path(folder,'migration.json').read_text()) for folder in ['native-stage-one','native-stage-two']]
+          assert a['source_commit']==b['source_commit']=='cd3b62f8003ecd88b5943cb0666cccfc32662f1f'
+          assert a['module_count']==b['module_count']==len(a['outputs'])==len(b['outputs'])==2569
+          assert a['outputs']==b['outputs']
+          assert b['fixed_point']=={'changed_c':[],'changed_olean':[]}
+          assert a['runtime_smoke']==b['runtime_smoke']=='PASS'
+          assert a['runtime_grammar_host']['status']==b['runtime_grammar_host']['status']=='PASS'
+          reports=[]
+          for folder,data in [('native-stage-one',a),('native-stage-two',b)]:
+              root=Path(folder)
+              assert sha(root/'migrated-ps0')==data['driver_sha256']
+              host=json.loads((root/'native-grammar-host.json').read_text())
+              assert sha(root/'native-grammar-host.json')==data['runtime_grammar_host']['evidence_sha256']
+              assert host['driver_sha256']==data['driver_sha256']
+              assert len(host['host_metadata'])==data['runtime_grammar_host']['metadata_files']==220
+              assert all(item['source_sha256']==item['published_sha256'] for item in host['host_metadata'].values())
+              census=json.loads((root/'source-census/summary.json').read_text())
+              assert census['module_count']==2569
+              assert census['declaration_modes']=={'native-compatible':72820}
+              reports.append(dict(stage=folder,driver_sha256=data['driver_sha256'],
+                  host_sha256=sha(root/'native-grammar-host.json'),host_metadata_files=220,
+                  host_sorted_metadata_sha256=hashlib.sha256(json.dumps(host['host_metadata'],sort_keys=True).encode()).hexdigest(),
+                  census_sha256=sha(root/'source-census/summary.json')))
+          assert reports[0]['driver_sha256']==reports[1]['driver_sha256']
+          summary=dict(source=a['source_commit'],modules=2569,native_compatible_rows=72820,mapped_ps_rows=0,
+                       fixed_point=b['fixed_point'],stages=reports,grammar_migration_complete=False,verified_execution=False,
+                       scope='native-compatible full compiler; original target output hashes and host metadata manifest, actual retained executables rehashed; not canonical source conversion')
+          Path('telescope-bootstrap-inspection.json').write_text(json.dumps(summary,indent=2)+'\n')
+          print('PS0_TELESCOPE_BOOTSTRAP_INSPECTION:'+json.dumps(summary,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-telescope-native-bootstrap-inspection-${{ github.run_id }}
+          path: |
+            telescope-bootstrap-inspection.json
+            telescope-bootstrap-inspection.log
+          if-no-files-found: error
+
+  telescope-where-instance-rehash:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: cbd741ec3c0ef5f5ef1f3537b6fa8569fd746128
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42558307141
+          name: ps0-compiler-fixtures-cbd741ec3c0ef5f5ef1f3537b6fa8569fd746128-42558307141
+          github-token: ${{ github.token }}
+          path: where-instance-artifact
+      - name: Rehash actual declaration-form and compiler-module outputs
+        run: |
+          set -euo pipefail
+          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py where-instance-artifact --source cbd741ec3c0ef5f5ef1f3537b6fa8569fd746128 --output where-instance-rehash.json | tee where-instance-rehash.log
+          python3 - <<'PY' | tee where-instance-roles.log
+          from pathlib import Path
+          import json
+          for path in Path('where-instance-artifact').rglob('evidence.json'):
+              if 'DeclarationForms' in path.parent.name:
+                  value=json.loads(path.read_text())
+                  print('PS0_WHERE_INSTANCE_ROLES:'+json.dumps(value.get('non_definition_source_roles',[]),sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-where-instance-rehash-${{ github.run_id }}
+          path: |
+            where-instance-rehash.json
+            where-instance-rehash.log
+            where-instance-roles.log
+          if-no-files-found: error

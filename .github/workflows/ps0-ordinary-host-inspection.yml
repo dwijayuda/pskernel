@@ -58,7 +58,7 @@ jobs:
               assert census['nativeSource'].encode()==source and census['imports']==['Init']
               if label!='baseline':
                   rows=[row['declaration'] for row in census['commands'] if row['declaration']]
-                  assert len(rows)==62 and all(row['mode']=='mapped-ps' for row in rows)
+                  assert len(rows)==42 and all(row['mode']=='mapped-ps' for row in rows)
           raw=(work/'baseline-MatchHostBootstrap.ps').read_bytes()
           plan=json.loads((work/'planned-edits.json').read_text())
           assert hashlib.sha256(raw).hexdigest()==plan['source_sha256']

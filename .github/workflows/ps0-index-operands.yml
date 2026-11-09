@@ -26,7 +26,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"82263dbab3562c53da524ce403a33a181733c4a2"}
+          pin={"repository":"dwijayuda/lean4","commit":"23a5981037091d1ad6a74ffd1dd60d1577980f99"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -128,6 +128,7 @@ jobs:
           start=sum(len(x) for x in original.splitlines(keepends=True)[:691])
           end=sum(len(x) for x in original.splitlines(keepends=True)[:704])
           print('PS0_RETAINED_INDEX_EDITS:'+json.dumps([e for e in plan['edits'] if start<=e['start']<=end]))
+          Path('experiments/ps0/build/retained-index-signature.txt').write_text('\n'.join(lines[695:700])+'\n')
           PY
       - name: Qualify native indexed access and source fidelity
         working-directory: experiments/ps0

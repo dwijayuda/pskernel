@@ -499,6 +499,8 @@ jobs:
             experiments/ps0/build/ellipsis-*/*.log
             experiments/ps0/build/lambdas-*/*.json
             experiments/ps0/build/lambdas-*/*.log
+            experiments/ps0/build/local-mixed-*/*.json
+            experiments/ps0/build/local-mixed-*/*.log
             experiments/ps0/build/index-operands-*/*.json
             experiments/ps0/build/index-operands-*/*.log
             experiments/ps0/build/declaration-tails-*/*.json
@@ -779,6 +781,11 @@ jobs:
         run: |
           set -euo pipefail
           python3 tests/run-binders.py 2>&1 | tee build/compiler-fixture-logs/binders.log
+      - name: Qualify local mixed binder source fidelity and native linking
+        if: success() || failure()
+        run: |
+          set -euo pipefail
+          python3 tests/run-local-mixed-binders.py 2>&1 | tee build/compiler-fixture-logs/local-mixed.log
       - name: Qualify native indexed access and pipeline operands
         if: success() || failure()
         run: |
@@ -820,6 +827,8 @@ jobs:
           name: ps0-compiler-fixtures-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
           path: |
             experiments/ps0/build/compiler-fixture-logs/
+            experiments/ps0/build/local-mixed-*/*.json
+            experiments/ps0/build/local-mixed-*/*.log
             experiments/ps0/build/index-operands-*/*.json
             experiments/ps0/build/index-operands-*/*.log
             experiments/ps0/build/ellipsis-*/*.json

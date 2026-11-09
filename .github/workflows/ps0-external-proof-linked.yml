@@ -499,6 +499,9 @@ jobs:
             experiments/ps0/build/ellipsis-*/*.log
             experiments/ps0/build/lambdas-*/*.json
             experiments/ps0/build/lambdas-*/*.log
+            experiments/ps0/build/local-mixed-*/*.c
+            experiments/ps0/build/local-mixed-*/*.olean
+            experiments/ps0/build/local-mixed-*/*.ps
             experiments/ps0/build/local-mixed-*/*.json
             experiments/ps0/build/local-mixed-*/*.log
             experiments/ps0/build/index-operands-*/*.json
@@ -827,6 +830,9 @@ jobs:
           name: ps0-compiler-fixtures-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
           path: |
             experiments/ps0/build/compiler-fixture-logs/
+            experiments/ps0/build/local-mixed-*/*.c
+            experiments/ps0/build/local-mixed-*/*.olean
+            experiments/ps0/build/local-mixed-*/*.ps
             experiments/ps0/build/local-mixed-*/*.json
             experiments/ps0/build/local-mixed-*/*.log
             experiments/ps0/build/index-operands-*/*.json

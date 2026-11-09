@@ -116,14 +116,14 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42580512720
-          name: ps0-transformed-corpus-742c5c180a8ee7314075d63792c220b710e96504-42580512720
+          run-id: 42681043836
+          name: ps0-native-head-census-0942ac5898b144d0f8ff3181ff6b4dacbfc76b8c-42681043836
           github-token: ${{ github.token }}
           path: native-census-cache
       - name: Compile all transformed upstream and self sources with PS grammar
         run: |
           set -euo pipefail
-          python3 tests/run-compiler-ps.py --source-plans "$GITHUB_WORKSPACE/source-plans" --plan-source bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f --native-censuses "$GITHUB_WORKSPACE/native-census-cache" --census-source 742c5c180a8ee7314075d63792c220b710e96504
+          python3 tests/run-compiler-ps.py --source-plans "$GITHUB_WORKSPACE/source-plans" --plan-source bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f --native-censuses "$GITHUB_WORKSPACE/native-census-cache" --census-source 0942ac5898b144d0f8ff3181ff6b4dacbfc76b8c
           python3 tests/run-compiler-census.py
       - uses: actions/upload-artifact@v4
         if: always()

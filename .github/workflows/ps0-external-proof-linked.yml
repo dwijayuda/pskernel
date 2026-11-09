@@ -499,6 +499,8 @@ jobs:
             experiments/ps0/build/ellipsis-*/*.log
             experiments/ps0/build/lambdas-*/*.json
             experiments/ps0/build/lambdas-*/*.log
+            experiments/ps0/build/index-operands-*/*.json
+            experiments/ps0/build/index-operands-*/*.log
             experiments/ps0/build/declaration-tails-*/*.json
             experiments/ps0/build/declaration-tails-*/*.log
             experiments/ps0/build/operators-*/*.json
@@ -777,6 +779,11 @@ jobs:
         run: |
           set -euo pipefail
           python3 tests/run-binders.py 2>&1 | tee build/compiler-fixture-logs/binders.log
+      - name: Qualify native indexed access and pipeline operands
+        if: success() || failure()
+        run: |
+          set -euo pipefail
+          python3 tests/run-index-operands.py 2>&1 | tee build/compiler-fixture-logs/index-operands.log
       - name: Qualify nested section delimiter hygiene
         if: success() || failure()
         run: |

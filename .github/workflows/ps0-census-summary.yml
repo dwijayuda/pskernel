@@ -468,3 +468,116 @@ jobs:
           path: audit/conversion-obligations.json
           if-no-files-found: error
 
+
+  declaration-tail-compiler-evidence:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-project-3b23a3520c270bb892462f0600abb8b7eed25c2c-42545863274
+          run-id: 42545863274
+          github-token: ${{ github.token }}
+          path: tails
+      - name: Inspect actual source roles and strict module equality
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root=Path('tails')
+          files=list(root.rglob('compiler-heads-*/evidence.json'))
+          assert len(files)==5, files
+          total=0
+          for file in sorted(files):
+              data=json.loads(file.read_text())
+              assert data['source']=='3b23a3520c270bb892462f0600abb8b7eed25c2c'
+              assert all(v['native']==v['ps'] for v in data['comparisons'].values())
+              total+=len(data['converted_declarations'])
+              print('PS0_DECLARATION_TAIL_MODULE_EVIDENCE',json.dumps(data,sort_keys=True))
+              if data['module']=='Lean.Compiler.LCNF.EmitUtil':
+                  assert data['pinned_blob']=='a1283439481c82fe7835b7b2d743e5e57bfd1111'
+                  roles={d['sourceName']:d for d in data['mapped_source_roles']}
+                  assert roles['collectUsedDecls']['nativeWhereTail']
+                  assert roles['usesModuleFrom']['ownedValueCall']
+                  assert any('term_&&_' in k for k in roles['usesModuleFrom']['ownedOperatorKinds'])
+                  assert any('term_!=_' in k for k in roles['usesModuleFrom']['ownedOperatorKinds'])
+                  plan=json.loads((file.parent/'plan.json').read_text())
+                  print('PS0_EMISSION_UTILITY_PLAN',json.dumps(plan,sort_keys=True))
+          assert total==17, total
+          cases=list(root.rglob('declaration-tails-*/evidence.json'))
+          assert len(cases)==1
+          data=json.loads(cases[0].read_text())
+          assert data['source']=='3b23a3520c270bb892462f0600abb8b7eed25c2c' and data['oracle']=='PS0_DECLARATION_TAILS:4:3:7:5'
+          print('PS0_DECLARATION_TAIL_RUNTIME_EVIDENCE',json.dumps(data,sort_keys=True))
+          hosts=list(root.rglob('relocated-grammar-*/evidence.json'))
+          assert len(hosts)==1
+          data=json.loads(hosts[0].read_text())
+          assert data['source']=='3b23a3520c270bb892462f0600abb8b7eed25c2c'
+          assert all(v['source_sha256']==v['published_sha256'] for v in data['host_metadata'].values())
+          assert 'PS0/OperatorDescriptors.olean' in data['host_metadata']
+          print('PS0_DECLARATION_TAIL_HOST_EVIDENCE',json.dumps({'source':data['source'],'driver_sha256':data['driver_sha256'],'metadata_files':len(data['host_metadata']),'raw_evidence_sha256':hashlib.sha256(hosts[0].read_bytes()).hexdigest(),'sorted_metadata_sha256':hashlib.sha256(json.dumps(data['host_metadata'],sort_keys=True).encode()).hexdigest()},sort_keys=True))
+          print('PS0_DECLARATION_TAIL_COMPILER_EVIDENCE: PASS')
+          PY
+
+  compiler-header-adapter-evidence:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: 3b23a3520c270bb892462f0600abb8b7eed25c2c
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            experiments/ps0/compiler-source-inventory.json
+            src/Lean.lean
+            src/LeanChecker.lean
+            src/LeanExport.lean
+            src/LeanIR.lean
+            src/Leanc.lean
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-compiler-stage2-2cba0bc26df49c52d653598fd9c791f23209199c-42532849633
+          run-id: 42532849633
+          github-token: ${{ github.token }}
+          repository: dwijayuda/pskernel
+          path: corpus
+      - name: Account for the five captured-source Git blob differences
+        run: |
+          python3 - <<'PY'
+          import difflib, hashlib, json
+          from pathlib import Path
+          root=Path('corpus')
+          migration=json.loads((root/'migration.json').read_text())
+          assert migration['source_commit']=='2cba0bc26df49c52d653598fd9c791f23209199c'
+          inventory=json.loads(Path('experiments/ps0/compiler-source-inventory.json').read_text())
+          entries={d['module']:d for d in inventory['entries']}
+          result=[]
+          for module in ['Lean','LeanChecker','LeanExport','LeanIR','Leanc']:
+              original=Path(entries[module]['repositoryPath']).read_bytes()
+              blob=hashlib.sha1(b'blob '+str(len(original)).encode()+b'\0'+original).hexdigest()
+              assert blob==entries[module]['blob'], module
+              data=json.loads((root/'source-census'/Path(*module.split('.')).with_suffix('.json')).read_text())
+              captured=data['nativeSource'].encode()
+              item=migration['inputs'][module]
+              assert item['body_mode']=='native-header-adapter', (module,item)
+              assert hashlib.sha256(original).hexdigest()==item['original_sha256']
+              assert hashlib.sha256(captured).hexdigest()==item['ps_sha256']
+              same=0
+              while same<min(len(original),len(captured)) and original[-same-1]==captured[-same-1]:
+                  same+=1
+              record={'module':module,'original_blob':blob,'original_sha256':item['original_sha256'],'converted_sha256':item['ps_sha256'],'body_mode':item['body_mode'],'unchanged_suffix_bytes':same}
+              result.append(record)
+              print('PS0_NATIVE_HEADER_ADAPTER_RECORD',json.dumps(record,sort_keys=True))
+              print(''.join(difflib.unified_diff(original.decode().splitlines(keepends=True),captured.decode().splitlines(keepends=True),fromfile=module+'.lean',tofile=module+'.ps')))
+          Path('audit').mkdir()
+          Path('audit/native-header-adapters.json').write_text(json.dumps({'source':migration['source_commit'],'records':result,'scope':'five recorded native header conversions; not canonical PS grammar conversion','verified_execution':False},sort_keys=True,indent=2)+'\n')
+          print('PS0_FIVE_NATIVE_HEADER_ADAPTERS_ACCOUNTED: PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ps0-native-header-adapter-evidence-${{ github.run_id }}
+          path: audit/native-header-adapters.json
+          if-no-files-found: error
+

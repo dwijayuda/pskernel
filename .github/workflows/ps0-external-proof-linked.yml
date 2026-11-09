@@ -601,7 +601,12 @@ jobs:
           test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
           lake build PS0 ps0 2>&1 | tee build/compiler-fixture-logs/build.log
           lake exe ps0 environment | tee build/compiler-fixture-logs/environment.json
+      - name: Qualify mixed instance and default operand regressions
+        run: |
+          set -euo pipefail
+          python3 tests/run-binders.py 2>&1 | tee build/compiler-fixture-logs/binders.log
       - name: Qualify nested section delimiter hygiene
+        if: success() || failure()
         run: |
           set -euo pipefail
           python3 tests/run-lambdas.py 2>&1 | tee build/compiler-fixture-logs/lambdas.log

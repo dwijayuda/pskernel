@@ -1003,3 +1003,60 @@ jobs:
             operator-prefix-rehash.log
             operator-prefix-roles.log
           if-no-files-found: error
+  projection-prelude-rehash:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: 2974fd2f0cbc0184a6d20b72ca48183bed0d151e
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42564088307
+          name: ps0-compiler-fixtures-2974fd2f0cbc0184a6d20b72ca48183bed0d151e-42564088307
+          github-token: ${{ github.token }}
+          path: projection-prelude-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42564088307
+          name: ps0-compiler-prelude-2974fd2f0cbc0184a6d20b72ca48183bed0d151e-42564088307
+          github-token: ${{ github.token }}
+          path: projection-prelude-artifact
+      - name: Rehash actual declaration-form and compiler-module outputs
+        run: |
+          set -euo pipefail
+          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py projection-prelude-artifact --source 2974fd2f0cbc0184a6d20b72ca48183bed0d151e --output projection-prelude-rehash.json | tee projection-prelude-rehash.log
+          python3 - <<'PY' | tee projection-prelude-roles.log
+          from pathlib import Path
+          import json
+          for path in Path('projection-prelude-artifact').rglob('evidence.json'):
+              if 'DeclarationForms' in path.parent.name:
+                  value=json.loads(path.read_text())
+                  print('PS0_WHERE_INSTANCE_ROLES:'+json.dumps(value.get('non_definition_source_roles',[]),sort_keys=True))
+          for path in Path('projection-prelude-artifact').rglob('evidence.json'):
+              if path.parent.name.startswith('lambdas-'):
+                  value=json.loads(path.read_text())
+                  assert value['source']=='2974fd2f0cbc0184a6d20b72ca48183bed0d151e'
+                  projection=value['projection']
+                  import hashlib
+                  source=Path('experiments/ps0/tests/v1/pending_section_projection.ps').read_bytes()
+                  assert hashlib.sha256(source).hexdigest()==projection['source_sha256']
+                  assert projection['original_range_checks']==2
+                  assert 'PS0_SECTION_PROJECTION:3' in (path.parent/'projection-runtime.log').read_text()
+                  assert 'PS0V1-CALL-GAP' in (path.parent/'projection-subject-gap.log').read_text()
+                  print('PS0_PROJECTION_ARTIFACT:'+json.dumps(projection,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-projection-prelude-rehash-${{ github.run_id }}
+          path: |
+            projection-prelude-rehash.json
+            projection-prelude-rehash.log
+            projection-prelude-roles.log
+          if-no-files-found: error

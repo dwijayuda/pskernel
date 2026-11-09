@@ -33,7 +33,7 @@ jobs:
           inventory=json.loads((folder/'input-inventory.json').read_text())
           assert inventory['source_commit']==source and inventory['module_count']==2569
           log=(folder/'compiler-build.log').read_text()
-          built=set(re.findall(r'^✔ \[\d+/\d+\] Built ([A-Za-z][A-Za-z0-9_\u0027.]*) (?:\(|$)',log,re.M))
+          built=set(re.findall(r'^[✔⚠] \[\d+/\d+\] Built ([A-Za-z][A-Za-z0-9_\u0027.]*) (?:\(|$)',log,re.M))
           assert built and built<=set(inventory['inputs'])
           sha=lambda data:hashlib.sha256(data).hexdigest()
           def declarations(commands):
@@ -72,6 +72,7 @@ jobs:
                    'native_compatible_escapes':escapes,
                    'definition_heads_in_those_observations':heads,'production_counts':dict(families),
                    'censuses_without_successful_lake_job':sorted(captured-built),
+                   'successful_lake_modules_with_warnings':sorted(set(re.findall(r'^⚠ \\[\\d+/\\d+\\] Built ([A-Za-z][A-Za-z0-9_\\u0027.]*) (?:\\(|$)',log,re.M))),
                    'refreshed_native_censuses':len(json.loads((folder/'source-plan-summary.json').read_text())['refreshed_declaration_censuses']),
                    'reused_native_censuses':len(json.loads((folder/'source-plan-summary.json').read_text())['reused_native_censuses']),
                    'scope':'successful native Lake job log entries plus retained source observations/plan identity; no retained target C/public olean rehash, runtime, full graph or fixed point acceptance',

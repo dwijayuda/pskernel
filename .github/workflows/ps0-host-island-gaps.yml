@@ -26,7 +26,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"6ed512e42888145a104674ba1b6ec656e8d84541"}
+          pin={"repository":"dwijayuda/lean4","commit":"f47da1bb67b58fdd9b6414a9d732aeb39cccec82"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -166,6 +166,7 @@ jobs:
             experiments/ps0/build/match-host-*/*.ps
             experiments/ps0/build/match-host-*/*.c
             experiments/ps0/build/match-host-*/*.olean
+            experiments/ps0/build/match-host-*/OrdinaryHostOrigins
             experiments/ps0/build/host-island-gaps-*/*.json
             experiments/ps0/build/host-island-gaps-*/*.log
             experiments/ps0/build/host-island-gaps-*/*.ps

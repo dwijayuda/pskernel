@@ -213,6 +213,13 @@ jobs:
           name: ps0-compiler-environment-fdfcf5f974c2791ae84f20569b87eee96aa57b00-42638373111
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42637604738
+          name: ps0-native-index-fdfcf5f974c2791ae84f20569b87eee96aa57b00-42637604738
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
       - name: Rehash compiler outputs and check actual owned do roles
         run: |
           set -euo pipefail

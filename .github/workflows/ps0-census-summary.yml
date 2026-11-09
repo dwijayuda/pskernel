@@ -1,0 +1,2694 @@
+name: PS0 pinned native source census summary
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-census-summary.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  census-summary:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-compiler-stage1-abf3585d99c921fe02697b679867a0a55e433168-42517718338
+          run-id: 42517718338
+          github-token: ${{ github.token }}
+          path: evidence
+      - name: Inspect exact native compiler census
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root=Path('evidence')
+          migration=json.loads((root/'migration.json').read_text())
+          summary=json.loads((root/'source-census/summary.json').read_text())
+          assert migration['source_commit']=='abf3585d99c921fe02697b679867a0a55e433168'
+          assert summary['source_commit']==migration['source_commit']
+          assert summary['lean_commit']=='eb6cafb7290e8bd5f2937522d8d804f58f02bafc'
+          assert summary['module_count']==2566
+          assert hashlib.sha256((root/'migrated-ps0').read_bytes()).hexdigest()==migration['driver_sha256']
+          print('PS0_NATIVE_CENSUS_PINNED_IDENTITY: PASS')
+          print(json.dumps({k:v for k,v in summary.items() if k!='modules'},indent=2))
+          print('PS0_NATIVE_CENSUS_TOP_MODULE_COMMAND_COUNTS')
+          for name, data in sorted(summary['modules'].items(), key=lambda x:x[1]['command_count'],reverse=True)[:30]:
+              print(name,data['command_count'])
+          print('PS0_NATIVE_CENSUS_SCOPE: native-compatible baseline; canonical PS grammar incomplete')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ps0-native-census-summary-${{ github.run_id }}
+          path: evidence/source-census/summary.json
+
+  compiler-head-evidence:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-prelude-compiler-head-probe-42521772271
+          run-id: 42521772271
+          github-token: ${{ github.token }}
+          path: probe
+      - name: Inspect exact compiler head parity evidence
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root=Path('probe')
+          files=list(root.rglob('compiler-heads-*/evidence.json'))
+          assert len(files)==1, files
+          evidence=json.loads(files[0].read_text())
+          assert evidence['source']=='704c5614e15981145260f5aac1ea8a891875cf12'
+          assert evidence['pinned_blob']=='20b7acf5d684789ab52b81dda7def4b19568213c'
+          assert all(c['native']==c['ps'] for c in evidence['comparisons'].values())
+          print('PS0_COMPILER_HEAD_EVIDENCE_IDENTITY: PASS')
+          print(json.dumps(evidence,indent=2))
+          print(json.dumps(json.loads((files[0].parent/'plan.json').read_text()),indent=2))
+          PY
+
+  mutual-compiler-head-evidence:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-project-3c47198c4ed8f43a4967deef199ea61fa5e8d592-42528176757
+          run-id: 42528176757
+          github-token: ${{ github.token }}
+          path: probe
+      - name: Inspect pinned recursive compiler parity evidence
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          files=list(Path('probe').rglob('compiler-heads-*/evidence.json'))
+          assert len(files)==2, files
+          for file in files:
+              evidence=json.loads(file.read_text())
+              assert evidence['source']=='3c47198c4ed8f43a4967deef199ea61fa5e8d592'
+              assert all(c['native']==c['ps'] for c in evidence['comparisons'].values())
+              print('PS0_MUTUAL_COMPILER_EVIDENCE_IDENTITY: PASS')
+              print(json.dumps(evidence,indent=2))
+              print(json.dumps(json.loads((file.parent/'plan.json').read_text()),indent=2))
+          PY
+
+  runtime-fixed-point-evidence:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-compiler-stage2-28904e5a7ccb19a15e311ecc654541dc0ee639ec-42522976977
+          run-id: 42522976977
+          github-token: ${{ github.token }}
+          path: stage2
+      - name: Inspect exact full compiler fixed point
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root=Path('stage2')
+          data=json.loads((root/'migration.json').read_text())
+          assert data['source_commit']=='28904e5a7ccb19a15e311ecc654541dc0ee639ec'
+          assert data['fixed_point']=={'changed_c': [], 'changed_olean': []}
+          summary=json.loads((root/'source-census/summary.json').read_text())
+          assert summary['module_count']==2567
+          assert hashlib.sha256((root/'migrated-ps0').read_bytes()).hexdigest()==data['driver_sha256']
+          print('PS0_RUNTIME_COMPILER_FIXED_POINT_EVIDENCE: PASS')
+          print(json.dumps({k:v for k,v in data.items() if k not in ['outputs','modules','inputs']},indent=2))
+          print(json.dumps({k:v for k,v in summary.items() if k!='modules'},indent=2))
+          print('PS0_FIXED_POINT_SCOPE: native-compatible source forest; canonical ProofScript grammar remains incomplete')
+          PY
+
+      - name: Audit actual small compiler binder default roles
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          rows=[]
+          for path in Path('stage2/source-census/Lean/Compiler').rglob('*.json'):
+              snapshot=json.loads(path.read_text())
+              defaults=[]
+              heads=[]
+              for command in snapshot['commands']:
+                  decl=command['declaration']
+                  if not decl or decl['production']!='Lean.Parser.Command.definition':
+                      continue
+                  heads.append(decl['sourceName'])
+                  for binder in decl['signatureSyntax']['args'][0]['args']:
+                      parts=binder['args']
+                      if binder['kind']=='Lean.Parser.Term.explicitBinder' and len(parts)==5 and parts[3]['args']:
+                          defaults.append({'name':decl['sourceName'],'typed':bool(parts[2]['args']),'kind':parts[3]['args'][0]['kind']})
+              if defaults:
+                  rows.append({'module':snapshot['module'],'source_bytes':len(snapshot['nativeSource'].encode()),'heads':heads,'defaults':defaults})
+          rows.sort(key=lambda r:r['source_bytes'])
+          Path('binder-default-audit.json').write_text(json.dumps(rows,indent=2)+'\n')
+          print('PS0_ACTUAL_COMPILER_BINDER_DEFAULT_AUDIT: inspection only')
+          print(json.dumps(rows[:20],indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ps0-actual-compiler-binder-default-audit-${{ github.run_id }}
+          path: binder-default-audit.json
+
+  mixed-default-host-evidence:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-project-7fea6986042ba76fd1f1a028474209dc5f3bc519-42532092264
+          run-id: 42532092264
+          github-token: ${{ github.token }}
+          path: probe
+      - name: Inspect actual mixed default compiler and native host evidence
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          files=list(Path('probe').rglob('compiler-heads-*/evidence.json'))
+          assert len(files)==4, files
+          total=0
+          for file in sorted(files):
+              data=json.loads(file.read_text())
+              assert data['source']=='7fea6986042ba76fd1f1a028474209dc5f3bc519'
+              assert all(c['native']==c['ps'] for c in data['comparisons'].values())
+              total+=len(data['converted_declarations'])
+              print(json.dumps(data,indent=2))
+              if data['module'] in ['Lean.Compiler.LCNF.ScopeM','Lean.Compiler.LCNF.OtherDecl']:
+                  print(json.dumps(json.loads((file.parent/'plan.json').read_text()),indent=2))
+          assert total==15, total
+          hosts=list(Path('probe').rglob('relocated-grammar-*/evidence.json'))
+          assert len(hosts)==1, hosts
+          host=json.loads(hosts[0].read_text())
+          assert host['source']=='7fea6986042ba76fd1f1a028474209dc5f3bc519'
+          assert all(v['source_sha256']==v['published_sha256'] for v in host['host_metadata'].values())
+          print(json.dumps({k:v for k,v in host.items() if k!='host_metadata'},indent=2))
+          print('PS0_NATIVE_HOST_METADATA_FILES',len(host['host_metadata']))
+          print('PS0_NATIVE_HOST_METADATA_MANIFEST_SHA256',hashlib.sha256(json.dumps(host['host_metadata'],sort_keys=True).encode()).hexdigest())
+          print('PS0_NATIVE_HOST_METADATA_IR_FILES',sum('.ir' in name for name in host['host_metadata']))
+          print('PS0_MIXED_DEFAULT_AND_HOST_EVIDENCE: PASS; converted_heads=15; modules=4')
+          PY
+
+  ps-built-grammar-host-evidence:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-compiler-stage1-2cba0bc26df49c52d653598fd9c791f23209199c-42532849633
+          run-id: 42532849633
+          github-token: ${{ github.token }}
+          path: fresh
+      - name: Inspect grammar host freshly compiled from ps
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root=Path('fresh')
+          migration=json.loads((root/'migration.json').read_text())
+          host=json.loads((root/'native-grammar-host.json').read_text())
+          summary=json.loads((root/'source-census/summary.json').read_text())
+          assert migration['source_commit']==host['source']=='2cba0bc26df49c52d653598fd9c791f23209199c'
+          assert migration['module_count']==summary['module_count']==2567
+          assert migration['runtime_smoke']=='PASS'
+          assert migration['runtime_grammar_host']['status']=='PASS'
+          assert host['driver_sha256']==migration['driver_sha256']
+          assert hashlib.sha256((root/'migrated-ps0').read_bytes()).hexdigest()==host['driver_sha256']
+          assert hashlib.sha256((root/'native-grammar-host.json').read_bytes()).hexdigest()==migration['runtime_grammar_host']['evidence_sha256']
+          assert len(host['host_metadata'])==migration['runtime_grammar_host']['metadata_files']==200
+          assert all(v['source_sha256']==v['published_sha256'] for v in host['host_metadata'].values())
+          print('PS0_FRESH_PS_BUILT_GRAMMAR_HOST_EVIDENCE: PASS')
+          print(json.dumps({k:v for k,v in migration.items() if k not in ['inputs','outputs']},indent=2))
+          print('PS0_FRESH_HOST_METADATA_MANIFEST_SHA256',hashlib.sha256(json.dumps(host['host_metadata'],sort_keys=True).encode()).hexdigest())
+          print('PS0_FRESH_SOURCE_CENSUS_MODES',json.dumps(summary['declaration_modes'],sort_keys=True))
+          PY
+
+  lambda-compiler-evidence:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-project-7f885fcc1caa9277e3633c849d086bb2614e143e-42537205963
+          run-id: 42537205963
+          github-token: ${{ github.token }}
+          path: lambda
+      - name: Inspect original lambda body ranges and strict compiler output
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          files=list(Path('lambda').rglob('compiler-heads-*/evidence.json'))
+          assert len(files)==4, files
+          for file in sorted(files):
+              data=json.loads(file.read_text())
+              assert data['source']=='7f885fcc1caa9277e3633c849d086bb2614e143e'
+              assert all(v['native']==v['ps'] for v in data['comparisons'].values())
+              print(json.dumps(data,indent=2))
+              if data['module']=='Lean.Compiler.LCNF.DeclHash':
+                  plan=json.loads((file.parent/'plan.json').read_text())
+                  assert len(plan['edits'])==18, plan
+                  census=json.loads((file.parent/'original-census.json').read_text())
+                  def declarations(commands):
+                      for command in commands:
+                          if command['declaration']:
+                              yield command['declaration']
+                          yield from declarations(command.get('nestedCommands',[]))
+                  owned=[d for d in declarations(census['commands']) if d.get('lambdaBodyApplications')]
+                  assert [d['sourceName'] for d in owned]==['hashAlts'], owned
+                  print(json.dumps(plan,indent=2))
+                  print('PS0_ORIGINAL_LAMBDA_BODY_ROLE',json.dumps(owned[0]['lambdaBodyApplications'],sort_keys=True))
+          print('PS0_LAMBDA_COMPILER_EVIDENCE: PASS')
+          PY
+
+  ps-built-stage-two-evidence:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-compiler-stage2-2cba0bc26df49c52d653598fd9c791f23209199c-42532849633
+          run-id: 42532849633
+          github-token: ${{ github.token }}
+          path: stage-two
+      - name: Inspect fresh grammar-host fixed point
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root=Path('stage-two')
+          data=json.loads((root/'migration.json').read_text())
+          host=json.loads((root/'native-grammar-host.json').read_text())
+          census=json.loads((root/'source-census/summary.json').read_text())
+          assert data['source_commit']==host['source']=='2cba0bc26df49c52d653598fd9c791f23209199c'
+          assert data['fixed_point']=={'changed_c': [], 'changed_olean': []}
+          assert data['module_count']==census['module_count']==2567
+          assert data['runtime_grammar_host']['status']==data['runtime_smoke']=='PASS'
+          assert hashlib.sha256((root/'migrated-ps0').read_bytes()).hexdigest()==host['driver_sha256']==data['driver_sha256']
+          assert hashlib.sha256((root/'native-grammar-host.json').read_bytes()).hexdigest()==data['runtime_grammar_host']['evidence_sha256']
+          assert len(host['host_metadata'])==200
+          print('PS0_FRESH_GRAMMAR_HOST_FIXED_POINT_EVIDENCE: PASS')
+          print(json.dumps({k:v for k,v in data.items() if k not in ['inputs','outputs']},indent=2))
+          print('PS0_STAGE_TWO_HOST_METADATA_MANIFEST_SHA256',hashlib.sha256(json.dumps(host['host_metadata'],sort_keys=True).encode()).hexdigest())
+          print('PS0_STAGE_TWO_CENSUS_MODES',json.dumps(census['declaration_modes'],sort_keys=True))
+          PY
+
+  operator-compiler-evidence:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-project-90e32a5ec5ce258e0310c1084512e076d283d682-42542351315
+          run-id: 42542351315
+          github-token: ${{ github.token }}
+          path: operators
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-operator-baseline-42542351315
+          run-id: 42542351315
+          github-token: ${{ github.token }}
+          path: baseline
+      - name: Inspect exact operator and native compiler evidence
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root=Path('operators')
+          files=list(root.rglob('compiler-heads-*/evidence.json'))
+          assert len(files)==4, files
+          count=0
+          for file in sorted(files):
+              data=json.loads(file.read_text())
+              assert data['source']=='90e32a5ec5ce258e0310c1084512e076d283d682'
+              assert all(v['native']==v['ps'] for v in data['comparisons'].values())
+              count+=len(data['converted_declarations'])
+              print('PS0_OPERATOR_MODULE_EVIDENCE',json.dumps(data,sort_keys=True))
+          assert count==15, count
+          owned=list(root.rglob('operators-*/evidence.json'))
+          assert len(owned)==1, owned
+          evidence=json.loads(owned[0].read_text())
+          assert evidence['source']=='90e32a5ec5ce258e0310c1084512e076d283d682'
+          assert evidence['oracle']=='PS0_OPERATORS:17:6:5:512:8:1:10:10:4:2:4'
+          print('PS0_OPERATOR_OPERAND_EVIDENCE',json.dumps(evidence,sort_keys=True))
+          inventory=owned[0].parent/'native-descriptors.log'
+          line=next(line for line in inventory.read_text().splitlines() if line.startswith('{"lean_commit"'))
+          data=json.loads(line)
+          assert data['lean_commit']=='eb6cafb7290e8bd5f2937522d8d804f58f02bafc'
+          assert len(data['operators'])==86
+          print('PS0_OPERATOR_DESCRIPTOR_EVIDENCE',json.dumps({'lean_commit':data['lean_commit'],'count':len(data['operators']),'file_sha256':hashlib.sha256(inventory.read_bytes()).hexdigest()},sort_keys=True))
+          hosts=list(root.rglob('relocated-grammar-*/evidence.json'))
+          assert len(hosts)==1, hosts
+          data=json.loads(hosts[0].read_text())
+          assert data['source']=='90e32a5ec5ce258e0310c1084512e076d283d682'
+          assert all(v['source_sha256']==v['published_sha256'] for v in data['host_metadata'].values())
+          assert 'PS0/Operators.olean' in data['host_metadata']
+          print('PS0_OPERATOR_HOST_EVIDENCE',json.dumps({'source':data['source'],'driver_sha256':data['driver_sha256'],'metadata_files':len(data['host_metadata']),'raw_evidence_sha256':hashlib.sha256(hosts[0].read_bytes()).hexdigest(),'sorted_metadata_sha256':hashlib.sha256(json.dumps(data['host_metadata'],sort_keys=True).encode()).hexdigest()},sort_keys=True))
+          files=list(Path('baseline').rglob('operator-baseline.json'))
+          assert len(files)==1, files
+          data=json.loads(files[0].read_text())
+          assert data['source']=='6dc96dd983c0d37fc91bf39d05777540f4f1322d' and data['status']=='PASS' and data['checker_exit']!=0
+          print('PS0_OPERATOR_PRE_ADAPTER_EVIDENCE',json.dumps(data,sort_keys=True))
+          print('PS0_OPERATOR_COMPILER_EVIDENCE: PASS')
+          PY
+
+  compiler-conversion-obligations:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: 3b23a3520c270bb892462f0600abb8b7eed25c2c
+          sparse-checkout: experiments/ps0/compiler-source-inventory.json
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-compiler-stage2-2cba0bc26df49c52d653598fd9c791f23209199c-42532849633
+          run-id: 42532849633
+          github-token: ${{ github.token }}
+          repository: dwijayuda/pskernel
+          path: corpus
+      - name: Audit every pinned upstream module's original source obligations
+        run: |
+          python3 - <<'PY'
+          from collections import Counter
+          import hashlib, json
+          from pathlib import Path
+          root=Path('corpus')
+          migration=json.loads((root/'migration.json').read_text())
+          assert migration['source_commit']=='2cba0bc26df49c52d653598fd9c791f23209199c'
+          assert migration['lean_commit']=='eb6cafb7290e8bd5f2937522d8d804f58f02bafc'
+          inventory_file=Path('experiments/ps0/compiler-source-inventory.json')
+          inventory=json.loads(inventory_file.read_text())
+          assert inventory['leanCommit']==migration['lean_commit'] and inventory['count']==2546
+          wanted={entry['module']:entry for entry in inventory['entries']}
+          seen={}
+          production=Counter()
+          signature=Counter()
+          binders=Counter()
+          patterns=Counter()
+          blockers=Counter()
+          root_calls=Counter()
+          mismatch=[]
+          definitions=0
+          def walk(commands):
+              for command in commands:
+                  if command.get('declaration'):
+                      yield command['declaration']
+                  yield from walk(command.get('nestedCommands',[]))
+          for file in sorted((root/'source-census').rglob('*.json')):
+              data=json.loads(file.read_text())
+              if data.get('schema')!='ps0-native-source-census/1' or data['module'] not in wanted:
+                  continue
+              module=data['module']
+              assert module not in seen, module
+              raw=data['nativeSource'].encode()
+              blob=hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()
+              if blob!=wanted[module]['blob']:
+                  mismatch.append({'module':module,'expected_blob':wanted[module]['blob'],'captured_blob':blob})
+              rows=list(walk(data['commands']))
+              counts=Counter(row['production'] for row in rows)
+              seen[module]={'census_sha256':hashlib.sha256(file.read_bytes()).hexdigest(),'original_git_blob_match':blob==wanted[module]['blob'],'declarations':len(rows),'productions':dict(counts)}
+              for row in rows:
+                  production[row['production']]+=1
+                  sig=row.get('signatureSyntax')
+                  if not sig:
+                      continue
+                  signature[sig['kind']]+=1
+                  if row['production']!='Lean.Parser.Command.definition':
+                      continue
+                  definitions+=1
+                  reasons=set()
+                  if sig['kind']!='Lean.Parser.Command.optDeclSig':
+                      reasons.add('signature_kind:'+sig['kind'])
+                  else:
+                      for binder in sig['args'][0]['args']:
+                          kind=binder['kind']
+                          binders[kind]+=1
+                          if kind=='Lean.Parser.Term.instBinder':
+                              continue
+                          if kind!='Lean.Parser.Term.explicitBinder':
+                              reasons.add('binder_kind:'+kind)
+                              continue
+                          parts=binder['args']
+                          names=len(parts[1]['args'])
+                          patterns['explicit_names:'+str(names)]+=1
+                          if names!=1:
+                              reasons.add('grouped_or_empty_explicit_identifiers')
+                          if len(parts[2]['args'])!=2:
+                              reasons.add('untyped_explicit_binder')
+                          suffix=parts[3]['args']
+                          if suffix and (len(suffix)!=1 or suffix[0]['kind']!='Lean.Parser.Term.binderDefault'):
+                              reasons.add('nonordinary_default_suffix')
+                  blockers.update(reasons)
+                  if not reasons:
+                      patterns['definition_signature_within_current_planner_shape']+=1
+                  call=row.get('valueApplication')
+                  if call:
+                      root_calls['native_root_applications']+=1
+                      for tag,kind in [('parenthesized_argument','Lean.Parser.Term.paren'),('direct_lambda_argument','Lean.Parser.Term.fun')]:
+                          if any(arg['kind']==kind for arg in call['arguments']):
+                              root_calls[tag]+=1
+          assert set(seen)==set(wanted), sorted(set(wanted)-set(seen))
+          report={'schema':'ps0-full-compiler-conversion-obligations/1','artifact_source':migration['source_commit'],'inventory_source':'3b23a3520c270bb892462f0600abb8b7eed25c2c','lean_commit':migration['lean_commit'],'upstream_modules':len(seen),'inventory_sha256':hashlib.sha256(inventory_file.read_bytes()).hexdigest(),'original_blob_matches':len(seen)-len(mismatch),'original_blob_mismatches':mismatch,'declaration_productions':dict(production),'signature_kinds':dict(signature),'definition_count':definitions,'definition_binder_kinds':dict(binders),'definition_patterns':dict(patterns),'definition_shape_blockers':dict(blockers),'root_application_roles':dict(root_calls),'modules':seen,'scope':'original native-compatible corpus audit, not conversion acceptance or grammar completion; shape eligibility does not prove successful conversion','grammarMigrationComplete':False,'verified_execution':False}
+          Path('audit').mkdir()
+          Path('audit/conversion-obligations.json').write_text(json.dumps(report,sort_keys=True,indent=2)+'\n')
+          print('PS0_FULL_COMPILER_CONVERSION_OBLIGATIONS: PASS')
+          print(json.dumps({k:v for k,v in report.items() if k!='modules'},sort_keys=True,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ps0-full-compiler-conversion-obligations-${{ github.run_id }}
+          path: audit/conversion-obligations.json
+          if-no-files-found: error
+
+
+  declaration-tail-compiler-evidence:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-project-3b23a3520c270bb892462f0600abb8b7eed25c2c-42545863274
+          run-id: 42545863274
+          github-token: ${{ github.token }}
+          path: tails
+      - name: Inspect actual source roles and strict module equality
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root=Path('tails')
+          files=list(root.rglob('compiler-heads-*/evidence.json'))
+          assert len(files)==5, files
+          total=0
+          for file in sorted(files):
+              data=json.loads(file.read_text())
+              assert data['source']=='3b23a3520c270bb892462f0600abb8b7eed25c2c'
+              assert all(v['native']==v['ps'] for v in data['comparisons'].values())
+              total+=len(data['converted_declarations'])
+              print('PS0_DECLARATION_TAIL_MODULE_EVIDENCE',json.dumps(data,sort_keys=True))
+              if data['module']=='Lean.Compiler.LCNF.EmitUtil':
+                  assert data['pinned_blob']=='a1283439481c82fe7835b7b2d743e5e57bfd1111'
+                  roles={d['sourceName']:d for d in data['mapped_source_roles']}
+                  assert roles['collectUsedDecls']['nativeWhereTail']
+                  assert roles['usesModuleFrom']['ownedValueCall']
+                  assert any('term_&&_' in k for k in roles['usesModuleFrom']['ownedOperatorKinds'])
+                  assert any('term_!=_' in k for k in roles['usesModuleFrom']['ownedOperatorKinds'])
+                  plan=json.loads((file.parent/'plan.json').read_text())
+                  print('PS0_EMISSION_UTILITY_PLAN',json.dumps(plan,sort_keys=True))
+          assert total==17, total
+          cases=list(root.rglob('declaration-tails-*/evidence.json'))
+          assert len(cases)==1
+          data=json.loads(cases[0].read_text())
+          assert data['source']=='3b23a3520c270bb892462f0600abb8b7eed25c2c' and data['oracle']=='PS0_DECLARATION_TAILS:4:3:7:5'
+          print('PS0_DECLARATION_TAIL_RUNTIME_EVIDENCE',json.dumps(data,sort_keys=True))
+          hosts=list(root.rglob('relocated-grammar-*/evidence.json'))
+          assert len(hosts)==1
+          data=json.loads(hosts[0].read_text())
+          assert data['source']=='3b23a3520c270bb892462f0600abb8b7eed25c2c'
+          assert all(v['source_sha256']==v['published_sha256'] for v in data['host_metadata'].values())
+          assert 'PS0/OperatorDescriptors.olean' in data['host_metadata']
+          print('PS0_DECLARATION_TAIL_HOST_EVIDENCE',json.dumps({'source':data['source'],'driver_sha256':data['driver_sha256'],'metadata_files':len(data['host_metadata']),'raw_evidence_sha256':hashlib.sha256(hosts[0].read_bytes()).hexdigest(),'sorted_metadata_sha256':hashlib.sha256(json.dumps(data['host_metadata'],sort_keys=True).encode()).hexdigest()},sort_keys=True))
+          print('PS0_DECLARATION_TAIL_COMPILER_EVIDENCE: PASS')
+          PY
+
+  compiler-header-adapter-evidence:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: leanprover/lean4
+          ref: eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            src/Lean.lean
+            src/LeanChecker.lean
+            src/LeanExport.lean
+            src/LeanIR.lean
+            src/Leanc.lean
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-compiler-stage2-2cba0bc26df49c52d653598fd9c791f23209199c-42532849633
+          run-id: 42532849633
+          github-token: ${{ github.token }}
+          repository: dwijayuda/pskernel
+          path: corpus
+      - name: Account for the five captured-source Git blob differences
+        run: |
+          python3 - <<'PY'
+          import difflib, hashlib, json
+          from pathlib import Path
+          root=Path('corpus')
+          migration=json.loads((root/'migration.json').read_text())
+          assert migration['source_commit']=='2cba0bc26df49c52d653598fd9c791f23209199c'
+          entries=json.loads("{\"Lean\":{\"repositoryPath\":\"src/Lean.lean\",\"blob\":\"db1d56fbd201eae72ad393ad94929d0602e80fa2\"},\"LeanChecker\":{\"repositoryPath\":\"src/LeanChecker.lean\",\"blob\":\"aa69c77767cfab76fdb95a7cafb170d36b9950c2\"},\"LeanExport\":{\"repositoryPath\":\"src/LeanExport.lean\",\"blob\":\"a21cc37c1a84d89026aba45daf61a7bc05be5f00\"},\"LeanIR\":{\"repositoryPath\":\"src/LeanIR.lean\",\"blob\":\"a95112b90e8b54756112e01a10e865971d6ac986\"},\"Leanc\":{\"repositoryPath\":\"src/Leanc.lean\",\"blob\":\"da517a3bf8a1dd6b0c1770deae367be40725b6bf\"}}")
+          result=[]
+          for module in ['Lean','LeanChecker','LeanExport','LeanIR','Leanc']:
+              original=Path(entries[module]['repositoryPath']).read_bytes()
+              blob=hashlib.sha1(b'blob '+str(len(original)).encode()+b'\0'+original).hexdigest()
+              assert blob==entries[module]['blob'], module
+              data=json.loads((root/'source-census'/Path(*module.split('.')).with_suffix('.json')).read_text())
+              captured=data['nativeSource'].encode()
+              item=migration['inputs'][module]
+              assert item['body_mode']=='native-header-adapter', (module,item)
+              assert hashlib.sha256(original).hexdigest()==item['original_sha256']
+              assert hashlib.sha256(captured).hexdigest()==item['ps_sha256']
+              same=0
+              while same<min(len(original),len(captured)) and original[-same-1]==captured[-same-1]:
+                  same+=1
+              record={'module':module,'original_blob':blob,'original_sha256':item['original_sha256'],'converted_sha256':item['ps_sha256'],'body_mode':item['body_mode'],'unchanged_suffix_bytes':same}
+              result.append(record)
+              print('PS0_NATIVE_HEADER_ADAPTER_RECORD',json.dumps(record,sort_keys=True))
+              print(''.join(difflib.unified_diff(original.decode().splitlines(keepends=True),captured.decode().splitlines(keepends=True),fromfile=module+'.lean',tofile=module+'.ps')))
+          Path('audit').mkdir()
+          Path('audit/native-header-adapters.json').write_text(json.dumps({'source':migration['source_commit'],'records':result,'scope':'five recorded native header conversions; not canonical PS grammar conversion','verified_execution':False},sort_keys=True,indent=2)+'\n')
+          print('PS0_FIVE_NATIVE_HEADER_ADAPTERS_ACCOUNTED: PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ps0-native-header-adapter-evidence-${{ github.run_id }}
+          path: audit/native-header-adapters.json
+          if-no-files-found: error
+
+
+  declaration-tail-raw-output-evidence:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-project-3b23a3520c270bb892462f0600abb8b7eed25c2c-42547214639
+          run-id: 42547214639
+          github-token: ${{ github.token }}
+          path: raw-tails
+      - name: Rehash actual native and PS C and public olean files
+        run: |
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          root=Path('raw-tails')
+          files=list(root.rglob('compiler-heads-*/evidence.json'))
+          assert len(files)==5, files
+          total=0
+          for file in sorted(files):
+              data=json.loads(file.read_text())
+              assert data['source']=='3b23a3520c270bb892462f0600abb8b7eed25c2c'
+              for relative, expected in data['comparisons'].items():
+                  native=hashlib.sha256((file.parent/'baseline'/relative).read_bytes()).hexdigest()
+                  ps=hashlib.sha256((file.parent/'migrated'/relative).read_bytes()).hexdigest()
+                  assert native==ps==expected['native']==expected['ps'], (data['module'],relative)
+              total+=len(data['converted_declarations'])
+              print('PS0_DECLARATION_TAIL_RAW_MODULE_EVIDENCE',json.dumps(data,sort_keys=True))
+              if data['module']=='Lean.Compiler.LCNF.EmitUtil':
+                  print('PS0_DECLARATION_TAIL_RAW_PLAN',json.dumps(json.loads((file.parent/'plan.json').read_text()),sort_keys=True))
+          assert total==17, total
+          print('PS0_DECLARATION_TAIL_RAW_OUTPUT_REHASH: PASS; modules=5; heads=17; files=20')
+          PY
+
+
+  corpus-telescope-basic-rehash:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: cd3b62f8003ecd88b5943cb0666cccfc32662f1f
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42552511645
+          name: ps0-compiler-fixtures-cd3b62f8003ecd88b5943cb0666cccfc32662f1f-42552511645
+          github-token: ${{ github.token }}
+          path: telescope-basic-artifact
+      - name: Reconstruct source edits and rehash actual native compiler outputs
+        run: |
+          set -euo pipefail
+          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py telescope-basic-artifact --source cd3b62f8003ecd88b5943cb0666cccfc32662f1f --output telescope-basic-rehash.json | tee telescope-basic-rehash.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-corpus-telescope-basic-rehash-${{ github.run_id }}
+          path: |
+            telescope-basic-rehash.json
+            telescope-basic-rehash.log
+          if-no-files-found: error
+
+
+  corpus-telescope-plan-inspection:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: cd3b62f8003ecd88b5943cb0666cccfc32662f1f
+          sparse-checkout: experiments/ps0
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42551085657
+          name: ps0-corpus-source-plan-483ac279f296257bbf2c686e93a96163b7218dd7-42551085657
+          github-token: ${{ github.token }}
+          path: corpus-plan-artifact
+      - name: Reconstruct every planned source and extract all remaining planner gaps
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' | tee corpus-plan-inspection.log
+          from pathlib import Path
+          from collections import Counter
+          import hashlib, json
+          root = Path('corpus-plan-artifact')
+          inventory = json.loads(Path('experiments/ps0/compiler-source-inventory.json').read_text())
+          paths = [path for path in root.rglob('evidence.json') if path.parent.name.startswith('corpus-source-plan-')]
+          assert len(paths) == 1
+          path = paths[0]
+          report = json.loads(path.read_text())
+          assert report['source'] == '483ac279f296257bbf2c686e93a96163b7218dd7'
+          assert report['count'] == len(report['modules']) == inventory['count'] == 2546
+          assert report['inventory_sha256'] == hashlib.sha256(Path('experiments/ps0/compiler-source-inventory.json').read_bytes()).hexdigest()
+          entries = {entry['module']: entry for entry in inventory['entries']}
+          counts, strategies, gaps, headers, line_changes = Counter(), Counter(), [], [], []
+          definition_count = 0
+          for module in report['modules']:
+              name = module['module']
+              assert module['blob'] == entries[name]['blob']
+              directory = path.parent / 'modules' / name
+              original = (directory / 'original.ps').read_bytes()
+              census_bytes = (directory / 'native-census.json').read_bytes()
+              census = json.loads(census_bytes)
+              assert census['module'] == name
+              assert census['nativeSource'].encode() == original
+              if hashlib.sha256(original).hexdigest() != module['original_sha256']:
+                  headers.append(name)
+              else:
+                  blob = hashlib.sha1(b'blob ' + str(len(original)).encode() + b'\0' + original).hexdigest()
+                  assert blob == entries[name]['blob']
+              counts[module['status']] += 1
+              if module['status'] != 'planned-unvalidated':
+                  gaps.append(dict(module=name, status=module['status'], log=(directory/'plan.log').read_text()[-1800:]))
+                  continue
+              plan = json.loads((directory / 'plan.json').read_text())
+              converted = (directory / 'converted.ps').read_bytes()
+              assert hashlib.sha256(census_bytes).hexdigest() == module['census_sha256']
+              assert hashlib.sha256(original).hexdigest() == plan['source_sha256']
+              assert hashlib.sha256(converted).hexdigest() == plan['result_sha256'] == module['converted_sha256']
+              cursor, chunks = 0, []
+              for edit in plan['edits']:
+                  assert cursor <= edit['start'] <= edit['end'] <= len(original)
+                  assert original[edit['start']:edit['end']].decode() == edit['old']
+                  chunks += [original[cursor:edit['start']], edit['new'].encode()]
+                  cursor = edit['end']
+              chunks.append(original[cursor:])
+              assert b''.join(chunks) == converted
+              definition_count += len(plan['declarations'])
+              strategies.update(strategy['targetKeyword'] for strategy in plan['strategies'])
+              if original.count(b'\n') != converted.count(b'\n'):
+                  line_changes.append(name)
+          assert dict(counts) == report['status_counts']
+          assert sorted(headers) == ['Lean', 'LeanChecker', 'LeanExport', 'LeanIR', 'Leanc']
+          summary = dict(source=report['source'], modules=len(entries), status_counts=dict(counts),
+                         planned_definition_count=definition_count, strategy_counts=dict(strategies),
+                         native_header_adapter_modules=sorted(headers), original_planner_line_count_changes=len(line_changes),
+                         gaps=gaps, grammar_migration_complete=False, verified_execution=False,
+                         scope='source identity/census and source edit reconstruction; no converted parse/build/parity acceptance')
+          Path('corpus-plan-inspection.json').write_text(json.dumps(summary, indent=2)+'\n')
+          print('PS0_CORPUS_PLAN_INDEPENDENT_INSPECTION:'+json.dumps(summary, sort_keys=True))
+          
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-corpus-telescope-plan-inspection-${{ github.run_id }}
+          path: |
+            corpus-plan-inspection.json
+            corpus-plan-inspection.log
+          if-no-files-found: error
+
+
+  corpus-telescope-comment-rehash:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42553645183
+          name: ps0-compiler-fixtures-bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f-42553645183
+          github-token: ${{ github.token }}
+          path: telescope-comment-artifact
+      - name: Reconstruct retained comments and independently check exact compiler outputs
+        run: |
+          set -euo pipefail
+          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py telescope-comment-artifact --source bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f --output telescope-comment-rehash.json | tee telescope-comment-rehash.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-corpus-telescope-comment-rehash-${{ github.run_id }}
+          path: |
+            telescope-comment-rehash.json
+            telescope-comment-rehash.log
+          if-no-files-found: error
+
+
+  complete-comment-plan-inspection:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f
+          sparse-checkout: experiments/ps0
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42553687595
+          name: ps0-corpus-source-plan-bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f-42553687595
+          github-token: ${{ github.token }}
+          path: corpus-plan-artifact
+      - name: Reconstruct every complete source plan and require unchanged line counts
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' | tee corpus-plan-inspection.log
+          from pathlib import Path
+          from collections import Counter
+          import hashlib, json
+          root = Path('corpus-plan-artifact')
+          inventory = json.loads(Path('experiments/ps0/compiler-source-inventory.json').read_text())
+          paths = [path for path in root.rglob('evidence.json') if path.parent.name.startswith('corpus-source-plan-')]
+          assert len(paths) == 1
+          path = paths[0]
+          report = json.loads(path.read_text())
+          assert report['source'] == 'bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f'
+          assert report['count'] == len(report['modules']) == inventory['count'] == 2546
+          assert report['inventory_sha256'] == hashlib.sha256(Path('experiments/ps0/compiler-source-inventory.json').read_bytes()).hexdigest()
+          entries = {entry['module']: entry for entry in inventory['entries']}
+          counts, strategies, gaps, headers, line_changes = Counter(), Counter(), [], [], []
+          definition_count = 0
+          for module in report['modules']:
+              name = module['module']
+              assert module['blob'] == entries[name]['blob']
+              directory = path.parent / 'modules' / name
+              original = (directory / 'original.ps').read_bytes()
+              census_bytes = (directory / 'native-census.json').read_bytes()
+              census = json.loads(census_bytes)
+              assert census['module'] == name
+              assert census['nativeSource'].encode() == original
+              if hashlib.sha256(original).hexdigest() != module['original_sha256']:
+                  headers.append(name)
+              else:
+                  blob = hashlib.sha1(b'blob ' + str(len(original)).encode() + b'\0' + original).hexdigest()
+                  assert blob == entries[name]['blob']
+              counts[module['status']] += 1
+              if module['status'] != 'planned-unvalidated':
+                  gaps.append(dict(module=name, status=module['status'], log=(directory/'plan.log').read_text()[-1800:]))
+                  continue
+              plan = json.loads((directory / 'plan.json').read_text())
+              converted = (directory / 'converted.ps').read_bytes()
+              assert hashlib.sha256(census_bytes).hexdigest() == module['census_sha256']
+              assert hashlib.sha256(original).hexdigest() == plan['source_sha256']
+              assert hashlib.sha256(converted).hexdigest() == plan['result_sha256'] == module['converted_sha256']
+              cursor, chunks = 0, []
+              for edit in plan['edits']:
+                  assert cursor <= edit['start'] <= edit['end'] <= len(original)
+                  assert original[edit['start']:edit['end']].decode() == edit['old']
+                  chunks += [original[cursor:edit['start']], edit['new'].encode()]
+                  cursor = edit['end']
+              chunks.append(original[cursor:])
+              assert b''.join(chunks) == converted
+              definition_count += len(plan['declarations'])
+              strategies.update(strategy['targetKeyword'] for strategy in plan['strategies'])
+              if original.count(b'\n') != converted.count(b'\n'):
+                  line_changes.append(name)
+          assert dict(counts) == report['status_counts']
+          assert dict(counts) == {'planned-unvalidated': 2546}
+          assert not line_changes
+          assert sorted(headers) == ['Lean', 'LeanChecker', 'LeanExport', 'LeanIR', 'Leanc']
+          summary = dict(source=report['source'], modules=len(entries), status_counts=dict(counts),
+                         planned_definition_count=definition_count, strategy_counts=dict(strategies),
+                         native_header_adapter_modules=sorted(headers), original_planner_line_count_changes=len(line_changes),
+                         gaps=gaps, grammar_migration_complete=False, verified_execution=False,
+                         scope='source identity/census and source edit reconstruction; no converted parse/build/parity acceptance')
+          Path('corpus-plan-inspection.json').write_text(json.dumps(summary, indent=2)+'\n')
+          print('PS0_CORPUS_PLAN_INDEPENDENT_INSPECTION:'+json.dumps(summary, sort_keys=True))
+          
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-complete-comment-plan-inspection-${{ github.run_id }}
+          path: |
+            corpus-plan-inspection.json
+            corpus-plan-inspection.log
+          if-no-files-found: error
+
+
+  telescope-native-bootstrap-fixed-point:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42552622266
+          name: ps0-compiler-stage1-cd3b62f8003ecd88b5943cb0666cccfc32662f1f-42552622266
+          github-token: ${{ github.token }}
+          path: native-stage-one
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42552622266
+          name: ps0-compiler-stage2-cd3b62f8003ecd88b5943cb0666cccfc32662f1f-42552622266
+          github-token: ${{ github.token }}
+          path: native-stage-two
+      - name: Check complete native-compatible compiler fixed point and retained executables
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' | tee telescope-bootstrap-inspection.log
+          from pathlib import Path
+          import hashlib, json
+          sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+          a,b=[json.loads(Path(folder,'migration.json').read_text()) for folder in ['native-stage-one','native-stage-two']]
+          assert a['source_commit']==b['source_commit']=='cd3b62f8003ecd88b5943cb0666cccfc32662f1f'
+          assert a['module_count']==b['module_count']==len(a['outputs'])==len(b['outputs'])==2569
+          assert a['outputs']==b['outputs']
+          assert b['fixed_point']=={'changed_c':[],'changed_olean':[]}
+          assert a['runtime_smoke']==b['runtime_smoke']=='PASS'
+          assert a['runtime_grammar_host']['status']==b['runtime_grammar_host']['status']=='PASS'
+          reports=[]
+          for folder,data in [('native-stage-one',a),('native-stage-two',b)]:
+              root=Path(folder)
+              assert sha(root/'migrated-ps0')==data['driver_sha256']
+              host=json.loads((root/'native-grammar-host.json').read_text())
+              assert sha(root/'native-grammar-host.json')==data['runtime_grammar_host']['evidence_sha256']
+              assert host['driver_sha256']==data['driver_sha256']
+              assert len(host['host_metadata'])==data['runtime_grammar_host']['metadata_files']==220
+              assert all(item['source_sha256']==item['published_sha256'] for item in host['host_metadata'].values())
+              census=json.loads((root/'source-census/summary.json').read_text())
+              assert census['module_count']==2569
+              assert census['declaration_modes']=={'native-compatible':72820}
+              reports.append(dict(stage=folder,driver_sha256=data['driver_sha256'],
+                  host_sha256=sha(root/'native-grammar-host.json'),host_metadata_files=220,
+                  host_sorted_metadata_sha256=hashlib.sha256(json.dumps(host['host_metadata'],sort_keys=True).encode()).hexdigest(),
+                  census_sha256=sha(root/'source-census/summary.json')))
+          assert reports[0]['driver_sha256']==reports[1]['driver_sha256']
+          summary=dict(source=a['source_commit'],modules=2569,native_compatible_rows=72820,mapped_ps_rows=0,
+                       fixed_point=b['fixed_point'],stages=reports,grammar_migration_complete=False,verified_execution=False,
+                       scope='native-compatible full compiler; original target output hashes and host metadata manifest, actual retained executables rehashed; not canonical source conversion')
+          Path('telescope-bootstrap-inspection.json').write_text(json.dumps(summary,indent=2)+'\n')
+          print('PS0_TELESCOPE_BOOTSTRAP_INSPECTION:'+json.dumps(summary,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-telescope-native-bootstrap-inspection-${{ github.run_id }}
+          path: |
+            telescope-bootstrap-inspection.json
+            telescope-bootstrap-inspection.log
+          if-no-files-found: error
+
+  telescope-where-instance-rehash:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: cbd741ec3c0ef5f5ef1f3537b6fa8569fd746128
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42558307141
+          name: ps0-compiler-fixtures-cbd741ec3c0ef5f5ef1f3537b6fa8569fd746128-42558307141
+          github-token: ${{ github.token }}
+          path: where-instance-artifact
+      - name: Rehash actual declaration-form and compiler-module outputs
+        run: |
+          set -euo pipefail
+          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py where-instance-artifact --source cbd741ec3c0ef5f5ef1f3537b6fa8569fd746128 --output where-instance-rehash.json | tee where-instance-rehash.log
+          python3 - <<'PY' | tee where-instance-roles.log
+          from pathlib import Path
+          import json
+          for path in Path('where-instance-artifact').rglob('evidence.json'):
+              if 'DeclarationForms' in path.parent.name:
+                  value=json.loads(path.read_text())
+                  print('PS0_WHERE_INSTANCE_ROLES:'+json.dumps(value.get('non_definition_source_roles',[]),sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-where-instance-rehash-${{ github.run_id }}
+          path: |
+            where-instance-rehash.json
+            where-instance-rehash.log
+            where-instance-roles.log
+          if-no-files-found: error
+  operator-prefix-rehash:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: 3088d45b88b96d59f45d836eebecacde70894c7b
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42563443759
+          name: ps0-compiler-fixtures-3088d45b88b96d59f45d836eebecacde70894c7b-42563443759
+          github-token: ${{ github.token }}
+          path: operator-prefix-artifact
+      - name: Rehash actual declaration-form and compiler-module outputs
+        run: |
+          set -euo pipefail
+          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py operator-prefix-artifact --source 3088d45b88b96d59f45d836eebecacde70894c7b --output operator-prefix-rehash.json | tee operator-prefix-rehash.log
+          python3 - <<'PY' | tee operator-prefix-roles.log
+          from pathlib import Path
+          import json
+          for path in Path('operator-prefix-artifact').rglob('evidence.json'):
+              if 'DeclarationForms' in path.parent.name:
+                  value=json.loads(path.read_text())
+                  print('PS0_WHERE_INSTANCE_ROLES:'+json.dumps(value.get('non_definition_source_roles',[]),sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-operator-prefix-rehash-${{ github.run_id }}
+          path: |
+            operator-prefix-rehash.json
+            operator-prefix-rehash.log
+            operator-prefix-roles.log
+          if-no-files-found: error
+  projection-prelude-rehash:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: 2974fd2f0cbc0184a6d20b72ca48183bed0d151e
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42564088307
+          name: ps0-compiler-fixtures-2974fd2f0cbc0184a6d20b72ca48183bed0d151e-42564088307
+          github-token: ${{ github.token }}
+          path: projection-prelude-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42564088307
+          name: ps0-compiler-prelude-2974fd2f0cbc0184a6d20b72ca48183bed0d151e-42564088307
+          github-token: ${{ github.token }}
+          path: projection-prelude-artifact
+      - name: Rehash actual declaration-form and compiler-module outputs
+        run: |
+          set -euo pipefail
+          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py projection-prelude-artifact --source 2974fd2f0cbc0184a6d20b72ca48183bed0d151e --output projection-prelude-rehash.json | tee projection-prelude-rehash.log
+          python3 - <<'PY' | tee projection-prelude-roles.log
+          from pathlib import Path
+          import json
+          for path in Path('projection-prelude-artifact').rglob('evidence.json'):
+              if 'DeclarationForms' in path.parent.name:
+                  value=json.loads(path.read_text())
+                  print('PS0_WHERE_INSTANCE_ROLES:'+json.dumps(value.get('non_definition_source_roles',[]),sort_keys=True))
+          for path in Path('projection-prelude-artifact').rglob('evidence.json'):
+              if path.parent.name.startswith('lambdas-'):
+                  value=json.loads(path.read_text())
+                  assert value['source']=='2974fd2f0cbc0184a6d20b72ca48183bed0d151e'
+                  projection=value['projection']
+                  import hashlib
+                  source=Path('experiments/ps0/tests/v1/pending_section_projection.ps').read_bytes()
+                  assert hashlib.sha256(source).hexdigest()==projection['source_sha256']
+                  assert projection['original_range_checks']==2
+                  assert 'PS0_SECTION_PROJECTION:3' in (path.parent/'projection-runtime.log').read_text()
+                  assert 'PS0V1-CALL-GAP' in (path.parent/'projection-subject-gap.log').read_text()
+                  print('PS0_PROJECTION_ARTIFACT:'+json.dumps(projection,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-projection-prelude-rehash-${{ github.run_id }}
+          path: |
+            projection-prelude-rehash.json
+            projection-prelude-rehash.log
+            projection-prelude-roles.log
+          if-no-files-found: error
+  projected-core-rehash:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: 26f715184f2e307efe8ddaa3682e448e5f44fdd3
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42565478507
+          name: ps0-compiler-fixtures-26f715184f2e307efe8ddaa3682e448e5f44fdd3-42565478507
+          github-token: ${{ github.token }}
+          path: projected-core-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42565478507
+          name: ps0-compiler-prelude-26f715184f2e307efe8ddaa3682e448e5f44fdd3-42565478507
+          github-token: ${{ github.token }}
+          path: projected-core-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42565478507
+          name: ps0-compiler-core-26f715184f2e307efe8ddaa3682e448e5f44fdd3-42565478507
+          github-token: ${{ github.token }}
+          path: projected-core-artifact
+      - name: Rehash actual declaration-form and compiler-module outputs
+        run: |
+          set -euo pipefail
+          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py projected-core-artifact --source 26f715184f2e307efe8ddaa3682e448e5f44fdd3 --output projected-core-rehash.json | tee projected-core-rehash.log
+          python3 - <<'PY' | tee projected-core-roles.log
+          from pathlib import Path
+          import json
+          from collections import Counter
+          def decls(commands):
+              for command in commands:
+                  if command['declaration'] is not None:
+                      yield command['declaration']
+                  yield from decls(command.get('nestedCommands',[]))
+          families={'Lean.Parser.Command.'+name:'PS0.StandardAdapters.ps0Standard'+name.title() for name in ['abbrev','theorem','opaque','axiom','instance','example']}
+          checked=0
+          for path in Path('projected-core-artifact').rglob('original-census.json'):
+              original=json.loads(path.read_text())
+              module=original['module']
+              observed_path=path.parent/'migrated/lib/lean'/Path(*module.split('.')).with_suffix('.ilean.ps0-source-census.json')
+              observed=json.loads(observed_path.read_text())
+              expected=Counter((d['sourceName'],families[d['production']]) for d in decls(original['commands']) if d['production'] in families)
+              actual=Counter((d['sourceName'],d['production']) for d in decls(observed['commands']) if d['production'] in families.values())
+              assert actual==expected,(module,actual,expected)
+              assert all(d['mode']=='mapped-ps' for d in decls(observed['commands']))
+              print('PS0_STANDARD_FAMILY_MULTIPLICITIES:'+json.dumps({'module':module,'roles':[{'name':n,'production':p,'count':c} for (n,p),c in sorted(actual.items())]},sort_keys=True))
+              checked+=1
+          assert checked==5,checked
+          for path in Path('projected-core-artifact').rglob('evidence.json'):
+              if 'DeclarationForms' in path.parent.name:
+                  value=json.loads(path.read_text())
+                  print('PS0_WHERE_INSTANCE_ROLES:'+json.dumps(value.get('non_definition_source_roles',[]),sort_keys=True))
+          for path in Path('projected-core-artifact').rglob('evidence.json'):
+              if path.parent.name.startswith('lambdas-'):
+                  value=json.loads(path.read_text())
+                  assert value['source']=='26f715184f2e307efe8ddaa3682e448e5f44fdd3'
+                  projection=value['projection']
+                  import hashlib
+                  source=Path('experiments/ps0/tests/v1/pending_section_projection.ps').read_bytes()
+                  assert hashlib.sha256(source).hexdigest()==projection['source_sha256']
+                  assert projection['original_range_checks']==2
+                  assert 'PS0_SECTION_PROJECTION:3' in (path.parent/'projection-runtime.log').read_text()
+                  assert 'PS0V1-CALL-GAP' in (path.parent/'projection-subject-gap.log').read_text()
+                  print('PS0_PROJECTION_ARTIFACT:'+json.dumps(projection,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-projected-core-rehash-${{ github.run_id }}
+          path: |
+            projected-core-rehash.json
+            projected-core-rehash.log
+            projected-core-roles.log
+          if-no-files-found: error
+
+  do-native-shapes:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42565478507
+          name: ps0-compiler-fixtures-26f715184f2e307efe8ddaa3682e448e5f44fdd3-42565478507
+          github-token: ${{ github.token }}
+          path: do-native-inputs
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42565478507
+          name: ps0-compiler-prelude-26f715184f2e307efe8ddaa3682e448e5f44fdd3-42565478507
+          github-token: ${{ github.token }}
+          path: do-native-inputs
+      - name: Inspect exact native do and let AST roles
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' | tee do-native-shapes.log
+          from pathlib import Path
+          import json
+          wanted={'Lean.Parser.Term.'+s for s in ['do','doSeqIndent','doSeqItem','doLet','doLetArrow','doIdDecl','doReassign','doReturn','doExpr','letDecl','letIdDecl','letIdDeclNoBinders']}
+          samples={}
+          def shape(node,depth):
+              return {'kind':node['kind'],'arity':len(node['args']),'args':[shape(x,depth-1) for x in node['args']]} if depth else {'kind':node['kind'],'arity':len(node['args'])}
+          def walk(node,module,raw):
+              if node['kind'] in wanted and node['kind'] not in samples:
+                  span=node['range']
+                  samples[node['kind']]={'module':module,'shape':shape(node,4),'source':raw[span['start']:span['end']].decode()[:500] if span else None}
+              for child in node['args']:
+                  walk(child,module,raw)
+          def commands(rows,module,raw):
+              for row in rows:
+                  declaration=row['declaration']
+                  if declaration and declaration.get('valueSyntax'):
+                      walk(declaration['valueSyntax'],module,raw)
+                  commands(row.get('nestedCommands',[]),module,raw)
+          for path in Path('do-native-inputs').rglob('original-census.json'):
+              value=json.loads(path.read_text())
+              commands(value['commands'],value['module'],value['nativeSource'].encode())
+          assert 'Lean.Parser.Term.do' in samples
+          Path('do-native-shapes.json').write_text(json.dumps(samples,indent=2)+'\n')
+          for kind,value in sorted(samples.items()):
+              print('PS0_NATIVE_DO_SHAPE:'+json.dumps({'kind':kind,**value},sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-do-native-shapes-${{ github.run_id }}
+          path: |
+            do-native-shapes.json
+            do-native-shapes.log
+          if-no-files-found: error
+
+  native-ellipsis-rehash:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: c1d813541ac0db3b743a284d531a363d3ae62028
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42569416393
+          name: ps0-compiler-fixtures-c1d813541ac0db3b743a284d531a363d3ae62028-42569416393
+          github-token: ${{ github.token }}
+          path: native-ellipsis-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42569416393
+          name: ps0-compiler-prelude-c1d813541ac0db3b743a284d531a363d3ae62028-42569416393
+          github-token: ${{ github.token }}
+          path: native-ellipsis-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42569416393
+          name: ps0-compiler-core-c1d813541ac0db3b743a284d531a363d3ae62028-42569416393
+          github-token: ${{ github.token }}
+          path: native-ellipsis-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42569416393
+          name: ps0-compiler-natbasic-c1d813541ac0db3b743a284d531a363d3ae62028-42569416393
+          github-token: ${{ github.token }}
+          path: native-ellipsis-artifact
+      - name: Rehash actual declaration-form and compiler-module outputs
+        run: |
+          set -euo pipefail
+          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py native-ellipsis-artifact --source c1d813541ac0db3b743a284d531a363d3ae62028 --output native-ellipsis-rehash.json | tee native-ellipsis-rehash.log
+          python3 - <<'PY' | tee native-ellipsis-roles.log
+          from pathlib import Path
+          import json
+          from collections import Counter
+          def decls(commands):
+              for command in commands:
+                  if command['declaration'] is not None:
+                      yield command['declaration']
+                  yield from decls(command.get('nestedCommands',[]))
+          families={'Lean.Parser.Command.'+name:'PS0.StandardAdapters.ps0Standard'+name.title() for name in ['abbrev','theorem','opaque','axiom','instance','example']}
+          checked=0
+          for path in Path('native-ellipsis-artifact').rglob('original-census.json'):
+              original=json.loads(path.read_text())
+              module=original['module']
+              observed_path=path.parent/'migrated/lib/lean'/Path(*module.split('.')).with_suffix('.ilean.ps0-source-census.json')
+              observed=json.loads(observed_path.read_text())
+              expected=Counter((d['sourceName'],families[d['production']]) for d in decls(original['commands']) if d['production'] in families)
+              actual=Counter((d['sourceName'],d['production']) for d in decls(observed['commands']) if d['production'] in families.values())
+              assert actual==expected,(module,actual,expected)
+              assert all(d['mode']=='mapped-ps' for d in decls(observed['commands']))
+              print('PS0_STANDARD_FAMILY_MULTIPLICITIES:'+json.dumps({'module':module,'roles':[{'name':n,'production':p,'count':c} for (n,p),c in sorted(actual.items())]},sort_keys=True))
+              checked+=1
+          assert checked==6,checked
+          for path in Path('native-ellipsis-artifact').rglob('evidence.json'):
+              if 'DeclarationForms' in path.parent.name:
+                  value=json.loads(path.read_text())
+                  print('PS0_WHERE_INSTANCE_ROLES:'+json.dumps(value.get('non_definition_source_roles',[]),sort_keys=True))
+          for path in Path('native-ellipsis-artifact').rglob('evidence.json'):
+              if path.parent.name.startswith('lambdas-'):
+                  value=json.loads(path.read_text())
+                  assert value['source']=='c1d813541ac0db3b743a284d531a363d3ae62028'
+                  projection=value['projection']
+                  import hashlib
+                  source=Path('experiments/ps0/tests/v1/pending_section_projection.ps').read_bytes()
+                  assert hashlib.sha256(source).hexdigest()==projection['source_sha256']
+                  assert projection['original_range_checks']==2
+                  assert 'PS0_SECTION_PROJECTION:3' in (path.parent/'projection-runtime.log').read_text()
+                  assert 'PS0V1-CALL-GAP' in (path.parent/'projection-subject-gap.log').read_text()
+                  print('PS0_PROJECTION_ARTIFACT:'+json.dumps(projection,sort_keys=True))
+          seen=0
+          for path in Path('native-ellipsis-artifact').rglob('evidence.json'):
+              if path.parent.name.startswith('ellipsis-'):
+                  value=json.loads(path.read_text())
+                  assert value['source']=='c1d813541ac0db3b743a284d531a363d3ae62028'
+                  assert value['original_native_node_identity'] is True
+                  source=Path('experiments/ps0/tests/v1/ellipsis_operands.ps').read_bytes()
+                  assert hashlib.sha256(source).hexdigest()==value['fixture_sha256']
+                  assert 'PS0_NATIVE_ELLIPSIS:PASS' in (path.parent/'runtime.log').read_text()
+                  assert 'PS0V1-CALL-ORDER' in (path.parent/'named-before-ellipsis.log').read_text()
+                  for name in ['nonterminal-ellipsis','repeated-ellipsis']:
+                      assert "unexpected '..'" in (path.parent/(name+'.log')).read_text()
+                  print('PS0_ELLIPSIS_ARTIFACT:'+json.dumps(value,sort_keys=True))
+                  seen+=1
+          assert seen==1,seen
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-native-ellipsis-rehash-${{ github.run_id }}
+          path: |
+            native-ellipsis-rehash.json
+            native-ellipsis-rehash.log
+            native-ellipsis-roles.log
+          if-no-files-found: error
+
+  ellipsis-retained-log-rehash:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: c1d813541ac0db3b743a284d531a363d3ae62028
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42569416393
+          name: ps0-compiler-fixtures-c1d813541ac0db3b743a284d531a363d3ae62028-42569416393
+          github-token: ${{ github.token }}
+          path: ellipsis-retained-log-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42569416393
+          name: ps0-compiler-prelude-c1d813541ac0db3b743a284d531a363d3ae62028-42569416393
+          github-token: ${{ github.token }}
+          path: ellipsis-retained-log-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42569416393
+          name: ps0-compiler-core-c1d813541ac0db3b743a284d531a363d3ae62028-42569416393
+          github-token: ${{ github.token }}
+          path: ellipsis-retained-log-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42569416393
+          name: ps0-compiler-natbasic-c1d813541ac0db3b743a284d531a363d3ae62028-42569416393
+          github-token: ${{ github.token }}
+          path: ellipsis-retained-log-artifact
+      - name: Rehash actual declaration-form and compiler-module outputs
+        run: |
+          set -euo pipefail
+          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py ellipsis-retained-log-artifact --source c1d813541ac0db3b743a284d531a363d3ae62028 --output ellipsis-retained-log-rehash.json | tee ellipsis-retained-log-rehash.log
+          python3 - <<'PY' | tee ellipsis-retained-log-roles.log
+          from pathlib import Path
+          import json
+          from collections import Counter
+          def decls(commands):
+              for command in commands:
+                  if command['declaration'] is not None:
+                      yield command['declaration']
+                  yield from decls(command.get('nestedCommands',[]))
+          families={'Lean.Parser.Command.'+name:'PS0.StandardAdapters.ps0Standard'+name.title() for name in ['abbrev','theorem','opaque','axiom','instance','example']}
+          checked=0
+          for path in Path('ellipsis-retained-log-artifact').rglob('original-census.json'):
+              original=json.loads(path.read_text())
+              module=original['module']
+              observed_path=path.parent/'migrated/lib/lean'/Path(*module.split('.')).with_suffix('.ilean.ps0-source-census.json')
+              observed=json.loads(observed_path.read_text())
+              expected=Counter((d['sourceName'],families[d['production']]) for d in decls(original['commands']) if d['production'] in families)
+              actual=Counter((d['sourceName'],d['production']) for d in decls(observed['commands']) if d['production'] in families.values())
+              assert actual==expected,(module,actual,expected)
+              assert all(d['mode']=='mapped-ps' for d in decls(observed['commands']))
+              print('PS0_STANDARD_FAMILY_MULTIPLICITIES:'+json.dumps({'module':module,'roles':[{'name':n,'production':p,'count':c} for (n,p),c in sorted(actual.items())]},sort_keys=True))
+              checked+=1
+          assert checked==6,checked
+          for path in Path('ellipsis-retained-log-artifact').rglob('evidence.json'):
+              if 'DeclarationForms' in path.parent.name:
+                  value=json.loads(path.read_text())
+                  print('PS0_WHERE_INSTANCE_ROLES:'+json.dumps(value.get('non_definition_source_roles',[]),sort_keys=True))
+          for path in Path('ellipsis-retained-log-artifact').rglob('evidence.json'):
+              if path.parent.name.startswith('lambdas-'):
+                  value=json.loads(path.read_text())
+                  assert value['source']=='c1d813541ac0db3b743a284d531a363d3ae62028'
+                  projection=value['projection']
+                  import hashlib
+                  source=Path('experiments/ps0/tests/v1/pending_section_projection.ps').read_bytes()
+                  assert hashlib.sha256(source).hexdigest()==projection['source_sha256']
+                  assert projection['original_range_checks']==2
+                  assert 'PS0_SECTION_PROJECTION:3' in (path.parent/'projection-runtime.log').read_text()
+                  assert 'PS0V1-CALL-GAP' in (path.parent/'projection-subject-gap.log').read_text()
+                  print('PS0_PROJECTION_ARTIFACT:'+json.dumps(projection,sort_keys=True))
+          root=Path('ellipsis-retained-log-artifact')
+          source=(root/'compiler-fixture-logs/source-sha.txt').read_text().strip()
+          assert source=='c1d813541ac0db3b743a284d531a363d3ae62028'
+          log=(root/'compiler-fixture-logs/ellipsis.log').read_text()
+          for marker in ['PS0_NATIVE_ELLIPSIS:PASS','PS0_ELLIPSIS_OPERANDS: PASS','named-before-ellipsis.ps','PS0V1-CALL-ORDER','nonterminal-ellipsis.ps','repeated-ellipsis.ps',"unexpected '..'"]:
+              assert marker in log,marker
+          fixture=Path('experiments/ps0/tests/v1/ellipsis_operands.ps').read_bytes()
+          print('PS0_ELLIPSIS_RETAINED_LOG:'+json.dumps({'source':source,'source_fixture_sha256':hashlib.sha256(fixture).hexdigest(),'aggregate_log_sha256':hashlib.sha256(log.encode()).hexdigest(),'scope':'retained source pin, aggregate success/runtime/rejection log and checked-in identity assertions; per-case JSON was not retained'},sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-ellipsis-retained-log-rehash-${{ github.run_id }}
+          path: |
+            ellipsis-retained-log-rehash.json
+            ellipsis-retained-log-rehash.log
+            ellipsis-retained-log-roles.log
+          if-no-files-found: error
+
+  native-pratt-do-rehash:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: ec35e2f50009a7b794141fe57c88d990b25f9df3
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42575555454
+          name: ps0-compiler-fixtures-ec35e2f50009a7b794141fe57c88d990b25f9df3-42575555454
+          github-token: ${{ github.token }}
+          path: native-pratt-do-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42575555454
+          name: ps0-compiler-prelude-ec35e2f50009a7b794141fe57c88d990b25f9df3-42575555454
+          github-token: ${{ github.token }}
+          path: native-pratt-do-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42575555454
+          name: ps0-compiler-core-ec35e2f50009a7b794141fe57c88d990b25f9df3-42575555454
+          github-token: ${{ github.token }}
+          path: native-pratt-do-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42575555454
+          name: ps0-compiler-natbasic-ec35e2f50009a7b794141fe57c88d990b25f9df3-42575555454
+          github-token: ${{ github.token }}
+          path: native-pratt-do-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42575555454
+          name: ps0-compiler-finbasic-ec35e2f50009a7b794141fe57c88d990b25f9df3-42575555454
+          github-token: ${{ github.token }}
+          path: native-pratt-do-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42575555454
+          name: ps0-do-layout-ec35e2f50009a7b794141fe57c88d990b25f9df3-42575555454
+          github-token: ${{ github.token }}
+          path: native-pratt-do-artifact
+      - name: Rehash compiler outputs and check actual owned do roles
+        run: |
+          set -euo pipefail
+          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py native-pratt-do-artifact --source ec35e2f50009a7b794141fe57c88d990b25f9df3 --output native-pratt-do-rehash.json | tee native-pratt-do-rehash.log
+          python3 - <<'PY' | tee native-pratt-do-roles.log
+          from pathlib import Path
+          from collections import Counter
+          import hashlib,json
+          root=Path('native-pratt-do-artifact')
+          def decls(commands):
+              for command in commands:
+                  if command['declaration'] is not None:
+                      yield command['declaration']
+                  yield from decls(command.get('nestedCommands',[]))
+          families={'Lean.Parser.Command.'+n:'PS0.StandardAdapters.ps0Standard'+n.title() for n in ['abbrev','theorem','opaque','axiom','instance','example']}
+          checked=0
+          for path in root.rglob('original-census.json'):
+              original=json.loads(path.read_text()); module=original['module']
+              observed=json.loads((path.parent/'migrated/lib/lean'/Path(*module.split('.')).with_suffix('.ilean.ps0-source-census.json')).read_text())
+              expected=Counter((d['sourceName'],families[d['production']]) for d in decls(original['commands']) if d['production'] in families)
+              actual=Counter((d['sourceName'],d['production']) for d in decls(observed['commands']) if d['production'] in families.values())
+              assert actual==expected,(module,actual,expected)
+              assert all(d['mode']=='mapped-ps' for d in decls(observed['commands']))
+              if module=='Lean.Compiler.DoLayoutProbe':
+                  rows={d['sourceName']:d for d in decls(observed['commands'])}
+                  for name in ['layoutValue','nestedValue','localDefault','localShared','unitReturn']:
+                      assert rows[name]['valueRootKind']=='ps0HostDo'
+                      assert rows[name]['doSequenceKind']=='Lean.Parser.Term.doSeqIndent'
+                  print('PS0_NATIVE_DO_ROLES:'+json.dumps([{k:r.get(k) for k in ['sourceName','valueRootKind','doSequenceKind','doElementKinds']} for r in rows.values()],sort_keys=True))
+              checked+=1
+          assert checked==8,checked
+          seen=set()
+          for path in root.rglob('evidence.json'):
+              folder=path.parent
+              if folder.name.startswith('ellipsis-'):
+                  value=json.loads(path.read_text()); assert value['source']=='ec35e2f50009a7b794141fe57c88d990b25f9df3'
+                  data=Path('experiments/ps0/tests/v1/ellipsis_operands.ps').read_bytes()
+                  assert hashlib.sha256(data).hexdigest()==value['fixture_sha256']
+                  assert value['original_native_node_identity'] is True
+                  assert value['oracle'] in (folder/'runtime.log').read_text()
+                  assert 'PS0V1-CALL-ORDER' in (folder/'named-before-ellipsis.log').read_text()
+                  for name in ['nonterminal-ellipsis','repeated-ellipsis']:
+                      assert "unexpected '..'" in (folder/(name+'.log')).read_text()
+                  seen.add('ellipsis'); print('PS0_NATIVE_ELLIPSIS_EVIDENCE:'+json.dumps(value,sort_keys=True))
+              if folder.name.startswith('do-layout-'):
+                  value=json.loads(path.read_text()); assert value['source']=='ec35e2f50009a7b794141fe57c88d990b25f9df3'
+                  data=Path('experiments/ps0/tests/v1/do_layout_operands.ps').read_bytes()
+                  assert hashlib.sha256(data).hexdigest()==value['fixture_sha256']
+                  assert value['oracle'] in (folder/'runtime.log').read_text()
+                  for name in ['return-gap','let-gap','statement-gap']:
+                      assert 'PS0V1-CALL-GAP' in (folder/(name+'.log')).read_text()
+                  assert 'PS0V1-CALL-ORDER' in (folder/'return-order.log').read_text()
+                  assert 'IO Unit' in (folder/'statement-type.log').read_text()
+                  seen.add('layout'); print('PS0_NATIVE_DO_EVIDENCE:'+json.dumps(value,sort_keys=True))
+          assert seen=={'layout','ellipsis'},seen
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-native-pratt-do-rehash-${{ github.run_id }}
+          path: |
+            native-pratt-do-rehash.json
+            native-pratt-do-rehash.log
+            native-pratt-do-roles.log
+          if-no-files-found: error
+
+  scoped-boundary-rehash:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: 742c5c180a8ee7314075d63792c220b710e96504
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42580480225
+          name: ps0-compiler-fixtures-742c5c180a8ee7314075d63792c220b710e96504-42580480225
+          github-token: ${{ github.token }}
+          path: scoped-boundary-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42580480225
+          name: ps0-compiler-prelude-742c5c180a8ee7314075d63792c220b710e96504-42580480225
+          github-token: ${{ github.token }}
+          path: scoped-boundary-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42580480225
+          name: ps0-compiler-core-742c5c180a8ee7314075d63792c220b710e96504-42580480225
+          github-token: ${{ github.token }}
+          path: scoped-boundary-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42580480225
+          name: ps0-compiler-natbasic-742c5c180a8ee7314075d63792c220b710e96504-42580480225
+          github-token: ${{ github.token }}
+          path: scoped-boundary-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42580480225
+          name: ps0-compiler-finbasic-742c5c180a8ee7314075d63792c220b710e96504-42580480225
+          github-token: ${{ github.token }}
+          path: scoped-boundary-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42580480225
+          name: ps0-do-layout-742c5c180a8ee7314075d63792c220b710e96504-42580480225
+          github-token: ${{ github.token }}
+          path: scoped-boundary-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42580480225
+          name: ps0-compiler-natlinear-742c5c180a8ee7314075d63792c220b710e96504-42580480225
+          github-token: ${{ github.token }}
+          path: scoped-boundary-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42580480225
+          name: ps0-compiler-grindac-742c5c180a8ee7314075d63792c220b710e96504-42580480225
+          github-token: ${{ github.token }}
+          path: scoped-boundary-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42580480225
+          name: ps0-compiler-iteratorempty-742c5c180a8ee7314075d63792c220b710e96504-42580480225
+          github-token: ${{ github.token }}
+          path: scoped-boundary-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42580480225
+          name: ps0-compiler-spredlaws-742c5c180a8ee7314075d63792c220b710e96504-42580480225
+          github-token: ${{ github.token }}
+          path: scoped-boundary-artifact
+      - name: Rehash compiler outputs and check actual owned do roles
+        run: |
+          set -euo pipefail
+          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py scoped-boundary-artifact --source 742c5c180a8ee7314075d63792c220b710e96504 --output scoped-boundary-rehash.json | tee scoped-boundary-rehash.log
+          python3 - <<'PY' | tee scoped-boundary-roles.log
+          from pathlib import Path
+          from collections import Counter
+          import hashlib,json
+          root=Path('scoped-boundary-artifact')
+          def decls(commands):
+              for command in commands:
+                  if command['declaration'] is not None:
+                      yield command['declaration']
+                  yield from decls(command.get('nestedCommands',[]))
+          families={'Lean.Parser.Command.'+n:'PS0.StandardAdapters.ps0Standard'+n.title() for n in ['abbrev','theorem','opaque','axiom','instance','example']}
+          checked=0
+          for path in root.rglob('original-census.json'):
+              original=json.loads(path.read_text()); module=original['module']
+              observed=json.loads((path.parent/'migrated/lib/lean'/Path(*module.split('.')).with_suffix('.ilean.ps0-source-census.json')).read_text())
+              expected=Counter((d['sourceName'],families[d['production']]) for d in decls(original['commands']) if d['production'] in families)
+              actual=Counter((d['sourceName'],d['production']) for d in decls(observed['commands']) if d['production'] in families.values())
+              assert actual==expected,(module,actual,expected)
+              assert all(d['mode']=='mapped-ps' for d in decls(observed['commands']))
+              if module=='Lean.Compiler.DoLayoutProbe':
+                  rows={d['sourceName']:d for d in decls(observed['commands'])}
+                  for name in ['layoutValue','nestedValue','localDefault','localShared','unitReturn']:
+                      assert rows[name]['valueRootKind']=='ps0HostDo'
+                      assert rows[name]['doSequenceKind']=='Lean.Parser.Term.doSeqIndent'
+                  print('PS0_NATIVE_DO_ROLES:'+json.dumps([{k:r.get(k) for k in ['sourceName','valueRootKind','doSequenceKind','doElementKinds']} for r in rows.values()],sort_keys=True))
+              checked+=1
+          assert checked==12,checked
+          for path in root.rglob('evidence.json'):
+              if not path.parent.name.startswith('compiler-heads-'):
+                  continue
+              evidence=json.loads(path.read_text())
+              assert evidence['operator_descriptor_scope']=='active-and-captured-kinds/1'
+              kind={'Init.Data.Nat.Internal.Linear':'Lean.Parser.Command.attribute',
+                    'Init.Grind.AC':'Lean.Parser.Command.attribute',
+                    'Std.Data.Iterators.Producers.Monadic.Empty':'Lean.Parser.Command.structure'}.get(evidence['module'])
+              if kind:
+                  heads=evidence['contextual_boundary_heads']
+                  assert any(h['previousCommandHeadKind']==kind and h['targetKeyword']=='def' for h in heads)
+                  print('PS0_CONTEXTUAL_BOUNDARY:'+json.dumps({'module':evidence['module'],'heads':heads},sort_keys=True))
+              if evidence['module']=='Std.Do.SPred.Laws':
+                  assert len(evidence['scoped_binary_kinds'])==3
+                  native=json.loads((path.parent/'original-census.json').read_text())
+                  rows={d['sourceName']:d for d in decls(native['commands'])}
+                  kinds=[]
+                  for name in ['and_curry','or_curry','imp_curry']:
+                      result=rows[name]['signatureSyntax']['args'][1]['args'][1]
+                      assert result['nativeBinaryOperator']
+                      kinds.append(result['kind'])
+                  assert kinds==evidence['scoped_binary_kinds']
+                  print('PS0_SCOPED_BINARY_BOUNDARY:'+json.dumps({'module':evidence['module'],'kinds':kinds},sort_keys=True))
+          seen=set()
+          for path in root.rglob('evidence.json'):
+              folder=path.parent
+              if folder.name.startswith('ellipsis-'):
+                  value=json.loads(path.read_text()); assert value['source']=='742c5c180a8ee7314075d63792c220b710e96504'
+                  data=Path('experiments/ps0/tests/v1/ellipsis_operands.ps').read_bytes()
+                  assert hashlib.sha256(data).hexdigest()==value['fixture_sha256']
+                  assert value['original_native_node_identity'] is True
+                  assert value['oracle'] in (folder/'runtime.log').read_text()
+                  assert 'PS0V1-CALL-ORDER' in (folder/'named-before-ellipsis.log').read_text()
+                  for name in ['nonterminal-ellipsis','repeated-ellipsis']:
+                      assert "unexpected '..'" in (folder/(name+'.log')).read_text()
+                  seen.add('ellipsis'); print('PS0_NATIVE_ELLIPSIS_EVIDENCE:'+json.dumps(value,sort_keys=True))
+              if folder.name.startswith('do-layout-'):
+                  value=json.loads(path.read_text()); assert value['source']=='742c5c180a8ee7314075d63792c220b710e96504'
+                  data=Path('experiments/ps0/tests/v1/do_layout_operands.ps').read_bytes()
+                  assert hashlib.sha256(data).hexdigest()==value['fixture_sha256']
+                  assert value['oracle'] in (folder/'runtime.log').read_text()
+                  for name in ['return-gap','let-gap','statement-gap']:
+                      assert 'PS0V1-CALL-GAP' in (folder/(name+'.log')).read_text()
+                  assert 'PS0V1-CALL-ORDER' in (folder/'return-order.log').read_text()
+                  assert 'IO Unit' in (folder/'statement-type.log').read_text()
+                  seen.add('layout'); print('PS0_NATIVE_DO_EVIDENCE:'+json.dumps(value,sort_keys=True))
+          assert seen=={'layout','ellipsis'},seen
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-scoped-boundary-rehash-${{ github.run_id }}
+          path: |
+            scoped-boundary-rehash.json
+            scoped-boundary-rehash.log
+            scoped-boundary-roles.log
+          if-no-files-found: error
+
+
+  unless-native-shapes:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42582700796
+          name: ps0-compiler-unless-9faf8ba8973f966366a9348f66b932090723c6d2-42582700796
+          github-token: ${{ github.token }}
+          path: unless-native-shapes
+      - name: Inspect original native binding and control shapes
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          wanted={'Lean.Parser.Term.doPatDecl','Lean.Parser.Term.doLetArrow','Lean.Parser.Term.doUnless','Lean.Parser.Term.termUnless'}
+          found={}
+          def shape(value,depth=0):
+              if not isinstance(value,dict) or 'kind' not in value: return value
+              result={'kind':value['kind'],'arity':len(value['args']),'atom':value.get('atom')}
+              if depth<3: result['args']=[shape(x,depth+1) for x in value['args']]
+              return result
+          def visit(value,module):
+              if isinstance(value,dict):
+                  kind=value.get('kind')
+                  if kind in wanted and kind not in found:
+                      found[kind]={'module':module,'shape':shape(value)}
+                  for child in value.values(): visit(child,module)
+              elif isinstance(value,list):
+                  for child in value: visit(child,module)
+          for path in Path('unless-native-shapes').rglob('original-census.json'):
+              data=json.loads(path.read_text()); visit(data['commands'],data['module'])
+          assert set(found)==wanted,found.keys()
+          print('PS0_UNLESS_NATIVE_SHAPES:'+json.dumps(found,sort_keys=True))
+          PY
+
+
+  transformed-graph-nine-audit:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42580512720
+          name: ps0-transformed-corpus-742c5c180a8ee7314075d63792c220b710e96504-42580512720
+          github-token: ${{ github.token }}
+          path: transformed-nine
+      - name: Audit retained mapped source observations against successful Lake jobs
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' | tee transformed-nine-audit.log
+          from pathlib import Path
+          from collections import Counter
+          import hashlib,json,re
+          source='742c5c180a8ee7314075d63792c220b710e96504'
+          folder=next(Path('transformed-nine').rglob('failed-build.json')).parent
+          failed=json.loads((folder/'failed-build.json').read_text())
+          assert failed['source_commit']==source and failed['source_grammar'] is True
+          assert failed['status']=='FAILED' and failed['module_count']==2569
+          inventory=json.loads((folder/'input-inventory.json').read_text())
+          assert inventory['source_commit']==source and inventory['module_count']==2569
+          log=(folder/'compiler-build.log').read_text()
+          built=set(re.findall(r'^✔ \[\d+/\d+\] Built ([A-Za-z][A-Za-z0-9_\u0027.]*) (?:\(|$)',log,re.M))
+          assert built and built<=set(inventory['inputs'])
+          sha=lambda data:hashlib.sha256(data).hexdigest()
+          def declarations(commands):
+              for command in commands:
+                  if command['declaration'] is not None: yield command['declaration']
+                  yield from declarations(command.get('nestedCommands',[]))
+          productions={k:'PS0.StandardAdapters.ps0Standard'+v for k,v in [('function','Function'),('const','Const'),('def','Def')]}
+          reports=[]; captured=set(); families=Counter(); heads=0
+          for path in sorted((folder/'partial-source-census').rglob('*.json')):
+              census=json.loads(path.read_text()); module=census['module']; captured.add(module)
+              if module not in built: continue
+              rel=Path(*module.split('.')).with_suffix('.ps')
+              raw=(folder/'transformed-source'/rel).read_bytes()
+              assert census['nativeSource'].encode()==raw
+              assert sha(raw)==inventory['inputs'][module]['ps_sha256']
+              plan_path=folder/('self-source-plans' if module.startswith('PS0') else 'current-source-plans')/module/'plan.json'
+              plan=json.loads(plan_path.read_text()); assert sha(raw)==plan['result_sha256']
+              observed=list(declarations(census['commands']))
+              assert all(d['mode']=='mapped-ps' for d in observed),(module,observed)
+              definitions=[d for d in observed if d['production'] in set(productions.values())|{'Lean.Parser.Command.definition'}]
+              assert len(definitions)==len(plan['strategies']),module
+              for strategy,declaration in zip(plan['strategies'],definitions):
+                  assert declaration['sourceName']==strategy['sourceName']
+                  assert declaration['production']==productions[strategy['targetKeyword']]
+                  span=declaration['keywordRange']
+                  assert raw[span['start']:span['end']].decode()==strategy['targetKeyword']
+              kinds=Counter(d['production'] for d in observed); families.update(kinds); heads+=len(definitions)
+              reports.append({'module':module,'definitions':len(definitions),'source_sha256':sha(raw),
+                              'census_sha256':sha(path.read_bytes()),'productions':dict(kinds)})
+          assert built<=captured,(built-captured)
+          assert len(reports)==len(built)
+          summary={'source':source,'run':42580512720,'job':129037820525,
+                   'prepared_inputs':2569,'successful_lake_modules_with_mapped_source_observations':len(reports),
+                   'definition_heads_in_those_observations':heads,'production_counts':dict(families),
+                   'censuses_without_successful_lake_job':sorted(captured-built),
+                   'refreshed_native_censuses':len(json.loads((folder/'source-plan-summary.json').read_text())['refreshed_declaration_censuses']),
+                   'scope':'successful native Lake job log entries plus retained source observations/plan identity; no retained target C/public olean rehash, runtime, full graph or fixed point acceptance',
+                   'full_graph_build':False,'canonical_fixed_point':False,
+                   'grammar_migration_complete':False,'verified_execution':False}
+          Path('transformed-nine-audit.json').write_text(json.dumps({'summary':summary,'modules':reports},indent=2)+'\n')
+          print('PS0_TRANSFORMED_PARTIAL_AUDIT:'+json.dumps(summary,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-transformed-nine-audit-${{ github.run_id }}
+          path: |
+            transformed-nine-audit.json
+            transformed-nine-audit.log
+          if-no-files-found: error
+
+  transformed-graph-nine-modes:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42580512720
+          name: ps0-transformed-corpus-742c5c180a8ee7314075d63792c220b710e96504-42580512720
+          github-token: ${{ github.token }}
+          path: transformed-nine
+      - name: Audit retained mapped source observations against successful Lake jobs
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' | tee transformed-nine-modes.log
+          from pathlib import Path
+          from collections import Counter
+          import hashlib,json,re
+          source='742c5c180a8ee7314075d63792c220b710e96504'
+          folder=next(Path('transformed-nine').rglob('failed-build.json')).parent
+          failed=json.loads((folder/'failed-build.json').read_text())
+          assert failed['source_commit']==source and failed['source_grammar'] is True
+          assert failed['status']=='FAILED' and failed['module_count']==2569
+          inventory=json.loads((folder/'input-inventory.json').read_text())
+          assert inventory['source_commit']==source and inventory['module_count']==2569
+          log=(folder/'compiler-build.log').read_text()
+          built=set(re.findall(r'^✔ \[\d+/\d+\] Built ([A-Za-z][A-Za-z0-9_\u0027.]*) (?:\(|$)',log,re.M))
+          assert built and built<=set(inventory['inputs'])
+          sha=lambda data:hashlib.sha256(data).hexdigest()
+          def declarations(commands):
+              for command in commands:
+                  if command['declaration'] is not None: yield command['declaration']
+                  yield from declarations(command.get('nestedCommands',[]))
+          productions={k:'PS0.StandardAdapters.ps0Standard'+v for k,v in [('function','Function'),('const','Const'),('def','Def')]}
+          reports=[]; captured=set(); families=Counter(); heads=0; escapes=[]
+          for path in sorted((folder/'partial-source-census').rglob('*.json')):
+              census=json.loads(path.read_text()); module=census['module']; captured.add(module)
+              if module not in built: continue
+              rel=Path(*module.split('.')).with_suffix('.ps')
+              raw=(folder/'transformed-source'/rel).read_bytes()
+              assert census['nativeSource'].encode()==raw
+              assert sha(raw)==inventory['inputs'][module]['ps_sha256']
+              plan_path=folder/('self-source-plans' if module.startswith('PS0') else 'current-source-plans')/module/'plan.json'
+              plan=json.loads(plan_path.read_text()); assert sha(raw)==plan['result_sha256']
+              observed=list(declarations(census['commands']))
+              escaped=[{'module':module,'name':d['sourceName'],'production':d['production'],'mode':d['mode'],'keywordRange':d['keywordRange']} for d in observed if d['mode']!='mapped-ps']
+              escapes.extend(escaped)
+              definitions=[d for d in observed if d['production'] in set(productions.values())|{'Lean.Parser.Command.definition'}]
+              assert len(definitions)==len(plan['strategies']),module
+              for strategy,declaration in zip(plan['strategies'],definitions) if not escaped else []:
+                  assert declaration['sourceName']==strategy['sourceName']
+                  assert declaration['production']==productions[strategy['targetKeyword']]
+                  span=declaration['keywordRange']
+                  assert raw[span['start']:span['end']].decode()==strategy['targetKeyword']
+              kinds=Counter(d['production'] for d in observed); families.update(kinds); heads+=len(definitions)
+              reports.append({'module':module,'definitions':len(definitions),'fully_mapped_mode':not escaped,'source_sha256':sha(raw),
+                              'census_sha256':sha(path.read_bytes()),'productions':dict(kinds)})
+          assert built<=captured,(built-captured)
+          assert len(reports)==len(built)
+          summary={'source':source,'run':42580512720,'job':129037820525,
+                   'prepared_inputs':2569,'successful_lake_modules_with_retained_source_observations':len(reports),
+                   'fully_mapped_mode_modules':sum(r['fully_mapped_mode'] for r in reports),
+                   'native_compatible_escapes':escapes,
+                   'definition_heads_in_those_observations':heads,'production_counts':dict(families),
+                   'censuses_without_successful_lake_job':sorted(captured-built),
+                   'refreshed_native_censuses':len(json.loads((folder/'source-plan-summary.json').read_text())['refreshed_declaration_censuses']),
+                   'scope':'successful native Lake job log entries plus retained source observations/plan identity; no retained target C/public olean rehash, runtime, full graph or fixed point acceptance',
+                   'full_graph_build':False,'canonical_fixed_point':False,
+                   'grammar_migration_complete':False,'verified_execution':False}
+          Path('transformed-nine-modes.json').write_text(json.dumps({'summary':summary,'modules':reports},indent=2)+'\n')
+          print('PS0_TRANSFORMED_MODE_AUDIT:'+json.dumps(summary,sort_keys=True))
+          assert not escapes,'Native-compatible standard declarations do not satisfy the all-PS goal'
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-transformed-nine-modes-${{ github.run_id }}
+          path: |
+            transformed-nine-modes.json
+            transformed-nine-modes.log
+          if-no-files-found: error
+
+  unicode-unless-rehash:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: bdc951bb97131ece1e44dcd853ee0faf5430ef40
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42586577949
+          name: ps0-compiler-fixtures-bdc951bb97131ece1e44dcd853ee0faf5430ef40-42586577949
+          github-token: ${{ github.token }}
+          path: unicode-unless-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42586577949
+          name: ps0-compiler-prelude-bdc951bb97131ece1e44dcd853ee0faf5430ef40-42586577949
+          github-token: ${{ github.token }}
+          path: unicode-unless-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42586577949
+          name: ps0-compiler-core-bdc951bb97131ece1e44dcd853ee0faf5430ef40-42586577949
+          github-token: ${{ github.token }}
+          path: unicode-unless-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42586577949
+          name: ps0-compiler-natbasic-bdc951bb97131ece1e44dcd853ee0faf5430ef40-42586577949
+          github-token: ${{ github.token }}
+          path: unicode-unless-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42586577949
+          name: ps0-compiler-finbasic-bdc951bb97131ece1e44dcd853ee0faf5430ef40-42586577949
+          github-token: ${{ github.token }}
+          path: unicode-unless-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42586577949
+          name: ps0-do-layout-bdc951bb97131ece1e44dcd853ee0faf5430ef40-42586577949
+          github-token: ${{ github.token }}
+          path: unicode-unless-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42586577949
+          name: ps0-compiler-natlinear-bdc951bb97131ece1e44dcd853ee0faf5430ef40-42586577949
+          github-token: ${{ github.token }}
+          path: unicode-unless-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42586577949
+          name: ps0-compiler-grindac-bdc951bb97131ece1e44dcd853ee0faf5430ef40-42586577949
+          github-token: ${{ github.token }}
+          path: unicode-unless-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42586577949
+          name: ps0-compiler-iteratorempty-bdc951bb97131ece1e44dcd853ee0faf5430ef40-42586577949
+          github-token: ${{ github.token }}
+          path: unicode-unless-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42586577949
+          name: ps0-compiler-spredlaws-bdc951bb97131ece1e44dcd853ee0faf5430ef40-42586577949
+          github-token: ${{ github.token }}
+          path: unicode-unless-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42586577949
+          name: ps0-compiler-unless-bdc951bb97131ece1e44dcd853ee0faf5430ef40-42586577949
+          github-token: ${{ github.token }}
+          path: unicode-unless-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42586577949
+          name: ps0-compiler-natlemmas-bdc951bb97131ece1e44dcd853ee0faf5430ef40-42586577949
+          github-token: ${{ github.token }}
+          path: unicode-unless-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42586577949
+          name: ps0-compiler-listattach-bdc951bb97131ece1e44dcd853ee0faf5430ef40-42586577949
+          github-token: ${{ github.token }}
+          path: unicode-unless-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42586577949
+          name: ps0-compiler-initwf-bdc951bb97131ece1e44dcd853ee0faf5430ef40-42586577949
+          github-token: ${{ github.token }}
+          path: unicode-unless-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42586577949
+          name: ps0-project-bdc951bb97131ece1e44dcd853ee0faf5430ef40-42586577949
+          github-token: ${{ github.token }}
+          path: unicode-unless-artifact
+      - name: Rehash compiler outputs and check actual owned do roles
+        run: |
+          set -euo pipefail
+          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py unicode-unless-artifact --source bdc951bb97131ece1e44dcd853ee0faf5430ef40 --output unicode-unless-rehash.json | tee unicode-unless-rehash.log
+          python3 - <<'PY' | tee unicode-unless-roles.log
+          from pathlib import Path
+          from collections import Counter
+          import hashlib,json
+          root=Path('unicode-unless-artifact')
+          def decls(commands):
+              for command in commands:
+                  if command['declaration'] is not None:
+                      yield command['declaration']
+                  yield from decls(command.get('nestedCommands',[]))
+          families={'Lean.Parser.Command.'+n:'PS0.StandardAdapters.ps0Standard'+n.title() for n in ['abbrev','theorem','opaque','axiom','instance','example']}
+          checked=0
+          for path in root.rglob('original-census.json'):
+              original=json.loads(path.read_text()); module=original['module']
+              observed=json.loads((path.parent/'migrated/lib/lean'/Path(*module.split('.')).with_suffix('.ilean.ps0-source-census.json')).read_text())
+              expected=Counter((d['sourceName'],families[d['production']]) for d in decls(original['commands']) if d['production'] in families)
+              actual=Counter((d['sourceName'],d['production']) for d in decls(observed['commands']) if d['production'] in families.values())
+              assert actual==expected,(module,actual,expected)
+              assert all(d['mode']=='mapped-ps' for d in decls(observed['commands']))
+              if module=='Lean.Compiler.DoLayoutProbe':
+                  rows={d['sourceName']:d for d in decls(observed['commands'])}
+                  for name in ['layoutValue','nestedValue','localDefault','localShared','unitReturn']:
+                      assert rows[name]['valueRootKind']=='ps0HostDo'
+                      assert rows[name]['doSequenceKind']=='Lean.Parser.Term.doSeqIndent'
+                  print('PS0_NATIVE_DO_ROLES:'+json.dumps([{k:r.get(k) for k in ['sourceName','valueRootKind','doSequenceKind','doElementKinds']} for r in rows.values()],sort_keys=True))
+              checked+=1
+          assert checked==22,checked
+          for path in root.rglob('evidence.json'):
+              if not path.parent.name.startswith('compiler-heads-'):
+                  continue
+              evidence=json.loads(path.read_text())
+              assert evidence['operator_descriptor_scope']=='active-and-captured-kinds/1'
+              kind={'Init.Data.Nat.Internal.Linear':'Lean.Parser.Command.attribute',
+                    'Init.Grind.AC':'Lean.Parser.Command.attribute',
+                    'Std.Data.Iterators.Producers.Monadic.Empty':'Lean.Parser.Command.structure'}.get(evidence['module'])
+              if kind:
+                  heads=evidence['contextual_boundary_heads']
+                  assert any(h['previousCommandHeadKind']==kind and h['targetKeyword']=='def' for h in heads)
+                  print('PS0_CONTEXTUAL_BOUNDARY:'+json.dumps({'module':evidence['module'],'heads':heads},sort_keys=True))
+              if evidence['module']=='Std.Do.SPred.Laws':
+                  assert len(evidence['scoped_binary_kinds'])==3
+                  native=json.loads((path.parent/'original-census.json').read_text())
+                  rows={d['sourceName']:d for d in decls(native['commands'])}
+                  kinds=[]
+                  for name in ['and_curry','or_curry','imp_curry']:
+                      result=rows[name]['signatureSyntax']['args'][1]['args'][1]
+                      assert result['nativeBinaryOperator']
+                      kinds.append(result['kind'])
+                  assert kinds==evidence['scoped_binary_kinds']
+                  print('PS0_SCOPED_BINARY_BOUNDARY:'+json.dumps({'module':evidence['module'],'kinds':kinds},sort_keys=True))
+          seen=set()
+          for path in root.rglob('evidence.json'):
+              folder=path.parent
+              if folder.name.startswith('ellipsis-'):
+                  value=json.loads(path.read_text()); assert value['source']=='bdc951bb97131ece1e44dcd853ee0faf5430ef40'
+                  data=Path('experiments/ps0/tests/v1/ellipsis_operands.ps').read_bytes()
+                  assert hashlib.sha256(data).hexdigest()==value['fixture_sha256']
+                  assert value['original_native_node_identity'] is True
+                  assert value['oracle'] in (folder/'runtime.log').read_text()
+                  assert 'PS0V1-CALL-ORDER' in (folder/'named-before-ellipsis.log').read_text()
+                  for name in ['nonterminal-ellipsis','repeated-ellipsis']:
+                      assert "unexpected '..'" in (folder/(name+'.log')).read_text()
+                  seen.add('ellipsis'); print('PS0_NATIVE_ELLIPSIS_EVIDENCE:'+json.dumps(value,sort_keys=True))
+              if folder.name.startswith('do-layout-'):
+                  value=json.loads(path.read_text()); assert value['source']=='bdc951bb97131ece1e44dcd853ee0faf5430ef40'
+                  data=Path('experiments/ps0/tests/v1/do_layout_operands.ps').read_bytes()
+                  assert hashlib.sha256(data).hexdigest()==value['fixture_sha256']
+                  assert value['oracle'] in (folder/'runtime.log').read_text()
+                  for name in ['return-gap','let-gap','statement-gap']:
+                      assert 'PS0V1-CALL-GAP' in (folder/(name+'.log')).read_text()
+                  assert 'PS0V1-CALL-ORDER' in (folder/'return-order.log').read_text()
+                  assert 'IO Unit' in (folder/'statement-type.log').read_text()
+                  seen.add('layout'); print('PS0_NATIVE_DO_EVIDENCE:'+json.dumps(value,sort_keys=True))
+          assert seen=={'layout','ellipsis'},seen
+          seen_new=set()
+          for path in root.rglob('evidence.json'):
+              value=json.loads(path.read_text()); folder=path.parent
+              if folder.name.startswith('unless-'):
+                  assert value['source']=='bdc951bb97131ece1e44dcd853ee0faf5430ef40'
+                  assert value['fixture_sha256']==hashlib.sha256(Path('experiments/ps0/tests/v1/unless_operands.ps').read_bytes()).hexdigest()
+                  assert value['original_condition_block_token_ranges'] is True
+                  assert value['original_pattern_optional_type_arrow_and_branch_ranges'] is True
+                  assert value['oracle'] in (folder/'runtime.log').read_text()
+                  for name in ['condition-gap','body-gap','term-condition-gap','term-body-gap','pattern-value-gap','pattern-fallback-gap','pattern-continuation-gap']:
+                      assert 'PS0V1-CALL-GAP' in (folder/(name+'.log')).read_text()
+                  assert 'PS0V1-CALL-ORDER' in (folder/'body-order.log').read_text()
+                  seen_new.add('unless')
+                  print('PS0_UNLESS_RETAINED:'+json.dumps(value,sort_keys=True))
+              if folder.name.startswith('lambdas-'):
+                  assert value['source']=='bdc951bb97131ece1e44dcd853ee0faf5430ef40'
+                  assert value['fixture_sha256']==hashlib.sha256(Path('experiments/ps0/tests/v1/lambda_operands.ps').read_bytes()).hexdigest()
+                  assert value['original_lambda_and_arrow_token_checks']==2
+                  assert value['oracle'] in (folder/'runtime.log').read_text()
+                  assert 'PS0V1-CALL-GAP' in (folder/'unicode-body-gap.log').read_text()
+                  assert 'PS0V1-CALL-ORDER' in (folder/'unicode-body-order.log').read_text()
+                  seen_new.add('lambda')
+                  print('PS0_UNICODE_LAMBDA_RETAINED:'+json.dumps(value,sort_keys=True))
+              if folder.name.startswith('command-operands-'):
+                  assert value['source']=='bdc951bb97131ece1e44dcd853ee0faf5430ef40'
+                  assert 'included' in value['mapped_source_names']
+                  assert 'PS0V1-CALL-GAP' in (folder/'include-gap.log').read_text()
+                  seen_new.add('include')
+                  print('PS0_INCLUDE_RETAINED:'+json.dumps(value,sort_keys=True))
+              if folder.name.startswith('compiler-heads-') and value.get('module') in ['Lean.Compiler.UnlessProbe','Lean.Compiler.InlineAttrs','Init.WF']:
+                  rows={r['sourceName']:r for r in value['mapped_source_roles']}
+                  if value['module']=='Lean.Compiler.UnlessProbe':
+                      assert rows['bodyValue']['doUnlessConditionKinds']==['ps0HostAdjacentCall']*2
+                      assert rows['patternValue']['doPatternBindingCount']==1
+                      assert rows['patternValue']['doUnlessConditionKinds']==['ps0HostAdjacentCall']
+                      assert rows['termValue']['valueRootKind']=='Lean.Parser.Term.termUnless'
+                  if value['module']=='Lean.Compiler.InlineAttrs':
+                      assert rows['isValidMacroInline']['doPatternBindingCount']==1
+                      assert 'PS0.Operators.ownedBinary' in rows['isValidMacroInline']['doUnlessConditionKinds']
+                  if value['module']=='Init.WF':
+                      observed=next(d for d in value['non_definition_source_roles'] if d['sourceName']=='induction')
+                      assert observed['mode']=='mapped-ps' and observed['production']=='PS0.StandardAdapters.ps0StandardTheorem'
+                  print('PS0_UNLESS_INCLUDE_SOURCE_ROLES:'+json.dumps({'module':value['module'],'rows':list(rows.values())},sort_keys=True))
+          assert seen_new=={'unless','lambda','include'},seen_new
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-unicode-unless-rehash-${{ github.run_id }}
+          path: |
+            unicode-unless-rehash.json
+            unicode-unless-rehash.log
+            unicode-unless-roles.log
+          if-no-files-found: error
+
+
+  native-census-reuse-comparison:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42580512720
+          name: ps0-transformed-corpus-742c5c180a8ee7314075d63792c220b710e96504-42580512720
+          github-token: ${{ github.token }}
+          path: native-cache
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42586577949
+          name: ps0-project-bdc951bb97131ece1e44dcd853ee0faf5430ef40-42586577949
+          github-token: ${{ github.token }}
+          path: fresh-capture
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42586577949
+          name: ps0-compiler-prelude-bdc951bb97131ece1e44dcd853ee0faf5430ef40-42586577949
+          github-token: ${{ github.token }}
+          path: fresh-capture
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42586577949
+          name: ps0-compiler-core-bdc951bb97131ece1e44dcd853ee0faf5430ef40-42586577949
+          github-token: ${{ github.token }}
+          path: fresh-capture
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42586577949
+          name: ps0-compiler-finbasic-bdc951bb97131ece1e44dcd853ee0faf5430ef40-42586577949
+          github-token: ${{ github.token }}
+          path: fresh-capture
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42586577949
+          name: ps0-compiler-natlemmas-bdc951bb97131ece1e44dcd853ee0faf5430ef40-42586577949
+          github-token: ${{ github.token }}
+          path: fresh-capture
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42586577949
+          name: ps0-compiler-listattach-bdc951bb97131ece1e44dcd853ee0faf5430ef40-42586577949
+          github-token: ${{ github.token }}
+          path: fresh-capture
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42586577949
+          name: ps0-compiler-initwf-bdc951bb97131ece1e44dcd853ee0faf5430ef40-42586577949
+          github-token: ${{ github.token }}
+          path: fresh-capture
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42586577949
+          name: ps0-compiler-unless-bdc951bb97131ece1e44dcd853ee0faf5430ef40-42586577949
+          github-token: ${{ github.token }}
+          path: fresh-capture
+      - name: Compare fresh and prior native syntax captures before enabling reuse
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' | tee native-census-reuse.log
+          from pathlib import Path
+          import hashlib,json
+          root=next(Path('native-cache').rglob('source-plan-summary.json')).parent
+          summary=json.loads((root/'source-plan-summary.json').read_text())
+          assert summary['planner_source']=='742c5c180a8ee7314075d63792c220b710e96504'
+          assert summary['module_count']==2569
+          checked=[]; unavailable=[]; mismatches=[]
+          sha=lambda data:hashlib.sha256(data).hexdigest()
+          for path in sorted(Path('fresh-capture').rglob('original-census.json')):
+              fresh=json.loads(path.read_text()); module=fresh['module']
+              cached=root/'current-source-plans'/module/'native-census.json'
+              if not cached.is_file():
+                  unavailable.append(module); continue
+              old=json.loads(cached.read_text())
+              assert fresh['leanCommit']==old['leanCommit']=='eb6cafb7290e8bd5f2937522d8d804f58f02bafc'
+              assert fresh['operatorDescriptorScope']==old['operatorDescriptorScope']=='active-and-captured-kinds/1'
+              fresh.pop('file'); old.pop('file')
+              if fresh!=old:
+                  mismatches.append({'module':module,'differentFields':[k for k in set(fresh)|set(old) if fresh.get(k)!=old.get(k)]})
+              else:
+                  checked.append({'module':module,'source_sha256':sha(fresh['nativeSource'].encode()),'capture_sha256':sha(json.dumps(fresh,sort_keys=True,separators=(',',':')).encode())})
+          assert len(checked)>=4,(checked,mismatches,unavailable)
+          data={'native_capture_source':'742c5c180a8ee7314075d63792c220b710e96504','fresh_capture_source':'bdc951bb97131ece1e44dcd853ee0faf5430ef40',
+                'compared_modules':checked,'unavailable_modules':unavailable,'mismatches':mismatches,
+                'scope':'native syntax capture equality after excluding file path only; not transformed compilation or a whole-cache qualification',
+                'grammar_migration_complete':False,'verified_execution':False}
+          Path('native-census-reuse.json').write_text(json.dumps(data,indent=2)+'\n')
+          print('PS0_NATIVE_CENSUS_REUSE_COMPARISON:'+json.dumps(data,sort_keys=True))
+          assert not mismatches,mismatches
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-native-census-reuse-${{ github.run_id }}
+          path: |
+            native-census-reuse.json
+            native-census-reuse.log
+          if-no-files-found: error
+
+
+  native-census-cache-validation:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: f024317810b08a0af99faa906defe2261289dee5
+          sparse-checkout: experiments/ps0
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42580512720
+          name: ps0-transformed-corpus-742c5c180a8ee7314075d63792c220b710e96504-42580512720
+          github-token: ${{ github.token }}
+          path: native-cache
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42553687595
+          name: ps0-corpus-source-plan-bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f-42553687595
+          github-token: ${{ github.token }}
+          path: source-plans
+      - name: Check cache identity rejection and all retained pinned-source captures
+        run: |
+          set -euo pipefail
+          python3 experiments/ps0/tests/test-native-census-cache.py 2>&1 | tee native-cache-tests.log
+          python3 - <<'PY' | tee native-cache-validation.log
+          from pathlib import Path
+          import hashlib,json,sys
+          sys.path.insert(0,'experiments/ps0/tests')
+          from native_census_cache import NativeCensusCache
+          cache=NativeCensusCache('native-cache','742c5c180a8ee7314075d63792c220b710e96504','eb6cafb7290e8bd5f2937522d8d804f58f02bafc')
+          reports=[p for p in Path('source-plans').rglob('evidence.json') if p.parent.name.startswith('corpus-source-plan-')]
+          assert len(reports)==1
+          report=json.loads(reports[0].read_text())
+          assert report['source']=='bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f'
+          manifest=Path('experiments/ps0/compiler-source-inventory.json')
+          assert report['inventory_sha256']==hashlib.sha256(manifest.read_bytes()).hexdigest()
+          assert report['count']==2546 and report['lean_commit']==cache.lean_commit
+          rows=[]
+          for item in report['modules']:
+              original=reports[0].parent/'modules'/item['module']/'original.ps'
+              snapshot=cache.find(item['module'],original.read_bytes(),item['original_sha256'])
+              if snapshot:
+                  rows.append({'module':item['module'],'census_sha256':hashlib.sha256(snapshot.read_bytes()).hexdigest()})
+          assert len(rows)==1872,len(rows)
+          data={'source':'f024317810b08a0af99faa906defe2261289dee5','capture_source':'742c5c180a8ee7314075d63792c220b710e96504',
+                'validated_captures':len(rows),'provenance':cache.provenance,
+                'scope':'cache reader and exact source/schema/native-mode identity validation against independently qualified frozen source-plan inputs; no current grammar compilation or graph acceptance',
+                'grammar_migration_complete':False,'verified_execution':False,'modules':rows}
+          Path('native-cache-validation.json').write_text(json.dumps(data,indent=2)+'\n')
+          print('PS0_NATIVE_CENSUS_CACHE_VALIDATION:'+json.dumps({k:v for k,v in data.items() if k!='modules'},sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-native-cache-validation-${{ github.run_id }}
+          path: |
+            native-cache-tests.log
+            native-cache-validation.log
+            native-cache-validation.json
+          if-no-files-found: error
+
+  transformed-graph-eleven-modes:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42586922686
+          name: ps0-transformed-corpus-bdc951bb97131ece1e44dcd853ee0faf5430ef40-42586922686
+          github-token: ${{ github.token }}
+          path: transformed-nine
+      - name: Audit retained mapped source observations against successful Lake jobs
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' | tee transformed-eleven-modes.log
+          from pathlib import Path
+          from collections import Counter
+          import hashlib,json,re
+          source='bdc951bb97131ece1e44dcd853ee0faf5430ef40'
+          folder=next(Path('transformed-nine').rglob('failed-build.json')).parent
+          failed=json.loads((folder/'failed-build.json').read_text())
+          assert failed['source_commit']==source and failed['source_grammar'] is True
+          assert failed['status']=='FAILED' and failed['module_count']==2569
+          inventory=json.loads((folder/'input-inventory.json').read_text())
+          assert inventory['source_commit']==source and inventory['module_count']==2569
+          log=(folder/'compiler-build.log').read_text()
+          built=set(re.findall(r'^✔ \[\d+/\d+\] Built ([A-Za-z][A-Za-z0-9_\u0027.]*) (?:\(|$)',log,re.M))
+          assert built and built<=set(inventory['inputs'])
+          sha=lambda data:hashlib.sha256(data).hexdigest()
+          def declarations(commands):
+              for command in commands:
+                  if command['declaration'] is not None: yield command['declaration']
+                  yield from declarations(command.get('nestedCommands',[]))
+          productions={k:'PS0.StandardAdapters.ps0Standard'+v for k,v in [('function','Function'),('const','Const'),('def','Def')]}
+          reports=[]; captured=set(); families=Counter(); heads=0; escapes=[]
+          for path in sorted((folder/'partial-source-census').rglob('*.json')):
+              census=json.loads(path.read_text()); module=census['module']; captured.add(module)
+              if module not in built: continue
+              rel=Path(*module.split('.')).with_suffix('.ps')
+              raw=(folder/'transformed-source'/rel).read_bytes()
+              assert census['nativeSource'].encode()==raw
+              assert sha(raw)==inventory['inputs'][module]['ps_sha256']
+              plan_path=folder/('self-source-plans' if module.startswith('PS0') else 'current-source-plans')/module/'plan.json'
+              plan=json.loads(plan_path.read_text()); assert sha(raw)==plan['result_sha256']
+              observed=list(declarations(census['commands']))
+              escaped=[{'module':module,'name':d['sourceName'],'production':d['production'],'mode':d['mode'],'keywordRange':d['keywordRange']} for d in observed if d['mode']!='mapped-ps']
+              escapes.extend(escaped)
+              definitions=[d for d in observed if d['production'] in set(productions.values())|{'Lean.Parser.Command.definition'}]
+              assert len(definitions)==len(plan['strategies']),module
+              for strategy,declaration in zip(plan['strategies'],definitions) if not escaped else []:
+                  assert declaration['sourceName']==strategy['sourceName']
+                  assert declaration['production']==productions[strategy['targetKeyword']]
+                  span=declaration['keywordRange']
+                  assert raw[span['start']:span['end']].decode()==strategy['targetKeyword']
+              kinds=Counter(d['production'] for d in observed); families.update(kinds); heads+=len(definitions)
+              reports.append({'module':module,'definitions':len(definitions),'fully_mapped_mode':not escaped,'source_sha256':sha(raw),
+                              'census_sha256':sha(path.read_bytes()),'productions':dict(kinds)})
+          assert built<=captured,(built-captured)
+          assert len(reports)==len(built)
+          summary={'source':source,'run':42586922686,'job':129059008065,
+                   'prepared_inputs':2569,'successful_lake_modules_with_retained_source_observations':len(reports),
+                   'fully_mapped_mode_modules':sum(r['fully_mapped_mode'] for r in reports),
+                   'native_compatible_escapes':escapes,
+                   'definition_heads_in_those_observations':heads,'production_counts':dict(families),
+                   'censuses_without_successful_lake_job':sorted(captured-built),
+                   'refreshed_native_censuses':len(json.loads((folder/'source-plan-summary.json').read_text())['refreshed_declaration_censuses']),
+                   'scope':'successful native Lake job log entries plus retained source observations/plan identity; no retained target C/public olean rehash, runtime, full graph or fixed point acceptance',
+                   'full_graph_build':False,'canonical_fixed_point':False,
+                   'grammar_migration_complete':False,'verified_execution':False}
+          Path('transformed-eleven-modes.json').write_text(json.dumps({'summary':summary,'modules':reports},indent=2)+'\n')
+          print('PS0_TRANSFORMED_MODE_AUDIT:'+json.dumps(summary,sort_keys=True))
+          assert not escapes,'Native-compatible standard declarations do not satisfy the all-PS goal'
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-transformed-eleven-modes-${{ github.run_id }}
+          path: |
+            transformed-eleven-modes.json
+            transformed-eleven-modes.log
+          if-no-files-found: error
+
+  native-boundaries-rehash:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: c31599ff0685581b83e657c4e888dd79023c5407
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-fixtures-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-prelude-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-core-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-natbasic-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-finbasic-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-do-layout-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-natlinear-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-grindac-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-iteratorempty-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-spredlaws-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-unless-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-natlemmas-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-listattach-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-initwf-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-project-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-stream-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-intlinear-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-arrayperm-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-persistenthashmap-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-nanosecond-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-associative-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - name: Rehash compiler outputs and check actual owned do roles
+        run: |
+          set -euo pipefail
+          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py native-boundaries-artifact --source c31599ff0685581b83e657c4e888dd79023c5407 --output native-boundaries-rehash.json | tee native-boundaries-rehash.log
+          python3 - <<'PY' | tee native-boundaries-roles.log
+          from pathlib import Path
+          from collections import Counter
+          import hashlib,json
+          root=Path('native-boundaries-artifact')
+          def decls(commands):
+              for command in commands:
+                  if command['declaration'] is not None:
+                      yield command['declaration']
+                  yield from decls(command.get('nestedCommands',[]))
+          families={'Lean.Parser.Command.'+n:'PS0.StandardAdapters.ps0Standard'+n.title() for n in ['abbrev','theorem','opaque','axiom','instance','example']}
+          checked=0
+          for path in root.rglob('original-census.json'):
+              original=json.loads(path.read_text()); module=original['module']
+              observed=json.loads((path.parent/'migrated/lib/lean'/Path(*module.split('.')).with_suffix('.ilean.ps0-source-census.json')).read_text())
+              expected=Counter((d['sourceName'],families[d['production']]) for d in decls(original['commands']) if d['production'] in families)
+              actual=Counter((d['sourceName'],d['production']) for d in decls(observed['commands']) if d['production'] in families.values())
+              assert actual==expected,(module,actual,expected)
+              assert all(d['mode']=='mapped-ps' for d in decls(observed['commands']))
+              if module=='Lean.Compiler.DoLayoutProbe':
+                  rows={d['sourceName']:d for d in decls(observed['commands'])}
+                  for name in ['layoutValue','nestedValue','localDefault','localShared','unitReturn']:
+                      assert rows[name]['valueRootKind']=='ps0HostDo'
+                      assert rows[name]['doSequenceKind']=='Lean.Parser.Term.doSeqIndent'
+                  print('PS0_NATIVE_DO_ROLES:'+json.dumps([{k:r.get(k) for k in ['sourceName','valueRootKind','doSequenceKind','doElementKinds']} for r in rows.values()],sort_keys=True))
+              checked+=1
+          assert checked==28,checked
+          for path in root.rglob('evidence.json'):
+              if not path.parent.name.startswith('compiler-heads-'):
+                  continue
+              evidence=json.loads(path.read_text())
+              assert evidence['operator_descriptor_scope']=='active-and-captured-kinds/1'
+              kind={'Init.Data.Nat.Internal.Linear':'Lean.Parser.Command.attribute',
+                    'Init.Grind.AC':'Lean.Parser.Command.attribute',
+                    'Std.Data.Iterators.Producers.Monadic.Empty':'Lean.Parser.Command.structure'}.get(evidence['module'])
+              if kind:
+                  heads=evidence['contextual_boundary_heads']
+                  assert any(h['previousCommandHeadKind']==kind and h['targetKeyword']=='def' for h in heads)
+                  print('PS0_CONTEXTUAL_BOUNDARY:'+json.dumps({'module':evidence['module'],'heads':heads},sort_keys=True))
+              if evidence['module']=='Std.Do.SPred.Laws':
+                  assert len(evidence['scoped_binary_kinds'])==3
+                  native=json.loads((path.parent/'original-census.json').read_text())
+                  rows={d['sourceName']:d for d in decls(native['commands'])}
+                  kinds=[]
+                  for name in ['and_curry','or_curry','imp_curry']:
+                      result=rows[name]['signatureSyntax']['args'][1]['args'][1]
+                      assert result['nativeBinaryOperator']
+                      kinds.append(result['kind'])
+                  assert kinds==evidence['scoped_binary_kinds']
+                  print('PS0_SCOPED_BINARY_BOUNDARY:'+json.dumps({'module':evidence['module'],'kinds':kinds},sort_keys=True))
+          seen=set()
+          for path in root.rglob('evidence.json'):
+              folder=path.parent
+              if folder.name.startswith('ellipsis-'):
+                  value=json.loads(path.read_text()); assert value['source']=='c31599ff0685581b83e657c4e888dd79023c5407'
+                  data=Path('experiments/ps0/tests/v1/ellipsis_operands.ps').read_bytes()
+                  assert hashlib.sha256(data).hexdigest()==value['fixture_sha256']
+                  assert value['original_native_node_identity'] is True
+                  assert value['oracle'] in (folder/'runtime.log').read_text()
+                  assert 'PS0V1-CALL-ORDER' in (folder/'named-before-ellipsis.log').read_text()
+                  for name in ['nonterminal-ellipsis','repeated-ellipsis']:
+                      assert "unexpected '..'" in (folder/(name+'.log')).read_text()
+                  seen.add('ellipsis'); print('PS0_NATIVE_ELLIPSIS_EVIDENCE:'+json.dumps(value,sort_keys=True))
+              if folder.name.startswith('do-layout-'):
+                  value=json.loads(path.read_text()); assert value['source']=='c31599ff0685581b83e657c4e888dd79023c5407'
+                  data=Path('experiments/ps0/tests/v1/do_layout_operands.ps').read_bytes()
+                  assert hashlib.sha256(data).hexdigest()==value['fixture_sha256']
+                  assert value['oracle'] in (folder/'runtime.log').read_text()
+                  for name in ['return-gap','let-gap','statement-gap']:
+                      assert 'PS0V1-CALL-GAP' in (folder/(name+'.log')).read_text()
+                  assert 'PS0V1-CALL-ORDER' in (folder/'return-order.log').read_text()
+                  assert 'IO Unit' in (folder/'statement-type.log').read_text()
+                  seen.add('layout'); print('PS0_NATIVE_DO_EVIDENCE:'+json.dumps(value,sort_keys=True))
+          assert seen=={'layout','ellipsis'},seen
+          seen_new=set()
+          for path in root.rglob('evidence.json'):
+              value=json.loads(path.read_text()); folder=path.parent
+              if folder.name.startswith('unless-'):
+                  assert value['source']=='c31599ff0685581b83e657c4e888dd79023c5407'
+                  assert value['fixture_sha256']==hashlib.sha256(Path('experiments/ps0/tests/v1/unless_operands.ps').read_bytes()).hexdigest()
+                  assert value['original_condition_block_token_ranges'] is True
+                  assert value['original_pattern_optional_type_arrow_and_branch_ranges'] is True
+                  assert value['oracle'] in (folder/'runtime.log').read_text()
+                  for name in ['condition-gap','body-gap','term-condition-gap','term-body-gap','pattern-value-gap','pattern-fallback-gap','pattern-continuation-gap']:
+                      assert 'PS0V1-CALL-GAP' in (folder/(name+'.log')).read_text()
+                  assert 'PS0V1-CALL-ORDER' in (folder/'body-order.log').read_text()
+                  seen_new.add('unless')
+                  print('PS0_UNLESS_RETAINED:'+json.dumps(value,sort_keys=True))
+              if folder.name.startswith('lambdas-'):
+                  assert value['source']=='c31599ff0685581b83e657c4e888dd79023c5407'
+                  assert value['fixture_sha256']==hashlib.sha256(Path('experiments/ps0/tests/v1/lambda_operands.ps').read_bytes()).hexdigest()
+                  assert value['original_lambda_and_arrow_token_checks']==2
+                  assert value['oracle'] in (folder/'runtime.log').read_text()
+                  assert 'PS0V1-CALL-GAP' in (folder/'unicode-body-gap.log').read_text()
+                  assert 'PS0V1-CALL-ORDER' in (folder/'unicode-body-order.log').read_text()
+                  seen_new.add('lambda')
+                  print('PS0_UNICODE_LAMBDA_RETAINED:'+json.dumps(value,sort_keys=True))
+              if folder.name.startswith('command-operands-'):
+                  assert value['source']=='c31599ff0685581b83e657c4e888dd79023c5407'
+                  assert 'included' in value['mapped_source_names']
+                  assert 'PS0V1-CALL-GAP' in (folder/'include-gap.log').read_text()
+                  seen_new.add('include')
+                  print('PS0_INCLUDE_RETAINED:'+json.dumps(value,sort_keys=True))
+              if folder.name.startswith('compiler-heads-') and value.get('module') in ['Lean.Compiler.UnlessProbe','Lean.Compiler.InlineAttrs','Init.WF']:
+                  rows={r['sourceName']:r for r in value['mapped_source_roles']}
+                  if value['module']=='Lean.Compiler.UnlessProbe':
+                      assert rows['bodyValue']['doUnlessConditionKinds']==['ps0HostAdjacentCall']*2
+                      assert rows['patternValue']['doPatternBindingCount']==1
+                      assert rows['patternValue']['doUnlessConditionKinds']==['ps0HostAdjacentCall']
+                      assert rows['termValue']['valueRootKind']=='Lean.Parser.Term.termUnless'
+                  if value['module']=='Lean.Compiler.InlineAttrs':
+                      assert rows['isValidMacroInline']['doPatternBindingCount']==1
+                      assert 'PS0.Operators.ownedBinary' in rows['isValidMacroInline']['doUnlessConditionKinds']
+                  if value['module']=='Init.WF':
+                      observed=next(d for d in value['non_definition_source_roles'] if d['sourceName']=='induction')
+                      assert observed['mode']=='mapped-ps' and observed['production']=='PS0.StandardAdapters.ps0StandardTheorem'
+                  print('PS0_UNLESS_INCLUDE_SOURCE_ROLES:'+json.dumps({'module':value['module'],'rows':list(rows.values())},sort_keys=True))
+          assert seen_new=={'unless','lambda','include'},seen_new
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-native-boundaries-rehash-${{ github.run_id }}
+          path: |
+            native-boundaries-rehash.json
+            native-boundaries-rehash.log
+            native-boundaries-roles.log
+          if-no-files-found: error

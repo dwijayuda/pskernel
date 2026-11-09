@@ -26,7 +26,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"c839f34c570660f09a1cddc8522d02785019f308"}
+          pin={"repository":"dwijayuda/lean4","commit":"53cb6205477602ead12e25a9a59c68094bd312a7"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -133,11 +133,17 @@ jobs:
       - name: Qualify native indexed access and source fidelity
         working-directory: experiments/ps0
         run: python3 tests/run-index-operands.py
+      - name: Qualify named local mixed and comma binders
+        if: success() || failure()
+        working-directory: experiments/ps0
+        run: python3 tests/run-local-mixed-binders.py
       - uses: actions/upload-artifact@v4
         if: success() || failure()
         with:
           name: ps0-native-index-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
           path: |
+            experiments/ps0/build/local-mixed-*/*.json
+            experiments/ps0/build/local-mixed-*/*.log
             experiments/ps0/build/index-operands-*/*.json
             experiments/ps0/build/index-operands-*/*.log
           if-no-files-found: error

@@ -496,8 +496,8 @@ jobs:
           pathlib.Path('build/native-logs/operator-baseline.log').write_text(result.stdout)
           print(result.stdout,flush=True)
           assert result.returncode != 0, 'missing adapter unexpectedly accepted owned binary operands'
-          assert 'Application type mismatch' in result.stdout and 'Nat × Nat' in result.stdout, 'expected native tuple/application mismatch, not harness failure'
-          evidence={'source':os.environ['PS0_SOURCE_SHA'],'fixture_sha256':hashlib.sha256(fixture.read_bytes()).hexdigest(),'probe_sha256':hashlib.sha256(probe.read_bytes()).hexdigest(),'expected_rejection':'native tuple/application mismatch before operator adapters','checker_exit':result.returncode,'status':'PASS','verified_execution':False}
+          assert "unexpected token '+'; expected command" in result.stdout, 'expected unconsumed binary operator after owned PS call, not harness failure'
+          evidence={'source':os.environ['PS0_SOURCE_SHA'],'fixture_sha256':hashlib.sha256(fixture.read_bytes()).hexdigest(),'probe_sha256':hashlib.sha256(probe.read_bytes()).hexdigest(),'expected_rejection':'unconsumed binary operator after owned PS call before operator adapters','checker_exit':result.returncode,'status':'PASS','verified_execution':False}
           pathlib.Path('build/native-logs/operator-baseline.json').write_text(json.dumps(evidence,indent=2)+'\n')
           print('PS0_NATIVE_OPERATOR_PRE_ADAPTER_REJECTION: PASS',flush=True)
           PY

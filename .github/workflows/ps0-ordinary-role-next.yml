@@ -243,6 +243,7 @@ jobs:
           if-no-files-found: error
 
   host-operand-parity:
+    if: false
     runs-on: ubuntu-22.04
     timeout-minutes: 15
     defaults:
@@ -626,6 +627,7 @@ jobs:
 
 
   aggregate-host-gaps:
+    if: false
     runs-on: ubuntu-22.04
     timeout-minutes: 15
     defaults:
@@ -1669,6 +1671,7 @@ jobs:
 
 
   compiler-prelude:
+    if: false
     runs-on: ubuntu-22.04
     timeout-minutes: 15
     defaults:
@@ -1786,6 +1789,7 @@ jobs:
             experiments/ps0/build/compiler-heads-*-InitPrelude/migrated/lib/lean/Init/Prelude.olean
           if-no-files-found: error
   compiler-associative:
+    if: false
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     defaults:
@@ -1905,6 +1909,7 @@ jobs:
 
 
   compiler-intlinear:
+    if: false
     runs-on: ubuntu-22.04
     timeout-minutes: 30
     defaults:

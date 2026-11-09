@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   index-operands:
@@ -25,7 +26,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"2af3f59a3fcf2139953032fffbd5896c31cb5d9d"}
+          pin={"repository":"dwijayuda/lean4","commit":"82263dbab3562c53da524ce403a33a181733c4a2"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -105,6 +106,29 @@ jobs:
           test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
           lake build PS0 ps0 2>&1 | tee build/compiler-fixture-logs/build.log
           lake exe ps0 environment | tee build/compiler-fixture-logs/environment.json
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42630740875
+          name: ps0-compiler-listattach-5a5cfe9e35d012c11e735123f941d07a7fdcf85e-42630740875
+          github-token: ${{ github.token }}
+          path: retained-listattach
+      - name: Inspect exact retained indexed signature
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          root=Path('retained-listattach')
+          source=next(root.rglob('converted/src/Init/Data/List/Attach.ps'))
+          lines=source.read_text().splitlines()
+          print('PS0_RETAINED_INDEX_SIGNATURE:'+repr('\n'.join(lines[691:704])))
+          plan=json.loads(next(root.rglob('plan.json')).read_text())
+          original=next(root.rglob('original/src/Init/Data/List/Attach.ps')).read_bytes()
+          start=sum(len(x) for x in original.splitlines(keepends=True)[:691])
+          end=sum(len(x) for x in original.splitlines(keepends=True)[:704])
+          print('PS0_RETAINED_INDEX_EDITS:'+json.dumps([e for e in plan['edits'] if start<=e['start']<=end]))
+          PY
       - name: Qualify native indexed access and source fidelity
         working-directory: experiments/ps0
         run: python3 tests/run-index-operands.py

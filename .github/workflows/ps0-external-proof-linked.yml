@@ -406,6 +406,7 @@ jobs:
             experiments/ps0/build/compiler-heads-*/*.diff
             experiments/ps0/build/compiler-heads-*/original/src/
             experiments/ps0/build/compiler-heads-*/converted/src/
+            experiments/ps0/build/compiler-heads-*/migrated/lib/lean/**/*.ilean.ps0-source-census.json
             experiments/ps0/build/compiler-heads-*/baseline/ir/Lean/Compiler/ClosedTermCache.c
             experiments/ps0/build/compiler-heads-*/baseline/lib/lean/Lean/Compiler/ClosedTermCache.olean
             experiments/ps0/build/compiler-heads-*/migrated/ir/Lean/Compiler/ClosedTermCache.c
@@ -610,6 +611,7 @@ jobs:
             experiments/ps0/build/compiler-heads-*/*.diff
             experiments/ps0/build/compiler-heads-*/original/src/
             experiments/ps0/build/compiler-heads-*/converted/src/
+            experiments/ps0/build/compiler-heads-*/migrated/lib/lean/**/*.ilean.ps0-source-census.json
             experiments/ps0/build/compiler-heads-*/baseline/ir/Lean/Compiler/LCNF/Basic.c
             experiments/ps0/build/compiler-heads-*/baseline/lib/lean/Lean/Compiler/LCNF/Basic.olean
             experiments/ps0/build/compiler-heads-*/migrated/ir/Lean/Compiler/LCNF/Basic.c

@@ -364,7 +364,7 @@ jobs:
           python3 tests/run-compiler-heads.py --fixture ScopeM --module Lean.Compiler.LCNF.ScopeM --blob 5bc78059af7e9f16d980688c88c3eaeecae3ab1a --declarations getScope,setScope,clearScope,withBackTrackingScope,withNewScope,isInScope,addToScope 2>&1 | tee build/project-logs/compiler-mixed-heads.log
           python3 tests/run-compiler-heads.py --fixture OtherDecl --module Lean.Compiler.LCNF.OtherDecl --blob a09e23d6f39bb7e87e7a5b10c2f0fc7556575cd4 --declarations getOtherDeclType 2>&1 | tee build/project-logs/compiler-default-heads.log
           python3 tests/run-compiler-heads.py --fixture EmitUtil --module Lean.Compiler.LCNF.EmitUtil --blob a1283439481c82fe7835b7b2d743e5e57bfd1111 --declarations collectUsedDecls,usesModuleFrom --owned-value-calls usesModuleFrom 2>&1 | tee build/project-logs/compiler-emission-heads.log
-          python3 tests/run-compiler-heads.py --fixture TelescopeProbe --module Lean.Compiler.TelescopeProbe --blob df579b62f3482393dd7db4dd6486e37b9c9b69fe --declarations ALL 2>&1 | tee build/project-logs/compiler-telescope-probe.log
+          python3 tests/run-compiler-heads.py --fixture TelescopeProbe --module Lean.Compiler.TelescopeProbe --blob 61b472c934e79b57492cf596ede396f7740230db --declarations ALL 2>&1 | tee build/project-logs/compiler-telescope-probe.log
           python3 tests/run-compiler-heads.py --fixture LCNFBasic --module Lean.Compiler.LCNF.Basic --blob 82c8dee0b9d13f09d58a6404dd5d5abf797d236e --declarations ALL 2>&1 | tee build/project-logs/compiler-lcnf-basic.log
       - name: Qualify modern native frontend startup hooks
         if: success() || failure()
@@ -600,6 +600,11 @@ jobs:
         run: |
           set -euo pipefail
           python3 tests/run-lambdas.py 2>&1 | tee build/compiler-fixture-logs/lambdas.log
+      - name: Qualify telescope comment and line-break fidelity
+        if: success() || failure()
+        run: |
+          set -euo pipefail
+          python3 tests/run-compiler-heads.py --fixture TelescopeProbe --module Lean.Compiler.TelescopeProbe --blob 61b472c934e79b57492cf596ede396f7740230db --declarations ALL 2>&1 | tee build/compiler-fixture-logs/telescope.log
       - name: Qualify all pinned Basic definitions and telescope source productions
         if: success() || failure()
         run: |
@@ -619,6 +624,10 @@ jobs:
             experiments/ps0/build/compiler-heads-*/original/src/
             experiments/ps0/build/compiler-heads-*/converted/src/
             experiments/ps0/build/compiler-heads-*/migrated/lib/lean/**/*.ilean.ps0-source-census.json
+            experiments/ps0/build/compiler-heads-*/baseline/ir/Lean/Compiler/TelescopeProbe.c
+            experiments/ps0/build/compiler-heads-*/baseline/lib/lean/Lean/Compiler/TelescopeProbe.olean
+            experiments/ps0/build/compiler-heads-*/migrated/ir/Lean/Compiler/TelescopeProbe.c
+            experiments/ps0/build/compiler-heads-*/migrated/lib/lean/Lean/Compiler/TelescopeProbe.olean
             experiments/ps0/build/compiler-heads-*/baseline/ir/Lean/Compiler/LCNF/Basic.c
             experiments/ps0/build/compiler-heads-*/baseline/lib/lean/Lean/Compiler/LCNF/Basic.olean
             experiments/ps0/build/compiler-heads-*/migrated/ir/Lean/Compiler/LCNF/Basic.c

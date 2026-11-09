@@ -613,3 +613,34 @@ jobs:
           assert total==17, total
           print('PS0_DECLARATION_TAIL_RAW_OUTPUT_REHASH: PASS; modules=5; heads=17; files=20')
           PY
+
+
+  corpus-telescope-basic-rehash:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: cd3b62f8003ecd88b5943cb0666cccfc32662f1f
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42552511645
+          name: ps0-compiler-fixtures-cd3b62f8003ecd88b5943cb0666cccfc32662f1f-42552511645
+          github-token: ${{ github.token }}
+          path: telescope-basic-artifact
+      - name: Reconstruct source edits and rehash actual native compiler outputs
+        run: |
+          set -euo pipefail
+          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py telescope-basic-artifact --source cd3b62f8003ecd88b5943cb0666cccfc32662f1f --output telescope-basic-rehash.json | tee telescope-basic-rehash.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-corpus-telescope-basic-rehash-${{ github.run_id }}
+          path: |
+            telescope-basic-rehash.json
+            telescope-basic-rehash.log
+          if-no-files-found: error

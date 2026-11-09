@@ -364,6 +364,8 @@ jobs:
           python3 tests/run-compiler-heads.py --fixture ScopeM --module Lean.Compiler.LCNF.ScopeM --blob 5bc78059af7e9f16d980688c88c3eaeecae3ab1a --declarations getScope,setScope,clearScope,withBackTrackingScope,withNewScope,isInScope,addToScope 2>&1 | tee build/project-logs/compiler-mixed-heads.log
           python3 tests/run-compiler-heads.py --fixture OtherDecl --module Lean.Compiler.LCNF.OtherDecl --blob a09e23d6f39bb7e87e7a5b10c2f0fc7556575cd4 --declarations getOtherDeclType 2>&1 | tee build/project-logs/compiler-default-heads.log
           python3 tests/run-compiler-heads.py --fixture EmitUtil --module Lean.Compiler.LCNF.EmitUtil --blob a1283439481c82fe7835b7b2d743e5e57bfd1111 --declarations collectUsedDecls,usesModuleFrom --owned-value-calls usesModuleFrom 2>&1 | tee build/project-logs/compiler-emission-heads.log
+          python3 tests/run-compiler-heads.py --fixture TelescopeProbe --module Lean.Compiler.TelescopeProbe --blob 20a7a2c01aae5ca810055e6a75e1adcd2b13f215 --declarations ALL 2>&1 | tee build/project-logs/compiler-telescope-probe.log
+          python3 tests/run-compiler-heads.py --fixture LCNFBasic --module Lean.Compiler.LCNF.Basic --blob 82c8dee0b9d13f09d58a6404dd5d5abf797d236e --declarations ALL 2>&1 | tee build/project-logs/compiler-lcnf-basic.log
       - name: Qualify modern native frontend startup hooks
         if: success() || failure()
         run: |

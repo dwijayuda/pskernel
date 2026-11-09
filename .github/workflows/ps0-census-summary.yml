@@ -1144,3 +1144,59 @@ jobs:
             projected-core-rehash.log
             projected-core-roles.log
           if-no-files-found: error
+
+  do-native-shapes:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42565478507
+          name: ps0-compiler-fixtures-26f715184f2e307efe8ddaa3682e448e5f44fdd3-42565478507
+          github-token: ${{ github.token }}
+          path: do-native-inputs
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42565478507
+          name: ps0-compiler-prelude-26f715184f2e307efe8ddaa3682e448e5f44fdd3-42565478507
+          github-token: ${{ github.token }}
+          path: do-native-inputs
+      - name: Inspect exact native do and let AST roles
+        run: |
+          python3 - <<'PY' | tee do-native-shapes.log
+          from pathlib import Path
+          import json
+          wanted={'Lean.Parser.Term.'+s for s in ['do','doSeqIndent','doSeqItem','doLet','doLetArrow','doIdDecl','doReassign','doReturn','doExpr','letDecl','letIdDecl','letIdDeclNoBinders']}
+          samples={}
+          def shape(node,depth):
+              return {'kind':node['kind'],'arity':len(node['args']),'args':[shape(x,depth-1) for x in node['args']]} if depth else {'kind':node['kind'],'arity':len(node['args'])}
+          def walk(node,module,raw):
+              if node['kind'] in wanted and node['kind'] not in samples:
+                  span=node['range']
+                  samples[node['kind']]={'module':module,'shape':shape(node,4),'source':raw[span['start']:span['end']].decode()[:500] if span else None}
+              for child in node['args']:
+                  walk(child,module,raw)
+          def commands(rows,module,raw):
+              for row in rows:
+                  declaration=row['declaration']
+                  if declaration and declaration.get('valueSyntax'):
+                      walk(declaration['valueSyntax'],module,raw)
+                  commands(row.get('nestedCommands',[]),module,raw)
+          for path in Path('do-native-inputs').rglob('original-census.json'):
+              value=json.loads(path.read_text())
+              commands(value['commands'],value['module'],value['nativeSource'].encode())
+          assert 'Lean.Parser.Term.doLet' in samples
+          Path('do-native-shapes.json').write_text(json.dumps(samples,indent=2)+'\n')
+          for kind,value in sorted(samples.items()):
+              print('PS0_NATIVE_DO_SHAPE:'+json.dumps({'kind':kind,**value},sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-do-native-shapes-${{ github.run_id }}
+          path: |
+            do-native-shapes.json
+            do-native-shapes.log
+          if-no-files-found: error

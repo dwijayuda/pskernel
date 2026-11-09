@@ -416,6 +416,10 @@ jobs:
             experiments/ps0/build/compiler-heads-*/baseline/lib/lean/Lean/Compiler/LCNF/ScopeM.olean
             experiments/ps0/build/compiler-heads-*/migrated/ir/Lean/Compiler/LCNF/ScopeM.c
             experiments/ps0/build/compiler-heads-*/migrated/lib/lean/Lean/Compiler/LCNF/ScopeM.olean
+            experiments/ps0/build/compiler-heads-*/baseline/ir/Lean/Compiler/LCNF/EmitUtil.c
+            experiments/ps0/build/compiler-heads-*/baseline/lib/lean/Lean/Compiler/LCNF/EmitUtil.olean
+            experiments/ps0/build/compiler-heads-*/migrated/ir/Lean/Compiler/LCNF/EmitUtil.c
+            experiments/ps0/build/compiler-heads-*/migrated/lib/lean/Lean/Compiler/LCNF/EmitUtil.olean
             experiments/ps0/build/compiler-heads-*/baseline/ir/Lean/Compiler/LCNF/OtherDecl.c
             experiments/ps0/build/compiler-heads-*/baseline/lib/lean/Lean/Compiler/LCNF/OtherDecl.olean
             experiments/ps0/build/compiler-heads-*/migrated/ir/Lean/Compiler/LCNF/OtherDecl.c

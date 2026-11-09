@@ -525,11 +525,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: dwijayuda/lean4
-          ref: 3b23a3520c270bb892462f0600abb8b7eed25c2c
+          repository: leanprover/lean4
+          ref: eb6cafb7290e8bd5f2937522d8d804f58f02bafc
           sparse-checkout-cone-mode: false
           sparse-checkout: |
-            experiments/ps0/compiler-source-inventory.json
             src/Lean.lean
             src/LeanChecker.lean
             src/LeanExport.lean
@@ -551,8 +550,7 @@ jobs:
           root=Path('corpus')
           migration=json.loads((root/'migration.json').read_text())
           assert migration['source_commit']=='2cba0bc26df49c52d653598fd9c791f23209199c'
-          inventory=json.loads(Path('experiments/ps0/compiler-source-inventory.json').read_text())
-          entries={d['module']:d for d in inventory['entries']}
+          entries=json.loads("{\"Lean\":{\"repositoryPath\":\"src/Lean.lean\",\"blob\":\"db1d56fbd201eae72ad393ad94929d0602e80fa2\"},\"LeanChecker\":{\"repositoryPath\":\"src/LeanChecker.lean\",\"blob\":\"aa69c77767cfab76fdb95a7cafb170d36b9950c2\"},\"LeanExport\":{\"repositoryPath\":\"src/LeanExport.lean\",\"blob\":\"a21cc37c1a84d89026aba45daf61a7bc05be5f00\"},\"LeanIR\":{\"repositoryPath\":\"src/LeanIR.lean\",\"blob\":\"a95112b90e8b54756112e01a10e865971d6ac986\"},\"Leanc\":{\"repositoryPath\":\"src/Leanc.lean\",\"blob\":\"da517a3bf8a1dd6b0c1770deae367be40725b6bf\"}}")
           result=[]
           for module in ['Lean','LeanChecker','LeanExport','LeanIR','Leanc']:
               original=Path(entries[module]['repositoryPath']).read_bytes()

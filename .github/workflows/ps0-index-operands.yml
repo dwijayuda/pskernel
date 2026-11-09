@@ -26,7 +26,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"323ee9df11a7628985ac258101ccd2e082129b02"}
+          pin={"repository":"dwijayuda/lean4","commit":"619d9246ddf717c4b23500d8c613c0cceb62f470"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -130,6 +130,8 @@ jobs:
           print('PS0_RETAINED_INDEX_EDITS:'+json.dumps([e for e in plan['edits'] if start<=e['start']<=end]))
           Path('experiments/ps0/build/retained-index-signature.txt').write_text('\n'.join(lines[695:700])+'\n')
           PY
+      - name: Retain native local declaration layouts
+        run: lake env lean tests/debug-local-layout.lean 2>&1 | tee build/compiler-fixture-logs/local-layout.log
       - name: Qualify native indexed access and source fidelity
         working-directory: experiments/ps0
         run: python3 tests/run-index-operands.py
@@ -160,7 +162,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"323ee9df11a7628985ac258101ccd2e082129b02"}
+          pin={"repository":"dwijayuda/lean4","commit":"619d9246ddf717c4b23500d8c613c0cceb62f470"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:

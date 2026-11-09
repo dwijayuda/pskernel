@@ -26,7 +26,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"ce71b1a262c52b1f011c4cb0040a5fb353d008b4"}
+          pin={"repository":"dwijayuda/lean4","commit":"e26623bc6f07e77f5689985a558178e65bfac6f5"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -142,6 +142,9 @@ jobs:
         with:
           name: ps0-native-index-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
           path: |
+            experiments/ps0/build/local-mixed-*/*.c
+            experiments/ps0/build/local-mixed-*/*.olean
+            experiments/ps0/build/local-mixed-*/*.ps
             experiments/ps0/build/local-mixed-*/*.json
             experiments/ps0/build/local-mixed-*/*.log
             experiments/ps0/build/index-operands-*/*.json
@@ -164,7 +167,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"ce71b1a262c52b1f011c4cb0040a5fb353d008b4"}
+          pin={"repository":"dwijayuda/lean4","commit":"e26623bc6f07e77f5689985a558178e65bfac6f5"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:

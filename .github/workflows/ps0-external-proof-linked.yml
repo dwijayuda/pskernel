@@ -532,9 +532,9 @@ jobs:
           if-no-files-found: error
 
 
-  corpus-source-plan:
+  compiler-fixtures:
     runs-on: ubuntu-22.04
-    timeout-minutes: 90
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: experiments/ps0
@@ -587,23 +587,30 @@ jobs:
       - name: Record exact source and build clean PS0
         run: |
           set -euo pipefail
-          mkdir -p build/corpus-plan-logs
+          mkdir -p build/compiler-fixture-logs
           test "$(git rev-parse HEAD)" = "$PS0_SOURCE_SHA"
-          printf '%s\n' "$PS0_SOURCE_SHA" > build/corpus-plan-logs/source-sha.txt
-          printf '%s\n' "$GITHUB_SHA" > build/corpus-plan-logs/runner-sha.txt
+          printf '%s\n' "$PS0_SOURCE_SHA" > build/compiler-fixture-logs/source-sha.txt
+          printf '%s\n' "$GITHUB_SHA" > build/compiler-fixture-logs/runner-sha.txt
           test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
-          lake build PS0 ps0 2>&1 | tee build/corpus-plan-logs/build.log
-          lake exe ps0 environment | tee build/corpus-plan-logs/environment.json
-      - name: Inventory all pinned modules through native source planning
+          lake build PS0 ps0 2>&1 | tee build/compiler-fixture-logs/build.log
+          lake exe ps0 environment | tee build/compiler-fixture-logs/environment.json
+      - name: Qualify all pinned Basic definitions and telescope source productions
         run: |
           set -euo pipefail
-          python3 tests/run-corpus-source-plan.py 2>&1 | tee build/corpus-plan-logs/plan.log
+          python3 tests/run-compiler-heads.py --fixture LCNFBasic --module Lean.Compiler.LCNF.Basic --blob 82c8dee0b9d13f09d58a6404dd5d5abf797d236e --declarations ALL 2>&1 | tee build/compiler-fixture-logs/basic.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ps0-corpus-source-plan-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
+          name: ps0-compiler-fixtures-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
           path: |
-            experiments/ps0/build/corpus-plan-logs/
-            experiments/ps0/build/corpus-source-plan-*/
+            experiments/ps0/build/compiler-fixture-logs/
+            experiments/ps0/build/compiler-heads-*/*.json
+            experiments/ps0/build/compiler-heads-*/*.log
+            experiments/ps0/build/compiler-heads-*/original/src/
+            experiments/ps0/build/compiler-heads-*/converted/src/
+            experiments/ps0/build/compiler-heads-*/baseline/ir/Lean/Compiler/LCNF/Basic.c
+            experiments/ps0/build/compiler-heads-*/baseline/lib/lean/Lean/Compiler/LCNF/Basic.olean
+            experiments/ps0/build/compiler-heads-*/migrated/ir/Lean/Compiler/LCNF/Basic.c
+            experiments/ps0/build/compiler-heads-*/migrated/lib/lean/Lean/Compiler/LCNF/Basic.olean
           if-no-files-found: error
 

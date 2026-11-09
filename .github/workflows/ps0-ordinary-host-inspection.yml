@@ -99,6 +99,23 @@ jobs:
           print('PS0_ORDINARY_HOST_INSPECTION:'+json.dumps(report,sort_keys=True))
           
           PY
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42692088403
+          name: ps0-compiler-synthinstance14-87fce86ed6638f32d4b6aa8543765d6f9cb096f2-42692088403
+          github-token: ${{ github.token }}
+          path: synth-diagnostic
+      - name: Read retained private olean diagnostic
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          files=list(Path('synth-diagnostic').rglob('c-parity-olean-diagnostic.log'))
+          assert len(files)==1,files
+          text=files[0].read_text()
+          Path('inspection/private-olean-diagnostic.log').write_text(text)
+          print(text[:16000])
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:

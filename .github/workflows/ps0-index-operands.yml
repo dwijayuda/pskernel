@@ -26,7 +26,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"d0151bcd3d02681a7a28300a6e4b0f4aa39989d5"}
+          pin={"repository":"dwijayuda/lean4","commit":"9835c4ce576f17f879d603f22f4dde455b4d4ff5"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -139,6 +139,8 @@ jobs:
         run: python3 tests/run-index-operands.py
       - name: Retain native where-local and finally layouts
         run: lake env lean tests/debug-where-local-layout.lean 2>&1 | tee build/compiler-fixture-logs/where-local-layout.log
+      - name: Inspect syntax-only source where parser
+        run: lake exe ps0 check tests/debug-source-where.ps 2>&1 | tee build/compiler-fixture-logs/source-where-layout.log
       - name: Test-first braced where local helpers
         run: python3 tests/run-where-local-helpers.py
       - uses: actions/upload-artifact@v4
@@ -147,6 +149,7 @@ jobs:
           name: ps0-native-index-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
           path: |
             experiments/ps0/build/compiler-fixture-logs/where-local-layout.log
+            experiments/ps0/build/compiler-fixture-logs/source-where-layout.log
             experiments/ps0/build/where-local-*/*.c
             experiments/ps0/build/where-local-*/*.olean
             experiments/ps0/build/where-local-*/*.ps
@@ -177,7 +180,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"d0151bcd3d02681a7a28300a6e4b0f4aa39989d5"}
+          pin={"repository":"dwijayuda/lean4","commit":"9835c4ce576f17f879d603f22f4dde455b4d4ff5"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:

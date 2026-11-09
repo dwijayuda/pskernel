@@ -1201,3 +1201,110 @@ jobs:
             do-native-shapes.json
             do-native-shapes.log
           if-no-files-found: error
+
+  native-ellipsis-rehash:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: c1d813541ac0db3b743a284d531a363d3ae62028
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42569416393
+          name: ps0-compiler-fixtures-c1d813541ac0db3b743a284d531a363d3ae62028-42569416393
+          github-token: ${{ github.token }}
+          path: native-ellipsis-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42569416393
+          name: ps0-compiler-prelude-c1d813541ac0db3b743a284d531a363d3ae62028-42569416393
+          github-token: ${{ github.token }}
+          path: native-ellipsis-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42569416393
+          name: ps0-compiler-core-c1d813541ac0db3b743a284d531a363d3ae62028-42569416393
+          github-token: ${{ github.token }}
+          path: native-ellipsis-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42569416393
+          name: ps0-compiler-natbasic-c1d813541ac0db3b743a284d531a363d3ae62028-42569416393
+          github-token: ${{ github.token }}
+          path: native-ellipsis-artifact
+      - name: Rehash actual declaration-form and compiler-module outputs
+        run: |
+          set -euo pipefail
+          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py native-ellipsis-artifact --source c1d813541ac0db3b743a284d531a363d3ae62028 --output native-ellipsis-rehash.json | tee native-ellipsis-rehash.log
+          python3 - <<'PY' | tee native-ellipsis-roles.log
+          from pathlib import Path
+          import json
+          from collections import Counter
+          def decls(commands):
+              for command in commands:
+                  if command['declaration'] is not None:
+                      yield command['declaration']
+                  yield from decls(command.get('nestedCommands',[]))
+          families={'Lean.Parser.Command.'+name:'PS0.StandardAdapters.ps0Standard'+name.title() for name in ['abbrev','theorem','opaque','axiom','instance','example']}
+          checked=0
+          for path in Path('native-ellipsis-artifact').rglob('original-census.json'):
+              original=json.loads(path.read_text())
+              module=original['module']
+              observed_path=path.parent/'migrated/lib/lean'/Path(*module.split('.')).with_suffix('.ilean.ps0-source-census.json')
+              observed=json.loads(observed_path.read_text())
+              expected=Counter((d['sourceName'],families[d['production']]) for d in decls(original['commands']) if d['production'] in families)
+              actual=Counter((d['sourceName'],d['production']) for d in decls(observed['commands']) if d['production'] in families.values())
+              assert actual==expected,(module,actual,expected)
+              assert all(d['mode']=='mapped-ps' for d in decls(observed['commands']))
+              print('PS0_STANDARD_FAMILY_MULTIPLICITIES:'+json.dumps({'module':module,'roles':[{'name':n,'production':p,'count':c} for (n,p),c in sorted(actual.items())]},sort_keys=True))
+              checked+=1
+          assert checked==6,checked
+          for path in Path('native-ellipsis-artifact').rglob('evidence.json'):
+              if 'DeclarationForms' in path.parent.name:
+                  value=json.loads(path.read_text())
+                  print('PS0_WHERE_INSTANCE_ROLES:'+json.dumps(value.get('non_definition_source_roles',[]),sort_keys=True))
+          for path in Path('native-ellipsis-artifact').rglob('evidence.json'):
+              if path.parent.name.startswith('lambdas-'):
+                  value=json.loads(path.read_text())
+                  assert value['source']=='c1d813541ac0db3b743a284d531a363d3ae62028'
+                  projection=value['projection']
+                  import hashlib
+                  source=Path('experiments/ps0/tests/v1/pending_section_projection.ps').read_bytes()
+                  assert hashlib.sha256(source).hexdigest()==projection['source_sha256']
+                  assert projection['original_range_checks']==2
+                  assert 'PS0_SECTION_PROJECTION:3' in (path.parent/'projection-runtime.log').read_text()
+                  assert 'PS0V1-CALL-GAP' in (path.parent/'projection-subject-gap.log').read_text()
+                  print('PS0_PROJECTION_ARTIFACT:'+json.dumps(projection,sort_keys=True))
+          seen=0
+          for path in Path('native-ellipsis-artifact').rglob('evidence.json'):
+              if path.parent.name.startswith('ellipsis-'):
+                  value=json.loads(path.read_text())
+                  assert value['source']=='c1d813541ac0db3b743a284d531a363d3ae62028'
+                  assert value['original_native_node_identity'] is True
+                  source=Path('experiments/ps0/tests/v1/ellipsis_operands.ps').read_bytes()
+                  assert hashlib.sha256(source).hexdigest()==value['fixture_sha256']
+                  assert 'PS0_NATIVE_ELLIPSIS:PASS' in (path.parent/'runtime.log').read_text()
+                  assert 'PS0V1-CALL-ORDER' in (path.parent/'named-before-ellipsis.log').read_text()
+                  for name in ['nonterminal-ellipsis','repeated-ellipsis']:
+                      assert "unexpected '..'" in (path.parent/(name+'.log')).read_text()
+                  print('PS0_ELLIPSIS_ARTIFACT:'+json.dumps(value,sort_keys=True))
+                  seen+=1
+          assert seen==1,seen
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-native-ellipsis-rehash-${{ github.run_id }}
+          path: |
+            native-ellipsis-rehash.json
+            native-ellipsis-rehash.log
+            native-ellipsis-roles.log
+          if-no-files-found: error

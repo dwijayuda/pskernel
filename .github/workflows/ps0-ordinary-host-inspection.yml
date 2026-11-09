@@ -14,15 +14,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: dwijayuda/lean4
-          ref: 91cfdf539b9ae534aac1a38c240bfb63b0b84dc0
+          ref: a12fda5ee8766194fa3ba0b3729c11ca9e4d8c91
           sparse-checkout: experiments/ps0/tests/v1/ordinary_host_origins.ps
           sparse-checkout-cone-mode: false
           persist-credentials: false
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42694705278
-          name: ps0-host-operand-parity-91cfdf539b9ae534aac1a38c240bfb63b0b84dc0-42694705278
+          run-id: 42698914651
+          name: ps0-host-operand-parity-a12fda5ee8766194fa3ba0b3729c11ca9e4d8c91-42698914651
           github-token: ${{ github.token }}
           path: retained
       - name: Rehash actual compiler outputs ELF source maps and plans
@@ -35,9 +35,9 @@ jobs:
           assert len(matches)==1,matches
           work=matches[0].parent
           e=json.loads(matches[0].read_text())
-          assert e['source']=='91cfdf539b9ae534aac1a38c240bfb63b0b84dc0'
-          assert e['mapped_definitions']==e['mapped_theorems']==21
-          assert e['source_origin_cases']==6
+          assert e['source']=='a12fda5ee8766194fa3ba0b3729c11ca9e4d8c91'
+          assert e['mapped_definitions']==25 and e['mapped_theorems']==22
+          assert e['source_origin_cases']==8
           assert e['logical_imports']==['Init']
           assert e['native_patterns_preserved'] and e['prepared_source_identity']
           assert e['independently_owned_native_dsl'] and e['native_quotation']
@@ -58,7 +58,7 @@ jobs:
               assert census['nativeSource'].encode()==source and census['imports']==['Init']
               if label!='baseline':
                   rows=[row['declaration'] for row in census['commands'] if row['declaration']]
-                  assert len(rows)==42 and all(row['mode']=='mapped-ps' for row in rows)
+                  assert len(rows)==47 and all(row['mode']=='mapped-ps' for row in rows)
           raw=(work/'baseline-MatchHostBootstrap.ps').read_bytes()
           plan=json.loads((work/'planned-edits.json').read_text())
           assert hashlib.sha256(raw).hexdigest()==plan['source_sha256']
@@ -85,15 +85,15 @@ jobs:
           assert len(gap_files)==1
           gaps=json.loads(gap_files[0].read_text())
           assert gaps['source']==e['source']
-          assert {row['case'] for row in gaps['observations']}=={'match','pattern-lambda','record-field','do-if','do-match','do-have'}
+          assert {row['case'] for row in gaps['observations']}=={'match','pattern-lambda','record-field','do-if','do-match','do-have','do-for','do-try'}
           for row in gaps['observations']:
               assert row['native_baseline_passed'] and row['ps_exit_code']!=0 and row['invalid_host_gap_rejected']
               assert 'PS0V1-CALL-GAP' in (gap_files[0].parent/(row['case']+'-ps.log')).read_text()
           out=Path('inspection');out.mkdir()
-          report=dict(status='PASS',producer_source=e['source'],producer_run=42694705278,producer_runner='c266cbfe03c34dd269e1d5c2b093b83a62e00be9',
+          report=dict(status='PASS',producer_source=e['source'],producer_run=42698914651,producer_runner='3db203a1a8f21953161760d998bf6a6bfd1ece08',
               actual_compiler_files_rehashed=6,actual_native_elf_files_rehashed=1,hashes=hashes,comparisons=e['comparisons'],
-              mapped_definitions=21,mapped_theorems=21,source_origin_cases=6,invalid_host_gaps_rejected=6,
-              evidence=e,scope='finite ordinary match, pattern lambda, record and do-if roles; retained ELF rehashed, runtime observed in producer; broader compiler C parity remains open',
+              mapped_definitions=25,mapped_theorems=22,source_origin_cases=8,invalid_host_gaps_rejected=8,
+              evidence=e,scope='finite ordinary match, pattern lambda, record, condition, do-match, named-have, for collection/body and try/catch/finally roles; loop annotations and broader compiler C parity remain open',
               grammar_migration_complete=False,verified_execution=False)
           (out/'inspection.json').write_text(json.dumps(report,indent=2)+'\n')
           print('PS0_ORDINARY_HOST_INSPECTION:'+json.dumps(report,sort_keys=True))

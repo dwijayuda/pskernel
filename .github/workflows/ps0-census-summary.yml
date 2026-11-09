@@ -2254,3 +2254,69 @@ jobs:
             native-census-reuse.json
             native-census-reuse.log
           if-no-files-found: error
+
+
+  native-census-cache-validation:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: f024317810b08a0af99faa906defe2261289dee5
+          sparse-checkout: experiments/ps0
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42580512720
+          name: ps0-transformed-corpus-742c5c180a8ee7314075d63792c220b710e96504-42580512720
+          github-token: ${{ github.token }}
+          path: native-cache
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42553687595
+          name: ps0-corpus-source-plan-bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f-42553687595
+          github-token: ${{ github.token }}
+          path: source-plans
+      - name: Check cache identity rejection and all retained pinned-source captures
+        run: |
+          set -euo pipefail
+          python3 experiments/ps0/tests/test-native-census-cache.py 2>&1 | tee native-cache-tests.log
+          python3 - <<'PY' | tee native-cache-validation.log
+          from pathlib import Path
+          import hashlib,json,sys
+          sys.path.insert(0,'experiments/ps0/tests')
+          from native_census_cache import NativeCensusCache
+          cache=NativeCensusCache('native-cache','742c5c180a8ee7314075d63792c220b710e96504','eb6cafb7290e8bd5f2937522d8d804f58f02bafc')
+          reports=[p for p in Path('source-plans').rglob('evidence.json') if p.parent.name.startswith('corpus-source-plan-')]
+          assert len(reports)==1
+          report=json.loads(reports[0].read_text())
+          assert report['source']=='bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f'
+          manifest=Path('experiments/ps0/compiler-source-inventory.json')
+          assert report['inventory_sha256']==hashlib.sha256(manifest.read_bytes()).hexdigest()
+          assert report['count']==2546 and report['lean_commit']==cache.lean_commit
+          rows=[]
+          for item in report['modules']:
+              original=reports[0].parent/'modules'/item['module']/'original.ps'
+              snapshot=cache.find(item['module'],original.read_bytes(),item['original_sha256'])
+              if snapshot:
+                  rows.append({'module':item['module'],'census_sha256':hashlib.sha256(snapshot.read_bytes()).hexdigest()})
+          assert len(rows)==1872,len(rows)
+          data={'source':'f024317810b08a0af99faa906defe2261289dee5','capture_source':'742c5c180a8ee7314075d63792c220b710e96504',
+                'validated_captures':len(rows),'provenance':cache.provenance,
+                'scope':'cache reader and exact source/schema/native-mode identity validation against independently qualified frozen source-plan inputs; no current grammar compilation or graph acceptance',
+                'grammar_migration_complete':False,'verified_execution':False,'modules':rows}
+          Path('native-cache-validation.json').write_text(json.dumps(data,indent=2)+'\n')
+          print('PS0_NATIVE_CENSUS_CACHE_VALIDATION:'+json.dumps({k:v for k,v in data.items() if k!='modules'},sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-native-cache-validation-${{ github.run_id }}
+          path: |
+            native-cache-tests.log
+            native-cache-validation.log
+            native-cache-validation.json
+          if-no-files-found: error

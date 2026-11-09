@@ -26,7 +26,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"cfb1bad49cf8cf82478fca0e46ca2c7fa9752e45"}
+          pin={"repository":"dwijayuda/lean4","commit":"cba236f79f826b5a63f3a92807daf310a4131070"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -141,6 +141,10 @@ jobs:
         run: lake env lean tests/debug-where-local-layout.lean 2>&1 | tee build/compiler-fixture-logs/where-local-layout.log
       - name: Inspect syntax-only source where parser
         run: lake exe ps0 check tests/debug-source-where.ps 2>&1 | tee build/compiler-fixture-logs/source-where-layout.log
+      - name: Inspect graph fourteen native operand boundaries
+        run: |
+          set -euo pipefail
+          lake exe ps0 check tests/debug-boundary-fourteen.ps 2>&1 | tee build/compiler-fixture-logs/boundary-fourteen-layout.log
       - name: Test-first braced where local helpers
         run: python3 tests/run-where-local-helpers.py
       - uses: actions/upload-artifact@v4
@@ -148,6 +152,7 @@ jobs:
         with:
           name: ps0-native-index-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
           path: |
+            experiments/ps0/build/compiler-fixture-logs/boundary-fourteen-layout.log
             experiments/ps0/build/compiler-fixture-logs/where-local-layout.log
             experiments/ps0/build/compiler-fixture-logs/source-where-layout.log
             experiments/ps0/build/where-local-*/*.c
@@ -180,7 +185,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"cfb1bad49cf8cf82478fca0e46ca2c7fa9752e45"}
+          pin={"repository":"dwijayuda/lean4","commit":"cba236f79f826b5a63f3a92807daf310a4131070"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -298,7 +303,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"cfb1bad49cf8cf82478fca0e46ca2c7fa9752e45"}
+          pin={"repository":"dwijayuda/lean4","commit":"cba236f79f826b5a63f3a92807daf310a4131070"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -416,7 +421,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"cfb1bad49cf8cf82478fca0e46ca2c7fa9752e45"}
+          pin={"repository":"dwijayuda/lean4","commit":"cba236f79f826b5a63f3a92807daf310a4131070"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -534,7 +539,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"cfb1bad49cf8cf82478fca0e46ca2c7fa9752e45"}
+          pin={"repository":"dwijayuda/lean4","commit":"cba236f79f826b5a63f3a92807daf310a4131070"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -652,7 +657,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"cfb1bad49cf8cf82478fca0e46ca2c7fa9752e45"}
+          pin={"repository":"dwijayuda/lean4","commit":"cba236f79f826b5a63f3a92807daf310a4131070"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -770,7 +775,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"cfb1bad49cf8cf82478fca0e46ca2c7fa9752e45"}
+          pin={"repository":"dwijayuda/lean4","commit":"cba236f79f826b5a63f3a92807daf310a4131070"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -888,7 +893,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"cfb1bad49cf8cf82478fca0e46ca2c7fa9752e45"}
+          pin={"repository":"dwijayuda/lean4","commit":"cba236f79f826b5a63f3a92807daf310a4131070"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:

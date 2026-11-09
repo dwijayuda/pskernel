@@ -23,7 +23,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"a12fda5ee8766194fa3ba0b3729c11ca9e4d8c91"}
+          pin={"repository":"dwijayuda/lean4","commit":"10b1709dabb6c4fc0b16c80a39bb21feee6039f6"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -141,7 +141,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"a12fda5ee8766194fa3ba0b3729c11ca9e4d8c91"}
+          pin={"repository":"dwijayuda/lean4","commit":"10b1709dabb6c4fc0b16c80a39bb21feee6039f6"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -256,7 +256,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"a12fda5ee8766194fa3ba0b3729c11ca9e4d8c91"}
+          pin={"repository":"dwijayuda/lean4","commit":"10b1709dabb6c4fc0b16c80a39bb21feee6039f6"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -346,7 +346,7 @@ jobs:
       - name: Qualify ordinary host values origins and native linking
         run: python3 tests/run-match-host-bodies.py
       - name: Reject six known ordinary host gaps
-        run: python3 tests/run-host-island-gaps.py --cases match,pattern-lambda,record-field,do-if,do-match,do-have,do-for,do-try
+        run: python3 tests/run-host-island-gaps.py --cases match,pattern-lambda,record-field,do-if,do-match,do-have,do-for,do-try,proof-if,typed-term,tactic-body
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -378,7 +378,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"a12fda5ee8766194fa3ba0b3729c11ca9e4d8c91"}
+          pin={"repository":"dwijayuda/lean4","commit":"10b1709dabb6c4fc0b16c80a39bb21feee6039f6"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -509,7 +509,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"a12fda5ee8766194fa3ba0b3729c11ca9e4d8c91"}
+          pin={"repository":"dwijayuda/lean4","commit":"10b1709dabb6c4fc0b16c80a39bb21feee6039f6"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:

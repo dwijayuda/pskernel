@@ -1,0 +1,298 @@
+name: PS0 native boundary artifact inspection
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-native-boundary-inspection.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  native-boundaries-rehash:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: c31599ff0685581b83e657c4e888dd79023c5407
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-fixtures-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-prelude-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-core-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-natbasic-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-finbasic-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-do-layout-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-natlinear-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-grindac-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-iteratorempty-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-spredlaws-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-unless-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-natlemmas-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-listattach-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-initwf-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-project-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-stream-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-intlinear-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-arrayperm-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-persistenthashmap-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-nanosecond-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42600424984
+          name: ps0-compiler-associative-c31599ff0685581b83e657c4e888dd79023c5407-42600424984
+          github-token: ${{ github.token }}
+          path: native-boundaries-artifact
+      - name: Rehash compiler outputs and check actual owned do roles
+        run: |
+          set -euo pipefail
+          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py native-boundaries-artifact --source c31599ff0685581b83e657c4e888dd79023c5407 --output native-boundaries-rehash.json | tee native-boundaries-rehash.log
+          python3 - <<'PY' | tee native-boundaries-roles.log
+          from pathlib import Path
+          from collections import Counter
+          import hashlib,json
+          root=Path('native-boundaries-artifact')
+          def decls(commands):
+              for command in commands:
+                  if command['declaration'] is not None:
+                      yield command['declaration']
+                  yield from decls(command.get('nestedCommands',[]))
+          families={'Lean.Parser.Command.'+n:'PS0.StandardAdapters.ps0Standard'+n.title() for n in ['abbrev','theorem','opaque','axiom','instance','example']}
+          checked=0
+          for path in root.rglob('original-census.json'):
+              original=json.loads(path.read_text()); module=original['module']
+              observed=json.loads((path.parent/'migrated/lib/lean'/Path(*module.split('.')).with_suffix('.ilean.ps0-source-census.json')).read_text())
+              expected=Counter((d['sourceName'],families[d['production']]) for d in decls(original['commands']) if d['production'] in families)
+              actual=Counter((d['sourceName'],d['production']) for d in decls(observed['commands']) if d['production'] in families.values())
+              assert actual==expected,(module,actual,expected)
+              assert all(d['mode']=='mapped-ps' for d in decls(observed['commands']))
+              if module=='Lean.Compiler.DoLayoutProbe':
+                  rows={d['sourceName']:d for d in decls(observed['commands'])}
+                  for name in ['layoutValue','nestedValue','localDefault','localShared','unitReturn']:
+                      assert rows[name]['valueRootKind']=='ps0HostDo'
+                      assert rows[name]['doSequenceKind']=='Lean.Parser.Term.doSeqIndent'
+                  print('PS0_NATIVE_DO_ROLES:'+json.dumps([{k:r.get(k) for k in ['sourceName','valueRootKind','doSequenceKind','doElementKinds']} for r in rows.values()],sort_keys=True))
+              checked+=1
+          assert checked==28,checked
+          for path in root.rglob('evidence.json'):
+              if not path.parent.name.startswith('compiler-heads-'):
+                  continue
+              evidence=json.loads(path.read_text())
+              assert evidence['operator_descriptor_scope']=='active-and-captured-kinds/1'
+              kind={'Init.Data.Nat.Internal.Linear':'Lean.Parser.Command.attribute',
+                    'Init.Grind.AC':'Lean.Parser.Command.attribute',
+                    'Std.Data.Iterators.Producers.Monadic.Empty':'Lean.Parser.Command.structure'}.get(evidence['module'])
+              if kind:
+                  heads=evidence['contextual_boundary_heads']
+                  assert any(h['previousCommandHeadKind']==kind and h['targetKeyword']=='def' for h in heads)
+                  print('PS0_CONTEXTUAL_BOUNDARY:'+json.dumps({'module':evidence['module'],'heads':heads},sort_keys=True))
+              if evidence['module']=='Std.Do.SPred.Laws':
+                  assert len(evidence['scoped_binary_kinds'])==3
+                  native=json.loads((path.parent/'original-census.json').read_text())
+                  rows={d['sourceName']:d for d in decls(native['commands'])}
+                  kinds=[]
+                  for name in ['and_curry','or_curry','imp_curry']:
+                      result=rows[name]['signatureSyntax']['args'][1]['args'][1]
+                      assert result['nativeBinaryOperator']
+                      kinds.append(result['kind'])
+                  assert kinds==evidence['scoped_binary_kinds']
+                  print('PS0_SCOPED_BINARY_BOUNDARY:'+json.dumps({'module':evidence['module'],'kinds':kinds},sort_keys=True))
+          seen=set()
+          for path in root.rglob('evidence.json'):
+              folder=path.parent
+              if folder.name.startswith('ellipsis-'):
+                  value=json.loads(path.read_text()); assert value['source']=='c31599ff0685581b83e657c4e888dd79023c5407'
+                  data=Path('experiments/ps0/tests/v1/ellipsis_operands.ps').read_bytes()
+                  assert hashlib.sha256(data).hexdigest()==value['fixture_sha256']
+                  assert value['original_native_node_identity'] is True
+                  assert value['oracle'] in (folder/'runtime.log').read_text()
+                  assert 'PS0V1-CALL-ORDER' in (folder/'named-before-ellipsis.log').read_text()
+                  for name in ['nonterminal-ellipsis','repeated-ellipsis']:
+                      assert "unexpected '..'" in (folder/(name+'.log')).read_text()
+                  seen.add('ellipsis'); print('PS0_NATIVE_ELLIPSIS_EVIDENCE:'+json.dumps(value,sort_keys=True))
+              if folder.name.startswith('do-layout-'):
+                  value=json.loads(path.read_text()); assert value['source']=='c31599ff0685581b83e657c4e888dd79023c5407'
+                  data=Path('experiments/ps0/tests/v1/do_layout_operands.ps').read_bytes()
+                  assert hashlib.sha256(data).hexdigest()==value['fixture_sha256']
+                  assert value['oracle'] in (folder/'runtime.log').read_text()
+                  for name in ['return-gap','let-gap','statement-gap']:
+                      assert 'PS0V1-CALL-GAP' in (folder/(name+'.log')).read_text()
+                  assert 'PS0V1-CALL-ORDER' in (folder/'return-order.log').read_text()
+                  assert 'IO Unit' in (folder/'statement-type.log').read_text()
+                  seen.add('layout'); print('PS0_NATIVE_DO_EVIDENCE:'+json.dumps(value,sort_keys=True))
+          assert seen=={'layout','ellipsis'},seen
+          seen_new=set()
+          for path in root.rglob('evidence.json'):
+              value=json.loads(path.read_text()); folder=path.parent
+              if folder.name.startswith('unless-'):
+                  assert value['source']=='c31599ff0685581b83e657c4e888dd79023c5407'
+                  assert value['fixture_sha256']==hashlib.sha256(Path('experiments/ps0/tests/v1/unless_operands.ps').read_bytes()).hexdigest()
+                  assert value['original_condition_block_token_ranges'] is True
+                  assert value['original_pattern_optional_type_arrow_and_branch_ranges'] is True
+                  assert value['oracle'] in (folder/'runtime.log').read_text()
+                  for name in ['condition-gap','body-gap','term-condition-gap','term-body-gap','pattern-value-gap','pattern-fallback-gap','pattern-continuation-gap']:
+                      assert 'PS0V1-CALL-GAP' in (folder/(name+'.log')).read_text()
+                  assert 'PS0V1-CALL-ORDER' in (folder/'body-order.log').read_text()
+                  seen_new.add('unless')
+                  print('PS0_UNLESS_RETAINED:'+json.dumps(value,sort_keys=True))
+              if folder.name.startswith('lambdas-'):
+                  assert value['source']=='c31599ff0685581b83e657c4e888dd79023c5407'
+                  assert value['fixture_sha256']==hashlib.sha256(Path('experiments/ps0/tests/v1/lambda_operands.ps').read_bytes()).hexdigest()
+                  assert value['original_lambda_and_arrow_token_checks']==2
+                  assert value['oracle'] in (folder/'runtime.log').read_text()
+                  assert 'PS0V1-CALL-GAP' in (folder/'unicode-body-gap.log').read_text()
+                  assert 'PS0V1-CALL-ORDER' in (folder/'unicode-body-order.log').read_text()
+                  seen_new.add('lambda')
+                  print('PS0_UNICODE_LAMBDA_RETAINED:'+json.dumps(value,sort_keys=True))
+              if folder.name.startswith('command-operands-'):
+                  assert value['source']=='c31599ff0685581b83e657c4e888dd79023c5407'
+                  assert 'included' in value['mapped_source_names']
+                  assert 'PS0V1-CALL-GAP' in (folder/'include-gap.log').read_text()
+                  seen_new.add('include')
+                  print('PS0_INCLUDE_RETAINED:'+json.dumps(value,sort_keys=True))
+              if folder.name.startswith('compiler-heads-') and value.get('module') in ['Lean.Compiler.UnlessProbe','Lean.Compiler.InlineAttrs','Init.WF']:
+                  rows={r['sourceName']:r for r in value['mapped_source_roles']}
+                  if value['module']=='Lean.Compiler.UnlessProbe':
+                      assert rows['bodyValue']['doUnlessConditionKinds']==['ps0HostAdjacentCall']*2
+                      assert rows['patternValue']['doPatternBindingCount']==1
+                      assert rows['patternValue']['doUnlessConditionKinds']==['ps0HostAdjacentCall']
+                      assert rows['termValue']['valueRootKind']=='Lean.Parser.Term.termUnless'
+                  if value['module']=='Lean.Compiler.InlineAttrs':
+                      assert rows['isValidMacroInline']['doPatternBindingCount']==1
+                      assert 'PS0.Operators.ownedBinary' in rows['isValidMacroInline']['doUnlessConditionKinds']
+                  if value['module']=='Init.WF':
+                      observed=next(d for d in value['non_definition_source_roles'] if d['sourceName']=='induction')
+                      assert observed['mode']=='mapped-ps' and observed['production']=='PS0.StandardAdapters.ps0StandardTheorem'
+                  print('PS0_UNLESS_INCLUDE_SOURCE_ROLES:'+json.dumps({'module':value['module'],'rows':list(rows.values())},sort_keys=True))
+          assert seen_new=={'unless','lambda','include'},seen_new
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-native-boundaries-rehash-${{ github.run_id }}
+          path: |
+            native-boundaries-rehash.json
+            native-boundaries-rehash.log
+            native-boundaries-roles.log
+          if-no-files-found: error

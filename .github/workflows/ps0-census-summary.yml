@@ -736,3 +736,34 @@ jobs:
             corpus-plan-inspection.json
             corpus-plan-inspection.log
           if-no-files-found: error
+
+
+  corpus-telescope-comment-rehash:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42553645183
+          name: ps0-compiler-fixtures-bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f-42553645183
+          github-token: ${{ github.token }}
+          path: telescope-comment-artifact
+      - name: Reconstruct retained comments and independently check exact compiler outputs
+        run: |
+          set -euo pipefail
+          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py telescope-comment-artifact --source bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f --output telescope-comment-rehash.json | tee telescope-comment-rehash.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-corpus-telescope-comment-rehash-${{ github.run_id }}
+          path: |
+            telescope-comment-rehash.json
+            telescope-comment-rehash.log
+          if-no-files-found: error

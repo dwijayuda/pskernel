@@ -1695,3 +1695,42 @@ jobs:
             scoped-boundary-rehash.log
             scoped-boundary-roles.log
           if-no-files-found: error
+
+
+  unless-native-shapes:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42582700796
+          name: ps0-compiler-unless-9faf8ba8973f966366a9348f66b932090723c6d2-42582700796
+          github-token: ${{ github.token }}
+          path: unless-native-shapes
+      - name: Inspect original native binding and control shapes
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          wanted={'Lean.Parser.Term.doPatDecl','Lean.Parser.Term.doLetArrow','Lean.Parser.Term.doUnless','Lean.Parser.Term.termUnless'}
+          found={}
+          def shape(value,depth=0):
+              if not isinstance(value,dict) or 'kind' not in value: return value
+              result={'kind':value['kind'],'arity':len(value['args']),'atom':value.get('atom')}
+              if depth<3: result['args']=[shape(x,depth+1) for x in value['args']]
+              return result
+          def visit(value,module):
+              if isinstance(value,dict):
+                  kind=value.get('kind')
+                  if kind in wanted and kind not in found:
+                      found[kind]={'module':module,'shape':shape(value)}
+                  for child in value.values(): visit(child,module)
+              elif isinstance(value,list):
+                  for child in value: visit(child,module)
+          for path in Path('unless-native-shapes').rglob('original-census.json'):
+              data=json.loads(path.read_text()); visit(data['commands'],data['module'])
+          assert set(found)==wanted,found.keys()
+          print('PS0_UNLESS_NATIVE_SHAPES:'+json.dumps(found,sort_keys=True))
+          PY

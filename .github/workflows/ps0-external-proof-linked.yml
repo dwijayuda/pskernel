@@ -413,6 +413,14 @@ jobs:
             experiments/ps0/build/compiler-heads-*/baseline/lib/lean/Lean/Compiler/LCNF/DeclHash.olean
             experiments/ps0/build/compiler-heads-*/migrated/ir/Lean/Compiler/LCNF/DeclHash.c
             experiments/ps0/build/compiler-heads-*/migrated/lib/lean/Lean/Compiler/LCNF/DeclHash.olean
+            experiments/ps0/build/compiler-heads-*/baseline/ir/Lean/Compiler/TelescopeProbe.c
+            experiments/ps0/build/compiler-heads-*/baseline/lib/lean/Lean/Compiler/TelescopeProbe.olean
+            experiments/ps0/build/compiler-heads-*/migrated/ir/Lean/Compiler/TelescopeProbe.c
+            experiments/ps0/build/compiler-heads-*/migrated/lib/lean/Lean/Compiler/TelescopeProbe.olean
+            experiments/ps0/build/compiler-heads-*/baseline/ir/Lean/Compiler/LCNF/Basic.c
+            experiments/ps0/build/compiler-heads-*/baseline/lib/lean/Lean/Compiler/LCNF/Basic.olean
+            experiments/ps0/build/compiler-heads-*/migrated/ir/Lean/Compiler/LCNF/Basic.c
+            experiments/ps0/build/compiler-heads-*/migrated/lib/lean/Lean/Compiler/LCNF/Basic.olean
             experiments/ps0/build/binder-lexical-*/
             experiments/ps0/build/compiler-heads-*/baseline/ir/Lean/Compiler/LCNF/ScopeM.c
             experiments/ps0/build/compiler-heads-*/baseline/lib/lean/Lean/Compiler/LCNF/ScopeM.olean
@@ -521,5 +529,81 @@ jobs:
         with:
           name: ps0-operator-baseline-${{ github.run_id }}
           path: experiments/ps0/build/native-logs/
+          if-no-files-found: error
+
+
+  corpus-source-plan:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: experiments/ps0
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          persist-credentials: false
+      - name: Read exact source pin
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          pin=json.load(open('ci/ps0-source.json'))
+          assert pin['repository']=='dwijayuda/lean4'
+          assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('PS0_SOURCE_SHA='+pin['commit']+'\n')
+          PY
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: ${{ env.PS0_SOURCE_SHA }}
+          sparse-checkout: experiments/ps0
+          persist-credentials: false
+      - name: Install pinned Lean with bounded download retries
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/ps0-elan-installer"
+          curl --fail --silent --show-error --location --connect-timeout 20 --max-time 120 \
+            --retry 5 --retry-max-time 300 --retry-all-errors \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            -o "$RUNNER_TEMP/ps0-elan.tar.gz"
+          echo "42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63  $RUNNER_TEMP/ps0-elan.tar.gz" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/ps0-elan.tar.gz" -C "$RUNNER_TEMP/ps0-elan-installer"
+          "$RUNNER_TEMP/ps0-elan-installer/elan-init" -y --default-toolchain none --no-modify-path
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          ps0_toolchain="$(cat lean-toolchain)"
+          ps0_lean_installed=0
+          for ps0_attempt in 1 2 3; do
+            if "$HOME/.elan/bin/elan" toolchain install "$ps0_toolchain"; then
+              ps0_lean_installed=1
+              break
+            fi
+            sleep "$((ps0_attempt * 2))"
+          done
+          test "$ps0_lean_installed" = 1
+          "$HOME/.elan/bin/lean" --version
+          "$HOME/.elan/bin/lake" --version
+      - name: Record exact source and build clean PS0
+        run: |
+          set -euo pipefail
+          mkdir -p build/corpus-plan-logs
+          test "$(git rev-parse HEAD)" = "$PS0_SOURCE_SHA"
+          printf '%s\n' "$PS0_SOURCE_SHA" > build/corpus-plan-logs/source-sha.txt
+          printf '%s\n' "$GITHUB_SHA" > build/corpus-plan-logs/runner-sha.txt
+          test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
+          lake build PS0 ps0 2>&1 | tee build/corpus-plan-logs/build.log
+          lake exe ps0 environment | tee build/corpus-plan-logs/environment.json
+      - name: Inventory all pinned modules through native source planning
+        run: |
+          set -euo pipefail
+          python3 tests/run-corpus-source-plan.py 2>&1 | tee build/corpus-plan-logs/plan.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-corpus-source-plan-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
+          path: |
+            experiments/ps0/build/corpus-plan-logs/
+            experiments/ps0/build/corpus-source-plan-*/
           if-no-files-found: error
 

@@ -2010,7 +2010,7 @@ jobs:
         if: success() || failure()
         run: |
           set -euo pipefail
-          python3 tests/run-compiler-heads.py --fixture UnlessProbe --module Lean.Compiler.UnlessProbe --blob 25297cdfa85b6416dba9d4c23871f1a648076e50 --declarations ALL 2>&1 | tee build/compiler-unless-logs/native-parity.log
+          python3 tests/run-compiler-heads.py --fixture UnlessProbe --module Lean.Compiler.UnlessProbe --blob 4a70859dc3e2c1c9350517086bb7664f2538a176 --declarations ALL 2>&1 | tee build/compiler-unless-logs/native-parity.log
       - name: Qualify entire pinned Lean.Compiler.InlineAttrs through native Lake
         if: success() || failure()
         run: |

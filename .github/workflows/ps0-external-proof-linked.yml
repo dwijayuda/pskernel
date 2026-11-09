@@ -1170,8 +1170,8 @@ jobs:
       - name: Qualify native do layout and PS element boundaries
         run: |
           set -euo pipefail
-          python3 tests/run-do-layout.py
-          python3 tests/run-local-recursion.py 2>&1 | tee build/do-layout-logs/do-layout.log
+          python3 tests/run-do-layout.py 2>&1 | tee build/do-layout-logs/do-layout.log
+          python3 tests/run-local-recursion.py 2>&1 | tee build/do-layout-logs/local-recursion.log
       - name: Qualify native local signatures and do output parity
         if: success() || failure()
         run: |
@@ -1195,6 +1195,8 @@ jobs:
             experiments/ps0/build/compiler-heads-*-DoLayoutProbe/migrated/lib/lean/Lean/Compiler/DoLayoutProbe.olean
             experiments/ps0/build/do-layout-*/*.json
             experiments/ps0/build/do-layout-*/*.log
+            experiments/ps0/build/local-recursion-*/*.json
+            experiments/ps0/build/local-recursion-*/*.log
           if-no-files-found: error
   compiler-natbasic:
     runs-on: ubuntu-22.04

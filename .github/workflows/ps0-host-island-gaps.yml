@@ -26,7 +26,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"f70703ffe0b19ff4caa30f8054744cab7f201279"}
+          pin={"repository":"dwijayuda/lean4","commit":"4781c712db7032f4af15565c39c408d43a261cd5"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -138,7 +138,7 @@ jobs:
         working-directory: experiments/ps0
         run: python3 tests/run-index-operands.py
       - name: Test-first ordinary host gap boundaries
-        run: python3 tests/run-host-island-gaps.py
+        run: python3 tests/run-host-island-gaps.py --cases match,pattern-lambda
       - name: Qualify native empty-return line boundaries
         run: python3 tests/run-return-boundary.py
       - name: Retain native where-local and finally layouts

@@ -965,3 +965,41 @@ jobs:
             where-instance-rehash.log
             where-instance-roles.log
           if-no-files-found: error
+  operator-prefix-rehash:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: 3088d45b88b96d59f45d836eebecacde70894c7b
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42563443759
+          name: ps0-compiler-fixtures-3088d45b88b96d59f45d836eebecacde70894c7b-42563443759
+          github-token: ${{ github.token }}
+          path: operator-prefix-artifact
+      - name: Rehash actual declaration-form and compiler-module outputs
+        run: |
+          set -euo pipefail
+          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py operator-prefix-artifact --source 3088d45b88b96d59f45d836eebecacde70894c7b --output operator-prefix-rehash.json | tee operator-prefix-rehash.log
+          python3 - <<'PY' | tee operator-prefix-roles.log
+          from pathlib import Path
+          import json
+          for path in Path('operator-prefix-artifact').rglob('evidence.json'):
+              if 'DeclarationForms' in path.parent.name:
+                  value=json.loads(path.read_text())
+                  print('PS0_WHERE_INSTANCE_ROLES:'+json.dumps(value.get('non_definition_source_roles',[]),sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-operator-prefix-rehash-${{ github.run_id }}
+          path: |
+            operator-prefix-rehash.json
+            operator-prefix-rehash.log
+            operator-prefix-roles.log
+          if-no-files-found: error

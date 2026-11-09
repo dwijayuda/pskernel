@@ -1,0 +1,107 @@
+name: PS0 ordinary host artifact inspection
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-ordinary-host-inspection.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  ordinary-host-inspection:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: 1fecb9236446c9a1291e7820994a9da0c812e11b
+          sparse-checkout: experiments/ps0/tests/v1/ordinary_host_origins.ps
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42691593415
+          name: ps0-native-index-1fecb9236446c9a1291e7820994a9da0c812e11b-42691593415
+          github-token: ${{ github.token }}
+          path: retained
+      - name: Rehash actual compiler outputs ELF source maps and plans
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          root=Path('retained')
+          matches=list(root.glob('match-host-*/evidence.json'))
+          assert len(matches)==1,matches
+          work=matches[0].parent
+          e=json.loads(matches[0].read_text())
+          assert e['source']=='1fecb9236446c9a1291e7820994a9da0c812e11b'
+          assert e['mapped_definitions']==e['mapped_theorems']==17
+          assert e['source_origin_cases']==4
+          assert e['logical_imports']==['Init']
+          assert e['native_patterns_preserved'] and e['prepared_source_identity']
+          assert e['independently_owned_native_dsl'] and e['native_quotation']
+          hashes={}
+          for ext,relative in [('c','ir/MatchHostBootstrap.c'),('olean','lib/lean/MatchHostBootstrap.olean')]:
+              for label in ['baseline','migrated','planned']:
+                  file=work/(label+'-MatchHostBootstrap.'+ext)
+                  digest=hashlib.sha256(file.read_bytes()).hexdigest()
+                  assert digest==e['comparisons'][relative][label]
+                  hashes[str(file.relative_to(root))]=digest
+              assert len(set(e['comparisons'][relative].values()))==1
+          for label in ['baseline','migrated','planned']:
+              source=(work/(label+'-MatchHostBootstrap.ps')).read_bytes()
+              mapping=json.loads((work/(label+'-source-map.json')).read_text())
+              assert mapping['source'].encode()==source
+              assert all(segment['kind']=='original' for segment in mapping['segments'])
+              census=json.loads((work/(label+'-source-census.json')).read_text())
+              assert census['nativeSource'].encode()==source and census['imports']==['Init']
+              if label!='baseline':
+                  rows=[row['declaration'] for row in census['commands'] if row['declaration']]
+                  assert len(rows)==34 and all(row['mode']=='mapped-ps' for row in rows)
+          raw=(work/'baseline-MatchHostBootstrap.ps').read_bytes()
+          plan=json.loads((work/'planned-edits.json').read_text())
+          assert hashlib.sha256(raw).hexdigest()==plan['source_sha256']
+          chunks=[];cursor=0
+          for edit in plan['edits']:
+              assert cursor<=edit['start']<=edit['end']<=len(raw)
+              assert raw[edit['start']:edit['end']].decode()==edit['old']
+              assert edit['old'].count('\n')==edit['new'].count('\n')
+              chunks.extend([raw[cursor:edit['start']],edit['new'].encode()]);cursor=edit['end']
+          chunks.append(raw[cursor:])
+          planned=b''.join(chunks)
+          assert planned==(work/'planned-MatchHostBootstrap.ps').read_bytes()
+          assert hashlib.sha256(planned).hexdigest()==plan['result_sha256']
+          assert b'\xcf\x80 / \xf0\x9f\x98\x80' in raw and b'\xcf\x80 / \xf0\x9f\x98\x80' in planned
+          elf=work/'OrdinaryHostOrigins'
+          assert elf.read_bytes().startswith(b'\x7fELF')
+          digest=hashlib.sha256(elf.read_bytes()).hexdigest()
+          assert digest==e['native_executable_sha256']
+          hashes[str(elf.relative_to(root))]=digest
+          assert (work/'runtime-origins.log').read_text().strip()==e['runtime_oracle']=='PS0_HOST_ORIGINS: PASS'
+          fixture=Path('experiments/ps0/tests/v1/ordinary_host_origins.ps')
+          assert hashlib.sha256(fixture.read_bytes()).hexdigest()==e['source_origin_fixture_sha256']
+          gap_files=list(root.glob('host-island-gaps-*/evidence.json'))
+          assert len(gap_files)==1
+          gaps=json.loads(gap_files[0].read_text())
+          assert gaps['source']==e['source']
+          assert {row['case'] for row in gaps['observations']}=={'match','pattern-lambda','record-field','do-if'}
+          for row in gaps['observations']:
+              assert row['native_baseline_passed'] and row['ps_exit_code']!=0 and row['invalid_host_gap_rejected']
+              assert 'PS0V1-CALL-GAP' in (gap_files[0].parent/(row['case']+'-ps.log')).read_text()
+          out=Path('inspection');out.mkdir()
+          report=dict(status='PASS',producer_source=e['source'],producer_run=42691593415,producer_runner='5457d0ef73faeaaf0627feb96c8f1827ac5294b9',
+              actual_compiler_files_rehashed=6,actual_native_elf_files_rehashed=1,hashes=hashes,comparisons=e['comparisons'],
+              mapped_definitions=17,mapped_theorems=17,source_origin_cases=4,invalid_host_gaps_rejected=4,
+              evidence=e,scope='finite ordinary match, pattern lambda, record and do-if roles; retained ELF rehashed, runtime observed in producer; broader compiler C parity remains open',
+              grammar_migration_complete=False,verified_execution=False)
+          (out/'inspection.json').write_text(json.dumps(report,indent=2)+'\n')
+          print('PS0_ORDINARY_HOST_INSPECTION:'+json.dumps(report,sort_keys=True))
+          
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-ordinary-host-inspection-${{ github.run_id }}
+          path: inspection/
+          if-no-files-found: error

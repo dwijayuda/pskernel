@@ -330,6 +330,11 @@ jobs:
         run: |
           set -o pipefail
           python3 tests/run-lambdas.py 2>&1 | tee build/project-logs/lambdas.log
+      - name: Qualify native operator descriptors and PS operands
+        if: success() || failure()
+        run: |
+          set -o pipefail
+          python3 tests/run-operators.py 2>&1 | tee build/project-logs/operators.log
       - name: Census actual native source commands
         if: success() || failure()
         run: |
@@ -381,6 +386,8 @@ jobs:
             experiments/ps0/build/owned-macros-*/*.log
             experiments/ps0/build/lambdas-*/*.json
             experiments/ps0/build/lambdas-*/*.log
+            experiments/ps0/build/operators-*/*.json
+            experiments/ps0/build/operators-*/*.log
             experiments/ps0/build/command-operands-*/
             experiments/ps0/build/modern-frontend-startup-*/
             experiments/ps0/build/prelude-grammar-*/

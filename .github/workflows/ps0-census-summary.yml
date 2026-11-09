@@ -355,3 +355,116 @@ jobs:
           print('PS0_OPERATOR_PRE_ADAPTER_EVIDENCE',json.dumps(data,sort_keys=True))
           print('PS0_OPERATOR_COMPILER_EVIDENCE: PASS')
           PY
+
+  compiler-conversion-obligations:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: 3b23a3520c270bb892462f0600abb8b7eed25c2c
+          sparse-checkout: experiments/ps0/compiler-source-inventory.json
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-compiler-stage2-2cba0bc26df49c52d653598fd9c791f23209199c-42532849633
+          run-id: 42532849633
+          github-token: ${{ github.token }}
+          repository: dwijayuda/pskernel
+          path: corpus
+      - name: Audit every pinned upstream module's original source obligations
+        run: |
+          python3 - <<'PY'
+          from collections import Counter
+          import hashlib, json
+          from pathlib import Path
+          root=Path('corpus')
+          migration=json.loads((root/'migration.json').read_text())
+          assert migration['source_commit']=='2cba0bc26df49c52d653598fd9c791f23209199c'
+          assert migration['lean_commit']=='eb6cafb7290e8bd5f2937522d8d804f58f02bafc'
+          inventory_file=Path('experiments/ps0/compiler-source-inventory.json')
+          inventory=json.loads(inventory_file.read_text())
+          assert inventory['leanCommit']==migration['lean_commit'] and inventory['count']==2546
+          wanted={entry['module']:entry for entry in inventory['entries']}
+          seen={}
+          production=Counter()
+          signature=Counter()
+          binders=Counter()
+          patterns=Counter()
+          blockers=Counter()
+          root_calls=Counter()
+          mismatch=[]
+          definitions=0
+          def walk(commands):
+              for command in commands:
+                  if command.get('declaration'):
+                      yield command['declaration']
+                  yield from walk(command.get('nestedCommands',[]))
+          for file in sorted((root/'source-census').rglob('*.json')):
+              data=json.loads(file.read_text())
+              if data.get('schema')!='ps0-native-source-census/1' or data['module'] not in wanted:
+                  continue
+              module=data['module']
+              assert module not in seen, module
+              raw=data['nativeSource'].encode()
+              blob=hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()
+              if blob!=wanted[module]['blob']:
+                  mismatch.append({'module':module,'expected_blob':wanted[module]['blob'],'captured_blob':blob})
+              rows=list(walk(data['commands']))
+              counts=Counter(row['production'] for row in rows)
+              seen[module]={'census_sha256':hashlib.sha256(file.read_bytes()).hexdigest(),'original_git_blob_match':blob==wanted[module]['blob'],'declarations':len(rows),'productions':dict(counts)}
+              for row in rows:
+                  production[row['production']]+=1
+                  sig=row.get('signatureSyntax')
+                  if not sig:
+                      continue
+                  signature[sig['kind']]+=1
+                  if row['production']!='Lean.Parser.Command.definition':
+                      continue
+                  definitions+=1
+                  reasons=set()
+                  if sig['kind']!='Lean.Parser.Command.optDeclSig':
+                      reasons.add('signature_kind:'+sig['kind'])
+                  else:
+                      for binder in sig['args'][0]['args']:
+                          kind=binder['kind']
+                          binders[kind]+=1
+                          if kind=='Lean.Parser.Term.instBinder':
+                              continue
+                          if kind!='Lean.Parser.Term.explicitBinder':
+                              reasons.add('binder_kind:'+kind)
+                              continue
+                          parts=binder['args']
+                          names=len(parts[1]['args'])
+                          patterns['explicit_names:'+str(names)]+=1
+                          if names!=1:
+                              reasons.add('grouped_or_empty_explicit_identifiers')
+                          if len(parts[2]['args'])!=2:
+                              reasons.add('untyped_explicit_binder')
+                          suffix=parts[3]['args']
+                          if suffix and (len(suffix)!=1 or suffix[0]['kind']!='Lean.Parser.Term.binderDefault'):
+                              reasons.add('nonordinary_default_suffix')
+                  blockers.update(reasons)
+                  if not reasons:
+                      patterns['definition_signature_within_current_planner_shape']+=1
+                  call=row.get('valueApplication')
+                  if call:
+                      root_calls['native_root_applications']+=1
+                      for tag,kind in [('parenthesized_argument','Lean.Parser.Term.paren'),('direct_lambda_argument','Lean.Parser.Term.fun')]:
+                          if any(arg['kind']==kind for arg in call['arguments']):
+                              root_calls[tag]+=1
+          assert set(seen)==set(wanted), sorted(set(wanted)-set(seen))
+          report={'schema':'ps0-full-compiler-conversion-obligations/1','artifact_source':migration['source_commit'],'inventory_source':'3b23a3520c270bb892462f0600abb8b7eed25c2c','lean_commit':migration['lean_commit'],'upstream_modules':len(seen),'inventory_sha256':hashlib.sha256(inventory_file.read_bytes()).hexdigest(),'original_blob_matches':len(seen)-len(mismatch),'original_blob_mismatches':mismatch,'declaration_productions':dict(production),'signature_kinds':dict(signature),'definition_count':definitions,'definition_binder_kinds':dict(binders),'definition_patterns':dict(patterns),'definition_shape_blockers':dict(blockers),'root_application_roles':dict(root_calls),'modules':seen,'scope':'original native-compatible corpus audit, not conversion acceptance or grammar completion; shape eligibility does not prove successful conversion','grammarMigrationComplete':False,'verified_execution':False}
+          Path('audit').mkdir()
+          Path('audit/conversion-obligations.json').write_text(json.dumps(report,sort_keys=True,indent=2)+'\n')
+          print('PS0_FULL_COMPILER_CONVERSION_OBLIGATIONS: PASS')
+          print(json.dumps({k:v for k,v in report.items() if k!='modules'},sort_keys=True,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ps0-full-compiler-conversion-obligations-${{ github.run_id }}
+          path: audit/conversion-obligations.json
+          if-no-files-found: error
+

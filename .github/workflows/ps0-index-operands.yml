@@ -26,7 +26,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"59151d0374a77cdc1ded799d21396b186c07958e"}
+          pin={"repository":"dwijayuda/lean4","commit":"c5a01974b72768ee5b0b2675d6aa7b8684f0b27a"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -137,11 +137,15 @@ jobs:
       - name: Qualify native indexed access and source fidelity
         working-directory: experiments/ps0
         run: python3 tests/run-index-operands.py
+      - name: Test-first braced where local helpers
+        run: python3 tests/run-where-local-helpers.py
       - uses: actions/upload-artifact@v4
         if: success() || failure()
         with:
           name: ps0-native-index-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
           path: |
+            experiments/ps0/build/where-local-*/*.json
+            experiments/ps0/build/where-local-*/*.log
             experiments/ps0/build/local-mixed-*/*.c
             experiments/ps0/build/local-mixed-*/*.olean
             experiments/ps0/build/local-mixed-*/*.ps
@@ -167,7 +171,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"59151d0374a77cdc1ded799d21396b186c07958e"}
+          pin={"repository":"dwijayuda/lean4","commit":"c5a01974b72768ee5b0b2675d6aa7b8684f0b27a"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:

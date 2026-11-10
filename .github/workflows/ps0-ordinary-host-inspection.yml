@@ -14,15 +14,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: dwijayuda/lean4
-          ref: cbba1e79c8ba7ed5453ed75e5bfc8ba214e8c75b
+          ref: 9c9a416ce7cfc5ac21c9d50f01ca27523800dad2
           sparse-checkout: experiments/ps0/tests/v1/ordinary_host_origins.ps
           sparse-checkout-cone-mode: false
           persist-credentials: false
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42732341309
-          name: ps0-host-operand-parity-cbba1e79c8ba7ed5453ed75e5bfc8ba214e8c75b-42732341309
+          run-id: 42734916050
+          name: ps0-host-operand-parity-9c9a416ce7cfc5ac21c9d50f01ca27523800dad2-42734916050
           github-token: ${{ github.token }}
           path: retained
       - name: Rehash actual compiler outputs ELF source maps and plans
@@ -35,7 +35,7 @@ jobs:
           assert len(matches)==1,matches
           work=matches[0].parent
           e=json.loads(matches[0].read_text())
-          assert e['source']=='cbba1e79c8ba7ed5453ed75e5bfc8ba214e8c75b'
+          assert e['source']=='9c9a416ce7cfc5ac21c9d50f01ca27523800dad2'
           assert e['mapped_definitions']==48 and e['mapped_theorems']==43
           assert e['source_origin_cases']==37
           assert e['logical_imports']==['Init']
@@ -175,10 +175,33 @@ jobs:
               assert (folder/'runtime.log').read_text().strip()==contract['runtime']=='PS0_SUFFICES: PASS'
               return contract
           suffices=inspect_suffices()
+          diagnostic_files=list(root.glob('diagnostic-origins-*/evidence.json'))
+          assert len(diagnostic_files)==1
+          diagnostic=json.loads(diagnostic_files[0].read_text()); directory=diagnostic_files[0].parent
+          assert diagnostic['source']==e['source']
+          assert {r['case'] for r in diagnostic['observations']}=={'legacy-lf','legacy-crlf','modern-lf','modern-crlf'}
+          diagnostic_source_hashes={}
+          import re
+          for row in diagnostic['observations']:
+              case=row['case']; ps=directory/(case+'.ps'); native=directory/(case+'.lean')
+              ps_raw=ps.read_bytes(); native_raw=native.read_bytes()
+              assert native_raw.replace(b'def      bad',b'function bad')==ps_raw
+              assert b'\xcf\x80 / \xf0\x9f\x98\x80' in ps_raw
+              assert (b'\r\n' in ps_raw)==case.endswith('-crlf')
+              for label,extension in [('native','.lean'),('ps','.ps')]:
+                  text=(directory/(case+'-'+label+'.log')).read_text()
+                  positions=re.findall(re.escape(case+extension)+r':(\d+):(\d+):[^\n]*[Uu]nknown identifier[^\n]*missingName',text)
+                  assert len(positions)==1
+                  assert [int(x) for x in positions[0]]==row['positions'][label]
+              expected=[4 if case.startswith('modern') else 3,41]
+              assert row['positions']['native']==row['positions']['ps']==expected
+              assert row['original_coordinates_match'] is True
+              for file in [ps,native]:
+                  diagnostic_source_hashes[str(file.relative_to(root))]=hashlib.sha256(file.read_bytes()).hexdigest()
           out=Path('inspection');out.mkdir()
-          report=dict(status='PASS',producer_source=e['source'],producer_run=42732341309,producer_runner='3192aee60f078483faecbe09236d876bf36602ca',
+          report=dict(status='PASS',producer_source=e['source'],producer_run=42734916050,producer_runner='057765de4c005e8ad7c94d97e0c2aa43cc9003ae',
               actual_compiler_files_rehashed=18,actual_native_elf_files_rehashed=3,hashes=hashes,comparisons=e['comparisons'],
-              mapped_definitions=48,mapped_theorems=43,source_origin_cases=37,invalid_host_gaps_rejected=34,loop_contract_definitions=6,loop_contract_evidence=contract,suffices_definitions=7,suffices_theorems=5,suffices_evidence=suffices,total_mapped_definitions=61,total_private_proof_guards=48,
+              mapped_definitions=48,mapped_theorems=43,source_origin_cases=37,invalid_host_gaps_rejected=34,loop_contract_definitions=6,loop_contract_evidence=contract,suffices_definitions=7,suffices_theorems=5,suffices_evidence=suffices,total_mapped_definitions=61,total_private_proof_guards=48,diagnostic_coordinate_cases=4,diagnostic_source_files_checked=8,diagnostic_source_hashes=diagnostic_source_hashes,diagnostic_evidence=diagnostic,
               evidence=e,scope='finite thirty-four ordinary boundaries including loop annotations and suffices type/from/by-prime/continuation; native gadget metadata erasure is not proof of annotations; whole compiler qualification remains open',
               grammar_migration_complete=False,verified_execution=False)
           report['producer_job_status']='SUCCESS'

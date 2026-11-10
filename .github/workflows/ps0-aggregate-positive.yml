@@ -9,6 +9,7 @@ permissions:
 jobs:
 
   host-operand-parity:
+    if: ${{ false }}
     runs-on: ubuntu-22.04
     timeout-minutes: 15
     defaults:

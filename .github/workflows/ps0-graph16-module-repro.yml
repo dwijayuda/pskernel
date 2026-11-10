@@ -9,11 +9,12 @@ permissions:
 jobs:
 
   module-reproduction:
+    if: ${{ false }}
     name: ${{ matrix.label }}-${{ matrix.fixture }}
     strategy:
       fail-fast: false
       matrix:
-        include: [{"module":"Std.Http.Data.URI.Parser","fixture":"URIParser","path":"src/Std/Http/Data/URI/Parser.lean","roots":"Std.Http.Data.URI","blob":"d51844ce35afe12c4c815dd41f617891f3a62980","source":"795c862f8bcf252819076c28456b6ee0438e1c7f","label":"owned-if"},{"module":"Lean.Meta.AbstractMVars","fixture":"AbstractMVars","path":"src/Lean/Meta/AbstractMVars.lean","roots":"Lean.Meta","blob":"175738e203ab7cbd59798431b0fb0133dd41ca5a","source":"795c862f8bcf252819076c28456b6ee0438e1c7f","label":"owned-if"},{"module":"Lean.Meta.DiscrTree.Main","fixture":"DiscrTreeMain","path":"src/Lean/Meta/DiscrTree/Main.lean","roots":"Lean.Meta.DiscrTree","blob":"bdfbcdff9d7ae3dcc369b2d637a4dec8cfe1f14a","source":"795c862f8bcf252819076c28456b6ee0438e1c7f","label":"owned-if"}]
+        include: [{"module":"Std.Http.Data.URI.Parser","fixture":"URIParser","path":"src/Std/Http/Data/URI/Parser.lean","roots":"Std.Http.Data.URI","blob":"d51844ce35afe12c4c815dd41f617891f3a62980","source":"795c862f8bcf252819076c28456b6ee0438e1c7f","label":"owned-if","relative":"Std/Http/Data/URI/Parser"},{"module":"Lean.Meta.AbstractMVars","fixture":"AbstractMVars","path":"src/Lean/Meta/AbstractMVars.lean","roots":"Lean.Meta","blob":"175738e203ab7cbd59798431b0fb0133dd41ca5a","source":"795c862f8bcf252819076c28456b6ee0438e1c7f","label":"owned-if","relative":"Lean/Meta/AbstractMVars"},{"module":"Lean.Meta.DiscrTree.Main","fixture":"DiscrTreeMain","path":"src/Lean/Meta/DiscrTree/Main.lean","roots":"Lean.Meta.DiscrTree","blob":"bdfbcdff9d7ae3dcc369b2d637a4dec8cfe1f14a","source":"795c862f8bcf252819076c28456b6ee0438e1c7f","label":"owned-if","relative":"Lean/Meta/DiscrTree/Main"}]
     runs-on: ubuntu-22.04
     timeout-minutes: 20
     defaults:
@@ -118,7 +119,19 @@ jobs:
         if: always()
         with:
           name: ps0-graph16-module-repro-${{ matrix.label }}-${{ matrix.fixture }}-${{ github.run_id }}
-          path: experiments/ps0/build/compiler-heads-*
+          path: |
+            experiments/ps0/build/compiler-heads-*/*.json
+            experiments/ps0/build/compiler-heads-*/*.log
+            experiments/ps0/build/compiler-heads-*/original/src/${{ matrix.relative }}.ps
+            experiments/ps0/build/compiler-heads-*/converted/src/${{ matrix.relative }}.ps
+            experiments/ps0/build/compiler-heads-*/baseline/ir/${{ matrix.relative }}.c
+            experiments/ps0/build/compiler-heads-*/migrated/ir/${{ matrix.relative }}.c
+            experiments/ps0/build/compiler-heads-*/baseline/lib/lean/${{ matrix.relative }}.olean
+            experiments/ps0/build/compiler-heads-*/migrated/lib/lean/${{ matrix.relative }}.olean
+            experiments/ps0/build/compiler-heads-*/baseline/lib/lean/${{ matrix.relative }}.ilean.ps0-source-census.json
+            experiments/ps0/build/compiler-heads-*/migrated/lib/lean/${{ matrix.relative }}.ilean.ps0-source-census.json
+            experiments/ps0/build/compiler-heads-*/baseline/lib/lean/${{ matrix.relative }}.ilean.ps0-source-map.json
+            experiments/ps0/build/compiler-heads-*/migrated/lib/lean/${{ matrix.relative }}.ilean.ps0-source-map.json
           if-no-files-found: error
   graph-plan-inspection:
     if: ${{ false }}

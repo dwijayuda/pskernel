@@ -1,0 +1,47 @@
+name: PS0 data declaration artifact differences
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-data-inspection.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  data-inspection:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42751711977
+          name: ps0-data-boundaries-ae5aa7f6515737cba323f7592b1e93b07e820fcd-42751711977
+          github-token: ${{ github.token }}
+          path: retained
+      - name: Inspect exact C and public olean differences
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json,difflib
+          root=Path('retained'); dirs=list(root.glob('data-declarations-*'))
+          assert len(dirs)==1,dirs
+          folder=dirs[0]; report={}
+          for ext in ['c','olean']:
+              files={label:folder/(label+'.'+ext) for label in ['baseline','migrated','planned']}
+              rows={label:hashlib.sha256(file.read_bytes()).hexdigest() for label,file in files.items()}
+              report[ext]=rows
+              print(ext,json.dumps(rows))
+              if ext=='c':
+                  native=files['baseline'].read_text().splitlines()
+                  for label in ['migrated','planned']:
+                      diff=list(difflib.unified_diff(native,files[label].read_text().splitlines(),fromfile='baseline',tofile=label))
+                      print('DIFF_LINES',label,len(diff)); print('\n'.join(diff[:220]))
+          out=Path('inspection');out.mkdir()
+          (out/'differences.json').write_text(json.dumps(report,indent=2)+'\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-data-inspection-${{ github.run_id }}
+          path: inspection/
+          if-no-files-found: error

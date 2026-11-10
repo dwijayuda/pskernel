@@ -24,7 +24,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"152801eebcd8f8424f986d04fe183158af4f2ef5"}
+          pin={"repository":"dwijayuda/lean4","commit":"797608d688cd95be1571b1ad9e85e10a539f9484"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -108,6 +108,8 @@ jobs:
         run: |
           python3 tests/test-native-census-cache.py
           python3 tests/run-host-island-gaps.py --cases initialize-value,builtin-initialize-value
+          lake env lean tests/InitializerOrigins.lean
+          python3 tests/run-initializers.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -116,4 +118,11 @@ jobs:
             experiments/ps0/build/host-island-gaps-*/*.json
             experiments/ps0/build/host-island-gaps-*/*.log
             experiments/ps0/build/host-island-gaps-*/**/*.ps
+            experiments/ps0/build/compiler-fixture-logs/
+            experiments/ps0/build/initializers-*/*.json
+            experiments/ps0/build/initializers-*/*.log
+            experiments/ps0/build/initializers-*/*.ps
+            experiments/ps0/build/initializers-*/*.c
+            experiments/ps0/build/initializers-*/*.olean
+            experiments/ps0/build/initializers-*/*InitializerRuntime
           if-no-files-found: error

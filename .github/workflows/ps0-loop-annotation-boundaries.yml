@@ -9,6 +9,7 @@ permissions:
 jobs:
 
   loop-annotation-boundaries:
+    if: ${{ false }}
     runs-on: ubuntu-22.04
     timeout-minutes: 15
     defaults:

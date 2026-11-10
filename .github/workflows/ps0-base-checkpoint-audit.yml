@@ -1,0 +1,115 @@
+name: PS0 independent native Lake base checkpoint audit
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-base-checkpoint-audit.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: experiments/ps0
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: b75a583592dc8bbe9046fd6e93784d8ef0365580
+          sparse-checkout: experiments/ps0
+          persist-credentials: false
+      - name: Verify exact successful base job and immutable checkpoint artifact
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const expected={owner:'dwijayuda',repo:'pskernel',run_id:42885813901};
+            const run=(await github.rest.actions.getWorkflowRun(expected)).data;
+            if(run.head_sha!=='ba0f8845164eef2ba55b042562ab1061ace775da')throw Error('producer runner mismatch');
+            const jobs=(await github.rest.actions.listJobsForWorkflowRun({...expected,per_page:100})).data.jobs;
+            const base=jobs.find(j=>j.id===130075349238&&j.name==='stage-one-base');
+            if(!base||base.status!=='completed'||base.conclusion!=='success')throw Error('base job not qualified');
+            const artifacts=(await github.rest.actions.listWorkflowRunArtifacts({...expected,per_page:100})).data.artifacts;
+            const artifact=artifacts.find(a=>a.id===13806062082);
+            if(!artifact||artifact.expired||artifact.digest!=='sha256:ef30cb64c1b9c7cda8f9036055d93ed2241cf910aac1b885333eedc18bcf15f4')throw Error('checkpoint artifact identity mismatch');
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42885813901
+          name: ps0-compiler-checkpoint-1-base-b75a583592dc8bbe9046fd6e93784d8ef0365580-42885813901
+          github-token: ${{ github.token }}
+          path: checkpoint-download
+      - name: Rehash actual prepared sources and native target outputs without compiler execution
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "b75a583592dc8bbe9046fd6e93784d8ef0365580"
+          python3 tests/compiler_build_checkpoint.py unpack "$GITHUB_WORKSPACE/checkpoint-download/compiler-checkpoint.tar.gz" "$PWD"
+          mkdir -p build/base-independent-audit
+          python3 - <<'PY' | tee build/base-independent-audit/audit.log
+          from pathlib import Path
+          from collections import Counter
+          import hashlib,json,sys
+          sys.path.insert(0,'tests')
+          from compiler_build_checkpoint import verify,sha
+          root=Path.cwd()
+          checkpoint=verify(root,root/'build/compiler-checkpoint.json',source='b75a583592dc8bbe9046fd6e93784d8ef0365580',phase='base',run_id='42885813901',driver=root/'.lake/build/bin/ps0')
+          state=checkpoint['state']
+          work=root/state['work']
+          evidence=root/'build/compiler-evidence'
+          inventory=json.loads((evidence/'input-inventory.json').read_text())
+          inputs=inventory['inputs']
+          assert inventory['source_commit']=='b75a583592dc8bbe9046fd6e93784d8ef0365580' and inventory['module_count']==len(inputs)==2569
+          assert len(list((work/'src').rglob('*.ps')))==2569 and not list((work/'src').rglob('*.lean'))
+          for module,item in inputs.items():
+              ps=work/'src'/Path(*module.split('.')).with_suffix('.ps')
+              assert item['body_mode']=='planned-ps-grammar' and sha(ps)==item['ps_sha256']
+          assert len(state['history'])==1
+          history=state['history'][0]
+          expected=[m for m in sorted(inputs) if any(m==n or m.startswith(n+'.') for n in ['Init','Std'])]
+          assert history['targets']==expected and len(expected)==1147
+          assert history['source_commit']=='b75a583592dc8bbe9046fd6e93784d8ef0365580' and history['driver_sha256']==state['driver_sha256']
+          assert history['options']=={'interpreter.prefer_native':False,'ps0.sourceGrammar':True}
+          build=work/'artifacts'
+          productions={'function':'PS0.StandardAdapters.ps0StandardFunction','const':'PS0.StandardAdapters.ps0StandardConst','def':'PS0.StandardAdapters.ps0StandardDef'}
+          def commands(items):
+              for item in items:
+                  yield item
+                  yield from commands(item.get('nestedCommands',[]))
+          rows=[];totals=Counter()
+          for module in expected:
+              rel=Path(*module.split('.'))
+              setup=json.loads((build/'ir'/rel.with_suffix('.setup.json')).read_text())
+              assert setup['options']['ps0.sourceGrammar'] is True
+              assert setup['options']['interpreter.prefer_native'] is False
+              ps=work/'src'/rel.with_suffix('.ps')
+              census=build/'lib/lean'/rel.with_suffix('.ilean.ps0-source-census.json')
+              observed=json.loads(census.read_text())
+              assert observed['module']==module and observed['leanCommit']==state['lean_commit']
+              assert observed['mappedOperandSyntaxScope']=='raw-command-before-native-lowering/1'
+              assert observed['nativeSource']==ps.read_bytes().decode().replace('\r\n','\n')
+              plan=json.loads((evidence/'current-source-plans'/module/'plan.json').read_text())
+              assert plan['result_sha256']==sha(ps)
+              flat=list(commands(observed['commands']))
+              declarations=[c['declaration'] for c in flat if c.get('declaration')]
+              assert all(d['mode']=='mapped-ps' for d in declarations)
+              defs=[d for d in declarations if d['production'] in productions.values()]
+              assert [(d['sourceName'],d['production']) for d in defs]==[(s['sourceName'],productions[s['targetKeyword']]) for s in plan['strategies']]
+              counts={'definitions':len(defs)}
+              for field,key in [('dataDeclaration','data_declarations'),('initialization','initialization_commands')]:
+                  captures=[c[field] for c in flat if c.get(field)]
+                  assert len(captures)==plan.get(key,0) and all(c['mode']=='mapped-ps' for c in captures)
+                  counts[key]=len(captures)
+              totals.update(counts)
+              outputs={kind:sha(build/folder/rel.with_suffix(extension)) for kind,folder,extension in [
+                  ('c','ir','.c'),('export_object','ir','.c.o.export'),('public_olean','lib/lean','.olean')]}
+              rows.append({'module':module,'ps_sha256':sha(ps),'census_sha256':sha(census),'outputs':outputs,'counts':counts})
+          report=dict(schema='ps0-independent-native-lake-base-checkpoint-audit/1',source='b75a583592dc8bbe9046fd6e93784d8ef0365580',producer_run=42885813901,producer_job=130075349238,producer_artifact=13806062082,checkpoint_files_rehashed=len(checkpoint['files']),prepared_ps_files_rehashed=2569,compiled_target_modules=len(rows),actual_target_output_files_rehashed=3*len(rows),mapped_censuses_rehashed=len(rows),totals=dict(totals),modules=rows,status='PASS',scope='Actual retained base sources/C/export-object/public-olean files and mapped censuses independently rehashed; base phase only, no full compiler graph/link/runtime/second-stage/fixed-point or native-SDK byte-parity qualification',grammar_migration_complete=False,verified_execution=False)
+          Path('build/base-independent-audit/audit.json').write_text(json.dumps(report,indent=2)+'\n')
+          print('PS0_BASE_CHECKPOINT_AUDIT:'+json.dumps({k:v for k,v in report.items() if k!='modules'},sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-base-checkpoint-independent-audit-b75a583592dc8bbe9046fd6e93784d8ef0365580-${{ github.run_id }}
+          path: experiments/ps0/build/base-independent-audit/
+          if-no-files-found: error

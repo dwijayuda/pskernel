@@ -1,0 +1,53 @@
+name: PS0 parser extension value difference inspection
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-extension-value-inspection.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inspect:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42776664478
+          name: ps0-graph17-recovery-ParserExtension18-cc92a4e1d344ab1e76d1c7e68dfbda00b7a85575-42776664478
+          github-token: ${{ github.token }}
+          path: capture
+      - name: Inspect precise private constant expression differences
+        run: |
+          mkdir -p evidence
+          python3 - <<'PY' | tee evidence/inspection.log
+          from pathlib import Path
+          import json,hashlib
+          folders=list(Path('capture').rglob('plan.json'))
+          assert len(folders)==1
+          folder=folders[0].parent
+          text=(folder/'c-parity-olean-diagnostic.log').read_text()
+          d=json.JSONDecoder().raw_decode(text[text.index('{'):])[0]
+          rows=[]
+          for row in d['changedConstants']:
+              item={k:row[k] for k in ['name','kindEqual','typeEqual','valueEqual','typeReprEqualIgnoringBinderNames','valueReprEqualIgnoringBinderNames','hintsEqual'] if k in row}
+              a,b=row.get('nativeValue',''),row.get('psValue','')
+              n=next((i for i,(x,y) in enumerate(zip(a,b)) if x!=y),min(len(a),len(b)))
+              item.update(first_value_difference=n,native_value_context=a[max(0,n-160):n+260],ps_value_context=b[max(0,n-160):n+260])
+              rows.append(item)
+          print('EXTENSION_VALUE_INSPECTION:'+json.dumps(dict(native_summary=d['native'],ps_summary=d['ps'],changes=rows),sort_keys=True))
+          for label in ['baseline','migrated']:
+              path=folder/label/'ir/Lean/Parser/Extension.c'
+              print('EXTENSION_ACTUAL_C:'+json.dumps(dict(variant=label,sha256=hashlib.sha256(path.read_bytes()).hexdigest())))
+          plan=json.loads(folders[0].read_text())
+          converted=folder/'converted/src/Lean/Parser/Extension.ps'
+          assert hashlib.sha256(converted.read_bytes()).hexdigest()==plan['result_sha256']
+          print('EXTENSION_PLAN:'+json.dumps(dict(definitions=len(plan['declarations']),source_sha256=plan['source_sha256'],result_sha256=plan['result_sha256'])))
+          Path('evidence/inspection.json').write_text(json.dumps(dict(changes=rows,native_summary=d['native'],ps_summary=d['ps']),indent=2)+'\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-extension-value-inspection-${{ github.run_id }}
+          path: evidence/
+          if-no-files-found: error

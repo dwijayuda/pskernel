@@ -26,7 +26,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"25a5bc2ad119c509f622ba97f90ca0d7e85bae73"}
+          pin={"repository":"dwijayuda/lean4","commit":"dd33df36f3955a54a9f674c877ab48e680bb91bb"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -111,6 +111,7 @@ jobs:
           set -euo pipefail
           python3 -m py_compile tests/native_compiler_prefix.py tests/run-compiler-ps.py
           python3 tests/test-native-compiler-prefix.py 2>&1 | tee build/transformed-corpus-logs/prefix-contracts.log
+          python3 tests/test-compiler-fixed-point-audit.py 2>&1 | tee build/transformed-corpus-logs/fixed-point-audit-contracts.log
           python3 tests/run-compiler-ps.py --help
       - uses: actions/upload-artifact@v4
         if: always()

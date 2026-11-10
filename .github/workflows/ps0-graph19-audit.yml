@@ -1,0 +1,103 @@
+name: PS0 graph nineteen recovery artifact audit
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-graph19-audit.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - name: Verify immutable producer and artifact identities
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const args = {owner: 'dwijayuda', repo: 'pskernel', run_id: 42823677427};
+            const run = (await github.rest.actions.getWorkflowRun(args)).data;
+            if (run.head_sha !== '1753320c93f3fcc01777913dac477346202861f0' || run.status !== 'completed' || run.conclusion !== 'failure') throw Error('producer identity or strict-failure status mismatch');
+            const jobs = (await github.rest.actions.listJobsForWorkflowRun({...args, per_page:100})).data.jobs;
+            if (jobs.length !== 7 || jobs.find(j=>j.name==='probe')?.conclusion!=='success') throw Error('missing probe qualification');
+            const modules=jobs.filter(j=>j.name.startsWith('module-recovery'));
+            if (modules.length!==6 || modules.filter(j=>j.conclusion==='success').length!==3 || modules.filter(j=>j.conclusion==='failure').length!==3) throw Error('producer strict matrix mismatch');
+            const artifacts=(await github.rest.actions.listWorkflowRunArtifacts({...args,per_page:100})).data.artifacts;
+            if (artifacts.length!==7 || artifacts.some(a=>a.expired || !a.digest || !a.name.endsWith('-298395dde05464d06dca208fec5d0b74012297e4-42823677427'))) throw Error('artifact identities mismatch');
+            fs.mkdirSync('evidence',{recursive:true});
+            fs.writeFileSync('evidence/producer.json',JSON.stringify({run,jobs,artifacts},null,2));
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42823677427
+          pattern: ps0-*-298395dde05464d06dca208fec5d0b74012297e4-42823677427
+          github-token: ${{ github.token }}
+          path: captures
+      - name: Independently rehash actual C files and reconstruct all six source plans
+        run: |
+          mkdir -p evidence
+          python3 - <<'PY' | tee evidence/audit.log
+          from pathlib import Path
+          import hashlib,json
+          expected={"Lean.Compiler.LCNF.Simp.JpCases":"80eb3b4f7b3c69da0c50c58d8860b5e65c709d2c","Lean.Meta.Tactic.Cbv.ControlFlow":"8fe30cc1f35b60a43cceac1c13c2f61524b5d92e","Lean.Meta.Tactic.Rewrite":"f616c869ab7dd86e771fc22918303ab8b7aa2998","Lean.Meta.MkIffOfInductiveProp":"6826af10a3ea2f461432d2eb45e1b6c831883e27","Lean.Elab.Syntax":"7b11aaf4830c83cc828eb77f40de308c06307053","Lean.Server.Watchdog":"dedb28154c483633b49a12d1689938209c1531c4"}
+          sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+          rows=[]
+          for path in Path('captures').rglob('plan.json'):
+              folder=path.parent
+              plan=json.loads(path.read_text())
+              capture=json.loads((folder/'original-census.json').read_text())
+              module=capture['module']
+              assert module in expected and capture['leanCommit']=='eb6cafb7290e8bd5f2937522d8d804f58f02bafc'
+              rel=Path(*module.split('.'))
+              original=folder/'original/src'/rel.with_suffix('.ps')
+              converted=folder/'converted/src'/rel.with_suffix('.ps')
+              data=original.read_bytes()
+              assert hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()==expected[module]
+              assert sha(original)==plan['source_sha256']
+              cursor=0;parts=[]
+              for edit in plan['edits']:
+                  assert cursor<=edit['start']<=edit['end']<=len(data)
+                  assert data[edit['start']:edit['end']].decode()==edit['old']
+                  assert edit['old'].count('\n')==edit['new'].count('\n')
+                  parts += [data[cursor:edit['start']], edit['new'].encode()]
+                  cursor=edit['end']
+              rebuilt=b''.join(parts+[data[cursor:]])
+              assert rebuilt==converted.read_bytes() and sha(converted)==plan['result_sha256']
+              assert 'Build completed successfully' in (folder/'baseline.log').read_text()
+              assert 'Build completed successfully' in (folder/'migrated.log').read_text()
+              c=[folder/label/'ir'/rel.with_suffix('.c') for label in ['baseline','migrated']]
+              hashes=dict(native=sha(c[0]), ps=sha(c[1]))
+              row=dict(module=module,pinned_blob=expected[module],definitions=len(plan['declarations']),actual_c_sha256=hashes,compiled=True)
+              if module in ['Lean.Meta.Tactic.Rewrite','Lean.Meta.Tactic.Cbv.ControlFlow','Lean.Server.Watchdog']:
+                  receipt=json.loads((folder/'evidence.json').read_text())
+                  assert receipt['source']=='298395dde05464d06dca208fec5d0b74012297e4'
+                  assert hashes['native']==hashes['ps']
+                  assert receipt['comparisons']['ir/'+rel.with_suffix('.c').as_posix()]==hashes
+                  public=receipt['comparisons']['lib/lean/'+rel.with_suffix('.olean').as_posix()]
+                  assert public['native']==public['ps']
+                  row['public_olean_receipt_sha256']=public
+                  row['qualification']='producer strict C/public olean PASS; independent actual C rehash'
+              else:
+                  assert hashes['native']!=hashes['ps']
+                  text=(folder/'c-parity-olean-diagnostic.log').read_text()
+                  details=json.JSONDecoder().raw_decode(text[text.index('{'):])[0]
+                  row['reader_changed_constants']=len(details['changedConstants'])
+                  row['reader_summary']={k:v for k,v in details.items() if k not in ['changedConstants','constants'] and not isinstance(v,(list,dict))}
+                  row['qualification']='target compiled; strict byte parity FAIL remains; no broad semantic-equivalence claim'
+              rows.append(row)
+          assert len(rows)==6 and {r['module'] for r in rows}==set(expected)
+          controls=list(Path('captures').rglob('graph19-shapes.log'))
+          assert len(controls)==1 and 'GRAPH19_REGRESSIONS: PASS 14 cases' in controls[0].read_text()
+          prior=list(Path('captures').rglob('graph17-shapes.log'))
+          assert len(prior)==1 and 'GRAPH17_TERM_SHAPES: PASS 10 cases' in prior[0].read_text()
+          assert 'GRAPH17_RESERVED_CALLEE_GUARDS: PASS 5 cases' in prior[0].read_text()
+          report=dict(schema='ps0-terminal-recovery-artifact-audit/1',producer_run=42823677427,producer_source='298395dde05464d06dca208fec5d0b74012297e4',actual_c_files_rehashed=12,source_plans_reconstructed=6,rows=rows,status='PASS',scope='artifact fidelity and exact phase distinctions only; actual target public olean files were not retained and are not independently rehashed; no whole-compiler or fixed-point result',grammar_migration_complete=False,verified_execution=False)
+          Path('evidence/audit.json').write_text(json.dumps(report,indent=2)+'\n')
+          print(json.dumps(report,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-terminal-recovery-independent-${{ github.run_id }}
+          path: evidence/
+          if-no-files-found: error

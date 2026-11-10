@@ -1,0 +1,38 @@
+name: PS0 native host role inventory
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  host-role-inventory:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: 1fecb9236446c9a1291e7820994a9da0c812e11b
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42681043836
+          name: ps0-native-head-census-0942ac5898b144d0f8ff3181ff6b4dacbfc76b8c-42681043836
+          github-token: ${{ github.token }}
+          path: retained
+      - name: Inventory retained pinned native signature and value trees
+        run: |
+          set -euo pipefail
+          mkdir -p inventory
+          python3 experiments/ps0/tests/audit-host-role-inventory.py retained/compiler-evidence/current-source-plans inventory/host-role-inventory.json | tee inventory/inventory.log
+          printf '%s\n' '1fecb9236446c9a1291e7820994a9da0c812e11b' > inventory/checker-source.txt
+          printf '%s\n' "$GITHUB_SHA" > inventory/runner-sha.txt
+          sha256sum inventory/host-role-inventory.json > inventory/host-role-inventory.sha256
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-host-role-inventory-1fecb9236446c9a1291e7820994a9da0c812e11b-${{ github.run_id }}
+          path: inventory/
+          if-no-files-found: error

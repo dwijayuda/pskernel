@@ -1,0 +1,58 @@
+name: PS0 graph seventeen captured syntax inspection
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-graph17-capture-inspection.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inspect:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42766301456
+          pattern: ps0-graph17-reproduction-*
+          github-token: ${{ github.token }}
+          path: captures
+      - name: Inspect exact native syntax and transformed source at terminal errors
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          targets={'FuzzyMatching.ps':[154,160], 'Extra.ps':[210,214], 'MonoTypes.ps':[116], 'CongrTheorems.ps':[131]}
+          def walk(node):
+              yield node
+              for child in node.get('args', []):
+                  yield from walk(child)
+          for path in Path('captures').rglob('original-census.json'):
+              d=json.loads(path.read_text())
+              print('MODULE', d['module'])
+              seen=set()
+              def declarations(commands):
+                  for command in commands:
+                      if command.get('declaration'):
+                          yield command['declaration']
+                      yield from declarations(command.get('nestedCommands',[]))
+              for decl in declarations(d['commands']):
+                  for node in walk(decl.get('valueSyntax') or {}):
+                      if any(c.get('atom') == 'matches' for c in node.get('args',[])):
+                          key=json.dumps(node,sort_keys=True)
+                          if key not in seen:
+                              seen.add(key)
+                              print('MATCHES_NATIVE',json.dumps(dict(declaration=decl['sourceName'],syntax=node)))
+                      r=node.get('range')
+                      if node.get('kind')=='Lean.Parser.Term.doReassign' and r:
+                          text=d['nativeSource'].encode()[r['start']:r['end']].decode()
+                          if 'skipPenalty' in text:
+                              print('REASSIGN_NATIVE',json.dumps(dict(declaration=decl['sourceName'],text=text,syntax=node)))
+          for path in Path('captures').rglob('*.ps'):
+              if 'converted' not in path.parts or path.name not in targets:
+                  continue
+              lines=path.read_text().splitlines()
+              print('CONVERTED_FILE',str(path))
+              for line in targets[path.name]:
+                  print(str(line)+': '+lines[line-1])
+          PY

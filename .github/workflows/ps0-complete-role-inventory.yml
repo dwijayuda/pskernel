@@ -1,0 +1,48 @@
+name: PS0 complete retained grammar role inventory
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-complete-role-inventory.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  complete-role-inventory:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: 2cac19be4b6ce1df75dcfc557bfb1aff09b292dc
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42719483426
+          name: ps0-transformed-corpus-f94118fb3d1463304c32b5a28189d7ea6572ecce-42719483426
+          github-token: ${{ github.token }}
+          path: retained
+      - run: |
+          python3 experiments/ps0/tests/audit-host-role-inventory.py retained inventory.json \
+            --expected-captures 2569 > inventory.log
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data=json.loads(Path('inventory.json').read_text())
+          assert len({r['module'] for r in data['captures']})==2569
+          focus={'Lean.Parser.Term.nestedAction','Lean.Parser.Term.termReturn','Lean.Parser.Term.termTry','Lean.Parser.Term.termFor'}
+          rows=[r for r in data['observations'] if r['role_kind'].split(':',1)[1] in focus]
+          print('PS0_COMPLETE_ROLE_INVENTORY:'+json.dumps({'capture_source':'f94118fb3d1463304c32b5a28189d7ea6572ecce',
+              'captures':len(data['captures']),'focused_native_observations':rows,
+              'scope':'native signature/value trees including pattern and DSL descendants; no ownership claim'},sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-complete-role-inventory-${{ github.run_id }}
+          path: |
+            inventory.json
+            inventory.log
+          if-no-files-found: error

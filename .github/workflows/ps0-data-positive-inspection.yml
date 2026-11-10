@@ -1,0 +1,177 @@
+name: PS0 data positive artifact inspection
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-data-positive-inspection.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+
+  data-positive-inspection:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: experiments/ps0
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          persist-credentials: false
+      - name: Read exact source pin
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          pin={"repository":"dwijayuda/lean4","commit":"4b274eed49979526acf6de8671d3811e50e43a1e"}
+          assert pin['repository']=='dwijayuda/lean4'
+          assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('PS0_SOURCE_SHA='+pin['commit']+'\n')
+          PY
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: ${{ env.PS0_SOURCE_SHA }}
+          sparse-checkout: experiments/ps0
+          persist-credentials: false
+      - uses: actions/cache/restore@v4
+        id: ps0-elan-input
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/restore@v4
+        id: ps0-lean-input
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Install checksum-verified pinned Linux Lean inputs
+        run: |
+          set -euo pipefail
+          ps0_fetch_input() {
+            local ps0_url="$1" ps0_api="$2" ps0_target="$3" ps0_digest="$4"
+            if test ! -f "$ps0_target"; then
+              if ! curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                --retry 5 --retry-max-time 300 --retry-all-errors "$ps0_url" -o "$ps0_target"; then
+                curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                  --retry 5 --retry-max-time 300 --retry-all-errors \
+                  -H 'Accept: application/octet-stream' -H 'X-GitHub-Api-Version: 2022-11-28' \
+                  "$ps0_api" -o "$ps0_target"
+              fi
+            fi
+            printf '%s  %s\n' "$ps0_digest" "$ps0_target" | sha256sum -c -
+          }
+          test "$(cat lean-toolchain)" = leanprover/lean4:v4.35.0
+          ps0_fetch_input \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            https://api.github.com/repos/leanprover/elan/releases/assets/529114798 \
+            "$RUNNER_TEMP/ps0-elan.tar.gz" \
+            42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+          ps0_fetch_input \
+            https://github.com/leanprover/lean4/releases/download/v4.35.0/lean-4.35.0-linux.tar.zst \
+            https://api.github.com/repos/leanprover/lean4/releases/assets/634574462 \
+            "$RUNNER_TEMP/ps0-lean.tar.zst" \
+            7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+          mkdir -p "$RUNNER_TEMP/ps0-elan-installer" "$RUNNER_TEMP/ps0-lean-verified"
+          tar -xzf "$RUNNER_TEMP/ps0-elan.tar.gz" -C "$RUNNER_TEMP/ps0-elan-installer"
+          "$RUNNER_TEMP/ps0-elan-installer/elan-init" -y --default-toolchain none --no-modify-path
+          tar --zstd -xf "$RUNNER_TEMP/ps0-lean.tar.zst" --strip-components=1 -C "$RUNNER_TEMP/ps0-lean-verified"
+          "$HOME/.elan/bin/elan" toolchain link ps0-pinned-lean-4.35.0 "$RUNNER_TEMP/ps0-lean-verified"
+          export ELAN_TOOLCHAIN=ps0-pinned-lean-4.35.0
+          echo "ELAN_TOOLCHAIN=$ELAN_TOOLCHAIN" >> "$GITHUB_ENV"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          test "$("$HOME/.elan/bin/lean" --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          "$HOME/.elan/bin/lean" --version
+          "$HOME/.elan/bin/lake" --version
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-elan-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-lean-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Record exact source and build clean PS0
+        run: |
+          set -euo pipefail
+          mkdir -p build/compiler-fixture-logs
+          test "$(git rev-parse HEAD)" = "$PS0_SOURCE_SHA"
+          printf '%s\n' "$PS0_SOURCE_SHA" > build/compiler-fixture-logs/source-sha.txt
+          printf '%s\n' "$GITHUB_SHA" > build/compiler-fixture-logs/runner-sha.txt
+          test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42753219078
+          name: ps0-data-boundaries-4b274eed49979526acf6de8671d3811e50e43a1e-42753219078
+          github-token: ${{ github.token }}
+          path: retained-data
+      - name: Inspect actual public native module data
+        run: |
+          set -euo pipefail
+          mkdir -p build/data-public-inspection
+          folder="$GITHUB_WORKSPACE/retained-data/data-declarations-42753219078"
+          lake env lean --run tests/compare-compiler-olean.lean "$folder/baseline.olean" "$folder/migrated.olean" | tee build/data-public-inspection/handwritten.json
+          lake env lean --run tests/compare-compiler-olean.lean "$folder/baseline.olean" "$folder/planned.olean" | tee build/data-public-inspection/planned.json
+      - name: Rehash actual files and repeat native constant checks
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          root=Path('build/data-public-inspection')
+          folder=Path(__import__('os').environ['GITHUB_WORKSPACE'])/'retained-data/data-declarations-42753219078'
+          e=json.loads((folder/'evidence.json').read_text()); assert e['source']=='4b274eed49979526acf6de8671d3811e50e43a1e'
+          assert e['mapped_data_declarations']==3 and e['mapped_definitions']==5 and e['private_rfl_guards']==3
+          hashes={}
+          for label in ['baseline','migrated','planned']:
+              source=(folder/(label+'-source.ps')).read_bytes()
+              mapping=json.loads((folder/(label+'-map.json')).read_text())
+              census=json.loads((folder/(label+'-census.json')).read_text())
+              assert mapping['source'].encode()==census['nativeSource'].encode()==source
+              assert all(row['kind']=='original' for row in mapping['segments'])
+              rows=[row['dataDeclaration'] for row in census['commands'] if row['dataDeclaration']]
+              assert len(rows)==3 and all(row['mode']==('native-compatible' if label=='baseline' else 'mapped-ps') for row in rows)
+              for ext,path in [('c','ir/DataDeclarationsBootstrap.c'),('olean','lib/lean/DataDeclarationsBootstrap.olean')]:
+                  file=folder/(label+'.'+ext); digest=hashlib.sha256(file.read_bytes()).hexdigest()
+                  assert e['comparisons'][path][label]==digest; hashes[file.name]=digest
+          for label,name in [('migrated','handwritten'),('planned','planned')]:
+              comparison=json.loads((root/(name+'.json')).read_text())
+              assert comparison['native']==comparison['ps']
+              for row in comparison['changedConstants']:
+                  assert all(row[key] for key in ['kindEqual','typeEqual','valueEqual','typeReprEqualIgnoringBinderNames','valueReprEqualIgnoringBinderNames'])
+                  assert row['nativeLevels']==row['psLevels'] and row.get('hintsEqual',True)
+                  assert row.get('nativeMutual')==row.get('psMutual')
+              assert e['public_constant_comparisons'][label]['changed_generated_binder_constants']==[row['name'] for row in comparison['changedConstants']]
+          assert len(set(e['comparisons']['ir/DataDeclarationsBootstrap.c'].values()))==1
+          assert e['comparisons']['lib/lean/DataDeclarationsBootstrap.olean']['baseline']==e['comparisons']['lib/lean/DataDeclarationsBootstrap.olean']['planned']
+          plan=json.loads((folder/'plan.json').read_text()); raw=(folder/'baseline-source.ps').read_bytes()
+          assert plan['data_declarations']==3 and hashlib.sha256(raw).hexdigest()==plan['source_sha256']
+          chunks=[];cursor=0
+          for edit in plan['edits']:
+              assert cursor<=edit['start']<=edit['end']<=len(raw)
+              assert raw[edit['start']:edit['end']].decode()==edit['old']
+              assert edit['old'].count('\n')==edit['new'].count('\n')
+              chunks.extend([raw[cursor:edit['start']],edit['new'].encode()]);cursor=edit['end']
+          chunks.append(raw[cursor:]); planned=b''.join(chunks)
+          assert planned==(folder/'planned-source.ps').read_bytes()
+          assert hashlib.sha256(planned).hexdigest()==plan['result_sha256']
+          elf=folder/'DataDeclarationsRuntime'; assert elf.read_bytes().startswith(b'\x7fELF')
+          hashes[elf.name]=hashlib.sha256(elf.read_bytes()).hexdigest()
+          assert hashes[elf.name]==e['native_executable_sha256']
+          assert (folder/'runtime.log').read_text().strip()=='PS0_DATA_DECLARATIONS: PASS'
+          report=dict(status='PASS',source=e['source'],producer_run=42753219078,producer_job=129621466658,
+              actual_compiler_files_rehashed=6,actual_native_elf_files_rehashed=1,hashes=hashes,evidence=e,
+              native_public_constant_comparisons_repeated=2,extension_payloads_compared=False,
+              grammar_migration_complete=False,verified_execution=False)
+          (root/'inspection.json').write_text(json.dumps(report,indent=2)+'\n')
+          print('PS0_DATA_POSITIVE_INSPECTION:'+json.dumps(report,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-data-positive-inspection-${{ github.run_id }}
+          path: experiments/ps0/build/data-public-inspection/
+          if-no-files-found: error

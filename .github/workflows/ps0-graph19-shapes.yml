@@ -26,7 +26,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"3808825343c1a1b6f7dcfe349920e047d270f60d"}
+          pin={"repository":"dwijayuda/lean4","commit":"889af6054e16b6709dd9e89e7390368092fd8649"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -112,7 +112,7 @@ jobs:
           run-id: 42815258848
           pattern: ps0-graph17-recovery-*-64e3730de513fc8815aa3ac5a2a2aff4b2441a48-42815258848
           github-token: ${{ github.token }}
-          path: native-captures
+          path: experiments/ps0/native-captures
       - name: Inspect pinned native syntax at the six failure boundaries
         run: |
           set -euo pipefail

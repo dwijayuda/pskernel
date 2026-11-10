@@ -24,7 +24,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"8bc5d9270a832185d22166943f0b7d3bd3150345"}
+          pin={"repository":"dwijayuda/lean4","commit":"92b22875cf81199f10413661b633e50df4671fb6"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -105,13 +105,24 @@ jobs:
           lake build PS0 ps0 2>&1 | tee build/compiler-fixture-logs/build.log
           lake exe ps0 environment | tee build/compiler-fixture-logs/environment.json
       - name: Require data mixed telescope admission with native controls
-        run: python3 tests/run-data-mixed-binders.py
+        run: |
+          python3 tests/run-data-mixed-binders.py
+          lake env lean tests/DataDeclarationOrigins.lean
+          python3 tests/run-data-declarations.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: ps0-data-mixed-binders-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
           path: |
             experiments/ps0/build/compiler-fixture-logs/
+            experiments/ps0/build/data-mixed-binders-*/*.c
+            experiments/ps0/build/data-mixed-binders-*/*.olean
+            experiments/ps0/build/data-declarations-*/*.json
+            experiments/ps0/build/data-declarations-*/*.log
+            experiments/ps0/build/data-declarations-*/*.ps
+            experiments/ps0/build/data-declarations-*/*.c
+            experiments/ps0/build/data-declarations-*/*.olean
+            experiments/ps0/build/data-declarations-*/DataDeclarationsRuntime
             experiments/ps0/build/data-mixed-binders-*/*.json
             experiments/ps0/build/data-mixed-binders-*/*.log
             experiments/ps0/build/data-mixed-binders-*/*.ps

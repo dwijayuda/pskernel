@@ -9,12 +9,11 @@ permissions:
 jobs:
 
   module-reproduction:
-    if: ${{ false }}
     name: ${{ matrix.label }}-${{ matrix.fixture }}
     strategy:
       fail-fast: false
       matrix:
-        include: [{"module":"Std.Http.Data.URI.Parser","fixture":"URIParser","path":"src/Std/Http/Data/URI/Parser.lean","roots":"Std.Http.Data.URI","blob":"d51844ce35afe12c4c815dd41f617891f3a62980","source":"7cb84202ade8aa0dddc306c459ab8335229c9ab8","label":"direct-bind"},{"module":"Lean.Meta.AbstractMVars","fixture":"AbstractMVars","path":"src/Lean/Meta/AbstractMVars.lean","roots":"Lean.Meta","blob":"175738e203ab7cbd59798431b0fb0133dd41ca5a","source":"7cb84202ade8aa0dddc306c459ab8335229c9ab8","label":"direct-bind"},{"module":"Lean.Meta.DiscrTree.Main","fixture":"DiscrTreeMain","path":"src/Lean/Meta/DiscrTree/Main.lean","roots":"Lean.Meta.DiscrTree","blob":"bdfbcdff9d7ae3dcc369b2d637a4dec8cfe1f14a","source":"7cb84202ade8aa0dddc306c459ab8335229c9ab8","label":"direct-bind"}]
+        include: [{"module":"Std.Http.Data.URI.Parser","fixture":"URIParser","path":"src/Std/Http/Data/URI/Parser.lean","roots":"Std.Http.Data.URI","blob":"d51844ce35afe12c4c815dd41f617891f3a62980","source":"795c862f8bcf252819076c28456b6ee0438e1c7f","label":"owned-if"},{"module":"Lean.Meta.AbstractMVars","fixture":"AbstractMVars","path":"src/Lean/Meta/AbstractMVars.lean","roots":"Lean.Meta","blob":"175738e203ab7cbd59798431b0fb0133dd41ca5a","source":"795c862f8bcf252819076c28456b6ee0438e1c7f","label":"owned-if"},{"module":"Lean.Meta.DiscrTree.Main","fixture":"DiscrTreeMain","path":"src/Lean/Meta/DiscrTree/Main.lean","roots":"Lean.Meta.DiscrTree","blob":"bdfbcdff9d7ae3dcc369b2d637a4dec8cfe1f14a","source":"795c862f8bcf252819076c28456b6ee0438e1c7f","label":"owned-if"}]
     runs-on: ubuntu-22.04
     timeout-minutes: 20
     defaults:

@@ -8,7 +8,7 @@ permissions:
   actions: read
 concurrency:
   group: ps0-selfhost-fixed-point-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   stage-one:
     runs-on: ubuntu-22.04
@@ -26,7 +26,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"6c71f6ef3f86815c179284c55177112e8af6014f"}
+          pin={"repository":"dwijayuda/lean4","commit":"25a5bc2ad119c509f622ba97f90ca0d7e85bae73"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -120,11 +120,15 @@ jobs:
           name: ps0-data-preparation-4471a585933c6260449fab38642641bc6f2e8b25-42753352309
           github-token: ${{ github.token }}
           path: native-census-cache
+      - name: Verify compiler stage prerequisites
+        run: |
+          set -euo pipefail
+          python3 -m py_compile tests/native_compiler_prefix.py tests/run-compiler-ps.py
+          python3 tests/test-native-compiler-prefix.py
+          python3 tests/test-native-census-cache.py
       - name: Build and retain actual all-PS compiler prefix
         run: |
           set -euo pipefail
-          python3 tests/test-native-compiler-prefix.py
-          python3 tests/test-native-census-cache.py
           python3 tests/run-compiler-ps.py --source-plans "$GITHUB_WORKSPACE/source-plans" --plan-source bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f --native-censuses "$GITHUB_WORKSPACE/native-census-cache" --census-source 4471a585933c6260449fab38642641bc6f2e8b25
           python3 tests/run-compiler-census.py
       - uses: actions/upload-artifact@v4
@@ -152,7 +156,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"6c71f6ef3f86815c179284c55177112e8af6014f"}
+          pin={"repository":"dwijayuda/lean4","commit":"25a5bc2ad119c509f622ba97f90ca0d7e85bae73"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -239,12 +243,12 @@ jobs:
           path: source-plans
       - uses: actions/download-artifact@v4
         with:
-          name: ps0-selfhost-stage-one-6c71f6ef3f86815c179284c55177112e8af6014f-${{ github.run_id }}
+          name: ps0-selfhost-stage-one-25a5bc2ad119c509f622ba97f90ca0d7e85bae73-${{ github.run_id }}
           path: previous-stage
       - name: Verify actual retained PS-built prefix and rebuild complete graph
         run: |
           set -euo pipefail
-          python3 tests/run-compiler-ps.py --stage-artifact "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --stage-source 6c71f6ef3f86815c179284c55177112e8af6014f --source-plans "$GITHUB_WORKSPACE/source-plans" --plan-source bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f --native-censuses "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --census-source 6c71f6ef3f86815c179284c55177112e8af6014f
+          python3 tests/run-compiler-ps.py --stage-artifact "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --stage-source 25a5bc2ad119c509f622ba97f90ca0d7e85bae73 --source-plans "$GITHUB_WORKSPACE/source-plans" --plan-source bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f --native-censuses "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --census-source 25a5bc2ad119c509f622ba97f90ca0d7e85bae73
           python3 tests/run-compiler-census.py
       - uses: actions/upload-artifact@v4
         if: always()

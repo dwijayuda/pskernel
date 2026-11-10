@@ -26,7 +26,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"e07e063a159417ba73a22bfa7650c567aa5db2a9"}
+          pin={"repository":"dwijayuda/lean4","commit":"b75a583592dc8bbe9046fd6e93784d8ef0365580"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -109,9 +109,10 @@ jobs:
       - name: Linux checkpoint contracts and real native Lake producer
         run: |
           set -euo pipefail
+          python3 -m py_compile tests/run-compiler-ps.py
           python3 tests/test-compiler-build-checkpoint.py
           mkdir -p build/checkpoint-probe/src
-          printf '%s\n' 'def main : IO Unit := do' '  IO.println("PS0_CHECKPOINT_NATIVE_LAKE")' > build/checkpoint-probe/src/Checkpoint.ps
+          printf '%s\n' 'module' 'prelude' 'public import Init' 'public section' 'def main : IO Unit := do' '  IO.println("PS0_CHECKPOINT_NATIVE_LAKE")' > build/checkpoint-probe/src/Checkpoint.ps
           lake -R -f lakefile.project.lean -KsourceRoot="$PWD/build/checkpoint-probe/src" -Kroots=Checkpoint -KrootModule=Checkpoint -KmoduleNames=Checkpoint -KsourceGrammar=true -Kbootstrap=true -Kdriver="$PWD/.lake/build/bin/ps0" -KprojectBuildDir="$PWD/build/checkpoint-probe/artifacts" build +Checkpoint:c.o | tee build/transformed-corpus-logs/checkpoint-producer.log
           python3 - <<'PY'
           from pathlib import Path
@@ -129,7 +130,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ps0-native-lake-checkpoint-e07e063a159417ba73a22bfa7650c567aa5db2a9-${{ github.run_id }}
+          name: ps0-native-lake-checkpoint-b75a583592dc8bbe9046fd6e93784d8ef0365580-${{ github.run_id }}
           path: |
             experiments/ps0/build/checkpoint-native-lake.tar.gz
             experiments/ps0/build/transformed-corpus-logs/
@@ -151,7 +152,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"e07e063a159417ba73a22bfa7650c567aa5db2a9"}
+          pin={"repository":"dwijayuda/lean4","commit":"b75a583592dc8bbe9046fd6e93784d8ef0365580"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -223,7 +224,7 @@ jobs:
           key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
       - uses: actions/download-artifact@v4
         with:
-          name: ps0-native-lake-checkpoint-e07e063a159417ba73a22bfa7650c567aa5db2a9-${{ github.run_id }}
+          name: ps0-native-lake-checkpoint-b75a583592dc8bbe9046fd6e93784d8ef0365580-${{ github.run_id }}
           path: checkpoint-download
       - name: Verify transported outputs and finish using native Lake
         run: |
@@ -254,6 +255,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ps0-native-lake-checkpoint-consumer-e07e063a159417ba73a22bfa7650c567aa5db2a9-${{ github.run_id }}
+          name: ps0-native-lake-checkpoint-consumer-b75a583592dc8bbe9046fd6e93784d8ef0365580-${{ github.run_id }}
           path: experiments/ps0/build/checkpoint-consumer-logs/
           if-no-files-found: error

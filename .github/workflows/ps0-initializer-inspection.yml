@@ -1,0 +1,84 @@
+name: PS0 initializer startup artifact inspection
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-initializer-inspection.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  initializer-inspection:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42750071234
+          name: ps0-initializer-boundaries-685688968525cc5a4bd994f24c497c4ff2512c1a-42750071234
+          github-token: ${{ github.token }}
+          path: retained
+      - name: Inspect exact C and public olean differences
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          root=Path('retained'); dirs=list(root.glob('initializers-*'))
+          assert len(dirs)==1,dirs
+          folder=dirs[0]; evidence=json.loads((folder/'evidence.json').read_text())
+          assert evidence['source']=='685688968525cc5a4bd994f24c497c4ff2512c1a'
+          assert evidence['initialization_commands']==6
+          labels=['baseline','native-trivia','migrated','planned']; hashes={}
+          for module in ['InitializerBase','InitializerMain']:
+              for label in labels:
+                  source=(folder/(label+'-'+module+'.ps')).read_bytes()
+                  mapping=json.loads((folder/(label+'-'+module+'-map.json')).read_text())
+                  census=json.loads((folder/(label+'-'+module+'-census.json')).read_text())
+                  assert mapping['source'].encode()==census['nativeSource'].encode()==source
+                  assert all(row['kind']=='original' for row in mapping['segments'])
+                  assert census['initializerOperandScope']=='native-initializer-operands/1'
+                  rows=[row['initialization'] for row in census['commands'] if row['initialization']]
+                  assert len(rows)==(5 if module=='InitializerBase' else 1)
+                  assert all(row['mode']==('mapped-ps' if label in ['migrated','planned'] else 'native-compatible') for row in rows)
+                  for ext,path in [('c','ir/'+module+'.c'),('olean','lib/lean/'+module+'.olean')]:
+                      file=folder/(label+'-'+module+'.'+ext)
+                      digest=hashlib.sha256(file.read_bytes()).hexdigest()
+                      assert evidence['comparisons'][path][label]==digest
+                      hashes[file.name]=digest
+              raw=(folder/('baseline-'+module+'.ps')).read_bytes()
+              plan=json.loads((folder/(module+'-plan.json')).read_text())
+              assert hashlib.sha256(raw).hexdigest()==plan['source_sha256']
+              assert plan['initialization_commands']==(5 if module=='InitializerBase' else 1)
+              chunks=[]; cursor=0
+              for edit in plan['edits']:
+                  assert cursor<=edit['start']<=edit['end']<=len(raw)
+                  assert raw[edit['start']:edit['end']].decode()==edit['old']
+                  assert edit['old'].count('\n')==edit['new'].count('\n')
+                  chunks.extend([raw[cursor:edit['start']],edit['new'].encode()]); cursor=edit['end']
+              chunks.append(raw[cursor:]); result=b''.join(chunks)
+              assert result==(folder/('planned-'+module+'.ps')).read_bytes()
+              assert hashlib.sha256(result).hexdigest()==plan['result_sha256']
+          for label in labels:
+              file=folder/(label+'-InitializerRuntime'); data=file.read_bytes()
+              assert data.startswith(b'\x7fELF')
+              digest=hashlib.sha256(data).hexdigest()
+              assert digest==evidence['executables'][label]; hashes[file.name]=digest
+              assert (folder/(label+'-runtime.log')).read_text().strip()=='PS0_INITIALIZERS: PASS'
+          assert evidence['native_trivia_changes']['ir/InitializerBase.c']
+          assert evidence['native_trivia_changes']['ir/InitializerMain.c']
+          assert evidence['raw_native_ps_artifact_equal']['lib/lean/InitializerMain.olean']
+          assert evidence['grammar_migration_complete'] is False and evidence['verified_execution'] is False
+          out=Path('inspection');out.mkdir()
+          report=dict(status='PASS',source=evidence['source'],producer_run=42750071234,producer_job=129611336184,
+              actual_compiler_files_rehashed=16,actual_native_elf_files_rehashed=4,hashes=hashes,evidence=evidence,
+              scope='Finite startup/order, actual file integrity and public consumer byte parity; initializer private identities differ, including native-only whitespace control',
+              grammar_migration_complete=False,verified_execution=False)
+          (out/'inspection.json').write_text(json.dumps(report,indent=2)+'\n')
+          print('PS0_INITIALIZER_INSPECTION:'+json.dumps(report,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-initializer-inspection-${{ github.run_id }}
+          path: inspection/
+          if-no-files-found: error

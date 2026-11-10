@@ -1,0 +1,89 @@
+name: PS0 graph fourteen boundary parity inspection
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-graph-fourteen-boundaries-inspection.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  two-module-boundaries:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: 4e19be6c82b1f19c61a85cb25fe5f6b875c0ce41
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42674597434
+          name: ps0-compiler-parserbasic14-4e19be6c82b1f19c61a85cb25fe5f6b875c0ce41-42674597434
+          github-token: ${{ github.token }}
+          path: boundary-artifacts
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42674597434
+          name: ps0-compiler-compilerm14-4e19be6c82b1f19c61a85cb25fe5f6b875c0ce41-42674597434
+          github-token: ${{ github.token }}
+          path: boundary-artifacts
+      - name: Independently rehash native and PS module outputs and native lexer decisions
+        run: |
+          set -euo pipefail
+          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py boundary-artifacts --source 4e19be6c82b1f19c61a85cb25fe5f6b875c0ce41 --output graph-fourteen-boundary-rehash.json | tee graph-fourteen-boundary-rehash.log
+          python3 - <<'PY' | tee graph-fourteen-boundary-roles.log
+          from pathlib import Path
+          import json
+          report=json.loads(Path('graph-fourteen-boundary-rehash.json').read_text())
+          rows={r['module']:r for r in report['modules']}
+          assert set(rows)=={'Lean.Parser.Basic','Lean.Compiler.LCNF.CompilerM'}
+          assert sum(2*len(r['hashes']) for r in rows.values())==8
+          assert rows['Lean.Compiler.LCNF.CompilerM']['definitions']==67
+          def declarations(commands):
+              for command in commands:
+                  if command['declaration'] is not None: yield command['declaration']
+                  yield from declarations(command.get('nestedCommands',[]))
+          roles=[]
+          for path in Path('boundary-artifacts').rglob('evidence.json'):
+              if not path.parent.name.startswith('compiler-heads-'): continue
+              evidence=json.loads(path.read_text()); folder=path.parent
+              plan=json.loads((folder/'plan.json').read_text())
+              module=evidence['module']; relative=Path(*module.split('.')).with_suffix('.ps')
+              converted=(folder/'converted/src'/relative).read_text()
+              if module=='Lean.Parser.Basic':
+                  native=json.loads((folder/'original-census.json').read_text())
+                  assert native['adjacentHeadLexicalScope']=='native-environment/1'
+                  names={d['sourceName']:d for d in declarations(native['commands'])}
+                  for name in ['sepBy','sepBy1']:
+                      assert names[name]['adjacentCallSpelling']=='«'+name+'»'
+                      assert 'function «'+name+'»(' in converted
+                  observed=json.loads((folder/'migrated/lib/lean'/relative.with_suffix('.ilean.ps0-source-census.json')).read_text())
+                  mapped={d['sourceName']:d for d in declarations(observed['commands'])}
+                  assert all(mapped[name]['mode']=='mapped-ps' for name in ['sepBy','sepBy1'])
+                  roles.append({'module':module,'native_lexer_escaped_names':['sepBy','sepBy1'],
+                                'native_name_identity_preserved':True,
+                                'native_identifier_edits':[e for e in plan['edits'] if 'native lexer requires' in e['role']]})
+              else:
+                  groups=[e for e in plan['edits'] if 'group low-precedence native call head' in e['role']]
+                  assert groups and '|>.2.find?)(' in converted
+                  roles.append({'module':module,'grouped_low_precedence_heads':groups})
+          summary={'source':'4e19be6c82b1f19c61a85cb25fe5f6b875c0ce41','run':42674597434,'actual_files_rehashed':8,
+                   'modules':rows,'native_roles':roles,
+                   'full_graph_build':False,'grammar_migration_complete':False,'verified_execution':False}
+          Path('graph-fourteen-boundary-roles.json').write_text(json.dumps(summary,indent=2)+'\n')
+          print('PS0_GRAPH14_BOUNDARY_REHASH:'+json.dumps(summary,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-graph-fourteen-boundary-rehash-${{ github.run_id }}
+          path: |
+            graph-fourteen-boundary-rehash.json
+            graph-fourteen-boundary-rehash.log
+            graph-fourteen-boundary-roles.json
+            graph-fourteen-boundary-roles.log
+          if-no-files-found: error

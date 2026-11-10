@@ -1,0 +1,21 @@
+name: PS0 native census contract upgrade
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-native-census-contract.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-census-contract:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: f89b9857d09ee210f4a66dfebcee44d2b4a7e40c
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - name: Reject stale native captures and verify source identities
+        working-directory: experiments/ps0
+        run: python3 tests/test-native-census-cache.py

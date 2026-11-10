@@ -1,0 +1,80 @@
+name: PS0 graph sixteen fixed module artifact inspection
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-graph16-fixed-module-inspection.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  fixed-module-inspection:
+    if: ${{ false }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: 795c862f8bcf252819076c28456b6ee0438e1c7f
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42740049293
+          name: ps0-graph16-module-repro-owned-if-AbstractMVars-42740049293
+          github-token: ${{ github.token }}
+          path: retained
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42740049293
+          name: ps0-graph16-module-repro-owned-if-URIParser-42740049293
+          github-token: ${{ github.token }}
+          path: retained
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42740049293
+          name: ps0-graph16-module-repro-owned-if-DiscrTreeMain-42740049293
+          github-token: ${{ github.token }}
+          path: retained
+      - run: |
+          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py retained \
+            --source 795c862f8bcf252819076c28456b6ee0438e1c7f --output modules.json > rehash.log
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          report=json.loads(Path('modules.json').read_text())
+          expected={"Std.Http.Data.URI.Parser":"d51844ce35afe12c4c815dd41f617891f3a62980","Lean.Meta.AbstractMVars":"175738e203ab7cbd59798431b0fb0133dd41ca5a","Lean.Meta.DiscrTree.Main":"bdfbcdff9d7ae3dcc369b2d637a4dec8cfe1f14a"}
+          assert {row['module'] for row in report['modules']}==set(expected)
+          modules=[]
+          for row in report['modules']:
+              assert row['pinned_blob']==expected[row['module']]
+              modules.append({key:row[key] for key in ['module','pinned_blob','definitions','edits','hashes','source_sha256','converted_sha256','line_count_preserved']})
+          evidence=list(Path('retained').rglob('evidence.json'))
+          assert len(evidence)==3
+          for path in evidence:
+              item=json.loads(path.read_text())
+              assert item['source']==report['source']
+              assert item['lean_commit']=='eb6cafb7290e8bd5f2937522d8d804f58f02bafc'
+              assert item['operator_descriptor_scope']=='active-and-captured-kinds/2'
+              relative=Path(*item['module'].split('.')).with_suffix('.ps')
+              raw=(path.parent/'original/src'/relative).read_bytes()
+              assert hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()==expected[item['module']]
+          assert sum(2*len(row['hashes']) for row in modules)==12
+          summary={'source':report['source'],'producer_run':42740049293,'modules':modules,
+                   'actual_compiler_files_rehashed':12,'whole_graph_built':False,
+                   'grammar_migration_complete':False,'verified_execution':False}
+          Path('summary.json').write_text(json.dumps(summary,indent=2)+'\n')
+          print('PS0_GRAPH16_FIXED_MODULE_REHASH:'+json.dumps(summary,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-graph16-fixed-module-inspection-${{ github.run_id }}
+          path: |
+            modules.json
+            summary.json
+            rehash.log
+          if-no-files-found: error

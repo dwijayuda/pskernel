@@ -1,0 +1,676 @@
+name: PS0 complete matrix retained artifact inspection
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-complete-matrix-inspection.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  recursive-boundaries-rehash:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: 9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-fixtures-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-prelude-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-core-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-natbasic-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-finbasic-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-do-layout-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-natlinear-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-grindac-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-iteratorempty-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-spredlaws-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-unless-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-natlemmas-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-listattach-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-initwf-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-project-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-stream-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-intlinear-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-arrayperm-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-persistenthashmap-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-nanosecond-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-associative-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-signedbitvec-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-rangechar-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-tzif-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-extdtreemapbasic-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-options-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-jsonrpc-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-environment-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-parserbasic14-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-compilerm14-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-ambiguousopen14-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-setoption14-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-defeqattrib14-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-synthinstance14-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-bound-if-AbstractMVars-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-bound-if-URIParser-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42743438881
+          name: ps0-compiler-bound-if-DiscrTreeMain-9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c-42743438881
+          github-token: ${{ github.token }}
+          path: recursive-boundaries-artifact
+      - name: Rehash compiler outputs and check actual owned do roles
+        run: |
+          set -euo pipefail
+          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py recursive-boundaries-artifact --source 9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c --output recursive-boundaries-rehash.json | tee recursive-boundaries-rehash.log
+          python3 - <<'PY' | tee recursive-boundaries-roles.log
+          from pathlib import Path
+          from collections import Counter
+          import hashlib,json
+          root=Path('recursive-boundaries-artifact')
+          def decls(commands):
+              for command in commands:
+                  if command['declaration'] is not None:
+                      yield command['declaration']
+                  yield from decls(command.get('nestedCommands',[]))
+          families={'Lean.Parser.Command.'+n:'PS0.StandardAdapters.ps0Standard'+n.title() for n in ['abbrev','theorem','opaque','axiom','instance','example']}
+          checked=0
+          for path in root.rglob('original-census.json'):
+              original=json.loads(path.read_text()); module=original['module']
+              observed=json.loads((path.parent/'migrated/lib/lean'/Path(*module.split('.')).with_suffix('.ilean.ps0-source-census.json')).read_text())
+              expected=Counter((d['sourceName'],families[d['production']]) for d in decls(original['commands']) if d['production'] in families)
+              actual=Counter((d['sourceName'],d['production']) for d in decls(observed['commands']) if d['production'] in families.values())
+              assert actual==expected,(module,actual,expected)
+              assert all(d['mode']=='mapped-ps' for d in decls(observed['commands']))
+              if module=='Lean.Compiler.DoLayoutProbe':
+                  rows={d['sourceName']:d for d in decls(observed['commands'])}
+                  for name in ['layoutValue','nestedValue','localDefault','localShared','unitReturn']:
+                      assert rows[name]['valueRootKind']=='ps0HostDo'
+                      assert rows[name]['doSequenceKind']=='Lean.Parser.Term.doSeqIndent'
+                  print('PS0_NATIVE_DO_ROLES:'+json.dumps([{k:r.get(k) for k in ['sourceName','valueRootKind','doSequenceKind','doElementKinds']} for r in rows.values()],sort_keys=True))
+              checked+=1
+          assert checked==44,checked
+          for path in root.rglob('evidence.json'):
+              if not path.parent.name.startswith('compiler-heads-'):
+                  continue
+              evidence=json.loads(path.read_text())
+              assert evidence['operator_descriptor_scope']=='active-and-captured-kinds/2'
+              kind={'Init.Data.Nat.Internal.Linear':'Lean.Parser.Command.attribute',
+                    'Init.Grind.AC':'Lean.Parser.Command.attribute',
+                    'Std.Data.Iterators.Producers.Monadic.Empty':'Lean.Parser.Command.structure',
+                    'Init.Data.Range.Polymorphic.Internal.SignedBitVec':'Lean.Parser.commandSeal__'}.get(evidence['module'])
+              if kind:
+                  heads=evidence['contextual_boundary_heads']
+                  assert any(h['previousCommandHeadKind']==kind and h['targetKeyword']=='def' for h in heads)
+                  print('PS0_CONTEXTUAL_BOUNDARY:'+json.dumps({'module':evidence['module'],'heads':heads},sort_keys=True))
+              if evidence['module']=='Std.Do.SPred.Laws':
+                  assert len(evidence['scoped_binary_kinds'])==3
+                  native=json.loads((path.parent/'original-census.json').read_text())
+                  rows={d['sourceName']:d for d in decls(native['commands'])}
+                  kinds=[]
+                  for name in ['and_curry','or_curry','imp_curry']:
+                      result=rows[name]['signatureSyntax']['args'][1]['args'][1]
+                      assert result['nativeBinaryOperator']
+                      kinds.append(result['kind'])
+                  assert kinds==evidence['scoped_binary_kinds']
+                  print('PS0_SCOPED_BINARY_BOUNDARY:'+json.dumps({'module':evidence['module'],'kinds':kinds},sort_keys=True))
+          seen=set()
+          for path in root.rglob('evidence.json'):
+              folder=path.parent
+              if folder.name.startswith('ellipsis-'):
+                  value=json.loads(path.read_text()); assert value['source']=='9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c'
+                  data=Path('experiments/ps0/tests/v1/ellipsis_operands.ps').read_bytes()
+                  assert hashlib.sha256(data).hexdigest()==value['fixture_sha256']
+                  assert value['original_native_node_identity'] is True
+                  assert value['oracle'] in (folder/'runtime.log').read_text()
+                  assert 'PS0V1-CALL-ORDER' in (folder/'named-before-ellipsis.log').read_text()
+                  for name in ['nonterminal-ellipsis','repeated-ellipsis']:
+                      assert "unexpected '..'" in (folder/(name+'.log')).read_text()
+                  seen.add('ellipsis'); print('PS0_NATIVE_ELLIPSIS_EVIDENCE:'+json.dumps(value,sort_keys=True))
+              if folder.name.startswith('do-layout-'):
+                  value=json.loads(path.read_text()); assert value['source']=='9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c'
+                  data=Path('experiments/ps0/tests/v1/do_layout_operands.ps').read_bytes()
+                  assert hashlib.sha256(data).hexdigest()==value['fixture_sha256']
+                  assert value['oracle'] in (folder/'runtime.log').read_text()
+                  for name in ['return-gap','let-gap','statement-gap']:
+                      assert 'PS0V1-CALL-GAP' in (folder/(name+'.log')).read_text()
+                  assert 'PS0V1-CALL-ORDER' in (folder/'return-order.log').read_text()
+                  assert 'IO Unit' in (folder/'statement-type.log').read_text()
+                  seen.add('layout'); print('PS0_NATIVE_DO_EVIDENCE:'+json.dumps(value,sort_keys=True))
+          assert seen=={'layout','ellipsis'},seen
+          seen_new=set()
+          for path in root.rglob('evidence.json'):
+              value=json.loads(path.read_text()); folder=path.parent
+              if folder.name.startswith('unless-'):
+                  assert value['source']=='9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c'
+                  assert value['fixture_sha256']==hashlib.sha256(Path('experiments/ps0/tests/v1/unless_operands.ps').read_bytes()).hexdigest()
+                  assert value['original_condition_block_token_ranges'] is True
+                  assert value['original_pattern_optional_type_arrow_and_branch_ranges'] is True
+                  assert value['oracle'] in (folder/'runtime.log').read_text()
+                  for name in ['condition-gap','body-gap','term-condition-gap','term-body-gap','pattern-value-gap','pattern-fallback-gap','pattern-continuation-gap']:
+                      assert 'PS0V1-CALL-GAP' in (folder/(name+'.log')).read_text()
+                  assert 'PS0V1-CALL-ORDER' in (folder/'body-order.log').read_text()
+                  seen_new.add('unless')
+                  print('PS0_UNLESS_RETAINED:'+json.dumps(value,sort_keys=True))
+              if folder.name.startswith('lambdas-'):
+                  assert value['source']=='9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c'
+                  assert value['fixture_sha256']==hashlib.sha256(Path('experiments/ps0/tests/v1/lambda_operands.ps').read_bytes()).hexdigest()
+                  assert value['original_lambda_and_arrow_token_checks']==2
+                  assert value['oracle'] in (folder/'runtime.log').read_text()
+                  assert 'PS0V1-CALL-GAP' in (folder/'unicode-body-gap.log').read_text()
+                  assert 'PS0V1-CALL-ORDER' in (folder/'unicode-body-order.log').read_text()
+                  seen_new.add('lambda')
+                  print('PS0_UNICODE_LAMBDA_RETAINED:'+json.dumps(value,sort_keys=True))
+              if folder.name.startswith('command-operands-'):
+                  assert value['source']=='9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c'
+                  assert 'included' in value['mapped_source_names']
+                  assert 'PS0V1-CALL-GAP' in (folder/'include-gap.log').read_text()
+                  seen_new.add('include')
+                  print('PS0_INCLUDE_RETAINED:'+json.dumps(value,sort_keys=True))
+              if folder.name.startswith('compiler-heads-') and value.get('module') in ['Lean.Compiler.UnlessProbe','Lean.Compiler.InlineAttrs','Init.WF']:
+                  rows={r['sourceName']:r for r in value['mapped_source_roles']}
+                  if value['module']=='Lean.Compiler.UnlessProbe':
+                      assert rows['bodyValue']['doUnlessConditionKinds']==['ps0HostAdjacentCall']*2
+                      assert rows['patternValue']['doPatternBindingCount']==1
+                      assert rows['patternValue']['doUnlessConditionKinds']==['ps0HostAdjacentCall']
+                      assert rows['termValue']['valueRootKind']=='Lean.Parser.Term.termUnless'
+                  if value['module']=='Lean.Compiler.InlineAttrs':
+                      assert rows['isValidMacroInline']['doPatternBindingCount']==1
+                      assert 'PS0.Operators.ownedBinary' in rows['isValidMacroInline']['doUnlessConditionKinds']
+                  if value['module']=='Init.WF':
+                      observed=next(d for d in value['non_definition_source_roles'] if d['sourceName']=='induction')
+                      assert observed['mode']=='mapped-ps' and observed['production']=='PS0.StandardAdapters.ps0StandardTheorem'
+                  print('PS0_UNLESS_INCLUDE_SOURCE_ROLES:'+json.dumps({'module':value['module'],'rows':list(rows.values())},sort_keys=True))
+          assert seen_new=={'unless','lambda','include'},seen_new
+          recursive_seen=False
+          for path in root.rglob('evidence.json'):
+              value=json.loads(path.read_text()); folder=path.parent
+              if folder.name.startswith('local-recursion-'):
+                  assert value['source']=='9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c'
+                  assert value['fixture_sha256']==hashlib.sha256(Path('experiments/ps0/tests/v1/local_recursion_operands.ps').read_bytes()).hexdigest()
+                  assert value['original_let_rec_separator_and_root_ranges'] is True
+                  assert value['oracle'] in (folder/'runtime.log').read_text()
+                  assert len(value['mapped_recursive_roles'])==4
+                  assert all(row['recursiveGroupCount']==1 for row in value['mapped_recursive_roles'])
+                  for name in ['binder-gap','default-gap','body-gap','equation-gap']:
+                      assert 'PS0V1-CALL-GAP' in (folder/(name+'.log')).read_text()
+                  assert 'PS0V1-CALL-ORDER' in (folder/'body-order.log').read_text()
+                  diagnostic=(folder/'default-type.log').read_text()
+                  assert all(text in diagnostic for text in ['Application type mismatch','String','Nat'])
+                  recursive_seen=True
+                  print('PS0_LOCAL_REC_RETAINED:'+json.dumps(value,sort_keys=True))
+              if folder.name.startswith('lambdas-'):
+                  assert value['native_and_ps_invalid_multi_pun_rejection']=='not a field of structure'
+                  assert value['native_and_ps_coerced_invalid_multi_pun_rejection']=='not a field of structure'
+                  assert value['native_and_ps_argument_collection_typing_rejection']=='Singleton'
+                  assert value['direct_and_local_body_wrappers_and_original_root_range'] is True
+                  assert value['body_wrapper_opening_and_closing_source_ranges'] is True
+                  for name in ['native-argument-wrapper','argument-wrapper']:
+                      assert 'Singleton' in (folder/(name+'.log')).read_text()
+                  for name in ['native-invalid-punning','invalid-punning','native-coerced-invalid-punning','coerced-invalid-punning']:
+                      assert 'not a field of structure' in (folder/(name+'.log')).read_text()
+              if not folder.name.startswith('compiler-heads-'): continue
+              plan=json.loads((folder/'plan.json').read_text())
+              expected={'Lean.Data.Options':'lambda binder type',
+                        'Std.Data.ExtDTreeMap.Basic':'lambda result type'}.get(value['module'])
+              if expected:
+                  assert any(expected in edit['role'] for edit in plan['edits']),value['module']
+              if value['module']=='Init.Data.Stream':
+                  rows={row['sourceName']:row for row in value['mapped_source_roles']}
+                  assert rows['Stream.forIn']['recursiveGroupCount']==1
+                  assert rows['Stream.forIn']['recursiveSimpleValueKinds']==['ps0HostDo']
+              if value['module']=='Std.Time.Time.Unit.Nanosecond':
+                  assert sum(bool(row['nativeDefDeriving']) for row in value['mapped_source_roles'])==4
+              if value['module']=='Init.Data.Range.Polymorphic.Char':
+                  observed=json.loads((folder/'migrated/lib/lean/Init/Data/Range/Polymorphic/Char.ilean.ps0-source-census.json').read_text())
+                  assert any(d.get('whereFieldCount')==2 for d in decls(observed['commands']))
+          assert recursive_seen
+          indexed_seen=False
+          local_mixed_seen=False
+          where_local_seen=False
+          module_boundaries=set()
+          for path in root.rglob('evidence.json'):
+              value=json.loads(path.read_text()); folder=path.parent
+              if folder.name.startswith('index-operands-'):
+                  assert value['source']=='9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c'
+                  assert value['fixture_sha256']==hashlib.sha256(Path('experiments/ps0/tests/v1/index_operands.ps').read_bytes()).hexdigest()
+                  assert value['original_index_tokens_and_ranges']==13
+                  assert value['original_projection_tokens_and_ranges']==3
+                  assert value['original_transport_token_and_range'] is True
+                  assert value['native_transport_shape']=={'kind':'Lean.Parser.Term.subst','arity':3,'token':'▸'}
+                  assert value['native_builtin_role_annotation_parity'] is True
+                  assert value['native_projected_index_quotation_ownership'] is True
+                  assert value['projected_oracle']=='PS0_PROJECTED_INDEX:3:2:1'
+                  assert value['projected_oracle'] in (folder/'runtime.log').read_text()
+                  shapes={row['kind']:row['arity'] for row in value['native_syntax_shapes']}
+                  assert shapes=={'«term__[_]»':4,"«term__[_]'_»":5,'«term__[_]_?»':7,'«term__[_]_!»':7,
+                                  'Array.«term__[_:_]»':6,'Array.«term__[_:]»':5,'Array.«term__[:_]»':5},shapes
+                  assert value['oracle']=='PS0_INDEX:3:2:3:2:3:2:1:1'
+                  assert value['oracle'] in (folder/'runtime.log').read_text()
+                  assert 'PS0_INDEX_PARSE_ERROR' not in (folder/'parser-layout.log').read_text()
+                  assert 'Lean checking passed' in (folder/'check.log').read_text()
+                  for name in ['index-gap','proof-gap','slice-gap','projected-index-gap','projected-slice-gap','transport-gap']:
+                      assert 'PS0V1-CALL-GAP' in (folder/(name+'.log')).read_text()
+                  for name in ['index-order','slice-order','projected-index-order']:
+                      assert 'PS0V1-CALL-ORDER' in (folder/(name+'.log')).read_text()
+                  assert 'type mismatch' in (folder/'proof-type.log').read_text().lower()
+                  indexed_seen=True
+                  print('PS0_NATIVE_INDEX_RETAINED:'+json.dumps(value,sort_keys=True))
+              if folder.name.startswith('local-mixed-'):
+                  assert value['source']=='9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c'
+                  assert value['fixture_sha256']==hashlib.sha256(Path('experiments/ps0/tests/v1/local_mixed_binders.ps').read_bytes()).hexdigest()
+                  assert value['origin_cases']==6 and value['rejection_cases']==6
+                  assert value['native_layout_controls']==6
+                  assert value['native_quotation_control'] is True
+                  assert value['duplicate_partition_coalesced'] is True
+                  assert value['different_partition_rejected'] is True
+                  assert value['oracle']=='PS0_LOCAL_MIXED:7:7:7:8:7:5'
+                  assert value['recursive_equation_oracle']=='PS0_LOCAL_EQNS:7:7'
+                  assert value['recursive_equation_oracle'] in (folder/'runtime.log').read_text()
+                  assert value['oracle'] in (folder/'runtime.log').read_text()
+                  assert 'Lean checking passed' in (folder/'check.log').read_text()
+                  assert (folder/'native-layouts.log').read_text().count('PS0_NATIVE_LOCAL_LAYOUT ')==6
+                  for name in ['type-gap','default-gap']:
+                      assert 'PS0V1-CALL-GAP' in (folder/(name+'.log')).read_text()
+                  assert 'PS0V1-CALL-ORDER' in (folder/'default-order.log').read_text()
+                  assert 'type mismatch' in (folder/'default-type.log').read_text().lower()
+                  assert 'Invalid pattern' in (folder/'empty-local.log').read_text()
+                  assert 'unknown identifier' in (folder/'default-forward.log').read_text().lower()
+                  assert 'PS0_LOCAL_ARRAY_UPDATE_BOUNDARY: PASS' in (folder/'native-layouts.log').read_text()
+                  assert value['prelude_logical_imports']==['Init'] and value['prelude_mapped_definitions']==2
+                  for label in ['baseline','migrated']:
+                      mapping=json.loads((folder/(label+'-bootstrap-source-map.json')).read_text())
+                      source=(folder/(label+'-LocalMixedBootstrap.ps')).read_bytes()
+                      assert mapping['source'].encode()==source
+                      assert all(segment['kind']=='original' for segment in mapping['segments'])
+                  census=json.loads((folder/'migrated-bootstrap-source-census.json').read_text())
+                  bootstrap_decls=list(decls(census['commands']))
+                  assert len(bootstrap_decls)==2 and all(row['mode']=='mapped-ps' for row in bootstrap_decls)
+                  assert set(value['prelude_native_parity'])=={'ir/LocalMixedBootstrap.c','lib/lean/LocalMixedBootstrap.olean'}
+                  for relative, pair in value['prelude_native_parity'].items():
+                      assert pair['baseline']==pair['migrated']
+                      suffix=Path(relative).suffix
+                      for label in ['baseline','migrated']:
+                          target=folder/(label+'-LocalMixedBootstrap'+suffix)
+                          assert hashlib.sha256(target.read_bytes()).hexdigest()==pair[label]
+                  print('PS0_LOCAL_BOOTSTRAP_REHASH:'+json.dumps({'module':'LocalMixedBootstrap','actual_files_rehashed':4,'mapped_definitions':2}))
+                  local_mixed_seen=True
+                  print('PS0_LOCAL_MIXED_RETAINED:'+json.dumps(value,sort_keys=True))
+              if folder.name.startswith('where-local-'):
+                  assert value['source']=='9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c'
+                  assert value['fixture_sha256']==hashlib.sha256(Path('experiments/ps0/tests/v1/where_local_helpers.ps').read_bytes()).hexdigest()
+                  assert value['origin_cases']==8 and value['rejection_cases']==10
+                  assert value['native_layout_controls']==5 and value['source_host_parser_controls']==5
+                  assert value['native_tactic_identifier_behavior']=='both'
+                  assert value['native_quotation_control'] is True
+                  assert value['ordinary_named_sections_match_native_rejection'] is True
+                  assert value['oracle']=='PS0_WHERE_LOCAL:7:5:4:4:5'
+                  assert value['proof_oracle']=='PS0_WHERE_PROOF:5:7:5:6:7:7'
+                  assert value['contextual_oracle']=='PS0_WHERE_CONTEXTUAL:6:4'
+                  runtime=(folder/'runtime.log').read_text()
+                  assert all(value[key] in runtime for key in ['oracle','proof_oracle','contextual_oracle'])
+                  assert 'Lean checking passed' in (folder/'check.log').read_text()
+                  assert (folder/'native-layouts.log').read_text().count('PS0_NATIVE_WHERE_LOCAL_LAYOUT ')==5
+                  source_host=(folder/'source-host-layouts.log').read_text()
+                  assert source_host.count('PS0_SOURCE_WHERE_PARSE_OK ')==5
+                  assert 'PS0_SOURCE_WHERE_PARSE_ERROR' not in source_host and 'LeadingIdentBehavior.both' in source_host
+                  for name in ['type-gap','default-gap','body-gap']:
+                      assert 'PS0V1-CALL-GAP' in (folder/(name+'.log')).read_text()
+                  assert "unexpected token 'finally'" in (folder/'attached-helper-finally.log').read_text()
+                  assert 'unsolved goals' in (folder/'unsolved-hole.log').read_text()
+                  assert 'type mismatch' in (folder/'bad-proof.log').read_text().lower()
+                  for name in ['ordinary-named-sections','native-ordinary-named-sections']:
+                      assert 'does not currently support any named sub-sections' in (folder/(name+'.log')).read_text()
+                  for name in ['nested-helper-tail','anonymous-helper','empty-helper']:
+                      assert 'error' in (folder/(name+'.log')).read_text().lower()
+                  assert value['prelude_logical_imports']==['Init'] and value['prelude_mapped_definitions']==8
+                  assert 'error' in (folder/'native-rejects-migrated.log').read_text().lower()
+                  for label in ['baseline','migrated']:
+                      mapping=json.loads((folder/(label+'-bootstrap-source-map.json')).read_text())
+                      original=(folder/(label+'-WhereLocalBootstrap.ps')).read_bytes()
+                      assert mapping['source'].encode()==original
+                      assert all(segment['kind']=='original' for segment in mapping['segments'])
+                  census=json.loads((folder/'migrated-bootstrap-source-census.json').read_text())
+                  roles=list(decls(census['commands']))
+                  assert len(roles)==8 and all(role['mode']=='mapped-ps' for role in roles)
+                  assert roles==value['mapped_where_roles']
+                  by_name={role['sourceName']:role for role in roles}
+                  assert by_name['forwardHelper']['whereHelperNames']==['first','second']
+                  assert by_name['capturedHelper']['whereHelperDocCount']==1
+                  assert by_name['capturedHelper']['whereHelperAttributeCount']==1
+                  assert by_name['recordHelper']['whereHelperValueKinds']==['PS0.StandardAdapters.psWhereLocalRecord']
+                  assert by_name['equationHelper']['whereHelperValueKinds']==['PS0.StandardAdapters.psWhereLocalEquations']
+                  assert by_name['namedProof']['whereFinallyKind']=='PS0.StandardAdapters.psWhereFinallyNative'
+                  assert by_name['namedProof']['whereFinallySectionNames']==[]
+                  assert set(value['prelude_native_parity'])=={'ir/WhereLocalBootstrap.c','lib/lean/WhereLocalBootstrap.olean'}
+                  for relative,pair in value['prelude_native_parity'].items():
+                      assert pair['baseline']==pair['migrated']
+                      for label in ['baseline','migrated']:
+                          path=folder/(label+'-WhereLocalBootstrap'+Path(relative).suffix)
+                          assert hashlib.sha256(path.read_bytes()).hexdigest()==pair[label]
+                  where_local_seen=True
+                  print('PS0_WHERE_LOCAL_BOOTSTRAP_REHASH:'+json.dumps({'module':'WhereLocalBootstrap','actual_files_rehashed':4,'mapped_definitions':8}))
+                  print('PS0_WHERE_LOCAL_RETAINED:'+json.dumps(value,sort_keys=True))
+              if not folder.name.startswith('compiler-heads-'): continue
+              if value['module']=='Lean.Data.JsonRpc':
+                  plan=json.loads((folder/'plan.json').read_text())
+                  strategy=next(s for s in plan['strategies'] if s['sourceName']=='readMessage')
+                  assert strategy['previousCommandHeadKind']=='Lean.Parser.Command.section'
+                  assert strategy['targetKeyword']=='def'
+                  module_boundaries.add(value['module'])
+              if value['module']=='Lean.Environment':
+                  observed=json.loads((folder/'migrated/lib/lean/Lean/Environment.ilean.ps0-source-census.json').read_text())
+                  row=next(d for d in decls(observed['commands']) if d['sourceName']=='getModuleIdxFor?')
+                  indices=row['ownedIndexedAccess']
+                  assert len(indices)==1 and indices[0]['kind']=='«term__[_]_?»'
+                  assert indices[0]['subjectKind']=='PS0.Operators.ownedPostfix'
+                  assert indices[0]['syntax']['args'][0]['args'][0]['kind']=='Lean.Parser.Term.pipeProj'
+                  assert indices[0]['indexKind'] in ['ps0NativeTermBridge','ps0HostHeadTerm']
+                  module_boundaries.add(value['module'])
+                  print('PS0_NATIVE_INDEX_SOURCE_ROLE:'+json.dumps(row,sort_keys=True))
+          assert indexed_seen and local_mixed_seen and where_local_seen
+          assert module_boundaries=={'Lean.Data.JsonRpc','Lean.Environment'},module_boundaries
+          PY
+          python3 - <<'PY' | tee native-lexer-pipeline-rehash.log
+          from pathlib import Path
+          import copy,json,subprocess,sys
+          sys.path.insert(0,'experiments/ps0/tests')
+          from native_census_cache import needs_head_lexical_refresh
+          report=json.loads(Path('recursive-boundaries-rehash.json').read_text())
+          rows={r['module']:r for r in report['modules']}
+          assert len(rows)==44 and sum(2*len(r['hashes']) for r in rows.values())==176
+          assert rows['Lean.Parser.Basic']['definitions']==222
+          assert rows['Lean.Compiler.LCNF.CompilerM']['definitions']==67
+          def declarations(commands):
+              for command in commands:
+                  if command['declaration'] is not None: yield command['declaration']
+                  yield from declarations(command.get('nestedCommands',[]))
+          roles=[]
+          for path in Path('recursive-boundaries-artifact').rglob('evidence.json'):
+              if not path.parent.name.startswith('compiler-heads-'): continue
+              evidence=json.loads(path.read_text()); module=evidence['module']
+              if module not in ['Lean.Parser.Basic','Lean.Compiler.LCNF.CompilerM']: continue
+              folder=path.parent; relative=Path(*module.split('.')).with_suffix('.ps')
+              plan=json.loads((folder/'plan.json').read_text())
+              converted=(folder/'converted/src'/relative).read_bytes()
+              if module=='Lean.Parser.Basic':
+                  native=json.loads((folder/'original-census.json').read_text())
+                  assert native['adjacentHeadLexicalScope']=='native-environment/1'
+                  assert needs_head_lexical_refresh(native) is False
+                  names={d['sourceName']:d for d in declarations(native['commands'])}
+                  for name in ['sepBy','sepBy1']:
+                      assert names[name]['adjacentCallSpelling']=='«'+name+'»'
+                      assert ('function «'+name+'»(').encode() in converted
+                  legacy=copy.deepcopy(native); legacy.pop('adjacentHeadLexicalScope')
+                  for declaration in declarations(legacy['commands']):
+                      declaration.pop('adjacentCallSpelling',None)
+                      declaration.pop('nameIdentifierRange',None)
+                  assert needs_head_lexical_refresh(legacy) is True
+                  legacy_path=Path('legacy-parser-basic-census.json')
+                  legacy_path.write_text(json.dumps(legacy))
+                  result=subprocess.run([sys.executable,'experiments/ps0/tests/migrate-compiler-heads.py',
+                      str(legacy_path),str(folder/'original/src'/relative),'rejected-legacy.ps',
+                      '--plan','rejected-legacy-plan.json'],capture_output=True,text=True)
+                  assert result.returncode!=0 and 'native adjacent declaration lexer observation required' in result.stderr
+                  result=subprocess.run([sys.executable,'experiments/ps0/tests/migrate-compiler-heads.py',
+                      str(folder/'original-census.json'),str(folder/'original/src'/relative),'replayed-parser-basic.ps',
+                      '--plan','replayed-parser-basic-plan.json'],capture_output=True,text=True)
+                  assert result.returncode==0,result.stderr
+                  assert Path('replayed-parser-basic.ps').read_bytes()==converted
+                  roles.append({'module':module,'native_lexer_escaped_names':['sepBy','sepBy1'],
+                                'legacy_native_capture_refresh_required':True,
+                                'legacy_planner_counterfactual_rejected':True,'current_capture_replay_identical':True,
+                                'native_identifier_edits':[e for e in plan['edits'] if 'native lexer requires' in e['role']]})
+              else:
+                  groups=[e for e in plan['edits'] if 'group low-precedence native call head' in e['role']]
+                  assert groups and b'|>.2.find?)(' in converted
+                  roles.append({'module':module,'grouped_low_precedence_heads':groups})
+          assert len(roles)==2
+          returns=[p for p in Path('recursive-boundaries-artifact').rglob('evidence.json') if p.parent.name.startswith('return-boundary-')]
+          assert len(returns)==1
+          retained=json.loads(returns[0].read_text())
+          assert retained['source']=='9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c'
+          import hashlib
+          fixture=Path('experiments/ps0/tests/v1/native_return_boundary.ps')
+          assert hashlib.sha256(fixture.read_bytes()).hexdigest()==retained['fixture_sha256']
+          assert retained['empty_return_does_not_consume_next_line'] is True
+          assert retained['oracle']=='PS0_RETURN_BOUNDARY:0'
+          assert (returns[0].parent/'runtime.log').read_text().splitlines()==['PS0_RETURN_BOUNDARY:0']
+          assert 'PS0 v1:' in (returns[0].parent/'check.log').read_text()
+          print('PS0_NATIVE_RETURN_RETAINED:'+json.dumps(retained,sort_keys=True))
+          summary={'source':'9bb5f1a9de58b5ddee92ccefa06ee980d04aff2c','run':42743438881,
+                   'compiler_matrix_modules':44,'compiler_matrix_actual_files_rehashed':176,
+                   'additional_local_prelude_files_rehashed':4,'additional_where_prelude_files_rehashed':4,
+                   'total_modules':46,'total_actual_files_rehashed':184,'native_roles':roles,
+                   'full_graph_build':False,'grammar_migration_complete':False,'verified_execution':False}
+          Path('native-lexer-pipeline-rehash.json').write_text(json.dumps(summary,indent=2)+'\n')
+          print('PS0_NATIVE_LEXER_PIPELINE_REHASH:'+json.dumps(summary,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-recursive-boundaries-rehash-${{ github.run_id }}
+          path: |
+            native-lexer-pipeline-rehash.json
+            native-lexer-pipeline-rehash.log
+            recursive-boundaries-rehash.json
+            recursive-boundaries-rehash.log
+            recursive-boundaries-roles.log
+          if-no-files-found: error

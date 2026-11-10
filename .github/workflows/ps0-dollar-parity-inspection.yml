@@ -1,0 +1,175 @@
+name: PS0 dollar parity artifact inspection
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-dollar-parity-inspection.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  ordinary-host-inspection:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: f88a0f71c63634888d390ac8e6b92243ddad5287
+          sparse-checkout: experiments/ps0/tests/v1/ordinary_host_origins.ps
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42706720256
+          name: ps0-host-operand-parity-f88a0f71c63634888d390ac8e6b92243ddad5287-42706720256
+          github-token: ${{ github.token }}
+          path: retained
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42706720256
+          name: ps0-compiler-synthinstance14-f88a0f71c63634888d390ac8e6b92243ddad5287-42706720256
+          github-token: ${{ github.token }}
+          path: synth-retained
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42711185732
+          name: ps0-compiler-parsertypes-64b45401734efee291085fd6b4199c7c5b8d1c98-42711185732
+          github-token: ${{ github.token }}
+          path: types-retained
+      - name: Rehash actual compiler outputs ELF source maps and plans
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          root=Path('retained')
+          matches=list(root.glob('match-host-*/evidence.json'))
+          assert len(matches)==1,matches
+          work=matches[0].parent
+          e=json.loads(matches[0].read_text())
+          assert e['source']=='f88a0f71c63634888d390ac8e6b92243ddad5287'
+          assert e['mapped_definitions']==33 and e['mapped_theorems']==30
+          assert e['source_origin_cases']==11
+          assert e['logical_imports']==['Init']
+          assert e['native_patterns_preserved'] and e['prepared_source_identity']
+          assert e['independently_owned_native_dsl'] and e['native_quotation']
+          hashes={}
+          for ext,relative in [('c','ir/MatchHostBootstrap.c'),('olean','lib/lean/MatchHostBootstrap.olean')]:
+              for label in ['baseline','migrated','planned']:
+                  file=work/(label+'-MatchHostBootstrap.'+ext)
+                  digest=hashlib.sha256(file.read_bytes()).hexdigest()
+                  assert digest==e['comparisons'][relative][label]
+                  hashes[str(file.relative_to(root))]=digest
+              assert len(set(e['comparisons'][relative].values()))==1
+          for label in ['baseline','migrated','planned']:
+              source=(work/(label+'-MatchHostBootstrap.ps')).read_bytes()
+              mapping=json.loads((work/(label+'-source-map.json')).read_text())
+              assert mapping['source'].encode()==source
+              assert all(segment['kind']=='original' for segment in mapping['segments'])
+              census=json.loads((work/(label+'-source-census.json')).read_text())
+              assert census['nativeSource'].encode()==source and census['imports']==['Init']
+              if label!='baseline':
+                  rows=[row['declaration'] for row in census['commands'] if row['declaration']]
+                  assert len(rows)==63 and all(row['mode']=='mapped-ps' for row in rows)
+          raw=(work/'baseline-MatchHostBootstrap.ps').read_bytes()
+          plan=json.loads((work/'planned-edits.json').read_text())
+          assert hashlib.sha256(raw).hexdigest()==plan['source_sha256']
+          chunks=[];cursor=0
+          for edit in plan['edits']:
+              assert cursor<=edit['start']<=edit['end']<=len(raw)
+              assert raw[edit['start']:edit['end']].decode()==edit['old']
+              assert edit['old'].count('\n')==edit['new'].count('\n')
+              chunks.extend([raw[cursor:edit['start']],edit['new'].encode()]);cursor=edit['end']
+          chunks.append(raw[cursor:])
+          planned=b''.join(chunks)
+          assert planned==(work/'planned-MatchHostBootstrap.ps').read_bytes()
+          assert hashlib.sha256(planned).hexdigest()==plan['result_sha256']
+          assert b'\xcf\x80 / \xf0\x9f\x98\x80' in raw and b'\xcf\x80 / \xf0\x9f\x98\x80' in planned
+          controls=(work/'native-dependent-if.log').read_text()
+          assert 'PS0_NATIVE_DEPENDENT_IF_CONTROL:h:Lean.binderIdent' in controls
+          assert 'PS0_NATIVE_DEPENDENT_IF_CONTROL:_:Lean.binderIdent' in controls
+          elf=work/'OrdinaryHostOrigins'
+          assert elf.read_bytes().startswith(b'\x7fELF')
+          digest=hashlib.sha256(elf.read_bytes()).hexdigest()
+          assert digest==e['native_executable_sha256']
+          hashes[str(elf.relative_to(root))]=digest
+          assert (work/'runtime-origins.log').read_text().strip()==e['runtime_oracle']=='PS0_HOST_ORIGINS: PASS'
+          fixture=Path('experiments/ps0/tests/v1/ordinary_host_origins.ps')
+          assert hashlib.sha256(fixture.read_bytes()).hexdigest()==e['source_origin_fixture_sha256']
+          gap_files=list(root.glob('host-island-gaps-*/evidence.json'))
+          assert len(gap_files)==1
+          gaps=json.loads(gap_files[0].read_text())
+          assert gaps['source']==e['source']
+          assert {row['case'] for row in gaps['observations']}=={'match','pattern-lambda','record-field','do-if','do-match','do-have','do-for','do-try','proof-if','typed-term','tactic-body'}
+          for row in gaps['observations']:
+              assert row['native_baseline_passed'] and row['ps_exit_code']!=0 and row['invalid_host_gap_rejected']
+              assert 'PS0V1-CALL-GAP' in (gap_files[0].parent/(row['case']+'-ps.log')).read_text()
+          out=Path('inspection');out.mkdir()
+          report=dict(status='PASS',producer_source=e['source'],producer_run=42706720256,producer_runner='805caf3c15305e7e43f8a332d6fb56cf86b3ddd4',
+              actual_compiler_files_rehashed=6,actual_native_elf_files_rehashed=1,hashes=hashes,comparisons=e['comparisons'],
+              mapped_definitions=33,mapped_theorems=30,source_origin_cases=11,invalid_host_gaps_rejected=11,
+              evidence=e,scope='finite ordinary match, pattern lambda, record, condition, do-match, named-have, for collection/body and try/catch/finally roles; loop annotations and other ordinary roles and broader matrix qualification remain open',
+              grammar_migration_complete=False,verified_execution=False)
+          synthroot=Path('synth-retained')
+          synthfiles=list(synthroot.glob('compiler-heads-*-SynthInstance14/evidence.json'))
+          assert len(synthfiles)==1,synthfiles
+          sw=synthfiles[0].parent
+          se=json.loads(synthfiles[0].read_text())
+          assert se['source']==e['source'] and se['module']=='Lean.Meta.SynthInstance'
+          assert se['compiler_pipeline']=='native-lake-eager'
+          synthhashes={}
+          for relative,comparison in se['comparisons'].items():
+              assert relative.endswith(('.c','.olean')),relative
+              assert comparison['native']==comparison['ps'],comparison
+              for label,directory in [('native','baseline'),('ps','migrated')]:
+                  file=sw/directory/relative
+                  actual=hashlib.sha256(file.read_bytes()).hexdigest()
+                  assert actual==comparison[label],(relative,label,actual)
+                  synthhashes[str(file.relative_to(synthroot))]=actual
+          assert len(synthhashes)==4,synthhashes
+          report['synthinstance']={'status':'PASS_FINITE_NATIVE_C_PUBLIC_OLEAN_PARITY','actual_compiler_files_rehashed':4,'hashes':synthhashes,'evidence':se}
+          typesroot=Path('types-retained')
+          tf=list(typesroot.glob('compiler-heads-*-ParserTypes/evidence.json'))
+          assert len(tf)==1,tf
+          tw=tf[0].parent
+          te=json.loads(tf[0].read_text())
+          assert te['source']=='64b45401734efee291085fd6b4199c7c5b8d1c98'
+          assert te['module']=='Lean.Parser.Types' and te['compiler_pipeline']=='native-lake-eager'
+          raw=(tw/'original/src/Lean/Parser/Types.ps').read_bytes()
+          gitblob=hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()
+          assert gitblob==te['pinned_blob']=='83c6647aba46768322afe237e359a3f271e1cf10'
+          plan=json.loads((tw/'plan.json').read_text())
+          assert hashlib.sha256(raw).hexdigest()==plan['source_sha256']
+          chunks=[];cursor=0
+          for edit in plan['edits']:
+              assert cursor<=edit['start']<=edit['end']<=len(raw)
+              assert raw[edit['start']:edit['end']].decode()==edit['old']
+              chunks.extend([raw[cursor:edit['start']],edit['new'].encode()])
+              cursor=edit['end']
+          chunks.append(raw[cursor:])
+          converted=b''.join(chunks)
+          assert converted==(tw/'converted/src/Lean/Parser/Types.ps').read_bytes()
+          assert hashlib.sha256(converted).hexdigest()==plan['result_sha256']
+          typeshashes={}
+          for relative,comparison in te['comparisons'].items():
+              assert relative.endswith(('.c','.olean'))
+              assert comparison['native']==comparison['ps'],comparison
+              for label,directory in [('native','baseline'),('ps','migrated')]:
+                  file=tw/directory/relative
+                  actual=hashlib.sha256(file.read_bytes()).hexdigest()
+                  assert actual==comparison[label]
+                  typeshashes[str(file.relative_to(typesroot))]=actual
+          assert len(typeshashes)==4,typeshashes
+          report['parserTypes']={'status':'PASS_FINITE_NATIVE_C_PUBLIC_OLEAN_PARITY','actual_compiler_files_rehashed':4,'hashes':typeshashes,'source_edit_reconstruction':True,'evidence':te}
+          (out/'inspection.json').write_text(json.dumps(report,indent=2)+'\n')
+          print('PS0_ORDINARY_HOST_INSPECTION:'+json.dumps(report,sort_keys=True))
+          
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-dollar-parity-inspection-${{ github.run_id }}
+          path: inspection/
+          if-no-files-found: error

@@ -24,7 +24,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"679ca5f879b228eb46f382e45f17e2e5154af628"}
+          pin={"repository":"dwijayuda/lean4","commit":"5febe0f507ad4345787157b7bac4a89753a3f4f3"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -108,6 +108,7 @@ jobs:
         run: |
           python3 tests/run-data-mixed-binders.py
           lake env lean tests/DataDeclarationOrigins.lean
+          lake env lean tests/DataMixedOrigins.lean
           python3 tests/run-data-declarations.py
       - uses: actions/upload-artifact@v4
         if: always()

@@ -1,0 +1,46 @@
+name: PS0 suffices native syntax inspection
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-suffices-syntax-inspection.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  suffices-native-syntax:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42730075500
+          name: ps0-suffices-boundaries-69b59de262563d8b45385774462f52e828182544-42730075500
+          github-token: ${{ github.token }}
+          path: retained
+      - run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          def shape(node, depth=3):
+              result={key:node.get(key) for key in ['kind','atom','ident','range']}
+              result['arity']=len(node.get('args',[]))
+              if depth: result['args']=[shape(child,depth-1) for child in node.get('args',[])]
+              return result
+          def visit(node):
+              if not isinstance(node,dict): return
+              if 'suffices' in node.get('kind',''):
+                  print('PS0_NATIVE_SUFFICES_SHAPE:'+json.dumps(shape(node),sort_keys=True))
+                  return
+              for child in node.get('args',[]): visit(child)
+          files=list(Path('retained').rglob('*-native-census.json'))
+          assert len(files)==3
+          for path in files:
+              data=json.loads(path.read_text())
+              assert data['imports']==['Init']
+              for command in data['commands']:
+                  declaration=command.get('declaration')
+                  if declaration and declaration['sourceName']=='bad':
+                      print('PS0_NATIVE_SUFFICES_CASE:'+path.name)
+                      visit(declaration['valueSyntax'])
+          PY

@@ -24,7 +24,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"526498bcadb50714b722ba37c79fa00bb17398ea"}
+          pin={"repository":"dwijayuda/lean4","commit":"152801eebcd8f8424f986d04fe183158af4f2ef5"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -105,7 +105,9 @@ jobs:
           lake build PS0 ps0 2>&1 | tee build/compiler-fixture-logs/build.log
           lake exe ps0 environment | tee build/compiler-fixture-logs/environment.json
       - name: Test native-controlled ordinary and builtin initialization operands
-        run: python3 tests/run-host-island-gaps.py --cases initialize-value,builtin-initialize-value
+        run: |
+          python3 tests/test-native-census-cache.py
+          python3 tests/run-host-island-gaps.py --cases initialize-value,builtin-initialize-value
       - uses: actions/upload-artifact@v4
         if: always()
         with:

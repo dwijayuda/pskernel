@@ -24,18 +24,18 @@ jobs:
               request=urllib.request.Request('https://api.github.com/repos/dwijayuda/pskernel/'+path,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json'})
               return json.load(urllib.request.urlopen(request,timeout=60))
           for attempt in range(80):
-              runs=fetch('actions/runs?head_sha=8594c6be6f43bd48f11fce5994e5c9787e90a360&per_page=100')['workflow_runs']
+              runs=fetch('actions/runs?head_sha=ac11813c43a505b018d3643cbbc912a0deb99f6a&per_page=100')['workflow_runs']
               candidates=[r for r in runs if r['path']=='.github/workflows/ps0-native-lake-checkpoint.yml']
               if candidates:
                   assert len(candidates)==1
                   run=candidates[0]
-                  assert run['head_sha']=='8594c6be6f43bd48f11fce5994e5c9787e90a360'
+                  assert run['head_sha']=='ac11813c43a505b018d3643cbbc912a0deb99f6a'
                   if run['status']=='completed':
                       assert run['conclusion']=='success',run
                       jobs=fetch('actions/runs/'+str(run['id'])+'/jobs?per_page=100')['jobs']
                       assert {j['name'] for j in jobs}=={'checkpoint-producer','checkpoint-consumer'}
                       assert all(j['status']=='completed' and j['conclusion']=='success' for j in jobs)
-                      print('PS0_NATIVE_LAKE_CHECKPOINT_QUALIFICATION: PASS; run='+str(run['id'])+'; source=b75a583592dc8bbe9046fd6e93784d8ef0365580; runner=8594c6be6f43bd48f11fce5994e5c9787e90a360')
+                      print('PS0_NATIVE_LAKE_CHECKPOINT_QUALIFICATION: PASS; run='+str(run['id'])+'; source=b75a583592dc8bbe9046fd6e93784d8ef0365580; runner=ac11813c43a505b018d3643cbbc912a0deb99f6a')
                       break
                   print('Waiting on exact checkpoint qualification run '+str(run['id']),flush=True)
               time.sleep(15)

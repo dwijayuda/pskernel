@@ -1,0 +1,56 @@
+name: PS0 mapped native bridge root inventory
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-mapped-bridge-inventory.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  mapped-bridge-inventory:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: ac75f82a9b916e870cd4cbf590b5f79410427553
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42719483426
+          name: ps0-transformed-corpus-f94118fb3d1463304c32b5a28189d7ea6572ecce-42719483426
+          github-token: ${{ github.token }}
+          path: graph-sixteen
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42752130115
+          name: ps0-data-parser-types-4471a585933c6260449fab38642641bc6f2e8b25-42752130115
+          github-token: ${{ github.token }}
+          path: current-parser-types
+      - name: Inventory category bridge roots without entering native descendants
+        run: |
+          mkdir -p inspection
+          test "$(git rev-parse HEAD)" = ac75f82a9b916e870cd4cbf590b5f79410427553
+          python3 experiments/ps0/tests/audit-mapped-native-bridges.py graph-sixteen inspection/graph-sixteen.json --capture-source f94118fb3d1463304c32b5a28189d7ea6572ecce --auditor-source ac75f82a9b916e870cd4cbf590b5f79410427553 > inspection/graph-sixteen.log
+          python3 experiments/ps0/tests/audit-mapped-native-bridges.py current-parser-types inspection/parser-types.json --capture-source 4471a585933c6260449fab38642641bc6f2e8b25 --auditor-source ac75f82a9b916e870cd4cbf590b5f79410427553 > inspection/parser-types.log
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          for file in sorted(Path('inspection').glob('*.json')):
+              data=json.loads(file.read_text())
+              rows=sorted(data['observations'],key=lambda row:row['occurrences'],reverse=True)
+              print('PS0_MAPPED_BRIDGE_INVENTORY:'+json.dumps(dict(dataset=file.stem,capture_source=data['capture_source'],
+                  auditor_source=data['auditor_source'],retained_captures=data['retained_captures'],
+                  mapped_command_owners=data['mapped_command_owners'],observations=rows,
+                  grammar_migration_complete=False,verified_execution=False),sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-mapped-bridge-inventory-${{ github.run_id }}
+          path: inspection/
+          if-no-files-found: error

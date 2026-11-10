@@ -26,7 +26,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"d2a5ed7c2bd864ad8e296dfa7a5875b239ea74ed"}
+          pin={"repository":"dwijayuda/lean4","commit":"298395dde05464d06dca208fec5d0b74012297e4"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -149,6 +149,7 @@ jobs:
       - name: Check native and PS source boundaries
         run: |
           set -euo pipefail
+          lake env lean tests/Graph17TermShapes.lean 2>&1 | tee build/transformed-corpus-logs/graph17-shapes.log
           lake env lean tests/Graph19TermShapes.lean 2>&1 | tee build/transformed-corpus-logs/graph19-shapes.log
       - uses: actions/upload-artifact@v4
         if: always()
@@ -201,7 +202,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"d2a5ed7c2bd864ad8e296dfa7a5875b239ea74ed"}
+          pin={"repository":"dwijayuda/lean4","commit":"298395dde05464d06dca208fec5d0b74012297e4"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:

@@ -1,0 +1,102 @@
+name: PS0 complete data preparation artifact inspection
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-data-preparation-inspection.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  data-preparation-inspection:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: 92b22875cf81199f10413661b633e50df4671fb6
+          sparse-checkout: experiments/ps0/tests
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42753352309
+          name: ps0-data-preparation-4471a585933c6260449fab38642641bc6f2e8b25-42753352309
+          github-token: ${{ github.token }}
+          path: retained
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42553687595
+          name: ps0-corpus-source-plan-bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f-42553687595
+          github-token: ${{ github.token }}
+          path: original-plans
+      - name: Reconstruct every prepared PS source and verify native capture freshness
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json,sys
+          sys.path.insert(0,'experiments/ps0/tests')
+          from native_census_cache import needs_data_refresh,needs_initializer_refresh,needs_head_lexical_refresh,OPERATOR_SCOPE
+          root=Path('retained'); summaries=list(root.rglob('source-plan-summary.json'))
+          assert len(summaries)==1,summaries
+          base=summaries[0].parent; summary=json.loads(summaries[0].read_text())
+          inventory=json.loads((base/'input-inventory.json').read_text())
+          preparation=json.loads((base/'preparation-only.json').read_text())
+          expected='4471a585933c6260449fab38642641bc6f2e8b25'
+          assert summary['planner_source']==inventory['source_commit']==preparation['source_commit']==expected
+          assert summary['module_count']==inventory['module_count']==preparation['module_count']==2569
+          assert preparation['compiled_graph'] is False and preparation['source_grammar'] is True
+          assert inventory['lean_commit']=='eb6cafb7290e8bd5f2937522d8d804f58f02bafc'
+          originals=list(Path('original-plans').rglob('evidence.json'))
+          originals=[p for p in originals if p.parent.name.startswith('corpus-source-plan-')]
+          assert len(originals)==1; original_root=originals[0].parent
+          assert json.loads(originals[0].read_text())['source']=='bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f'
+          hashes={}; definitions=data_declarations=initializers=0; refreshed=fallback=0
+          for module,item in sorted(inventory['inputs'].items()):
+              relative=Path(*module.split('.')).with_suffix('.ps')
+              target=base/'transformed-source'/relative; result=target.read_bytes()
+              assert hashlib.sha256(result).hexdigest()==item['ps_sha256']
+              folder=base/'self-source-plans'/module
+              if not folder.is_dir(): folder=base/'current-source-plans'/module
+              plan=json.loads((folder/'plan.json').read_text())
+              census=folder/'native-census.json'
+              if census.is_file(): refreshed+=1
+              else:
+                  census=original_root/'modules'/module/'native-census.json'; fallback+=1
+              captured=json.loads(census.read_text())
+              assert captured['module']==module and captured['leanCommit']==inventory['lean_commit']
+              assert captured['operatorDescriptorScope']==OPERATOR_SCOPE
+              assert not needs_data_refresh(captured) and not needs_initializer_refresh(captured) and not needs_head_lexical_refresh(captured)
+              raw=captured['nativeSource'].encode()
+              assert hashlib.sha256(raw).hexdigest()==plan['source_sha256']
+              chunks=[];cursor=0
+              for edit in plan['edits']:
+                  assert cursor<=edit['start']<=edit['end']<=len(raw)
+                  assert raw[edit['start']:edit['end']].decode()==edit['old']
+                  assert edit['old'].count('\n')==edit['new'].count('\n')
+                  chunks.extend([raw[cursor:edit['start']],edit['new'].encode()]);cursor=edit['end']
+              chunks.append(raw[cursor:]); assert b''.join(chunks)==result
+              assert hashlib.sha256(result).hexdigest()==plan['result_sha256']
+              assert raw.count(b'\n')==result.count(b'\n') and plan['line_count_preserved']
+              definitions+=len(plan['declarations'])
+              data_declarations+=plan['data_declarations']; initializers+=plan['initialization_commands']
+              hashes[module]=dict(ps_sha256=hashlib.sha256(result).hexdigest(),native_capture_sha256=hashlib.sha256(census.read_bytes()).hexdigest())
+          assert not list((base/'transformed-source').rglob('*.lean'))
+          assert len(list((base/'transformed-source').rglob('*.ps')))==2569
+          out=Path('inspection');out.mkdir()
+          report=dict(status='PASS',producer_source=expected,producer_run=42753352309,producer_job=129621894476,
+              actual_ps_sources_rehashed=2569,plans_reconstructed=2569,definitions=definitions,data_declarations=data_declarations,initialization_commands=initializers,
+              retained_captures_used=refreshed,original_native_captures_used=fallback,hashes=hashes,
+              scope='All prepared sources and source edits; SDK/blob checks belong to the producer, target graph compilation is not claimed',
+              compiled_graph=False,grammar_migration_complete=False,verified_execution=False)
+          (out/'inspection.json').write_text(json.dumps(report,indent=2)+'\n')
+          brief={k:v for k,v in report.items() if k!='hashes'}
+          print('PS0_DATA_PREPARATION_INSPECTION:'+json.dumps(brief,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-data-preparation-inspection-${{ github.run_id }}
+          path: inspection/
+          if-no-files-found: error

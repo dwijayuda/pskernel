@@ -1,0 +1,83 @@
+name: PS0 compiler timeout partial source audit
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-timeout-partial-audit.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42824602117
+          name: ps0-selfhost-stage-one-298395dde05464d06dca208fec5d0b74012297e4-42824602117
+          github-token: ${{ github.token }}
+          path: capture
+      - name: Check exact prepared sources and raw module captures without promoting the failed graph
+        run: |
+          mkdir -p evidence
+          python3 - <<'PY' | tee evidence/audit.log
+          from pathlib import Path
+          from collections import Counter
+          import hashlib,json
+          files=list(Path('capture').rglob('failed-build.json'))
+          assert len(files)==1
+          root=files[0].parent
+          failed=json.loads(files[0].read_text())
+          source='298395dde05464d06dca208fec5d0b74012297e4'
+          assert failed['source_commit']==source and failed['source_grammar'] is True
+          assert failed['status']=='FAILED' and failed['module_count']==2569
+          inventory=json.loads((root/'input-inventory.json').read_text())
+          assert inventory['source_commit']==source and inventory['module_count']==2569
+          sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+          for module,item in inventory['inputs'].items():
+              path=root/'transformed-source'/Path(*module.split('.')).with_suffix('.ps')
+              assert item['body_mode']=='planned-ps-grammar' and sha(path)==item['ps_sha256'],module
+          equal_sources=[m for m,item in inventory['inputs'].items() if item['original_sha256']==item['ps_sha256']]
+          native_only_modes=[m for m,item in inventory['inputs'].items() if item['body_mode']=='byte-identical']
+          productions={'function':'PS0.StandardAdapters.ps0StandardFunction','const':'PS0.StandardAdapters.ps0StandardConst','def':'PS0.StandardAdapters.ps0StandardDef'}
+          def commands(items):
+              for item in items:
+                  yield item
+                  yield from commands(item.get('nestedCommands',[]))
+          rows=[];totals=Counter()
+          for module in failed['completed_census_modules']:
+              rel=Path(*module.split('.'))
+              path=root/'partial-source-census'/rel.with_suffix('.json')
+              d=json.loads(path.read_text())
+              assert d['module']==module and d['leanCommit']=='eb6cafb7290e8bd5f2937522d8d804f58f02bafc'
+              assert d['mappedOperandSyntaxScope']=='raw-command-before-native-lowering/1'
+              ps=root/'transformed-source'/rel.with_suffix('.ps')
+              assert d['nativeSource']==ps.read_bytes().decode().replace('\r\n','\n'),module
+              plans=[root/name/module/'plan.json' for name in ['current-source-plans','self-source-plans']]
+              existing=[p for p in plans if p.is_file()]
+              assert len(existing)==1,module
+              plan=json.loads(existing[0].read_text())
+              flat=list(commands(d['commands']))
+              decls=[c['declaration'] for c in flat if c.get('declaration')]
+              assert all(x['mode']=='mapped-ps' for x in decls),module
+              defs=[x for x in decls if x['production'] in productions.values()]
+              assert [(x['sourceName'],x['production']) for x in defs]==[(x['sourceName'],productions[x['targetKeyword']]) for x in plan['strategies']],module
+              counts=dict(definitions=len(defs))
+              for key,counter in [('dataDeclaration','data_declarations'),('initialization','initialization_commands')]:
+                  captures=[c[key] for c in flat if c.get(key)]
+                  assert len(captures)==plan.get(counter,0),module
+                  assert all(c['mode']=='mapped-ps' for c in captures),module
+                  counts[counter]=len(captures)
+              totals.update(counts)
+              rows.append(dict(module=module,census_sha256=sha(path),ps_sha256=sha(ps),counts=counts))
+          assert rows and len(rows)==len({r['module'] for r in rows})
+          report=dict(schema='ps0-data-graph-partial-source-audit/1',source=source,producer_run=42824602117,prepared_ps_files_rehashed=2569,actual_byte_equal_to_original_sources=len(equal_sources),native_only_body_mode_count=len(native_only_modes),captured_frontend_modules=len(rows),totals=dict(totals),modules=rows,status='PASS',scope='actual raw frontend capture/source/plan fidelity only; producer graph FAILED; no claim that uncaptured dependents, all C targets, native linking or fixed point passed',grammar_migration_complete=False,verified_execution=False)
+          Path('evidence/audit.json').write_text(json.dumps(report,indent=2)+'\n')
+          print('DATA_PARTIAL_AUDIT:'+json.dumps({k:v for k,v in report.items() if k!='modules'},sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-timeout-partial-source-audit-${{ github.run_id }}
+          path: evidence/
+          if-no-files-found: error

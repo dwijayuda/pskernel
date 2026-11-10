@@ -12,7 +12,7 @@ concurrency:
 jobs:
   stage-one:
     runs-on: ubuntu-22.04
-    timeout-minutes: 240
+    timeout-minutes: 360
     defaults:
       run:
         working-directory: experiments/ps0
@@ -26,7 +26,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"25a5bc2ad119c509f622ba97f90ca0d7e85bae73"}
+          pin={"repository":"dwijayuda/lean4","commit":"903805a7c29e2da9b79ec88f263660ce130b0146"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -126,6 +126,7 @@ jobs:
           python3 -m py_compile tests/native_compiler_prefix.py tests/run-compiler-ps.py
           python3 tests/test-native-compiler-prefix.py
           python3 tests/test-native-census-cache.py
+          lake env lean tests/Graph17TermShapes.lean
       - name: Build and retain actual all-PS compiler prefix
         run: |
           set -euo pipefail
@@ -142,7 +143,7 @@ jobs:
   stage-two:
     needs: stage-one
     runs-on: ubuntu-22.04
-    timeout-minutes: 240
+    timeout-minutes: 360
     defaults:
       run:
         working-directory: experiments/ps0
@@ -156,7 +157,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"25a5bc2ad119c509f622ba97f90ca0d7e85bae73"}
+          pin={"repository":"dwijayuda/lean4","commit":"903805a7c29e2da9b79ec88f263660ce130b0146"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -243,12 +244,12 @@ jobs:
           path: source-plans
       - uses: actions/download-artifact@v4
         with:
-          name: ps0-selfhost-stage-one-25a5bc2ad119c509f622ba97f90ca0d7e85bae73-${{ github.run_id }}
+          name: ps0-selfhost-stage-one-903805a7c29e2da9b79ec88f263660ce130b0146-${{ github.run_id }}
           path: previous-stage
       - name: Verify actual retained PS-built prefix and rebuild complete graph
         run: |
           set -euo pipefail
-          python3 tests/run-compiler-ps.py --stage-artifact "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --stage-source 25a5bc2ad119c509f622ba97f90ca0d7e85bae73 --source-plans "$GITHUB_WORKSPACE/source-plans" --plan-source bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f --native-censuses "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --census-source 25a5bc2ad119c509f622ba97f90ca0d7e85bae73
+          python3 tests/run-compiler-ps.py --stage-artifact "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --stage-source 903805a7c29e2da9b79ec88f263660ce130b0146 --source-plans "$GITHUB_WORKSPACE/source-plans" --plan-source bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f --native-censuses "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --census-source 903805a7c29e2da9b79ec88f263660ce130b0146
           python3 tests/run-compiler-census.py
       - uses: actions/upload-artifact@v4
         if: always()

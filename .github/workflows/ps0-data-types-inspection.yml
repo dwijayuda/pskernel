@@ -14,19 +14,19 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: dwijayuda/lean4
-          ref: 4471a585933c6260449fab38642641bc6f2e8b25
+          ref: ea0c698084f8c70ea84409c3a9eb2d8e226ca214
           sparse-checkout: experiments/ps0/tests
           persist-credentials: false
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42752130115
-          name: ps0-data-parser-types-4471a585933c6260449fab38642641bc6f2e8b25-42752130115
+          run-id: 42756812357
+          name: ps0-data-parser-types-ea0c698084f8c70ea84409c3a9eb2d8e226ca214-42756812357
           github-token: ${{ github.token }}
           path: retained
       - name: Independently verify actual outputs and all data declaration captures
         run: |
-          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py retained --source 4471a585933c6260449fab38642641bc6f2e8b25 --output modules.json > rehash.log
+          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py retained --source ea0c698084f8c70ea84409c3a9eb2d8e226ca214 --output modules.json > rehash.log
           python3 - <<'PY'
           from pathlib import Path
           import json
@@ -53,11 +53,22 @@ jobs:
           assert [row['syntax']['args'][1]['kind'] for row in a]==[row['syntax']['args'][1]['kind'] for row in b]
           plan=json.loads((root/'plan.json').read_text())
           assert plan['data_declarations']==len(a)
-          report.update(status='PASS',producer_run=42752130115,producer_job=129617957451,
+          report.update(status='PASS',producer_run=42756812357,producer_job=129632975933,
               actual_compiler_files_rehashed=4,data_declarations=len(a),scope='Actual pinned parser type module, 70 function heads and native data operands; no complete corpus claim')
           report['modules'][0]={key:module[key] for key in ['module','pinned_blob','definitions','strategies','hashes','source_sha256','converted_sha256','line_count_preserved']}
           Path('inspection.json').write_text(json.dumps(report,indent=2)+'\n')
           print('PS0_DATA_TYPES_INSPECTION:'+json.dumps(report,sort_keys=True))
+          PY
+      - name: Inventory full mapped command operands
+        run: |
+          python3 experiments/ps0/tests/audit-mapped-native-bridges.py retained bridge-inventory.json --capture-source ea0c698084f8c70ea84409c3a9eb2d8e226ca214 --auditor-source ea0c698084f8c70ea84409c3a9eb2d8e226ca214 > bridge-inventory.log
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          data=json.loads(Path('bridge-inventory.json').read_text())
+          assert data['retained_captures']==1
+          assert data['mapped_commands_without_complete_operand_capture']==0
+          print('PS0_CURRENT_TYPES_BRIDGES:'+json.dumps({key:value for key,value in data.items() if key!='captures'},sort_keys=True))
           PY
       - uses: actions/upload-artifact@v4
         if: always()
@@ -67,4 +78,6 @@ jobs:
             inspection.json
             modules.json
             rehash.log
+            bridge-inventory.json
+            bridge-inventory.log
           if-no-files-found: error

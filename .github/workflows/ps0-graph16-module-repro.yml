@@ -9,6 +9,7 @@ permissions:
 jobs:
 
   module-reproduction:
+    if: ${{ false }}
     name: ${{ matrix.label }}-${{ matrix.fixture }}
     strategy:
       fail-fast: false

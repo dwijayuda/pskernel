@@ -15,6 +15,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - fixture: ParserExtension18
+            module: Lean.Parser.Extension
+            blob: c981ad03186e2eda5fcc0f1ee3fc844af5f794cd
+            roots: Lean.Parser
           - fixture: FuzzyMatching17
             module: Lean.Data.FuzzyMatching
             blob: 3227c14d58d907195bccb2f10c7adb80fb99a634
@@ -46,7 +50,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"811e4b8f5587838cb57fbca942172d9b6ef49ed8"}
+          pin={"repository":"dwijayuda/lean4","commit":"cc92a4e1d344ab1e76d1c7e68dfbda00b7a85575"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:

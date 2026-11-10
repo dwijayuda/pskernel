@@ -111,15 +111,16 @@ jobs:
           set -euo pipefail
           python3 -m py_compile tests/run-compiler-ps.py
           python3 tests/test-compiler-build-checkpoint.py
-          mkdir -p build/checkpoint-probe/src
-          printf '%s\n' 'module' 'prelude' 'public import Init' 'public section' 'def main : IO Unit := do' '  IO.println("PS0_CHECKPOINT_NATIVE_LAKE")' > build/checkpoint-probe/src/Checkpoint.ps
+          mkdir -p build/checkpoint-probe/src/Checkpoint
+          printf '%s\n' 'module' 'prelude' 'public import Init' 'public section' 'const checkpointMessage : String := "PS0_CHECKPOINT_NATIVE_LAKE"' > build/checkpoint-probe/src/Checkpoint/Library.ps
+          printf '%s\n' 'module' 'prelude' 'public import Init' 'import Checkpoint.Library' 'public section' 'def main : IO Unit := do' '  IO.println(checkpointMessage)' > build/checkpoint-probe/src/Checkpoint/Main.ps
           python3 - <<'PY'
           from pathlib import Path
           import shutil,subprocess
           sdk=Path(subprocess.check_output(['lean','--print-prefix'],text=True).strip())
           shutil.copytree(sdk/'include',Path('build/checkpoint-probe/artifacts/include'))
           PY
-          lake -R -f lakefile.project.lean -KsourceRoot="$PWD/build/checkpoint-probe/src" -Kroots=Checkpoint -KrootModule=Checkpoint -KmoduleNames=Checkpoint -KsourceGrammar=true -Kbootstrap=true -Kdriver="$PWD/.lake/build/bin/ps0" -KprojectBuildDir="$PWD/build/checkpoint-probe/artifacts" build +Checkpoint:c.o | tee build/transformed-corpus-logs/checkpoint-producer.log
+          lake -R -f lakefile.project.lean -KsourceRoot="$PWD/build/checkpoint-probe/src" -Kroots=Checkpoint -KrootModule=Checkpoint.Main -KmoduleNames=Checkpoint.Library,Checkpoint.Main -KsourceGrammar=true -Kbootstrap=true -Kdriver="$PWD/.lake/build/bin/ps0" -KprojectBuildDir="$PWD/build/checkpoint-probe/artifacts" build +Checkpoint.Library:c.o | tee build/transformed-corpus-logs/checkpoint-producer.log
           python3 - <<'PY'
           from pathlib import Path
           import os, sys
@@ -246,13 +247,13 @@ jobs:
           root=Path.cwd()
           driver=root/'.lake/build/bin/ps0'
           data=verify(root,root/'build/compiler-checkpoint.json',source=os.environ['PS0_SOURCE_SHA'],phase='base',run_id=os.environ['GITHUB_RUN_ID'],driver=driver)
-          paths=[root/'build/checkpoint-probe/artifacts'/p for p in ['ir/Checkpoint.c','ir/Checkpoint.c.o.export','lib/lean/Checkpoint.olean']]
+          paths=[root/'build/checkpoint-probe/artifacts'/p for p in ['ir/Checkpoint/Library.c','ir/Checkpoint/Library.c.o.export','lib/lean/Checkpoint/Library.olean']]
           before={str(p):sha(p) for p in paths}
           before_times={str(p):p.stat().st_mtime_ns for p in paths}
-          command=['lake','-R','-f','lakefile.project.lean','-KsourceRoot='+str(root/'build/checkpoint-probe/src'),'-Kroots=Checkpoint','-KrootModule=Checkpoint','-KmoduleNames=Checkpoint','-KsourceGrammar=true','-Kbootstrap=true','-Kdriver='+str(driver),'-KprojectBuildDir='+str(root/'build/checkpoint-probe/artifacts')]
-          result=subprocess.run(command+['build','+Checkpoint:c.o'],capture_output=True,text=True,check=True)
+          command=['lake','-R','-f','lakefile.project.lean','-KsourceRoot='+str(root/'build/checkpoint-probe/src'),'-Kroots=Checkpoint','-KrootModule=Checkpoint.Main','-KmoduleNames=Checkpoint.Library,Checkpoint.Main','-KsourceGrammar=true','-Kbootstrap=true','-Kdriver='+str(driver),'-KprojectBuildDir='+str(root/'build/checkpoint-probe/artifacts')]
+          result=subprocess.run(command+['build','+Checkpoint.Library:c.o'],capture_output=True,text=True,check=True)
           print(result.stdout,result.stderr)
-          assert 'Built Checkpoint' not in result.stdout+result.stderr,'native Lake recompiled retained Checkpoint'
+          assert 'Built Checkpoint.Library' not in result.stdout+result.stderr,'native Lake recompiled retained Checkpoint'
           subprocess.run(command+['build','PS0Project:static','ps0project'],check=True)
           assert before=={str(p):sha(p) for p in paths}
           assert before_times=={str(p):p.stat().st_mtime_ns for p in paths},'native Lake rewrote a retained C/object/olean during final graph linking'

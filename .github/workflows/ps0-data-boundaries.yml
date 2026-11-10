@@ -24,7 +24,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"1a25088f19bc42cbeab08b329cb23363656dbaec"}
+          pin={"repository":"dwijayuda/lean4","commit":"1d0bcdae5f97086355d861b7429e119df5e2e70f"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -105,12 +105,15 @@ jobs:
           lake build PS0 ps0 2>&1 | tee build/compiler-fixture-logs/build.log
           lake exe ps0 environment | tee build/compiler-fixture-logs/environment.json
       - name: Test native-controlled data declaration binder and field operands
-        run: python3 tests/run-host-island-gaps.py --cases structure-field-type,structure-field-default,class-field-default,inductive-constructor-type,inductive-parameter-type,structure-parameter-type
+        run: |
+          python3 tests/test-native-census-cache.py
+          python3 tests/run-host-island-gaps.py --cases structure-field-type,structure-field-default,class-field-default,inductive-constructor-type,inductive-parameter-type,structure-parameter-type
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: ps0-data-boundaries-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
           path: |
+            experiments/ps0/build/compiler-fixture-logs/
             experiments/ps0/build/host-island-gaps-*/*.json
             experiments/ps0/build/host-island-gaps-*/*.log
             experiments/ps0/build/host-island-gaps-*/**/*.ps

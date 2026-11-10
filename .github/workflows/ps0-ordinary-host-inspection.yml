@@ -14,15 +14,15 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: dwijayuda/lean4
-          ref: 4667e4c5a1c6de61fd7532d6d4cbd8952e02b555
+          ref: cbba1e79c8ba7ed5453ed75e5bfc8ba214e8c75b
           sparse-checkout: experiments/ps0/tests/v1/ordinary_host_origins.ps
           sparse-checkout-cone-mode: false
           persist-credentials: false
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42731612463
-          name: ps0-host-operand-parity-4667e4c5a1c6de61fd7532d6d4cbd8952e02b555-42731612463
+          run-id: 42732341309
+          name: ps0-host-operand-parity-cbba1e79c8ba7ed5453ed75e5bfc8ba214e8c75b-42732341309
           github-token: ${{ github.token }}
           path: retained
       - name: Rehash actual compiler outputs ELF source maps and plans
@@ -35,7 +35,7 @@ jobs:
           assert len(matches)==1,matches
           work=matches[0].parent
           e=json.loads(matches[0].read_text())
-          assert e['source']=='4667e4c5a1c6de61fd7532d6d4cbd8952e02b555'
+          assert e['source']=='cbba1e79c8ba7ed5453ed75e5bfc8ba214e8c75b'
           assert e['mapped_definitions']==48 and e['mapped_theorems']==43
           assert e['source_origin_cases']==37
           assert e['logical_imports']==['Init']
@@ -176,7 +176,7 @@ jobs:
               return contract
           suffices=inspect_suffices()
           out=Path('inspection');out.mkdir()
-          report=dict(status='PASS',producer_source=e['source'],producer_run=42731612463,producer_runner='c281e5594202d0977d97fcb51ac35f5cca6afd34',
+          report=dict(status='PASS',producer_source=e['source'],producer_run=42732341309,producer_runner='3192aee60f078483faecbe09236d876bf36602ca',
               actual_compiler_files_rehashed=18,actual_native_elf_files_rehashed=3,hashes=hashes,comparisons=e['comparisons'],
               mapped_definitions=48,mapped_theorems=43,source_origin_cases=37,invalid_host_gaps_rejected=34,loop_contract_definitions=6,loop_contract_evidence=contract,suffices_definitions=7,suffices_theorems=5,suffices_evidence=suffices,total_mapped_definitions=61,total_private_proof_guards=48,
               evidence=e,scope='finite thirty-four ordinary boundaries including loop annotations and suffices type/from/by-prime/continuation; native gadget metadata erasure is not proof of annotations; whole compiler qualification remains open',

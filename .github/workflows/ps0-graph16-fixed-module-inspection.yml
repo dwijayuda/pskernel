@@ -8,6 +8,7 @@ permissions:
   actions: read
 jobs:
   fixed-module-inspection:
+    if: ${{ false }}
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     steps:

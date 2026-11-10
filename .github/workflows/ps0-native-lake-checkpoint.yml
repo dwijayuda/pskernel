@@ -248,12 +248,14 @@ jobs:
           data=verify(root,root/'build/compiler-checkpoint.json',source=os.environ['PS0_SOURCE_SHA'],phase='base',run_id=os.environ['GITHUB_RUN_ID'],driver=driver)
           paths=[root/'build/checkpoint-probe/artifacts'/p for p in ['ir/Checkpoint.c','ir/Checkpoint.c.o.export','lib/lean/Checkpoint.olean']]
           before={str(p):sha(p) for p in paths}
+          before_times={str(p):p.stat().st_mtime_ns for p in paths}
           command=['lake','-R','-f','lakefile.project.lean','-KsourceRoot='+str(root/'build/checkpoint-probe/src'),'-Kroots=Checkpoint','-KrootModule=Checkpoint','-KmoduleNames=Checkpoint','-KsourceGrammar=true','-Kbootstrap=true','-Kdriver='+str(driver),'-KprojectBuildDir='+str(root/'build/checkpoint-probe/artifacts')]
           result=subprocess.run(command+['build','+Checkpoint:c.o'],capture_output=True,text=True,check=True)
           print(result.stdout,result.stderr)
           assert 'Built Checkpoint' not in result.stdout+result.stderr,'native Lake recompiled retained Checkpoint'
           subprocess.run(command+['build','PS0Project:static','ps0project'],check=True)
           assert before=={str(p):sha(p) for p in paths}
+          assert before_times=={str(p):p.stat().st_mtime_ns for p in paths},'native Lake rewrote a retained C/object/olean during final graph linking'
           result=subprocess.check_output([str(root/'build/checkpoint-probe/artifacts/bin/ps0project')],text=True)
           assert result.strip()=='PS0_CHECKPOINT_NATIVE_LAKE',result
           print('PS0_NATIVE_LAKE_CHECKPOINT_CONSUMER: PASS; actual source/C/object/olean verified; native Lake reused module then linked and executed')

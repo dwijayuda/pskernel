@@ -9,7 +9,6 @@ permissions:
 jobs:
 
   host-operand-parity:
-    if: ${{ false }}
     runs-on: ubuntu-22.04
     timeout-minutes: 15
     defaults:
@@ -25,7 +24,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"9c9a416ce7cfc5ac21c9d50f01ca27523800dad2"}
+          pin={"repository":"dwijayuda/lean4","commit":"658acba36911b357875220ead7470bd375281fd7"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -112,6 +111,8 @@ jobs:
           name: ps0-compiler-listattach-5a5cfe9e35d012c11e735123f941d07a7fdcf85e-42630740875
           github-token: ${{ github.token }}
           path: retained-listattach
+      - name: Assert owned PS calls beneath bound native do-if
+        run: lake env lean tests/debug-bound-if-layout.lean
       - name: Qualify ordinary host values origins and native linking
         run: python3 tests/run-match-host-bodies.py
       - name: Qualify native loop gadget annotation parity and linking
@@ -120,8 +121,8 @@ jobs:
           python3 tests/run-suffices.py
       - name: Compare original source diagnostic coordinates
         run: python3 tests/run-diagnostic-origins.py
-      - name: Reject thirty-four known ordinary host gaps
-        run: python3 tests/run-host-island-gaps.py --cases suffices-body,suffices-type,suffices-continuation,match,pattern-lambda,record-field,do-if,do-match,do-have,do-for,do-try,proof-if,typed-term,tactic-body,pattern-if,tuple-element,list-element,array-element,interpolation,forall-domain,forall-body,pattern-let,anonymous-constructor,show-body,show-type,pure-have,while-body,while-condition,repeat-body,repeat-condition,loop-for-invariant,loop-invariant-type,loop-while-invariant,loop-while-measure
+      - name: Reject thirty-six known ordinary host gaps
+        run: python3 tests/run-host-island-gaps.py --cases bound-if-then,bound-if-else,suffices-body,suffices-type,suffices-continuation,match,pattern-lambda,record-field,do-if,do-match,do-have,do-for,do-try,proof-if,typed-term,tactic-body,pattern-if,tuple-element,list-element,array-element,interpolation,forall-domain,forall-body,pattern-let,anonymous-constructor,show-body,show-type,pure-have,while-body,while-condition,repeat-body,repeat-condition,loop-for-invariant,loop-invariant-type,loop-while-invariant,loop-while-measure
       - name: Bound native and PS nested parenthesis parsing
         run: |
           python3 - <<'PY'

@@ -1,0 +1,259 @@
+name: PS0 native Lake checkpoint contracts
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-native-lake-checkpoint.yml, ci/ps0-checkpoint-source.json]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: ps0-native-lake-checkpoint-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  checkpoint-producer:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: experiments/ps0
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          persist-credentials: false
+      - name: Read exact source pin
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          pin={"repository":"dwijayuda/lean4","commit":"e07e063a159417ba73a22bfa7650c567aa5db2a9"}
+          assert pin['repository']=='dwijayuda/lean4'
+          assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('PS0_SOURCE_SHA='+pin['commit']+'\n')
+          PY
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: ${{ env.PS0_SOURCE_SHA }}
+          sparse-checkout: experiments/ps0
+          persist-credentials: false
+      - uses: actions/cache/restore@v4
+        id: ps0-elan-input
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/restore@v4
+        id: ps0-lean-input
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Install checksum-verified pinned Linux Lean inputs
+        run: |
+          set -euo pipefail
+          ps0_fetch_input() {
+            local ps0_url="$1" ps0_api="$2" ps0_target="$3" ps0_digest="$4"
+            if test ! -f "$ps0_target"; then
+              if ! curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                --retry 5 --retry-max-time 300 --retry-all-errors "$ps0_url" -o "$ps0_target"; then
+                curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                  --retry 5 --retry-max-time 300 --retry-all-errors \
+                  -H 'Accept: application/octet-stream' -H 'X-GitHub-Api-Version: 2022-11-28' \
+                  "$ps0_api" -o "$ps0_target"
+              fi
+            fi
+            printf '%s  %s\n' "$ps0_digest" "$ps0_target" | sha256sum -c -
+          }
+          test "$(cat lean-toolchain)" = leanprover/lean4:v4.35.0
+          ps0_fetch_input \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            https://api.github.com/repos/leanprover/elan/releases/assets/529114798 \
+            "$RUNNER_TEMP/ps0-elan.tar.gz" \
+            42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+          ps0_fetch_input \
+            https://github.com/leanprover/lean4/releases/download/v4.35.0/lean-4.35.0-linux.tar.zst \
+            https://api.github.com/repos/leanprover/lean4/releases/assets/634574462 \
+            "$RUNNER_TEMP/ps0-lean.tar.zst" \
+            7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+          mkdir -p "$RUNNER_TEMP/ps0-elan-installer" "$RUNNER_TEMP/ps0-lean-verified"
+          tar -xzf "$RUNNER_TEMP/ps0-elan.tar.gz" -C "$RUNNER_TEMP/ps0-elan-installer"
+          "$RUNNER_TEMP/ps0-elan-installer/elan-init" -y --default-toolchain none --no-modify-path
+          tar --zstd -xf "$RUNNER_TEMP/ps0-lean.tar.zst" --strip-components=1 -C "$RUNNER_TEMP/ps0-lean-verified"
+          "$HOME/.elan/bin/elan" toolchain link ps0-pinned-lean-4.35.0 "$RUNNER_TEMP/ps0-lean-verified"
+          export ELAN_TOOLCHAIN=ps0-pinned-lean-4.35.0
+          echo "ELAN_TOOLCHAIN=$ELAN_TOOLCHAIN" >> "$GITHUB_ENV"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          test "$("$HOME/.elan/bin/lean" --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          "$HOME/.elan/bin/lean" --version
+          "$HOME/.elan/bin/lake" --version
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-elan-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-lean-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Record exact source and build clean PS0
+        run: |
+          set -euo pipefail
+          mkdir -p build/transformed-corpus-logs
+          test "$(git rev-parse HEAD)" = "$PS0_SOURCE_SHA"
+          printf '%s\n' "$PS0_SOURCE_SHA" > build/transformed-corpus-logs/source-sha.txt
+          printf '%s\n' "$GITHUB_SHA" > build/transformed-corpus-logs/runner-sha.txt
+          test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
+          lake build PS0 ps0 2>&1 | tee build/transformed-corpus-logs/build.log
+          lake exe ps0 environment | tee build/transformed-corpus-logs/environment.json
+      - name: Linux checkpoint contracts and real native Lake producer
+        run: |
+          set -euo pipefail
+          python3 tests/test-compiler-build-checkpoint.py
+          mkdir -p build/checkpoint-probe/src
+          printf '%s\n' 'def main : IO Unit := do' '  IO.println("PS0_CHECKPOINT_NATIVE_LAKE")' > build/checkpoint-probe/src/Checkpoint.ps
+          lake -R -f lakefile.project.lean -KsourceRoot="$PWD/build/checkpoint-probe/src" -Kroots=Checkpoint -KrootModule=Checkpoint -KmoduleNames=Checkpoint -KsourceGrammar=true -Kbootstrap=true -Kdriver="$PWD/.lake/build/bin/ps0" -KprojectBuildDir="$PWD/build/checkpoint-probe/artifacts" build +Checkpoint:c.o | tee build/transformed-corpus-logs/checkpoint-producer.log
+          python3 - <<'PY'
+          from pathlib import Path
+          import os, sys
+          sys.path.insert(0, 'tests')
+          from compiler_build_checkpoint import LEAN, seal, sha, pack
+          root=Path.cwd()
+          driver=root/'.lake/build/bin/ps0'
+          state=dict(source_commit=os.environ['PS0_SOURCE_SHA'],lean_commit=LEAN,run_id=os.environ['GITHUB_RUN_ID'],phase='base',driver=str(driver),driver_sha256=sha(driver),work='build/checkpoint-probe',source_grammar=True)
+          manifest=root/'build/compiler-checkpoint.json'
+          seal(root,manifest,state,['.lake','build/checkpoint-probe'])
+          pack(root,manifest,root/'build/checkpoint-native-lake.tar.gz')
+          print('PS0_NATIVE_LAKE_CHECKPOINT_PRODUCER: PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-native-lake-checkpoint-e07e063a159417ba73a22bfa7650c567aa5db2a9-${{ github.run_id }}
+          path: |
+            experiments/ps0/build/checkpoint-native-lake.tar.gz
+            experiments/ps0/build/transformed-corpus-logs/
+          if-no-files-found: error
+  checkpoint-consumer:
+    needs: checkpoint-producer
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: experiments/ps0
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          persist-credentials: false
+      - name: Read exact source pin
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          pin={"repository":"dwijayuda/lean4","commit":"e07e063a159417ba73a22bfa7650c567aa5db2a9"}
+          assert pin['repository']=='dwijayuda/lean4'
+          assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('PS0_SOURCE_SHA='+pin['commit']+'\n')
+          PY
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: ${{ env.PS0_SOURCE_SHA }}
+          sparse-checkout: experiments/ps0
+          persist-credentials: false
+      - uses: actions/cache/restore@v4
+        id: ps0-elan-input
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/restore@v4
+        id: ps0-lean-input
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Install checksum-verified pinned Linux Lean inputs
+        run: |
+          set -euo pipefail
+          ps0_fetch_input() {
+            local ps0_url="$1" ps0_api="$2" ps0_target="$3" ps0_digest="$4"
+            if test ! -f "$ps0_target"; then
+              if ! curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                --retry 5 --retry-max-time 300 --retry-all-errors "$ps0_url" -o "$ps0_target"; then
+                curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                  --retry 5 --retry-max-time 300 --retry-all-errors \
+                  -H 'Accept: application/octet-stream' -H 'X-GitHub-Api-Version: 2022-11-28' \
+                  "$ps0_api" -o "$ps0_target"
+              fi
+            fi
+            printf '%s  %s\n' "$ps0_digest" "$ps0_target" | sha256sum -c -
+          }
+          test "$(cat lean-toolchain)" = leanprover/lean4:v4.35.0
+          ps0_fetch_input \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            https://api.github.com/repos/leanprover/elan/releases/assets/529114798 \
+            "$RUNNER_TEMP/ps0-elan.tar.gz" \
+            42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+          ps0_fetch_input \
+            https://github.com/leanprover/lean4/releases/download/v4.35.0/lean-4.35.0-linux.tar.zst \
+            https://api.github.com/repos/leanprover/lean4/releases/assets/634574462 \
+            "$RUNNER_TEMP/ps0-lean.tar.zst" \
+            7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+          mkdir -p "$RUNNER_TEMP/ps0-elan-installer" "$RUNNER_TEMP/ps0-lean-verified"
+          tar -xzf "$RUNNER_TEMP/ps0-elan.tar.gz" -C "$RUNNER_TEMP/ps0-elan-installer"
+          "$RUNNER_TEMP/ps0-elan-installer/elan-init" -y --default-toolchain none --no-modify-path
+          tar --zstd -xf "$RUNNER_TEMP/ps0-lean.tar.zst" --strip-components=1 -C "$RUNNER_TEMP/ps0-lean-verified"
+          "$HOME/.elan/bin/elan" toolchain link ps0-pinned-lean-4.35.0 "$RUNNER_TEMP/ps0-lean-verified"
+          export ELAN_TOOLCHAIN=ps0-pinned-lean-4.35.0
+          echo "ELAN_TOOLCHAIN=$ELAN_TOOLCHAIN" >> "$GITHUB_ENV"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          test "$("$HOME/.elan/bin/lean" --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          "$HOME/.elan/bin/lean" --version
+          "$HOME/.elan/bin/lake" --version
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-elan-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-lean-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-native-lake-checkpoint-e07e063a159417ba73a22bfa7650c567aa5db2a9-${{ github.run_id }}
+          path: checkpoint-download
+      - name: Verify transported outputs and finish using native Lake
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PS0_SOURCE_SHA"
+          python3 tests/compiler_build_checkpoint.py unpack "$GITHUB_WORKSPACE/checkpoint-download/checkpoint-native-lake.tar.gz" "$PWD"
+          mkdir -p build/checkpoint-consumer-logs
+          python3 - <<'PY' | tee build/checkpoint-consumer-logs/result.log
+          from pathlib import Path
+          import os, subprocess, sys
+          sys.path.insert(0,'tests')
+          from compiler_build_checkpoint import verify, sha
+          root=Path.cwd()
+          driver=root/'.lake/build/bin/ps0'
+          data=verify(root,root/'build/compiler-checkpoint.json',source=os.environ['PS0_SOURCE_SHA'],phase='base',run_id=os.environ['GITHUB_RUN_ID'],driver=driver)
+          paths=[root/'build/checkpoint-probe/artifacts'/p for p in ['ir/Checkpoint.c','ir/Checkpoint.c.o','lib/lean/Checkpoint.olean']]
+          before={str(p):sha(p) for p in paths}
+          command=['lake','-R','-f','lakefile.project.lean','-KsourceRoot='+str(root/'build/checkpoint-probe/src'),'-Kroots=Checkpoint','-KrootModule=Checkpoint','-KmoduleNames=Checkpoint','-KsourceGrammar=true','-Kbootstrap=true','-Kdriver='+str(driver),'-KprojectBuildDir='+str(root/'build/checkpoint-probe/artifacts')]
+          result=subprocess.run(command+['build','+Checkpoint:c.o'],capture_output=True,text=True,check=True)
+          print(result.stdout,result.stderr)
+          assert 'Built Checkpoint' not in result.stdout+result.stderr,'native Lake recompiled retained Checkpoint'
+          subprocess.run(command+['build','PS0Project:static','ps0project'],check=True)
+          assert before=={str(p):sha(p) for p in paths}
+          result=subprocess.check_output([str(root/'build/checkpoint-probe/artifacts/bin/ps0project')],text=True)
+          assert result.strip()=='PS0_CHECKPOINT_NATIVE_LAKE',result
+          print('PS0_NATIVE_LAKE_CHECKPOINT_CONSUMER: PASS; actual source/C/object/olean verified; native Lake reused module then linked and executed')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-native-lake-checkpoint-consumer-e07e063a159417ba73a22bfa7650c567aa5db2a9-${{ github.run_id }}
+          path: experiments/ps0/build/checkpoint-consumer-logs/
+          if-no-files-found: error

@@ -102,13 +102,11 @@ jobs:
           printf '%s\n' "$PS0_SOURCE_SHA" > build/compiler-fixture-logs/source-sha.txt
           printf '%s\n' "$GITHUB_SHA" > build/compiler-fixture-logs/runner-sha.txt
           test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
-          lake build PS0 ps0 2>&1 | tee build/compiler-fixture-logs/build.log
-          lake exe ps0 environment | tee build/compiler-fixture-logs/environment.json
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
           run-id: 42751711977
-          name: ps0-data-public-differences-${{ github.run_id }}
+          name: ps0-data-boundaries-ae5aa7f6515737cba323f7592b1e93b07e820fcd-42751711977
           github-token: ${{ github.token }}
           path: retained-data
       - name: Inspect actual public native module data
@@ -121,6 +119,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ps0-data-boundaries-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
+          name: ps0-data-public-differences-${{ github.run_id }}
           path: experiments/ps0/build/data-public-inspection/
           if-no-files-found: error

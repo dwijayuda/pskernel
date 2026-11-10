@@ -9,6 +9,7 @@ permissions:
 jobs:
 
   term-monadic-boundaries:
+    if: ${{ false }}
     runs-on: ubuntu-22.04
     timeout-minutes: 15
     defaults:

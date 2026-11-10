@@ -9,7 +9,6 @@ permissions:
 jobs:
 
   host-operand-parity:
-    if: ${{ false }}
     runs-on: ubuntu-22.04
     timeout-minutes: 15
     defaults:
@@ -25,7 +24,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"658acba36911b357875220ead7470bd375281fd7"}
+          pin={"repository":"dwijayuda/lean4","commit":"9ad6c937716cc78e029e3a738df7c923b7d3bf4e"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -120,10 +119,11 @@ jobs:
         run: |
           python3 tests/run-loop-contracts.py
           python3 tests/run-suffices.py
+          python3 tests/run-term-monadic.py
       - name: Compare original source diagnostic coordinates
         run: python3 tests/run-diagnostic-origins.py
-      - name: Reject thirty-six known ordinary host gaps
-        run: python3 tests/run-host-island-gaps.py --cases bound-if-then,bound-if-else,suffices-body,suffices-type,suffices-continuation,match,pattern-lambda,record-field,do-if,do-match,do-have,do-for,do-try,proof-if,typed-term,tactic-body,pattern-if,tuple-element,list-element,array-element,interpolation,forall-domain,forall-body,pattern-let,anonymous-constructor,show-body,show-type,pure-have,while-body,while-condition,repeat-body,repeat-condition,loop-for-invariant,loop-invariant-type,loop-while-invariant,loop-while-measure
+      - name: Reject forty known ordinary host gaps
+        run: python3 tests/run-host-island-gaps.py --cases nested-action,term-return,term-try,term-for,bound-if-then,bound-if-else,suffices-body,suffices-type,suffices-continuation,match,pattern-lambda,record-field,do-if,do-match,do-have,do-for,do-try,proof-if,typed-term,tactic-body,pattern-if,tuple-element,list-element,array-element,interpolation,forall-domain,forall-body,pattern-let,anonymous-constructor,show-body,show-type,pure-have,while-body,while-condition,repeat-body,repeat-condition,loop-for-invariant,loop-invariant-type,loop-while-invariant,loop-while-measure
       - name: Bound native and PS nested parenthesis parsing
         run: |
           python3 - <<'PY'
@@ -150,6 +150,12 @@ jobs:
             experiments/ps0/build/diagnostic-origins-*/*.log
             experiments/ps0/build/diagnostic-origins-*/*.ps
             experiments/ps0/build/diagnostic-origins-*/*.lean
+            experiments/ps0/build/term-monadic-*/*.json
+            experiments/ps0/build/term-monadic-*/*.log
+            experiments/ps0/build/term-monadic-*/*.ps
+            experiments/ps0/build/term-monadic-*/*.c
+            experiments/ps0/build/term-monadic-*/*.olean
+            experiments/ps0/build/term-monadic-*/TermMonadicRuntime
             experiments/ps0/build/suffices-*/*.json
             experiments/ps0/build/suffices-*/*.log
             experiments/ps0/build/suffices-*/*.ps

@@ -1,0 +1,50 @@
+name: PS0 initializer artifact difference inspection
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-initializer-inspection.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  initializer-inspection:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42749371573
+          name: ps0-initializer-boundaries-797608d688cd95be1571b1ad9e85e10a539f9484-42749371573
+          github-token: ${{ github.token }}
+          path: retained
+      - name: Inspect exact C and public olean differences
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json,difflib
+          root=Path('retained')
+          dirs=list(root.glob('initializers-*'))
+          assert len(dirs)==1,dirs
+          folder=dirs[0]; report={}
+          for module in ['InitializerBase','InitializerMain']:
+              for ext in ['c','olean']:
+                  files={label:folder/(label+'-'+module+'.'+ext) for label in ['baseline','migrated','planned']}
+                  rows={label:hashlib.sha256(file.read_bytes()).hexdigest() for label,file in files.items()}
+                  report[module+'.'+ext]=rows
+                  print(module+'.'+ext,json.dumps(rows))
+                  if ext=='c':
+                      native=files['baseline'].read_text().splitlines()
+                      for label in ['migrated','planned']:
+                          print('\n'.join(difflib.unified_diff(native,files[label].read_text().splitlines(),fromfile='baseline',tofile=label)))
+          for file in folder.glob('*plan.json'):
+              print(file.name,file.read_text())
+          out=Path('inspection');out.mkdir()
+          (out/'differences.json').write_text(json.dumps(report,indent=2)+'\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-initializer-inspection-${{ github.run_id }}
+          path: inspection/
+          if-no-files-found: error

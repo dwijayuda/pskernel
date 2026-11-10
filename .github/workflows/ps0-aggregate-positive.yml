@@ -24,7 +24,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"4667e4c5a1c6de61fd7532d6d4cbd8952e02b555"}
+          pin={"repository":"dwijayuda/lean4","commit":"cbba1e79c8ba7ed5453ed75e5bfc8ba214e8c75b"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -114,7 +114,8 @@ jobs:
       - name: Qualify ordinary host values origins and native linking
         run: python3 tests/run-match-host-bodies.py
       - name: Qualify native loop gadget annotation parity and linking
-        run: python3 tests/run-loop-contracts.py
+        run: |
+          python3 tests/run-loop-contracts.py
           python3 tests/run-suffices.py
       - name: Reject thirty-four known ordinary host gaps
         run: python3 tests/run-host-island-gaps.py --cases suffices-body,suffices-type,suffices-continuation,match,pattern-lambda,record-field,do-if,do-match,do-have,do-for,do-try,proof-if,typed-term,tactic-body,pattern-if,tuple-element,list-element,array-element,interpolation,forall-domain,forall-body,pattern-let,anonymous-constructor,show-body,show-type,pure-have,while-body,while-condition,repeat-body,repeat-condition,loop-for-invariant,loop-invariant-type,loop-while-invariant,loop-while-measure

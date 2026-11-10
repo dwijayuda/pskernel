@@ -11,6 +11,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   reproduce:
+    if: github.event_name == 'workflow_dispatch'
     strategy:
       fail-fast: false
       matrix:

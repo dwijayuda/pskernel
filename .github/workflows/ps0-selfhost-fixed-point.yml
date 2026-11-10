@@ -26,7 +26,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"cc92a4e1d344ab1e76d1c7e68dfbda00b7a85575"}
+          pin={"repository":"dwijayuda/lean4","commit":"298395dde05464d06dca208fec5d0b74012297e4"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -127,6 +127,7 @@ jobs:
           python3 tests/test-native-compiler-prefix.py
           python3 tests/test-native-census-cache.py
           lake env lean tests/Graph17TermShapes.lean
+          lake env lean tests/Graph19TermShapes.lean
       - name: Build and retain actual all-PS compiler prefix
         run: |
           set -euo pipefail
@@ -157,7 +158,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"cc92a4e1d344ab1e76d1c7e68dfbda00b7a85575"}
+          pin={"repository":"dwijayuda/lean4","commit":"298395dde05464d06dca208fec5d0b74012297e4"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -244,12 +245,12 @@ jobs:
           path: source-plans
       - uses: actions/download-artifact@v4
         with:
-          name: ps0-selfhost-stage-one-cc92a4e1d344ab1e76d1c7e68dfbda00b7a85575-${{ github.run_id }}
+          name: ps0-selfhost-stage-one-298395dde05464d06dca208fec5d0b74012297e4-${{ github.run_id }}
           path: previous-stage
       - name: Verify actual retained PS-built prefix and rebuild complete graph
         run: |
           set -euo pipefail
-          python3 tests/run-compiler-ps.py --stage-artifact "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --stage-source cc92a4e1d344ab1e76d1c7e68dfbda00b7a85575 --source-plans "$GITHUB_WORKSPACE/source-plans" --plan-source bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f --native-censuses "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --census-source cc92a4e1d344ab1e76d1c7e68dfbda00b7a85575
+          python3 tests/run-compiler-ps.py --stage-artifact "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --stage-source 298395dde05464d06dca208fec5d0b74012297e4 --source-plans "$GITHUB_WORKSPACE/source-plans" --plan-source bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f --native-censuses "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --census-source 298395dde05464d06dca208fec5d0b74012297e4
           python3 tests/run-compiler-census.py
       - uses: actions/upload-artifact@v4
         if: always()

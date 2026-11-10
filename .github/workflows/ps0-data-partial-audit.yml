@@ -37,6 +37,8 @@ jobs:
           for module,item in inventory['inputs'].items():
               path=root/'transformed-source'/Path(*module.split('.')).with_suffix('.ps')
               assert item['body_mode']=='planned-ps-grammar' and sha(path)==item['ps_sha256'],module
+          equal_sources=[m for m,item in inventory['inputs'].items() if item['original_sha256']==item['ps_sha256']]
+          native_only_modes=[m for m,item in inventory['inputs'].items() if item['body_mode']=='byte-identical']
           productions={'function':'PS0.StandardAdapters.ps0StandardFunction','const':'PS0.StandardAdapters.ps0StandardConst','def':'PS0.StandardAdapters.ps0StandardDef'}
           def commands(items):
               for item in items:
@@ -69,7 +71,7 @@ jobs:
               totals.update(counts)
               rows.append(dict(module=module,census_sha256=sha(path),ps_sha256=sha(ps),counts=counts))
           assert rows and len(rows)==len({r['module'] for r in rows})
-          report=dict(schema='ps0-data-graph-partial-source-audit/1',source=source,producer_run=42756129015,prepared_ps_files_rehashed=2569,captured_frontend_modules=len(rows),totals=dict(totals),modules=rows,status='PASS',scope='actual admitted frontend capture/source/plan fidelity only; producer graph FAILED; no claim that uncaptured dependents, all C targets, native linking or fixed point passed',grammar_migration_complete=False,verified_execution=False)
+          report=dict(schema='ps0-data-graph-partial-source-audit/1',source=source,producer_run=42756129015,prepared_ps_files_rehashed=2569,actual_byte_equal_to_original_sources=len(equal_sources),native_only_body_mode_count=len(native_only_modes),captured_frontend_modules=len(rows),totals=dict(totals),modules=rows,status='PASS',scope='actual admitted frontend capture/source/plan fidelity only; producer graph FAILED; no claim that uncaptured dependents, all C targets, native linking or fixed point passed',grammar_migration_complete=False,verified_execution=False)
           Path('evidence/audit.json').write_text(json.dumps(report,indent=2)+'\n')
           print('DATA_PARTIAL_AUDIT:'+json.dumps({k:v for k,v in report.items() if k!='modules'},sort_keys=True))
           PY

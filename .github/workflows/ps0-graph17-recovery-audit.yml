@@ -1,0 +1,83 @@
+name: PS0 terminal compiler recovery artifact audit
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-graph17-recovery-audit.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42768692837
+          pattern: ps0-graph17-recovery-*
+          github-token: ${{ github.token }}
+          path: captures
+      - name: Independently rehash actual C files and reconstruct all four source plans
+        run: |
+          mkdir -p evidence
+          python3 - <<'PY' | tee evidence/audit.log
+          from pathlib import Path
+          import hashlib,json
+          expected={'Lean.Data.FuzzyMatching':'3227c14d58d907195bccb2f10c7adb80fb99a634','Lean.Parser.Extra':'b41124fb0f5d9b594350ae901eeed2b767b82f54','Lean.Compiler.LCNF.MonoTypes':'068b22fc1ef7d7fec282673d2223fb8e590f6818','Lean.Meta.CongrTheorems':'2b0f7de86c99ab7a804854faf9d97370d0007f8c'}
+          sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
+          rows=[]
+          for path in Path('captures').rglob('plan.json'):
+              folder=path.parent
+              plan=json.loads(path.read_text())
+              capture=json.loads((folder/'original-census.json').read_text())
+              module=capture['module']
+              assert module in expected and capture['leanCommit']=='eb6cafb7290e8bd5f2937522d8d804f58f02bafc'
+              rel=Path(*module.split('.'))
+              original=folder/'original/src'/rel.with_suffix('.ps')
+              converted=folder/'converted/src'/rel.with_suffix('.ps')
+              data=original.read_bytes()
+              assert hashlib.sha1(b'blob '+str(len(data)).encode()+b'\0'+data).hexdigest()==expected[module]
+              assert sha(original)==plan['source_sha256']
+              cursor=0;parts=[]
+              for edit in plan['edits']:
+                  assert cursor<=edit['start']<=edit['end']<=len(data)
+                  assert data[edit['start']:edit['end']].decode()==edit['old']
+                  assert edit['old'].count('\n')==edit['new'].count('\n')
+                  parts += [data[cursor:edit['start']], edit['new'].encode()]
+                  cursor=edit['end']
+              rebuilt=b''.join(parts+[data[cursor:]])
+              assert rebuilt==converted.read_bytes() and sha(converted)==plan['result_sha256']
+              assert 'Build completed successfully' in (folder/'baseline.log').read_text()
+              assert 'Build completed successfully' in (folder/'migrated.log').read_text()
+              c=[folder/label/'ir'/rel.with_suffix('.c') for label in ['baseline','migrated']]
+              hashes=dict(native=sha(c[0]), ps=sha(c[1]))
+              row=dict(module=module,pinned_blob=expected[module],definitions=len(plan['declarations']),actual_c_sha256=hashes,compiled=True)
+              if module=='Lean.Data.FuzzyMatching':
+                  receipt=json.loads((folder/'evidence.json').read_text())
+                  assert receipt['source']=='811e4b8f5587838cb57fbca942172d9b6ef49ed8'
+                  assert hashes['native']==hashes['ps']
+                  assert receipt['comparisons']['ir/'+rel.with_suffix('.c').as_posix()]==hashes
+                  public=receipt['comparisons']['lib/lean/'+rel.with_suffix('.olean').as_posix()]
+                  assert public['native']==public['ps']
+                  row['public_olean_receipt_sha256']=public
+                  row['qualification']='producer strict C/public olean PASS; independent actual C rehash'
+              else:
+                  assert hashes['native']!=hashes['ps']
+                  text=(folder/'c-parity-olean-diagnostic.log').read_text()
+                  details=json.JSONDecoder().raw_decode(text[text.index('{'):])[0]
+                  assert details['changedConstants']==[]
+                  row['reader_changed_constants']=0
+                  row['reader_summary']={k:v for k,v in details.items() if k not in ['changedConstants','constants'] and not isinstance(v,(list,dict))}
+                  row['qualification']='target compiled; strict byte parity FAIL remains; no broad semantic-equivalence claim'
+              rows.append(row)
+          assert len(rows)==4 and {r['module'] for r in rows}==set(expected)
+          report=dict(schema='ps0-terminal-recovery-artifact-audit/1',producer_run=42768692837,producer_source='811e4b8f5587838cb57fbca942172d9b6ef49ed8',actual_c_files_rehashed=8,source_plans_reconstructed=4,rows=rows,status='PASS',scope='artifact fidelity and exact phase distinctions only; actual target public olean files were not retained and are not independently rehashed; no whole-compiler or fixed-point result',grammar_migration_complete=False,verified_execution=False)
+          Path('evidence/audit.json').write_text(json.dumps(report,indent=2)+'\n')
+          print(json.dumps(report,sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-terminal-recovery-independent-${{ github.run_id }}
+          path: evidence/
+          if-no-files-found: error

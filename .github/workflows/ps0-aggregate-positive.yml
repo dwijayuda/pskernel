@@ -24,7 +24,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"3e49c4020daeb556b601c33a63f788c2fd4965f5"}
+          pin={"repository":"dwijayuda/lean4","commit":"4667e4c5a1c6de61fd7532d6d4cbd8952e02b555"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -115,8 +115,9 @@ jobs:
         run: python3 tests/run-match-host-bodies.py
       - name: Qualify native loop gadget annotation parity and linking
         run: python3 tests/run-loop-contracts.py
-      - name: Reject six known ordinary host gaps
-        run: python3 tests/run-host-island-gaps.py --cases match,pattern-lambda,record-field,do-if,do-match,do-have,do-for,do-try,proof-if,typed-term,tactic-body,pattern-if,tuple-element,list-element,array-element,interpolation,forall-domain,forall-body,pattern-let,anonymous-constructor,show-body,show-type,pure-have,while-body,while-condition,repeat-body,repeat-condition,loop-for-invariant,loop-invariant-type,loop-while-invariant,loop-while-measure
+          python3 tests/run-suffices.py
+      - name: Reject thirty-four known ordinary host gaps
+        run: python3 tests/run-host-island-gaps.py --cases suffices-body,suffices-type,suffices-continuation,match,pattern-lambda,record-field,do-if,do-match,do-have,do-for,do-try,proof-if,typed-term,tactic-body,pattern-if,tuple-element,list-element,array-element,interpolation,forall-domain,forall-body,pattern-let,anonymous-constructor,show-body,show-type,pure-have,while-body,while-condition,repeat-body,repeat-condition,loop-for-invariant,loop-invariant-type,loop-while-invariant,loop-while-measure
       - name: Bound native and PS nested parenthesis parsing
         run: |
           python3 - <<'PY'
@@ -139,6 +140,12 @@ jobs:
           name: ps0-host-operand-parity-${{ env.PS0_SOURCE_SHA }}-${{ github.run_id }}
           path: |
             experiments/ps0/build/compiler-fixture-logs/paren-budget.log
+            experiments/ps0/build/suffices-*/*.json
+            experiments/ps0/build/suffices-*/*.log
+            experiments/ps0/build/suffices-*/*.ps
+            experiments/ps0/build/suffices-*/*.c
+            experiments/ps0/build/suffices-*/*.olean
+            experiments/ps0/build/suffices-*/SufficesRuntime
             experiments/ps0/build/loop-contracts-*/*.json
             experiments/ps0/build/loop-contracts-*/*.log
             experiments/ps0/build/loop-contracts-*/*.ps

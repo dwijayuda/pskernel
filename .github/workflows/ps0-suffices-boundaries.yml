@@ -9,7 +9,6 @@ permissions:
 jobs:
 
   suffices-boundaries:
-    if: ${{ false }}
     runs-on: ubuntu-22.04
     timeout-minutes: 15
     defaults:
@@ -25,7 +24,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"69b59de262563d8b45385774462f52e828182544"}
+          pin={"repository":"dwijayuda/lean4","commit":"4667e4c5a1c6de61fd7532d6d4cbd8952e02b555"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:

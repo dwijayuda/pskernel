@@ -26,7 +26,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"c4c10632de03d436ca53bf34798a5cc83f7efbc0"}
+          pin={"repository":"dwijayuda/lean4","commit":"3808825343c1a1b6f7dcfe349920e047d270f60d"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -106,6 +106,46 @@ jobs:
           test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
           lake build PS0 ps0 2>&1 | tee build/transformed-corpus-logs/build.log
           lake exe ps0 environment | tee build/transformed-corpus-logs/environment.json
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 42815258848
+          pattern: ps0-graph17-recovery-*-64e3730de513fc8815aa3ac5a2a2aff4b2441a48-42815258848
+          github-token: ${{ github.token }}
+          path: native-captures
+      - name: Inspect pinned native syntax at the six failure boundaries
+        run: |
+          set -euo pipefail
+          python3 - <<'PY' | tee build/transformed-corpus-logs/graph19-native-inspection.log
+          from pathlib import Path
+          import json
+          captures=list(Path('native-captures').rglob('original-census.json'))
+          assert len(captures)==6
+          lines={'Lean.Compiler.LCNF.Simp.JpCases':126,'Lean.Meta.Tactic.Cbv.ControlFlow':73,'Lean.Meta.Tactic.Rewrite':73,'Lean.Meta.MkIffOfInductiveProp':291,'Lean.Elab.Syntax':428,'Lean.Server.Watchdog':361}
+          def walk(value):
+              if isinstance(value,dict):
+                  if 'kind' in value and 'args' in value and 'range' in value: yield value
+                  for child in value.values(): yield from walk(child)
+              elif isinstance(value,list):
+                  for child in value: yield from walk(child)
+          result={}
+          for path in captures:
+              data=json.loads(path.read_text());module=data['module']
+              assert data['leanCommit']=='eb6cafb7290e8bd5f2937522d8d804f58f02bafc'
+              raw=data['nativeSource'].encode();parts=raw.splitlines(keepends=True)
+              start=sum(map(len,parts[:lines[module]-1]));end=start+len(parts[lines[module]-1])
+              nodes=[];seen=set()
+              for node in walk(data):
+                  span=node['range']
+                  if not span or span['end']<=start or span['start']>=end or not 8<=span['end']-span['start']<=600: continue
+                  key=(node['kind'],span['start'],span['end'])
+                  if key in seen: continue
+                  seen.add(key)
+                  nodes.append(dict(kind=node['kind'],text=raw[span['start']:span['end']].decode(),children=[x['kind'] for x in node['args']],syntax=node))
+              result[module]=nodes
+              print('GRAPH19_NATIVE:'+json.dumps(dict(module=module,nodes=[{k:v for k,v in n.items() if k!='syntax'} for n in nodes]),sort_keys=True))
+          Path('build/transformed-corpus-logs/graph19-native-inspection.json').write_text(json.dumps(result,indent=2)+'\\n')
+          PY
       - name: Check native and PS source boundaries
         run: |
           set -euo pipefail

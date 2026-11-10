@@ -15,26 +15,30 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - fixture: ParserExtension18
-            module: Lean.Parser.Extension
-            blob: c981ad03186e2eda5fcc0f1ee3fc844af5f794cd
-            roots: Lean.Parser
-          - fixture: FuzzyMatching17
-            module: Lean.Data.FuzzyMatching
-            blob: 3227c14d58d907195bccb2f10c7adb80fb99a634
-            roots: Lean.Data
-          - fixture: ParserExtra17
-            module: Lean.Parser.Extra
-            blob: b41124fb0f5d9b594350ae901eeed2b767b82f54
-            roots: Lean.Parser
-          - fixture: MonoTypes17
-            module: Lean.Compiler.LCNF.MonoTypes
-            blob: 068b22fc1ef7d7fec282673d2223fb8e590f6818
-            roots: Lean.Compiler.LCNF
-          - fixture: CongrTheorems17
-            module: Lean.Meta.CongrTheorems
-            blob: 2b0f7de86c99ab7a804854faf9d97370d0007f8c
+          - fixture: JpCases19
+            module: Lean.Compiler.LCNF.Simp.JpCases
+            blob: 80eb3b4f7b3c69da0c50c58d8860b5e65c709d2c
+            roots: Lean.Compiler.LCNF.Simp
+          - fixture: CbvControlFlow19
+            module: Lean.Meta.Tactic.Cbv.ControlFlow
+            blob: 8fe30cc1f35b60a43cceac1c13c2f61524b5d92e
+            roots: Lean.Meta.Tactic.Cbv
+          - fixture: Rewrite19
+            module: Lean.Meta.Tactic.Rewrite
+            blob: f616c869ab7dd86e771fc22918303ab8b7aa2998
             roots: Lean.Meta
+          - fixture: MkIffInductive19
+            module: Lean.Meta.MkIffOfInductiveProp
+            blob: 6826af10a3ea2f461432d2eb45e1b6c831883e27
+            roots: Lean.Meta
+          - fixture: ElabSyntax19
+            module: Lean.Elab.Syntax
+            blob: 7b11aaf4830c83cc828eb77f40de308c06307053
+            roots: Lean.Elab
+          - fixture: Watchdog19
+            module: Lean.Server.Watchdog
+            blob: dedb28154c483633b49a12d1689938209c1531c4
+            roots: Lean.Server
     runs-on: ubuntu-22.04
     timeout-minutes: 20
     defaults:
@@ -50,7 +54,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"cc92a4e1d344ab1e76d1c7e68dfbda00b7a85575"}
+          pin={"repository":"dwijayuda/lean4","commit":"64e3730de513fc8815aa3ac5a2a2aff4b2441a48"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:

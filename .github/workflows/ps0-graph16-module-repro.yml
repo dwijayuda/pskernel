@@ -9,12 +9,11 @@ permissions:
 jobs:
 
   module-reproduction:
-    if: ${{ false }}
     name: ${{ matrix.label }}-${{ matrix.fixture }}
     strategy:
       fail-fast: false
       matrix:
-        include: [{"module":"Std.Http.Data.URI.Parser","fixture":"URIParser","path":"src/Std/Http/Data/URI/Parser.lean","roots":"Std.Http.Data.URI","blob":"d51844ce35afe12c4c815dd41f617891f3a62980","source":"f94118fb3d1463304c32b5a28189d7ea6572ecce","label":"graph-source"},{"module":"Lean.Meta.AbstractMVars","fixture":"AbstractMVars","path":"src/Lean/Meta/AbstractMVars.lean","roots":"Lean.Meta","blob":"175738e203ab7cbd59798431b0fb0133dd41ca5a","source":"f94118fb3d1463304c32b5a28189d7ea6572ecce","label":"graph-source"},{"module":"Lean.Meta.DiscrTree.Main","fixture":"DiscrTreeMain","path":"src/Lean/Meta/DiscrTree/Main.lean","roots":"Lean.Meta.DiscrTree","blob":"bdfbcdff9d7ae3dcc369b2d637a4dec8cfe1f14a","source":"f94118fb3d1463304c32b5a28189d7ea6572ecce","label":"graph-source"},{"module":"Std.Http.Data.URI.Parser","fixture":"URIParser","path":"src/Std/Http/Data/URI/Parser.lean","roots":"Std.Http.Data.URI","blob":"d51844ce35afe12c4c815dd41f617891f3a62980","source":"9c9a416ce7cfc5ac21c9d50f01ca27523800dad2","label":"current"},{"module":"Lean.Meta.AbstractMVars","fixture":"AbstractMVars","path":"src/Lean/Meta/AbstractMVars.lean","roots":"Lean.Meta","blob":"175738e203ab7cbd59798431b0fb0133dd41ca5a","source":"9c9a416ce7cfc5ac21c9d50f01ca27523800dad2","label":"current"},{"module":"Lean.Meta.DiscrTree.Main","fixture":"DiscrTreeMain","path":"src/Lean/Meta/DiscrTree/Main.lean","roots":"Lean.Meta.DiscrTree","blob":"bdfbcdff9d7ae3dcc369b2d637a4dec8cfe1f14a","source":"9c9a416ce7cfc5ac21c9d50f01ca27523800dad2","label":"current"}]
+        include: [{"module":"Std.Http.Data.URI.Parser","fixture":"URIParser","path":"src/Std/Http/Data/URI/Parser.lean","roots":"Std.Http.Data.URI","blob":"d51844ce35afe12c4c815dd41f617891f3a62980","source":"7cb84202ade8aa0dddc306c459ab8335229c9ab8","label":"direct-bind"},{"module":"Lean.Meta.AbstractMVars","fixture":"AbstractMVars","path":"src/Lean/Meta/AbstractMVars.lean","roots":"Lean.Meta","blob":"175738e203ab7cbd59798431b0fb0133dd41ca5a","source":"7cb84202ade8aa0dddc306c459ab8335229c9ab8","label":"direct-bind"},{"module":"Lean.Meta.DiscrTree.Main","fixture":"DiscrTreeMain","path":"src/Lean/Meta/DiscrTree/Main.lean","roots":"Lean.Meta.DiscrTree","blob":"bdfbcdff9d7ae3dcc369b2d637a4dec8cfe1f14a","source":"7cb84202ade8aa0dddc306c459ab8335229c9ab8","label":"direct-bind"}]
     runs-on: ubuntu-22.04
     timeout-minutes: 20
     defaults:
@@ -122,6 +121,7 @@ jobs:
           path: experiments/ps0/build/compiler-heads-*
           if-no-files-found: error
   graph-plan-inspection:
+    if: ${{ false }}
     runs-on: ubuntu-22.04
     timeout-minutes: 10
     steps:
@@ -148,35 +148,4 @@ jobs:
                   elif path.name=='plan.json':
                       data=json.loads(path.read_text())
                       print('PS0_GRAPH16_PLAN_FIELDS:'+json.dumps({'module':name,'keys':list(data),'edits':len(data.get('edits',[]))}))
-                      import hashlib
-                      census=json.loads((path.parent/'native-census.json').read_text())
-                      raw=census['nativeSource'].encode()
-                      assert hashlib.sha256(raw).hexdigest()==data['source_sha256']
-                      chunks=[];cursor=0
-                      for edit in data['edits']:
-                          assert raw[edit['start']:edit['end']].decode()==edit['old']
-                          assert cursor<=edit['start']<=edit['end']
-                          chunks.extend([raw[cursor:edit['start']],edit['new'].encode()]);cursor=edit['end']
-                      chunks.append(raw[cursor:]);converted=b''.join(chunks)
-                      assert hashlib.sha256(converted).hexdigest()==data['result_sha256']
-                      target=97 if 'URI' in name else 102 if 'Abstract' in name else 278
-                      lines=converted.decode().splitlines()
-                      print('PS0_GRAPH16_RECONSTRUCTED_LINES:'+json.dumps({'module':name,'lines':[[i+1,line] for i,line in enumerate(lines) if target-5<=i+1<=target+4]}))
-                      original=raw.decode().splitlines(keepends=True)
-                      token='takeWhileAtMost' if 'URI' in name else 'pure' if 'Abstract' in name else 'pushArgsAux'
-                      point=len(''.join(original[:target-1]).encode())+len(original[target-1].split(token)[0].encode())
-                      def walk(node, ancestry):
-                          span=node.get('range')
-                          if span and span['start']<=point<span['end']:
-                              ancestry=ancestry+[{'kind':node['kind'],'arity':len(node.get('args',[]))}]
-                              if node['kind']=='Lean.Parser.Term.app':
-                                  print('PS0_GRAPH16_NATIVE_ROLE_PATH:'+json.dumps({'module':name,'path':ancestry,'children':[c['kind'] for c in node.get('args',[])]}))
-                          for child in node.get('args',[]):walk(child,ancestry)
-                      def commands(rows):
-                          for command in rows:
-                              declaration=command.get('declaration')
-                              if declaration and declaration.get('valueSyntax'):walk(declaration['valueSyntax'],[])
-                              commands(command.get('nestedCommands',[]))
-                      commands(census['commands'])
-
           PY

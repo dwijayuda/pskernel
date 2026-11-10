@@ -14,251 +14,251 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: dwijayuda/lean4
-          ref: f94118fb3d1463304c32b5a28189d7ea6572ecce
+          ref: 5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e
           sparse-checkout: experiments/ps0/tests
           persist-credentials: false
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-fixtures-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-fixtures-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-prelude-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-prelude-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-core-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-core-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-natbasic-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-natbasic-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-finbasic-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-finbasic-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-do-layout-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-do-layout-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-natlinear-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-natlinear-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-grindac-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-grindac-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-iteratorempty-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-iteratorempty-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-spredlaws-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-spredlaws-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-unless-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-unless-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-natlemmas-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-natlemmas-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-listattach-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-listattach-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-initwf-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-initwf-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-project-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-project-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-stream-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-stream-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-intlinear-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-intlinear-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-arrayperm-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-arrayperm-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-persistenthashmap-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-persistenthashmap-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-nanosecond-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-nanosecond-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-associative-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-associative-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-signedbitvec-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-signedbitvec-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-rangechar-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-rangechar-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-tzif-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-tzif-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-extdtreemapbasic-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-extdtreemapbasic-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-options-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-options-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-jsonrpc-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-jsonrpc-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-environment-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-environment-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-parserbasic14-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-parserbasic14-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-compilerm14-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-compilerm14-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-ambiguousopen14-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-ambiguousopen14-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-setoption14-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-setoption14-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-defeqattrib14-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-defeqattrib14-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - uses: actions/download-artifact@v4
         with:
           repository: dwijayuda/pskernel
-          run-id: 42718020600
-          name: ps0-compiler-synthinstance14-f94118fb3d1463304c32b5a28189d7ea6572ecce-42718020600
+          run-id: 42726667178
+          name: ps0-compiler-synthinstance14-5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e-42726667178
           github-token: ${{ github.token }}
           path: recursive-boundaries-artifact
       - name: Rehash compiler outputs and check actual owned do roles
         run: |
           set -euo pipefail
-          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py recursive-boundaries-artifact --source f94118fb3d1463304c32b5a28189d7ea6572ecce --output recursive-boundaries-rehash.json | tee recursive-boundaries-rehash.log
+          python3 experiments/ps0/tests/inspect-compiler-fixture-artifact.py recursive-boundaries-artifact --source 5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e --output recursive-boundaries-rehash.json | tee recursive-boundaries-rehash.log
           python3 - <<'PY' | tee recursive-boundaries-roles.log
           from pathlib import Path
           from collections import Counter
@@ -314,7 +314,7 @@ jobs:
           for path in root.rglob('evidence.json'):
               folder=path.parent
               if folder.name.startswith('ellipsis-'):
-                  value=json.loads(path.read_text()); assert value['source']=='f94118fb3d1463304c32b5a28189d7ea6572ecce'
+                  value=json.loads(path.read_text()); assert value['source']=='5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e'
                   data=Path('experiments/ps0/tests/v1/ellipsis_operands.ps').read_bytes()
                   assert hashlib.sha256(data).hexdigest()==value['fixture_sha256']
                   assert value['original_native_node_identity'] is True
@@ -324,7 +324,7 @@ jobs:
                       assert "unexpected '..'" in (folder/(name+'.log')).read_text()
                   seen.add('ellipsis'); print('PS0_NATIVE_ELLIPSIS_EVIDENCE:'+json.dumps(value,sort_keys=True))
               if folder.name.startswith('do-layout-'):
-                  value=json.loads(path.read_text()); assert value['source']=='f94118fb3d1463304c32b5a28189d7ea6572ecce'
+                  value=json.loads(path.read_text()); assert value['source']=='5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e'
                   data=Path('experiments/ps0/tests/v1/do_layout_operands.ps').read_bytes()
                   assert hashlib.sha256(data).hexdigest()==value['fixture_sha256']
                   assert value['oracle'] in (folder/'runtime.log').read_text()
@@ -338,7 +338,7 @@ jobs:
           for path in root.rglob('evidence.json'):
               value=json.loads(path.read_text()); folder=path.parent
               if folder.name.startswith('unless-'):
-                  assert value['source']=='f94118fb3d1463304c32b5a28189d7ea6572ecce'
+                  assert value['source']=='5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e'
                   assert value['fixture_sha256']==hashlib.sha256(Path('experiments/ps0/tests/v1/unless_operands.ps').read_bytes()).hexdigest()
                   assert value['original_condition_block_token_ranges'] is True
                   assert value['original_pattern_optional_type_arrow_and_branch_ranges'] is True
@@ -349,7 +349,7 @@ jobs:
                   seen_new.add('unless')
                   print('PS0_UNLESS_RETAINED:'+json.dumps(value,sort_keys=True))
               if folder.name.startswith('lambdas-'):
-                  assert value['source']=='f94118fb3d1463304c32b5a28189d7ea6572ecce'
+                  assert value['source']=='5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e'
                   assert value['fixture_sha256']==hashlib.sha256(Path('experiments/ps0/tests/v1/lambda_operands.ps').read_bytes()).hexdigest()
                   assert value['original_lambda_and_arrow_token_checks']==2
                   assert value['oracle'] in (folder/'runtime.log').read_text()
@@ -358,7 +358,7 @@ jobs:
                   seen_new.add('lambda')
                   print('PS0_UNICODE_LAMBDA_RETAINED:'+json.dumps(value,sort_keys=True))
               if folder.name.startswith('command-operands-'):
-                  assert value['source']=='f94118fb3d1463304c32b5a28189d7ea6572ecce'
+                  assert value['source']=='5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e'
                   assert 'included' in value['mapped_source_names']
                   assert 'PS0V1-CALL-GAP' in (folder/'include-gap.log').read_text()
                   seen_new.add('include')
@@ -382,7 +382,7 @@ jobs:
           for path in root.rglob('evidence.json'):
               value=json.loads(path.read_text()); folder=path.parent
               if folder.name.startswith('local-recursion-'):
-                  assert value['source']=='f94118fb3d1463304c32b5a28189d7ea6572ecce'
+                  assert value['source']=='5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e'
                   assert value['fixture_sha256']==hashlib.sha256(Path('experiments/ps0/tests/v1/local_recursion_operands.ps').read_bytes()).hexdigest()
                   assert value['original_let_rec_separator_and_root_ranges'] is True
                   assert value['oracle'] in (folder/'runtime.log').read_text()
@@ -428,7 +428,7 @@ jobs:
           for path in root.rglob('evidence.json'):
               value=json.loads(path.read_text()); folder=path.parent
               if folder.name.startswith('index-operands-'):
-                  assert value['source']=='f94118fb3d1463304c32b5a28189d7ea6572ecce'
+                  assert value['source']=='5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e'
                   assert value['fixture_sha256']==hashlib.sha256(Path('experiments/ps0/tests/v1/index_operands.ps').read_bytes()).hexdigest()
                   assert value['original_index_tokens_and_ranges']==13
                   assert value['original_projection_tokens_and_ranges']==3
@@ -453,7 +453,7 @@ jobs:
                   indexed_seen=True
                   print('PS0_NATIVE_INDEX_RETAINED:'+json.dumps(value,sort_keys=True))
               if folder.name.startswith('local-mixed-'):
-                  assert value['source']=='f94118fb3d1463304c32b5a28189d7ea6572ecce'
+                  assert value['source']=='5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e'
                   assert value['fixture_sha256']==hashlib.sha256(Path('experiments/ps0/tests/v1/local_mixed_binders.ps').read_bytes()).hexdigest()
                   assert value['origin_cases']==6 and value['rejection_cases']==6
                   assert value['native_layout_controls']==6
@@ -493,7 +493,7 @@ jobs:
                   local_mixed_seen=True
                   print('PS0_LOCAL_MIXED_RETAINED:'+json.dumps(value,sort_keys=True))
               if folder.name.startswith('where-local-'):
-                  assert value['source']=='f94118fb3d1463304c32b5a28189d7ea6572ecce'
+                  assert value['source']=='5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e'
                   assert value['fixture_sha256']==hashlib.sha256(Path('experiments/ps0/tests/v1/where_local_helpers.ps').read_bytes()).hexdigest()
                   assert value['origin_cases']==8 and value['rejection_cases']==10
                   assert value['native_layout_controls']==5 and value['source_host_parser_controls']==5
@@ -625,7 +625,7 @@ jobs:
           returns=[p for p in Path('recursive-boundaries-artifact').rglob('evidence.json') if p.parent.name.startswith('return-boundary-')]
           assert len(returns)==1
           retained=json.loads(returns[0].read_text())
-          assert retained['source']=='f94118fb3d1463304c32b5a28189d7ea6572ecce'
+          assert retained['source']=='5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e'
           import hashlib
           fixture=Path('experiments/ps0/tests/v1/native_return_boundary.ps')
           assert hashlib.sha256(fixture.read_bytes()).hexdigest()==retained['fixture_sha256']
@@ -634,7 +634,7 @@ jobs:
           assert (returns[0].parent/'runtime.log').read_text().splitlines()==['PS0_RETURN_BOUNDARY:0']
           assert 'PS0 v1:' in (returns[0].parent/'check.log').read_text()
           print('PS0_NATIVE_RETURN_RETAINED:'+json.dumps(retained,sort_keys=True))
-          summary={'source':'f94118fb3d1463304c32b5a28189d7ea6572ecce','run':42718020600,
+          summary={'source':'5bd3b36744f2a9f9fcfef5aa87dc6cfffe2b673e','run':42726667178,
                    'compiler_matrix_modules':41,'compiler_matrix_actual_files_rehashed':164,
                    'additional_local_prelude_files_rehashed':4,'additional_where_prelude_files_rehashed':4,
                    'total_modules':43,'total_actual_files_rehashed':172,'native_roles':roles,

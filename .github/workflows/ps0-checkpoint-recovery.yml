@@ -51,11 +51,6 @@ jobs:
       run:
         working-directory: experiments/ps0
     steps:
-      - uses: actions/checkout@v4
-        with:
-          sparse-checkout: ci
-          path: recovery-runner
-          persist-credentials: false
       - name: Read exact source pin
         working-directory: .
         run: |
@@ -80,9 +75,15 @@ jobs:
           path: ps0-harness
           sparse-checkout: experiments/ps0/tests
           persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          path: recovery-runner
+          persist-credentials: false
       - name: Verify exact build harness revision
         run: |
           test "$(git -C "$GITHUB_WORKSPACE/ps0-harness" rev-parse HEAD)" = "5cfaede4b3aa5d1e521456866cc9f360f8ade15a"
+          test -s "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-checkpoint-recovery-early-targets.json"
           printf '%s\n' 'PS0_BUILD_HARNESS_SHA=5cfaede4b3aa5d1e521456866cc9f360f8ade15a' >> "$GITHUB_ENV"
       - uses: actions/cache/restore@v4
         id: ps0-elan-input
@@ -185,11 +186,6 @@ jobs:
       run:
         working-directory: experiments/ps0
     steps:
-      - uses: actions/checkout@v4
-        with:
-          sparse-checkout: ci
-          path: recovery-runner
-          persist-credentials: false
       - name: Read exact source pin
         working-directory: .
         run: |
@@ -214,9 +210,15 @@ jobs:
           path: ps0-harness
           sparse-checkout: experiments/ps0/tests
           persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          path: recovery-runner
+          persist-credentials: false
       - name: Verify exact build harness revision
         run: |
           test "$(git -C "$GITHUB_WORKSPACE/ps0-harness" rev-parse HEAD)" = "5cfaede4b3aa5d1e521456866cc9f360f8ade15a"
+          test -s "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-checkpoint-recovery-early-targets.json"
           printf '%s\n' 'PS0_BUILD_HARNESS_SHA=5cfaede4b3aa5d1e521456866cc9f360f8ade15a' >> "$GITHUB_ENV"
       - uses: actions/cache/restore@v4
         id: ps0-elan-input
@@ -316,11 +318,6 @@ jobs:
       run:
         working-directory: experiments/ps0
     steps:
-      - uses: actions/checkout@v4
-        with:
-          sparse-checkout: ci
-          path: recovery-runner
-          persist-credentials: false
       - name: Read exact source pin
         working-directory: .
         run: |
@@ -345,9 +342,15 @@ jobs:
           path: ps0-harness
           sparse-checkout: experiments/ps0/tests
           persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          path: recovery-runner
+          persist-credentials: false
       - name: Verify exact build harness revision
         run: |
           test "$(git -C "$GITHUB_WORKSPACE/ps0-harness" rev-parse HEAD)" = "5cfaede4b3aa5d1e521456866cc9f360f8ade15a"
+          test -s "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-checkpoint-recovery-early-targets.json"
           printf '%s\n' 'PS0_BUILD_HARNESS_SHA=5cfaede4b3aa5d1e521456866cc9f360f8ade15a' >> "$GITHUB_ENV"
       - uses: actions/cache/restore@v4
         id: ps0-elan-input
@@ -441,11 +444,6 @@ jobs:
       run:
         working-directory: experiments/ps0
     steps:
-      - uses: actions/checkout@v4
-        with:
-          sparse-checkout: ci
-          path: recovery-runner
-          persist-credentials: false
       - name: Read exact source pin
         working-directory: .
         run: |
@@ -470,9 +468,15 @@ jobs:
           path: ps0-harness
           sparse-checkout: experiments/ps0/tests
           persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          path: recovery-runner
+          persist-credentials: false
       - name: Verify exact build harness revision
         run: |
           test "$(git -C "$GITHUB_WORKSPACE/ps0-harness" rev-parse HEAD)" = "5cfaede4b3aa5d1e521456866cc9f360f8ade15a"
+          test -s "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-checkpoint-recovery-early-targets.json"
           printf '%s\n' 'PS0_BUILD_HARNESS_SHA=5cfaede4b3aa5d1e521456866cc9f360f8ade15a' >> "$GITHUB_ENV"
       - uses: actions/cache/restore@v4
         id: ps0-elan-input
@@ -575,11 +579,6 @@ jobs:
       run:
         working-directory: experiments/ps0
     steps:
-      - uses: actions/checkout@v4
-        with:
-          sparse-checkout: ci
-          path: recovery-runner
-          persist-credentials: false
       - name: Read exact source pin
         working-directory: .
         run: |
@@ -604,9 +603,15 @@ jobs:
           path: ps0-harness
           sparse-checkout: experiments/ps0/tests
           persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          path: recovery-runner
+          persist-credentials: false
       - name: Verify exact build harness revision
         run: |
           test "$(git -C "$GITHUB_WORKSPACE/ps0-harness" rev-parse HEAD)" = "5cfaede4b3aa5d1e521456866cc9f360f8ade15a"
+          test -s "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-checkpoint-recovery-early-targets.json"
           printf '%s\n' 'PS0_BUILD_HARNESS_SHA=5cfaede4b3aa5d1e521456866cc9f360f8ade15a' >> "$GITHUB_ENV"
       - uses: actions/cache/restore@v4
         id: ps0-elan-input
@@ -710,11 +715,6 @@ jobs:
       run:
         working-directory: experiments/ps0
     steps:
-      - uses: actions/checkout@v4
-        with:
-          sparse-checkout: ci
-          path: recovery-runner
-          persist-credentials: false
       - name: Read exact source pin
         working-directory: .
         run: |
@@ -739,9 +739,15 @@ jobs:
           path: ps0-harness
           sparse-checkout: experiments/ps0/tests
           persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          path: recovery-runner
+          persist-credentials: false
       - name: Verify exact build harness revision
         run: |
           test "$(git -C "$GITHUB_WORKSPACE/ps0-harness" rev-parse HEAD)" = "5cfaede4b3aa5d1e521456866cc9f360f8ade15a"
+          test -s "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-checkpoint-recovery-early-targets.json"
           printf '%s\n' 'PS0_BUILD_HARNESS_SHA=5cfaede4b3aa5d1e521456866cc9f360f8ade15a' >> "$GITHUB_ENV"
       - uses: actions/cache/restore@v4
         id: ps0-elan-input
@@ -845,11 +851,6 @@ jobs:
       run:
         working-directory: experiments/ps0
     steps:
-      - uses: actions/checkout@v4
-        with:
-          sparse-checkout: ci
-          path: recovery-runner
-          persist-credentials: false
       - name: Read exact source pin
         working-directory: .
         run: |
@@ -874,9 +875,15 @@ jobs:
           path: ps0-harness
           sparse-checkout: experiments/ps0/tests
           persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          path: recovery-runner
+          persist-credentials: false
       - name: Verify exact build harness revision
         run: |
           test "$(git -C "$GITHUB_WORKSPACE/ps0-harness" rev-parse HEAD)" = "5cfaede4b3aa5d1e521456866cc9f360f8ade15a"
+          test -s "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-checkpoint-recovery-early-targets.json"
           printf '%s\n' 'PS0_BUILD_HARNESS_SHA=5cfaede4b3aa5d1e521456866cc9f360f8ade15a' >> "$GITHUB_ENV"
       - uses: actions/cache/restore@v4
         id: ps0-elan-input

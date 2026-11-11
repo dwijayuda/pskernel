@@ -131,6 +131,14 @@ jobs:
         run: |
           set -euo pipefail
           python3 tests/compiler_build_checkpoint.py unpack "$GITHUB_WORKSPACE/checkpoint-download/compiler-checkpoint.tar.gz" "$PWD"
+      - name: Install debugger for the isolated compiler process
+        run: |
+          set -euo pipefail
+          if ! command -v gdb >/dev/null; then
+            sudo -n apt-get update -qq
+            sudo -n apt-get install -y -qq gdb
+          fi
+          gdb --version | head -n 1
       - name: Reproduce the NoConfusion target from the exact early checkpoint
         run: |
           set -euo pipefail

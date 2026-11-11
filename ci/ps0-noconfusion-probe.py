@@ -58,7 +58,7 @@ samples = []
 with (evidence / 'lake.log').open('w') as log:
     process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
     try:
-        for _ in range(30):
+        for _ in range(8):
             try:
                 process.wait(timeout=30)
                 break
@@ -67,15 +67,15 @@ with (evidence / 'lake.log').open('w') as log:
                 sample = {'elapsed_seconds': int(time.monotonic() - start), 'target_processes': pids}
                 samples.append(sample)
                 print('PS0_NOCONFUSION_PROBE_SAMPLE', json.dumps(sample), flush=True)
-                if pids and shutil.which('gdb') and len(samples) in [2, 4, 8, 16]:
+                if pids and shutil.which('gdb') and len(samples) in [2, 4, 8]:
                     for pid in pids:
-                        result = subprocess.run(['sudo', '-n', 'timeout', '15', 'gdb', '-nx', '-batch',
-                            '-ex', 'set pagination off', '-ex', 'thread apply all bt 24', '-p', pid],
+                        result = subprocess.run(['sudo', '-n', 'timeout', '30', 'gdb', '-nx', '-batch',
+                            '-ex', 'set pagination off', '-ex', 'thread apply all bt 45', '-p', pid],
                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
                         (evidence / ('stack-' + str(len(samples)) + '-' + pid + '.log')).write_text(result.stdout)
                         print('PS0_NOCONFUSION_STACK', pid, result.returncode, flush=True)
-                        relevant = [line for line in result.stdout.splitlines() if 'Parser' in line or 'Elab' in line or 'Compiler' in line]
-                        print('\n'.join(relevant[-30:]), flush=True)
+                        relevant = [line for line in result.stdout.splitlines() if any(s in line for s in ('PS0', 'Parser', 'Elab', 'Compiler', 'futex', 'wait'))]
+                        print('\n'.join(relevant[-120:]), flush=True)
     finally:
         if process.poll() is None:
             os.killpg(process.pid, signal.SIGTERM)

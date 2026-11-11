@@ -52,30 +52,56 @@ def target_pids():
             yield command_line.parent.name
 
 
+def prefix_checks(pid):
+    setup = build / 'ir/Lean/Meta/Constructions/NoConfusion.setup.json'
+    assert setup.is_file(), setup
+    command_environment = dict(os.environ)
+    for item in (Path('/proc') / pid / 'environ').read_bytes().split(b'\0'):
+        key, separator, value = item.partition(b'=')
+        if separator and key in [b'LEAN_PATH', b'LEAN_SYSROOT', b'LEAN_SRC_PATH']:
+            command_environment[os.fsdecode(key)] = os.fsdecode(value)
+    raw = original.read_bytes()
+    ps_lines = target.read_bytes().splitlines(keepends=True)
+    plan = json.loads((root / 'build/compiler-evidence/current-source-plans' / module / 'plan.json').read_text())
+    assert len(raw.splitlines()) == len(ps_lines) and plan['line_count_preserved']
+    starts = [(raw[:d['keywordRange']['start']].count(b'\n'), d['sourceName']) for d in plan['strategies']]
+    assert len(starts) >= 10 and starts == sorted(starts)
+    output = []
+    for index in range(len(starts)):
+        end = starts[index + 1][0] if index + 1 < len(starts) else len(ps_lines)
+        prefix = evidence / ('prefix-' + str(index) + '.ps')
+        prefix.write_bytes(b''.join(ps_lines[:end]))
+        t = time.monotonic()
+        result = subprocess.run(['timeout', '--kill-after=3', '18', str(driver), str(prefix),
+                                 '--setup', str(setup), '--json'], env=command_environment,
+                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        (evidence / ('prefix-' + str(index) + '.log')).write_text(result.stdout)
+        record = {'declaration': starts[index][1], 'start_line': starts[index][0] + 1,
+                  'last_line': end, 'elapsed_seconds': round(time.monotonic() - t, 2), 'exit': result.returncode}
+        output.append(record)
+        print('PS0_NOCONFUSION_PREFIX', json.dumps(record), flush=True)
+        if result.returncode in (124, 137):
+            print('PS0_NOCONFUSION_FIRST_SLOW_DECLARATION', starts[index][1], flush=True)
+            for line_index in range(starts[index][0], min(end, starts[index][0] + 75)):
+                print(str(line_index + 1) + ' ' + ps_lines[line_index].decode().rstrip(), flush=True)
+            break
+    (evidence / 'prefix-results.json').write_text(json.dumps(output, indent=2) + '\n')
+
+
 print('PS0_NOCONFUSION_PROBE_START', module, 'verified_files', len(checkpoint['files']), flush=True)
-start = time.monotonic()
-samples = []
 with (evidence / 'lake.log').open('w') as log:
     process = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
     try:
-        for _ in range(8):
-            try:
-                process.wait(timeout=30)
+        for _ in range(90):
+            if process.poll() is not None:
+                raise RuntimeError('Lake finished before the prefix diagnosis: ' + str(process.returncode))
+            pids = list(target_pids())
+            if pids:
+                prefix_checks(pids[0])
                 break
-            except subprocess.TimeoutExpired:
-                pids = list(target_pids())
-                sample = {'elapsed_seconds': int(time.monotonic() - start), 'target_processes': pids}
-                samples.append(sample)
-                print('PS0_NOCONFUSION_PROBE_SAMPLE', json.dumps(sample), flush=True)
-                if pids and shutil.which('gdb') and len(samples) in [2, 4, 8]:
-                    for pid in pids:
-                        result = subprocess.run(['sudo', '-n', 'timeout', '30', 'gdb', '-nx', '-batch',
-                            '-ex', 'set pagination off', '-ex', 'thread apply all bt 45', '-p', pid],
-                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-                        (evidence / ('stack-' + str(len(samples)) + '-' + pid + '.log')).write_text(result.stdout)
-                        print('PS0_NOCONFUSION_STACK', pid, result.returncode, flush=True)
-                        relevant = [line for line in result.stdout.splitlines() if any(s in line for s in ('PS0', 'Parser', 'Elab', 'Compiler', 'futex', 'wait'))]
-                        print('\n'.join(relevant[-120:]), flush=True)
+            time.sleep(2)
+        else:
+            raise RuntimeError('NoConfusion module process did not start')
     finally:
         if process.poll() is None:
             os.killpg(process.pid, signal.SIGTERM)
@@ -84,11 +110,3 @@ with (evidence / 'lake.log').open('w') as log:
             except subprocess.TimeoutExpired:
                 os.killpg(process.pid, signal.SIGKILL)
                 process.wait()
-status = {'schema': 'ps0-noconfusion-exact-lake-probe/1', 'module': module,
-          'source': 'b75a583592dc8bbe9046fd6e93784d8ef0365580', 'checkpoint_artifact': 13870203959,
-          'native_sdk_exit': baseline.returncode, 'lake_exit': process.returncode,
-          'elapsed_seconds': int(time.monotonic() - start), 'samples': samples}
-(evidence / 'probe.json').write_text(json.dumps(status, indent=2) + '\n')
-print('PS0_NOCONFUSION_PROBE_RESULT', json.dumps(status), flush=True)
-print((evidence / 'lake.log').read_text()[-10000:], flush=True)
-raise SystemExit(0 if process.returncode == 0 else 1)

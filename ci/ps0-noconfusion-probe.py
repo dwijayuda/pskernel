@@ -52,7 +52,8 @@ def target_pids():
             yield command_line.parent.name
 
 
-def prefix_checks(pid):
+def candidate_check(pid):
+    candidate = Path(os.environ['PS0_PARSER_CANDIDATE'])
     setup = build / 'ir/Lean/Meta/Constructions/NoConfusion.setup.json'
     assert setup.is_file(), setup
     command_environment = dict(os.environ)
@@ -65,28 +66,26 @@ def prefix_checks(pid):
     plan = json.loads((root / 'build/compiler-evidence/current-source-plans' / module / 'plan.json').read_text())
     assert len(raw.splitlines()) == len(ps_lines) and plan['line_count_preserved']
     starts = [(raw[:d['keywordRange']['start']].count(b'\n'), d['sourceName']) for d in plan['strategies']]
-    assert len(starts) >= 10 and starts == sorted(starts)
-    output = []
-    for index in range(len(starts)):
-        end = starts[index + 1][0] if index + 1 < len(starts) else len(ps_lines)
-        prefix = evidence / ('prefix-' + str(index) + '.ps')
-        prefix.write_bytes(b''.join(ps_lines[:end]))
-        t = time.monotonic()
-        result = subprocess.run(['timeout', '--kill-after=3', '18', str(driver), str(prefix),
-                                 '--setup', str(setup), '--json'], env=command_environment,
+    assert starts[0] == (28, 'mkNoConfusionCtorArg') and starts[1][0] == 52
+    prefix = evidence / 'prefix.ps'
+    prefix.write_bytes(b''.join(ps_lines[:starts[1][0]]))
+    outputs = {'-o': evidence / 'NoConfusion.olean', '-i': evidence / 'NoConfusion.ilean', '-c': evidence / 'NoConfusion.c'}
+    checks = [('prefix', prefix, 18, []),
+              ('module', target, 240, [str(item) for pair in outputs.items() for item in pair])]
+    for label, source, seconds, options in checks:
+        started = time.monotonic()
+        result = subprocess.run(['timeout', '--kill-after=3', str(seconds), str(candidate), str(source),
+                                 '--setup', str(setup), '--json', *options], env=command_environment,
                                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-        (evidence / ('prefix-' + str(index) + '.log')).write_text(result.stdout)
-        record = {'declaration': starts[index][1], 'start_line': starts[index][0] + 1,
-                  'last_line': end, 'elapsed_seconds': round(time.monotonic() - t, 2), 'exit': result.returncode}
-        output.append(record)
-        print('PS0_NOCONFUSION_PREFIX', json.dumps(record), flush=True)
-        if result.returncode in (124, 137):
-            print('PS0_NOCONFUSION_FIRST_SLOW_DECLARATION', starts[index][1], flush=True)
-            for line_index in range(starts[index][0], min(end, starts[index][0] + 75)):
-                print(str(line_index + 1) + ' ' + ps_lines[line_index].decode().rstrip(), flush=True)
-            break
-    (evidence / 'prefix-results.json').write_text(json.dumps(output, indent=2) + '\n')
-
+        (evidence / (label + '.log')).write_text(result.stdout)
+        print('PS0_NOCONFUSION_CANDIDATE', label, result.returncode, round(time.monotonic() - started, 2), flush=True)
+        if result.returncode:
+            print(result.stdout[-16000:], flush=True)
+            result.check_returncode()
+    for output in outputs.values():
+        assert output.stat().st_size > 0, output
+    shutil.copy2(setup, evidence / setup.name)
+    subprocess.run(['sha256sum', str(candidate), str(target), *(str(output) for output in outputs.values())], check=True)
 
 print('PS0_NOCONFUSION_PROBE_START', module, 'verified_files', len(checkpoint['files']), flush=True)
 with (evidence / 'lake.log').open('w') as log:
@@ -94,10 +93,10 @@ with (evidence / 'lake.log').open('w') as log:
     try:
         for _ in range(90):
             if process.poll() is not None:
-                raise RuntimeError('Lake finished before the prefix diagnosis: ' + str(process.returncode))
+                raise RuntimeError('Original Lake process finished before the candidate diagnosis: ' + str(process.returncode))
             pids = list(target_pids())
             if pids:
-                prefix_checks(pids[0])
+                candidate_check(pids[0])
                 break
             time.sleep(2)
         else:

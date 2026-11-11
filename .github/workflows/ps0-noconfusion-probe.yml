@@ -1,4 +1,4 @@
-name: PS0 NoConfusion exact Lake target diagnosis
+name: PS0 NoConfusion candidate parser regression
 on:
   pull_request:
     paths: [.github/workflows/ps0-noconfusion-probe.yml, ci/ps0-noconfusion-probe.py]
@@ -8,7 +8,7 @@ permissions:
 jobs:
   noconfusion:
     runs-on: ubuntu-22.04
-    timeout-minutes: 35
+    timeout-minutes: 50
     defaults:
       run:
         working-directory: experiments/ps0
@@ -110,6 +110,21 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$PS0_SOURCE_SHA"
           test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: 0c98bc2d0fefeadc242bdeec725a108a265a8111
+          path: ps0-parser-candidate
+          sparse-checkout: experiments/ps0
+          persist-credentials: false
+      - name: Build the candidate PS0 frontend with pinned Lean and Lake
+        working-directory: ps0-parser-candidate/experiments/ps0
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "0c98bc2d0fefeadc242bdeec725a108a265a8111"
+          lake build PS0 ps0
+          echo "PS0_PARSER_CANDIDATE=$PWD/.lake/build/bin/ps0" >> "$GITHUB_ENV"
+          sha256sum .lake/build/bin/ps0
       - name: Verify immutable early checkpoint identity
         uses: actions/github-script@v7
         with:
@@ -131,7 +146,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 tests/compiler_build_checkpoint.py unpack "$GITHUB_WORKSPACE/checkpoint-download/compiler-checkpoint.tar.gz" "$PWD"
-      - name: Locate the first slow NoConfusion declaration in the exact graph
+      - name: Compile the exact slow declaration and complete PS module
         run: |
           set -euo pipefail
           PYTHONPATH="$GITHUB_WORKSPACE/ps0-harness/experiments/ps0/tests" python3 "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-noconfusion-probe.py"

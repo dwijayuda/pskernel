@@ -1,4 +1,4 @@
-name: PS0 self-source two-stage fixed-point probe
+name: PS0 linked self-source census crash diagnosis
 on:
   pull_request:
     paths: [.github/workflows/ps0-self-grammar-probe.yml, ci/ps0-self-grammar-probe.py]
@@ -99,7 +99,12 @@ jobs:
           mkdir -p build/self-grammar-logs
           test "$(git rev-parse HEAD)" = "$PS0_SOURCE_SHA"
           lake build PS0 ps0 2>&1 | tee build/self-grammar-logs/bootstrap.log
-      - name: Rebuild and compare both PS0 self-source stages via Lake
+      - name: Install gdb for the isolated compiler diagnosis
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq gdb
+      - name: Diagnose the linked PS0 Binders census
         run: |
           set -euo pipefail
           python3 "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-self-grammar-probe.py" 2>&1 | tee build/self-grammar-logs/self-build.log

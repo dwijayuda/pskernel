@@ -115,35 +115,24 @@ run(['python3', 'tests/run-relocated-grammar.py'], env={
 verified_prefix = root / 'build' / ('relocated-grammar-' + os.environ['GITHUB_RUN_ID'] + '-self-grammar-first') / 'prefix'
 ps_built_driver = verified_prefix / 'bin/ps0'
 assert sha(ps_built_driver) == sha(first_driver)
-second_plans = report / 'stage-two-plans'
-second_plans.mkdir()
+probe = report / 'binders-census-reproduction'
+probe.mkdir()
+original = plans / 'PS0.Binders' / 'original.ps'
+interpreted = probe / 'interpreted.ps'
+text = original.read_text()
+marker = 'public meta section\n'
+assert text.count(marker) == 1
+interpreted.write_text(text.replace(marker, 'set_option interpreter.prefer_native false\n' + marker))
 self_env = {**os.environ, 'LEAN_PATH': str(verified_prefix / 'lib/lean')}
-for module, target in files.items():
-    module_plan = second_plans / module
-    module_plan.mkdir()
-    rel = target.relative_to(source)
-    original, census, converted, plan = [module_plan / file for file in
-                                        ['original.ps', 'native-census.json', 'converted.ps', 'plan.json']]
-    run([ps_built_driver, 'convert-native', root / rel.with_suffix('.lean'), original])
-    assert sha(original) == sha(plans / module / 'original.ps'), module
-    run([ps_built_driver, 'census-source', original, module, census], env=self_env)
-    run(['python3', 'tests/migrate-compiler-heads.py', census, original, converted, '--plan', plan, '--allow-empty'])
-    assert sha(converted) == sha(target), module
-print('PS0_SELF_GRAMMAR_STAGE_TWO_PLANS: PASS', len(files), flush=True)
-shutil.copytree(sysroot / 'include', second / 'include')
-second_lake = [('-Kdriver=' + str(ps_built_driver)) if arg.startswith('-Kdriver=') else arg for arg in lake]
-run([*second_lake, '-KsourceGrammar=true', '-KprojectBuildDir=' + str(second), 'build', 'PS0Project:static', 'ps0project'])
-outputs['second'] = validate_outputs(second, 'second')
-run(['python3', 'tests/run-relocated-grammar.py'], env={
-    **os.environ, 'PS0_PACKAGE_DRIVER': str(second / 'bin/ps0project'),
-    'PS0_PACKAGE_METADATA': str(second / 'lib/lean'), 'PS0_PACKAGE_TAG': '-self-grammar-second',
-})
-changed = {facet: [module for module in files if outputs['first'][module][facet] != outputs['second'][module][facet]]
-           for facet in ['source', 'c', 'olean']}
-(report / 'qualification.json').write_text(json.dumps({
-    'source': os.environ['PS0_SOURCE_SHA'], 'modules': len(files), 'changes': changed,
-    'first_driver_sha256': sha(first_driver), 'second_driver_sha256': sha(second / 'bin/ps0project'),
-    'scope': 'PS0-owned sources in both stages using pinned SDK dependencies, with actual first-stage prefix',
-}, indent=2) + '\n')
-assert not any(changed.values()), changed
-print('PS0_SELF_GRAMMAR_FIXED_POINT: PASS', len(files), flush=True)
+for label, candidate in [('exact', original), ('interpret-current-stage', interpreted)]:
+    command = [str(ps_built_driver), 'census-source', str(candidate), 'PS0.Binders', str(probe / (label + '.json'))]
+    completed = subprocess.run(['timeout', '--kill-after=5', '60', *command], env=self_env,
+                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    (probe / (label + '.log')).write_text(completed.stdout)
+    print('PS0_SELF_CENSUS_DIAGNOSIS', label, completed.returncode, completed.stdout[-4000:], flush=True)
+    if completed.returncode:
+        debug = subprocess.run(['timeout', '--kill-after=5', '90', 'gdb', '-q', '-batch',
+                                '-ex', 'set pagination off', '-ex', 'run', '-ex', 'bt 45', '--args', *command],
+                               env=self_env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        (probe / (label + '-gdb.log')).write_text(debug.stdout)
+        print(debug.stdout[-16000:], flush=True)

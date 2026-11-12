@@ -52,6 +52,17 @@ for module, target in files.items():
     assert planned['line_count_preserved'] and planned['result_sha256'] == sha(target)
     shutil.copy2(target, module_plan / 'converted.ps')
 assert not list(source.rglob('*.lean'))
+frontend = plans / 'PS0.LakeFrontend'
+native = json.loads((frontend / 'native-census.json').read_text())
+compile_choices = [c for c in native['commands'] if (c.get('declaration') or {}).get('sourceName') == 'compile']
+assert len(compile_choices) == 1 and compile_choices[0]['kind'] == 'choice', compile_choices
+original = (frontend / 'original.ps').read_text().splitlines()
+generated = files['PS0.LakeFrontend'].read_text().splitlines()
+assert len(original) == len(generated) and original[242].strip() == '| [] => pure ()'
+assert generated[242].strip() == '| [] => pure(())', generated[242]
+print('PS0_SELF_GRAMMAR_NATIVE_CHOICE', compile_choices[0]['kind'], generated[242].strip(), flush=True)
+sysroot = Path(subprocess.check_output(['lean', '--print-prefix'], text=True).strip())
+shutil.copytree(sysroot / 'include', compiled / 'include')
 run([*lake, '-KsourceGrammar=true', '-KprojectBuildDir=' + str(compiled), 'build', 'PS0Project:static', 'ps0project'])
 outputs = {}
 for module, target in files.items():

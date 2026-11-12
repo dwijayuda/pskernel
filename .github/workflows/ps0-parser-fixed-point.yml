@@ -1,4 +1,4 @@
-name: PS0 parser repair clean two-stage native build
+name: PS0 scoped grammar clean two-stage native build
 on:
   pull_request:
     paths: [.github/workflows/ps0-parser-fixed-point.yml, ci/ps0-parser-fixed-point-targets.json]
@@ -43,7 +43,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"0c98bc2d0fefeadc242bdeec725a108a265a8111"}
+          pin={"repository":"dwijayuda/lean4","commit":"bff5d8296cd8798f8c3e9e954ef695f77ea0aec4"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -170,14 +170,14 @@ jobs:
           python3 tests/compiler_build_checkpoint.py pack "$PWD" "$PWD/build/compiler-checkpoint.json" "$PWD/build/compiler-checkpoint.tar.gz"
       - uses: actions/upload-artifact@v4
         with:
-          name: ps0-compiler-checkpoint-1-base-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-compiler-checkpoint-1-base-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: experiments/ps0/build/compiler-checkpoint.tar.gz
           compression-level: 0
           if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ps0-compiler-slice-evidence-1-base-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-compiler-slice-evidence-1-base-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: |
             experiments/ps0/build/transformed-corpus-logs/
             experiments/ps0/build/compiler-evidence/
@@ -195,7 +195,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"0c98bc2d0fefeadc242bdeec725a108a265a8111"}
+          pin={"repository":"dwijayuda/lean4","commit":"bff5d8296cd8798f8c3e9e954ef695f77ea0aec4"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -289,7 +289,7 @@ jobs:
           test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
       - uses: actions/download-artifact@v4
         with:
-          name: ps0-compiler-checkpoint-1-base-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-compiler-checkpoint-1-base-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: checkpoint-download
       - name: Restore exact checkpoint files
         run: |
@@ -302,14 +302,14 @@ jobs:
           python3 tests/compiler_build_checkpoint.py pack "$PWD" "$PWD/build/compiler-checkpoint.json" "$PWD/build/compiler-checkpoint.tar.gz"
       - uses: actions/upload-artifact@v4
         with:
-          name: ps0-compiler-checkpoint-1-compiler-early-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-compiler-checkpoint-1-compiler-early-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: experiments/ps0/build/compiler-checkpoint.tar.gz
           compression-level: 0
           if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ps0-compiler-slice-evidence-1-compiler-early-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-compiler-slice-evidence-1-compiler-early-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: |
             experiments/ps0/build/transformed-corpus-logs/
             experiments/ps0/build/compiler-evidence/
@@ -327,7 +327,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"0c98bc2d0fefeadc242bdeec725a108a265a8111"}
+          pin={"repository":"dwijayuda/lean4","commit":"bff5d8296cd8798f8c3e9e954ef695f77ea0aec4"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -421,7 +421,7 @@ jobs:
           test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
       - uses: actions/download-artifact@v4
         with:
-          name: ps0-compiler-checkpoint-1-compiler-early-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-compiler-checkpoint-1-compiler-early-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: checkpoint-download
       - name: Restore exact checkpoint files
         run: |
@@ -434,14 +434,14 @@ jobs:
           python3 tests/compiler_build_checkpoint.py pack "$PWD" "$PWD/build/compiler-checkpoint.json" "$PWD/build/compiler-checkpoint.tar.gz"
       - uses: actions/upload-artifact@v4
         with:
-          name: ps0-compiler-checkpoint-1-compiler-middle-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-compiler-checkpoint-1-compiler-middle-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: experiments/ps0/build/compiler-checkpoint.tar.gz
           compression-level: 0
           if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ps0-compiler-slice-evidence-1-compiler-middle-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-compiler-slice-evidence-1-compiler-middle-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: |
             experiments/ps0/build/transformed-corpus-logs/
             experiments/ps0/build/compiler-evidence/
@@ -459,7 +459,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"0c98bc2d0fefeadc242bdeec725a108a265a8111"}
+          pin={"repository":"dwijayuda/lean4","commit":"bff5d8296cd8798f8c3e9e954ef695f77ea0aec4"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -553,7 +553,7 @@ jobs:
           test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
       - uses: actions/download-artifact@v4
         with:
-          name: ps0-compiler-checkpoint-1-compiler-middle-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-compiler-checkpoint-1-compiler-middle-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: checkpoint-download
       - name: Restore exact checkpoint files
         run: |
@@ -566,14 +566,14 @@ jobs:
           python3 tests/compiler_build_checkpoint.py pack "$PWD" "$PWD/build/compiler-checkpoint.json" "$PWD/build/compiler-checkpoint.tar.gz"
       - uses: actions/upload-artifact@v4
         with:
-          name: ps0-compiler-checkpoint-1-compiler-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-compiler-checkpoint-1-compiler-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: experiments/ps0/build/compiler-checkpoint.tar.gz
           compression-level: 0
           if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ps0-compiler-slice-evidence-1-compiler-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-compiler-slice-evidence-1-compiler-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: |
             experiments/ps0/build/transformed-corpus-logs/
             experiments/ps0/build/compiler-evidence/
@@ -591,7 +591,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"0c98bc2d0fefeadc242bdeec725a108a265a8111"}
+          pin={"repository":"dwijayuda/lean4","commit":"bff5d8296cd8798f8c3e9e954ef695f77ea0aec4"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -685,7 +685,7 @@ jobs:
           test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
       - uses: actions/download-artifact@v4
         with:
-          name: ps0-compiler-checkpoint-1-compiler-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-compiler-checkpoint-1-compiler-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: checkpoint-download
       - name: Restore exact checkpoint files
         run: |
@@ -699,7 +699,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ps0-selfhost-stage-one-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-selfhost-stage-one-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: |
             experiments/ps0/build/transformed-corpus-logs/
             experiments/ps0/build/compiler-evidence/
@@ -717,7 +717,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"0c98bc2d0fefeadc242bdeec725a108a265a8111"}
+          pin={"repository":"dwijayuda/lean4","commit":"bff5d8296cd8798f8c3e9e954ef695f77ea0aec4"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -811,7 +811,7 @@ jobs:
           test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
       - uses: actions/download-artifact@v4
         with:
-          name: ps0-selfhost-stage-one-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-selfhost-stage-one-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: previous-stage
       - uses: actions/download-artifact@v4
         with:
@@ -823,18 +823,18 @@ jobs:
       - name: Native Lake PS-built compiler base slice
         run: |
           set -euo pipefail
-          python3 "$GITHUB_WORKSPACE/ps0-harness/experiments/ps0/tests/run-compiler-ps.py" --workspace "$PWD" --stage-artifact "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --stage-source 0c98bc2d0fefeadc242bdeec725a108a265a8111 --source-plans "$GITHUB_WORKSPACE/source-plans" --plan-source bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f --native-censuses "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --census-source 0c98bc2d0fefeadc242bdeec725a108a265a8111 --build-slice base
+          python3 "$GITHUB_WORKSPACE/ps0-harness/experiments/ps0/tests/run-compiler-ps.py" --workspace "$PWD" --stage-artifact "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --stage-source bff5d8296cd8798f8c3e9e954ef695f77ea0aec4 --source-plans "$GITHUB_WORKSPACE/source-plans" --plan-source bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f --native-censuses "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --census-source bff5d8296cd8798f8c3e9e954ef695f77ea0aec4 --build-slice base
           python3 tests/compiler_build_checkpoint.py pack "$PWD" "$PWD/build/compiler-checkpoint.json" "$PWD/build/compiler-checkpoint.tar.gz"
       - uses: actions/upload-artifact@v4
         with:
-          name: ps0-compiler-checkpoint-2-base-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-compiler-checkpoint-2-base-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: experiments/ps0/build/compiler-checkpoint.tar.gz
           compression-level: 0
           if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ps0-compiler-slice-evidence-2-base-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-compiler-slice-evidence-2-base-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: |
             experiments/ps0/build/transformed-corpus-logs/
             experiments/ps0/build/compiler-evidence/
@@ -852,7 +852,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"0c98bc2d0fefeadc242bdeec725a108a265a8111"}
+          pin={"repository":"dwijayuda/lean4","commit":"bff5d8296cd8798f8c3e9e954ef695f77ea0aec4"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -946,11 +946,11 @@ jobs:
           test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
       - uses: actions/download-artifact@v4
         with:
-          name: ps0-selfhost-stage-one-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-selfhost-stage-one-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: previous-stage
       - uses: actions/download-artifact@v4
         with:
-          name: ps0-compiler-checkpoint-2-base-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-compiler-checkpoint-2-base-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: checkpoint-download
       - name: Restore exact checkpoint files
         run: |
@@ -959,18 +959,18 @@ jobs:
       - name: Native Lake PS-built compiler early Lean targets
         run: |
           set -euo pipefail
-          python3 "$GITHUB_WORKSPACE/ps0-harness/experiments/ps0/tests/run-compiler-ps.py" --workspace "$PWD" --stage-artifact "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --stage-source 0c98bc2d0fefeadc242bdeec725a108a265a8111 --source-plans "$GITHUB_WORKSPACE/source-plans" --plan-source bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f --resume-build build/compiler-checkpoint.json --build-slice compiler --compiler-part early --compiler-target-plan "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-parser-fixed-point-targets.json"
+          python3 "$GITHUB_WORKSPACE/ps0-harness/experiments/ps0/tests/run-compiler-ps.py" --workspace "$PWD" --stage-artifact "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --stage-source bff5d8296cd8798f8c3e9e954ef695f77ea0aec4 --source-plans "$GITHUB_WORKSPACE/source-plans" --plan-source bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f --resume-build build/compiler-checkpoint.json --build-slice compiler --compiler-part early --compiler-target-plan "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-parser-fixed-point-targets.json"
           python3 tests/compiler_build_checkpoint.py pack "$PWD" "$PWD/build/compiler-checkpoint.json" "$PWD/build/compiler-checkpoint.tar.gz"
       - uses: actions/upload-artifact@v4
         with:
-          name: ps0-compiler-checkpoint-2-compiler-early-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-compiler-checkpoint-2-compiler-early-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: experiments/ps0/build/compiler-checkpoint.tar.gz
           compression-level: 0
           if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ps0-compiler-slice-evidence-2-compiler-early-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-compiler-slice-evidence-2-compiler-early-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: |
             experiments/ps0/build/transformed-corpus-logs/
             experiments/ps0/build/compiler-evidence/
@@ -988,7 +988,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"0c98bc2d0fefeadc242bdeec725a108a265a8111"}
+          pin={"repository":"dwijayuda/lean4","commit":"bff5d8296cd8798f8c3e9e954ef695f77ea0aec4"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -1082,11 +1082,11 @@ jobs:
           test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
       - uses: actions/download-artifact@v4
         with:
-          name: ps0-selfhost-stage-one-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-selfhost-stage-one-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: previous-stage
       - uses: actions/download-artifact@v4
         with:
-          name: ps0-compiler-checkpoint-2-compiler-early-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-compiler-checkpoint-2-compiler-early-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: checkpoint-download
       - name: Restore exact checkpoint files
         run: |
@@ -1095,18 +1095,18 @@ jobs:
       - name: Native Lake PS-built compiler middle Lean targets
         run: |
           set -euo pipefail
-          python3 "$GITHUB_WORKSPACE/ps0-harness/experiments/ps0/tests/run-compiler-ps.py" --workspace "$PWD" --stage-artifact "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --stage-source 0c98bc2d0fefeadc242bdeec725a108a265a8111 --source-plans "$GITHUB_WORKSPACE/source-plans" --plan-source bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f --resume-build build/compiler-checkpoint.json --build-slice compiler --compiler-part middle --compiler-target-plan "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-parser-fixed-point-targets.json"
+          python3 "$GITHUB_WORKSPACE/ps0-harness/experiments/ps0/tests/run-compiler-ps.py" --workspace "$PWD" --stage-artifact "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --stage-source bff5d8296cd8798f8c3e9e954ef695f77ea0aec4 --source-plans "$GITHUB_WORKSPACE/source-plans" --plan-source bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f --resume-build build/compiler-checkpoint.json --build-slice compiler --compiler-part middle --compiler-target-plan "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-parser-fixed-point-targets.json"
           python3 tests/compiler_build_checkpoint.py pack "$PWD" "$PWD/build/compiler-checkpoint.json" "$PWD/build/compiler-checkpoint.tar.gz"
       - uses: actions/upload-artifact@v4
         with:
-          name: ps0-compiler-checkpoint-2-compiler-middle-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-compiler-checkpoint-2-compiler-middle-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: experiments/ps0/build/compiler-checkpoint.tar.gz
           compression-level: 0
           if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ps0-compiler-slice-evidence-2-compiler-middle-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-compiler-slice-evidence-2-compiler-middle-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: |
             experiments/ps0/build/transformed-corpus-logs/
             experiments/ps0/build/compiler-evidence/
@@ -1124,7 +1124,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"0c98bc2d0fefeadc242bdeec725a108a265a8111"}
+          pin={"repository":"dwijayuda/lean4","commit":"bff5d8296cd8798f8c3e9e954ef695f77ea0aec4"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -1218,11 +1218,11 @@ jobs:
           test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
       - uses: actions/download-artifact@v4
         with:
-          name: ps0-selfhost-stage-one-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-selfhost-stage-one-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: previous-stage
       - uses: actions/download-artifact@v4
         with:
-          name: ps0-compiler-checkpoint-2-compiler-middle-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-compiler-checkpoint-2-compiler-middle-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: checkpoint-download
       - name: Restore exact checkpoint files
         run: |
@@ -1231,18 +1231,18 @@ jobs:
       - name: Native Lake PS-built compiler final nine Lean targets
         run: |
           set -euo pipefail
-          python3 "$GITHUB_WORKSPACE/ps0-harness/experiments/ps0/tests/run-compiler-ps.py" --workspace "$PWD" --stage-artifact "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --stage-source 0c98bc2d0fefeadc242bdeec725a108a265a8111 --source-plans "$GITHUB_WORKSPACE/source-plans" --plan-source bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f --resume-build build/compiler-checkpoint.json --build-slice compiler --compiler-part late --compiler-target-plan "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-parser-fixed-point-targets.json"
+          python3 "$GITHUB_WORKSPACE/ps0-harness/experiments/ps0/tests/run-compiler-ps.py" --workspace "$PWD" --stage-artifact "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --stage-source bff5d8296cd8798f8c3e9e954ef695f77ea0aec4 --source-plans "$GITHUB_WORKSPACE/source-plans" --plan-source bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f --resume-build build/compiler-checkpoint.json --build-slice compiler --compiler-part late --compiler-target-plan "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-parser-fixed-point-targets.json"
           python3 tests/compiler_build_checkpoint.py pack "$PWD" "$PWD/build/compiler-checkpoint.json" "$PWD/build/compiler-checkpoint.tar.gz"
       - uses: actions/upload-artifact@v4
         with:
-          name: ps0-compiler-checkpoint-2-compiler-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-compiler-checkpoint-2-compiler-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: experiments/ps0/build/compiler-checkpoint.tar.gz
           compression-level: 0
           if-no-files-found: error
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ps0-compiler-slice-evidence-2-compiler-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-compiler-slice-evidence-2-compiler-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: |
             experiments/ps0/build/transformed-corpus-logs/
             experiments/ps0/build/compiler-evidence/
@@ -1260,7 +1260,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"0c98bc2d0fefeadc242bdeec725a108a265a8111"}
+          pin={"repository":"dwijayuda/lean4","commit":"bff5d8296cd8798f8c3e9e954ef695f77ea0aec4"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -1354,11 +1354,11 @@ jobs:
           test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
       - uses: actions/download-artifact@v4
         with:
-          name: ps0-selfhost-stage-one-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-selfhost-stage-one-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: previous-stage
       - uses: actions/download-artifact@v4
         with:
-          name: ps0-compiler-checkpoint-2-compiler-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-compiler-checkpoint-2-compiler-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: checkpoint-download
       - name: Restore exact checkpoint files
         run: |
@@ -1367,12 +1367,12 @@ jobs:
       - name: Native Lake PS-built compiler finish slice
         run: |
           set -euo pipefail
-          python3 "$GITHUB_WORKSPACE/ps0-harness/experiments/ps0/tests/run-compiler-ps.py" --workspace "$PWD" --stage-artifact "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --stage-source 0c98bc2d0fefeadc242bdeec725a108a265a8111 --source-plans "$GITHUB_WORKSPACE/source-plans" --plan-source bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f --resume-build build/compiler-checkpoint.json --build-slice finish
+          python3 "$GITHUB_WORKSPACE/ps0-harness/experiments/ps0/tests/run-compiler-ps.py" --workspace "$PWD" --stage-artifact "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --stage-source bff5d8296cd8798f8c3e9e954ef695f77ea0aec4 --source-plans "$GITHUB_WORKSPACE/source-plans" --plan-source bb08239fa5caad63c3cf0cb9bea71cfaf23b1a1f --resume-build build/compiler-checkpoint.json --build-slice finish
           python3 tests/run-compiler-census.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ps0-selfhost-stage-two-0c98bc2d0fefeadc242bdeec725a108a265a8111-${{ github.run_id }}
+          name: ps0-selfhost-stage-two-bff5d8296cd8798f8c3e9e954ef695f77ea0aec4-${{ github.run_id }}
           path: |
             experiments/ps0/build/transformed-corpus-logs/
             experiments/ps0/build/compiler-evidence/

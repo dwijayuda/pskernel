@@ -1,0 +1,108 @@
+name: PS0 independent current-stage IR compiler fixed-point audit
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-audit-parser-fixed-point.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: 978d594a10fac8f6e5687190a22d70334b331dab
+          sparse-checkout: experiments/ps0
+          persist-credentials: false
+      - name: Verify complete producer chain and immutable stage artifacts
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const ref = {owner: 'dwijayuda', repo: 'pskernel', run_id: 43161199302};
+            const run = (await github.rest.actions.getWorkflowRun(ref)).data;
+            if (run.head_sha !== 'a12344e09baeb6fcee479b1934805de16e7c42b4' || run.status !== 'completed' || run.conclusion !== 'success') {
+              throw Error('exact recovered producer did not succeed');
+            }
+            const required = ['checkpoint-qualification', 'stage-one-base', 'stage-one-compiler-early',
+              'stage-one-compiler-middle', 'stage-one-compiler', 'stage-one', 'stage-two-base',
+              'stage-two-compiler-early', 'stage-two-compiler-middle', 'stage-two-compiler', 'stage-two'];
+            const exactJobs = {"checkpoint-qualification":130992905462,"stage-one-base":130992952236,"stage-one-compiler-early":131068141924,"stage-one-compiler-middle":131095296236,"stage-one-compiler":131112167389,"stage-one":131116729741,"stage-two-base":131124669250,"stage-two-compiler-early":131218562554,"stage-two-compiler-middle":131262212803,"stage-two-compiler":131277773131,"stage-two":131285603913};
+            const jobs = (await github.rest.actions.listJobsForWorkflowRun({...ref, per_page: 100})).data.jobs;
+            if (jobs.length !== required.length || required.some(name =>
+              jobs.filter(j => j.name === name && j.id === exactJobs[name] && j.status === 'completed' && j.conclusion === 'success').length !== 1)) {
+              throw Error('incomplete recovered compiler job chain');
+            }
+            const artifacts = (await github.rest.actions.listWorkflowRunArtifacts({...ref, per_page: 100})).data.artifacts;
+            const stages = [{"id":13934124327,"name":"ps0-selfhost-stage-one-978d594a10fac8f6e5687190a22d70334b331dab-43161199302","digest":"sha256:8c206edde04ade42d72faa33e191575c05b0662d757fd51d77b649baadc4dbbd","bytes":384532453},{"id":13960655720,"name":"ps0-selfhost-stage-two-978d594a10fac8f6e5687190a22d70334b331dab-43161199302","digest":"sha256:e1181ef53eb305d2b71938c0021acc1bd05f9faafadb058620311ec94b0ea4bb","bytes":384532234}];
+            for (const expected of stages) {
+              const actual = artifacts.find(a => a.id === expected.id);
+              if (!actual || actual.name !== expected.name || actual.digest !== expected.digest || actual.size_in_bytes !== expected.bytes || actual.expired) {
+                throw Error('stage artifact mismatch: ' + expected.name);
+              }
+            }
+            fs.mkdirSync('evidence', {recursive: true});
+            fs.writeFileSync('evidence/producer.json', JSON.stringify({
+              source: '978d594a10fac8f6e5687190a22d70334b331dab', harness: 'dc3c66b1c71cb64f96384a07599d50361e56137d', runner: run.head_sha, run: run.id,
+              jobs: jobs.map(j => ({id: j.id, name: j.name, conclusion: j.conclusion})), stages,
+            }, null, 2));
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 43161199302
+          name: ps0-selfhost-stage-one-978d594a10fac8f6e5687190a22d70334b331dab-43161199302
+          github-token: ${{ github.token }}
+          path: first
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 43161199302
+          name: ps0-selfhost-stage-two-978d594a10fac8f6e5687190a22d70334b331dab-43161199302
+          github-token: ${{ github.token }}
+          path: second
+      - name: Rehash retained sources, censuses and compiler prefixes and compare complete output receipts
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "978d594a10fac8f6e5687190a22d70334b331dab"
+          test "$(git hash-object experiments/ps0/PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
+          python3 experiments/ps0/tests/test-compiler-fixed-point-audit.py
+          python3 experiments/ps0/tests/audit-compiler-fixed-point.py first/compiler-evidence second/compiler-evidence --source 978d594a10fac8f6e5687190a22d70334b331dab --output evidence/audit.json | tee evidence/audit.log
+          python3 - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          receipts = {}
+          for stage in ['first', 'second']:
+              root = Path(stage) / 'compiler-evidence'
+              migration = json.loads((root / 'migration.json').read_text())
+              census = json.loads((root / 'source-census/summary.json').read_text())
+              receipts[stage] = {
+                  'driver_sha256': migration['driver_sha256'],
+                  'compiler_link_map_sha256': hashlib.sha256((root / 'compiler-link.map').read_bytes()).hexdigest(),
+                  'migration_sha256': hashlib.sha256((root / 'migration.json').read_bytes()).hexdigest(),
+                  'declaration_modes': census['declaration_modes'],
+                  'nested_declaration_modes': census['nested_declaration_modes'],
+              }
+              assert migration['build_harness_source'] == 'dc3c66b1c71cb64f96384a07599d50361e56137d'
+              assert migration['native_lake_graph_run_id'] == '43161199302'
+              phases = migration['native_lake_build_slices']
+              assert [p['phase'] for p in phases] == ['base', 'compiler', 'compiler', 'compiler', 'finish']
+              assert [p['compiler_part'] for p in phases[1:4]] == ['early', 'middle', 'late']
+              early, middle, late = (set(p['targets']) for p in phases[1:4])
+              targets = {m for m in migration['inputs'] if m == 'Lean' or m.startswith('Lean.')}
+              assert (len(early), len(middle), len(late)) == (850, 368, 9)
+              assert not (early & middle or early & late or middle & late)
+              assert early | middle | late == targets
+              assert all(p['producer_run_id'] == '43161199302' for p in phases[:-1])
+              assert all(p['source_commit'] == migration['source_commit'] for p in phases[:-1])
+              assert phases[-1]['targets'] == ['PS0Project:static', 'ps0project']
+          (Path('evidence') / 'stage-receipts.json').write_text(json.dumps(receipts, indent=2) + '\n')
+          print('PS0_AUDIT_STAGE_RECEIPTS', json.dumps(receipts))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-independent-parser-fixed-point-978d594a10fac8f6e5687190a22d70334b331dab-${{ github.run_id }}
+          path: evidence/
+          if-no-files-found: error

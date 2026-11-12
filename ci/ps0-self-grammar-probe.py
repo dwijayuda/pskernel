@@ -58,9 +58,12 @@ compile_choices = [c for c in native['commands'] if (c.get('declaration') or {})
 assert len(compile_choices) == 1 and compile_choices[0]['kind'] == 'choice', compile_choices
 original = (frontend / 'original.ps').read_text().splitlines()
 generated = files['PS0.LakeFrontend'].read_text().splitlines()
-assert len(original) == len(generated) and original[242].strip() == '| [] => pure ()'
-assert generated[242].strip() == '| [] => pure(())', generated[242]
-print('PS0_SELF_GRAMMAR_NATIVE_CHOICE', compile_choices[0]['kind'], generated[242].strip(), flush=True)
+assert len(original) == len(generated)
+branch_lines = [index for index, line in enumerate(original) if line.strip() == '| [] => pure ()']
+assert len(branch_lines) == 1, branch_lines
+branch = branch_lines[0]
+assert generated[branch].strip() == '| [] => pure(())', generated[branch]
+print('PS0_SELF_GRAMMAR_NATIVE_CHOICE', compile_choices[0]['kind'], branch + 1, generated[branch].strip(), flush=True)
 sysroot = Path(subprocess.check_output(['lean', '--print-prefix'], text=True).strip())
 shutil.copytree(sysroot / 'include', compiled / 'include')
 first_driver = compiled / 'bin/ps0project'

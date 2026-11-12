@@ -1,0 +1,1362 @@
+name: PS0 canonical ProofScript two-stage native build
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-canonical-two-stage.yml, ci/ps0-canonical-two-stage-targets.json]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: ps0-canonical-two-stage-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  checkpoint-qualification:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: a5160194aad78ff06acf55c42109ca1a5bb16f4d
+          sparse-checkout: |
+            src
+            experiments/ps0
+          persist-credentials: false
+      - name: Run canonical source and checkpoint contracts
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "a5160194aad78ff06acf55c42109ca1a5bb16f4d"
+          python3 -m py_compile experiments/ps0/tests/run-compiler-ps.py
+          python3 experiments/ps0/tests/test-canonical-compiler-sources.py
+          python3 experiments/ps0/tests/test-compiler-build-checkpoint.py
+          python3 experiments/ps0/tests/test-compiler-fixed-point-audit.py
+          PYTHONPATH=experiments/ps0/tests python3 - <<'PY'
+          import json, subprocess
+          from pathlib import Path
+          from canonical_compiler_sources import read_canonical_corpus
+          project = Path('experiments/ps0')
+          catalog = project / 'compiler-canonical-sources.json'
+          modules = read_canonical_corpus(Path.cwd(), catalog, json.loads((project / 'compiler-source-inventory.json').read_text()))
+          tracked = set(subprocess.check_output(['git', 'ls-files', '-z'], text=True).split('\0'))
+          assert len(modules) == 2569
+          assert {row['path'] for row in modules.values()} <= tracked
+          assert not any(path.endswith('.lean') and path.startswith('src/') for path in tracked)
+          print('PS0_CANONICAL_GIT_INVENTORY: PASS', len(modules))
+          PY
+      - name: Verify audited seed artifact identity
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const repo = {owner: 'dwijayuda', repo: 'pskernel'};
+            const seed = (await github.rest.actions.getArtifact({...repo, artifact_id: 13934124327})).data;
+            const audit = (await github.rest.actions.listJobsForWorkflowRun({...repo, run_id: 43254180674, per_page: 100})).data.jobs.find(job => job.id === 131307810313);
+            if (seed.expired || seed.workflow_run?.id !== 43161199302 ||
+                seed.workflow_run.head_sha !== 'a12344e09baeb6fcee479b1934805de16e7c42b4' ||
+                seed.digest !== 'sha256:8c206edde04ade42d72faa33e191575c05b0662d757fd51d77b649baadc4dbbd' ||
+                audit?.run_id !== 43254180674 || audit.conclusion !== 'success') {
+              throw Error('audited seed identity differs');
+            }
+  stage-one-base:
+    needs: checkpoint-qualification
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    defaults:
+      run:
+        working-directory: experiments/ps0
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          persist-credentials: false
+      - name: Read exact source pin
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          pin={"repository":"dwijayuda/lean4","commit":"a5160194aad78ff06acf55c42109ca1a5bb16f4d"}
+          assert pin['repository']=='dwijayuda/lean4'
+          assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('PS0_SOURCE_SHA='+pin['commit']+'\n')
+          PY
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: ${{ env.PS0_SOURCE_SHA }}
+          sparse-checkout: |
+            src
+            experiments/ps0
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          path: recovery-runner
+          persist-credentials: false
+      - uses: actions/cache/restore@v4
+        id: ps0-elan-input
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/restore@v4
+        id: ps0-lean-input
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Install checksum-verified pinned Linux Lean inputs
+        run: |
+          set -euo pipefail
+          ps0_fetch_input() {
+            local ps0_url="$1" ps0_api="$2" ps0_target="$3" ps0_digest="$4"
+            if test ! -f "$ps0_target"; then
+              if ! curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                --retry 5 --retry-max-time 300 --retry-all-errors "$ps0_url" -o "$ps0_target"; then
+                curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                  --retry 5 --retry-max-time 300 --retry-all-errors \
+                  -H 'Accept: application/octet-stream' -H 'X-GitHub-Api-Version: 2022-11-28' \
+                  "$ps0_api" -o "$ps0_target"
+              fi
+            fi
+            printf '%s  %s\n' "$ps0_digest" "$ps0_target" | sha256sum -c -
+          }
+          test "$(cat lean-toolchain)" = leanprover/lean4:v4.35.0
+          ps0_fetch_input \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            https://api.github.com/repos/leanprover/elan/releases/assets/529114798 \
+            "$RUNNER_TEMP/ps0-elan.tar.gz" \
+            42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+          ps0_fetch_input \
+            https://github.com/leanprover/lean4/releases/download/v4.35.0/lean-4.35.0-linux.tar.zst \
+            https://api.github.com/repos/leanprover/lean4/releases/assets/634574462 \
+            "$RUNNER_TEMP/ps0-lean.tar.zst" \
+            7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+          mkdir -p "$RUNNER_TEMP/ps0-elan-installer" "$RUNNER_TEMP/ps0-lean-verified"
+          tar -xzf "$RUNNER_TEMP/ps0-elan.tar.gz" -C "$RUNNER_TEMP/ps0-elan-installer"
+          "$RUNNER_TEMP/ps0-elan-installer/elan-init" -y --default-toolchain none --no-modify-path
+          tar --zstd -xf "$RUNNER_TEMP/ps0-lean.tar.zst" --strip-components=1 -C "$RUNNER_TEMP/ps0-lean-verified"
+          "$HOME/.elan/bin/elan" toolchain link ps0-pinned-lean-4.35.0 "$RUNNER_TEMP/ps0-lean-verified"
+          export ELAN_TOOLCHAIN=ps0-pinned-lean-4.35.0
+          echo "ELAN_TOOLCHAIN=$ELAN_TOOLCHAIN" >> "$GITHUB_ENV"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          test "$("$HOME/.elan/bin/lean" --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          "$HOME/.elan/bin/lean" --version
+          "$HOME/.elan/bin/lake" --version
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-elan-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-lean-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Verify canonical source and runner inputs
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PS0_SOURCE_SHA"
+          test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
+          test -s "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-canonical-two-stage-targets.json"
+          printf '%s\n' "PS0_BUILD_HARNESS_SHA=$PS0_SOURCE_SHA" >> "$GITHUB_ENV"
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 43161199302
+          name: ps0-selfhost-stage-one-978d594a10fac8f6e5687190a22d70334b331dab-43161199302
+          github-token: ${{ github.token }}
+          path: audited-seed
+      - name: Native Lake bootstrap compiler base slice
+        run: |
+          set -euo pipefail
+          python3 tests/run-compiler-ps.py --canonical-corpus --bootstrap-artifact "$GITHUB_WORKSPACE/audited-seed/compiler-evidence" --bootstrap-source 978d594a10fac8f6e5687190a22d70334b331dab --build-slice base
+          python3 tests/compiler_build_checkpoint.py pack "$PWD" "$PWD/build/compiler-checkpoint.json" "$PWD/build/compiler-checkpoint.tar.gz"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ps0-compiler-checkpoint-1-base-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: experiments/ps0/build/compiler-checkpoint.tar.gz
+          compression-level: 0
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-compiler-slice-evidence-1-base-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: |
+            experiments/ps0/build/transformed-corpus-logs/
+            experiments/ps0/build/compiler-evidence/
+          if-no-files-found: error
+  stage-one-compiler-early:
+    needs: stage-one-base
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    defaults:
+      run:
+        working-directory: experiments/ps0
+    steps:
+      - name: Read exact source pin
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          pin={"repository":"dwijayuda/lean4","commit":"a5160194aad78ff06acf55c42109ca1a5bb16f4d"}
+          assert pin['repository']=='dwijayuda/lean4'
+          assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('PS0_SOURCE_SHA='+pin['commit']+'\n')
+          PY
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: ${{ env.PS0_SOURCE_SHA }}
+          sparse-checkout: |
+            src
+            experiments/ps0
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          path: recovery-runner
+          persist-credentials: false
+      - uses: actions/cache/restore@v4
+        id: ps0-elan-input
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/restore@v4
+        id: ps0-lean-input
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Install checksum-verified pinned Linux Lean inputs
+        run: |
+          set -euo pipefail
+          ps0_fetch_input() {
+            local ps0_url="$1" ps0_api="$2" ps0_target="$3" ps0_digest="$4"
+            if test ! -f "$ps0_target"; then
+              if ! curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                --retry 5 --retry-max-time 300 --retry-all-errors "$ps0_url" -o "$ps0_target"; then
+                curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                  --retry 5 --retry-max-time 300 --retry-all-errors \
+                  -H 'Accept: application/octet-stream' -H 'X-GitHub-Api-Version: 2022-11-28' \
+                  "$ps0_api" -o "$ps0_target"
+              fi
+            fi
+            printf '%s  %s\n' "$ps0_digest" "$ps0_target" | sha256sum -c -
+          }
+          test "$(cat lean-toolchain)" = leanprover/lean4:v4.35.0
+          ps0_fetch_input \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            https://api.github.com/repos/leanprover/elan/releases/assets/529114798 \
+            "$RUNNER_TEMP/ps0-elan.tar.gz" \
+            42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+          ps0_fetch_input \
+            https://github.com/leanprover/lean4/releases/download/v4.35.0/lean-4.35.0-linux.tar.zst \
+            https://api.github.com/repos/leanprover/lean4/releases/assets/634574462 \
+            "$RUNNER_TEMP/ps0-lean.tar.zst" \
+            7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+          mkdir -p "$RUNNER_TEMP/ps0-elan-installer" "$RUNNER_TEMP/ps0-lean-verified"
+          tar -xzf "$RUNNER_TEMP/ps0-elan.tar.gz" -C "$RUNNER_TEMP/ps0-elan-installer"
+          "$RUNNER_TEMP/ps0-elan-installer/elan-init" -y --default-toolchain none --no-modify-path
+          tar --zstd -xf "$RUNNER_TEMP/ps0-lean.tar.zst" --strip-components=1 -C "$RUNNER_TEMP/ps0-lean-verified"
+          "$HOME/.elan/bin/elan" toolchain link ps0-pinned-lean-4.35.0 "$RUNNER_TEMP/ps0-lean-verified"
+          export ELAN_TOOLCHAIN=ps0-pinned-lean-4.35.0
+          echo "ELAN_TOOLCHAIN=$ELAN_TOOLCHAIN" >> "$GITHUB_ENV"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          test "$("$HOME/.elan/bin/lean" --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          "$HOME/.elan/bin/lean" --version
+          "$HOME/.elan/bin/lake" --version
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-elan-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-lean-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Verify canonical source and runner inputs
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PS0_SOURCE_SHA"
+          test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
+          test -s "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-canonical-two-stage-targets.json"
+          printf '%s\n' "PS0_BUILD_HARNESS_SHA=$PS0_SOURCE_SHA" >> "$GITHUB_ENV"
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 43161199302
+          name: ps0-selfhost-stage-one-978d594a10fac8f6e5687190a22d70334b331dab-43161199302
+          github-token: ${{ github.token }}
+          path: audited-seed
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-compiler-checkpoint-1-base-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: checkpoint-download
+      - name: Restore exact checkpoint files
+        run: |
+          set -euo pipefail
+          python3 tests/compiler_build_checkpoint.py unpack "$GITHUB_WORKSPACE/checkpoint-download/compiler-checkpoint.tar.gz" "$PWD"
+      - name: Native Lake bootstrap compiler early Lean targets
+        run: |
+          set -euo pipefail
+          python3 tests/run-compiler-ps.py --canonical-corpus --bootstrap-artifact "$GITHUB_WORKSPACE/audited-seed/compiler-evidence" --bootstrap-source 978d594a10fac8f6e5687190a22d70334b331dab --resume-build build/compiler-checkpoint.json --build-slice compiler --compiler-part early --compiler-target-plan "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-canonical-two-stage-targets.json"
+          python3 tests/compiler_build_checkpoint.py pack "$PWD" "$PWD/build/compiler-checkpoint.json" "$PWD/build/compiler-checkpoint.tar.gz"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ps0-compiler-checkpoint-1-compiler-early-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: experiments/ps0/build/compiler-checkpoint.tar.gz
+          compression-level: 0
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-compiler-slice-evidence-1-compiler-early-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: |
+            experiments/ps0/build/transformed-corpus-logs/
+            experiments/ps0/build/compiler-evidence/
+          if-no-files-found: error
+  stage-one-compiler-middle:
+    needs: stage-one-compiler-early
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    defaults:
+      run:
+        working-directory: experiments/ps0
+    steps:
+      - name: Read exact source pin
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          pin={"repository":"dwijayuda/lean4","commit":"a5160194aad78ff06acf55c42109ca1a5bb16f4d"}
+          assert pin['repository']=='dwijayuda/lean4'
+          assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('PS0_SOURCE_SHA='+pin['commit']+'\n')
+          PY
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: ${{ env.PS0_SOURCE_SHA }}
+          sparse-checkout: |
+            src
+            experiments/ps0
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          path: recovery-runner
+          persist-credentials: false
+      - uses: actions/cache/restore@v4
+        id: ps0-elan-input
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/restore@v4
+        id: ps0-lean-input
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Install checksum-verified pinned Linux Lean inputs
+        run: |
+          set -euo pipefail
+          ps0_fetch_input() {
+            local ps0_url="$1" ps0_api="$2" ps0_target="$3" ps0_digest="$4"
+            if test ! -f "$ps0_target"; then
+              if ! curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                --retry 5 --retry-max-time 300 --retry-all-errors "$ps0_url" -o "$ps0_target"; then
+                curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                  --retry 5 --retry-max-time 300 --retry-all-errors \
+                  -H 'Accept: application/octet-stream' -H 'X-GitHub-Api-Version: 2022-11-28' \
+                  "$ps0_api" -o "$ps0_target"
+              fi
+            fi
+            printf '%s  %s\n' "$ps0_digest" "$ps0_target" | sha256sum -c -
+          }
+          test "$(cat lean-toolchain)" = leanprover/lean4:v4.35.0
+          ps0_fetch_input \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            https://api.github.com/repos/leanprover/elan/releases/assets/529114798 \
+            "$RUNNER_TEMP/ps0-elan.tar.gz" \
+            42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+          ps0_fetch_input \
+            https://github.com/leanprover/lean4/releases/download/v4.35.0/lean-4.35.0-linux.tar.zst \
+            https://api.github.com/repos/leanprover/lean4/releases/assets/634574462 \
+            "$RUNNER_TEMP/ps0-lean.tar.zst" \
+            7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+          mkdir -p "$RUNNER_TEMP/ps0-elan-installer" "$RUNNER_TEMP/ps0-lean-verified"
+          tar -xzf "$RUNNER_TEMP/ps0-elan.tar.gz" -C "$RUNNER_TEMP/ps0-elan-installer"
+          "$RUNNER_TEMP/ps0-elan-installer/elan-init" -y --default-toolchain none --no-modify-path
+          tar --zstd -xf "$RUNNER_TEMP/ps0-lean.tar.zst" --strip-components=1 -C "$RUNNER_TEMP/ps0-lean-verified"
+          "$HOME/.elan/bin/elan" toolchain link ps0-pinned-lean-4.35.0 "$RUNNER_TEMP/ps0-lean-verified"
+          export ELAN_TOOLCHAIN=ps0-pinned-lean-4.35.0
+          echo "ELAN_TOOLCHAIN=$ELAN_TOOLCHAIN" >> "$GITHUB_ENV"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          test "$("$HOME/.elan/bin/lean" --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          "$HOME/.elan/bin/lean" --version
+          "$HOME/.elan/bin/lake" --version
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-elan-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-lean-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Verify canonical source and runner inputs
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PS0_SOURCE_SHA"
+          test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
+          test -s "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-canonical-two-stage-targets.json"
+          printf '%s\n' "PS0_BUILD_HARNESS_SHA=$PS0_SOURCE_SHA" >> "$GITHUB_ENV"
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 43161199302
+          name: ps0-selfhost-stage-one-978d594a10fac8f6e5687190a22d70334b331dab-43161199302
+          github-token: ${{ github.token }}
+          path: audited-seed
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-compiler-checkpoint-1-compiler-early-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: checkpoint-download
+      - name: Restore exact checkpoint files
+        run: |
+          set -euo pipefail
+          python3 tests/compiler_build_checkpoint.py unpack "$GITHUB_WORKSPACE/checkpoint-download/compiler-checkpoint.tar.gz" "$PWD"
+      - name: Native Lake bootstrap compiler middle Lean targets
+        run: |
+          set -euo pipefail
+          python3 tests/run-compiler-ps.py --canonical-corpus --bootstrap-artifact "$GITHUB_WORKSPACE/audited-seed/compiler-evidence" --bootstrap-source 978d594a10fac8f6e5687190a22d70334b331dab --resume-build build/compiler-checkpoint.json --build-slice compiler --compiler-part middle --compiler-target-plan "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-canonical-two-stage-targets.json"
+          python3 tests/compiler_build_checkpoint.py pack "$PWD" "$PWD/build/compiler-checkpoint.json" "$PWD/build/compiler-checkpoint.tar.gz"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ps0-compiler-checkpoint-1-compiler-middle-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: experiments/ps0/build/compiler-checkpoint.tar.gz
+          compression-level: 0
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-compiler-slice-evidence-1-compiler-middle-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: |
+            experiments/ps0/build/transformed-corpus-logs/
+            experiments/ps0/build/compiler-evidence/
+          if-no-files-found: error
+  stage-one-compiler:
+    needs: stage-one-compiler-middle
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    defaults:
+      run:
+        working-directory: experiments/ps0
+    steps:
+      - name: Read exact source pin
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          pin={"repository":"dwijayuda/lean4","commit":"a5160194aad78ff06acf55c42109ca1a5bb16f4d"}
+          assert pin['repository']=='dwijayuda/lean4'
+          assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('PS0_SOURCE_SHA='+pin['commit']+'\n')
+          PY
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: ${{ env.PS0_SOURCE_SHA }}
+          sparse-checkout: |
+            src
+            experiments/ps0
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          path: recovery-runner
+          persist-credentials: false
+      - uses: actions/cache/restore@v4
+        id: ps0-elan-input
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/restore@v4
+        id: ps0-lean-input
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Install checksum-verified pinned Linux Lean inputs
+        run: |
+          set -euo pipefail
+          ps0_fetch_input() {
+            local ps0_url="$1" ps0_api="$2" ps0_target="$3" ps0_digest="$4"
+            if test ! -f "$ps0_target"; then
+              if ! curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                --retry 5 --retry-max-time 300 --retry-all-errors "$ps0_url" -o "$ps0_target"; then
+                curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                  --retry 5 --retry-max-time 300 --retry-all-errors \
+                  -H 'Accept: application/octet-stream' -H 'X-GitHub-Api-Version: 2022-11-28' \
+                  "$ps0_api" -o "$ps0_target"
+              fi
+            fi
+            printf '%s  %s\n' "$ps0_digest" "$ps0_target" | sha256sum -c -
+          }
+          test "$(cat lean-toolchain)" = leanprover/lean4:v4.35.0
+          ps0_fetch_input \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            https://api.github.com/repos/leanprover/elan/releases/assets/529114798 \
+            "$RUNNER_TEMP/ps0-elan.tar.gz" \
+            42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+          ps0_fetch_input \
+            https://github.com/leanprover/lean4/releases/download/v4.35.0/lean-4.35.0-linux.tar.zst \
+            https://api.github.com/repos/leanprover/lean4/releases/assets/634574462 \
+            "$RUNNER_TEMP/ps0-lean.tar.zst" \
+            7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+          mkdir -p "$RUNNER_TEMP/ps0-elan-installer" "$RUNNER_TEMP/ps0-lean-verified"
+          tar -xzf "$RUNNER_TEMP/ps0-elan.tar.gz" -C "$RUNNER_TEMP/ps0-elan-installer"
+          "$RUNNER_TEMP/ps0-elan-installer/elan-init" -y --default-toolchain none --no-modify-path
+          tar --zstd -xf "$RUNNER_TEMP/ps0-lean.tar.zst" --strip-components=1 -C "$RUNNER_TEMP/ps0-lean-verified"
+          "$HOME/.elan/bin/elan" toolchain link ps0-pinned-lean-4.35.0 "$RUNNER_TEMP/ps0-lean-verified"
+          export ELAN_TOOLCHAIN=ps0-pinned-lean-4.35.0
+          echo "ELAN_TOOLCHAIN=$ELAN_TOOLCHAIN" >> "$GITHUB_ENV"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          test "$("$HOME/.elan/bin/lean" --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          "$HOME/.elan/bin/lean" --version
+          "$HOME/.elan/bin/lake" --version
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-elan-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-lean-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Verify canonical source and runner inputs
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PS0_SOURCE_SHA"
+          test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
+          test -s "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-canonical-two-stage-targets.json"
+          printf '%s\n' "PS0_BUILD_HARNESS_SHA=$PS0_SOURCE_SHA" >> "$GITHUB_ENV"
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 43161199302
+          name: ps0-selfhost-stage-one-978d594a10fac8f6e5687190a22d70334b331dab-43161199302
+          github-token: ${{ github.token }}
+          path: audited-seed
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-compiler-checkpoint-1-compiler-middle-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: checkpoint-download
+      - name: Restore exact checkpoint files
+        run: |
+          set -euo pipefail
+          python3 tests/compiler_build_checkpoint.py unpack "$GITHUB_WORKSPACE/checkpoint-download/compiler-checkpoint.tar.gz" "$PWD"
+      - name: Native Lake bootstrap compiler final nine Lean targets
+        run: |
+          set -euo pipefail
+          python3 tests/run-compiler-ps.py --canonical-corpus --bootstrap-artifact "$GITHUB_WORKSPACE/audited-seed/compiler-evidence" --bootstrap-source 978d594a10fac8f6e5687190a22d70334b331dab --resume-build build/compiler-checkpoint.json --build-slice compiler --compiler-part late --compiler-target-plan "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-canonical-two-stage-targets.json"
+          python3 tests/compiler_build_checkpoint.py pack "$PWD" "$PWD/build/compiler-checkpoint.json" "$PWD/build/compiler-checkpoint.tar.gz"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ps0-compiler-checkpoint-1-compiler-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: experiments/ps0/build/compiler-checkpoint.tar.gz
+          compression-level: 0
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-compiler-slice-evidence-1-compiler-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: |
+            experiments/ps0/build/transformed-corpus-logs/
+            experiments/ps0/build/compiler-evidence/
+          if-no-files-found: error
+  stage-one:
+    needs: stage-one-compiler
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    defaults:
+      run:
+        working-directory: experiments/ps0
+    steps:
+      - name: Read exact source pin
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          pin={"repository":"dwijayuda/lean4","commit":"a5160194aad78ff06acf55c42109ca1a5bb16f4d"}
+          assert pin['repository']=='dwijayuda/lean4'
+          assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('PS0_SOURCE_SHA='+pin['commit']+'\n')
+          PY
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: ${{ env.PS0_SOURCE_SHA }}
+          sparse-checkout: |
+            src
+            experiments/ps0
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          path: recovery-runner
+          persist-credentials: false
+      - uses: actions/cache/restore@v4
+        id: ps0-elan-input
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/restore@v4
+        id: ps0-lean-input
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Install checksum-verified pinned Linux Lean inputs
+        run: |
+          set -euo pipefail
+          ps0_fetch_input() {
+            local ps0_url="$1" ps0_api="$2" ps0_target="$3" ps0_digest="$4"
+            if test ! -f "$ps0_target"; then
+              if ! curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                --retry 5 --retry-max-time 300 --retry-all-errors "$ps0_url" -o "$ps0_target"; then
+                curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                  --retry 5 --retry-max-time 300 --retry-all-errors \
+                  -H 'Accept: application/octet-stream' -H 'X-GitHub-Api-Version: 2022-11-28' \
+                  "$ps0_api" -o "$ps0_target"
+              fi
+            fi
+            printf '%s  %s\n' "$ps0_digest" "$ps0_target" | sha256sum -c -
+          }
+          test "$(cat lean-toolchain)" = leanprover/lean4:v4.35.0
+          ps0_fetch_input \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            https://api.github.com/repos/leanprover/elan/releases/assets/529114798 \
+            "$RUNNER_TEMP/ps0-elan.tar.gz" \
+            42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+          ps0_fetch_input \
+            https://github.com/leanprover/lean4/releases/download/v4.35.0/lean-4.35.0-linux.tar.zst \
+            https://api.github.com/repos/leanprover/lean4/releases/assets/634574462 \
+            "$RUNNER_TEMP/ps0-lean.tar.zst" \
+            7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+          mkdir -p "$RUNNER_TEMP/ps0-elan-installer" "$RUNNER_TEMP/ps0-lean-verified"
+          tar -xzf "$RUNNER_TEMP/ps0-elan.tar.gz" -C "$RUNNER_TEMP/ps0-elan-installer"
+          "$RUNNER_TEMP/ps0-elan-installer/elan-init" -y --default-toolchain none --no-modify-path
+          tar --zstd -xf "$RUNNER_TEMP/ps0-lean.tar.zst" --strip-components=1 -C "$RUNNER_TEMP/ps0-lean-verified"
+          "$HOME/.elan/bin/elan" toolchain link ps0-pinned-lean-4.35.0 "$RUNNER_TEMP/ps0-lean-verified"
+          export ELAN_TOOLCHAIN=ps0-pinned-lean-4.35.0
+          echo "ELAN_TOOLCHAIN=$ELAN_TOOLCHAIN" >> "$GITHUB_ENV"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          test "$("$HOME/.elan/bin/lean" --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          "$HOME/.elan/bin/lean" --version
+          "$HOME/.elan/bin/lake" --version
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-elan-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-lean-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Verify canonical source and runner inputs
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PS0_SOURCE_SHA"
+          test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
+          test -s "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-canonical-two-stage-targets.json"
+          printf '%s\n' "PS0_BUILD_HARNESS_SHA=$PS0_SOURCE_SHA" >> "$GITHUB_ENV"
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 43161199302
+          name: ps0-selfhost-stage-one-978d594a10fac8f6e5687190a22d70334b331dab-43161199302
+          github-token: ${{ github.token }}
+          path: audited-seed
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-compiler-checkpoint-1-compiler-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: checkpoint-download
+      - name: Restore exact checkpoint files
+        run: |
+          set -euo pipefail
+          python3 tests/compiler_build_checkpoint.py unpack "$GITHUB_WORKSPACE/checkpoint-download/compiler-checkpoint.tar.gz" "$PWD"
+      - name: Native Lake bootstrap compiler finish slice
+        run: |
+          set -euo pipefail
+          python3 tests/run-compiler-ps.py --canonical-corpus --bootstrap-artifact "$GITHUB_WORKSPACE/audited-seed/compiler-evidence" --bootstrap-source 978d594a10fac8f6e5687190a22d70334b331dab --resume-build build/compiler-checkpoint.json --build-slice finish
+          python3 tests/run-compiler-census.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-selfhost-stage-one-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: |
+            experiments/ps0/build/transformed-corpus-logs/
+            experiments/ps0/build/compiler-evidence/
+          if-no-files-found: error
+  stage-two-base:
+    needs: stage-one
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    defaults:
+      run:
+        working-directory: experiments/ps0
+    steps:
+      - name: Read exact source pin
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          pin={"repository":"dwijayuda/lean4","commit":"a5160194aad78ff06acf55c42109ca1a5bb16f4d"}
+          assert pin['repository']=='dwijayuda/lean4'
+          assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('PS0_SOURCE_SHA='+pin['commit']+'\n')
+          PY
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: ${{ env.PS0_SOURCE_SHA }}
+          sparse-checkout: |
+            src
+            experiments/ps0
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          path: recovery-runner
+          persist-credentials: false
+      - uses: actions/cache/restore@v4
+        id: ps0-elan-input
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/restore@v4
+        id: ps0-lean-input
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Install checksum-verified pinned Linux Lean inputs
+        run: |
+          set -euo pipefail
+          ps0_fetch_input() {
+            local ps0_url="$1" ps0_api="$2" ps0_target="$3" ps0_digest="$4"
+            if test ! -f "$ps0_target"; then
+              if ! curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                --retry 5 --retry-max-time 300 --retry-all-errors "$ps0_url" -o "$ps0_target"; then
+                curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                  --retry 5 --retry-max-time 300 --retry-all-errors \
+                  -H 'Accept: application/octet-stream' -H 'X-GitHub-Api-Version: 2022-11-28' \
+                  "$ps0_api" -o "$ps0_target"
+              fi
+            fi
+            printf '%s  %s\n' "$ps0_digest" "$ps0_target" | sha256sum -c -
+          }
+          test "$(cat lean-toolchain)" = leanprover/lean4:v4.35.0
+          ps0_fetch_input \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            https://api.github.com/repos/leanprover/elan/releases/assets/529114798 \
+            "$RUNNER_TEMP/ps0-elan.tar.gz" \
+            42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+          ps0_fetch_input \
+            https://github.com/leanprover/lean4/releases/download/v4.35.0/lean-4.35.0-linux.tar.zst \
+            https://api.github.com/repos/leanprover/lean4/releases/assets/634574462 \
+            "$RUNNER_TEMP/ps0-lean.tar.zst" \
+            7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+          mkdir -p "$RUNNER_TEMP/ps0-elan-installer" "$RUNNER_TEMP/ps0-lean-verified"
+          tar -xzf "$RUNNER_TEMP/ps0-elan.tar.gz" -C "$RUNNER_TEMP/ps0-elan-installer"
+          "$RUNNER_TEMP/ps0-elan-installer/elan-init" -y --default-toolchain none --no-modify-path
+          tar --zstd -xf "$RUNNER_TEMP/ps0-lean.tar.zst" --strip-components=1 -C "$RUNNER_TEMP/ps0-lean-verified"
+          "$HOME/.elan/bin/elan" toolchain link ps0-pinned-lean-4.35.0 "$RUNNER_TEMP/ps0-lean-verified"
+          export ELAN_TOOLCHAIN=ps0-pinned-lean-4.35.0
+          echo "ELAN_TOOLCHAIN=$ELAN_TOOLCHAIN" >> "$GITHUB_ENV"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          test "$("$HOME/.elan/bin/lean" --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          "$HOME/.elan/bin/lean" --version
+          "$HOME/.elan/bin/lake" --version
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-elan-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-lean-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Verify canonical source and runner inputs
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PS0_SOURCE_SHA"
+          test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
+          test -s "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-canonical-two-stage-targets.json"
+          printf '%s\n' "PS0_BUILD_HARNESS_SHA=$PS0_SOURCE_SHA" >> "$GITHUB_ENV"
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-selfhost-stage-one-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: previous-stage
+      - name: Native Lake PS-built compiler base slice
+        run: |
+          set -euo pipefail
+          python3 tests/run-compiler-ps.py --canonical-corpus --stage-artifact "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --stage-source a5160194aad78ff06acf55c42109ca1a5bb16f4d --build-slice base
+          python3 tests/compiler_build_checkpoint.py pack "$PWD" "$PWD/build/compiler-checkpoint.json" "$PWD/build/compiler-checkpoint.tar.gz"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ps0-compiler-checkpoint-2-base-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: experiments/ps0/build/compiler-checkpoint.tar.gz
+          compression-level: 0
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-compiler-slice-evidence-2-base-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: |
+            experiments/ps0/build/transformed-corpus-logs/
+            experiments/ps0/build/compiler-evidence/
+          if-no-files-found: error
+  stage-two-compiler-early:
+    needs: stage-two-base
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    defaults:
+      run:
+        working-directory: experiments/ps0
+    steps:
+      - name: Read exact source pin
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          pin={"repository":"dwijayuda/lean4","commit":"a5160194aad78ff06acf55c42109ca1a5bb16f4d"}
+          assert pin['repository']=='dwijayuda/lean4'
+          assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('PS0_SOURCE_SHA='+pin['commit']+'\n')
+          PY
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: ${{ env.PS0_SOURCE_SHA }}
+          sparse-checkout: |
+            src
+            experiments/ps0
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          path: recovery-runner
+          persist-credentials: false
+      - uses: actions/cache/restore@v4
+        id: ps0-elan-input
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/restore@v4
+        id: ps0-lean-input
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Install checksum-verified pinned Linux Lean inputs
+        run: |
+          set -euo pipefail
+          ps0_fetch_input() {
+            local ps0_url="$1" ps0_api="$2" ps0_target="$3" ps0_digest="$4"
+            if test ! -f "$ps0_target"; then
+              if ! curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                --retry 5 --retry-max-time 300 --retry-all-errors "$ps0_url" -o "$ps0_target"; then
+                curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                  --retry 5 --retry-max-time 300 --retry-all-errors \
+                  -H 'Accept: application/octet-stream' -H 'X-GitHub-Api-Version: 2022-11-28' \
+                  "$ps0_api" -o "$ps0_target"
+              fi
+            fi
+            printf '%s  %s\n' "$ps0_digest" "$ps0_target" | sha256sum -c -
+          }
+          test "$(cat lean-toolchain)" = leanprover/lean4:v4.35.0
+          ps0_fetch_input \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            https://api.github.com/repos/leanprover/elan/releases/assets/529114798 \
+            "$RUNNER_TEMP/ps0-elan.tar.gz" \
+            42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+          ps0_fetch_input \
+            https://github.com/leanprover/lean4/releases/download/v4.35.0/lean-4.35.0-linux.tar.zst \
+            https://api.github.com/repos/leanprover/lean4/releases/assets/634574462 \
+            "$RUNNER_TEMP/ps0-lean.tar.zst" \
+            7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+          mkdir -p "$RUNNER_TEMP/ps0-elan-installer" "$RUNNER_TEMP/ps0-lean-verified"
+          tar -xzf "$RUNNER_TEMP/ps0-elan.tar.gz" -C "$RUNNER_TEMP/ps0-elan-installer"
+          "$RUNNER_TEMP/ps0-elan-installer/elan-init" -y --default-toolchain none --no-modify-path
+          tar --zstd -xf "$RUNNER_TEMP/ps0-lean.tar.zst" --strip-components=1 -C "$RUNNER_TEMP/ps0-lean-verified"
+          "$HOME/.elan/bin/elan" toolchain link ps0-pinned-lean-4.35.0 "$RUNNER_TEMP/ps0-lean-verified"
+          export ELAN_TOOLCHAIN=ps0-pinned-lean-4.35.0
+          echo "ELAN_TOOLCHAIN=$ELAN_TOOLCHAIN" >> "$GITHUB_ENV"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          test "$("$HOME/.elan/bin/lean" --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          "$HOME/.elan/bin/lean" --version
+          "$HOME/.elan/bin/lake" --version
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-elan-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-lean-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Verify canonical source and runner inputs
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PS0_SOURCE_SHA"
+          test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
+          test -s "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-canonical-two-stage-targets.json"
+          printf '%s\n' "PS0_BUILD_HARNESS_SHA=$PS0_SOURCE_SHA" >> "$GITHUB_ENV"
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-selfhost-stage-one-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: previous-stage
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-compiler-checkpoint-2-base-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: checkpoint-download
+      - name: Restore exact checkpoint files
+        run: |
+          set -euo pipefail
+          python3 tests/compiler_build_checkpoint.py unpack "$GITHUB_WORKSPACE/checkpoint-download/compiler-checkpoint.tar.gz" "$PWD"
+      - name: Native Lake PS-built compiler early Lean targets
+        run: |
+          set -euo pipefail
+          python3 tests/run-compiler-ps.py --canonical-corpus --stage-artifact "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --stage-source a5160194aad78ff06acf55c42109ca1a5bb16f4d --resume-build build/compiler-checkpoint.json --build-slice compiler --compiler-part early --compiler-target-plan "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-canonical-two-stage-targets.json"
+          python3 tests/compiler_build_checkpoint.py pack "$PWD" "$PWD/build/compiler-checkpoint.json" "$PWD/build/compiler-checkpoint.tar.gz"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ps0-compiler-checkpoint-2-compiler-early-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: experiments/ps0/build/compiler-checkpoint.tar.gz
+          compression-level: 0
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-compiler-slice-evidence-2-compiler-early-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: |
+            experiments/ps0/build/transformed-corpus-logs/
+            experiments/ps0/build/compiler-evidence/
+          if-no-files-found: error
+  stage-two-compiler-middle:
+    needs: stage-two-compiler-early
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    defaults:
+      run:
+        working-directory: experiments/ps0
+    steps:
+      - name: Read exact source pin
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          pin={"repository":"dwijayuda/lean4","commit":"a5160194aad78ff06acf55c42109ca1a5bb16f4d"}
+          assert pin['repository']=='dwijayuda/lean4'
+          assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('PS0_SOURCE_SHA='+pin['commit']+'\n')
+          PY
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: ${{ env.PS0_SOURCE_SHA }}
+          sparse-checkout: |
+            src
+            experiments/ps0
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          path: recovery-runner
+          persist-credentials: false
+      - uses: actions/cache/restore@v4
+        id: ps0-elan-input
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/restore@v4
+        id: ps0-lean-input
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Install checksum-verified pinned Linux Lean inputs
+        run: |
+          set -euo pipefail
+          ps0_fetch_input() {
+            local ps0_url="$1" ps0_api="$2" ps0_target="$3" ps0_digest="$4"
+            if test ! -f "$ps0_target"; then
+              if ! curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                --retry 5 --retry-max-time 300 --retry-all-errors "$ps0_url" -o "$ps0_target"; then
+                curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                  --retry 5 --retry-max-time 300 --retry-all-errors \
+                  -H 'Accept: application/octet-stream' -H 'X-GitHub-Api-Version: 2022-11-28' \
+                  "$ps0_api" -o "$ps0_target"
+              fi
+            fi
+            printf '%s  %s\n' "$ps0_digest" "$ps0_target" | sha256sum -c -
+          }
+          test "$(cat lean-toolchain)" = leanprover/lean4:v4.35.0
+          ps0_fetch_input \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            https://api.github.com/repos/leanprover/elan/releases/assets/529114798 \
+            "$RUNNER_TEMP/ps0-elan.tar.gz" \
+            42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+          ps0_fetch_input \
+            https://github.com/leanprover/lean4/releases/download/v4.35.0/lean-4.35.0-linux.tar.zst \
+            https://api.github.com/repos/leanprover/lean4/releases/assets/634574462 \
+            "$RUNNER_TEMP/ps0-lean.tar.zst" \
+            7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+          mkdir -p "$RUNNER_TEMP/ps0-elan-installer" "$RUNNER_TEMP/ps0-lean-verified"
+          tar -xzf "$RUNNER_TEMP/ps0-elan.tar.gz" -C "$RUNNER_TEMP/ps0-elan-installer"
+          "$RUNNER_TEMP/ps0-elan-installer/elan-init" -y --default-toolchain none --no-modify-path
+          tar --zstd -xf "$RUNNER_TEMP/ps0-lean.tar.zst" --strip-components=1 -C "$RUNNER_TEMP/ps0-lean-verified"
+          "$HOME/.elan/bin/elan" toolchain link ps0-pinned-lean-4.35.0 "$RUNNER_TEMP/ps0-lean-verified"
+          export ELAN_TOOLCHAIN=ps0-pinned-lean-4.35.0
+          echo "ELAN_TOOLCHAIN=$ELAN_TOOLCHAIN" >> "$GITHUB_ENV"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          test "$("$HOME/.elan/bin/lean" --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          "$HOME/.elan/bin/lean" --version
+          "$HOME/.elan/bin/lake" --version
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-elan-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-lean-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Verify canonical source and runner inputs
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PS0_SOURCE_SHA"
+          test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
+          test -s "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-canonical-two-stage-targets.json"
+          printf '%s\n' "PS0_BUILD_HARNESS_SHA=$PS0_SOURCE_SHA" >> "$GITHUB_ENV"
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-selfhost-stage-one-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: previous-stage
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-compiler-checkpoint-2-compiler-early-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: checkpoint-download
+      - name: Restore exact checkpoint files
+        run: |
+          set -euo pipefail
+          python3 tests/compiler_build_checkpoint.py unpack "$GITHUB_WORKSPACE/checkpoint-download/compiler-checkpoint.tar.gz" "$PWD"
+      - name: Native Lake PS-built compiler middle Lean targets
+        run: |
+          set -euo pipefail
+          python3 tests/run-compiler-ps.py --canonical-corpus --stage-artifact "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --stage-source a5160194aad78ff06acf55c42109ca1a5bb16f4d --resume-build build/compiler-checkpoint.json --build-slice compiler --compiler-part middle --compiler-target-plan "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-canonical-two-stage-targets.json"
+          python3 tests/compiler_build_checkpoint.py pack "$PWD" "$PWD/build/compiler-checkpoint.json" "$PWD/build/compiler-checkpoint.tar.gz"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ps0-compiler-checkpoint-2-compiler-middle-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: experiments/ps0/build/compiler-checkpoint.tar.gz
+          compression-level: 0
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-compiler-slice-evidence-2-compiler-middle-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: |
+            experiments/ps0/build/transformed-corpus-logs/
+            experiments/ps0/build/compiler-evidence/
+          if-no-files-found: error
+  stage-two-compiler:
+    needs: stage-two-compiler-middle
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    defaults:
+      run:
+        working-directory: experiments/ps0
+    steps:
+      - name: Read exact source pin
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          pin={"repository":"dwijayuda/lean4","commit":"a5160194aad78ff06acf55c42109ca1a5bb16f4d"}
+          assert pin['repository']=='dwijayuda/lean4'
+          assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('PS0_SOURCE_SHA='+pin['commit']+'\n')
+          PY
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: ${{ env.PS0_SOURCE_SHA }}
+          sparse-checkout: |
+            src
+            experiments/ps0
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          path: recovery-runner
+          persist-credentials: false
+      - uses: actions/cache/restore@v4
+        id: ps0-elan-input
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/restore@v4
+        id: ps0-lean-input
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Install checksum-verified pinned Linux Lean inputs
+        run: |
+          set -euo pipefail
+          ps0_fetch_input() {
+            local ps0_url="$1" ps0_api="$2" ps0_target="$3" ps0_digest="$4"
+            if test ! -f "$ps0_target"; then
+              if ! curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                --retry 5 --retry-max-time 300 --retry-all-errors "$ps0_url" -o "$ps0_target"; then
+                curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                  --retry 5 --retry-max-time 300 --retry-all-errors \
+                  -H 'Accept: application/octet-stream' -H 'X-GitHub-Api-Version: 2022-11-28' \
+                  "$ps0_api" -o "$ps0_target"
+              fi
+            fi
+            printf '%s  %s\n' "$ps0_digest" "$ps0_target" | sha256sum -c -
+          }
+          test "$(cat lean-toolchain)" = leanprover/lean4:v4.35.0
+          ps0_fetch_input \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            https://api.github.com/repos/leanprover/elan/releases/assets/529114798 \
+            "$RUNNER_TEMP/ps0-elan.tar.gz" \
+            42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+          ps0_fetch_input \
+            https://github.com/leanprover/lean4/releases/download/v4.35.0/lean-4.35.0-linux.tar.zst \
+            https://api.github.com/repos/leanprover/lean4/releases/assets/634574462 \
+            "$RUNNER_TEMP/ps0-lean.tar.zst" \
+            7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+          mkdir -p "$RUNNER_TEMP/ps0-elan-installer" "$RUNNER_TEMP/ps0-lean-verified"
+          tar -xzf "$RUNNER_TEMP/ps0-elan.tar.gz" -C "$RUNNER_TEMP/ps0-elan-installer"
+          "$RUNNER_TEMP/ps0-elan-installer/elan-init" -y --default-toolchain none --no-modify-path
+          tar --zstd -xf "$RUNNER_TEMP/ps0-lean.tar.zst" --strip-components=1 -C "$RUNNER_TEMP/ps0-lean-verified"
+          "$HOME/.elan/bin/elan" toolchain link ps0-pinned-lean-4.35.0 "$RUNNER_TEMP/ps0-lean-verified"
+          export ELAN_TOOLCHAIN=ps0-pinned-lean-4.35.0
+          echo "ELAN_TOOLCHAIN=$ELAN_TOOLCHAIN" >> "$GITHUB_ENV"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          test "$("$HOME/.elan/bin/lean" --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          "$HOME/.elan/bin/lean" --version
+          "$HOME/.elan/bin/lake" --version
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-elan-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-lean-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Verify canonical source and runner inputs
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PS0_SOURCE_SHA"
+          test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
+          test -s "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-canonical-two-stage-targets.json"
+          printf '%s\n' "PS0_BUILD_HARNESS_SHA=$PS0_SOURCE_SHA" >> "$GITHUB_ENV"
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-selfhost-stage-one-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: previous-stage
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-compiler-checkpoint-2-compiler-middle-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: checkpoint-download
+      - name: Restore exact checkpoint files
+        run: |
+          set -euo pipefail
+          python3 tests/compiler_build_checkpoint.py unpack "$GITHUB_WORKSPACE/checkpoint-download/compiler-checkpoint.tar.gz" "$PWD"
+      - name: Native Lake PS-built compiler final nine Lean targets
+        run: |
+          set -euo pipefail
+          python3 tests/run-compiler-ps.py --canonical-corpus --stage-artifact "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --stage-source a5160194aad78ff06acf55c42109ca1a5bb16f4d --resume-build build/compiler-checkpoint.json --build-slice compiler --compiler-part late --compiler-target-plan "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-canonical-two-stage-targets.json"
+          python3 tests/compiler_build_checkpoint.py pack "$PWD" "$PWD/build/compiler-checkpoint.json" "$PWD/build/compiler-checkpoint.tar.gz"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ps0-compiler-checkpoint-2-compiler-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: experiments/ps0/build/compiler-checkpoint.tar.gz
+          compression-level: 0
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-compiler-slice-evidence-2-compiler-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: |
+            experiments/ps0/build/transformed-corpus-logs/
+            experiments/ps0/build/compiler-evidence/
+          if-no-files-found: error
+  stage-two:
+    needs: stage-two-compiler
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    defaults:
+      run:
+        working-directory: experiments/ps0
+    steps:
+      - name: Read exact source pin
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          pin={"repository":"dwijayuda/lean4","commit":"a5160194aad78ff06acf55c42109ca1a5bb16f4d"}
+          assert pin['repository']=='dwijayuda/lean4'
+          assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
+          with open(os.environ['GITHUB_ENV'],'a') as f:
+              f.write('PS0_SOURCE_SHA='+pin['commit']+'\n')
+          PY
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: ${{ env.PS0_SOURCE_SHA }}
+          sparse-checkout: |
+            src
+            experiments/ps0
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: ci
+          path: recovery-runner
+          persist-credentials: false
+      - uses: actions/cache/restore@v4
+        id: ps0-elan-input
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/restore@v4
+        id: ps0-lean-input
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Install checksum-verified pinned Linux Lean inputs
+        run: |
+          set -euo pipefail
+          ps0_fetch_input() {
+            local ps0_url="$1" ps0_api="$2" ps0_target="$3" ps0_digest="$4"
+            if test ! -f "$ps0_target"; then
+              if ! curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                --retry 5 --retry-max-time 300 --retry-all-errors "$ps0_url" -o "$ps0_target"; then
+                curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                  --retry 5 --retry-max-time 300 --retry-all-errors \
+                  -H 'Accept: application/octet-stream' -H 'X-GitHub-Api-Version: 2022-11-28' \
+                  "$ps0_api" -o "$ps0_target"
+              fi
+            fi
+            printf '%s  %s\n' "$ps0_digest" "$ps0_target" | sha256sum -c -
+          }
+          test "$(cat lean-toolchain)" = leanprover/lean4:v4.35.0
+          ps0_fetch_input \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            https://api.github.com/repos/leanprover/elan/releases/assets/529114798 \
+            "$RUNNER_TEMP/ps0-elan.tar.gz" \
+            42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+          ps0_fetch_input \
+            https://github.com/leanprover/lean4/releases/download/v4.35.0/lean-4.35.0-linux.tar.zst \
+            https://api.github.com/repos/leanprover/lean4/releases/assets/634574462 \
+            "$RUNNER_TEMP/ps0-lean.tar.zst" \
+            7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+          mkdir -p "$RUNNER_TEMP/ps0-elan-installer" "$RUNNER_TEMP/ps0-lean-verified"
+          tar -xzf "$RUNNER_TEMP/ps0-elan.tar.gz" -C "$RUNNER_TEMP/ps0-elan-installer"
+          "$RUNNER_TEMP/ps0-elan-installer/elan-init" -y --default-toolchain none --no-modify-path
+          tar --zstd -xf "$RUNNER_TEMP/ps0-lean.tar.zst" --strip-components=1 -C "$RUNNER_TEMP/ps0-lean-verified"
+          "$HOME/.elan/bin/elan" toolchain link ps0-pinned-lean-4.35.0 "$RUNNER_TEMP/ps0-lean-verified"
+          export ELAN_TOOLCHAIN=ps0-pinned-lean-4.35.0
+          echo "ELAN_TOOLCHAIN=$ELAN_TOOLCHAIN" >> "$GITHUB_ENV"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          test "$("$HOME/.elan/bin/lean" --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          "$HOME/.elan/bin/lean" --version
+          "$HOME/.elan/bin/lake" --version
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-elan-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-lean-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Verify canonical source and runner inputs
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$PS0_SOURCE_SHA"
+          test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
+          test -s "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-canonical-two-stage-targets.json"
+          printf '%s\n' "PS0_BUILD_HARNESS_SHA=$PS0_SOURCE_SHA" >> "$GITHUB_ENV"
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-selfhost-stage-one-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: previous-stage
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-compiler-checkpoint-2-compiler-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: checkpoint-download
+      - name: Restore exact checkpoint files
+        run: |
+          set -euo pipefail
+          python3 tests/compiler_build_checkpoint.py unpack "$GITHUB_WORKSPACE/checkpoint-download/compiler-checkpoint.tar.gz" "$PWD"
+      - name: Native Lake PS-built compiler finish slice
+        run: |
+          set -euo pipefail
+          python3 tests/run-compiler-ps.py --canonical-corpus --stage-artifact "$GITHUB_WORKSPACE/previous-stage/compiler-evidence" --stage-source a5160194aad78ff06acf55c42109ca1a5bb16f4d --resume-build build/compiler-checkpoint.json --build-slice finish
+          python3 tests/run-compiler-census.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-selfhost-stage-two-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: |
+            experiments/ps0/build/transformed-corpus-logs/
+            experiments/ps0/build/compiler-evidence/
+          if-no-files-found: error
+  independent-audit:
+    needs: stage-two
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: a5160194aad78ff06acf55c42109ca1a5bb16f4d
+          sparse-checkout: |
+            src
+            experiments/ps0
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-selfhost-stage-one-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: first
+      - uses: actions/download-artifact@v4
+        with:
+          name: ps0-selfhost-stage-two-a5160194aad78ff06acf55c42109ca1a5bb16f4d-${{ github.run_id }}
+          path: second
+      - name: Verify both stages against the tracked corpus
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "a5160194aad78ff06acf55c42109ca1a5bb16f4d"
+          cmp experiments/ps0/compiler-canonical-sources.json first/compiler-evidence/canonical-source-catalog.json
+          cmp experiments/ps0/compiler-canonical-sources.json second/compiler-evidence/canonical-source-catalog.json
+          python3 experiments/ps0/tests/audit-compiler-fixed-point.py first/compiler-evidence second/compiler-evidence --source a5160194aad78ff06acf55c42109ca1a5bb16f4d --output evidence/audit.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ps0-canonical-independent-audit-${{ github.run_id }}
+          path: evidence/
+          if-no-files-found: error

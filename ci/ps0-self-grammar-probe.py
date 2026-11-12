@@ -115,9 +115,21 @@ run(['python3', 'tests/run-relocated-grammar.py'], env={
 verified_prefix = root / 'build' / ('relocated-grammar-' + os.environ['GITHUB_RUN_ID'] + '-self-grammar-first') / 'prefix'
 ps_built_driver = verified_prefix / 'bin/ps0'
 assert sha(ps_built_driver) == sha(first_driver)
+second_plans = report / 'stage-two-plans'
+second_plans.mkdir()
+self_env = {**os.environ, 'LEAN_PATH': str(verified_prefix / 'lib/lean')}
 for module, target in files.items():
-    assert sha(target) == outputs['first'][module]['source'], module
-print('PS0_SELF_GRAMMAR_STAGE_TWO_INPUTS: PASS', len(files), flush=True)
+    module_plan = second_plans / module
+    module_plan.mkdir()
+    rel = target.relative_to(source)
+    original, census, converted, plan = [module_plan / file for file in
+                                        ['original.ps', 'native-census.json', 'converted.ps', 'plan.json']]
+    run([ps_built_driver, 'convert-native', root / rel.with_suffix('.lean'), original])
+    assert sha(original) == sha(plans / module / 'original.ps'), module
+    run([ps_built_driver, 'census-source', original, module, census], env=self_env)
+    run(['python3', 'tests/migrate-compiler-heads.py', census, original, converted, '--plan', plan, '--allow-empty'])
+    assert sha(converted) == sha(target), module
+print('PS0_SELF_GRAMMAR_STAGE_TWO_PLANS: PASS', len(files), flush=True)
 shutil.copytree(sysroot / 'include', second / 'include')
 second_lake = [('-Kdriver=' + str(ps_built_driver)) if arg.startswith('-Kdriver=') else arg for arg in lake]
 run([*second_lake, '-KsourceGrammar=true', '-KprojectBuildDir=' + str(second), 'build', 'PS0Project:static', 'ps0project'])
@@ -131,7 +143,7 @@ changed = {facet: [module for module in files if outputs['first'][module][facet]
 (report / 'qualification.json').write_text(json.dumps({
     'source': os.environ['PS0_SOURCE_SHA'], 'modules': len(files), 'changes': changed,
     'first_driver_sha256': sha(first_driver), 'second_driver_sha256': sha(second / 'bin/ps0project'),
-    'scope': 'same PS0-owned PS inputs in both stages using pinned SDK dependencies and actual first-stage prefix',
+    'scope': 'PS0-owned sources in both stages using pinned SDK dependencies, with actual first-stage prefix',
 }, indent=2) + '\n')
 assert not any(changed.values()), changed
 print('PS0_SELF_GRAMMAR_FIXED_POINT: PASS', len(files), flush=True)

@@ -1,4 +1,4 @@
-name: PS0 self-source PS-built compilation probe
+name: PS0 self-source current-stage IR fixed-point probe
 on:
   pull_request:
     paths: [.github/workflows/ps0-self-grammar-probe.yml, ci/ps0-self-grammar-probe.py]
@@ -18,7 +18,7 @@ jobs:
         run: |
           python3 - <<'PY'
           import json, os, re
-          pin={"repository":"dwijayuda/lean4","commit":"bff5d8296cd8798f8c3e9e954ef695f77ea0aec4"}
+          pin={"repository":"dwijayuda/lean4","commit":"978d594a10fac8f6e5687190a22d70334b331dab"}
           assert pin['repository']=='dwijayuda/lean4'
           assert re.fullmatch('[0-9a-f]{40}',pin['commit'])
           with open(os.environ['GITHUB_ENV'],'a') as f:
@@ -99,7 +99,7 @@ jobs:
           mkdir -p build/self-grammar-logs
           test "$(git rev-parse HEAD)" = "$PS0_SOURCE_SHA"
           lake build PS0 ps0 2>&1 | tee build/self-grammar-logs/bootstrap.log
-      - name: Compile identical PS sources with both actual stage drivers
+      - name: Rebuild and compare both PS0 self-source stages via Lake
         run: |
           set -euo pipefail
           python3 "$GITHUB_WORKSPACE/recovery-runner/ci/ps0-self-grammar-probe.py" 2>&1 | tee build/self-grammar-logs/self-build.log

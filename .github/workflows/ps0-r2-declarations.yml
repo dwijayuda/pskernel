@@ -1,0 +1,145 @@
+name: PS0 canonical review and R2 declarations
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-r2-declarations.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  qualify:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: experiments/ps0
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: 1da2e8cd68c3f2b32aafab94c7267dcb5ddb5ffc
+          sparse-checkout: |
+            src
+            experiments/ps0
+          persist-credentials: false
+      - uses: actions/cache/restore@v4
+        id: ps0-elan-input
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/restore@v4
+        id: ps0-lean-input
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Install checksum-verified pinned Linux Lean inputs
+        run: |
+          set -euo pipefail
+          ps0_fetch_input() {
+            local ps0_url="$1" ps0_api="$2" ps0_target="$3" ps0_digest="$4"
+            if test ! -f "$ps0_target"; then
+              if ! curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                --retry 5 --retry-max-time 300 --retry-all-errors "$ps0_url" -o "$ps0_target"; then
+                curl --fail --silent --show-error --location --connect-timeout 20 --max-time 180 \
+                  --retry 5 --retry-max-time 300 --retry-all-errors \
+                  -H 'Accept: application/octet-stream' -H 'X-GitHub-Api-Version: 2022-11-28' \
+                  "$ps0_api" -o "$ps0_target"
+              fi
+            fi
+            printf '%s  %s\n' "$ps0_digest" "$ps0_target" | sha256sum -c -
+          }
+          test "$(cat lean-toolchain)" = leanprover/lean4:v4.35.0
+          ps0_fetch_input \
+            https://github.com/leanprover/elan/releases/download/v4.2.4/elan-x86_64-unknown-linux-gnu.tar.gz \
+            https://api.github.com/repos/leanprover/elan/releases/assets/529114798 \
+            "$RUNNER_TEMP/ps0-elan.tar.gz" \
+            42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+          ps0_fetch_input \
+            https://github.com/leanprover/lean4/releases/download/v4.35.0/lean-4.35.0-linux.tar.zst \
+            https://api.github.com/repos/leanprover/lean4/releases/assets/634574462 \
+            "$RUNNER_TEMP/ps0-lean.tar.zst" \
+            7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+          mkdir -p "$RUNNER_TEMP/ps0-elan-installer" "$RUNNER_TEMP/ps0-lean-verified"
+          tar -xzf "$RUNNER_TEMP/ps0-elan.tar.gz" -C "$RUNNER_TEMP/ps0-elan-installer"
+          "$RUNNER_TEMP/ps0-elan-installer/elan-init" -y --default-toolchain none --no-modify-path
+          tar --zstd -xf "$RUNNER_TEMP/ps0-lean.tar.zst" --strip-components=1 -C "$RUNNER_TEMP/ps0-lean-verified"
+          "$HOME/.elan/bin/elan" toolchain link ps0-pinned-lean-4.35.0 "$RUNNER_TEMP/ps0-lean-verified"
+          export ELAN_TOOLCHAIN=ps0-pinned-lean-4.35.0
+          echo "ELAN_TOOLCHAIN=$ELAN_TOOLCHAIN" >> "$GITHUB_ENV"
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          test "$("$HOME/.elan/bin/lean" --githash)" = eb6cafb7290e8bd5f2937522d8d804f58f02bafc
+          "$HOME/.elan/bin/lean" --version
+          "$HOME/.elan/bin/lake" --version
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-elan-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-elan.tar.gz
+          key: ps0-linux-elan-42b94d4244e8353142c456ec0e4ca6528fd898a6c604d4059f494e706e431f63
+      - uses: actions/cache/save@v4
+        if: success() && steps.ps0-lean-input.outputs.cache-hit != 'true'
+        with:
+          path: ${{ runner.temp }}/ps0-lean.tar.zst
+          key: ps0-linux-lean-7289597a44543246c9227b8cae501767e095ce17f6d448b95fc4a8dc97268f6d
+      - name: Verify source and the prior canonical Linux compiler artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "1da2e8cd68c3f2b32aafab94c7267dcb5ddb5ffc"
+          test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
+          gh api repos/dwijayuda/pskernel/actions/artifacts/14074263951 | jq -e '
+            .workflow_run.id == 43414525459 and .workflow_run.head_sha == "d5ccec6831ef55f156c4ee99d695e02953c1d4d5" and
+            .digest == "sha256:3de0d4290ba7f79371211ae9c9ea71e2661ead75a49bcd424644196d8b90b50a" and .expired == false'
+          git -C "$GITHUB_WORKSPACE" diff --exit-code 430c21f1742334d0abb103a58a7aaa1c65fc16e1 -- src experiments/ps0/PS0 experiments/ps0/PS0.ps experiments/ps0/PS0Main.ps experiments/ps0/compiler-canonical-sources.json || {
+            git -C "$GITHUB_WORKSPACE" fetch --no-tags --depth 1 origin 430c21f1742334d0abb103a58a7aaa1c65fc16e1
+            git -C "$GITHUB_WORKSPACE" diff --exit-code FETCH_HEAD -- src experiments/ps0/PS0 experiments/ps0/PS0.ps experiments/ps0/PS0Main.ps experiments/ps0/compiler-canonical-sources.json
+          }
+          python3 tests/test-canonical-compiler-sources.py
+      - uses: actions/download-artifact@v4
+        with:
+          repository: dwijayuda/pskernel
+          run-id: 43414525459
+          github-token: ${{ github.token }}
+          name: ps0-selfhost-stage-two-430c21f1742334d0abb103a58a7aaa1c65fc16e1-43414525459
+          path: qualified-stage
+      - name: Exercise the documented CLI path
+        run: |
+          set -euo pipefail
+          mkdir -p build/r2-declaration-evidence
+          root="$GITHUB_WORKSPACE/qualified-stage/compiler-evidence"
+          PYTHONPATH=tests python3 -c 'import json,sys; from native_compiler_prefix import verify_compiler_prefix; print(json.dumps(verify_compiler_prefix(sys.argv[1],sys.argv[2])))' "$root" 430c21f1742334d0abb103a58a7aaa1c65fc16e1 > build/r2-declaration-evidence/prefix.json
+          driver="$root/compiler-prefix/bin/ps0"
+          chmod u+x "$driver"
+          export LEAN_PATH="$root/compiler-prefix/lib/lean"
+          sha256sum "$driver" tests/v1/r2_declarations.ps PS0_V1_LANGUAGE_REFERENCE.md | tee build/r2-declaration-evidence/SHA256SUMS
+          "$driver" check tests/v1/native_capabilities.ps
+          "$driver" check tests/v1/registered_syntax.ps
+          "$driver" module-header tests/v1/explicit_module.ps
+          "$driver" check tests/lean/unrestricted.lean
+          "$driver" build-project tests/project Demo.Main build/project-demo
+          test "$(./build/project-demo/ps0project one two)" = "PS0_PROJECT:42:7:2"
+      - name: Check R2 declaration semantics and native runtime
+        if: success() || failure()
+        run: |
+          set -euo pipefail
+          fixture=tests/v1/r2_declarations.ps
+          work="$PWD/build/r2-declaration-evidence"
+          mkdir -p "$work/src"
+          cp "$fixture" "$work/src/R2Declarations.ps"
+          driver="$GITHUB_WORKSPACE/qualified-stage/compiler-evidence/compiler-prefix/bin/ps0"
+          chmod u+x "$driver"
+          lake -R -f lakefile.project.lean -KsourceRoot="$work/src" -Kroots=R2Declarations \
+            -KmoduleNames=R2Declarations -KrootModule=R2Declarations -Kdriver="$driver" \
+            -KsourceGrammar=true -KprojectBuildDir="$work/native" build ps0project 2>&1 | tee "$work/lake.log"
+          "$work/native/bin/ps0project" | tee "$work/runtime.log"
+          grep -Fx 'PS0_R2_DECLARATIONS:3:5:1:5:true:0:1:0' "$work/runtime.log"
+          cp "$work/native/lib/lean/R2Declarations.ilean.ps0-source-census.json" "$work/census.json"
+          grep -F 'PS0_R2_DECLARATION_ORACLES: PASS' "$work/lake.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ps0-r2-declaration-evidence-${{ github.run_id }}
+          path: |
+            experiments/ps0/build/r2-declaration-evidence/*.json
+            experiments/ps0/build/r2-declaration-evidence/*.log
+            experiments/ps0/build/r2-declaration-evidence/SHA256SUMS
+          if-no-files-found: error

@@ -111,7 +111,7 @@ private function filterToken(table : TokenMap((Parser × Nat)), token : Name,
 -- Retain the native argument parser for ordinary Lean arguments and syntax data.
 private const whitespaceArgument : Parser :=
   (checkWsBefore "expected space" >> checkColGt "expected to be indented" >>
-    (atomic((lookahead "do" >> dbgTraceState("PS0-R2-17-do-arg", (categoryParser `psTerm argPrec)))) <|>
+    (atomic((lookahead "do" >> categoryParser `psTerm argPrec)) <|>
       (lookahead(adjacentIdentifier >> checkNoWsBefore >> "(") >>
         categoryParser `psHead maxPrec))) <|> Lean.Parser.Term.argument
 
@@ -158,7 +158,17 @@ private unsafe function leadingWith(head : Bool) : ParserFn := fun ctx initial =
     for (token, parsers) in category.tables.trailingTable do
       for entry in (parsers.filter keep).reverse do
         trailingTable := trailingTable.insert token entry
-  let nativeTrailing := category.tables.trailingParsers.filter keep
+  let originalTrailing := category.tables.trailingParsers.filter keep
+  let nativeTrailing := originalTrailing.map(fun (parser, priority) =>
+    if (parser.info.collectKinds {}).contains ``Lean.Parser.Term.app then
+      (withFn((fun parse ctx initial =>
+        let after := (peekToken ctx initial).2
+        let stop := match after with
+          | .ok (.atom _ "for") => checkLineEq.fn ctx initial |>.hasError
+          | _ => false
+        if stop then initial.mkUnexpectedError "a new line starts a for statement"
+        else parse ctx initial), parser), priority)
+    else (parser, priority))
   let trailingParsers := if head then nativeTrailing else (whitespaceApplication, 0) :: nativeTrailing
   let tables := {category.tables with trailingTable, trailingParsers}
   -- The unrestricted legacy wrapper is not an ordinary PS term production.

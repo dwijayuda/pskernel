@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: dwijayuda/lean4
-          ref: 060d9f507c5162b5458bef109ca6101adddcd6cc
+          ref: 68ffc59f8e59e9841865b3803e32bc4152d3f099
           sparse-checkout: |
             src
             experiments/ps0
@@ -84,7 +84,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "060d9f507c5162b5458bef109ca6101adddcd6cc"
+          test "$(git rev-parse HEAD)" = "68ffc59f8e59e9841865b3803e32bc4152d3f099"
           test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
           gh api repos/dwijayuda/pskernel/actions/artifacts/14107360730 | jq -e '
             .workflow_run.id == 43534267147 and .workflow_run.head_sha == "343c6939709fb62d3af6eef0cdddf1b7fdb4f6a6" and
@@ -117,6 +117,8 @@ jobs:
           export LEAN_PATH="$work/native/lib/lean"
           sha256sum "$driver" tests/run-r2-data-pattern.py PS0_V1_LANGUAGE_REFERENCE.md
           python3 tests/run-r2-data-pattern.py "$driver" build/r2-data-pattern-evidence
+          python3 tests/run-r2-calls.py "$driver" build/r2-call-regression
+          cp build/r2-call-regression/result.json build/r2-data-pattern-evidence/call-regression.json
           for fixture in host_postfix_calls binder_operands operator_operands do_layout_operands; do
             "$driver" check "tests/v1/$fixture.ps" > "build/r2-data-pattern-evidence/$fixture.log" 2>&1 || {
               cat "build/r2-data-pattern-evidence/$fixture.log"

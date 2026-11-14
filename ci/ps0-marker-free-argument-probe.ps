@@ -165,7 +165,10 @@ private unsafe function leadingWith(head : Bool) : ParserFn := fun ctx initial =
     let guarded := withFn((fun parse ctx initial => Id.run(do
       let after := (peekToken ctx initial).2
       let stop := match after with
-        | .ok (.atom _ "for") => (checkLineEqFn("same line", ctx, initial)).hasError
+        | .ok (.atom _ "for") =>
+          match initial.stxStack.back.getTailPos? with
+          | some previous => (ctx.fileMap.toPosition previous).line != (ctx.fileMap.toPosition initial.pos).line
+          | none => false
         | _ => false
       if stop then return initial.mkUnexpectedError "a new line starts a for statement"
       return parse ctx initial)), parser)

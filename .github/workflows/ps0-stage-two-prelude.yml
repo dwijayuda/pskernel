@@ -130,9 +130,17 @@ jobs:
             mkdir -p "$target/src/$(dirname "$source")"
             cp "$GITHUB_WORKSPACE/src/$source" "$target/src/$source"
             sha256sum "$target/src/$source"
+            sdk="$(lean --print-prefix)/lib/lean"
+            imports="$target/native/lib/lean"
+            mkdir -p "$imports"
+            cp -as "$sdk/." "$imports/"
+            for suffix in olean olean.private olean.server ilean ir; do
+              output="$imports/${source%.ps}.$suffix"
+              if test -L "$output"; then unlink "$output"; fi
+            done
             if lake -R -f lakefile.project.lean -KsourceRoot="$target/src" -Kroots="$module" \
                 -KmoduleNames="$module" -Kdriver="$driver" -KsourceGrammar=true \
-                -KprojectBuildDir="$target/native" build "$module" 2>&1 | tee "$target/build.log"; then
+                -Kbootstrap=true -KprojectBuildDir="$target/native" build "$module" 2>&1 | tee "$target/build.log"; then
               test -s "$target/native/lib/lean/${source%.ps}.ilean.ps0-source-census.json"
               echo "PS0_STAGE_TWO_BASE $module PASS"
             else

@@ -1,4 +1,4 @@
-name: PS0 stage-two Prelude reproduction
+name: PS0 stage-two base grammar reproduction
 on:
   pull_request:
     paths: [.github/workflows/ps0-stage-two-prelude.yml]
@@ -8,7 +8,7 @@ permissions:
 jobs:
   qualify:
     runs-on: ubuntu-22.04
-    timeout-minutes: 25
+    timeout-minutes: 35
     defaults:
       run:
         working-directory: experiments/ps0
@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: dwijayuda/lean4
-          ref: f3006855247554712b6a39ae5131cc688e5c4d3e
+          ref: 40c5b25438906316751441470502055ffc96632b
           sparse-checkout: |
             src
             experiments/ps0
@@ -84,8 +84,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "f3006855247554712b6a39ae5131cc688e5c4d3e"
-          test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
+          test "$(git rev-parse HEAD)" = "40c5b25438906316751441470502055ffc96632b"
+          test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = d446dc87b2f9487919f5c0eb47df7a1163c5e140
           gh api repos/dwijayuda/pskernel/actions/artifacts/14107360730 | jq -e '
             .workflow_run.id == 43534267147 and .workflow_run.head_sha == "343c6939709fb62d3af6eef0cdddf1b7fdb4f6a6" and
             .digest == "sha256:894ddeb97ec02430a16bc89d1e3a626dd446108e00445e64d7a1977f38877ed1" and .expired == false'
@@ -114,18 +114,37 @@ jobs:
             -KrootModule=PS0Main -KmoduleNames="$modules" -Kdriver="$driver" \
             -KsourceGrammar=true -KprojectBuildDir="$work/native" build ps0project
           driver="$work/native/bin/ps0project"
-          target="$PWD/build/stage-two-prelude"
-          mkdir -p "$target/src/Init"
-          cp "$GITHUB_WORKSPACE/src/Init/Prelude.ps" "$target/src/Init/Prelude.ps"
-          lake -R -f lakefile.project.lean -KsourceRoot="$target/src" -Kroots=Init \
-            -KmoduleNames=Init.Prelude -Kdriver="$driver" -KsourceGrammar=true \
-            -Kbootstrap=true -KprojectBuildDir="$target/native" build Init.Prelude 2>&1 | tee "$target/prelude.log"
-          test -s "$target/native/lib/lean/Init/Prelude.ilean.ps0-source-census.json"
+          targets=(
+            Init.Data.Array.Lex.Basic
+            Init.Data.Vector.Basic
+            Std.Data.DHashMap.RawDef
+            Std.Data.DTreeMap.Internal.Operations
+            Std.Tactic.BVDecide.Bitblast.BVExpr.Basic
+          )
+          out="$PWD/build/stage-two-base-probe"
+          mkdir -p "$out"
+          status=0
+          for module in "${targets[@]}"; do
+            target="$out/$module"
+            source="${module//./\/}.ps"
+            mkdir -p "$target/src/$(dirname "$source")"
+            cp "$GITHUB_WORKSPACE/src/$source" "$target/src/$source"
+            sha256sum "$target/src/$source"
+            if lake -R -f lakefile.project.lean -KsourceRoot="$target/src" -Kroots="$module" \
+                -KmoduleNames="$module" -Kdriver="$driver" -KsourceGrammar=true \
+                -Kbootstrap=true -KprojectBuildDir="$target/native" build "$module" 2>&1 | tee "$target/build.log"; then
+              test -s "$target/native/lib/lean/${source%.ps}.ilean.ps0-source-census.json"
+              echo "PS0_STAGE_TWO_BASE $module PASS"
+            else
+              echo "PS0_STAGE_TWO_BASE $module FAIL"
+              status=1
+            fi
+          done
+          exit "$status"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: ps0-stage-two-prelude-${{ github.run_id }}
           path: |
             experiments/ps0/build/prefix.json
-            experiments/ps0/build/stage-two-prelude/prelude.log
-            experiments/ps0/build/stage-two-prelude/native/lib/lean/Init/Prelude.ilean.ps0-source-census.json
+            experiments/ps0/build/stage-two-base-probe/*/build.log

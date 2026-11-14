@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: dwijayuda/lean4
-          ref: 047759daaecc9e163da7939db1a21fcc09d7addf
+          ref: 6dfe41f772bdb32cd8a9b9714cc93f236c3380b5
           sparse-checkout: |
             src
             experiments/ps0

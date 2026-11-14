@@ -176,8 +176,8 @@ const loopBasicFun : Parser :=
 @[run_parser_attribute_hooks] const patternIfTerm : Parser :=
   leadingNode `termIfLet leadPrec <|
     "if " >> "let " >> termParser >> " := " >>
-      ((atomic((dbgTraceState "PS0-R2-18-header"
-        (withForbiddens(#["{"], (categoryParser `psTerm 0))) >> lookahead "{")) >>
+      ((atomic((dbgTraceState("PS0-R2-18-header",
+        (withForbiddens(#["{"], (categoryParser `psTerm 0)))) >> lookahead "{")) >>
         withFn((fun parse ctx initial =>
           let parsed := parse ctx initial
           if parsed.hasError then parsed else
@@ -327,8 +327,8 @@ function forDeclaration(collection : Parser) : Parser :=
 @[run_parser_attribute_hooks] const forElem : Parser :=
   leadingNode ``Lean.Parser.Term.doFor maxPrec <|
     "for " >>
-    ((atomic((dbgTraceState "PS0-R2-17-header"
-        (sepBy1((forDeclaration((withForbiddens(#["{"], (categoryParser `psTerm 0))))), ", ")) >>
+    ((atomic((dbgTraceState("PS0-R2-17-header",
+        (sepBy1((forDeclaration((withForbiddens(#["{"], (categoryParser `psTerm 0))))), ", "))) >>
       optional loopInvariant >> optional loopDecreasing >> lookahead "{")) >>
       withFn((fun parse ctx initial =>
         let parsed := parse ctx initial

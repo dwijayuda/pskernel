@@ -120,6 +120,13 @@ jobs:
           mkdir -p build
           sha256sum tests/run-r2-calls.py PS0_V1_LANGUAGE_REFERENCE.md
           python3 tests/run-r2-calls.py "$driver" build/r2-call-evidence
+          "$driver" check tests/v1/host_postfix_calls.ps
+          "$driver" check tests/v1/binder_operands.ps
+          "$driver" check tests/v1/operator_operands.ps
+          "$driver" check tests/v1/do_layout_operands.ps
+          "$driver" check tests/v1/r2_declarations.ps
+          PS0_TEST_DRIVER="$driver" PS0_SOURCE_SHA="$(git rev-parse HEAD)" python3 tests/run-prelude-grammar.py 2>&1 | tee build/r2-call-evidence/prelude-grammar.log
+          PYTHONPATH=tests python3 -c 'import json; from pathlib import Path; from canonical_compiler_sources import read_canonical_corpus; p = Path.cwd(); assert len(read_canonical_corpus(p.parent.parent, p/"compiler-canonical-sources.json", json.loads((p/"compiler-source-inventory.json").read_text()))) == 2569'
       - uses: actions/upload-artifact@v4
         if: always()
         with:

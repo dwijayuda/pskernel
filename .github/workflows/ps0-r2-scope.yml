@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: dwijayuda/lean4
-          ref: 6aacc6af6e270f4adf3eb1fa1ab471519ccbef72
+          ref: ba330959efa7ecc43995a5585d802f8c83eaddc9
           sparse-checkout: |
             src
             experiments/ps0
@@ -84,7 +84,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "6aacc6af6e270f4adf3eb1fa1ab471519ccbef72"
+          test "$(git rev-parse HEAD)" = "ba330959efa7ecc43995a5585d802f8c83eaddc9"
           test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
           gh api repos/dwijayuda/pskernel/actions/artifacts/14107360730 | jq -e '
             .workflow_run.id == 43534267147 and .workflow_run.head_sha == "343c6939709fb62d3af6eef0cdddf1b7fdb4f6a6" and
@@ -116,4 +116,7 @@ jobs:
             experiments/ps0/build/r2-scope-evidence/*.log
             experiments/ps0/build/r2-scope-evidence/result.json
             experiments/ps0/build/r2-scope-evidence/src/
+            experiments/ps0/build/r2-scope-evidence/PublicAll.lean
+            experiments/ps0/build/r2-scope-evidence/native/ps0-inputs/
+            experiments/ps0/build/r2-scope-evidence/native/lib/lean/Scopes/Prelude.ilean.ps0-source-map.json
           if-no-files-found: error

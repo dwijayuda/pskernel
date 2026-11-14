@@ -84,7 +84,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "047759daaecc9e163da7939db1a21fcc09d7addf"
+          test "$(git rev-parse HEAD)" = "6dfe41f772bdb32cd8a9b9714cc93f236c3380b5"
           test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
           gh api repos/dwijayuda/pskernel/actions/artifacts/14107360730 | jq -e '
             .workflow_run.id == 43534267147 and .workflow_run.head_sha == "343c6939709fb62d3af6eef0cdddf1b7fdb4f6a6" and

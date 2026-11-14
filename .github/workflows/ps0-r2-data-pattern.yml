@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: dwijayuda/lean4
-          ref: 23f3f7bc814f33070d68d2accefbf65d2e5e4d07
+          ref: 3750c4fc8fd624b8b61e83ffef2f69713fd9a059
           sparse-checkout: |
             src
             experiments/ps0
@@ -84,7 +84,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "23f3f7bc814f33070d68d2accefbf65d2e5e4d07"
+          test "$(git rev-parse HEAD)" = "3750c4fc8fd624b8b61e83ffef2f69713fd9a059"
           test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
           gh api repos/dwijayuda/pskernel/actions/artifacts/14107360730 | jq -e '
             .workflow_run.id == 43534267147 and .workflow_run.head_sha == "343c6939709fb62d3af6eef0cdddf1b7fdb4f6a6" and
@@ -105,9 +105,26 @@ jobs:
           PYTHONPATH=tests python3 -c 'import json,sys; from native_compiler_prefix import verify_compiler_prefix; print(json.dumps(verify_compiler_prefix(sys.argv[1],sys.argv[2])))' "$root" c8e776e295eed4019a5bd1567ecd3b9ec8c85ab5 | tee build/prefix.json
           driver="$root/compiler-prefix/bin/ps0"
           chmod u+x "$driver"
-          export LEAN_PATH="$root/compiler-prefix/lib/lean"
+          mkdir -p build/r2-data-self/src
+          cp -R PS0 build/r2-data-self/src/
+          cp PS0.ps PS0Main.ps build/r2-data-self/src/
+          work="$PWD/build/r2-data-self"
+          modules="$(find "$work/src" -name '*.ps' -printf '%P\n' | sed 's/\.ps$//; s|/|.|g' | sort | paste -sd,)"
+          lake -R -f lakefile.project.lean -KsourceRoot="$work/src" -Kroots=PS0,PS0Main \
+            -KrootModule=PS0Main -KmoduleNames="$modules" -Kdriver="$driver" \
+            -KsourceGrammar=true -KprojectBuildDir="$work/native" build ps0project
+          driver="$work/native/bin/ps0project"
+          export LEAN_PATH="$work/native/lib/lean"
           sha256sum "$driver" tests/run-r2-data-pattern.py PS0_V1_LANGUAGE_REFERENCE.md
           python3 tests/run-r2-data-pattern.py "$driver" build/r2-data-pattern-evidence
+          for fixture in host_postfix_calls binder_operands operator_operands do_layout_operands; do
+            "$driver" check "tests/v1/$fixture.ps" > "build/r2-data-pattern-evidence/$fixture.log" 2>&1 || {
+              cat "build/r2-data-pattern-evidence/$fixture.log"
+              exit 1
+            }
+          done
+          PS0_TEST_DRIVER="$driver" PS0_SOURCE_SHA="$(git rev-parse HEAD)" python3 tests/run-prelude-grammar.py 2>&1 | tee build/r2-data-pattern-evidence/prelude-grammar.log
+          PYTHONPATH=tests python3 -c 'import json; from pathlib import Path; from canonical_compiler_sources import read_canonical_corpus; p = Path.cwd(); assert len(read_canonical_corpus(p.parent.parent, p/"compiler-canonical-sources.json", json.loads((p/"compiler-source-inventory.json").read_text()))) == 2569'
       - uses: actions/upload-artifact@v4
         if: always()
         with:

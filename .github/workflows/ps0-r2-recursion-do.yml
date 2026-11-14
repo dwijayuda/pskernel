@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: dwijayuda/lean4
-          ref: 8be284b6e1d1026497e962f28c213362c9a6be58
+          ref: a300e30c2e617c5ac344611714c28da398f26abf
           sparse-checkout: |
             src
             experiments/ps0
@@ -84,7 +84,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD)" = "8be284b6e1d1026497e962f28c213362c9a6be58"
+          test "$(git rev-parse HEAD)" = "a300e30c2e617c5ac344611714c28da398f26abf"
           test "$(git hash-object PS0_V1_LANGUAGE_REFERENCE.md)" = c50203f8e4cb79b3e6680088a07c1d1e145b8f0b
           gh api repos/dwijayuda/pskernel/actions/artifacts/14107360730 | jq -e '
             .workflow_run.id == 43534267147 and .workflow_run.head_sha == "343c6939709fb62d3af6eef0cdddf1b7fdb4f6a6" and

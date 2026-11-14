@@ -132,7 +132,7 @@ jobs:
             sha256sum "$target/src/$source"
             if lake -R -f lakefile.project.lean -KsourceRoot="$target/src" -Kroots="$module" \
                 -KmoduleNames="$module" -Kdriver="$driver" -KsourceGrammar=true \
-                -Kbootstrap=true -KprojectBuildDir="$target/native" build "$module" 2>&1 | tee "$target/build.log"; then
+                -KprojectBuildDir="$target/native" build "$module" 2>&1 | tee "$target/build.log"; then
               test -s "$target/native/lib/lean/${source%.ps}.ilean.ps0-source-census.json"
               echo "PS0_STAGE_TWO_BASE $module PASS"
             else

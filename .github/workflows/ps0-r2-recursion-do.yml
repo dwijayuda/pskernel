@@ -106,9 +106,9 @@ jobs:
           driver="$root/compiler-prefix/bin/ps0"
           chmod u+x "$driver"
           mkdir -p build/r2-recursion-self/src
-          cp -R PS0 build/r2-data-self/src/
-          cp PS0.ps PS0Main.ps build/r2-data-self/src/
-          work="$PWD/build/r2-data-self"
+          cp -R PS0 build/r2-recursion-self/src/
+          cp PS0.ps PS0Main.ps build/r2-recursion-self/src/
+          work="$PWD/build/r2-recursion-self"
           modules="$(find "$work/src" -name '*.ps' -printf '%P\n' | sed 's/\.ps$//; s|/|.|g' | sort | paste -sd,)"
           lake -R -f lakefile.project.lean -KsourceRoot="$work/src" -Kroots=PS0,PS0Main \
             -KrootModule=PS0Main -KmoduleNames="$modules" -Kdriver="$driver" \

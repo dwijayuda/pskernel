@@ -21,6 +21,12 @@ jobs:
             src
             experiments/ps0
           persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          sparse-checkout: ci/ps0-marker-free-argument-probe.ps
+          path: runner-input
+          persist-credentials: false
       - uses: actions/cache/restore@v4
         id: ps0-elan-input
         with:
@@ -107,6 +113,8 @@ jobs:
           chmod u+x "$driver"
           mkdir -p build/r2-boundary-self/src
           cp -R PS0 build/r2-boundary-self/src/
+          cp "$GITHUB_WORKSPACE/runner-input/ci/ps0-marker-free-argument-probe.ps" build/r2-boundary-self/src/PS0/Operators.ps
+          printf '%s  %s\n' 6e43ff0f6d94c791157093eaae61e2788acf2ffd31af255ff12b94940e5202b5 build/r2-boundary-self/src/PS0/Operators.ps | sha256sum -c -
           cp PS0.ps PS0Main.ps build/r2-boundary-self/src/
           work="$PWD/build/r2-boundary-self"
           modules="$(find "$work/src" -name '*.ps' -printf '%P\n' | sed 's/\.ps$//; s|/|.|g' | sort | paste -sd,)"

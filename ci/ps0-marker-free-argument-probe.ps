@@ -161,13 +161,13 @@ private unsafe function leadingWith(head : Bool) : ParserFn := fun ctx initial =
   let originalTrailing := category.tables.trailingParsers.filter keep
   let nativeTrailing := originalTrailing.map(fun (parser, priority) =>
     if (parser.info.collectKinds {}).contains ``Lean.Parser.Term.app then
-      (withFn((fun parse ctx initial =>
+      (withFn((fun parse ctx initial => Id.run(do
         let after := (peekToken ctx initial).2
         let stop := match after with
           | .ok (.atom _ "for") => checkLineEq.fn ctx initial |>.hasError
           | _ => false
-        if stop then initial.mkUnexpectedError "a new line starts a for statement"
-        else parse ctx initial), parser), priority)
+        if stop then return initial.mkUnexpectedError "a new line starts a for statement"
+        return parse ctx initial)), parser), priority)
     else (parser, priority))
   let trailingParsers := if head then nativeTrailing else (whitespaceApplication, 0) :: nativeTrailing
   let tables := {category.tables with trailingTable, trailingParsers}

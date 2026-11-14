@@ -114,7 +114,7 @@ jobs:
           mkdir -p build/r2-boundary-self/src
           cp -R PS0 build/r2-boundary-self/src/
           cp "$GITHUB_WORKSPACE/runner-input/ci/ps0-marker-free-argument-probe.ps" build/r2-boundary-self/src/PS0/Operators.ps
-          printf '%s  %s\n' 67fa7c1c750d57035552799944a7dcdb8c73de35c45959ef4ffc31642a5d797b build/r2-boundary-self/src/PS0/Operators.ps | sha256sum -c -
+          printf '%s  %s\n' 669f92fd8bd07d4bd80afa809796b78ff4c0752d3b1518b7b727828b8537ceb6 build/r2-boundary-self/src/PS0/Operators.ps | sha256sum -c -
           cp PS0.ps PS0Main.ps build/r2-boundary-self/src/
           work="$PWD/build/r2-boundary-self"
           modules="$(find "$work/src" -name '*.ps' -printf '%P\n' | sed 's/\.ps$//; s|/|.|g' | sort | paste -sd,)"

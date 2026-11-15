@@ -122,6 +122,31 @@ jobs:
             -KrootModule=PS0Main -KmoduleNames="$modules" -Kdriver="$driver" \
             -KsourceGrammar=true -KprojectBuildDir="$work/native" build ps0project
           driver="$work/native/bin/ps0project"
+          mkdir -p build/section-probes
+          export LEAN_PATH="$work/native/lib/lean"
+          cat > build/section-probes/simple.ps <<'EOF'
+          public import Init
+          const sectionCall : Option Nat → Nat := (·.getD(3))
+          example : sectionCall(none) = 3 := rfl
+          EOF
+          cat > build/section-probes/native.ps <<'EOF'
+          public import Init
+          const sectionCall : Option Nat → Nat := (·.getD 3)
+          example : sectionCall(none) = 3 := rfl
+          EOF
+          cat > build/section-probes/nested.ps <<'EOF'
+          public import Init
+          const sectionCall : Id Nat := do
+            let n : Option Nat := none
+            let f : Option Nat → Nat := (·.getD(3))
+            return f(n)
+          example : sectionCall = 3 := rfl
+          EOF
+          for src in build/section-probes/*.ps; do
+            echo "PS0_SECTION_PROBE $src"
+            "$driver" check "$src" || true
+          done
+          unset LEAN_PATH
           targets=(Lean.Elab.Tactic.Doc)
           out="$PWD/build/stage-two-base-probe"
           mkdir -p "$out"

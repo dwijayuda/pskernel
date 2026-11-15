@@ -21,6 +21,12 @@ jobs:
             src
             experiments/ps0
           persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          sparse-checkout: ci/ps0-marker-free-probe.ps
+          path: runner-input
+          persist-credentials: false
       - uses: actions/cache/restore@v4
         id: ps0-elan-input
         with:
@@ -107,6 +113,8 @@ jobs:
           chmod u+x "$driver"
           mkdir -p build/r2-recursion-self/src
           cp -R PS0 build/r2-recursion-self/src/
+          cp "$GITHUB_WORKSPACE/runner-input/ci/ps0-marker-free-probe.ps" build/r2-recursion-self/src/PS0/HostCategories.ps
+          sha256sum build/r2-recursion-self/src/PS0/HostCategories.ps
           cp PS0.ps PS0Main.ps build/r2-recursion-self/src/
           work="$PWD/build/r2-recursion-self"
           modules="$(find "$work/src" -name '*.ps' -printf '%P\n' | sed 's/\.ps$//; s|/|.|g' | sort | paste -sd,)"
@@ -114,14 +122,7 @@ jobs:
             -KrootModule=PS0Main -KmoduleNames="$modules" -Kdriver="$driver" \
             -KsourceGrammar=true -KprojectBuildDir="$work/native" build ps0project
           driver="$work/native/bin/ps0project"
-          targets=(
-            Init.Data.Array.Lex.Basic
-            Init.Data.Vector.Basic
-            Std.Data.DHashMap.RawDef
-            Std.Data.DTreeMap.Internal.Operations
-            Std.Tactic.BVDecide.Bitblast.BVExpr.Basic
-            Std.Tactic.BVDecide.Bitblast.BVExpr.Circuit.Impl.Operations.GetLsbD
-          )
+          targets=(Lean.Elab.Tactic.Doc)
           out="$PWD/build/stage-two-base-probe"
           mkdir -p "$out"
           status=0

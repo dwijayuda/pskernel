@@ -1324,3 +1324,4 @@ jobs:
           name: ps0-canonical-independent-audit-${{ github.run_id }}
           path: evidence/
           if-no-files-found: error
+# Qualification retry: stale GitHub job 132907809797 had no logs or state transition.

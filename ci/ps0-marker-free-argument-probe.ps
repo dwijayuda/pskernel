@@ -68,6 +68,10 @@ function checkCallConflict(parse : ParserFn) : ParserFn := fun ctx initial => Id
   let some category := getParserCategory? ctx.env `term
     | return initial.mkUnexpectedError "missing native term category"
   let (start, candidates) := indexed category.tables.trailingTable ctx head .default
+  -- The scoped compatibility parsers lower the same call argument partition.
+  let candidates := candidates.filter(fun (parser, _) =>
+    let kinds := parser.info.collectKinds({})
+    !kinds.contains `PS0.pscvCall && !kinds.contains `PS0.pscvEmptyCall)
   if start.hasError || candidates.isEmpty then
     return initial.mkUnexpectedError "no competing native call parser"
   let candidate := longestMatchFn((some start.stxStack.back), candidates, ctx,
@@ -158,21 +162,7 @@ private unsafe function leadingWith(head : Bool) : ParserFn := fun ctx initial =
     for (token, parsers) in category.tables.trailingTable do
       for entry in (parsers.filter keep).reverse do
         trailingTable := trailingTable.insert token entry
-  let originalTrailing := category.tables.trailingParsers.filter keep
-  let nativeTrailing := originalTrailing.map(fun (parser, priority) => Id.run(do
-    unless (parser.info.collectKinds {}).contains ``Lean.Parser.Term.app do
-      return (parser, priority)
-    let guarded := withFn((fun parse ctx initial => Id.run(do
-      let after := (peekToken ctx initial).2
-      let stop := match after with
-        | .ok (.atom _ "for") =>
-          match initial.stxStack.back.getTailPos? with
-          | some previous => (ctx.fileMap.toPosition previous).line != (ctx.fileMap.toPosition initial.pos).line
-          | none => false
-        | _ => false
-      if stop then return initial.mkUnexpectedError "a new line starts a for statement"
-      return parse ctx initial)), parser)
-    return (guarded, priority)))
+  let nativeTrailing := category.tables.trailingParsers.filter keep
   let trailingParsers := if head then nativeTrailing else (whitespaceApplication, 0) :: nativeTrailing
   let tables := {category.tables with trailingTable, trailingParsers}
   -- The unrestricted legacy wrapper is not an ordinary PS term production.

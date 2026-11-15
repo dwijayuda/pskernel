@@ -146,21 +146,6 @@ jobs:
             echo "PS0_SECTION_PROBE $src"
             "$driver" check "$src" || true
           done
-          cat > build/section-probes/reassign.ps <<'EOF'
-          public import Lean
-          open Lean
-          function result(_n : Nat) : Nat := helper(_n)
-          where
-            helper (n : Nat) : Nat := Id.run(do
-              let mut entries : NameMap Nat := {}
-              for _ in [0] do
-                for _ in [0] do
-                  if n == 0 then
-                    entries := entries.alter(`value, (·.getD(3)))
-              return entries.findD `value 0)
-          example : result(0) = 3 := rfl
-          EOF
-          "$driver" check build/section-probes/reassign.ps || true
           unset LEAN_PATH
           targets=(Lean.Elab.Tactic.Doc)
           out="$PWD/build/stage-two-base-probe"
@@ -171,7 +156,6 @@ jobs:
             source="${module//./\/}.ps"
             mkdir -p "$target/src/$(dirname "$source")"
             cp "$GITHUB_WORKSPACE/src/$source" "$target/src/$source"
-            sed -i 's/·\.getD(tok)/·.getD tok/' "$target/src/$source"
             sha256sum "$target/src/$source"
             sdk="$(lean --print-prefix)/lib/lean"
             imports="$target/native/lib/lean"

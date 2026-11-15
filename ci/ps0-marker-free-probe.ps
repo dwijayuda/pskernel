@@ -733,7 +733,6 @@ const ps0HostConflictingCall : Lean.Parser.Parser :=
 const ps0NativeHeadBridge : Lean.Parser.Parser := PS0.Operators.headLeading
 @[psHead_parser]
 const ps0NativeHeadProjectionParser : Lean.Parser.TrailingParser := PS0.Operators.projection
-syntax:max (name := ps0CDotHead) Lean.Parser.Term.cdot : psHead
 syntax:max (name := ps0ParenthesizedHead) Lean.Parser.Term.hygienicLParen PS0.DoLayout.argumentValue ")" : psHead
 syntax:max (name := ps0AscribedHead) (priority := 20000) PS0.DoLayout.ascriptionTerm : psHead
 syntax:max (name := ps0HeadCall) psHead:max noWs
@@ -1615,7 +1614,6 @@ partial function lowerFunBinder(source : Lean.Syntax) :
   Macro.throwError "PS0V1-LAMBDA-BINDER: unsupported owned lambda binder")
 
 partial function lowerHead(source : Lean.Syntax) : MacroM Lean.Syntax := withRef(source, do
-  if source.isOfKind ``ps0CDotHead then return source[0]
   if source.isOfKind ``ps0AscribedHead then
     return ← lower(`psTerm, source[0])
   if source.isOfKind `PS0.Operators.ownedPostfix then

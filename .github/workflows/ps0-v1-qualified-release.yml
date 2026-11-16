@@ -1,0 +1,76 @@
+name: Publish PS0 V1 qualified bootstrap
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-v1-qualified-release.yml, ci/publish-ps0-v1-qualified.py]
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: write
+concurrency:
+  group: ps0-v1-qualified-release-156524fc
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.repository == 'dwijayuda/pskernel' && (github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: dwijayuda/pskernel
+      TAG: ps0-v1-qualified-lean4.35.0-156524fc-linux-x86_64
+      ASSET: ps0-bootstrap-lean4.35.0-156524fc-linux-x86_64.zip
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          sparse-checkout: ci
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: dwijayuda/lean4
+          ref: 156524fc660dbd6db8fbc4a5845d5a2d486860c3
+          sparse-checkout: experiments/ps0/tests
+          path: source
+          persist-credentials: false
+      - name: Verify qualified run, archives, audit receipt and retained prefix
+        run: |
+          set -euo pipefail
+          python3 ci/publish-ps0-v1-qualified.py
+          sha256sum -c SHA256SUMS
+      - name: Publish immutable qualified release assets
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" --json tagName >/dev/null 2>&1; then
+            gh release download "$TAG" --dir released
+            cmp SHA256SUMS released/SHA256SUMS
+            (cd released && sha256sum -c SHA256SUMS)
+          else
+            cat > release-notes.md <<'EOF'
+          PS0 V1 qualified Linux x86-64 bootstrap for pinned Lean 4.35.0.
+
+          Source: `156524fc660dbd6db8fbc4a5845d5a2d486860c3`.
+          Lean: `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`.
+          Runner: `fabaecaed7573daf3ffcca751699fceb9079e0cb`.
+
+          [Qualification run](https://github.com/dwijayuda/pskernel/actions/runs/43750175058): all 12 Linux jobs passed, including both native Lake stages and the independent audit over 2,569 canonical .ps modules. The bootstrap ZIP is the unchanged stage-two artifact. The audit ZIP is also retained unchanged.
+
+          Download all assets and run `sha256sum -c SHA256SUMS` before extraction. Read release-manifest.json for source, driver, job, artifact and audit identities.
+
+          Qualification covers retained source/census/prefix fidelity and comparison of producer C/public-olean receipts. It does not establish byte-identical final ELF output, language-wide conformance, completed grammar migration, or formally verified execution.
+          EOF
+            gh release create "$TAG" "$ASSET" independent-audit.zip audit.json release-manifest.json SHA256SUMS \
+              --target d5117848c893c10a81e72874f2dca4fad2f0a9b5 \
+              --title "PS0 V1 qualified bootstrap — Lean 4.35.0, Linux x86-64" \
+              --notes-file release-notes.md --latest=false
+          fi
+          gh release view "$TAG" --json tagName,url,isDraft,assets > published-release.json
+          jq -e --arg asset "$ASSET" '.isDraft == false and any(.assets[]; .name == $asset and .size == 285576940) and any(.assets[]; .name == "SHA256SUMS") and any(.assets[]; .name == "audit.json") and any(.assets[]; .name == "release-manifest.json")' published-release.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ps0-v1-qualified-publication-receipt
+          path: |
+            published-release.json
+            release-manifest.json
+            SHA256SUMS
+            audit.json
+          if-no-files-found: error

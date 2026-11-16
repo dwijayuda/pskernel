@@ -1,0 +1,74 @@
+name: Publish audited PS0 bootstrap
+on:
+  pull_request:
+    paths: [.github/workflows/ps0-bootstrap-publication.yml]
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: write
+concurrency:
+  group: ps0-bootstrap-publication
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.repository == 'dwijayuda/pskernel' && (github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: dwijayuda/pskernel
+      TAG: ps0-bootstrap-lean4.35.0-978d594a-linux-x86_64
+      ASSET: ps0-bootstrap-lean4.35.0-978d594a-linux-x86_64.zip
+      ARCHIVE_SHA: 8c206edde04ade42d72faa33e191575c05b0662d757fd51d77b649baadc4dbbd
+    steps:
+      - name: Verify exact audited producer and download bootstrap archive
+        run: |
+          set -euo pipefail
+          gh api "repos/$GH_REPO/actions/artifacts/13934124327" | jq -e --arg hash "sha256:$ARCHIVE_SHA" '
+            .id == 13934124327 and .expired == false and .digest == $hash and
+            .workflow_run.id == 43161199302 and .workflow_run.head_sha == "a12344e09baeb6fcee479b1934805de16e7c42b4"'
+          gh api "repos/$GH_REPO/actions/runs/43254180674/jobs" | jq -e '
+            any(.jobs[]; .id == 131307810313 and .conclusion == "success")'
+          gh api "repos/$GH_REPO/actions/artifacts/13934124327/zip" > "$ASSET"
+          test "$(stat -c %s "$ASSET")" = 384532453
+          printf '%s  %s\n' "$ARCHIVE_SHA" "$ASSET" > SHA256SUMS
+          sha256sum -c SHA256SUMS
+          unzip -p "$ASSET" compiler-evidence/migration.json | jq -e '
+            .source_commit == "978d594a10fac8f6e5687190a22d70334b331dab" and
+            .lean_commit == "eb6cafb7290e8bd5f2937522d8d804f58f02bafc" and
+            .driver_sha256 == "163fd4d0f10901757e758ba84b8a5929319200113c2f142d1dec9e2d373e2ec3" and
+            .module_count == 2569 and .runtime_grammar_host.metadata_files == 220'
+      - name: Publish the versioned bootstrap and SHA-256 checksums
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" --json tagName > /dev/null 2>&1; then
+            gh release download "$TAG" --pattern "$ASSET" --pattern SHA256SUMS --dir released
+            cmp SHA256SUMS released/SHA256SUMS
+            (cd released && sha256sum -c SHA256SUMS)
+          else
+            cat > release-notes.md <<'EOF'
+          Linux x86-64 PS0 bootstrap seed for the canonical ProofScript compiler build.
+
+          - PS0 source: `978d594a10fac8f6e5687190a22d70334b331dab`
+          - Lean 4.35.0 SDK revision: `eb6cafb7290e8bd5f2937522d8d804f58f02bafc`
+          - Compiler executable SHA-256: `163fd4d0f10901757e758ba84b8a5929319200113c2f142d1dec9e2d373e2ec3`
+          - The ZIP is the original audited stage artifact, including the compiler prefix, 220 metadata files, and verification receipts.
+          - Verify the ZIP against `SHA256SUMS` before extracting it.
+
+          [Producer](https://github.com/dwijayuda/pskernel/actions/runs/43161199302/job/131116729741)
+          [Independent audit](https://github.com/dwijayuda/pskernel/actions/runs/43254180674/job/131307810313)
+          EOF
+            gh release create "$TAG" "$ASSET" SHA256SUMS --target 7d3e220e495f5d82178a3e66f191255045862bd5 \
+              --title "PS0 bootstrap for Lean 4.35.0 (Linux x86-64)" --notes-file release-notes.md --latest=false
+          fi
+          gh release view "$TAG" --json tagName,url,isDraft,assets | tee published-release.json
+          jq -e --arg asset "$ASSET" '
+            .isDraft == false and any(.assets[]; .name == $asset and .size == 384532453) and
+            any(.assets[]; .name == "SHA256SUMS")' published-release.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ps0-bootstrap-publication-receipt
+          path: |
+            SHA256SUMS
+            published-release.json
+          if-no-files-found: error

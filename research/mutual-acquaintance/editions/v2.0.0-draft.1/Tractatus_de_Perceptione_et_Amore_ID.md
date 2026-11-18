@@ -87,6 +87,8 @@
 
 **4.11** Tetapi percakapan yang sama juga bisa membuat kita lebih berani berkata jujur, merasa lebih dekat, atau justru mengetahui bahwa kita tidak nyaman bersama.
 
+**4.12** Merasa dimengerti bukan bukti bahwa maksud kita telah ditangkap dengan tepat. Tetapi ketepatan penafsiran saja juga belum menjelaskan bagaimana rasanya didengarkan.
+
 **4.2** Di sini ada tiga peristiwa yang perlu dibedakan: mengetahui sesuatu tentang orang lain, mengenali atau mengubah keinginan sendiri, dan membentuk atau mengubah keadaan hubungan.
 
 **4.21** Yang pertama terutama menyangkut pengetahuan; yang kedua penilaian terhadap apa yang diinginkan; yang ketiga sesuatu yang terjadi di antara dua orang.

@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   build-pdfs:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
@@ -25,8 +25,19 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          sudo apt-get update -qq
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
+          sources="$RUNNER_TEMP/acquaintance-ubuntu.list"
+          printf '%s\n' \
+            'deb https://archive.ubuntu.com/ubuntu noble main universe' \
+            'deb https://archive.ubuntu.com/ubuntu noble-updates main universe' \
+            'deb https://security.ubuntu.com/ubuntu noble-security main universe' > "$sources"
+          apt_options=(
+            -o "Dir::Etc::sourcelist=$sources"
+            -o 'Dir::Etc::sourceparts=-'
+            -o 'Acquire::Retries=2'
+            -o 'Acquire::https::Timeout=25'
+          )
+          sudo apt-get "${apt_options[@]}" update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get "${apt_options[@]}" install -y \
             pandoc texlive-xetex texlive-latex-extra texlive-fonts-recommended \
             fonts-dejavu-core fonts-linuxlibertine fonts-crosextra-carlito
       - name: Render all four Markdown editions

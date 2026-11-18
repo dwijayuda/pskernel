@@ -19,7 +19,7 @@ Baseline: PR [#267](https://github.com/dwijayuda/pskernel/pull/267), branch `res
 | MutualAcquaintance.lean | `98439818fa421e9d9c55fcecb06dc02da48e761ecc50c1d0393ddcd46c23f2ac` |
 | MutualAcquaintanceDynamics.lean | `df83d0d1af4e2e2bb774fff239f9975551587249fefd3ec84d7133ac76bb3d29` |
 
-The source audit found no active placeholders or user-declared axioms in the two baseline modules. The workflow’s anchored keyword check alone would miss an inline placeholder. A dependency audit should use Lean’s axiom reporting, with a CI failure on `sorryAx` or warnings. The baseline paper’s creation-era claim of no Lean kernel run is stale if read as applying to the companion modules. The PR description and original core preamble are historical statements. PDF text and rendering were beyond this source audit. The style-reference PDF was unavailable for direct inspection during the editorial pass.
+The source audit found no active placeholders or user-declared axioms in the two baseline modules. The workflow’s anchored keyword check alone would miss an inline placeholder. A dependency audit should use Lean’s axiom reporting, with a CI failure on `sorryAx` or warnings. The baseline paper’s creation-era claim of no Lean kernel run is stale if read as applying to the companion modules. The PR description and original core preamble are historical statements. PDF text and rendering were beyond this source audit. The style-reference PDF was located, but its caption text was unavailable through page extraction. No stylistic revisions were made to the treatise.
 
 ## Philosophy and translation
 
@@ -122,3 +122,11 @@ Commit `5325174fcc0a5d1339ac47faa0eaab7bf77b9616` passed [Linux run 44354979353]
 - Core SHA-256: `98439818fa421e9d9c55fcecb06dc02da48e761ecc50c1d0393ddcd46c23f2ac`.
 - Dynamics SHA-256: `64e6f8ce53bad966f950ce5c47fa7f4259e16f6fb1d2ca04521d7ec837f0a4ca`.
 - Both new theorems reported the imported Lean axioms `propext`, `Classical.choice` and `Quot.sound`. The file adds 2 theorem declarations to the 19 baseline dynamics declarations. The normalized-filter and classification-risk proofs are outside this checked result.
+
+### Reproduction and rendered editions
+
+The source revision `3996e0f9019a35ca8cfe567573899c895ed2fb0f` passed the [direct Linux push job 134986097408](https://github.com/dwijayuda/pskernel/actions/runs/44356552353/job/134986097408) and [PR job 134986145826](https://github.com/dwijayuda/pskernel/actions/runs/44356567167/job/134986145826). The Lean version, both source hashes and imported axiom reports matched the receipt above. The bounded Python checks reproduced the committed JSON, including 20,480 passive-information cases, 1,215 decision-sufficiency cases, 255 willingness tables and 2,257 dynamic prefix checks.
+
+[PDF job 134986097407](https://github.com/dwijayuda/pskernel/actions/runs/44356552316/job/134986097407) rendered all four editions from that source revision. It committed only PDF snapshots at `6bf3ee4fe99660c394c1a1e8f13911768fabbc9b` and uploaded artifact `14453436720`. The archive SHA-256 is `5f768ae00f10d14e41013f5bd0eafc76fd91d902c43df2e56f6908db394258a6`. The revised paper PDF SHA-256 is `64df80a7a840e9fcb6bf738690114a20fe7c72ba600876c8f8f310d73df91683`. The job logs contain all four individual hashes. A successful renderer establishes artifact generation, with visual inspection and line-by-line translation review separate.
+
+Additional empirical benchmarks include the [Social Relations Model](https://doi.org/10.1016/S0065-2601(08)60144-6), the [ideal-preference meta-analysis](https://pubmed.ncbi.nlm.nih.gov/23586697/) and a [43-study longitudinal analysis of relationship quality](https://doi.org/10.1073/pnas.1917036117). Initial attraction, current relationship quality and future change are separate prediction targets. Any proposed dyadic model should specify which target it evaluates before comparing its predictive value with a profile-only baseline.

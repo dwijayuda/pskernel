@@ -418,6 +418,28 @@ theorem construct_sharp_channel (scenario : Scenario) (baseline increase denomin
     simp only [gap, Nat.mul_add]
     ac_rfl
 
+private def endpointPrior : BinaryLaw := ⟨15, 5, by decide⟩
+private def lowerEndpoint : Scenario := ⟨endpointPrior, 6, by decide⟩
+private def upperEndpoint : Scenario := ⟨endpointPrior, 15, by decide⟩
+
+private def lowerEndpointChannel : Channel :=
+  ⟨24, by decide, (fun r => if r then 24 else 4), by intro r; cases r <;> decide⟩
+
+private def upperEndpointChannel : Channel :=
+  ⟨24, by decide, (fun r => if r then 15 else 7), by intro r; cases r <;> decide⟩
+
+/-- The same exact observations are attained at both endpoints, with moved
+    fractions `6/20 = 3/10` and `15/20 = 3/4`. The two positive-report
+    probabilities are `180/480 = 3/8` and `300/480 = 5/8`. -/
+theorem sharp_example_endpoints :
+    lowerEndpoint.moved accepted = 6 ∧ upperEndpoint.moved accepted = 15 ∧
+    endpointPrior.total = 20 ∧
+    twoPolicyReports endpointPrior (lowerEndpoint.changed accepted)
+      lowerEndpointChannel lowerEndpointChannel = ((180, 480), (300, 480)) ∧
+    twoPolicyReports endpointPrior (upperEndpoint.changed accepted)
+      upperEndpointChannel upperEndpointChannel = ((180, 480), (300, 480)) := by
+  decide
+
 #print axioms movement_lower_bounds
 #print axioms construct_sharp_channel
 

@@ -16,21 +16,21 @@ header-includes:
   - '\usepackage{microtype}'
   - '\usepackage{fancyhdr}'
   - '\pagestyle{fancy}'
-  - '\fancyhead[L]{\footnotesize Mutual Acquaintance | Working draft v0.1}'
+  - '\fancyhead[L]{\footnotesize Mutual Acquaintance | Working draft v0.2}'
   - '\fancyhead[R]{\footnotesize Interpretations and proof obligations}'
   - '\fancyfoot[C]{\thepage}'
   - '\setlength{\headheight}{14pt}'
 ---
 
-> **WORKING DRAFT v0.1 | 18 November 2026 | Not submitted, not peer reviewed**  
+> **WORKING DRAFT v0.2 | 18 November 2026 | Not submitted, not peer reviewed**  
 > **Purpose:** interpret the numbered propositions of *Tractatus de Perceptione et Amore* through a dynamic two-person mathematical model.  
 > **Source:** the latest Indonesian philosophical edition, including 6.91, 6.92, and its single concluding proposition 7.  
 > **Evidence standard:** a derivation proves only what its definitions and assumptions entail. An illustrative model does not validate a psychological law.  
-> **Verification status:** traditional proofs below are drafted for review. The previous project's finite Python tests are separate evidence; no new Lean 4 kernel verification is claimed in this draft.
+> **Verification status:** selected finite results have companion Lean proofs. The [research audit](../RESEARCH_AUDIT.md) records precisely which statements were checked and gives reproducible CI evidence.
 
 # Working abstract (provisional)
 
-Two people who become acquainted do not merely estimate a fixed pair of hidden personalities. Each constructs a fallible representation of the other, notices and interprets evidence differently, may discover or change personal preferences, and participates in encounters that affect the relation being considered. This working draft reads the seven principal propositions of *Tractatus de Perceptione et Amore* as an ordered set of modeling questions. A finite-state, two-agent stochastic system separates (i) epistemic updating, (ii) preference discovery or change, and (iii) constitutive changes in a dyadic state. We derive elementary results about asymmetric learning, observational equivalence, decision-specific sufficiency, active versus passive information, dependence on shared history, and the underdetermination of unchosen alternatives. The results are best understood as **conditional interpretations and counterexamples**. The eventual research contribution, if there is one, must be established by comparing this architecture with dynamic epistemic logic, interactive POMDPs, decision theory, and interpersonal relationship models. It cannot be established by restating the *Tractatus* in symbols.
+Two people who become acquainted do not merely estimate a fixed pair of hidden personalities. Each constructs a fallible representation of the other, notices and interprets evidence differently, may discover or change personal preferences, and participates in encounters that affect the relation being considered. This working draft reads the seven principal propositions of *Tractatus de Perceptione et Amore* as an ordered set of modeling questions. A finite-state, two-agent stochastic system separates (i) epistemic updating, (ii) preference discovery or change, and (iii) constitutive changes in a dyadic state. We derive elementary results about asymmetric learning, observational equivalence, decision-specific sufficiency, active versus passive information, dependence on shared history, and the underdetermination of unchosen alternatives. For a one-step binary relational outcome, we also derive sharp partial-identification bounds under an invariant but uncalibrated report channel and give explicit alternative mechanisms for the same observed contrast. The results are conditional interpretations and counterexamples. The eventual research contribution, if there is one, must be established by comparing this architecture with dynamic epistemic logic, interactive POMDPs, decision theory, and interpersonal relationship models. It cannot be established by restating the *Tractatus* in symbols.
 
 # How to read this draft
 
@@ -390,7 +390,7 @@ Consider models M and N. Both yield the same observed outcome $r_1=0$ under the 
 
 **Reading of 6.41–6.43:** imagining a favorable alternative does not identify what would have happened. This does **not** show that counterfactuals are unknowable in general: additional structural assumptions or randomized comparisons may identify or bound some alternatives.
 
-## 6.5. An important unresolved issue: causal identification [OPEN]
+## 6.5. What follows from an observed report difference
 
 It is easy to write separate parameters for belief change, preference change, and relational change. It is much harder to estimate them from observed conversation histories because:
 
@@ -400,7 +400,23 @@ It is easy to write separate parameters for belief change, preference change, an
 4. participants' memories and self-reports have their own uncertainty;
 5. dyad-specific history and context can confound apparent effects.
 
-**Needed:** an explicit causal graph or structural causal model, identifiable estimands, and ethically acceptable measurements. The finite counterexamples above demonstrate logical distinctions, not identification from human data.
+### A bounded identification result
+
+Consider a specified binary relational state at a fixed follow-up. Two policies start with the same prevalence $p$ of the true state. The stable policy leaves it unchanged, while the accepted encounter can move a mass $m$ from false to true, with $0\le m\le 1-p$. Both policies use a common measurement channel whose rates for positive reports in the false and true states are $c_0$ and $c_1$. If $q=c_1-c_0$, the passive and active report probabilities are $y_0=c_0+pq$ and $y_1=c_0+(p+m)q$. Their difference is $\Delta=mq$. A nonzero calibrated $q$ gives $m=\Delta/q$.
+
+Suppose instead that $0<p<1$ is known, $\Delta>0$, and the channel is invariant and positively oriented but uncalibrated. The feasible contrast has upper bound $q_{\max}=\min(y_0/p,(1-y_0)/(1-p))$. For compatible data the sharp set is
+
+$$
+\frac{\Delta}{q_{\max}}\le m\le 1-p.
+$$
+
+The lower bound follows from the two probability restrictions $c_0\ge 0$ and $c_1\le 1$. The upper bound is the available false mass. For every candidate in the interval, take $q=\Delta/m$, $c_0=y_0-pq$ and $c_1=y_0+(1-p)q$. These rates satisfy the channel constraints and reproduce the two observations. The companion Lean development verifies the cross-multiplied bounds and constructs a channel for feasible rational inputs.
+
+For $p=1/4$ and observed positive-report probabilities $3/8$ and $5/8$, the sharp interval is $[3/10,3/4]$. If the policy can change the reporting channel, or if the groups can start with different latent distributions, even zero latent movement can reproduce the two report probabilities. The [sensitivity note](../notes/IDENTIFICATION_SENSITIVITY.md) gives explicit machine-checked witnesses. If transitions can occur in both directions, the invariant calibrated contrast identifies the net prevalence change, while opposing transitions can cancel.
+
+### From a model contrast to a study
+
+A randomized voluntary offer can identify an effect of assignment on observed reports when the study design and follow-up support that inference. The effect of taking up the offer and the effect on a latent relational outcome are distinct estimands. Existing relational state can influence both participants' willingness and the subsequent outcome. An offer can also influence what participants report. These paths require separate assumptions and measurement evidence. This finite model supplies an estimand, conditions for a partial-identification result, and concrete ways those conditions can fail. It leaves causal identification from actual encounters open.
 
 # 7. What a mathematical interpretation can say, and what it cannot
 
@@ -433,6 +449,7 @@ This point matters because the **saying/showing** distinction in Wittgenstein's 
 | C4 | 6.92 | Active information can have negative total value | **Counterexample written** | Actual questions reduce closeness |
 | C5 | 6.92 | Dyad state may depend on history beyond trait pair | **Counterexample written** | Real relations follow the chosen transition rule |
 | C6 | 6.41–6.43 | Observed path alone cannot fix unchosen counterfactual | **Counterexample written** | All counterfactuals are unknowable |
+| I1 | 6.92 | Sharp bounds and observational alternatives for one binary encounter | Cross-multiplied bounds and rational channel construction checked in Lean | Identification from self-selected groups or changing measurement |
 | 7 | 7 | Limits of what model entails | **Interpretation only** | Any theorem of unsayability |
 
 **Important:** 'proof written' means a traditional mathematical derivation is supplied under explicit assumptions. This label does not mean Lean checked, published, peer reviewed, or empirically confirmed. A proof may still require revision after independent mathematical scrutiny.
@@ -498,4 +515,5 @@ The bibliography is a **working comparison list**. Citations here identify relev
 # Editorial change log
 
 - **v0.1, 18 November 2026:** reorganized the earlier conventional 11-page research manuscript into a seven-part, proposition-indexed *interpretation* of the latest literary *Tractatus*. Reclassified definitional claims, finite counterexamples, theorems, and unproved research questions. Kept the original philosophical work unchanged.
-- **Audit revision:** clarified filtering assumptions, added a distinct formation-versus-discovery witness, and specified the limits of profile-only prediction. The [research audit](../RESEARCH_AUDIT.md) records proof correspondence and checked Lean scope. Normalized stochastic results and the classification-risk calculation remain written mathematical arguments.
+- **Audit revision:** clarified filtering assumptions, added a distinct formation-versus-discovery witness, and specified the limits of profile-only prediction. The [research audit](../RESEARCH_AUDIT.md) records proof correspondence and checked Lean scope. The general stochastic architecture and the classification-risk calculation remain written mathematical arguments.
+- **v0.2 identification revision:** integrated the verified one-step binary results and sharp sensitivity bounds into §6.5. The general two-agent filtering model and empirical validation remain open.

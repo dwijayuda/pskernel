@@ -18,9 +18,9 @@ The conditions c₀ ≥ 0 and c₁ ≤ 1 imply q ≤ q_max. The one-way transiti
 
     Δ/q_max ≤ m ≤ 1−p.
 
-For any m in this interval, set q = Δ/m, c₀ = y₀ − p q and c₁ = y₀ + (1−p) q. These choices are feasible and reproduce both observed probabilities. This proves sharpness over real-valued probabilities and supplies rational witnesses for rational inputs and candidate masses. The bounds and their sharpness are written proofs. The current Lean module checks the exact contrast and explicit observationally equivalent mechanisms.
+For any m in this interval, set q = Δ/m, c₀ = y₀ − p q and c₁ = y₀ + (1−p) q. These choices are feasible and reproduce both observed probabilities. This proves sharpness over real-valued probabilities and supplies rational witnesses for rational inputs and candidate masses. Lean verifies the cross-multiplied lower bounds and constructs an invariant measurement channel for each feasible candidate represented by integer counts. This covers all rational inputs and candidates. The derivation above also gives the real-valued formulation.
 
-With p = 1/4, y₀ = 3/8, and y₁ = 5/8, the data identify positive movement and constrain it to [3/10, 3/4] under these assumptions. These endpoints are attainable: movement 3/10 uses report probabilities (1/6, 1), and movement 3/4 uses (7/24, 5/8). Information about the measurement channel narrows this interval.
+With p = 1/4, y₀ = 3/8, and y₁ = 5/8, the data identify positive movement and constrain it to [3/10, 3/4] under these assumptions. These endpoints are attainable: movement 3/10 uses report probabilities (1/6, 1), and movement 3/4 uses (7/24, 5/8). Lean also checks the two endpoint witnesses exactly in `sharp_example_endpoints`. Information about the measurement channel narrows this interval.
 
 ## Four mechanisms, one pair of observed laws
 

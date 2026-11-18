@@ -203,4 +203,103 @@ theorem example_posterior :
 #print axioms same_report_law_iff
 #print axioms accepted_step_separates
 
+/-! ## What measurement calibration and comparable participation buy -/
+
+/-- With an oriented common channel, the increase in positive-report mass
+    is the moved mass times the channel's discrimination. -/
+theorem positive_report_increase (scenario : Scenario) (channel : Channel)
+    (policy : Policy) (oriented : channel.yes false ≤ channel.yes true) :
+    reportWeight (scenario.changed policy) channel true =
+      reportWeight scenario.prior channel true +
+        scenario.moved policy * (channel.yes true - channel.yes false) := by
+  have balance := reportWeight_decomposition scenario channel policy true
+  change reportWeight scenario.prior channel true +
+      scenario.moved policy * channel.yes true =
+    reportWeight (scenario.changed policy) channel true +
+      scenario.moved policy * channel.yes false at balance
+  have contrast :
+      scenario.moved policy * (channel.yes true - channel.yes false) +
+        scenario.moved policy * channel.yes false =
+      scenario.moved policy * channel.yes true := by
+    rw [← Nat.mul_add, Nat.sub_add_cancel oriented]
+  omega
+
+/-- For a common prior and a calibrated strictly oriented channel, equal
+    observed positive-report numerators force equal moved mass. The prior
+    and channel fix the common positive denominator. -/
+theorem calibrated_movement_unique (first second : Scenario) (channel : Channel)
+    (firstPolicy secondPolicy : Policy)
+    (prior : first.prior = second.prior)
+    (informative : channel.yes false < channel.yes true)
+    (observed : reportWeight (first.changed firstPolicy) channel true =
+      reportWeight (second.changed secondPolicy) channel true) :
+    first.moved firstPolicy = second.moved secondPolicy := by
+  have a := positive_report_increase first channel firstPolicy (Nat.le_of_lt informative)
+  have b := positive_report_increase second channel secondPolicy (Nat.le_of_lt informative)
+  rw [prior] at a
+  have equal :
+      first.moved firstPolicy * (channel.yes true - channel.yes false) =
+      second.moved secondPolicy * (channel.yes true - channel.yes false) := by omega
+  exact (Nat.mul_right_cancel_iff (by omega : 0 < channel.yes true - channel.yes false)).mp equal
+
+/-- The denominator and positive numerator determine the full binary report law. -/
+def reportSignature (law : BinaryLaw) (channel : Channel) : Nat × Nat :=
+  (reportWeight law channel true, law.total * channel.scale)
+
+def twoPolicyReports (passivePrior activePrior : BinaryLaw)
+    (passiveChannel activeChannel : Channel) : (Nat × Nat) × (Nat × Nat) :=
+  (reportSignature passivePrior passiveChannel, reportSignature activePrior activeChannel)
+
+private def studyPrior : BinaryLaw := ⟨9, 3, by decide⟩
+
+private def studyMovement : Scenario := ⟨studyPrior, 6, by decide⟩
+
+private def alternativeMovement : Scenario := ⟨studyPrior, 8, by decide⟩
+
+private def positiveChannel (low high : Nat) (hlo : low ≤ 32) (hhi : high ≤ 32) : Channel :=
+  ⟨32, by decide, (fun r => if r then high else low), by
+    intro r
+    cases r
+    · exact hlo
+    · exact hhi⟩
+
+private def calibratedChannel := positiveChannel 8 24 (by decide) (by decide)
+private def unknownChannel := positiveChannel 9 21 (by decide) (by decide)
+private def shiftedChannel := positiveChannel 16 32 (by decide) (by decide)
+private def selectedPrior : BinaryLaw := ⟨3, 9, by decide⟩
+
+/-- Different magnitudes of change fit the same report data when calibration
+    is unknown, even with the same initial law and invariant measurement
+    across policies within each model. -/
+theorem uncalibrated_magnitudes_agree :
+    twoPolicyReports studyPrior (studyMovement.changed accepted)
+      calibratedChannel calibratedChannel =
+    twoPolicyReports studyPrior (alternativeMovement.changed accepted)
+      unknownChannel unknownChannel ∧
+    studyMovement.moved accepted ≠ alternativeMovement.moved accepted := by decide
+
+/-- A model with no latent transition matches both report laws if measurement
+    may depend on policy. -/
+theorem reporting_shift_agrees :
+    twoPolicyReports studyPrior (studyMovement.changed accepted)
+      calibratedChannel calibratedChannel =
+    twoPolicyReports studyPrior studyPrior calibratedChannel shiftedChannel := by decide
+
+/-- A model with no latent transition matches both report laws if the active
+    group can have a different initial population. -/
+theorem selection_shift_agrees :
+    twoPolicyReports studyPrior (studyMovement.changed accepted)
+      calibratedChannel calibratedChannel =
+    twoPolicyReports studyPrior selectedPrior calibratedChannel calibratedChannel := by decide
+
+theorem sensitivity_example_signature :
+    twoPolicyReports studyPrior (studyMovement.changed accepted)
+      calibratedChannel calibratedChannel = ((144, 384), (240, 384)) := by decide
+
+#print axioms positive_report_increase
+#print axioms calibrated_movement_unique
+#print axioms uncalibrated_magnitudes_agree
+#print axioms reporting_shift_agrees
+#print axioms selection_shift_agrees
+
 end MutualAcquaintanceIdentification

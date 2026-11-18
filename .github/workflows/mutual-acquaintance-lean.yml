@@ -1,0 +1,43 @@
+name: Mutual Acquaintance Lean 4
+
+on:
+  push:
+    paths:
+      - 'research/mutual-acquaintance/**'
+      - '.github/workflows/mutual-acquaintance-lean.yml'
+  pull_request:
+    paths:
+      - 'research/mutual-acquaintance/**'
+      - '.github/workflows/mutual-acquaintance-lean.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lean-check:
+    name: Lean 4.36.0 kernel check
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install elan
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.36.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Check formalization
+        shell: bash
+        working-directory: research/mutual-acquaintance/lean
+        run: |
+          set -euo pipefail
+          lean --version
+          sha256sum MutualAcquaintance.lean MutualAcquaintanceDynamics.lean
+          lean MutualAcquaintance.lean
+          lean MutualAcquaintanceDynamics.lean
+          if grep -nE '^[[:space:]]*(sorry|admit|axiom)([[:space:]]|$)' MutualAcquaintance.lean MutualAcquaintanceDynamics.lean; then
+            echo 'Unexpected proof placeholder or user-declared axiom' >&2
+            exit 1
+          fi
+          echo 'LEAN_KERNEL_CHECK_OK'

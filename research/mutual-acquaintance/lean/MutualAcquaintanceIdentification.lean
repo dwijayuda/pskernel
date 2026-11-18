@@ -170,7 +170,7 @@ theorem accepted_step_separates (scenario : Scenario) (channel : Channel) (polic
     ¬ SameReportLaw scenario channel policy := by
   intro same
   rcases (same_report_law_iff scenario channel policy).mp same with zero | equal
-  · rw [Scenario.moved, if_pos accepted] at zero
+  · simp [Scenario.moved, accepted] at zero
     omega
   · exact informative equal
 

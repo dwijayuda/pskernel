@@ -130,3 +130,7 @@ The source revision `3996e0f9019a35ca8cfe567573899c895ed2fb0f` passed the [direc
 [PDF job 134986097407](https://github.com/dwijayuda/pskernel/actions/runs/44356552316/job/134986097407) rendered all four editions from that source revision. It committed only PDF snapshots at `6bf3ee4fe99660c394c1a1e8f13911768fabbc9b` and uploaded artifact `14453436720`. The archive SHA-256 is `5f768ae00f10d14e41013f5bd0eafc76fd91d902c43df2e56f6908db394258a6`. The revised paper PDF SHA-256 is `64df80a7a840e9fcb6bf738690114a20fe7c72ba600876c8f8f310d73df91683`. The job logs contain all four individual hashes. A successful renderer establishes artifact generation, with visual inspection and line-by-line translation review separate.
 
 Additional empirical benchmarks include the [Social Relations Model](https://doi.org/10.1016/S0065-2601(08)60144-6), the [ideal-preference meta-analysis](https://pubmed.ncbi.nlm.nih.gov/23586697/) and a [43-study longitudinal analysis of relationship quality](https://doi.org/10.1073/pnas.1917036117). Initial attraction, current relationship quality and future change are separate prediction targets. Any proposed dyadic model should specify which target it evaluates before comparing its predictive value with a profile-only baseline.
+
+## Follow-up model
+
+[Can an encounter distinguish revelation from change?](notes/REVELATION_VS_CHANGE.md) formalizes the prioritized two-mechanism comparison with exact binary laws and explicit policy acceptance. Its CI receipt is recorded separately once the revision passes.

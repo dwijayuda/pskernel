@@ -33,10 +33,11 @@ jobs:
         run: |
           set -euo pipefail
           lean --version
-          sha256sum MutualAcquaintance.lean MutualAcquaintanceDynamics.lean
+          sha256sum MutualAcquaintance.lean MutualAcquaintanceDynamics.lean MutualAcquaintanceIdentification.lean
           lean MutualAcquaintance.lean
           lean MutualAcquaintanceDynamics.lean
-          if grep -nE '^[[:space:]]*(sorry|admit|axiom)([[:space:]]|$)' MutualAcquaintance.lean MutualAcquaintanceDynamics.lean; then
+          lean -DwarningAsError=true MutualAcquaintanceIdentification.lean
+          if grep -nE '^[[:space:]]*(sorry|admit|axiom)([[:space:]]|$)' MutualAcquaintance.lean MutualAcquaintanceDynamics.lean MutualAcquaintanceIdentification.lean; then
             echo 'Unexpected proof placeholder or user-declared axiom' >&2
             exit 1
           fi

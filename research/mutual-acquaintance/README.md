@@ -2,9 +2,17 @@
 
 A stand-alone **research project** inside `dwijayuda/pskernel`, completely separate from PS0, PSV0, PSC0, and compiler qualification.
 
+## Philosophical editions (versioned)
+
+**Proposed v2.0.0-draft.1:** [read the revised Indonesian Tractatus](editions/v2.0.0-draft.1/Tractatus_de_Perceptione_et_Amore_ID.md) (**74 propositions**), [editorial audit](editions/v2.0.0-draft.1/EDITORIAL_AUDIT.md), [literature-grounded research programme](editions/v2.0.0-draft.1/RESEARCH_PROGRAM.md), and [119-row original→revised proposition map](editions/v2.0.0-draft.1/PROPOSITION_CROSSWALK.csv). The [edition registry](editions/README.md) records retrospective baseline naming and future version rules. This is a **draft**, not a peer-reviewed or empirically validated result.
+
+**Original 119-proposition edition:** retained unchanged in `tractatus/` in Indonesian, English, and Latin. The mathematical paper and existing Lean source currently interpret the original philosophical edition, **not** the new v2 draft; correspondence is open work.
+
+To audit the revised edition’s numbering from the repo root: `python research/mutual-acquaintance/editions/verify_edition.py`.
+
 ## Read in order
 
-1. **Philosophical work**: [Tractatus de Perceptione et Amore (Indonesian)](tractatus/Tractatus_de_Perceptione_et_Amore_ID.md), [English](tractatus/Tractatus_de_Perceptione_et_Amore_EN.md), [Latin](tractatus/Tractatus_de_Perceptione_et_Amore_LA.md). Latest 119-proposition edition with §6.91, §6.92 and single §7.
+1. **Philosophical work**: [Tractatus de Perceptione et Amore (Indonesian)](tractatus/Tractatus_de_Perceptione_et_Amore_ID.md), [English](tractatus/Tractatus_de_Perceptione_et_Amore_EN.md), [Latin](tractatus/Tractatus_de_Perceptione_et_Amore_LA.md). Preserved 119-proposition source edition with §6.91, §6.92 and single §7.
 2. **Mathematical working draft**: [A Dynamic Epistemic Model of Mutual Acquaintance](paper/A_Dynamic_Epistemic_Model_of_Mutual_Acquaintance_WORKING_DRAFT.md), and [proposition index](paper/PROPOSITION_INDEX.md).
 3. **Kernel-checked Lean 4 formalization**: [Finite core](lean/MutualAcquaintance.lean), [dynamics](lean/MutualAcquaintanceDynamics.lean), and [revelation versus change](lean/MutualAcquaintanceIdentification.lean). Lean 4.36.0 GitHub Actions [workflow](../../.github/workflows/mutual-acquaintance-lean.yml).
 4. **Verification and support**: [finite checker](paper/check_finite_examples.py), [dynamic example checker](tests/check_dynamic_examples.py), [dynamics notes](notes/DYNAMICS_ADDENDUM.md), and [proof correspondence and CI evidence](research_notes.md).

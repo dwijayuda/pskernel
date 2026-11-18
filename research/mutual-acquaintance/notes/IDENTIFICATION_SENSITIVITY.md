@@ -43,3 +43,5 @@ The first two rows identify the role of independent calibration. The third shows
 - Prespecify the observed-report contrast, the assumptions supporting a latent interpretation, and the corresponding identified set or sensitivity analysis. The sharp set above describes structural uncertainty at known population probabilities. Sampling error and loss to follow-up require separate analysis.
 
 The philosophical distinction between what was already there and what took shape together survives this sensitivity analysis. A study has to earn the inference from an observed change to either explanation.
+
+The [repeated-encounter extension](MULTIROUND_IDENTIFICATION.md) shows which conclusions extend to cumulative movement and what intermediate report waves can reveal about timing.

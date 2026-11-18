@@ -41,3 +41,12 @@ jobs:
             exit 1
           fi
           echo 'LEAN_KERNEL_CHECK_OK'
+      - name: Reproduce bounded examples
+        shell: bash
+        working-directory: research/mutual-acquaintance
+        run: |
+          set -euo pipefail
+          python3 paper/check_finite_examples.py | tee "$RUNNER_TEMP/mutual-acquaintance-finite.json"
+          diff -u <(python3 -m json.tool --sort-keys paper/FINITE_CHECK_RESULTS.json) \
+            <(python3 -m json.tool --sort-keys "$RUNNER_TEMP/mutual-acquaintance-finite.json")
+          python3 tests/check_dynamic_examples.py

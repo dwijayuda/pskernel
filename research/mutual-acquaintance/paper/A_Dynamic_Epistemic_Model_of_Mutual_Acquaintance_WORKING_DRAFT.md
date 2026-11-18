@@ -374,9 +374,9 @@ Fix the admissible run set and let $S(h)$ denote the summary available to a pred
 
 For a finite distribution of runs and zero-one loss, the minimum prediction error given $S$ is
 
-$
+$$
 \sum_s \min\{\Pr(S=s,R=0),\Pr(S=s,R=1)\}.
-$
+$$
 
 On each summary, choosing 0 incurs the mass with target 1, and choosing 1 incurs the mass with target 0. The choices can be minimized separately. For the two reversed histories in the Lean toy model, if only these histories have mass and their probabilities are $p$ and $1-p$, the exact minimum error from their common terminal profile is $\min(p,1-p)$. A predictor who observes which of the two histories occurred has zero error in that model. This is a standard binary classification risk applied to a model witness. The probabilities would require independent justification in any empirical application.
 

@@ -1,0 +1,68 @@
+name: Mutual Acquaintance PDF snapshots
+
+on:
+  push:
+    branches:
+      - research/mutual-acquaintance-dynamics-20261118
+    paths:
+      - 'research/mutual-acquaintance/tractatus/*.md'
+      - 'research/mutual-acquaintance/paper/A_Dynamic_Epistemic_Model_of_Mutual_Acquaintance_WORKING_DRAFT.md'
+      - '.github/workflows/mutual-acquaintance-pdfs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-pdfs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Install PDF toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
+            pandoc texlive-xetex texlive-latex-extra texlive-fonts-recommended \
+            fonts-dejavu-core fonts-linuxlibertine fonts-crosextra-carlito
+      - name: Render all four Markdown editions
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd research/mutual-acquaintance
+          for lang in ID EN LA; do
+            file="tractatus/Tractatus_de_Perceptione_et_Amore_${lang}"
+            pandoc "${file}.md" --standalone --pdf-engine=xelatex \
+              -V mainfont="DejaVu Serif" -V papersize=a5 \
+              -V geometry:margin=16mm -o "${file}.pdf"
+          done
+          paper="paper/A_Dynamic_Epistemic_Model_of_Mutual_Acquaintance_WORKING_DRAFT"
+          pandoc "${paper}.md" --standalone --pdf-engine=xelatex -o "${paper}.pdf"
+          sha256sum tractatus/*.pdf paper/*.pdf
+      - name: Commit PDF snapshots on research branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/research/mutual-acquaintance-dynamics-20261118'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/mutual-acquaintance/tractatus/*.pdf \
+                  research/mutual-acquaintance/paper/*WORKING_DRAFT.pdf
+          if ! git diff --cached --quiet; then
+            git commit -m "docs(acquaintance): render PDF snapshots [skip pdf]"
+            git push origin "HEAD:research/mutual-acquaintance-dynamics-20261118"
+          else
+            echo "PDF snapshots unchanged"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mutual-acquaintance-pdf-snapshots
+          path: |
+            research/mutual-acquaintance/tractatus/*.pdf
+            research/mutual-acquaintance/paper/*WORKING_DRAFT.pdf
+          if-no-files-found: warn

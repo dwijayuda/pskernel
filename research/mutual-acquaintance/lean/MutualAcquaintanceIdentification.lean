@@ -443,4 +443,87 @@ theorem sharp_example_endpoints :
 #print axioms movement_lower_bounds
 #print axioms construct_sharp_channel
 
+/-! ## Repeated encounters under an invariant channel -/
+
+structure Encounter where
+  policy : Policy
+  requested : Nat
+
+/-- Each accepted encounter can move at most the remaining false mass. -/
+def encounterScenario (law : BinaryLaw) (encounter : Encounter) : Scenario :=
+  ⟨law, min encounter.requested law.no, Nat.min_le_right _ _⟩
+
+def afterEncounter (law : BinaryLaw) (encounter : Encounter) : BinaryLaw :=
+  (encounterScenario law encounter).changed encounter.policy
+
+def afterEncounters (law : BinaryLaw) : List Encounter → BinaryLaw
+  | [] => law
+  | encounter :: rest => afterEncounters (afterEncounter law encounter) rest
+
+def totalMovement (law : BinaryLaw) : List Encounter → Nat
+  | [] => 0
+  | encounter :: rest =>
+    (encounterScenario law encounter).moved encounter.policy +
+      totalMovement (afterEncounter law encounter) rest
+
+/-- Repeated one-way movement conserves population and telescopes in both states. -/
+theorem repeated_mass_balance (law : BinaryLaw) (encounters : List Encounter) :
+    (afterEncounters law encounters).yes = law.yes + totalMovement law encounters ∧
+    (afterEncounters law encounters).no + totalMovement law encounters = law.no := by
+  induction encounters generalizing law with
+  | nil => simp [afterEncounters, totalMovement]
+  | cons encounter rest ih =>
+    have h := ih (afterEncounter law encounter)
+    have bounded := (encounterScenario law encounter).moved_bounded encounter.policy
+    change (encounterScenario law encounter).moved encounter.policy ≤ law.no at bounded
+    simp only [afterEncounters, totalMovement]
+    rcases h with ⟨hi, lo⟩
+    change (afterEncounters (afterEncounter law encounter) rest).yes =
+      law.yes + (encounterScenario law encounter).moved encounter.policy +
+        totalMovement (afterEncounter law encounter) rest at hi
+    change (afterEncounters (afterEncounter law encounter) rest).no +
+      totalMovement (afterEncounter law encounter) rest =
+        law.no - (encounterScenario law encounter).moved encounter.policy at lo
+    constructor <;> omega
+
+theorem repeated_total (law : BinaryLaw) (encounters : List Encounter) :
+    (afterEncounters law encounters).total = law.total := by
+  obtain ⟨hi, lo⟩ := repeated_mass_balance law encounters
+  unfold BinaryLaw.total
+  omega
+
+/-- The same channel at every round makes the marginal increase depend only
+    on total movement. The denominator is conserved by repeated_total. -/
+theorem repeated_report_increase (law : BinaryLaw) (channel : Channel)
+    (encounters : List Encounter) (oriented : channel.yes false ≤ channel.yes true) :
+    reportWeight (afterEncounters law encounters) channel true =
+      reportWeight law channel true +
+        totalMovement law encounters * (channel.yes true - channel.yes false) := by
+  induction encounters generalizing law with
+  | nil => simp [afterEncounters, totalMovement]
+  | cons encounter rest ih =>
+    have step := positive_report_increase (encounterScenario law encounter)
+      channel encounter.policy oriented
+    change reportWeight (afterEncounter law encounter) channel true =
+      reportWeight law channel true +
+        (encounterScenario law encounter).moved encounter.policy *
+          (channel.yes true - channel.yes false) at step
+    simp only [afterEncounters, totalMovement, ih, step, Nat.add_mul, Nat.add_assoc]
+
+private def earlyMovement : List Encounter := [⟨accepted, 2⟩, ⟨accepted, 0⟩]
+private def lateMovement : List Encounter := [⟨accepted, 0⟩, ⟨accepted, 2⟩]
+
+/-- Endpoints miss the timing, even with the same known informative channel.
+    The intermediate positive report masses are 10 and 6 out of 16. -/
+theorem endpoint_reports_hide_timing :
+    reportSignature (afterEncounters exampleScenario.prior earlyMovement) exampleChannel =
+      reportSignature (afterEncounters exampleScenario.prior lateMovement) exampleChannel ∧
+    reportWeight (afterEncounters exampleScenario.prior (earlyMovement.take 1))
+      exampleChannel true = 10 ∧
+    reportWeight (afterEncounters exampleScenario.prior (lateMovement.take 1))
+      exampleChannel true = 6 := by decide
+
+#print axioms repeated_mass_balance
+#print axioms repeated_report_increase
+
 end MutualAcquaintanceIdentification

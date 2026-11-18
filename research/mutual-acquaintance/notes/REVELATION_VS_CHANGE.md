@@ -29,3 +29,5 @@ This is population-level discrimination inside a specified two-model class. Diff
 The model isolates one transition and a binary follow-up. Private observation histories, endogenous approvals, multiple rounds, sampling uncertainty, and empirical calibration are subsequent research questions.
 
 The Lean correspondence is in [the identification module](../lean/MutualAcquaintanceIdentification.lean). The main results are `same_report_law_iff`, `passive_agreement`, `accepted_step_separates`, `report_total` and `posterior_total`. Both the general criterion and the numerical witness are checked by the same Linux workflow as the earlier modules.
+
+For calibrated effect recovery, sharp bounds under unknown calibration, and observationally equivalent reporting and selection mechanisms, see [What two encounter policies can identify](IDENTIFICATION_SENSITIVITY.md).

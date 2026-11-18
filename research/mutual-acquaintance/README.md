@@ -9,6 +9,8 @@ A stand-alone **research project** inside `dwijayuda/pskernel`, completely separ
 3. **Kernel-checked Lean 4 formalization**: [Finite core](lean/MutualAcquaintance.lean) and [dynamics](lean/MutualAcquaintanceDynamics.lean). Lean 4.36.0 GitHub Actions [workflow](../../.github/workflows/mutual-acquaintance-lean.yml).
 4. **Verification and support**: [finite checker](paper/check_finite_examples.py), [dynamic example checker](tests/check_dynamic_examples.py), [dynamics notes](notes/DYNAMICS_ADDENDUM.md), and [proof correspondence and CI evidence](research_notes.md).
 
+For the current-state audit, theorem correspondence, literature comparison, and exact CI receipts, see [the research audit](RESEARCH_AUDIT.md).
+
 ## Reproduce
 
 Run the Lean modules independently from `lean/`:

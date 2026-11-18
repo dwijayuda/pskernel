@@ -121,7 +121,7 @@ $$
 \tag{M7}
 $$
 
-when the denominator is positive and the Markov assumptions hold. If the other person's action is partly hidden, it must be marginalized under an explicit policy model. Neither formula claims that people actually compute Bayes' rule.
+when the denominator is positive and the kernels satisfy the conditional independence assumptions relative to the agent’s history: given the current state and action, the next state is independent of that history, and given the next state and action, the observation is independent of that history. If the other person's action is partly hidden, it must be marginalized under an explicit policy model. Neither formula claims that people actually compute Bayes' rule.
 
 # 1. A person is not a representation of that person
 
@@ -186,7 +186,7 @@ $$
 
 ## 2.2. Decision-relative sufficiency, not omniscience
 
-Let $p(\omega\mid h)$ be an agent's current posterior; $D(h)$ is the finite set of **that agent's feasible decisions**, and $U(d,\omega)$ is a fixed utility mapping for a particular decision problem. Define expected value of perfect information
+Let $p(\omega\mid h)$ be an agent's current posterior; $D(h)$ is the finite set of **that agent's feasible decisions**, and $U(d,\omega)$ is a fixed utility mapping for a particular decision problem. Assume $D(h)$ is nonempty and $h$ has positive probability. Define expected value of perfect information
 
 $$
 \operatorname{EVPI}(h)=
@@ -213,10 +213,10 @@ For the finite fixed-utility problem in (2.3), $\operatorname{EVPI}(h)=0$ **if a
 
 ## 3.1. Two latent variables, one visible report
 
-Let $q_{i,t}$ be an operative preference, $\rho^i_t$ an agent's beliefs about their own preference, and $\hat q_{i,t}$ their report. The report may depend on context $e_t$:
+Let $q_{i,t}$ be an operative preference, $\rho^i_t$ an agent's beliefs about their own preference, and $\hat q_{i,t}$ their report. The report may depend on both their self-belief and the context $e_t$:
 
 $$
-\hat q_{i,t}=g(q_{i,t},e_t,\eta_t).
+\hat q_{i,t}=g(q_{i,t},\rho^i_t,e_t,\eta_t).
 \tag{3.1}
 $$
 
@@ -231,7 +231,7 @@ Let $\hat q_t=q_t\oplus e_t$ for $t=0,1$ with binary variables. Consider:
 | F, preference formation | $0,1$ | $0,0$ | $0,1$ |
 | R, reporting/context shift | $0,0$ | $0,1$ | $0,1$ |
 
-**Proof.** The identical observed pair follows by substituting into the XOR equation. One model changes the operative preference and the other does not. No statistic based **only** on this report history distinguishes them. $\square$
+**Proof.** The identical observed pair follows by substituting into the XOR equation. One model changes the operative preference and the other does not. No statistic based only on this report history distinguishes them. If $e_t$ is also recorded and the XOR reporting rule is known, $q_t$ is recovered directly. This witness uses a context shift, so it does not by itself show equivalence between preference formation and discovery. For that comparison, hold context fixed and use the reporting rule $\hat q_t=\rho_t$. Both a fixed $q=(1,1)$ with a newly accurate self-belief $\rho=(0,1)$ and a changing $q=(0,1)$ with the same self-belief path produce the same reports. $\square$
 
 **Interpretation:** 3.23 survives as a conceptual distinction; a claim about a real person's preference formation requires more observations, assumptions, or study design.
 
@@ -326,7 +326,7 @@ giving the lower bound, together with nonnegativity. $\square$
 
 ## 6.1. Passive information has nonnegative *decision value* under restricted assumptions
 
-Suppose $\omega$ is fixed, an agent chooses among finite $D$, the signal $Z$ is costless, the agent may ignore it, and $U(d,\omega)$ is unchanged by its receipt. Set
+Suppose $\omega$ is fixed, an agent chooses among finite $D$, the signal $Z$ is costless, the agent may ignore it, and $U(d,\omega)$ is unchanged by its receipt. Assume finite state and signal spaces and a nonempty decision set. Set
 
 $$
 V_0=\max_{d\in D}\sum_\omega p(\omega)U(d,\omega),\quad
@@ -367,6 +367,20 @@ Hold both personal trait vectors fixed at $x_A=x_B=0$. Begin with $r_0=0$. Let o
 **Proof.** A proposed universal function $g(x_A,x_B)$ would assign one value to $g(0,0)$, yet the admissible histories require both 0 and 1. Contradiction. $\square$
 
 **Reading of 6.92:** one may lack information about an existing feature, or the shared history may genuinely change a relational feature. These are distinct reasons why the future cannot be known simply from a list of individual traits.
+
+### Exact recovery and prediction error
+
+Fix the admissible run set and let $S(h)$ denote the summary available to a predictor, such as an individual profile or one participant’s observed history. Let $R(h)$ be the Boolean relational target. An exact predictor from $S$ exists if and only if $R$ is constant among runs sharing each reachable value of $S$. Necessity follows by applying the predictor to equal inputs. For sufficiency, assign each reachable summary its unique target and give unreachable summaries an arbitrary value. This is an elementary factorization criterion. It applies even when histories are absent from the terminal state description.
+
+For a finite distribution of runs and zero-one loss, the minimum prediction error given $S$ is
+
+$
+\sum_s \min\{\Pr(S=s,R=0),\Pr(S=s,R=1)\}.
+$
+
+On each summary, choosing 0 incurs the mass with target 1, and choosing 1 incurs the mass with target 0. The choices can be minimized separately. For the two reversed histories in the Lean toy model, if only these histories have mass and their probabilities are $p$ and $1-p$, the exact minimum error from their common terminal profile is $\min(p,1-p)$. A predictor who observes which of the two histories occurred has zero error in that model. This is a standard binary classification risk applied to a model witness. The probabilities would require independent justification in any empirical application.
+
+Population identification concerns a different question: whether two admissible mechanisms yield the same observable-data law while giving different values for the specified estimand. A profile collision in a single specified model does not establish such observational equivalence between mechanisms. It also does not rule out calibrated probabilistic profile predictions.
 
 ## 6.4. Counterexample C6: the unchosen possibility is not identified by the chosen history alone
 
@@ -479,9 +493,9 @@ The bibliography is a **working comparison list**. Citations here identify relev
 8. Eastwick, P. W., Zhao, A. A. Z., & Zietsch, B. P. (2026). Mate preferences and the compatibility puzzle. *Trends in Cognitive Sciences*, advance online publication. <https://doi.org/10.1016/j.tics.2026.10.001>.
 9. Paul, L. A. (2014). *Transformative Experience*. Oxford University Press. <https://doi.org/10.1093/acprof:oso/9780198717959.001.0001>.
 10. Howard, R. A. (1966). Information value theory. *IEEE Transactions on Systems Science and Cybernetics, 2*, 22–26. <https://doi.org/10.1109/TSSC.1966.300074>.
-11. Blackwell, D. (1953). Equivalent comparison of experiments. *Annals of Mathematical Statistics, 24*, 265–272. <https://doi.org/10.1214/aoms/1177729032>.
+11. Blackwell, D. (1953). Equivalent Comparisons of Experiments. *Annals of Mathematical Statistics, 24*, 265–272. <https://doi.org/10.1214/aoms/1177729032>.
 
 # Editorial change log
 
 - **v0.1, 18 November 2026:** reorganized the earlier conventional 11-page research manuscript into a seven-part, proposition-indexed *interpretation* of the latest literary *Tractatus*. Reclassified definitional claims, finite counterexamples, theorems, and unproved research questions. Kept the original philosophical work unchanged.
-- **Known limitation:** no new empirical study, no independently reviewed proofs, no Lean kernel run, no demonstration of unique novelty against all adjacent models.
+- **Audit revision:** clarified filtering assumptions, added a distinct formation-versus-discovery witness, and specified the limits of profile-only prediction. The [research audit](../RESEARCH_AUDIT.md) records proof correspondence and checked Lean scope. Normalized stochastic results and the classification-risk calculation remain written mathematical arguments.

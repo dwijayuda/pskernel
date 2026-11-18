@@ -302,4 +302,123 @@ theorem sensitivity_example_signature :
 #print axioms reporting_shift_agrees
 #print axioms selection_shift_agrees
 
+/-! ## Sharp bounds with unknown calibration -/
+
+/-- Cross-multiplied lower bounds on moved mass. The two inequalities
+    come from the lower bound on the false-state reported-positive rate
+    and the upper bound on the true-state reported-positive rate. -/
+theorem movement_lower_bounds (scenario : Scenario) (channel : Channel)
+    (policy : Policy) (oriented : channel.yes false ≤ channel.yes true) :
+    let delta := reportWeight (scenario.changed policy) channel true -
+      reportWeight scenario.prior channel true
+    scenario.prior.yes * delta ≤
+        scenario.moved policy * reportWeight scenario.prior channel true ∧
+    scenario.prior.no * delta ≤
+        scenario.moved policy * reportWeight scenario.prior channel false := by
+  let gap := channel.yes true - channel.yes false
+  have increment := positive_report_increase scenario channel policy oriented
+  have delta : reportWeight (scenario.changed policy) channel true -
+      reportWeight scenario.prior channel true = scenario.moved policy * gap := by
+    change reportWeight (scenario.changed policy) channel true =
+      reportWeight scenario.prior channel true + scenario.moved policy * gap at increment
+    omega
+  have hi : scenario.prior.yes * gap ≤ reportWeight scenario.prior channel true := by
+    change scenario.prior.yes * gap ≤
+      scenario.prior.no * channel.yes false + scenario.prior.yes * channel.yes true
+    have := Nat.mul_le_mul_left scenario.prior.yes (show gap ≤ channel.yes true by
+      dsimp [gap]
+      omega)
+    omega
+  have lo : scenario.prior.no * gap ≤ reportWeight scenario.prior channel false := by
+    change scenario.prior.no * gap ≤
+      scenario.prior.no * (channel.scale - channel.yes false) +
+        scenario.prior.yes * (channel.scale - channel.yes true)
+    have := Nat.mul_le_mul_left scenario.prior.no
+      (show gap ≤ channel.scale - channel.yes false by
+        have bound := channel.bounded true
+        dsimp [gap]
+        omega)
+    omega
+  dsimp only
+  rw [delta]
+  constructor
+  · calc
+      _ = scenario.moved policy * (scenario.prior.yes * gap) := by ac_rfl
+      _ ≤ _ := Nat.mul_le_mul_left _ hi
+  · calc
+      _ = scenario.moved policy * (scenario.prior.no * gap) := by ac_rfl
+      _ ≤ _ := Nat.mul_le_mul_left _ lo
+
+/-- Construct an invariant channel for any positive candidate moved mass
+    satisfying the two cross-multiplied lower bounds. The scenario's
+    boundedness field supplies the upper bound. Passive and active observed
+    probabilities are exactly baseline/denominator and
+    (baseline + increase)/denominator, respectively. -/
+theorem construct_sharp_channel (scenario : Scenario) (baseline increase denominator : Nat)
+    (massPositive : 0 < scenario.movable) (denPositive : 0 < denominator)
+    (increasePositive : 0 < increase) (baselineBound : baseline ≤ denominator)
+    (positiveBound : scenario.prior.yes * increase ≤ scenario.movable * baseline)
+    (negativeBound : scenario.prior.no * increase ≤
+      scenario.movable * (denominator - baseline)) :
+    ∃ channel : Channel,
+      channel.yes false < channel.yes true ∧
+      reportSignature scenario.prior channel =
+        (scenario.prior.total * (scenario.movable * baseline),
+         scenario.prior.total * (scenario.movable * denominator)) ∧
+      reportSignature (scenario.changed accepted) channel =
+        (scenario.prior.total * (scenario.movable * (baseline + increase)),
+         scenario.prior.total * (scenario.movable * denominator)) := by
+  let low := scenario.movable * baseline - scenario.prior.yes * increase
+  let gap := scenario.prior.total * increase
+  have lowSum : low + scenario.prior.yes * increase = scenario.movable * baseline :=
+    Nat.sub_add_cancel positiveBound
+  have gapSum : gap = scenario.prior.no * increase + scenario.prior.yes * increase := by
+    simp only [gap, BinaryLaw.total, Nat.add_mul]
+  have numeratorSum : scenario.movable * (denominator - baseline) +
+      scenario.movable * baseline = scenario.movable * denominator := by
+    rw [← Nat.mul_add, Nat.sub_add_cancel baselineBound]
+  have highBound : low + gap ≤ scenario.movable * denominator := by omega
+  let channel : Channel :=
+    { scale := scenario.movable * denominator
+      positive := Nat.mul_pos massPositive denPositive
+      yes := fun r => match r with
+        | false => low
+        | true => low + gap
+      bounded := by
+        intro r
+        cases r
+        · change low ≤ scenario.movable * denominator
+          omega
+        · exact highBound }
+  have strict : channel.yes false < channel.yes true := by
+    have gapPositive : 0 < gap := Nat.mul_pos scenario.prior.positive increasePositive
+    change low < low + gap
+    omega
+  have stable : reportWeight scenario.prior channel true =
+      scenario.prior.total * (scenario.movable * baseline) := by
+    change scenario.prior.no * low + scenario.prior.yes * (low + gap) =
+      scenario.prior.total * (scenario.movable * baseline)
+    calc
+      _ = scenario.prior.total * (low + scenario.prior.yes * increase) := by
+        simp only [gap, BinaryLaw.total, Nat.mul_add, Nat.add_mul]
+        ac_rfl
+      _ = _ := congrArg (fun n => scenario.prior.total * n) lowSum
+  have active := positive_report_increase scenario channel accepted (Nat.le_of_lt strict)
+  have gapEq : channel.yes true - channel.yes false = gap := by
+    change low + gap - low = gap
+    omega
+  have moveEq : scenario.moved accepted = scenario.movable := rfl
+  rw [stable, gapEq, moveEq] at active
+  refine ⟨channel, strict, ?_, ?_⟩
+  · unfold reportSignature
+    rw [stable]
+  · unfold reportSignature
+    rw [scenario.same_total, active]
+    congr 1
+    simp only [gap, Nat.mul_add]
+    ac_rfl
+
+#print axioms movement_lower_bounds
+#print axioms construct_sharp_channel
+
 end MutualAcquaintanceIdentification

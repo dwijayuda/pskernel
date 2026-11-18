@@ -1,0 +1,22 @@
+name: Tractatus edition traceability
+
+on:
+  pull_request:
+    paths:
+      - 'research/mutual-acquaintance/editions/**'
+      - '.github/workflows/tractatus-version-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-proposition-map:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify baseline and candidate edition numbering
+        run: python research/mutual-acquaintance/editions/verify_edition.py

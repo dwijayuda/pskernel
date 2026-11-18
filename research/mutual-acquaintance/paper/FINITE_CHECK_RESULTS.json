@@ -1,0 +1,49 @@
+{
+  "status": "PASS",
+  "scope": "finite constructed examples and bounded exhaustive checks",
+  "checks": {
+    "asymmetric_public_signal": {
+      "B_p_theta_0_given_y": "1/2",
+      "A_identifies_theta": true
+    },
+    "repeated_context_nonidentification": {
+      "history_lengths_checked": "0..8",
+      "posterior_odds": "3/2"
+    },
+    "formation_vs_reporting": {
+      "observed_reports": [
+        0,
+        1
+      ],
+      "latent_preference_paths_differ": true
+    },
+    "passive_voi_small_exhaustive": {
+      "cases": 20480,
+      "strict_improvement_cases": 1512,
+      "nonnegative_and_equality_condition": true
+    },
+    "active_vs_passive": {
+      "quiet": "5/4",
+      "passive_signal": "7/4",
+      "active_encounter": "1",
+      "active_minus_quiet": "-1/4"
+    },
+    "decision_sufficiency_small_exhaustive": {
+      "cases": 1215,
+      "criterion_held": true
+    },
+    "mutual_willingness_frechet": {
+      "distributions": 255,
+      "bounds_held": true
+    },
+    "path_dependence_and_counterfactuals": {
+      "traits_held_fixed": [
+        0,
+        0
+      ],
+      "different_dyad_states": true,
+      "observed_actual_same": true,
+      "unobserved_alternative_different": true
+    }
+  }
+}

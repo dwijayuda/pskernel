@@ -7,7 +7,7 @@ A self-contained Lean 4 extension of `MutualAcquaintance.lean`, built around
 Tractatus de Perceptione et Amore §§1.12, 2.7, 3.23, 4.53, 5.31,
 6.63–6.64 and 6.91–6.92.
 
-Formalization status: SOURCE DRAFT; must be checked by a Lean 4 compiler.
+Formalization status: working research. See CI for the exact revision checked.
 No `sorry`, `admit`, `axiom`, or Mathlib dependency is intended.
 
 Interpretation:
@@ -196,6 +196,47 @@ theorem no_profile_only_predictor
     _ = predict (profile (run m initial h₂)) := congrArg predict heq
     _ = (run m initial h₂).relation := hpred h₂
 
+/-- A Boolean target can be recovered exactly from an arbitrary summary
+    precisely when it is constant on the histories sharing that summary.
+    The values of the predictor off the reachable summaries are arbitrary. -/
+theorem exact_bool_predictor_iff
+    {History : Type u} {Summary : Type v} (summarize : History → Summary)
+    (target : History → Bool) :
+    (∃ predict : Summary → Bool, ∀ h, predict (summarize h) = target h) ↔
+      ∀ h₁ h₂, summarize h₁ = summarize h₂ → target h₁ = target h₂ := by
+  classical
+  constructor
+  · rintro ⟨predict, correct⟩ h₁ h₂ same
+    exact (correct h₁).symm.trans ((congrArg predict same).trans (correct h₂))
+  · intro constantOnFibers
+    let predict := fun summary : Summary =>
+      if ∃ h, summarize h = summary ∧ target h = true then true else false
+    refine ⟨predict, ?_⟩
+    intro h
+    change (if ∃ k, summarize k = summarize h ∧ target k = true
+      then true else false) = target h
+    split
+    · rename_i witness
+      obtain ⟨k, same, yes⟩ := witness
+      exact yes.symm.trans (constantOnFibers k h same)
+    · rename_i noWitness
+      cases eq : target h with
+      | false => rfl
+      | true => exact (noWitness ⟨h, rfl, eq⟩).elim
+
+/-- Specialization to terminal individual profiles. -/
+theorem profile_only_predictor_iff (m : Model) (initial : State) :
+    (∃ predict : Profile → Bool, ∀ h : List Event,
+      predict (profile (run m initial h)) = (run m initial h).relation) ↔
+    ∀ h₁ h₂ : List Event,
+      profile (run m initial h₁) = profile (run m initial h₂) →
+      (run m initial h₁).relation = (run m initial h₂).relation :=
+  exact_bool_predictor_iff (fun h => profile (run m initial h))
+    (fun h => (run m initial h).relation)
+
+#print axioms exact_bool_predictor_iff
+#print axioms profile_only_predictor_iff
+
 /-! ## D. Constructive model: different histories, same profiles -/
 
 /-- In this illustrative model, an asymmetric signal can update A's belief.
@@ -306,7 +347,7 @@ theorem toy_has_no_profile_only_predictor :
 
 /-! ## E. Active information may have an assumed relational cost -/
 
-/-- Variant toy model: a unilateral probe reveals a bit to A but,
+/-- Variant toy model: a unilateral probe sends a fixed positive signal to A but,
     BY STIPULATION, resets the relational bit to false. -/
 def probeModel : Model where
   observeA := fun _ e => e.action.a && !e.action.b
@@ -330,7 +371,7 @@ def illustrativeScore (s : State) : Nat :=
 
 def relationInitiallyPresent : State := { initial with relation := true }
 
-/-- An informative intervention can be worse under a stipulated adverse
+/-- An intervention that updates a belief bit can score worse under a stipulated adverse
     relation transition. It does NOT refute the value-of-passive-information
     theorem from the original mathematical working draft. -/
 theorem informative_probe_can_have_lower_total_value :

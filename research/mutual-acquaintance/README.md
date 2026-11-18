@@ -24,6 +24,6 @@ On Windows PowerShell: `./verify.ps1` from the `lean/` folder.
 
 The mathematical writing is a **working draft**. A previous standalone research-paper version and early Lean sketch are retained under `paper/archive/`, not substituted for the current draft. The Lean code formalizes finite and deterministic toy models rather than the entire stochastic model or any empirical regularity.
 
-**PDFs:** Original PDF renderings were created in the conversation, but this repository tracks authoritative editable source files; PDFs can be regenerated from Markdown rather than maintaining multiple potentially stale copies.
+**PDFs:** All four PDF snapshots are committed alongside their authoritative Markdown sources. They were regenerated and committed by the dedicated [PDF workflow](../../.github/workflows/mutual-acquaintance-pdfs.yml). If Markdown changes, the PDFs must be regenerated; the Markdown files remain the source of truth.
 
 Do not present a successful formal proof as an empirical confirmation of the behavioral premises.

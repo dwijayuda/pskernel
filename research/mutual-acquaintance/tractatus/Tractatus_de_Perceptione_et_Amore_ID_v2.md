@@ -70,7 +70,7 @@
 
 **3.6** Karena preferensi dapat berubah, keputusan yang jujur pada suatu waktu tidak dengan sendirinya merupakan janji bahwa seluruh penilaian di masa depan akan tetap sama.
 
-**3.63** Tidak terwujudnya suatu hubungan tidak dengan sendirinya membantah kualitas baik yang dilihat pada orang lain; ia menunjukkan bahwa kemungkinan hubungan itu, dalam keadaan yang ada, tidak menjadi pilihan bersama.
+**3.63** Tidak terwujudnya suatu hubungan tidak dengan sendirinya membantah kualitas baik pada orang-orang yang terlibat. Hal itu dapat berawal dari pilihan yang berbeda ataupun keadaan yang tidak memungkinkan, meskipun keduanya bersedia.
 
 ## 4. Tentang percakapan
 

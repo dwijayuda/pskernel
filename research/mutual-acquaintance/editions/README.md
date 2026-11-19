@@ -1,5 +1,7 @@
 # Tractatus de Perceptione et Amore — edition registry
 
+> **ARCHIVED (2026-11-19):** This branch contains historical proposals numbered above v1.1.0; they are **not** the current philosophical edition. The canonical edition is [Tractatus v1.1.0](https://github.com/dwijayuda/pskernel/blob/research/mutual-acquaintance-dynamics-20261118/research/mutual-acquaintance/tractatus/Tractatus_de_Perceptione_et_Amore_ID.md). [Edition registry and preserved archives](https://github.com/dwijayuda/pskernel/blob/research/mutual-acquaintance-dynamics-20261118/research/mutual-acquaintance/editions/README.md). Historical wording below is retained for provenance; any references to “current v2” describe the state of a former draft, not today's version policy.
+
 **Date initiated:** 2026-11-19  
 **Editorial principle:** treat the Indonesian *Tractatus* as a philosophical work in its own right. Its mathematical companion is an optional, fallible interpretation. Preserve the original voice; do not manufacture novelty or convert reflective propositions into unsupported laws.
 

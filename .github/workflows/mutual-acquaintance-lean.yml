@@ -51,3 +51,4 @@ jobs:
           diff -u <(python3 -m json.tool --sort-keys paper/FINITE_CHECK_RESULTS.json) \
             <(python3 -m json.tool --sort-keys "$RUNNER_TEMP/mutual-acquaintance-finite.json")
           python3 tests/check_dynamic_examples.py
+          python3 tests/check_edition_alignment.py

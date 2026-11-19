@@ -10,6 +10,10 @@ A stand-alone **research project** inside `dwijayuda/pskernel`, completely separ
 
 To audit the revised edition’s numbering from the repo root: `python research/mutual-acquaintance/editions/verify_edition.py`.
 
+## New research iteration (independent of philosophical editions)
+
+**r0.2.0-draft.1**: [research version registry](advances/README.md), [permission-relative hypothesis-testing note](advances/r0.2.0-draft.1/PERMISSION_RELATIVE_IDENTIFICATION.md), [adaptive sequential coupling bound](advances/r0.2.0-draft.1/SEQUENTIAL_BOUND.md), and [consent-safe Stage-0 pilot protocol](advances/r0.2.0-draft.1/PILOT_PROTOCOL.md). The new [Lean 4 binary decision module](lean/MutualAcquaintanceDecision.lean) proves elementary conditional error bounds and a stipulated example. Neither the numerical example nor the protocol is empirical evidence; the sequential bound is a written proof, not a Lean-checked theorem.
+
 ## Read in order
 
 1. **Philosophical work**: [Tractatus de Perceptione et Amore (Indonesian)](tractatus/Tractatus_de_Perceptione_et_Amore_ID.md), [English](tractatus/Tractatus_de_Perceptione_et_Amore_EN.md), [Latin](tractatus/Tractatus_de_Perceptione_et_Amore_LA.md). Preserved 119-proposition source edition with §6.91, §6.92 and single §7.

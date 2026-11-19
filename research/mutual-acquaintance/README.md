@@ -12,7 +12,7 @@ This version-policy choice changes no Lean source, formal claim, or mathematical
 
 [**v1.1.0 companion alignment audit**](COMPANION_ALIGNMENT_v1.1.0.md) connects the philosophical propositions to paper v0.2, the current Lean modules and the independent research notes, and records scope limits and exact-source Lean CI evidence. All 20 display-math blocks of the paper were left unchanged when literary cross-references were updated. Run `python3 tests/check_edition_alignment.py` from this project directory to check the 116 IDs, trilingual snapshots, proposition index, version registry and archived v2 proposals; the same check is included in the Lean workflow.
 
-The four PDF snapshots **must be checked against the current Markdown** before they are cited as synchronized. Source compatibility is not itself new Lean verification or empirical confirmation.
+All four PDF snapshots have now been regenerated from v1.1.0-aligned Markdown, with [source/PDF SHA-256 receipts](PDF_SOURCE_RECEIPTS.sha256) and a [successful PDF workflow run](https://github.com/dwijayuda/pskernel/actions/runs/44511575748). Rendering correctness and source consistency are **not** mathematical novelty or empirical validation.
 
 ## Read in order
 
@@ -39,6 +39,6 @@ On Windows PowerShell: `./verify.ps1` from the `lean/` folder.
 
 The mathematical writing is a **working draft**. A previous standalone research-paper version and early Lean sketch are retained under `paper/archive/`, not substituted for the current draft. The Lean code formalizes finite and deterministic toy models rather than the entire stochastic model or any empirical regularity.
 
-**PDFs:** All four PDF snapshots are committed alongside their authoritative Markdown sources. They were regenerated and committed by the dedicated [PDF workflow](../../.github/workflows/mutual-acquaintance-pdfs.yml). If Markdown changes, the PDFs must be regenerated; the Markdown files remain the source of truth. Markdown is authoritative. PDF snapshots may lag behind source commits until the dedicated workflow completes; verify their source correspondence before citing them.
+**PDFs:** The authoritative Markdown and four verified PDF snapshots were synchronized on 19 November 2026 by the dedicated [PDF workflow](../../.github/workflows/mutual-acquaintance-pdfs.yml). The [SHA-256 receipt](PDF_SOURCE_RECEIPTS.sha256) records the exact source/PDF pairs for that render. If any Markdown source changes, the snapshots must be regenerated and checked again; the Markdown remains authoritative.
 
 Do not present a successful formal proof as an empirical confirmation of the behavioral premises.

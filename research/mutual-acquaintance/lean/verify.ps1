@@ -3,7 +3,7 @@ Set-Location $PSScriptRoot
 Write-Host 'Lean version:'
 & lean --version
 if ($LASTEXITCODE -ne 0) { throw 'Lean version check failed' }
-$files = @('MutualAcquaintance.lean','MutualAcquaintanceDynamics.lean','MutualAcquaintanceIdentification.lean')
+$files = @('MutualAcquaintance.lean','MutualAcquaintanceDynamics.lean','MutualAcquaintanceIdentification.lean','MutualAcquaintanceDecision.lean')
 foreach ($file in $files) {
   Write-Host "Verifying $file ..."
   & lean ".\$file"

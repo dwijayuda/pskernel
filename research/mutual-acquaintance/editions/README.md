@@ -26,3 +26,8 @@ The v2 material was never merged as the canonical philosophical edition. All thr
 - Minor editorial revisions should retain the character, structure and sound distinctions of the work unless a concrete reason warrants change.
 - Changing the canonical edition requires an explicit version-registry update and a matching review of translations, proposition index and any claimed proof correspondence.
 - The file name `Tractatus_de_Perceptione_et_Amore_ID.md` without an edition qualifier on the active research branch refers to **v1.1.0**, not to any v2 proposal.
+
+
+## Companion relationship to canonical v1.1.0
+
+The [mathematical working paper](../paper/A_Dynamic_Epistemic_Model_of_Mutual_Acquaintance_WORKING_DRAFT.md) is **v0.2** in an independent research version series, not a rival edition of the Tractatus. Its active proposition links and interpretive explanations now target **v1.1.0**. The [companion alignment audit](../COMPANION_ALIGNMENT_v1.1.0.md) documents which sources have Lean counterparts, the preserved proof-scope limits, and the unresolved PDF verification obligation. No v2 draft is active by implication from a later date or higher version string.

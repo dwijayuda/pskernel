@@ -25,3 +25,12 @@ Revisi editorial selektif dari komit `8cddd561986153bc443ee0b9310aacb80aeb1c38`.
 **Terjemahan saja:** EN/LA §§6.92 dan 7 ditajamkan agar tidak menyiratkan eksklusivitas atau ketidakmungkinan pengungkapan secara verbal.
 
 Tidak ada definisi formal, kode Lean, teorema, ataupun klaim empiris yang diubah. Teks Markdown adalah sumber otoritatif, dan PDF perlu diregenerasi setelah masuk ke branch riset utama.
+
+
+## Status keputusan editorial — 19 November 2026
+
+**v1.1.0 adalah edisi filosofis terbaru dan kanonis pada branch riset ini.** Melalui PR #269, naskah Indonesia, Inggris, dan Latin v1.1.0 digabungkan tanpa perubahan isi lebih lanjut. Salinan identik ditetapkan di `editions/v1.1.0/`.
+
+Usulan yang bernomor lebih tinggi disimpan **sebagai arsip, bukan penerus aktif**: `editions/archive/v2.0.0-draft.1/` (74 proposisi), `editions/archive/v2.0.0-draft.2/` (78), serta `editions/archive/v2.0.0-draft.1-alt66/` (66; rancangan independen dengan nama draft.1 yang kebetulan sama). Setiap naskah disalin tanpa mengubah isinya; audit, crosswalk, dan ledger pendamping disimpan bersama. Cabang arsip juga mempertahankan seluruh konteks Git asli. Informasi status dan tautan: [`editions/README.md`](../editions/README.md).
+
+Penetapan ini **tidak** menghapus riset yang lebih baru, tidak membalikkan pembuktian, dan tidak menyatakan bahwa versi terdahulu pernah terbit sebagai rilis stabil. Angka versi yang lebih tinggi tidak otomatis berarti lebih baik atau lebih matang. Perubahan status tidak merupakan penilaian ilmiah atas usulan v2.

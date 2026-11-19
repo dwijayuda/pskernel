@@ -8,7 +8,8 @@
 | Label | Status | What it refers to | Permanence |
 | --- | --- | --- | --- |
 | **v1.0.0-baseline** | Retrospective label, **not a historical release/tag** | [Original Indonesian Tractatus](../tractatus/Tractatus_de_Perceptione_et_Amore_ID.md) as recorded in Git commit `8cddd561986153bc443ee0b9310aacb80aeb1c38`; blob SHA `8611cb3403afa77ca59b1ac583ba806c6361ab7e` | **119 numbered propositions**; this file is not overwritten by the v2 proposal |
-| **v2.0.0-draft.1** | New proposed philosophical edition, not peer-reviewed | [Indonesian treatise](./v2.0.0-draft.1/Tractatus_de_Perceptione_et_Amore_ID.md) | **74 numbered propositions**; subject to review; revision history in Git |
+| **v2.0.0-draft.1** | Preserved first major revision | [Indonesian treatise](./v2.0.0-draft.1/Tractatus_de_Perceptione_et_Amore_ID.md) | **74** numbered propositions, protected Git blob `96285c8103315775da33bc267fb726b92ff3bb51` |
+| **v2.0.0-draft.2** | Latest proposed philosophical edition, not peer-reviewed | [Indonesian treatise](./v2.0.0-draft.2/Tractatus_de_Perceptione_et_Amore_ID.md) | **78** numbered propositions; four targeted additions, 74 unchanged; audit in [editorial addendum](./v2.0.0-draft.2/EDITORIAL_ADDENDUM.md) |
 
 The labels above distinguish **editorial versions**, not software releases or claims of publication. A later stable `v2.0.0` should have a fixed commit and optionally an annotated Git tag once approved. **No tag has been created.**
 
@@ -24,13 +25,17 @@ The labels above distinguish **editorial versions**, not software releases or cl
 
 ## Read in this order
 
-1. [New v2 Indonesian Tractatus](./v2.0.0-draft.1/Tractatus_de_Perceptione_et_Amore_ID.md) — the revised philosophical work.
+1. [Current v2 Indonesian Tractatus draft.2](./v2.0.0-draft.2/Tractatus_de_Perceptione_et_Amore_ID.md) — 78 propositions with four philosophically targeted additions.
 2. [Editor’s rationale, limits, and detailed version log](./v2.0.0-draft.1/EDITORIAL_AUDIT.md) — what changed and why.
-3. [119-row proposition crosswalk](./v2.0.0-draft.1/PROPOSITION_CROSSWALK.csv) — maps **every** numbered v1 proposition to a primary v2 conceptual destination; **not** a literal line-by-line equivalence.
+3. [119-row proposition crosswalk](./v2.0.0-draft.2/PROPOSITION_CROSSWALK.csv) — maps **every** numbered v1 proposition to a primary v2 conceptual destination; **not** a literal line-by-line equivalence.
 4. [Research programme](./v2.0.0-draft.1/RESEARCH_PROGRAM.md) — precedents, rival models, possible empirical tests, formal-methods limitations.
 5. [Historical manuscript and existing mathematical paper](../tractatus/Tractatus_de_Perceptione_et_Amore_ID.md) — independent baseline, not superseded for citation purposes.
 
 ## Change log
+
+### v2.0.0-draft.2 — 2026-11-19
+
+Adds only four propositions (**1.13, 4.32, 4.33, 4.42**) to answer serious philosophical precedents: direct perception of other minds, joint commitment/shared agency, and order-sensitive relational history. Old text remains unchanged. The [addendum](./v2.0.0-draft.2/EDITORIAL_ADDENDUM.md) records rationale, opponents, and limits. Research iteration [r0.2.0-draft.1](../advances/README.md) develops an independently versioned permission-relative identification programme; it is **not** itself a new version of the treatise.
 
 ### v2.0.0-draft.1 — 2026-11-19
 

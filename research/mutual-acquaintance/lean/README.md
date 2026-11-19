@@ -2,6 +2,8 @@
 
 This is an **independent research experiment** in `dwijayuda/pskernel`. It is not part of the PS0, PSV0, PSC0, or compiler qualification pipelines.
 
+**Philosophical correspondence (19 November 2026):** canonical *Tractatus de Perceptione et Amore* **v1.1.0**, with 116 active numbered propositions. The Lean modules remain **mathematical research companions**, not versioned philosophical editions. Their unchanged code interprets the stable core (especially §§1.12, 2.7, 3.23, 4.53, 5.31, 6.63, 6.92). The additions §§2.72, 4.54, 6.8, 6.93 have explanatory connections but no claim of a new theorem specific to those sentences. See [alignment audit](../COMPANION_ALIGNMENT_v1.1.0.md).
+
 ## Sources and scope
 
 - `MutualAcquaintance.lean`: earlier finite Boolean and nonnegative-integer core (22 theorem declarations). The author reported a clean local compilation on Lean 4.35.0 and 4.36.0.
@@ -11,6 +13,10 @@ This is an **independent research experiment** in `dwijayuda/pskernel`. It is no
 - CI workflow: `.github/workflows/mutual-acquaintance-lean.yml`.
 
 The dynamics file models separate observations, belief updates, preference transitions, and a relational state. It includes a conditional theorem showing that **if two admissible histories have the same final individual profile but different relational states, no deterministic profile-only predictor can fit both**. A toy model supplies witnesses. The theorem is conditional; it is not an empirical discovery about people.
+
+## Exact-source verification provenance
+
+The active Git blob SHA identifiers of **all three** modules match their counterparts on source commit `2734dd2c99c82f8a22792630f22c596810613d06`, which passed [GitHub Actions Linux Lean 4.36.0 run 44380993280, job 135072858943](https://github.com/dwijayuda/pskernel/actions/runs/44380993280/job/135072858943) with `LEAN_KERNEL_CHECK_OK`. This establishes historical successful compilation of those unchanged sources; it **does not** assert that CI ran successfully on the latest documentation-only branch head. The current PR-head workflow status must be checked independently.
 
 ## Reproduce
 

@@ -1,5 +1,8 @@
 # Research boundaries and proof correspondence
 
+**Edition alignment (19 November 2026):** the current philosophical source is **Tractatus v1.1.0**, 116 propositions. This document's older verification receipts are **historical**, not the latest run. For current cross-references and exact-source checks see [COMPANION_ALIGNMENT_v1.1.0.md](COMPANION_ALIGNMENT_v1.1.0.md) and [the edition registry](editions/README.md). The three Lean source files are unchanged from successful [run 44380993280 / job 135072858943](https://github.com/dwijayuda/pskernel/actions/runs/44380993280/job/135072858943).
+
+
 The seven *Tractatus* groups motivate the model:
 
 1. Person versus representation;
@@ -14,7 +17,7 @@ The formalization currently establishes only finite, chosen mathematical counter
 
 **Open**: normalized stochastic transitions, Bayesian filtering, general finite state spaces, long-term choices under preference revisions, statistical identifiability, comparison with existing models, and empirical validation.
 
-**Prior Linux CI evidence**: Run 44335791423, job 134912017712, commit 0a95aac365894392edc7ae470d6aaa703c21cc00; Lean 4.36.0; both Lean modules passed with exit code 0 and `LEAN_KERNEL_CHECK_OK`.
+**Earlier Linux CI evidence (first two modules, not the latest receipt)**: Run 44335791423, job 134912017712, commit 0a95aac365894392edc7ae470d6aaa703c21cc00; Lean 4.36.0; both Lean modules passed with exit code 0 and `LEAN_KERNEL_CHECK_OK`.
 
 **Pinned file SHA-256**:
 - `lean/MutualAcquaintance.lean`: 98439818fa421e9d9c55fcecb06dc02da48e761ecc50c1d0393ddcd46c23f2ac

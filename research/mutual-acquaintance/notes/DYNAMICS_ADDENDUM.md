@@ -1,13 +1,13 @@
 # A Dynamic Epistemic Model of Mutual Acquaintance
 ## Working formalization addendum v0.2 — 18 November 2026
 
-**Status:** new Lean 4 source authored; kernel verification **pending**. This addendum extends the working draft conceptually, but it does not replace or change the philosophical *Tractatus* or the earlier, reportedly compiled core file.
+**Current status (19 November 2026):** the three active Lean source files, including `MutualAcquaintanceDynamics.lean`, are **byte-identical** (Git blobs) to those compiled successfully with Lean 4.36.0 in [Linux run 44380993280, job 135072858943](https://github.com/dwijayuda/pskernel/actions/runs/44380993280/job/135072858943), which logged `LEAN_KERNEL_CHECK_OK`. This statement is about those exact source files, not a fresh CI run for the latest documentation-only commits or empirical confirmation. The addendum dates from 18 November 2026; its modeling content remains unchanged. Philosophical citations refer to canonical *Tractatus* v1.1.0.
 
 ### 1. Why this extension exists
 
 The original mathematical working draft separates belief updating, preference change, and dyadic change, but its original Lean file is mostly a collection of small static models and Boolean witnesses. The current extension represents the entire *chronological process of interaction* as a deterministic transition system conditioned on a joint action and an external event.
 
-The relevant source propositions are 1.12–1.22 (representations), 2.7 (decision-relative information), 3.23 (preference discovery versus change), 4.53 (experienced understanding versus accurate understanding), 5.31 (mutual choice), 6.63–6.64 (three simultaneous kinds of change), and especially 6.91–6.92 (not-yet-known versus not-yet-formed).
+The relevant canonical v1.1.0 propositions are 1.12–1.22 (representations), 2.7–2.72 (decision-relative information), 3.23 (preference discovery versus change), 4.53–4.54 (experienced understanding, responsiveness and accuracy), 5.31–5.32 (mutual choice and its definitional limit), 6.8 (learning as intervention), 6.63–6.64 (separate dimensions of change), and 6.91–6.93 (revelation, formation and the difficulty of distinguishing them). These are **interpretive correspondences**, not a claim that each listed proposition is formalized in Lean.
 
 ### 2. Model and update rule
 
@@ -100,6 +100,4 @@ The most promising next target would be a theorem about **identifiability of rel
 
 ### 7. Verification boundary
 
-The previous `MutualAcquaintance.lean` file has been reported as compiling on the user's Windows Lean 4.35.0 and 4.36.0 installations. Its copied SHA-256 is `63103d75b6b9927f68883dec3d8d98c23c6812bd6abfb98175f5e8bb0789ad53`.
-
-The **new** `MutualAcquaintanceDynamics.lean` is **not yet Lean-kernel verified**: the authoring environment has no Lean executable and cannot download it. Independent Python finite checks confirm the constructive Boolean example and chronology on enumerated histories, but do not verify Lean syntax or proofs. See `README.md` and `verify.ps1` for exact local verification commands.
+**Historical authoring-stage note, now superseded:** when this text was first prepared, the new dynamics file had not yet been run through a Lean kernel. Subsequently, the exact active versions of `MutualAcquaintance.lean`, `MutualAcquaintanceDynamics.lean` and `MutualAcquaintanceIdentification.lean` were checked in [successful Lean 4.36.0 CI run 44380993280, job 135072858943](https://github.com/dwijayuda/pskernel/actions/runs/44380993280/job/135072858943). Their logged SHA-256 hashes respectively were `98439818fa421e9d9c55fcecb06dc02da48e761ecc50c1d0393ddcd46c23f2ac`, `64e6f8ce53bad966f950ce5c47fa7f4259e16f6fb1d2ca04521d7ec837f0a4ca`, and `28d8f35e4060739d6e0c3ef22e4c5e3b7c76791d2c25a6ee178c3e20a3865baa`. The active Git blobs were compared against the source commit associated with that successful run; all three matched. Python finite checks serve a separate role and do not substitute for Lean kernel compilation.

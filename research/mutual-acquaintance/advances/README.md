@@ -16,6 +16,7 @@ does not silently renumber the work of philosophy.
 - [Permission-relative identifiability](r0.2.0-draft.1/PERMISSION_RELATIVE_IDENTIFICATION.md): precise one-report risk, mechanisms, causal identification, direct precedents.
 - [Adaptive finite-horizon bound](r0.2.0-draft.1/SEQUENTIAL_BOUND.md): standard coupling argument, **traditional proof only**, no Lean claim.
 - [Stage-0 pilot protocol](r0.2.0-draft.1/PILOT_PROTOCOL.md): clear testable target and ethical randomized-offer estimand, **not yet preregistered**.
+- [Adversarial internal review](r0.2.0-draft.1/ADVERSARIAL_REVIEW.md): strongest competing theories, assumptions at risk, and novelty gates; **not independent peer review**.
 - [Lean 4 module](../lean/MutualAcquaintanceDecision.lean): exact integer-count Bayes risk inequalities and toy bilateral approval.
 - [Philosophical v2 edition](../editions/v2.0.0-draft.1/Tractatus_de_Perceptione_et_Amore_ID.md): separately versioned literary source. The existing mathematical paper remains anchored to the earlier philosophical edition unless explicitly mapped.
 

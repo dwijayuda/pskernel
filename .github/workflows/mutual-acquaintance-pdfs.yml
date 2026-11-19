@@ -8,6 +8,11 @@ on:
       - 'research/mutual-acquaintance/tractatus/*.md'
       - 'research/mutual-acquaintance/paper/A_Dynamic_Epistemic_Model_of_Mutual_Acquaintance_WORKING_DRAFT.md'
       - '.github/workflows/mutual-acquaintance-pdfs.yml'
+  pull_request:
+    paths:
+      - 'research/mutual-acquaintance/tractatus/*.md'
+      - 'research/mutual-acquaintance/paper/A_Dynamic_Epistemic_Model_of_Mutual_Acquaintance_WORKING_DRAFT.md'
+      - '.github/workflows/mutual-acquaintance-pdfs.yml'
   workflow_dispatch:
 
 permissions:

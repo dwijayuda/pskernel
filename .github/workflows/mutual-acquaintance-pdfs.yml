@@ -1,0 +1,121 @@
+name: Mutual Acquaintance PDF snapshots
+
+on:
+  push:
+    branches:
+      - research/mutual-acquaintance-dynamics-20261118
+    paths:
+      - 'research/mutual-acquaintance/tractatus/*.md'
+      - 'research/mutual-acquaintance/paper/A_Dynamic_Epistemic_Model_of_Mutual_Acquaintance_WORKING_DRAFT.md'
+      - '.github/workflows/mutual-acquaintance-pdfs.yml'
+  pull_request:
+    paths:
+      - 'research/mutual-acquaintance/tractatus/*.md'
+      - 'research/mutual-acquaintance/paper/A_Dynamic_Epistemic_Model_of_Mutual_Acquaintance_WORKING_DRAFT.md'
+      - '.github/workflows/mutual-acquaintance-pdfs.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-pdfs:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Install PDF toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          sources="$RUNNER_TEMP/acquaintance-ubuntu.list"
+          printf '%s\n' \
+            'deb https://archive.ubuntu.com/ubuntu noble main universe' \
+            'deb https://archive.ubuntu.com/ubuntu noble-updates main universe' \
+            'deb https://security.ubuntu.com/ubuntu noble-security main universe' > "$sources"
+          apt_options=(
+            -o "Dir::Etc::sourcelist=$sources"
+            -o 'Dir::Etc::sourceparts=-'
+            -o 'Acquire::Retries=2'
+            -o 'Acquire::https::Timeout=25'
+          )
+          sudo apt-get "${apt_options[@]}" update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get "${apt_options[@]}" install -y \
+            pandoc texlive-xetex texlive-latex-extra texlive-fonts-recommended \
+            fonts-dejavu-core fonts-linuxlibertine fonts-crosextra-carlito poppler-utils
+      - name: Render all four Markdown editions
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd research/mutual-acquaintance
+          for lang in ID EN LA; do
+            file="tractatus/Tractatus_de_Perceptione_et_Amore_${lang}"
+            pandoc "${file}.md" --standalone --pdf-engine=xelatex \
+              -V mainfont="DejaVu Serif" -V papersize=a5 \
+              -V geometry:margin=16mm -o "${file}.pdf"
+          done
+          paper="paper/A_Dynamic_Epistemic_Model_of_Mutual_Acquaintance_WORKING_DRAFT"
+          pandoc "${paper}.md" --standalone --pdf-engine=xelatex -o "${paper}.pdf"
+          sha256sum tractatus/*.pdf paper/*.pdf
+      - name: Verify editions and record PDF-source provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd research/mutual-acquaintance
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess
+          import re
+
+          for lang in ("ID", "EN", "LA"):
+              path = Path(f"tractatus/Tractatus_de_Perceptione_et_Amore_{lang}.pdf")
+              text = subprocess.check_output(
+                  ["pdftotext", "-layout", str(path), "-"], text=True
+              )
+              for prop in ("2.72", "4.54", "6.93"):
+                  if not re.search(r"(?<![0-9])" + re.escape(prop) + r"(?![0-9])", text):
+                      raise SystemExit(f"{path}: missing canonical v1.1.0 §{prop}")
+              print(f"PDF_TEXT_V1_1_0_OK {path}")
+
+          paper = Path("paper/A_Dynamic_Epistemic_Model_of_Mutual_Acquaintance_WORKING_DRAFT.pdf")
+          paper_text = subprocess.check_output(
+              ["pdftotext", "-layout", str(paper), "-"], text=True
+          )
+          for marker in ("v1.1.0", "2.72", "4.54", "6.93"):
+              if marker not in paper_text:
+                  raise SystemExit(f"{paper}: missing paper alignment marker {marker}")
+          print(f"PDF_PAPER_COMPANION_OK {paper}")
+          PY
+          sha256sum tractatus/Tractatus_de_Perceptione_et_Amore_{ID,EN,LA}.{md,pdf} \
+            paper/A_Dynamic_Epistemic_Model_of_Mutual_Acquaintance_WORKING_DRAFT.{md,pdf} \
+            > PDF_SOURCE_RECEIPTS.sha256
+          sha256sum --check PDF_SOURCE_RECEIPTS.sha256
+          echo "PDF_SOURCE_RECEIPTS_OK"
+
+      - name: Commit PDF snapshots on research branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/research/mutual-acquaintance-dynamics-20261118'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/mutual-acquaintance/tractatus/*.pdf \
+                  research/mutual-acquaintance/paper/*WORKING_DRAFT.pdf \
+                  research/mutual-acquaintance/PDF_SOURCE_RECEIPTS.sha256
+          if ! git diff --cached --quiet; then
+            git commit -m "docs(acquaintance): render PDF snapshots [skip pdf]"
+            git push origin "HEAD:research/mutual-acquaintance-dynamics-20261118"
+          else
+            echo "PDF snapshots unchanged"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mutual-acquaintance-pdf-snapshots
+          path: |
+            research/mutual-acquaintance/tractatus/*.pdf
+            research/mutual-acquaintance/paper/*WORKING_DRAFT.pdf
+            research/mutual-acquaintance/PDF_SOURCE_RECEIPTS.sha256
+          if-no-files-found: warn

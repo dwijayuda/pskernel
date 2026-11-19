@@ -1,5 +1,7 @@
 # Mutual acquaintance research audit
 
+> **Current-edition notice (19 November 2026):** The opening inventory and evaluation below are an **18 November historical baseline**, not an inventory of the current branch. The canonical philosophical edition is **Tractatus v1.1.0** (116 propositions), with later-numbered v2 proposals archived. The mathematical working paper is **v0.2**, a separate version series. For a current item-by-item companion crosswalk, structural tests, accurate Lean source hashes, and unresolved PDF status, read [COMPANION_ALIGNMENT_v1.1.0.md](COMPANION_ALIGNMENT_v1.1.0.md). Keep the baseline figures and their provenance intact; do not silently reattribute their scores to v1.1.0.
+
 Baseline: PR [#267](https://github.com/dwijayuda/pskernel/pull/267), branch `research/mutual-acquaintance-dynamics-20261118`, head `bc985a715c2ae20bd0b6e25805b18258e0a8f1b8`. Scope is the research subtree and its two workflows. The baseline PR added 25 project files and two workflow files.
 
 | Area | Baseline inventory and authority |
@@ -156,3 +158,16 @@ The integrated v0.2 source and endpoint witnesses passed [Linux PR run 443664598
 [What repeated reports identify](notes/MULTIROUND_IDENTIFICATION.md) extends the binary model to finitely many consent-gated one-way encounters with conserved population and invariant reporting. Lean checks state-mass balance, the conserved denominator, the cumulative report contrast, and the endpoint timing counterexample. The note derives intermediate-wave sharpness and the relative timing result for population marginals. Joint longitudinal reports and empirical validity remain outside this model.
 
 Source commit `2734dd2c99c82f8a22792630f22c596810613d06` passed [Linux run 44380993280, job 135072858943](https://github.com/dwijayuda/pskernel/actions/runs/44380993280/job/135072858943). Identification source SHA-256: `28d8f35e4060739d6e0c3ef22e4c5e3b7c76791d2c25a6ee178c3e20a3865baa`. The two reported general theorem dependencies were `propext` and `Quot.sound`.
+
+
+## Addendum — companion alignment with TDA v1.1.0 (19 November 2026)
+
+This audit's initial 119-proposition inventory, proof-module counts, and literature assessment describe the **historical baseline**, not a current 116-proposition re-audit. **Current**: 116 IDs in Indonesian, English and Latin, with shared numbering and frozen copies; three v2 proposals are archived and excluded from the active proposition index. Paper version **v0.2** is independent from philosophical **v1.1.0**.
+
+The mathematical working draft now explicitly interprets newly relevant §§2.72 (decision-relative value of information), 4.54 (perceived closeness and response), 6.8 (active inquiry as intervention), and 6.93 (observed report change not sufficient to identify revelation versus formation). The original **20 display-math blocks** have not changed. These additions are not claimed as independently proved psychological laws or new Lean theorems.
+
+The three unchanged active Lean source blobs match the source at successful [run 44380993280 / job 135072858943](https://github.com/dwijayuda/pskernel/actions/runs/44380993280/job/135072858943) (Lean 4.36.0), including the identification module. The earlier 'verification pending' status in the 18 November dynamics note has been revised with exact-source historical evidence. A currently triggered PR workflow can separately be blocked or incomplete; do not equate its status with that older success.
+
+The [versioned companion alignment](COMPANION_ALIGNMENT_v1.1.0.md) is the authoritative current crosswalk. [Structural regression test](tests/check_edition_alignment.py) now compares all active/frozen philosophical editions, index labels, archival counts, and published Lean hashes, and has been added to the Lean CI workflow. Its result must be verified on the **current** GitHub head before claiming the latest CI success.
+
+**Still open:** verifying four PDF snapshots against the newly updated Markdown (including visual rendering); independent validation of translation idiom; substantive mathematical peer review; testing empirical assumptions; Lean proof of the full stochastic model. Existing mathematical proof receipts cannot fill those gaps.

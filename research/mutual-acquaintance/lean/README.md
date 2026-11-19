@@ -7,6 +7,7 @@ This is an **independent research experiment** in `dwijayuda/pskernel`. It is no
 - `MutualAcquaintance.lean`: earlier finite Boolean and nonnegative-integer core (22 theorem declarations). The author reported a clean local compilation on Lean 4.35.0 and 4.36.0.
 - `MutualAcquaintanceDynamics.lean`: v0.2 deterministic, time-indexed two-agent transition system (21 additional theorem declarations), with encounters represented as events and sequential histories represented as lists.
 - `MutualAcquaintanceIdentification.lean`: exact binary filtering and a necessary and sufficient criterion for distinguishing two mechanisms by their report law. See the [research note](../notes/REVELATION_VS_CHANGE.md).
+- `MutualAcquaintanceDecision.lean`: **r0.2.0-draft.1** exact equal-prior binary classification error (two report laws, common finite denominator), attainable classifier, and a permission-dependent **toy example**. The main identity is classical total-variation hypothesis testing, not a novel psychological or statistical result. See [the new research note](../advances/r0.2.0-draft.1/PERMISSION_RELATIVE_IDENTIFICATION.md). The [adaptive multi-round bound](../advances/r0.2.0-draft.1/SEQUENTIAL_BOUND.md) has **only a traditional written proof**, not a Lean proof.
 - `lean-toolchain`: Lean 4.36.0. No Mathlib or other third-party dependency.
 - CI workflow: `.github/workflows/mutual-acquaintance-lean.yml`.
 
@@ -21,6 +22,7 @@ lean --version
 lean MutualAcquaintance.lean
 lean MutualAcquaintanceDynamics.lean
 lean MutualAcquaintanceIdentification.lean
+lean MutualAcquaintanceDecision.lean
 ```
 
 Successful Lean compilation with exit code 0 is required for a kernel-check claim. CI additionally publishes version and source SHA-256 values in its logs.

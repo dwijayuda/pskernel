@@ -1,5 +1,7 @@
 # Mutual Acquaintance: Philosophy, Mathematics, and Lean 4
 
+> **ARCHIVED (2026-11-19):** This branch contains historical proposals numbered above v1.1.0; they are **not** the current philosophical edition. The canonical edition is [Tractatus v1.1.0](https://github.com/dwijayuda/pskernel/blob/research/mutual-acquaintance-dynamics-20261118/research/mutual-acquaintance/tractatus/Tractatus_de_Perceptione_et_Amore_ID.md). [Edition registry and preserved archives](https://github.com/dwijayuda/pskernel/blob/research/mutual-acquaintance-dynamics-20261118/research/mutual-acquaintance/editions/README.md). Historical wording below is retained for provenance; any references to “current v2” describe the state of a former draft, not today's version policy.
+
 A stand-alone **research project** inside `dwijayuda/pskernel`, completely separate from PS0, PSV0, PSC0, and compiler qualification.
 
 ## Philosophical editions (versioned)

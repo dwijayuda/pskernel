@@ -8,6 +8,12 @@ A stand-alone **research project** inside `dwijayuda/pskernel`, completely separ
 
 This version-policy choice changes no Lean source, formal claim, or mathematical working paper. The repository-wide `main` branch and independent research PR have their own integration lifecycle.
 
+## Companion consistency and verification
+
+[**v1.1.0 companion alignment audit**](COMPANION_ALIGNMENT_v1.1.0.md) connects the philosophical propositions to paper v0.2, the current Lean modules and the independent research notes, and records scope limits and exact-source Lean CI evidence. All 20 display-math blocks of the paper were left unchanged when literary cross-references were updated. Run `python3 tests/check_edition_alignment.py` from this project directory to check the 116 IDs, trilingual snapshots, proposition index, version registry and archived v2 proposals; the same check is included in the Lean workflow.
+
+The four PDF snapshots **must be checked against the current Markdown** before they are cited as synchronized. Source compatibility is not itself new Lean verification or empirical confirmation.
+
 ## Read in order
 
 1. **Philosophical work**: [Tractatus de Perceptione et Amore (Indonesian)](tractatus/Tractatus_de_Perceptione_et_Amore_ID.md), [English](tractatus/Tractatus_de_Perceptione_et_Amore_EN.md), [Latin](tractatus/Tractatus_de_Perceptione_et_Amore_LA.md). **CURRENT canonical edition: v1.1.0 (2026-11-19)** with 116 active propositions, stable historical numbering, and refined §§2.72, 4.54, and 6.93. See the [revision log](tractatus/REVISION_NOTES.md).

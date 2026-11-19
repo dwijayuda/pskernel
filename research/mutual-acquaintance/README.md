@@ -2,6 +2,12 @@
 
 A stand-alone **research project** inside `dwijayuda/pskernel`, completely separate from PS0, PSV0, PSC0, and compiler qualification.
 
+## Editorial revision (not yet the canonical research edition)
+
+A shorter Indonesian **[Tractatus v2.0.0-draft.1](tractatus/Tractatus_de_Perceptione_et_Amore_ID_v2.md)** (66 propositions, 19 November 2026) is available with its **[revision and number-crosswalk ledger](tractatus/V2_EDITORIAL_LEDGER.md)**. This is an independently readable editorial proposal that removes repetition and strengthens the question of informed mutual choice under relational change.
+
+**Compatibility:** The three unversioned Markdown editions, their PDFs, the 119-entry proposition index, and the Lean/paper correspondence below still refer to **v1**. Do not assume their numbering or proof claims describe v2. Translation, theorem remapping, and PDF generation for v2 remain outstanding.
+
 ## Read in order
 
 1. **Philosophical work**: [Tractatus de Perceptione et Amore (Indonesian)](tractatus/Tractatus_de_Perceptione_et_Amore_ID.md), [English](tractatus/Tractatus_de_Perceptione_et_Amore_EN.md), [Latin](tractatus/Tractatus_de_Perceptione_et_Amore_LA.md). Latest 119-proposition edition with §6.91, §6.92 and single §7.

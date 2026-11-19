@@ -16,11 +16,11 @@
 
 **1.21** Gambaran itu mungkin tepat dalam beberapa hal, tetapi keliru dalam hal lain. Bahkan setelah lama mengenal seseorang, masih ada kebiasaan kecil atau bagian dari kehidupannya yang belum pernah kita lihat.
 
-**1.22** Semakin banyak berinteraksi, semakin banyak pula kesempatan untuk mengenal. Tapi banyaknya interaksi tidak selalu berbanding lurus dengan ketepatan pemahaman.
+**1.22** Interaksi berulang memberi kesempatan menguji gambaran kita. Namun bila yang terlihat selalu serupa, rasa yakin bisa bertambah tanpa ketepatan pemahaman ikut bertambah.
 
 **1.3** Lucunya, kita bisa sangat yakin telah mengenal seseorang, padahal yang kita yakini sebenarnya adalah gambaran yang kita susun sendiri.
 
-**1.31** Keyakinan yang besar tidak membuat gambaran itu menjadi lebih benar. Kita tetap memerlukan bukti.
+**1.31** Tingkat keyakinan dan ketepatan penilaian tidak selalu bergerak bersama; keduanya perlu dibedakan.
 
 **1.4** Dua orang bisa mengenal individu yang sama dan memiliki gambaran yang berbeda tentang dirinya.
 
@@ -44,7 +44,7 @@
 
 **2.2** Misalnya, seseorang tidak membalas pesan. Kita bisa memikirkan banyak kemungkinan. Mungkin sedang sibuk, mungkin kelelahan, mungkin lupa, atau memang sedang tidak ingin berbicara.
 
-**2.21** Semua kemungkinan itu masuk akal untuk dipertimbangkan. Tapi masuk akal bukan berarti benar.
+**2.21** Satu kejadian dapat sesuai dengan beberapa penjelasan; tanpa informasi tambahan, kita belum beralasan memilih salah satunya sebagai yang benar.
 
 **2.22** Tidak adanya penjelasan juga tidak membuat penjelasan yang paling kita sukai menjadi yang paling mungkin.
 
@@ -52,7 +52,7 @@
 
 **2.31** Kalau setiap hal baru hanya kita gunakan untuk membenarkan dugaan lama, barangkali yang sedang kita pertahankan adalah dugaan itu sendiri.
 
-**2.32** Kenyataan yang berbeda dari harapan tetaplah kenyataan.
+**2.32** Ketika informasi baru bertentangan dengan dugaan lama, dugaan itulah yang perlu ditinjau kembali.
 
 **2.4** Kita juga sering memikirkan apa yang orang lain pikirkan tentang kita.
 
@@ -64,8 +64,6 @@
 
 **2.51** Kita bisa melihat seseorang melakukan sesuatu tanpa tahu apa yang sedang ia pikirkan saat melakukannya.
 
-**2.52** Yang masih jadi pertanyaan adalah alasannya. Kejadiannya sendiri sudah kita lihat.
-
 **2.6** Tidak semua pertanyaan mendapatkan jawaban yang lengkap.
 
 **2.61** Melihat kebiasaan yang sama berulang kali mungkin membuat kita lebih mengenal kebiasaan itu. Tapi bagaimana seseorang bersikap dalam keadaan yang berbeda masih menjadi pertanyaan lain.
@@ -75,6 +73,8 @@
 **2.7** Cukup mengenal seseorang juga bergantung pada pilihan apa yang sedang dipertimbangkan.
 
 **2.71** Apa yang perlu diketahui untuk menghabiskan satu sore bersama seseorang belum tentu cukup untuk membangun kehidupan bersamanya.
+
+**2.72** Pentingnya informasi tidak hanya ditentukan oleh seberapa banyak yang kita tahu, tetapi oleh apakah hal itu dapat mengubah pilihan dan akibat jika penilaian kita keliru.
 
 ## 3. Tentang sosok yang kita inginkan
 
@@ -102,7 +102,7 @@
 
 **3.41** Sebaliknya, seseorang yang tidak sepenuhnya sesuai dengan gambaran awal bisa saja menjadi orang yang sangat berarti.
 
-**3.42** Mungkin karena manusia tidak sesederhana daftar sifat yang tinggal dicentang satu per satu.
+**3.42** Daftar kualitas dapat membantu kita menjelaskan apa yang dicari; daftar itu belum menjelaskan bagaimana dua orang akan saling menanggapi dalam keadaan nyata.
 
 **3.5** Dua orang bisa memiliki karakter yang mirip, tetapi kehadirannya memberi pengalaman yang berbeda.
 
@@ -124,7 +124,7 @@
 
 **4.1** Dalam percakapan, ada maksud yang ingin disampaikan dan ada cara orang lain memahaminya. Kadang dua hal itu bertemu, kadang tidak.
 
-**4.11** Kadang keduanya bertemu dengan baik. Kadang meleset sedikit. Kadang kita baru sadar setelahnya kalau yang dimaksud dan yang didengar ternyata berbeda jauh.
+**4.11** Kata-kata yang sama dapat diterima berbeda karena dua orang membawa pengalaman dan harapan yang tidak selalu sama ke dalam percakapan.
 
 **4.2** Suatu perkataan bisa disampaikan dengan jujur, tetapi tetap dipahami tidak sebagaimana dimaksudkan.
 
@@ -132,13 +132,9 @@
 
 **4.3** Sebuah tindakan bisa memperlihatkan maksud seseorang. Tapi tindakan yang sama tidak selalu hanya mempunyai satu penafsiran.
 
-**4.31** Kita kadang sibuk memikirkan apa yang mungkin sedang dipikirkan orang lain tentang kita. Padahal mengulang dugaan yang sama berkali-kali tidak membuat kita semakin tahu isi pikirannya.
-
 **4.4** Perhatian, waktu, dan usaha dapat menjadi cara seseorang menunjukkan kesungguhan.
 
 **4.41** Namun perhatian tidak selalu berarti ketertarikan romantis. Begitu juga keramahan, kepedulian, atau kesediaan mendengarkan.
-
-**4.42** Seseorang bisa menghabiskan banyak waktu dan tenaga untuk sesuatu yang penting baginya. Belum tentu orang yang melihatnya menangkap arti yang sama.
 
 **4.5** Saling bercerita memberi kesempatan bagi dua orang untuk mengenal hal-hal yang sebelumnya belum mereka ketahui.
 
@@ -147,6 +143,8 @@
 **4.52** Cara mendengarkan juga berpengaruh. Bertanya lagi ketika belum paham, menanggapi, atau menyadari bahwa tadi kita salah menangkap maksudnya. Semuanya bagian dari percakapan.
 
 **4.53** Ada percakapan yang membuat kita merasa dimengerti. Apakah maksud kita benar-benar tertangkap, itu pertanyaan lain.
+
+**4.54** Respons terhadap cerita orang lain dapat memengaruhi kedekatan yang dirasakan, bahkan ketika ketepatan saling memahami masih belum pasti.
 
 **4.6** Tidak semua yang tidak dikatakan mengandung makna tersembunyi.
 
@@ -162,7 +160,7 @@
 
 **5.** Hubungan antara dua orang tidak dapat ditentukan oleh keinginan salah satu pihak saja.
 
-**5.1** Dalam teori permainan, hasil suatu interaksi dapat bergantung pada pilihan beberapa individu yang memiliki tujuan dan preferensi masing-masing.
+**5.1** Pilihan seseorang dapat dipengaruhi oleh apa yang ia perkirakan akan dipilih orang lain. Maka pilihan dua orang tidak selalu bisa dipahami secara terpisah.
 
 **5.11** Kita bisa menentukan apa yang ingin kita lakukan, tetapi tidak selalu bisa menentukan bagaimana orang lain akan meresponsnya.
 
@@ -178,7 +176,7 @@
 
 H(A,B,t) ⇒ W_A(B,t) ∧ W_B(A,t)
 
-**5.32** Artinya, hubungan tersebut memerlukan kesediaan kedua pihak.
+**5.32** Ini adalah syarat yang terkandung dalam arti 'hubungan yang dijalani secara sukarela', bukan bukti bahwa keduanya akan memilih hubungan tersebut.
 
 **5.33** Dua orang yang sama-sama bersedia pun belum tentu bisa menjalani hubungan seperti yang dibayangkan. Ada waktu, keadaan, kemampuan, dan hal-hal lain yang belum tentu sudah mereka perhitungkan.
 
@@ -188,19 +186,15 @@ H(A,B,t) ⇒ W_A(B,t) ∧ W_B(A,t)
 
 **5.5** Mengetahui apa yang disukai seseorang mungkin membantu kita memahami atau memperkirakan pilihannya.
 
-**5.51** Tapi ketika hasilnya bergantung pada dua orang, pilihan salah satunya saja memang belum cukup untuk menentukan hasilnya.
-
 **5.6** Dua orang tidak harus memiliki pemahaman yang persis sama untuk membuat pilihan bersama.
 
 **5.61** Dua orang bisa mengingat satu pertemuan dengan cara yang berbeda. Mereka tak perlu memikirkan semua hal dengan cara yang sama untuk sama-sama memilih menjalani hubungan.
 
 ## 6. Tentang perubahan dan kemungkinan yang belum dialami
 
-**6.** Manusia dapat belajar, berubah, dan memperbaiki dirinya.
+**6.** Saling mengenal berlangsung dalam waktu. Selama itu, orang yang mengenal dan orang yang dikenal sama-sama dapat berubah.
 
-**6.1** Kita bisa menjadi lebih sabar, lebih percaya diri, lebih mampu berbicara atau mendengarkan. Kadang perubahan kecil baru terasa ketika kita menghadapi keadaan yang dulu membuat kita kesulitan.
-
-**6.11** Kadang perubahan itu berawal dari pengalaman menyenangkan. Kadang justru dari sesuatu yang tidak berjalan seperti harapan.
+**6.1** Perubahan itu tidak selalu merupakan perbaikan. Kita bisa menjadi lebih terbuka, lebih berhati-hati, atau menyadari bahwa kebiasaan lama tidak cocok untuk keadaan yang baru.
 
 **6.2** Perjumpaan dengan seseorang kadang menjadi awal perubahan yang bahkan tidak kita rencanakan.
 
@@ -224,8 +218,6 @@ H(A,B,t) ⇒ W_A(B,t) ∧ W_B(A,t)
 
 **6.51** Dalam satu peristiwa, seseorang mungkin memperhatikan cara orang lain menyelesaikan masalah. Orang yang lain justru mengingat bagaimana perasaannya ketika mereka menyelesaikan masalah itu bersama.
 
-**6.52** Mungkin sejak awal perhatian mereka memang berbeda. Yang satu ingat persoalannya, yang lain ingat bagaimana rasanya menghadapi persoalan itu bersama.
-
 **6.6** Dari pengalaman bersama, yang bertambah kadang bukan cuma pengetahuan tentang sifat seseorang.
 
 **6.61** Dari sebuah percakapan, kita bisa mengetahui sesuatu yang sebelumnya tidak kita tahu. Kadang justru setelah percakapan selesai, kita baru sadar ada hal tentang diri sendiri yang ikut berubah.
@@ -240,7 +232,7 @@ H(A,B,t) ⇒ W_A(B,t) ∧ W_B(A,t)
 
 **6.71** Ada hal yang baru terasa setelah kita benar-benar mengalaminya. Kadang hal itu bahkan tidak kita pikirkan sebelumnya.
 
-**6.8** Kata-kata dapat menjelaskan apa yang diketahui dan apa yang masih kita kira. Tetapi mengucapkan sebuah dugaan tidak membuatnya menjadi kenyataan.
+**6.8** Berusaha mengetahui bagaimana suatu hubungan mungkin berjalan berarti melakukan sesuatu: bertemu, bertanya, atau mencoba menjalani pengalaman bersama. Tindakan itu sendiri dapat mengubah hubungan yang sedang kita pertimbangkan.
 
 **6.81** Ada hal-hal yang baru tampak ketika dua orang benar-benar melakukan sesuatu bersama. Kalau hanya dijelaskan lewat daftar sifat, sebagian pengalamannya mungkin hilang.
 
@@ -251,6 +243,8 @@ H(A,B,t) ⇒ W_A(B,t) ∧ W_B(A,t)
 **6.91** Kita mungkin semakin mengenal seseorang lewat pengalaman bersama. Tapi selama itu, apa yang kita inginkan dan hubungan yang terbentuk di antara kita juga bisa ikut berubah.
 
 **6.92** Ada hal yang sebenarnya sudah ada, hanya belum kita ketahui. Ada juga yang memang baru terbentuk ketika dua orang menjalani sesuatu bersama.
+
+**6.93** Perubahan yang tampak setelah suatu pertemuan belum cukup untuk menentukan apakah sesuatu yang semula tersembunyi kini terungkap, atau sesuatu yang baru justru telah terbentuk.
 
 ## 7. Tentang yang dikatakan dan yang tampak
 

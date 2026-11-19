@@ -34,6 +34,10 @@ The active Lean modules were **not changed** in this alignment. Their current Gi
 
 This establishes successful **historical compilation for unchanged inputs**, not CI success for the latest documentation changes. If any Lean source changes, the historical receipts must not be used for its new content. The [Lean README](lean/README.md) and [earlier audit](RESEARCH_AUDIT.md) distinguish past from current results. `#print axioms` in selected modules is informative but no claim is made that every theorem has undergone an independently reproduced axiom-dependency audit.
 
+## 19 November 2026 current-source CI receipt
+
+The first completed post-alignment [GitHub Actions run 44508741681](https://github.com/dwijayuda/pskernel/actions/runs/44508741681), [job 135507088185](https://github.com/dwijayuda/pskernel/actions/runs/44508741681/job/135507088185) **succeeded** on PR #267 head `e0fb2a723b25582f53d49aa94c1c42412c4624e7`, using Lean 4.36.0. The log contains `LEAN_KERNEL_CHECK_OK`, exact SHA-256 values for all three modules matching the historical successful run, and the new check marker `TRACTATUS_V1_1_0_COMPANION_ALIGNMENT_OK: 116 ID/EN/LA/INDEX, 3 archived drafts, versioned paper references`. The same job ran the bounded Python examples. This is **real executed CI evidence** for that commit, not merely a hypothetical test or evidence for a future modified head. Any newer commit should be checked against its own CI result.
+
 ## Structural regression test
 
 Run from the project directory:

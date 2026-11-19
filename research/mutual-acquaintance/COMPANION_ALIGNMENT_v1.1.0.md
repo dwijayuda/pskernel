@@ -54,11 +54,15 @@ This checks:
 
 The same script is invoked alongside bounded finite Python examples in the [Lean 4 workflow](../../.github/workflows/mutual-acquaintance-lean.yml). These are **structural checks**, not validation of philosophical truth or psychological premises. The latest pipeline must be checked for an exact successful run before claiming all tests passed on the current head.
 
-## PDF and remaining verification boundary
+## Verified PDF editions and remaining verification boundary
 
-The project includes three *Tractatus* PDF files and a mathematical paper PDF. The Markdown sources are authoritative. **The working-paper PDF needs regeneration**: on the audit head, its Git blob SHA was still `fecaf1e4e0c2c210bdda8e97a5050d467059067a`, identical to the pre-alignment source commit `20f181aa150136152e815356cd8456efa1877da4`, whereas the working paper Markdown has since changed substantially. The three Tractatus PDF blobs had changed since the v1.0 baseline, but their visual/content equivalence to v1.1.0 has **not been independently checked**. The dedicated [PDF workflow](../../.github/workflows/mutual-acquaintance-pdfs.yml) is configured to regenerate all four snapshots on changes to the working paper or active tractatus Markdown on the research branch, but a configured workflow or a committed older PDF is not evidence of successful new rendering. Verify a post-alignment workflow receipt, generated PDFs, and visual quality before calling the PDF versions v1.1.0-consistent.
+**Verified on 19 November 2026:** all three philosophical PDFs and the mathematical working-paper PDF have been regenerated from the canonical v1.1.0-aligned Markdown. The [PDF snapshot commit `44d7e320693cbea0b5d455f705d7c3f14fcf9e0b`](https://github.com/dwijayuda/pskernel/commit/44d7e320693cbea0b5d455f705d7c3f14fcf9e0b) updates the four PDFs and adds the [eight-entry source/PDF SHA-256 manifest](PDF_SOURCE_RECEIPTS.sha256).
 
-Other unproven matters: general stochastic/Bayesian theorem in Lean; causal identification from nonrandom encounters; calibration and invariance of real reports; experimental outcomes; philosophical novelty; human-rated English and philological Latin translation quality; complete theorem-by-theorem independent review. None is supplied merely by updating edition labels.
+The independently triggered [PR PDF run 44511575748, job 135516869337](https://github.com/dwijayuda/pskernel/actions/runs/44511575748/job/135516869337) completed **successfully** with `PDF_TEXT_V1_1_0_OK` for ID, EN, LA; `PDF_PAPER_COMPANION_OK`; and `PDF_SOURCE_RECEIPTS_OK`. This job rendered the PDFs from the same Markdown source revision and checked all eight SHA-256 entries in its own artifact. The branch commit has its own run-generated manifest; PDF byte hashes can differ between runs, so compare each file to **its corresponding manifest**, not to a different build's PDF hash.
+
+The [PDF artifact archive](https://github.com/dwijayuda/pskernel/actions/runs/44511575748) was independently inspected: 10 pages for Indonesian, 9 each for English and Latin, and 13 for the mathematical paper. All files opened, text was extractable, and all 41 pages rendered into images; a page-contact-sheet visual inspection showed no obvious clipping or malformed glyphs. This is a basic rendering check, **not** professional typesetting review or a complete line-by-line textual audit.
+
+**Still open:** independent mathematical peer review, complete proof-dependency audit beyond recorded CI, empirical validation of relation/measurement assumptions, a formally checked fully stochastic multi-agent model, and professional EN/LA linguistic review. A verified PDF proves layout/render provenance, not philosophical or psychological correctness.
 
 ## Edition history policy
 

@@ -24,9 +24,11 @@ header-includes:
 
 > **WORKING DRAFT v0.2 | 18 November 2026 | Not submitted, not peer reviewed**  
 > **Purpose:** interpret the numbered propositions of *Tractatus de Perceptione et Amore* through a dynamic two-person mathematical model.  
-> **Source:** the latest Indonesian philosophical edition, including 6.91, 6.92, and its single concluding proposition 7.  
+> **Current philosophical source:** *Tractatus de Perceptione et Amore* **v1.1.0 (19 November 2026)**, Indonesian canonical edition, 116 active numbered propositions and unchanged concluding §7. Earlier research versions of this paper began from the 119-proposition predecessor.  
 > **Evidence standard:** a derivation proves only what its definitions and assumptions entail. An illustrative model does not validate a psychological law.  
 > **Verification status:** selected finite results have companion Lean proofs. The [research audit](../RESEARCH_AUDIT.md) records precisely which statements were checked and gives reproducible CI evidence.
+
+**Companion alignment (19 November 2026):** This is mathematical working draft **v0.2**, not philosophical edition v0.2. The source crosswalk was updated to the literary **v1.1.0** (§§2.72, 4.54, 6.8, 6.93) without changing mathematical equations, proved claims, or the Lean files. Proposition numbers refer to v1.1.0 unless a historical baseline is explicitly named. [See the active proposition index](PROPOSITION_INDEX.md), [edition registry](../editions/README.md), and [alignment audit](../COMPANION_ALIGNMENT_v1.1.0.md).
 
 # Working abstract (provisional)
 
@@ -47,11 +49,11 @@ This numbering is an *interpretive crosswalk*, not a renumbering or replacement 
 | Source in *Tractatus* | Question for a model | Main result or status in this draft |
 |:--|:--|:--|
 | 1, 1.12, 1.2, 1.22, 1.52 | How can a person differ from a representation, and how can confidence differ from accuracy? | Belief–state distinction; counterexample (C1) |
-| 2.21, 2.61, 2.7 | When is evidence informative, and when is knowledge sufficient? | Non-identification (T2); decision sufficiency (T3) |
+| 2.21, 2.61, 2.7, 2.72 | When is evidence informative, and when is knowledge sufficient? | Non-identification (T2); decision sufficiency (T3) |
 | 3.23, 3.3 | Is a preference discovered or newly formed? | Observational-equivalence example (C2) |
-| 4.3, 4.53, 4.61–4.62 | Does a perceived response identify an intended meaning? | Signaling model; inference limitation (C3) |
+| 4.3, 4.53–4.54, 4.61–4.62 | Does a perceived response identify an intended meaning? | Signaling model; inference limitation (C3) |
 | 5.3–5.33, 5.61 | What conditions allow a joint choice? | Necessary willingness condition (D1); bounds (T4) |
-| 6.41–6.43, 6.63–6.64, 6.91–6.92 | Can encounters create a state, not just reveal one? Can unrealized possibilities be identified? | Active information counterexample (C4); history dependence (C5); counterfactual non-identification (C6) |
+| 6.8, 6.41–6.43, 6.63–6.64, 6.91–6.93 | Can encounters create a state, not just reveal one? Can unrealized possibilities be identified? | Active information counterexample (C4); history dependence (C5); counterfactual non-identification (C6) |
 | 7 | What remains outside the scope of a mathematical description? | Boundary of interpretation; no proposed theorem of ineffability |
 
 # 0. Modeling contract: what exists, what is observed, what changes
@@ -154,7 +156,7 @@ A distribution $\pi$ has a measure of concentration, for example $1-H(\pi)/\log 
 
 # 2. What is known, supposed, and sufficient for a decision
 
-**Source propositions:** 2.21; 2.22; 2.31; 2.61–2.62; 2.7–2.71. The *Tractatus* distinguishes a possible explanation from a known explanation and makes sufficiency relative to the choice considered.
+**Source propositions:** 2.21; 2.22; 2.31; 2.61–2.62; 2.7–2.72. The *Tractatus* distinguishes a possible explanation from a known explanation and makes sufficiency relative to the choice considered.
 
 ## 2.1. An inference target must be identifiable under the evidence available
 
@@ -205,7 +207,9 @@ For the finite fixed-utility problem in (2.3), $\operatorname{EVPI}(h)=0$ **if a
 
 **Example.** Suppose the hidden state is either $\omega_0$ or $\omega_1$ with equal probabilities, yet decision $d_0$ yields utility 2 in both and the only alternative yields at most 1. The agent remains uncertain about the state, while $\operatorname{EVPI}=0$. Full knowledge is unnecessary for selecting $d_0$.
 
-**Open work:** in the literary proposition 2.7 the relevance is explicitly to a contemplated choice. A full dynamic decision model may change its options and utilities during acquaintance, so the static $\operatorname{EVPI}$ is only a local approximation.
+**Alignment with TDA v1.1.0 §2.72.** Information is decision-relevant not merely because it increases certainty, but because it may change an available choice and the consequences of a mistaken choice. Equation (2.3) assumes a fixed decision problem, fixed utility function, and costless perfect information; it does **not** establish that every real encounter is worth its informational value. A fully dynamic problem can change its options, costs, and utilities while information is gathered.
+
+**Open work:** in literary §§2.7–2.72 the relevance is explicitly to a contemplated choice. A full dynamic decision model may change its options and utilities during acquaintance, so static $\operatorname{EVPI}$ is only a local approximation.
 
 # 3. The desired person, the perceived person, and changing preferences
 
@@ -250,7 +254,7 @@ $$
 
 # 4. What is said, intended, perceived, and understood
 
-**Source propositions:** 4; 4.3; 4.51–4.53; 4.61–4.62; 4.7. Speech and silence are actions and observations, not transparent containers of a private mind.
+**Source propositions:** 4; 4.3; 4.51–4.54; 4.61–4.62; 4.7. Speech and silence are actions and observations, not transparent containers of a private mind.
 
 ## 4.1. A signal is not an intention
 
@@ -280,7 +284,7 @@ Introduce two outcome variables:
 - $f^i_t$: the participant's **reported feeling of being understood**;
 - $\ell^i_t=L(\hat m^j_t,m^i_t)$: an **accuracy loss** against a specified ground-truth criterion, when such a criterion is available.
 
-The two measures are different by definition. One might be low and the other high, or vice versa. But **their empirical joint distribution is not determined by the distinction**. Work on perceived responsiveness is relevant here, but should not be substituted for a direct accuracy measure.
+The two measures are different by definition. One might be low and the other high, or vice versa. But **their empirical joint distribution is not determined by the distinction**. In v1.1.0 §4.54 the **response to disclosure may itself affect experienced closeness** even if interpretive accuracy remains unmeasured. Work on perceived responsiveness is relevant to this distinct relational outcome, but should not be substituted for a direct accuracy measure. This passage makes no causal or empirical claim that responsiveness always increases closeness.
 
 **Open work:** specify what counts as a valid criterion for another person's intention or preference, including uncertainty in self-reports. Study how different measures covary before stating any general relationship.
 
@@ -322,7 +326,7 @@ giving the lower bound, together with nonnegativity. $\square$
 
 # 6. What an encounter reveals, and what it brings into being
 
-**Source propositions:** 6.41–6.43; 6.51; 6.61–6.64; 6.91–6.92. This is the draft's principal architectural claim. The same encounter may improve an estimate, disclose a preference, and change the relational state. The second and third changes are not reducible to observation alone.
+**Source propositions:** 6.8; 6.41–6.43; 6.51; 6.61–6.64; 6.91–6.93. This is the draft's principal architectural claim. The same encounter may improve an estimate, disclose a preference, and change the relational state. The second and third changes are not reducible to observation alone.
 
 ## 6.1. Passive information has nonnegative *decision value* under restricted assumptions
 
@@ -358,7 +362,7 @@ $$
 
 **Proof.** The guess is correct with probability $1/2$ under the quiet option and with probability one under the probe. Add the specified terminal relational payoffs. $\square$
 
-The labels are invented choices in an abstract countermodel, **not advice about questioning another person**. The negative relational effect is *assumed*, not observed. The logical target is the invalid move from 'information can improve a fixed decision problem' to 'active information acquisition always improves a changing relationship'.
+The labels are invented choices in an abstract countermodel, **not advice about questioning another person**. The negative relational effect is *assumed*, not observed. The logical target is the invalid move from 'information can improve a fixed decision problem' to 'active information acquisition always improves a changing relationship'. This directly interprets **TDA v1.1.0 §6.8**: acquiring information may be an intervention into the relationship itself, not only an observation of a fixed target.
 
 ## 6.3. Counterexample C5: dyadic state is not a function of trait lists alone
 
@@ -391,6 +395,8 @@ Consider models M and N. Both yield the same observed outcome $r_1=0$ under the 
 **Reading of 6.41–6.43:** imagining a favorable alternative does not identify what would have happened. This does **not** show that counterfactuals are unknowable in general: additional structural assumptions or randomized comparisons may identify or bound some alternatives.
 
 ## 6.5. What follows from an observed report difference
+
+**Alignment with TDA v1.1.0 §6.93:** a difference in reports after an encounter does not by itself distinguish revelation of an existing attribute from formation of a new relational attribute. The following mathematical example sharpens this caution under explicitly restrictive assumptions. Even a measured difference in a latent outcome would not, without appropriate comparisons and measurement assumptions, uniquely identify its causal mechanism.
 
 It is easy to write separate parameters for belief change, preference change, and relational change. It is much harder to estimate them from observed conversation histories because:
 
@@ -446,10 +452,10 @@ This point matters because the **saying/showing** distinction in Wittgenstein's 
 | D1 | 5.3 | Jointly voluntary action entails willingness of both | **Definition**, not an empirical theorem | A prediction of any individual's choice |
 | T4 | 5.3 | Dependence bounds for two willingness indicators | **Proof written**; classical inequality | Independence of two people |
 | T5 | 6.63 | Passive costless information has nonnegative value under fixed utilities | **Proof written** | A conversation is always beneficial |
-| C4 | 6.92 | Active information can have negative total value | **Counterexample written** | Actual questions reduce closeness |
-| C5 | 6.92 | Dyad state may depend on history beyond trait pair | **Counterexample written** | Real relations follow the chosen transition rule |
+| C4 | 6.8, 6.92 | Active information can have negative total value | **Counterexample written** | Actual questions reduce closeness |
+| C5 | 6.64, 6.92 | Dyad state may depend on history beyond trait pair | **Counterexample written** | Real relations follow the chosen transition rule |
 | C6 | 6.41–6.43 | Observed path alone cannot fix unchosen counterfactual | **Counterexample written** | All counterfactuals are unknowable |
-| I1 | 6.92 | Sharp bounds and observational alternatives for one binary encounter | Cross-multiplied bounds and rational channel construction checked in Lean | Identification from self-selected groups or changing measurement |
+| I1 | 6.92–6.93 | Sharp bounds and observational alternatives for one binary encounter | Cross-multiplied bounds and rational channel construction checked in Lean | Identification from self-selected groups or changing measurement |
 | 7 | 7 | Limits of what model entails | **Interpretation only** | Any theorem of unsayability |
 
 **Important:** 'proof written' means a traditional mathematical derivation is supplied under explicit assumptions. This label does not mean Lean checked, published, peer reviewed, or empirically confirmed. A proof may still require revision after independent mathematical scrutiny.
@@ -500,7 +506,7 @@ This point matters because the **saying/showing** distinction in Wittgenstein's 
 
 The bibliography is a **working comparison list**. Citations here identify relevant prior literature; they do not certify the new model or establish the originality of its claims.
 
-1. *Tractatus de Perceptione et Amore*. Latest Indonesian literary edition, 18 November 2026. Primary source for all proposition numbers used here; author-provided unpublished manuscript.
+1. *Tractatus de Perceptione et Amore*, **v1.1.0 (19 November 2026)**. Current Indonesian canonical philosophical edition, 116 active propositions; unpublished manuscript. [Version registry](../editions/README.md). The paper's initial 18 November 2026 draft was based on the 119-proposition predecessor; its stable shared proposition identifiers have been rechecked against v1.1.0.
 2. Wittgenstein, L. (1922). *Tractatus Logico-Philosophicus*, propositions 4.1212, 6.54, 7. Text: <https://wittgensteinproject.org/w/index.php/Tractatus_Logico-Philosophicus_%28English%29>.
 3. Stanford Encyclopedia of Philosophy. *Dynamic Epistemic Logic*. <https://plato.stanford.edu/entries/dynamic-epistemic/>.
 4. Gmytrasiewicz, P. J., & Doshi, P. (2005). A framework for sequential planning in multi-agent settings. *Journal of Artificial Intelligence Research, 24*, 49–79. <https://doi.org/10.1613/JAIR.1579>.
@@ -517,3 +523,4 @@ The bibliography is a **working comparison list**. Citations here identify relev
 - **v0.1, 18 November 2026:** reorganized the earlier conventional 11-page research manuscript into a seven-part, proposition-indexed *interpretation* of the latest literary *Tractatus*. Reclassified definitional claims, finite counterexamples, theorems, and unproved research questions. Kept the original philosophical work unchanged.
 - **Audit revision:** clarified filtering assumptions, added a distinct formation-versus-discovery witness, and specified the limits of profile-only prediction. The [research audit](../RESEARCH_AUDIT.md) records proof correspondence and checked Lean scope. The general stochastic architecture and the classification-risk calculation remain written mathematical arguments.
 - **v0.2 identification revision:** integrated the verified one-step binary results and sharp sensitivity bounds into §6.5. The general two-agent filtering model and empirical validation remain open.
+- **v1.1.0 philosophical-source alignment, 19 November 2026:** corrected the source edition, reference notes and active proposition mapping; incorporated new §§2.72, 4.54, 6.8 and 6.93 solely as interpretations and open empirical/formal questions. No mathematical statement, computation, or claimed Lean proof was altered.

@@ -16,11 +16,11 @@
 
 **1.21** That picture may be right in some respects and mistaken in others. Even after knowing someone for a long time, there may be little habits or parts of their life we have never seen.
 
-**1.22** The more we interact, the more chances we have to know someone. But having more interactions does not always mean understanding them more accurately.
+**1.22** Repeated encounters give us chances to test our picture of someone. Yet if we keep seeing only similar situations, our confidence may grow without a corresponding gain in accuracy.
 
 **1.3** The funny thing is, we can feel so sure that we know someone, when what we are really sure of is the picture we made of them ourselves.
 
-**1.31** Being very sure does not make that picture any truer. We still need evidence.
+**1.31** Confidence and accuracy do not always move together; we should distinguish them.
 
 **1.4** Two people can know the same person and have different pictures of them.
 
@@ -44,7 +44,7 @@
 
 **2.2** Say someone does not reply to a message. We can think of all kinds of explanations. Perhaps they are busy, perhaps they are exhausted, perhaps they forgot, or perhaps they just do not feel like talking.
 
-**2.21** All these possibilities are worth considering. But something making sense does not make it true.
+**2.21** A single event may fit several explanations; without further information, we may have no grounds for treating one of them as true.
 
 **2.22** Having no explanation does not make the explanation we like best the most likely one either.
 
@@ -52,7 +52,7 @@
 
 **2.31** If we use everything new merely to confirm an old assumption, perhaps it is the assumption itself that we are trying to hold on to.
 
-**2.32** A reality that differs from our hopes is still reality.
+**2.32** When new information conflicts with an old assumption, it is the assumption that needs reconsidering.
 
 **2.4** We often wonder what other people think of us, too.
 
@@ -64,8 +64,6 @@
 
 **2.51** We can watch someone do something without knowing what they were thinking when they did it.
 
-**2.52** The reason is still in question. The event itself is something we have already seen.
-
 **2.6** Not every question gets a complete answer.
 
 **2.61** Seeing the same habit over and over may help us know that habit better. But how someone behaves in a different situation is still another question.
@@ -75,6 +73,8 @@
 **2.7** Knowing someone well enough also depends on the choice being considered.
 
 **2.71** What we need to know to spend an afternoon with someone may not be enough to build a life with them.
+
+**2.72** The value of information depends not only on how much we know, but on whether it could alter a choice and on what is at stake if we are mistaken.
 
 ## 3. On the person we want
 
@@ -102,7 +102,7 @@
 
 **3.41** On the other hand, someone who does not quite fit our original picture may become deeply meaningful to us.
 
-**3.42** Maybe people are not as simple as a checklist of traits, with boxes to tick one by one.
+**3.42** A list of qualities may help describe what we seek; it does not yet explain how two people will respond to one another in actual situations.
 
 **3.5** Two people can have similar personalities, yet being around them can feel very different.
 
@@ -124,7 +124,7 @@
 
 **4.1** In conversation there is what someone intends to convey and the way another person understands it. Sometimes the two meet, sometimes they do not.
 
-**4.11** Sometimes they fit together nicely. Sometimes they miss by a little. Sometimes we only realize later just how far apart what was meant and what was heard turned out to be.
+**4.11** The same words can be understood differently because two people bring different experiences and expectations into a conversation.
 
 **4.2** Something can be said honestly and still be understood in a way the speaker never intended.
 
@@ -132,13 +132,9 @@
 
 **4.3** An action can reveal something of a person's intention. But the same action does not always have only one possible interpretation.
 
-**4.31** Sometimes we get caught up wondering what someone else might be thinking about us. Repeating the same guess over and over does not mean we know their mind any better.
-
 **4.4** Attention, time, and effort can be ways of showing that something matters to a person.
 
 **4.41** But attention does not always mean romantic attraction. Neither does kindness, care, or a willingness to listen.
-
-**4.42** Someone can put a great deal of time and energy into something that matters to them. That does not mean the person watching understands it in the same way.
 
 **4.5** Telling each other stories gives two people a chance to learn things they did not know before.
 
@@ -147,6 +143,8 @@
 **4.52** How we listen matters, too. Asking again when we do not understand, responding, or realizing that we missed the point earlier. All these are part of a conversation.
 
 **4.53** Some conversations leave us feeling understood. Whether the other person really caught what we meant is another question.
+
+**4.54** The response to someone's story may affect how close two people feel, even when the accuracy of their mutual understanding remains uncertain.
 
 **4.6** Not everything left unsaid carries a hidden meaning.
 
@@ -162,7 +160,7 @@
 
 **5.** A relationship between two people cannot be determined by what only one of them wants.
 
-**5.1** In game theory, the outcome of an interaction can depend on the choices of several people, each with their own goals and preferences.
+**5.1** A person's choice may depend on what they expect the other person to choose. Two people's choices therefore cannot always be understood separately.
 
 **5.11** We can choose what we want to do, but we cannot always choose how another person will respond.
 
@@ -178,7 +176,7 @@
 
 H(A,B,t) ⇒ W_A(B,t) ∧ W_B(A,t)
 
-**5.32** In other words, such a relationship requires the willingness of both people.
+**5.32** This condition follows from what we mean by 'a freely undertaken relationship'; it does not prove that the two will choose such a relationship.
 
 **5.33** Even when both are willing, the relationship may not unfold as they imagined. There is time, circumstance, ability, and so much else that they may not yet have considered.
 
@@ -188,19 +186,15 @@ H(A,B,t) ⇒ W_A(B,t) ∧ W_B(A,t)
 
 **5.5** Knowing what someone likes may help us understand or anticipate their choices.
 
-**5.51** But when an outcome depends on two people, one person's choice alone is not enough to determine it.
-
 **5.6** Two people do not need exactly the same understanding to make a choice together.
 
 **5.61** They can remember the same meeting in different ways. They need not think alike about everything in order to choose, together, to be in a relationship.
 
 ## 6. On change and possibilities not yet experienced
 
-**6.** People can learn, change, and better themselves.
+**6.** Getting to know each other takes time. During that time, both the person who observes and the person observed can change.
 
-**6.1** We may become more patient, more confident, better at speaking or listening. Sometimes we only notice the small changes when we face something that used to be difficult for us.
-
-**6.11** Sometimes change begins with something lovely. Sometimes it begins with something that did not go as we hoped.
+**6.1** Change is not always improvement. We may become more open, more cautious, or realize that an old habit does not suit a new situation.
 
 **6.2** Meeting someone can sometimes set off changes we never planned.
 
@@ -224,8 +218,6 @@ H(A,B,t) ⇒ W_A(B,t) ∧ W_B(A,t)
 
 **6.51** In one event, someone might notice how the other person solved a problem. The other might remember how it felt to work through the problem together.
 
-**6.52** Maybe their attention was different from the start. One remembers the problem, the other remembers what it felt like to face it together.
-
 **6.6** Sometimes what grows out of a shared experience is more than knowledge about someone's traits.
 
 **6.61** A conversation may teach us something we did not know before. Sometimes it is only after the conversation ends that we realize something in ourselves has changed, too.
@@ -240,7 +232,7 @@ H(A,B,t) ⇒ W_A(B,t) ∧ W_B(A,t)
 
 **6.71** Some things only become apparent once we have actually experienced them. Sometimes they are things we never even thought about beforehand.
 
-**6.8** Words can explain what we know and what we only suppose. But saying a guess out loud does not turn it into reality.
+**6.8** Trying to learn how a relationship might unfold involves doing something: meeting, asking, or sharing an experience. Those very actions may change the relationship we are considering.
 
 **6.81** Some things only become visible when two people actually do something together. A list of traits may leave part of that experience out.
 
@@ -250,8 +242,10 @@ H(A,B,t) ⇒ W_A(B,t) ∧ W_B(A,t)
 
 **6.91** Shared experiences may help us know someone better. But along the way, what we want and the relationship taking shape between us can change, too.
 
-**6.92** Some things were already there; we simply did not know them yet. Others only come into being when two people experience something together.
+**6.92** Some things were already there; we simply did not know them yet. Others come into being through what two people experience together.
+
+**6.93** An observed change after a meeting is not enough to tell whether something previously hidden has been revealed or something new has come into being.
 
 ## 7. On what is said and what is shown
 
-**7.** We can know a great deal about someone. But as we get to know each other, some things come into view, some take shape for the first time, and some remain unknown. Not everything we experience together can be put into words.
+**7.** We can know a great deal about someone. But as we get to know each other, some things come into view, some take shape for the first time, and some remain unknown. Words do not always exhaust what we experience together.

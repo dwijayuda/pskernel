@@ -16,11 +16,11 @@
 
 **1.21** Imago illa in quibusdam rebus vera esse potest, in aliis falsa. Etiam post longam familiaritatem, parvae consuetudines vel partes vitae alterius nobis ignotae manere possunt.
 
-**1.22** Quo saepius inter nos versamur, eo plures occasiones cognoscendi habemus. At frequentia congressuum non semper cum veritate intellectus crescit.
+**1.22** Congressus iterati occasionem praebent imaginem nostram explorandi. Si tamen semper condiciones similes videmus, fiducia nostra crescere potest, quamquam intellegendi rectitudo non pariter augetur.
 
 **1.3** Mirum est quam certi nobis videamur aliquem nosse, cum fortasse de imagine a nobis ipsis ficta certissimi simus.
 
-**1.31** Magna persuasio imaginem veriorem non facit. Argumentis adhuc opus est.
+**1.31** Persuasio et rectitudo iudicii non semper una crescunt; inter eas distinguendum est.
 
 **1.4** Duo homines eundem hominem nosse possunt, diversa tamen de eo mente fingentes.
 
@@ -44,7 +44,7 @@
 
 **2.2** Puta aliquem nuntio scripto non respondere. Multae rationes nobis occurrunt. Fortasse occupatus est, fortasse fessus, fortasse oblitus est, aut fortasse colloqui eo tempore non vult.
 
-**2.21** Omnes hae possibilitates considerari possunt. Sed quod rationi consentaneum videtur, non continuo verum est.
+**2.21** Unus eventus pluribus explicationibus convenire potest; sine alia notitia non semper habemus causam cur unam earum veram putemus.
 
 **2.22** Neque, si explicatio deest, ea quam maxime cupimus propterea verisimillima fit.
 
@@ -52,7 +52,7 @@
 
 **2.31** Si quicquid novi accidit ad veterem coniecturam confirmandam tantum adhibemus, fortasse ipsam coniecturam retinere conamur.
 
-**2.32** Res a spe discrepans res tamen est.
+**2.32** Cum nova notitia veteri coniecturae repugnat, ipsa coniectura iterum examinanda est.
 
 **2.4** Saepe etiam cogitamus quid alii de nobis sentiant.
 
@@ -64,8 +64,6 @@
 
 **2.51** Aliquem aliquid agentem videre possumus, nescientes quid inter agendum cogitaverit.
 
-**2.52** Causa adhuc quaeritur. Rem ipsam iam vidimus.
-
 **2.6** Non omnis quaestio responsum plenum accipit.
 
 **2.61** Eandem consuetudinem iterum atque iterum videre nos fortasse docet illam consuetudinem melius nosse. Quomodo vero idem homo in alia condicione se gerat, alia quaestio est.
@@ -75,6 +73,8 @@
 **2.7** Quantum satis sit aliquem nosse etiam ex eo pendet quid eligere velimus.
 
 **2.71** Quae scire oportet ut unam horam pomeridianam cum aliquo agamus, non necessario sufficiunt ut vitam cum eo instituamus.
+
+**2.72** Momentum notitiae non tantum ex copia eorum quae scimus pendet, sed etiam ex eo num electionem mutare possit et quid intersit si erraverimus.
 
 ## 3. De eo quem desideramus
 
@@ -102,7 +102,7 @@
 
 **3.41** Contra, aliquis qui imagini nostrae primae non omnino convenit nobis magni momenti fieri potest.
 
-**3.42** Fortasse quia homo non tam simplex est quam index qualitatum, cui singula signa adscribantur.
+**3.42** Index qualitatum explicare potest quid quaeramus; nondum tamen ostendit quomodo duo homines in rebus ipsis sibi mutuo respondeant.
 
 **3.5** Duo homines similem indolem habere possunt, sed praesentia eorum dissimilem experientiam praebere.
 
@@ -124,7 +124,7 @@
 
 **4.1** In colloquio est intentio eius qui loquitur, et est modus quo alter verba intellegit. Interdum conveniunt, interdum non.
 
-**4.11** Interdum bene conveniunt. Interdum paulum discrepant. Interdum postea demum animadvertimus quam longe abfuerit quod significabatur ab eo quod auditum est.
+**4.11** Eadem verba aliter intellegi possunt, quia duo homines diversas experientias et exspectationes in colloquium afferunt.
 
 **4.2** Verba sincere dici possunt, quamquam aliter intelleguntur quam dicens intendit.
 
@@ -132,13 +132,9 @@
 
 **4.3** Factum aliquod intentionem hominis ostendere potest. Idem tamen factum non semper unam solam interpretationem admittit.
 
-**4.31** Interdum nimis occupamur quaerendo quid alius de nobis cogitet. Eandem coniecturam saepe repetere non efficit ut eius mentem melius noverimus.
-
 **4.4** Cura, tempus, et labor ostendere possunt aliquid alicui magni momenti esse.
 
 **4.41** Cura tamen non semper amorem significat. Neque benignitas, sollicitudo, aut voluntas audiendi per se amorem significant.
-
-**4.42** Aliquis multum temporis et laboris in rem sibi caram impendere potest. Non sequitur ut is qui spectat eundem sensum percipiat.
 
 **4.5** Narrationes inter se communicando duo homines occasionem habent discendi quae antea nesciebant.
 
@@ -147,6 +143,8 @@
 **4.52** Interest etiam quomodo audiamus. Iterum rogare cum non intellegimus, respondere, aut animadvertere nos antea sensum non cepisse. Haec omnia partes colloquii sunt.
 
 **4.53** Quaedam colloquia efficiunt ut nos intellectos esse sentiamus. Utrum alter revera quid significaverimus perceperit, alia quaestio est.
+
+**4.54** Responsum narrationi alterius datum afficere potest quam propinqui sibi duo homines videantur, etiamsi adhuc incertum sit quam recte se mutuo intellegant.
 
 **4.6** Non omne quod tacetur sensum occultum habet.
 
@@ -162,7 +160,7 @@
 
 **5.** Necessitudo inter duos homines ex voluntate unius tantum constitui non potest.
 
-**5.1** In theoria ludorum, exitus interactionis a consiliis plurium hominum pendere potest, quorum quisque sua proposita et praeferentias habet.
+**5.1** Electio unius pendere potest ex eo quod alterum electurum esse exspectat. Itaque electiones duorum hominum non semper separatim intellegi possunt.
 
 **5.11** Quid ipsi facere velimus eligere possumus, non autem semper quomodo alius respondeat.
 
@@ -178,7 +176,7 @@
 
 H(A,B,t) ⇒ W_A(B,t) ∧ W_B(A,t)
 
-**5.32** Id est, talis necessitudo voluntatem utriusque requirit.
+**5.32** Haec condicio ex significatione necessitudinis libere susceptae sequitur; non probat tamen utrumque eam electurum esse.
 
 **5.33** Etiam si ambo volunt, necessitudo non necessario procedet sicut eam finxerunt. Sunt tempus, condiciones, facultates, atque alia multa quae nondum consideraverint.
 
@@ -188,19 +186,15 @@ H(A,B,t) ⇒ W_A(B,t) ∧ W_B(A,t)
 
 **5.5** Scire quid alicui placeat nos adiuvare potest ut eius electiones intellegamus aut praevideamus.
 
-**5.51** Sed ubi exitus a duobus hominibus pendet, unius electio ad eum determinandum non sufficit.
-
 **5.6** Duo homines non necesse est prorsus idem intellegant ut aliquid una eligant.
 
 **5.61** Eundem conventum diversimode meminisse possunt. Non opus est ut de omnibus idem cogitent, ut ambo necessitudinem colere eligant.
 
 ## 6. De mutatione et possibilitatibus nondum expertis
 
-**6.** Homines discere, mutari, et se ipsos emendare possunt.
+**6.** Cognitio mutua tempore procedit. Interea et is qui cognoscit et is qui cognoscitur mutari possunt.
 
-**6.1** Patientiores fieri possumus, fiduciam maiorem adipisci, melius loqui aut audire. Interdum mutationes parvas tum demum animadvertimus cum res antea difficiles iterum occurrunt.
-
-**6.11** Interdum mutatio ab experientia iucunda incipit. Interdum ab eo quod contra spem accidit.
+**6.1** Mutatio non semper emendatio est. Apertiores aut cautiores fieri possumus, aut intellegere veterem consuetudinem novis condicionibus non convenire.
 
 **6.2** Congressus cum aliquo interdum initium mutationum fit quas ne cogitaveramus quidem.
 
@@ -224,8 +218,6 @@ H(A,B,t) ⇒ W_A(B,t) ∧ W_B(A,t)
 
 **6.51** In eodem eventu alter fortasse animadvertit quomodo socius difficultatem solverit. Alter autem meminit quid senserit dum difficultatem una superarent.
 
-**6.52** Fortasse ab initio diversis rebus animum adverterunt. Alter quaestionem meminit, alter quid senserit dum eam una tractarent.
-
 **6.6** Ex experientia communi interdum plus nascitur quam cognitio qualitatum alterius.
 
 **6.61** Ex colloquio discere possumus aliquid quod antea nesciebamus. Interdum vero, colloquio demum finito, animadvertimus aliquid etiam in nobis mutatum esse.
@@ -240,7 +232,7 @@ H(A,B,t) ⇒ W_A(B,t) ∧ W_B(A,t)
 
 **6.71** Quaedam tum demum apparent cum re vera ea experimur. Interdum ne antea quidem de iis cogitaveramus.
 
-**6.8** Verbis explicare possumus quid sciamus et quid tantum coniciamus. Sed coniecturam dicere non facit ut ea res vera fiat.
+**6.8** Discere conantes quomodo necessitudo procedere possit aliquid agimus: convenimus, rogamus, aut aliquid una experimur. Ipsae hae actiones necessitudinem quam consideramus mutare possunt.
 
 **6.81** Quaedam tum demum apparent cum duo homines aliquid vere una agunt. Si per indicem qualitatum tantum describuntur, pars experientiae omitti potest.
 
@@ -250,8 +242,10 @@ H(A,B,t) ⇒ W_A(B,t) ∧ W_B(A,t)
 
 **6.91** Experientiae communes efficere possunt ut aliquem melius cognoscamus. Sed interea et ea quae volumus et necessitudo quae inter nos nascitur mutari possunt.
 
-**6.92** Quaedam iam erant, quamquam ea nondum noveramus. Alia vero tum demum oriuntur, cum duo homines aliquid una experiuntur.
+**6.92** Quaedam iam erant, quamquam ea nondum noveramus. Alia vero ex iis oriuntur quae duo homines una experiuntur.
+
+**6.93** Mutatio post congressum observata per se non sufficit ad discernendum utrum aliquid antea occultum patefactum sit an aliquid novum ortum sit.
 
 ## 7. De iis quae dicuntur et quae ostenduntur
 
-**7.** Multa de aliquo scire possumus. Sed dum nos invicem cognoscimus, quaedam primum apparent, quaedam tum demum nascuntur, quaedam adhuc ignota manent. Non omnia quae una experimur verbis explicari possunt.
+**7.** Multa de aliquo scire possumus. Sed dum nos invicem cognoscimus, quaedam primum apparent, quaedam tum demum nascuntur, quaedam adhuc ignota manent. Verba non semper totum complectuntur quod una experimur.

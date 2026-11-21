@@ -8,6 +8,10 @@ A stand-alone **research project** inside `dwijayuda/pskernel`, completely separ
 
 This version-policy choice changes no Lean source, formal claim, or mathematical working paper. The repository-wide `main` branch and independent research PR have their own integration lifecycle.
 
+## Reader-facing mathematical tafsir (new)
+
+The [**Indonesian mathematical tafsir v0.3**](tafsir/TAFSIR_MATEMATIS_v0.3_ID.md) is now the recommended **first companion to read** after the philosophical text. It follows the seven *Tractatus* chapters with ordinary-language explanation, small models, worked counterexamples, theorem statements, and proof sketches. It does **not** alter the canonical v1.1.0 propositions, change the Lean code, or replace the full technical working draft v0.2. Its version number belongs to the companion series, not the literary-edition series.
+
 ## Companion consistency and verification
 
 [**v1.1.0 companion alignment audit**](COMPANION_ALIGNMENT_v1.1.0.md) connects the philosophical propositions to paper v0.2, the current Lean modules and the independent research notes, and records scope limits and exact-source Lean CI evidence. All 20 display-math blocks of the paper were left unchanged when literary cross-references were updated. Run `python3 tests/check_edition_alignment.py` from this project directory to check the 116 IDs, trilingual snapshots, proposition index, version registry and archived v2 proposals; the same check is included in the Lean workflow.
@@ -17,9 +21,10 @@ All four PDF snapshots have now been regenerated from v1.1.0-aligned Markdown, w
 ## Read in order
 
 1. **Philosophical work**: [Tractatus de Perceptione et Amore (Indonesian)](tractatus/Tractatus_de_Perceptione_et_Amore_ID.md), [English](tractatus/Tractatus_de_Perceptione_et_Amore_EN.md), [Latin](tractatus/Tractatus_de_Perceptione_et_Amore_LA.md). **CURRENT canonical edition: v1.1.0 (2026-11-19)** with 116 active propositions, stable historical numbering, and refined §§2.72, 4.54, and 6.93. See the [revision log](tractatus/REVISION_NOTES.md).
-2. **Mathematical working draft**: [A Dynamic Epistemic Model of Mutual Acquaintance](paper/A_Dynamic_Epistemic_Model_of_Mutual_Acquaintance_WORKING_DRAFT.md), and [proposition index](paper/PROPOSITION_INDEX.md).
-3. **Kernel-checked Lean 4 formalization**: [Finite core](lean/MutualAcquaintance.lean), [dynamics](lean/MutualAcquaintanceDynamics.lean), and [revelation versus change](lean/MutualAcquaintanceIdentification.lean). Lean 4.36.0 GitHub Actions [workflow](../../.github/workflows/mutual-acquaintance-lean.yml).
-4. **Verification and support**: [finite checker](paper/check_finite_examples.py), [dynamic example checker](tests/check_dynamic_examples.py), [dynamics notes](notes/DYNAMICS_ADDENDUM.md), and [proof correspondence and CI evidence](research_notes.md).
+2. **Accessible mathematical tafsir (recommended)**: [Tafsir Matematis v0.3 (Indonesian)](tafsir/TAFSIR_MATEMATIS_v0.3_ID.md), following §§1–7 with theorem explanations, proofs, examples and limits.
+3. **Technical mathematical draft (preserved)**: [A Dynamic Epistemic Model of Mutual Acquaintance v0.2](paper/A_Dynamic_Epistemic_Model_of_Mutual_Acquaintance_WORKING_DRAFT.md), and [proposition index](paper/PROPOSITION_INDEX.md).
+4. **Kernel-checked Lean 4 formalization**: [Finite core](lean/MutualAcquaintance.lean), [dynamics](lean/MutualAcquaintanceDynamics.lean), and [revelation versus change](lean/MutualAcquaintanceIdentification.lean). Lean 4.36.0 GitHub Actions [workflow](../../.github/workflows/mutual-acquaintance-lean.yml).
+5. **Verification and support**: [finite checker](paper/check_finite_examples.py), [dynamic example checker](tests/check_dynamic_examples.py), [dynamics notes](notes/DYNAMICS_ADDENDUM.md), and [proof correspondence and CI evidence](research_notes.md).
 
 For the current-state audit, theorem correspondence, literature comparison, and exact CI receipts, see [the research audit](RESEARCH_AUDIT.md).
 

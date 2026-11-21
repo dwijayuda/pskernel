@@ -2,7 +2,7 @@
 
 **Technical mathematical working draft v0.2**, with interpretive references aligned to the canonical philosophical *Tractatus de Perceptione et Amore* **v1.1.0 (116 propositions)**; **not peer-reviewed**, not an empirically validated theory.
 
-- [Recommended accessible tafsir v0.3 in Indonesian](../tafsir/TAFSIR_MATEMATIS_v0.3_ID.md) — proposition-led explanation with models, proofs and examples; the technical draft remains intact.
+- [Recommended Mathematical Companion v0.3 (English)](../companion/Mathematical_Companion_v0.3_EN.md) — a readable, proposition-led explanation with models, proofs and examples; the technical draft remains intact.
 - [Current technical mathematical working draft](A_Dynamic_Epistemic_Model_of_Mutual_Acquaintance_WORKING_DRAFT.md)
 - [v1.1.0 index of all 116 active philosophical propositions](PROPOSITION_INDEX.md)
 - [Finite Python checker](check_finite_examples.py)

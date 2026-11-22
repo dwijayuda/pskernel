@@ -9,6 +9,7 @@ This proposed edition incorporates the eight additional propositions in the sepa
 - [Latin — unreviewed working translation](Tractatus_de_Perceptione_et_Amore_LA.md)
 - [Editorial ledger and interpretive limits](EDITORIAL_AUDIT.md)
 - [Full 126-proposition companion correspondence](COMPANION_ALIGNMENT_v0.4.md)
+- [Deep mathematical and scientific audit](DEEP_RESEARCH_AND_CRITICAL_AUDIT.md)
 
 ## Explicit approval implemented (ID)
 

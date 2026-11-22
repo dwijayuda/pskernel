@@ -94,9 +94,9 @@ def selectionObserved (u : Bool) : ExposureReport :=
 def influenceObserved (u : Bool) : ExposureReport :=
   {exposure := u, outcome := u}
 
-def selectionDo (u e : Bool) : Bool := u
+def selectionDo (u _e : Bool) : Bool := u
 
-def influenceDo (u e : Bool) : Bool := e
+def influenceDo (_u e : Bool) : Bool := e
 
 theorem observational_equivalence (u : Bool) :
     selectionObserved u = influenceObserved u := by

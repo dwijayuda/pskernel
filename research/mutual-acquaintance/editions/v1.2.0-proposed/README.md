@@ -8,6 +8,7 @@ This proposed edition incorporates the eight additional propositions in the sepa
 - [English — working translation](Tractatus_de_Perceptione_et_Amore_EN.md)
 - [Latin — unreviewed working translation](Tractatus_de_Perceptione_et_Amore_LA.md)
 - [Editorial ledger and interpretive limits](EDITORIAL_AUDIT.md)
+- [Full 126-proposition companion correspondence](COMPANION_ALIGNMENT_v0.4.md)
 
 ## Explicit approval implemented (ID)
 
@@ -19,6 +20,6 @@ This proposed edition incorporates the eight additional propositions in the sepa
 
 The final heading is **7. Tentang batas pengetahuan**. These are philosophical propositions, not Lean theorems or claims that conduct uniquely identifies another person's private intention. An action can provide evidence without determining its hidden cause. The `saying/showing` vocabulary is an interpretive analogy, **not** the same as Wittgenstein's technical logic of showing.
 
-**Companion status:** Existing [Mathematical Companion v0.3](../../companion/Mathematical_Companion_v0.3_EN.md) and [technical working draft v0.2](../../paper/A_Dynamic_Epistemic_Model_of_Mutual_Acquaintance_WORKING_DRAFT.md) remain unchanged and explicitly aligned to v1.1.0. The independent, unverified local v0.4 candidate has not been promoted to the canonical research companion by this PR. No new Lean proof or CI claim is made.
+**Companion status:** Existing [Mathematical Companion v0.3](../../companion/Mathematical_Companion_v0.3_EN.md) and [technical working draft v0.2](../../paper/A_Dynamic_Epistemic_Model_of_Mutual_Acquaintance_WORKING_DRAFT.md) remain unchanged and explicitly aligned to v1.1.0. The [proposed Mathematical Companion v0.4](../../companion/Mathematical_Companion_v0.4_EN.md), [126-proposition alignment](COMPANION_ALIGNMENT_v0.4.md), [multi-agent Lean source](../../lean/MultiAgentAcquaintance.lean) and finite checks have now been added to this same PR. They remain **proposed**, not the canonical companion, and their kernel verification scope is restricted to the actual Lean declarations and successful CI receipts. No empirical claim is made.
 
 Run `python3 research/mutual-acquaintance/editions/v1.2.0-proposed/check_proposed_edition.py` to check numbering and preservation.

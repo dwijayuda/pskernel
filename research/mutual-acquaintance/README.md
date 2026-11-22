@@ -8,6 +8,10 @@ A stand-alone **research project** inside `dwijayuda/pskernel`, completely separ
 
 This version-policy choice changes no Lean source, formal claim, or mathematical working paper. The repository-wide `main` branch and independent research PR have their own integration lifecycle.
 
+## Proposed v1.2.0 + Mathematical Companion v0.4 (not yet canonical)
+
+Draft manuscripts with **126 proposition IDs** are under [v1.2.0-proposed](editions/v1.2.0-proposed/README.md) (ID/EN/LA). The associated [Mathematical Companion v0.4](companion/Mathematical_Companion_v0.4_EN.md), [proposition crosswalk](editions/v1.2.0-proposed/COMPANION_ALIGNMENT_v0.4.md) and [finite multi-agent Lean source](lean/MultiAgentAcquaintance.lean) are editorial/research candidates in PR #270. They do **not** replace the canonical v1.1.0 or independently validate empirical hypotheses. Mathematical claims beyond the finite Lean declarations remain paper proofs.
+
 ## Mathematical Companion (English, v0.3)
 
 The [**Mathematical Companion v0.3**](companion/Mathematical_Companion_v0.3_EN.md) is the recommended **first companion to read** after the philosophical text. Written in English, it follows the seven *Tractatus* chapters and explains their underlying models through ordinary-language reasoning, worked counterexamples, theorems, and concise proofs. It is a readable development of the philosophical ideas, **not a conventional mathematics research paper**. It does **not** change canonical v1.1.0, the Lean code, or the full technical mathematical working draft v0.2. The companion and literary edition use separate version numbers.

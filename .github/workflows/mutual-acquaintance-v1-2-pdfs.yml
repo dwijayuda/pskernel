@@ -37,10 +37,10 @@ jobs:
           d=editions/v1.2.0-proposed
           mkdir -p "$d/pdfs"
           for lang in ID EN LA; do
-            pandoc "$d/Tractatus_de_Perceptione_et_Amore_$lang.md" --standalone --pdf-engine=xelatex -V mainfont="DejaVu Serif" -V monofont="DejaVu Sans Mono" -V papersize=a5 -V fontsize=10pt -V geometry:margin=17mm -o "$d/pdfs/Tractatus_de_Perceptione_et_Amore_v1.2.0_$lang.pdf"
+            pandoc "$d/Tractatus_de_Perceptione_et_Amore_$lang.md" -f markdown+tex_math_single_backslash --standalone --pdf-engine=xelatex -V mainfont="DejaVu Serif" -V monofont="DejaVu Sans Mono" -V papersize=a5 -V fontsize=10pt -V geometry:margin=17mm -o "$d/pdfs/Tractatus_de_Perceptione_et_Amore_v1.2.0_$lang.pdf"
           done
-          pandoc companion/Mathematical_Companion_v0.4_EN.md --standalone --pdf-engine=xelatex -V mainfont="DejaVu Serif" -V monofont="DejaVu Sans Mono" -V papersize=a4 -V fontsize=10pt -V geometry:margin=20mm -o companion/Mathematical_Companion_v0.4_EN.pdf
-          pandoc "$d/DEEP_RESEARCH_AND_CRITICAL_AUDIT.md" --standalone --pdf-engine=xelatex -V mainfont="DejaVu Serif" -V monofont="DejaVu Sans Mono" -V papersize=a4 -V fontsize=9pt -V geometry:margin=18mm -o "$d/DEEP_RESEARCH_AND_CRITICAL_AUDIT.pdf"
+          pandoc companion/Mathematical_Companion_v0.4_EN.md -f markdown+tex_math_single_backslash --standalone --pdf-engine=xelatex -V mainfont="DejaVu Serif" -V monofont="DejaVu Sans Mono" -V papersize=a4 -V fontsize=10pt -V geometry:margin=20mm -o companion/Mathematical_Companion_v0.4_EN.pdf
+          pandoc "$d/DEEP_RESEARCH_AND_CRITICAL_AUDIT.md" -f markdown+tex_math_single_backslash --standalone --pdf-engine=xelatex -V mainfont="DejaVu Serif" -V monofont="DejaVu Sans Mono" -V papersize=a4 -V fontsize=9pt -V geometry:margin=18mm -o "$d/DEEP_RESEARCH_AND_CRITICAL_AUDIT.pdf"
       - name: Verify PDF content and record source receipts
         shell: bash
         working-directory: research/mutual-acquaintance

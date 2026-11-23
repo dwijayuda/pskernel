@@ -6,6 +6,10 @@ This registry is authoritative for the `research/mutual-acquaintance-dynamics-20
 
 This supersession is **editorial/version-policy only**. It does not imply peer review, empirical validation, or a novel mathematical theorem. The companion Lean models retain their explicitly limited interpretations.
 
+## Proposed editorial edition (not yet canonical)
+
+- **v1.2.0-proposed (23 November 2026):** [Indonesian, English, and Latin manuscripts, 126 propositions](v1.2.0-proposed/README.md). Includes the multi-agent editorial additions and the user-approved §§6.95–6.96 with a revised Chapter 7, *Tentang batas pengetahuan*. The existing canonical v1.1.0 and its mathematical companion remain unchanged until separate review and promotion.
+
 ## Current and historic editions
 
 | Label | Status as of 2026-11-19 | Contents |

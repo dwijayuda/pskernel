@@ -37,7 +37,10 @@ jobs:
           lean MutualAcquaintance.lean
           lean MutualAcquaintanceDynamics.lean
           lean -DwarningAsError=true MutualAcquaintanceIdentification.lean
-          if grep -nE '^[[:space:]]*(sorry|admit|axiom)([[:space:]]|$)' MutualAcquaintance.lean MutualAcquaintanceDynamics.lean MutualAcquaintanceIdentification.lean; then
+          if [ -f MultiAgentAcquaintance.lean ]; then
+            lean -DwarningAsError=true MultiAgentAcquaintance.lean
+          fi
+          if grep -nE '^[[:space:]]*(sorry|admit|axiom)([[:space:]]|$)' MutualAcquaintance.lean MutualAcquaintanceDynamics.lean MutualAcquaintanceIdentification.lean MultiAgentAcquaintance.lean; then
             echo 'Unexpected proof placeholder or user-declared axiom' >&2
             exit 1
           fi
@@ -51,4 +54,10 @@ jobs:
           diff -u <(python3 -m json.tool --sort-keys paper/FINITE_CHECK_RESULTS.json) \
             <(python3 -m json.tool --sort-keys "$RUNNER_TEMP/mutual-acquaintance-finite.json")
           python3 tests/check_dynamic_examples.py
+          if [ -f tests/check_proposed_multiagent.py ]; then
+            python3 tests/check_proposed_multiagent.py
+          fi
           python3 tests/check_edition_alignment.py
+          if [ -f editions/v1.2.0-proposed/check_proposed_edition.py ]; then
+            python3 editions/v1.2.0-proposed/check_proposed_edition.py
+          fi

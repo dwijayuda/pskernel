@@ -1,0 +1,96 @@
+name: Tractatus v1.2.0 proposed PDFs
+on:
+  push:
+    branches:
+      - editorial/tractatus-v1-2-proposed-saying-knowing-20261123
+    paths:
+      - 'research/mutual-acquaintance/editions/v1.2.0-proposed/*.md'
+      - 'research/mutual-acquaintance/companion/Mathematical_Companion_v0.4_EN.md'
+      - '.github/workflows/mutual-acquaintance-v1-2-pdfs.yml'
+  pull_request:
+    paths:
+      - 'research/mutual-acquaintance/editions/v1.2.0-proposed/*.md'
+      - 'research/mutual-acquaintance/companion/Mathematical_Companion_v0.4_EN.md'
+      - '.github/workflows/mutual-acquaintance-v1-2-pdfs.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PDF toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          sources="$RUNNER_TEMP/ubuntu.list"
+          printf '%s\n' 'deb https://archive.ubuntu.com/ubuntu noble main universe' 'deb https://archive.ubuntu.com/ubuntu noble-updates main universe' 'deb https://security.ubuntu.com/ubuntu noble-security main universe' > "$sources"
+          sudo apt-get -o "Dir::Etc::sourcelist=$sources" -o 'Dir::Etc::sourceparts=-' update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get -o "Dir::Etc::sourcelist=$sources" -o 'Dir::Etc::sourceparts=-' install -y pandoc texlive-xetex texlive-latex-extra texlive-fonts-recommended fonts-dejavu-core fonts-crosextra-carlito poppler-utils
+      - name: Render proposed books and companion
+        shell: bash
+        working-directory: research/mutual-acquaintance
+        run: |
+          set -euo pipefail
+          d=editions/v1.2.0-proposed
+          mkdir -p "$d/pdfs"
+          for lang in ID EN LA; do
+            pandoc "$d/Tractatus_de_Perceptione_et_Amore_$lang.md" -f markdown+tex_math_single_backslash --standalone --pdf-engine=xelatex -V mainfont="DejaVu Serif" -V monofont="DejaVu Sans Mono" -V papersize=a5 -V fontsize=10pt -V geometry:margin=17mm -o "$d/pdfs/Tractatus_de_Perceptione_et_Amore_v1.2.0_$lang.pdf"
+          done
+          pandoc companion/Mathematical_Companion_v0.4_EN.md -f markdown+tex_math_single_backslash --standalone --pdf-engine=xelatex -V mainfont="DejaVu Serif" -V monofont="DejaVu Sans Mono" -V papersize=a4 -V fontsize=10pt -V geometry:margin=20mm -o companion/Mathematical_Companion_v0.4_EN.pdf
+          pandoc "$d/DEEP_RESEARCH_AND_CRITICAL_AUDIT.md" -f markdown+tex_math_single_backslash --standalone --pdf-engine=xelatex -V mainfont="DejaVu Serif" -V monofont="DejaVu Sans Mono" -V papersize=a4 -V fontsize=9pt -V geometry:margin=18mm -o "$d/DEEP_RESEARCH_AND_CRITICAL_AUDIT.pdf"
+      - name: Verify PDF content and record source receipts
+        shell: bash
+        working-directory: research/mutual-acquaintance
+        run: |
+          set -euo pipefail
+          python3 editions/v1.2.0-proposed/check_proposed_edition.py
+          python3 tests/check_proposed_multiagent.py
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess, re
+          d = Path('editions/v1.2.0-proposed')
+          for language in ('ID', 'EN', 'LA'):
+              p = d / 'pdfs' / f'Tractatus_de_Perceptione_et_Amore_v1.2.0_{language}.pdf'
+              t = subprocess.check_output(['pdftotext','-layout',str(p),'-'],text=True)
+              for label in ('6.95','6.96'):
+                  assert re.search(r'(?<![0-9])' + re.escape(label) + r'(?![0-9])',t), (p,label)
+              assert p.stat().st_size > 15000
+              print('PDF_TRACTATUS_OK', language)
+          p = Path('companion/Mathematical_Companion_v0.4_EN.pdf')
+          t = subprocess.check_output(['pdftotext','-layout',str(p),'-'],text=True)
+          for label in ('MA-1','MA-8','MA-9'):
+              assert label in t, (p,label)
+          print('PDF_COMPANION_OK')
+          p=d/'DEEP_RESEARCH_AND_CRITICAL_AUDIT.pdf'
+          t=subprocess.check_output(['pdftotext','-layout',str(p),'-'],text=True)
+          assert 'A36' in t
+          print('PDF_AUDIT_OK')
+          PY
+          sha256sum editions/v1.2.0-proposed/Tractatus_de_Perceptione_et_Amore_{ID,EN,LA}.md editions/v1.2.0-proposed/pdfs/*.pdf companion/Mathematical_Companion_v0.4_EN.{md,pdf} editions/v1.2.0-proposed/DEEP_RESEARCH_AND_CRITICAL_AUDIT.{md,pdf} > editions/v1.2.0-proposed/PDF_SOURCE_RECEIPTS.sha256
+          sha256sum --check editions/v1.2.0-proposed/PDF_SOURCE_RECEIPTS.sha256
+          echo PDF_SOURCE_RECEIPTS_OK
+      - name: Commit PDFs onto the proposed branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/editorial/tractatus-v1-2-proposed-saying-knowing-20261123'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add research/mutual-acquaintance/editions/v1.2.0-proposed/pdfs/*.pdf research/mutual-acquaintance/editions/v1.2.0-proposed/DEEP_RESEARCH_AND_CRITICAL_AUDIT.pdf research/mutual-acquaintance/companion/Mathematical_Companion_v0.4_EN.pdf research/mutual-acquaintance/editions/v1.2.0-proposed/PDF_SOURCE_RECEIPTS.sha256
+          if ! git diff --cached --quiet; then
+            git commit -m "docs(tractatus): render v1.2.0 and companion PDF snapshots [skip pdf]"
+            git push origin HEAD:editorial/tractatus-v1-2-proposed-saying-knowing-20261123
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tractatus-v1-2-proposed-pdf-editions
+          path: |
+            research/mutual-acquaintance/editions/v1.2.0-proposed/pdfs/*.pdf
+            research/mutual-acquaintance/editions/v1.2.0-proposed/DEEP_RESEARCH_AND_CRITICAL_AUDIT.pdf
+            research/mutual-acquaintance/companion/Mathematical_Companion_v0.4_EN.pdf
+            research/mutual-acquaintance/editions/v1.2.0-proposed/PDF_SOURCE_RECEIPTS.sha256
+          if-no-files-found: warn
